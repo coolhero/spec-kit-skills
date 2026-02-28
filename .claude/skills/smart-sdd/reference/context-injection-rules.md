@@ -29,17 +29,34 @@ All content from constitution-seed.md is provided as context when executing `/sp
 
 ### Checkpoint Display Content
 
+Show the **actual content** of constitution-seed.md so the user can review and modify before finalizing:
+
 ```
 📋 Context for Constitution finalization:
 
-Source reference strategy: [Same stack / New stack]
-Architecture principles: [N] extracted
-Technical constraints: [N] items
-Coding conventions: [N] items
-Best Practices: Test-First, Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution
-Global Evolution operational principles: Cross-Feature Consistency
+── Source Reference Strategy ─────────────────────
+[Actual strategy content: Same/New stack details and reference approach]
 
-Please let me know if there is anything to modify. If approved, I will execute /speckit.constitution.
+── Architecture Principles ───────────────────────
+[List each extracted principle with its description]
+
+── Technical Constraints ─────────────────────────
+[List each constraint]
+
+── Coding Conventions ────────────────────────────
+[List each convention]
+
+── Best Practices ────────────────────────────────
+[Show the 5 best practices with their descriptions]
+
+── Global Evolution Operational Principles ───────
+[Show the operational principles]
+
+──────────────────────────────────────────────────
+Review the above content. You can:
+  - Approve as-is to proceed with /speckit.constitution
+  - Request modifications (add/remove/change principles)
+  - Edit constitution-seed.md directly before proceeding
 ```
 
 ---
@@ -78,17 +95,43 @@ When a completed preceding Feature exists and the current Feature depends on it:
 
 ### Checkpoint Display Content
 
+Show the **actual content** that will be injected, so the user can review requirements, acceptance criteria, and business rules before spec creation:
+
 ```
 📋 Context for Specify execution:
 
 Feature: [FID] - [Feature Name]
-Information to inject:
-  - pre-context "For /speckit.specify": [N] FR-###, [N] SC-###
-  - business-logic-map: [N] business rules
-  - Original sources: [N] files
-  - [Preceding Feature reference: spec.md from F00X]
 
-Please let me know if there is anything to modify.
+── Feature Summary ───────────────────────────────
+[Actual feature description and scope from pre-context]
+
+── Draft Requirements ────────────────────────────
+[List each FR-### with its full description]
+  FR-001: ...
+  FR-002: ...
+
+── Draft Acceptance Criteria ─────────────────────
+[List each SC-### with its full description]
+  SC-001: ...
+  SC-002: ...
+
+── Business Rules (from business-logic-map) ──────
+[List each business rule with its description]
+
+── Edge Cases ────────────────────────────────────
+[List each edge case]
+
+── Original Source Files ─────────────────────────
+[List of source files for reference]
+
+── Preceding Feature References ──────────────────
+[If applicable: what was referenced from preceding Features]
+
+──────────────────────────────────────────────────
+Review the above content. You can:
+  - Approve as-is to proceed with /speckit.specify
+  - Request modifications (add/remove/change requirements or criteria)
+  - Edit pre-context.md or business-logic-map.md directly before proceeding
 ```
 
 ---
@@ -137,17 +180,46 @@ Reference the actual implementation results of dependent preceding Features:
 
 ### Checkpoint Display Content
 
+Show the **actual schemas, contracts, and dependencies** so the user can verify data models and API designs before plan creation:
+
 ```
 📋 Context for Plan execution:
 
 Feature: [FID] - [Feature Name]
-Information to inject:
-  - pre-context "For /speckit.plan": [N] dependencies, [N] technical decisions
-  - entity-registry: [N] owned entities, [N] referenced entities
-  - api-registry: [N] provided APIs, [N] consumed APIs
-  - [Preceding Feature: F00X plan results applied (finalized schema takes precedence)]
 
-Please let me know if there is anything to modify.
+── Dependencies ──────────────────────────────────
+[List each preceding Feature with dependency type]
+  - F00X-name: [entity dependency / API dependency / etc.]
+
+── Entity Schemas (Owned) ────────────────────────
+[For each owned entity: show full schema with fields, types, constraints, relationships]
+  ### EntityName
+  | Field | Type | Constraints |
+  ...
+
+── Entity Schemas (Referenced) ───────────────────
+[For each referenced entity: show summary schema]
+
+── API Contracts (Provided) ──────────────────────
+[For each API this Feature provides: show full contract]
+  ### POST /api/resource
+  Request: { ... }
+  Response: { ... }
+
+── API Contracts (Consumed) ──────────────────────
+[For each API this Feature consumes from others: show summary]
+
+── Technical Decisions ───────────────────────────
+[List each technical decision from pre-context]
+
+── Preceding Feature Overrides ───────────────────
+[If applicable: show which drafts were replaced by finalized schemas from preceding Features]
+
+──────────────────────────────────────────────────
+Review the above content. You can:
+  - Approve as-is to proceed with /speckit.plan
+  - Request modifications (adjust schemas, contracts, or decisions)
+  - Edit entity-registry.md, api-registry.md, or pre-context.md directly before proceeding
 ```
 
 ---
@@ -217,15 +289,34 @@ Only a simplified checkpoint is displayed:
 
 ### Checkpoint Display Content
 
+Show the **actual verification checklist** so the user can see what will be checked:
+
 ```
 📋 Verify execution: [FID] - [Feature Name]
 
-Verification items:
-  Phase 1: Execution verification (test/build/lint)
-  Phase 2: Cross-Feature verification ([N] cross-verification points)
-  Phase 3: Global Evolution update (entity-registry, api-registry consistency)
+── Phase 1: Execution Verification ───────────────
+  - Test command: [actual test command]
+  - Build command: [actual build command]
+  - Lint command: [actual lint command or "not configured"]
 
-Do you want to proceed?
+── Phase 2: Cross-Feature Verification ───────────
+[List each cross-verification point from pre-context]
+  - [ ] Entity compatibility: [specific check]
+  - [ ] API contract compatibility: [specific check]
+  - [ ] Business rule consistency: [specific check]
+
+── Phase 3: Global Evolution Consistency ─────────
+[List entities/APIs to verify against registry]
+  - entity-registry: [entities to check]
+  - api-registry: [APIs to check]
+
+── Impact Scope ──────────────────────────────────
+[List of other Features potentially affected by changes]
+
+──────────────────────────────────────────────────
+Review the verification plan. You can:
+  - Approve as-is to proceed
+  - Add or remove verification items
 ```
 
 ---

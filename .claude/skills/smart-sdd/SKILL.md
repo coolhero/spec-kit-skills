@@ -99,27 +99,41 @@ All spec-kit command executions follow this 4-step protocol.
 
 ### 2. Checkpoint — User Confirmation
 
-Presents the assembled context to the user in a **summarized form**:
+Presents the assembled context to the user with **actual content**, not just counts. The user must be able to review what will be injected and make informed decisions.
+
+Display format:
 
 ```
 📋 Context for [command] execution:
 
 Feature: [Feature ID] - [Feature Name]
-Injected information:
-  - [Source 1]: [Summary]
-  - [Source 2]: [Summary]
-  - ...
 
-Prerequisites: [Met / Not met]
-Cross-Feature references: [List of related Features]
+── Injected Content ──────────────────────────────
 
-Proceed with /speckit.[command] using this context?
-Let me know if there is anything to modify.
+[Show the actual assembled content organized by source.
+ For example, for specify: show the FR-### list, SC-### list,
+ business rules, and edge cases — the real text, not just counts.
+ For plan: show the entity schemas, API contracts, and dependencies.]
+
+── Cross-Feature References ──────────────────────
+
+[List of related Features and what is being referenced from each]
+
+── Prerequisites ─────────────────────────────────
+
+[Met / Not met — with details if not met]
+
+──────────────────────────────────────────────────
+
+Review the above content. You can:
+  - Approve as-is to proceed
+  - Request modifications (add/remove/change items)
+  - Edit the source files directly before proceeding
 ```
 
-Uses AskUserQuestion to obtain user approval or modifications.
+Uses AskUserQuestion to obtain user approval or modifications. If the user requests changes, apply them and re-display the updated content for re-confirmation.
 
-**`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context summary is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This applies to all commands and pipeline steps.
+**`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This applies to all commands and pipeline steps.
 
 ### 3. Execute — spec-kit Command Execution
 
