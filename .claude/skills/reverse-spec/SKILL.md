@@ -10,7 +10,8 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 
 Analyzes existing source code to extract project-level global context needed for spec-kit-based SDD (Spec-Driven Development) redevelopment.
 
-**Target Directory**: `$ARGUMENTS` (defaults to the current directory if not specified)
+**Target Directory** (source to analyze): `$ARGUMENTS` (defaults to the current directory if not specified)
+**Output Directory** (where artifacts are written): Always the **current working directory** (CWD) where the skill was invoked — NOT the target directory. The target directory is read-only; no files are written there.
 
 Execute the following 5 Phases in order. Report progress to the user after completing each Phase.
 
@@ -217,7 +218,7 @@ Present the classification results to the user via AskUserQuestion and obtain ap
 
 ## Phase 4 — Deliverable Generation
 
-Generate hierarchical deliverables from the finalized analysis results. Create a `specs/reverse-spec/` directory within the target directory.
+Generate hierarchical deliverables from the finalized analysis results. Create a `specs/reverse-spec/` directory in the **current working directory** (CWD), NOT in the target directory. The target directory is the source being analyzed and must remain untouched.
 
 ### 4-1. Project-Level Deliverables
 

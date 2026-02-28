@@ -156,7 +156,7 @@ Generates hierarchical artifacts based on the finalized analysis results.
 #### Artifact Structure
 
 ```
-[target-directory]/specs/reverse-spec/
+[current-working-directory]/specs/reverse-spec/
 ├── roadmap.md                           # Feature evolution map + Tier classification + Release plan
 ├── constitution-seed.md                 # Constitution draft (source reference principles + Best Practices)
 ├── entity-registry.md                   # Shared entity registry
