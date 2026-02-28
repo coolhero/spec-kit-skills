@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow based on reverse-spec artifacts. Automatically injects cross-Feature context at each step and maintains the Global Evolution Layer.
-argument-hint: <command> [feature-id] [--from path]
+argument-hint: <command> [feature-id] [--from path] [--auto]
 disable-model-invocation: true
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
@@ -17,7 +17,8 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 ## Usage
 
 ```
-/smart-sdd pipeline                    # Run the full pipeline
+/smart-sdd pipeline                    # Run the full pipeline (with per-step confirmation)
+/smart-sdd pipeline --auto             # Run the full pipeline without stopping for confirmation
 /smart-sdd pipeline --from ./path      # Read reverse-spec artifacts from specified path
 /smart-sdd constitution                # Finalize constitution (one-time)
 /smart-sdd specify F001                # Specify Feature F001
@@ -26,6 +27,10 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd implement F001             # Implement Feature F001
 /smart-sdd verify F001                 # Verify Feature F001
 /smart-sdd status                      # Check overall progress status
+
+# --auto can be combined with any command
+/smart-sdd specify F001 --auto         # Specify without confirmation
+/smart-sdd pipeline --from ./path --auto  # Full pipeline, custom path, no confirmation
 ```
 
 ---
@@ -69,6 +74,7 @@ $ARGUMENTS parsing rules:
   First token  → command (pipeline | constitution | specify | plan | tasks | implement | verify | status)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/implement/verify)
   --from <path> → reverse-spec artifacts path (defaults to ./specs/reverse-spec/ if not specified)
+  --auto        → Skip Checkpoint confirmation and execute all steps automatically
 ```
 
 **BASE_PATH** determination:
@@ -112,6 +118,8 @@ Let me know if there is anything to modify.
 ```
 
 Uses AskUserQuestion to obtain user approval or modifications.
+
+**`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context summary is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This applies to all commands and pipeline steps.
 
 ### 3. Execute — spec-kit Command Execution
 
