@@ -400,7 +400,7 @@ specs/reverse-spec/
 
 ## Constitution Best Practices
 
-`constitution-seed.md`에 포함되는 5가지 권장 개발 원칙입니다 (`/reverse-spec` 또는 `/smart-sdd init`이 생성):
+`constitution-seed.md`에 포함되는 6가지 권장 개발 원칙입니다 (`/reverse-spec` 또는 `/smart-sdd init`이 생성):
 
 | 원칙 | 핵심 | 검증 기준 |
 |------|------|-----------|
@@ -409,6 +409,7 @@ specs/reverse-spec/
 | **III. Simplicity First** | spec 범위만 구현. 추측적 기능 추가/조기 추상화 금지 | 모든 코드가 요구사항으로 추적 가능 |
 | **IV. Surgical Changes** | 인접 코드 개선 금지. 자기 변경으로 발생한 고아 코드만 정리 | 변경 줄이 task로 추적 가능 |
 | **V. Goal-Driven Execution** | 검증 가능한 완료 기준 필수. "구현한다" → "테스트가 통과한다" | 자동화 검증 통과 |
+| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. 실행 → 핵심 플로우 수행 → 결과 확인이 가능한 데모 안내 포함 | 비개발자도 데모 안내를 따라 Feature 동작을 확인 가능 |
 
 ---
 

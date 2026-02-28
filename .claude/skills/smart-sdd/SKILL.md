@@ -189,14 +189,15 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
 
 #### Phase 3: Constitution Seed Definition
 
-1. **Present the 5 Best Practices** with descriptions:
+1. **Present the 6 Best Practices** with descriptions:
    - I. Test-First (NON-NEGOTIABLE) — Write tests first. Code without tests is not complete
    - II. Think Before Coding — No assumptions. Mark unclear items as `[NEEDS CLARIFICATION]`
    - III. Simplicity First — Implement only what is in the spec. No speculative additions
    - IV. Surgical Changes — No "improving" adjacent code. Only clean up own changes
    - V. Goal-Driven Execution — Verifiable completion criteria required
+   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. Include demo instructions so the Feature can be launched, exercised, and verified
 
-2. **User selection**: All 5 are selected by default. The user can:
+2. **User selection**: All 6 are selected by default. The user can:
    - Deselect specific practices
    - Modify descriptions
    - Add custom principles (with Rule + Rationale format)

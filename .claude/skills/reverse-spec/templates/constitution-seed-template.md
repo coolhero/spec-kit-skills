@@ -115,6 +115,13 @@
 - For multi-step work, define verification methods for each step in advance
 - **Verification criterion**: `Automated verification (tests, build, lint) must pass upon each task completion`
 
+### VI. Demo-Ready Delivery
+- Each Feature must be demonstrable upon completion — not just passing tests, but runnable and visually/functionally verifiable
+- Include a demo script or instructions in the Feature's tasks.md that describes how to launch and interact with the completed Feature
+- "Demo-ready" means: the Feature can be started, exercised through its core user flows, and the results observed — without requiring other incomplete Features
+- If the Feature has no UI, provide a CLI command, API call sequence, or script that exercises the core functionality and displays results
+- **Verification criterion**: `A non-developer stakeholder can follow the demo instructions and verify the Feature works`
+
 ---
 
 ## Global Evolution Layer Operational Principles
