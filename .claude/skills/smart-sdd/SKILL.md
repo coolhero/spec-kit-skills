@@ -43,7 +43,7 @@ All paths are relative to the **current working directory** (CWD) where the skil
 |--------|------|-------|
 | reverse-spec artifacts | `./specs/reverse-spec/` | Relative to CWD. Can be changed via `--from` argument |
 | spec-kit feature artifacts | `./specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
-| spec-kit constitution | `./.specify/memory/constitution.md` | Native spec-kit path |
+| spec-kit constitution | `./specs/constitution.md` | Native spec-kit path |
 | State file | `./specs/reverse-spec/sdd-state.md` | Created and managed by smart-sdd |
 
 ### reverse-spec Artifact Structure
@@ -299,7 +299,7 @@ The context sources and content injected per command are defined in [context-inj
 ## Important Notes
 
 - Does not alter or override spec-kit command behavior. Only injects context and utilizes results.
-- Does not directly modify files managed by spec-kit (`specs/{NNN-feature}/`, `.specify/`). Changes are made only through spec-kit commands.
+- Does not directly modify files managed by spec-kit (`specs/`). Changes are made only through spec-kit commands.
 - Global Evolution Layer files (`entity-registry.md`, `api-registry.md`, `roadmap.md`) are modified only during the Update step.
 - If `sdd-state.md` does not exist, it is treated as a first run and an initial state file is created.
 - For detailed context injection rules, refer to [context-injection-rules.md](reference/context-injection-rules.md).

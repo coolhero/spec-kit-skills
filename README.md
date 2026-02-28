@@ -342,7 +342,7 @@ The state file includes Feature Progress, Feature Detail Log, Feature Mapping (F
 |--------|------|-------|
 | reverse-spec artifacts | `specs/reverse-spec/` | Flat structure. Can be changed via `/smart-sdd --from` |
 | spec-kit feature artifacts | `specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
-| spec-kit infrastructure | `.specify/` | Templates, scripts, constitution storage |
+| spec-kit constitution | `specs/constitution.md` | Native spec-kit path |
 | smart-sdd state file | `specs/reverse-spec/sdd-state.md` | Automatically created/managed by smart-sdd |
 
 ---

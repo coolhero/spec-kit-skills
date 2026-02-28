@@ -339,7 +339,7 @@ F004-payment    | T2   |         |      |       |      |
 |------|------|------|
 | reverse-spec 산출물 | `specs/reverse-spec/` | 평탄화 구조. `/smart-sdd --from`으로 변경 가능 |
 | spec-kit 피처 산출물 | `specs/{NNN-feature}/` | spec-kit 고유 경로. smart-sdd가 건드리지 않음 |
-| spec-kit 인프라 | `.specify/` | 템플릿, 스크립트, constitution 저장 |
+| spec-kit constitution | `specs/constitution.md` | spec-kit 고유 경로 |
 | smart-sdd 상태 파일 | `specs/reverse-spec/sdd-state.md` | smart-sdd가 자동 생성/관리 |
 
 ---
