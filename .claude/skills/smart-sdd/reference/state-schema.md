@@ -73,8 +73,8 @@ Feature ID와 spec-kit Feature Name(디렉토리명)의 매핑 테이블.
 
 | Feature ID | spec-kit Name | spec-kit Path |
 |------------|---------------|---------------|
-| F001 | 001-auth | .specify/specs/001-auth/ |
-| F002 | 002-product | .specify/specs/002-product/ |
+| F001 | 001-auth | specs/001-auth/ |
+| F002 | 002-product | specs/002-product/ |
 
 ---
 
