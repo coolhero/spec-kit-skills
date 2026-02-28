@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. A Reverse Specification skill that extracts specs from existing implementations.
-argument-hint: [target-directory]
+argument-hint: [target-directory] [--scope core|full] [--stack same|new]
 disable-model-invocation: true
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
@@ -10,8 +10,16 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 
 Analyzes existing source code to extract project-level global context needed for spec-kit-based SDD (Spec-Driven Development) redevelopment.
 
-**Target Directory** (source to analyze): `$ARGUMENTS` (defaults to the current directory if not specified)
+**Target Directory** (source to analyze): First positional argument from `$ARGUMENTS` (defaults to the current directory if not specified)
 **Output Directory** (where artifacts are written): Always the **current working directory** (CWD) where the skill was invoked — NOT the target directory. The target directory is read-only; no files are written there.
+
+**Argument Parsing**:
+```
+$ARGUMENTS parsing rules:
+  Positional    → target-directory (path to analyze, defaults to "." if not specified)
+  --scope <val> → Implementation scope: "core" or "full" (skips Phase 0 Question 1 if provided)
+  --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
+```
 
 Execute the following 5 Phases in order. Report progress to the user after completing each Phase.
 
@@ -19,19 +27,23 @@ Execute the following 5 Phases in order. Report progress to the user after compl
 
 ## Phase 0 — Strategy Questions
 
-Ask the user two questions to determine the direction of the deliverables.
+Determine the direction of the deliverables. Each question can be answered via CLI arguments OR interactive prompt.
 
 ### Question 1: Implementation Scope
-Ask the user via AskUserQuestion:
-- **Core Only (Core)**: Redevelop only the core features that form the foundation of the project. For learning/prototyping purposes
-- **Full Implementation (Full)**: Redevelop the full set of features identical to the existing system
+- If `--scope` argument is provided: use the specified value (`core` or `full`).
+- Otherwise: Ask the user via AskUserQuestion:
+  - **Core Only (Core)**: Redevelop only the core features that form the foundation of the project. For learning/prototyping purposes
+  - **Full Implementation (Full)**: Redevelop the full set of features identical to the existing system
 
 ### Question 2: Tech Stack Strategy
-Ask the user via AskUserQuestion:
-- **Same Stack (Same)**: Use the same language, framework, and libraries as the existing project
-- **New Stack (New)**: Migrate to an optimal modern tech stack
+- If `--stack` argument is provided: use the specified value (`same` or `new`).
+- Otherwise: Ask the user via AskUserQuestion:
+  - **Same Stack (Same)**: Use the same language, framework, and libraries as the existing project
+  - **New Stack (New)**: Migrate to an optimal modern tech stack
 
 Record both responses and reference them throughout all subsequent Phases.
+
+> **Note**: When running with `--dangerously-skip-permissions`, AskUserQuestion may be auto-skipped. Always provide `--scope` and `--stack` arguments in such environments to ensure correct strategy selection.
 
 ---
 
@@ -207,12 +219,12 @@ Examples:
 - "Auth recommended as Tier 1: 7 Features directly depend on it, owns the User entity, used as middleware for all APIs"
 - "Notification recommended as Tier 3: Independent module with no reverse dependencies, loosely coupled via event subscription"
 
-Present the classification results to the user via AskUserQuestion and obtain approval/adjustments.
+Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
 
 ### 3-4. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
 - Propose modern alternatives for each current technology component
 - Evaluate pros/cons, migration complexity, and learning cost of each alternative
-- Confirm with the user before finalizing
+- Confirm with the user before finalizing (if AskUserQuestion is unavailable, display the proposal and proceed with the recommended alternatives)
 
 ---
 

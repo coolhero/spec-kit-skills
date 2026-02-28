@@ -135,6 +135,8 @@ Uses AskUserQuestion to obtain user approval or modifications. If the user reque
 
 **`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This applies to all commands and pipeline steps.
 
+> **Note on `--dangerously-skip-permissions`**: When Claude Code is run with `--dangerously-skip-permissions` (or equivalent), AskUserQuestion calls may be auto-skipped even without `--auto`. In this environment, the pipeline effectively behaves as `--auto` mode. Be aware that all Checkpoints will be bypassed and the pipeline will run to completion without user intervention.
+
 ### 3. Execute — spec-kit Command Execution
 
 Executes the corresponding spec-kit command with the approved context:
