@@ -443,10 +443,35 @@ Running `/smart-sdd pipeline` progresses through the entire workflow sequentiall
 
 ### Pipeline Initialization
 
-Before Phase 0, check if `BASE_PATH/sdd-state.md` exists. If not, initialize it:
+Before Phase 0, initialize the state and validate the source path.
+
+**Step 1 — State file initialization**:
+If `BASE_PATH/sdd-state.md` does not exist, create it:
 1. Read `BASE_PATH/roadmap.md` to extract the Feature list and Tiers
 2. Generate `sdd-state.md` following the [state-schema.md](reference/state-schema.md) format
 3. Set Origin based on the project type (`greenfield` or `reverse-spec`)
+4. Set Source Path (see state-schema.md for rules per mode)
+
+**Step 2 — Source Path verification (HARD STOP)**:
+Read the `Source Path` from `sdd-state.md` and verify based on the project mode:
+
+| Mode | Source Path | Verification |
+|------|------------|-------------|
+| **greenfield** | `N/A` | Skip — no source to reference. Display: "Greenfield project — no existing source reference." |
+| **reverse-spec (rebuild)** | Absolute path from reverse-spec | Verify the path exists and is accessible. Display the path and ask the user to confirm or update it (the source may have moved since `/reverse-spec` was run). |
+| **add (incremental)** | `.` (CWD) | Verify that the current directory contains source code (check for common markers: `package.json`, `pyproject.toml`, `go.mod`, `src/`, etc.). Display: "Incremental mode — current directory is the source reference." |
+
+For **reverse-spec** mode, present to the user via AskUserQuestion:
+```
+📂 Source Reference Path: [path from sdd-state.md]
+```
+- "Confirm path"
+- "Update path"
+
+If the user selects "Update path", accept the new path via "Other" input, verify it exists, and update `sdd-state.md`.
+If the path does not exist, warn the user and ask for correction. **Do NOT proceed until a valid source path is confirmed** (source reference is essential for brownfield development).
+
+**You MUST STOP and WAIT for the user's response.** Do NOT auto-confirm.
 
 ### Phase 0: Constitution Finalization
 

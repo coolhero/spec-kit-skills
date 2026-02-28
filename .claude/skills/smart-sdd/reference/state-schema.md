@@ -13,6 +13,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 **Project**: [Project name]
 **Origin**: [greenfield | reverse-spec]
+**Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
 **Created**: [Initial creation date/time]
 **Last Updated**: [Last updated date/time]
 **Constitution Version**: [Version]
@@ -116,6 +117,10 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
    - `greenfield` — if initialized by `/smart-sdd init`
    - `reverse-spec` — if initialized from `/reverse-spec` artifacts
    - Origin does not change when Features are added later via `/smart-sdd add`
+6. Set Source Path based on the project mode:
+   - `greenfield` → `N/A` (no existing source code)
+   - `reverse-spec` → Extract from the `**Source**:` field in `BASE_PATH/roadmap.md` (the original target-directory path used during `/reverse-spec`)
+   - `add` (incremental) → `.` (source is the current working directory)
 
 ---
 

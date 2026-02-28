@@ -80,9 +80,29 @@ Classify the project type based on the collected information:
 - For monorepos, identify workspace/package boundaries
 - Estimate the role of each module
 
-Upon completing Phase 1, report a summary of the detected tech stack and project structure to the user.
+### 1-5. Static Resource Inventory
+Identify non-code resource files that must be **copied as-is** to the new project (these cannot be regenerated through code):
 
-### 1-5. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
+| Resource Type | Search Patterns |
+|---------------|-----------------|
+| Images | `**/*.{png,jpg,jpeg,gif,svg,ico,webp,avif}` |
+| Fonts | `**/*.{woff,woff2,ttf,otf,eot}` |
+| Media | `**/*.{mp4,mp3,wav,ogg,webm}` |
+| Documents | `**/*.{pdf,doc,docx}` (if used as app assets) |
+| Localization | `**/*.{json,yaml,yml}` in `locales/`, `i18n/`, `translations/` directories |
+| Configuration | Environment templates (`.env.example`), deployment configs used at runtime |
+| Other static | Files in `public/`, `static/`, `assets/`, `resources/` directories |
+
+For each discovered resource directory/group, record:
+- **Directory path** and approximate file count
+- **Usage context**: Where/how these resources are referenced in the code (e.g., imported in components, served statically, bundled by build tool)
+- **Feature association**: Which Feature(s) use these resources
+
+Exclude: `node_modules/`, build output (`dist/`, `build/`), generated files, test fixtures.
+
+Upon completing Phase 1, report a summary of the detected tech stack, project structure, and static resource inventory to the user.
+
+### 1-6. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
 
 This step determines the concrete new tech stack **immediately after detecting the current stack**, so the user has a clear direction before deep analysis begins. Skip entirely if "Same Stack" was selected.
 
@@ -369,6 +389,7 @@ For each Feature, generate `specs/reverse-spec/features/[Feature-ID]-[feature-na
 
 Contents to include in each pre-context.md:
 - **Source Reference**: List of related original files + reference guide by stack strategy
+- **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
 - **For /speckit.specify**: Existing feature summary, draft requirements (FR-###), draft acceptance criteria (SC-###)
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts, technical decisions
 - **For /speckit.analyze**: Cross-Feature verification points

@@ -35,6 +35,20 @@
 - **Extract**: What (what it does), Why (why it does it)
 - **Ignore**: How (how it was implemented)
 
+### Static Resources
+
+> Non-code files used by this Feature that must be **copied from the original source** during implementation.
+> These files cannot be regenerated — they must be copied as-is and placed in the appropriate location in the new project.
+
+| Source Path | Type | Target Path | Usage |
+|-------------|------|-------------|-------|
+| `[original/path/logo.svg]` | Image | `[new/path/logo.svg]` | [e.g., App logo displayed in header] |
+| `[original/path/locales/en.json]` | i18n | `[new/path/locales/en.json]` | [e.g., English translation strings] |
+| `[original/path/fonts/custom.woff2]` | Font | `[new/path/fonts/custom.woff2]` | [e.g., Custom brand font] |
+
+> If no static resources are associated with this Feature, write "None".
+> If resources need modification (e.g., resizing images, updating translation keys), note it in the Usage column.
+
 ---
 
 ## For /speckit.specify
