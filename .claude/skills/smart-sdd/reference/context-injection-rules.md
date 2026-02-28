@@ -331,10 +331,43 @@ Before or during implementation, if the Feature's `pre-context.md` has a non-emp
 **Greenfield projects**: Skip — no Static Resources section exists.
 **Incremental (add) projects**: Source Path = `.`, so resources are already in place. Skip copying but verify the files exist at the expected paths.
 
+### Demo-Ready Delivery (only if VI. Demo-Ready Delivery is in the constitution)
+
+After `/speckit.implement` completes, if the constitution includes "Demo-Ready Delivery":
+
+1. **Determine the Feature's demo surface type** based on what was implemented:
+   - Has UI components → demo via the running app (document the route/page)
+   - Backend/API only → create a demo script (`demos/scripts/demo-F00N.sh` or `.ts`) that invokes the API and displays results
+   - Data/logic layer only → create a CLI command or demo script that exercises the core logic with sample data
+   - Pipeline/engine → create a demo script that runs the pipeline with sample input and shows output
+
+2. **Create `demos/F00N-name.md`** with:
+   ```markdown
+   # Demo: [Feature Name]
+
+   ## Prerequisites
+   [What must be running/installed]
+
+   ## Setup
+   [Commands to prepare the demo environment]
+
+   ## Demo Walkthrough
+   1. [Step-by-step instructions with expected results]
+   2. ...
+
+   ## Validation Scenarios
+   See [specs/{NNN-feature}/quickstart.md](../specs/{NNN-feature}/quickstart.md) for detailed validation.
+   ```
+
+3. **Update `demos/README.md`** (Demo Hub):
+   - Create if it doesn't exist (first Feature with demo)
+   - Add the Feature to the index with status and link
+
 ### Injected Content
 
 - Automatically executes `/speckit.implement` based on tasks.md
 - Static resource copy instructions from pre-context.md (if applicable)
+- If Demo-Ready Delivery is active: demo surface implementation + `demos/F00N-name.md` creation
 
 ### Checkpoint
 

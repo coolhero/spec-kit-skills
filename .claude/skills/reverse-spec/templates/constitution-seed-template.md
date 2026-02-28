@@ -162,10 +162,24 @@ Quality-driven:
 
 ### VI. Demo-Ready Delivery
 - Each Feature must be demonstrable upon completion — not just passing tests, but runnable and visually/functionally verifiable
-- Include a demo script or instructions in the Feature's tasks.md that describes how to launch and interact with the completed Feature
+- spec-kit generates `quickstart.md` per Feature during `/speckit.plan` (validation scenarios). When this principle is active, `quickstart.md` must also include a **Demo** section with step-by-step instructions for launching and interacting with the Feature
+- Maintain a centralized `demos/` directory at the project root that aggregates per-Feature demo entry points:
+  ```
+  demos/
+  ├── README.md              # Demo Hub — index of all Feature demos with status
+  ├── F001-auth.md           # Links to quickstart.md + demo-specific setup/instructions
+  ├── F002-product.md
+  └── ...
+  ```
+- Each `demos/F00N-name.md` must contain: Prerequisites, Setup commands, Demo walkthrough (step-by-step), Expected results, and a link back to `specs/{NNN-feature}/quickstart.md` for detailed validation scenarios
 - "Demo-ready" means: the Feature can be started, exercised through its core user flows, and the results observed — without requiring other incomplete Features
-- If the Feature has no UI, provide a CLI command, API call sequence, or script that exercises the core functionality and displays results
-- **Verification criterion**: `A non-developer stakeholder can follow the demo instructions and verify the Feature works`
+- If the Feature has no UI, **implement a minimal demo surface** (CLI command, simple demo page, API playground, or script) that exercises the core functionality and displays results. "Tests only" is NOT demo-ready
+- **Minimal demo surface examples by Feature type**:
+  - Backend logic without UI → CLI command or demo script that invokes the logic and prints results
+  - API endpoints → Simple API test page or curl-based demo script
+  - Data layer / Store → CLI or minimal UI that performs CRUD and displays state changes
+  - Pipeline / Engine → Demo script that runs the pipeline with sample data and shows output
+- **Verification criterion**: `A non-developer stakeholder can follow demos/F00N-name.md and verify the Feature works — "npm test passes" alone does NOT satisfy this criterion`
 
 ---
 

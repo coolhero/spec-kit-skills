@@ -197,7 +197,7 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
    - III. Simplicity First — Implement only what is in the spec. No speculative additions
    - IV. Surgical Changes — No "improving" adjacent code. Only clean up own changes
    - V. Goal-Driven Execution — Verifiable completion criteria required
-   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. Include demo instructions so the Feature can be launched, exercised, and verified
+   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Implement a minimal demo surface (CLI command, simple demo page, API playground, or demo script) and provide step-by-step instructions in `demos/F00N-name.md`
 
 2. **User selection**: All 6 are selected by default. The user can:
    - Deselect specific practices
@@ -615,7 +615,22 @@ Running `/smart-sdd verify [FID]` performs a 3-phase verification.
 - Check the cross-verification points in the "For /speckit.analyze" section of `pre-context.md`
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
 
-### Phase 3: Global Evolution Update
+### Phase 3: Demo-Ready Verification (only if VI. Demo-Ready Delivery is in the constitution)
+- Check that `demos/F00N-name.md` exists for the Feature
+- Check that a demo surface exists (not just tests): CLI command, demo script, demo page, or API playground
+- If either is missing, **block verification** and instruct the user:
+  ```
+  ❌ Demo-Ready verification failed for [FID] - [Feature Name]:
+    - [Missing: demos/F00N-name.md | Missing: demo surface implementation]
+
+  "Tests pass" alone does not satisfy Demo-Ready Delivery.
+  Please implement a minimal demo surface and create demos/F00N-name.md.
+  ```
+- Update `demos/README.md` (Demo Hub) with the Feature's demo status
+
+> **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
+
+### Phase 4: Global Evolution Update
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found
 - api-registry.md: Verify that the actually implemented API contracts match the registry; update if discrepancies are found
 - sdd-state.md: Record verification results (success/failure, test results, verification time)
