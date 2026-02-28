@@ -69,7 +69,7 @@ Show the **actual content** of constitution-seed.md so the user can review and m
 [List each convention]
 
 ── Best Practices ────────────────────────────────
-[Show the 5 best practices with their descriptions]
+[Show the 6 best practices with their descriptions]
 
 ── Global Evolution Operational Principles ───────
 [Show the operational principles]
@@ -167,6 +167,7 @@ Review the above content. You can:
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
 | `BASE_PATH/entity-registry.md` | Related entity sections | See rules below |
 | `BASE_PATH/api-registry.md` | Related API sections | See rules below |
+| `BASE_PATH/stack-migration.md` | Category Details + Per-Feature row | **Only if New Stack strategy**. See rules below |
 | `SPEC_PATH/[feature-name]/spec.md` | Entire file | Finalized spec for the current Feature |
 
 ### Entity Registry Filtering Rules
@@ -187,6 +188,17 @@ Review the above content. You can:
 
 > **Greenfield/add note**: If api-registry.md is empty or has no matching APIs, skip API injection. The Checkpoint notes: "No pre-existing APIs — defining from scratch." As preceding Features complete their plans, api-registry.md will be populated and available for subsequent Features.
 
+### Stack Migration Filtering Rules (New Stack only)
+
+Skip entirely if "Same Stack" strategy or if `stack-migration.md` does not exist.
+
+1. Read the **Migration Overview** table to provide the full technology mapping context
+2. Read the **Category Details** sections relevant to the Feature's technology areas (e.g., if the Feature uses ORM, include the ORM/Data Layer section)
+3. Read the **Per-Feature Migration Notes** row for the current Feature
+4. Read the **Patterns That Require Rethinking** section to highlight areas where the implementation approach must fundamentally differ
+
+This context helps the plan step make technology decisions aligned with the new stack rather than carrying over patterns from the old stack.
+
 ### Preceding Feature Actual Implementation Reference
 
 Reference the actual implementation results of dependent preceding Features:
@@ -201,6 +213,7 @@ Reference the actual implementation results of dependent preceding Features:
 - **Dependency information**: List of preceding Features and dependency types
 - **Draft entity schemas**: Related entities filtered from entity-registry (or finalized schemas from preceding Features)
 - **Draft API contracts**: Related APIs filtered from api-registry (or finalized contracts from preceding Features)
+- **Stack migration context** (New Stack only): Technology mapping, per-Feature migration notes, and patterns requiring rethinking from stack-migration.md. Skipped if Same Stack or file missing
 - **Technical decisions**: Draft technical decisions from pre-context
 - **Preceding Feature actual results**: Reference data-model and contracts from Features that have already completed plan
 
@@ -237,6 +250,10 @@ Feature: [FID] - [Feature Name]
 
 ── Technical Decisions ───────────────────────────
 [List each technical decision from pre-context]
+
+── Stack Migration Context (New Stack only) ──────
+[If New Stack strategy: show technology mapping, migration notes for this Feature,
+ and patterns that require rethinking. Omitted if Same Stack or file missing.]
 
 ── Preceding Feature Overrides ───────────────────
 [If applicable: show which drafts were replaced by finalized schemas from preceding Features]
