@@ -12,6 +12,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 # SDD State
 
 **Project**: [Project name]
+**Origin**: [greenfield | reverse-spec]
 **Created**: [Initial creation date/time]
 **Last Updated**: [Last updated date/time]
 **Constitution Version**: [Version]
@@ -111,6 +112,10 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 2. Initialize all steps of all Features to `pending` (blank)
 3. Leave the Feature Mapping table empty; map the spec-kit Name when each Feature's specify step is completed
 4. Initialize Constitution to `pending`
+5. Set Origin based on how artifacts were generated:
+   - `greenfield` — if initialized by `/smart-sdd init`
+   - `reverse-spec` — if initialized from `/reverse-spec` artifacts
+   - Origin does not change when Features are added later via `/smart-sdd add`
 
 ---
 

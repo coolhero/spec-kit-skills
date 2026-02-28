@@ -1,14 +1,18 @@
 ---
 name: smart-sdd
-description: Orchestrates the spec-kit SDD workflow based on reverse-spec artifacts. Automatically injects cross-Feature context at each step and maintains the Global Evolution Layer.
-argument-hint: <command> [feature-id] [--from path] [--auto]
+description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, and full rebuild via reverse-spec.
+argument-hint: <command> [feature-id] [--from path] [--auto] [--prd path]
 disable-model-invocation: true
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
 # Smart-SDD: spec-kit Workflow Orchestrator
 
-Wraps spec-kit commands based on reverse-spec artifacts, automatically injecting cross-Feature context at each step and maintaining the Global Evolution Layer.
+Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with three project modes:
+
+- **Greenfield**: New project from scratch via `/smart-sdd init`
+- **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
+- **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`
 
 Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Context Assembly → User Confirmation → spec-kit Execution → Global Evolution Update**.
 
@@ -17,20 +21,32 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 ## Usage
 
 ```
-/smart-sdd pipeline                    # Run the full pipeline (with per-step confirmation)
-/smart-sdd pipeline --auto             # Run the full pipeline without stopping for confirmation
-/smart-sdd pipeline --from ./path      # Read reverse-spec artifacts from specified path
-/smart-sdd constitution                # Finalize constitution (one-time)
-/smart-sdd specify F001                # Specify Feature F001
-/smart-sdd plan F001                   # Plan Feature F001
-/smart-sdd tasks F001                  # Generate tasks for Feature F001
-/smart-sdd implement F001             # Implement Feature F001
-/smart-sdd verify F001                 # Verify Feature F001
-/smart-sdd status                      # Check overall progress status
+# Greenfield — New project setup
+/smart-sdd init                          # Interactive greenfield project setup
+/smart-sdd init --prd path/to/prd.md     # Setup from a PRD document
 
-# --auto can be combined with any command
-/smart-sdd specify F001 --auto         # Specify without confirmation
-/smart-sdd pipeline --from ./path --auto  # Full pipeline, custom path, no confirmation
+# Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
+/smart-sdd add                           # Interactive: define and add new Feature(s)
+
+# Pipeline — Run the full SDD pipeline (after init, add, or reverse-spec)
+/smart-sdd pipeline                      # With per-step confirmation
+/smart-sdd pipeline --auto               # Without stopping for confirmation
+/smart-sdd pipeline --from ./path        # Read artifacts from specified path
+
+# Step Mode — Execute a specific step for a specific Feature
+/smart-sdd constitution                  # Finalize constitution (one-time)
+/smart-sdd specify F001                  # Specify Feature F001
+/smart-sdd plan F001                     # Plan Feature F001
+/smart-sdd tasks F001                    # Generate tasks for Feature F001
+/smart-sdd implement F001               # Implement Feature F001
+/smart-sdd verify F001                   # Verify Feature F001
+
+# Status check
+/smart-sdd status                        # Check overall progress status
+
+# --auto can be combined with any command to skip confirmation
+/smart-sdd specify F001 --auto
+/smart-sdd pipeline --from ./path --auto
 ```
 
 ---
@@ -41,12 +57,12 @@ All paths are relative to the **current working directory** (CWD) where the skil
 
 | Target | Path | Notes |
 |--------|------|-------|
-| reverse-spec artifacts | `./specs/reverse-spec/` | Relative to CWD. Can be changed via `--from` argument |
+| Global Evolution artifacts | `./specs/reverse-spec/` | Relative to CWD. Can be changed via `--from` argument |
 | spec-kit feature artifacts | `./specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
 | spec-kit constitution | `./specs/constitution.md` | Native spec-kit path |
 | State file | `./specs/reverse-spec/sdd-state.md` | Created and managed by smart-sdd |
 
-### reverse-spec Artifact Structure
+### Global Evolution Layer Artifact Structure
 
 ```
 specs/reverse-spec/
@@ -54,8 +70,8 @@ specs/reverse-spec/
 ├── constitution-seed.md
 ├── entity-registry.md
 ├── api-registry.md
-├── business-logic-map.md
-├── stack-migration.md              # (only for new stack)
+├── business-logic-map.md           # (only for rebuild mode)
+├── stack-migration.md              # (only for rebuild with new stack)
 ├── sdd-state.md                    # State file created and managed by smart-sdd
 └── features/
     ├── F001-auth/pre-context.md
@@ -71,9 +87,10 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (pipeline | constitution | specify | plan | tasks | implement | verify | status)
+  First token  → command (init | add | pipeline | constitution | specify | plan | tasks | implement | verify | status)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/implement/verify)
-  --from <path> → reverse-spec artifacts path (defaults to ./specs/reverse-spec/ if not specified)
+  --from <path> → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
+  --prd <path>  → Path to PRD document (only for init command)
   --auto        → Skip Checkpoint confirmation and execute all steps automatically
 ```
 
@@ -81,9 +98,244 @@ $ARGUMENTS parsing rules:
 - If `--from` is specified: use that path
 - If not specified: `./specs/reverse-spec/`
 
-**Pre-validation**: Checks whether `roadmap.md` exists at BASE_PATH. If not found, displays an error message and instructs the user to run `/reverse-spec` first.
+**Pre-validation** (for all commands except `init` and `status`):
+1. Check whether `roadmap.md` exists at BASE_PATH
+2. If not found, display:
+   ```
+   No roadmap.md found at [BASE_PATH].
+   To set up your project, run one of the following:
+     - /smart-sdd init             — Start a new project (greenfield)
+     - /smart-sdd init --prd <path> — Start from a PRD document
+     - /reverse-spec [target-dir]  — Reverse-analyze existing code for full rebuild
+   ```
+3. `init` command: Skip pre-validation (init creates roadmap.md)
+4. `add` command: roadmap.md **must** exist (adding to an existing project)
+5. `status` command: If `sdd-state.md` does not exist, display "No project initialized yet" and suggest `init` or `reverse-spec`
 
-> **Note**: BASE_PATH is relative to the CWD. Both `/reverse-spec` and `/smart-sdd` must be invoked from the same project directory so that smart-sdd can find the artifacts generated by reverse-spec.
+> **Note**: BASE_PATH is relative to the CWD. All smart-sdd commands must be invoked from the same project directory.
+
+---
+
+## Init Command — Greenfield Project Setup
+
+Running `/smart-sdd init` sets up a new project by interactively defining Features, dependencies, and development principles, then generating the Global Evolution Layer artifacts.
+
+### Input Sources
+
+1. **PRD document** (`--prd path/to/prd.md`): Reads the PRD file and extracts project description, proposed features, and requirements as starting context for the interactive Q&A
+2. **Conversational input**: If no `--prd` is specified, gathers all information through interactive Q&A with the user
+
+### Init Workflow
+
+#### Phase 1: Project Definition
+
+1. **If `--prd` is provided**: Read the PRD document and extract:
+   - Project name and description
+   - Target domain
+   - Proposed features/capabilities
+   - Technical requirements or constraints (if mentioned)
+   - Present the extracted information to the user for confirmation/adjustment
+
+2. **If no `--prd`**: Ask the user:
+   - Project name
+   - Project description (what problem it solves, target users)
+   - Domain (e-commerce, SaaS, CMS, education platform, etc.)
+   - Target architecture type (monolithic, microservice, etc.)
+   - Tech stack (language, framework, DB, testing framework)
+
+#### Phase 2: Feature Definition (Interactive Q&A)
+
+1. **Initial Feature brainstorm**:
+   - If PRD was provided: Present extracted feature candidates and ask for confirmation/additions/removals
+   - If no PRD: Ask the user to list the major features of their project
+
+2. **For each Feature, define**:
+   - Feature name (concise English, e.g., "auth", "product", "order")
+   - Description (1-2 sentences)
+   - Tier classification (present Tier definitions, let user assign or confirm suggestion):
+     - Tier 1 (Essential): System cannot function without it
+     - Tier 2 (Recommended): Completes core UX, system works without but value diminished
+     - Tier 3 (Optional): Auxiliary, can be added later
+   - Classification rationale (1 sentence)
+
+3. **Define dependencies between Features**:
+   - For each Feature: "Which other Features does this depend on?"
+   - Record dependency type (entity reference, API call, shared logic)
+   - Validate no circular dependencies exist
+
+4. **Assign Feature IDs**:
+   - Perform topological sort on the dependency graph
+   - Assign F001, F002, ... in topological order
+   - Features at the same level: Tier 1 first, then Tier 2, then Tier 3
+
+5. **Define Release Groups**:
+   - Propose grouping based on dependency layers and Tiers
+   - Present to user for confirmation/adjustment
+
+6. **Checkpoint**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Ask for final approval.
+
+#### Phase 3: Constitution Seed Definition
+
+1. **Present the 5 Best Practices** with descriptions:
+   - I. Test-First (NON-NEGOTIABLE) — Write tests first. Code without tests is not complete
+   - II. Think Before Coding — No assumptions. Mark unclear items as `[NEEDS CLARIFICATION]`
+   - III. Simplicity First — Implement only what is in the spec. No speculative additions
+   - IV. Surgical Changes — No "improving" adjacent code. Only clean up own changes
+   - V. Goal-Driven Execution — Verifiable completion criteria required
+
+2. **User selection**: All 5 are selected by default. The user can:
+   - Deselect specific practices
+   - Modify descriptions
+   - Add custom principles (with Rule + Rationale format)
+
+3. **Project conventions**: Ask for project-specific conventions:
+   - Naming conventions
+   - Project structure conventions
+   - Error handling patterns
+   - Testing patterns
+
+4. **Checkpoint**: Display the complete constitution-seed content for final approval.
+
+#### Phase 4: Artifact Generation
+
+Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
+
+1. **`roadmap.md`**: Using the roadmap template format
+   - Project Overview: From Phase 1 input
+   - "Development Strategy" section (instead of "Rebuild Strategy"): "Greenfield — new project, no existing codebase"
+   - Feature Catalog, Dependency Graph, Release Groups: From Phase 2
+   - Cross-Feature Entity/API Dependencies: Leave empty (populated as Features are planned)
+
+2. **`constitution-seed.md`**: Using the constitution-seed template format
+   - Source Code Reference Principles: "N/A — Greenfield project. No existing source code to reference."
+   - Architecture Principles: From user input (if any), otherwise "Define as the project evolves"
+   - Technical Constraints: From user input (if any)
+   - Coding Conventions: From user input (if any)
+   - Best Practices: From Phase 3 selections
+   - Global Evolution Layer Operational Principles: Always included
+
+3. **`entity-registry.md`**: Empty registry with headers only
+   - Note: "Entities will be populated as Features are planned via /speckit.plan."
+
+4. **`api-registry.md`**: Empty registry with headers only
+   - Note: "Endpoints will be populated as Features are planned via /speckit.plan."
+
+5. **`features/F00N-name/pre-context.md`** (per Feature): Simplified greenfield format
+   - Source Reference: "N/A — Greenfield project"
+   - For /speckit.specify: Feature description + dependencies only (no FR/SC drafts)
+   - For /speckit.plan: Dependencies + empty entity/API draft sections (note: "Define during /speckit.plan")
+   - For /speckit.analyze: Dependency-based cross-Feature verification points
+
+6. **`sdd-state.md`**: Initialize with Origin: `greenfield`, all Features set to `pending`
+
+7. **Not generated**: `business-logic-map.md` (no existing logic to map), `stack-migration.md` (no existing stack)
+
+#### Phase 5: Completion Report
+
+```
+✅ Greenfield project initialized:
+
+  specs/reverse-spec/roadmap.md
+  specs/reverse-spec/constitution-seed.md
+  specs/reverse-spec/entity-registry.md (empty — populated during plan)
+  specs/reverse-spec/api-registry.md (empty — populated during plan)
+  specs/reverse-spec/sdd-state.md
+  specs/reverse-spec/features/F001-xxx/pre-context.md
+  specs/reverse-spec/features/F002-xxx/pre-context.md
+  ...
+
+Next steps:
+  /smart-sdd pipeline       — Run the full SDD pipeline
+  /smart-sdd constitution   — Start by finalizing the constitution
+```
+
+#### Init and --auto Mode
+
+When `--auto` is specified, Phase 2 and Phase 3 Checkpoints are skipped (content is displayed but proceeds immediately). However, interactive Q&A in Phases 1-3 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 5 Best Practices, AI-suggested Tier assignments and Release Groups).
+
+#### Init and --dangerously-skip-permissions
+
+Same handling as other commands: interactive prompts use regular text messages instead of AskUserQuestion. The `--prd` argument is recommended in this environment to minimize required interaction.
+
+---
+
+## Add Command — Brownfield Incremental
+
+Running `/smart-sdd add` adds new Feature(s) to an existing smart-sdd project.
+
+**Prerequisite**: `roadmap.md`, `entity-registry.md`, `api-registry.md`, and `sdd-state.md` must already exist at BASE_PATH.
+
+### Add Workflow
+
+#### Phase 1: Current Project State
+
+1. Read `sdd-state.md` → completed/in-progress Feature list
+2. Read `roadmap.md` → Feature Catalog, Dependency Graph
+3. Read `entity-registry.md` → currently defined entities
+4. Read `api-registry.md` → currently defined APIs
+5. Display current state summary to the user:
+   ```
+   📊 Current Project State:
+
+   Features: N total (X completed, Y in-progress, Z pending)
+   Entities: N defined
+   APIs: N defined
+
+   Completed Features: F001-auth, F002-product, ...
+   In-progress: F003-order (→ plan step)
+   Pending: F004-payment, ...
+   ```
+
+#### Phase 2: New Feature Definition (Interactive Q&A)
+
+1. Ask the user: "Describe the Feature(s) you want to add"
+   - Feature name, description
+   - Which existing Features it depends on (entity references, API calls, etc.)
+   - Tier classification (default: Tier 2)
+2. Multiple Features can be added at once (iterative)
+3. Define dependencies between new Features if applicable
+4. Assign Feature IDs: continue from the last existing ID
+
+#### Phase 3: Checkpoint
+
+1. Display new Feature(s) with Tier + dependencies
+2. Show the updated Dependency Graph (existing + new nodes)
+3. Propose Release Group placement
+4. Ask for user approval/modifications
+
+#### Phase 4: Artifact Updates
+
+1. **Update `roadmap.md`**:
+   - Add new Features to Feature Catalog
+   - Add new nodes/edges to Dependency Graph
+   - Place new Features in Release Groups
+   - Update Cross-Feature Entity/API Dependencies
+
+2. **Create `features/F00N-name/pre-context.md`** per new Feature:
+   - Source Reference: "N/A (added to existing project)"
+   - For /speckit.specify: Feature description + dependency summary (no FR/SC drafts)
+   - For /speckit.plan: Dependencies with entity/API info copied from existing registries
+   - For /speckit.analyze: Dependency-based cross-Feature verification points
+
+3. **Update `sdd-state.md`**:
+   - Add new Features to Feature Progress table (`pending`)
+   - Add to Feature Mapping
+   - Record "Feature added" in Global Evolution Log
+
+#### Phase 5: Completion Report
+
+```
+✅ Added N new Feature(s) to the project:
+  F006-notifications (Tier 2) — depends on F001-auth, F003-order
+  F007-analytics (Tier 3) — depends on F002-product
+
+Updated: roadmap.md, sdd-state.md
+Created: features/F006-notifications/pre-context.md, features/F007-analytics/pre-context.md
+
+Next steps:
+  /smart-sdd specify F006     — Start specifying the first new Feature
+  /smart-sdd pipeline         — Resume pipeline (picks up from first pending Feature)
+```
 
 ---
 
@@ -96,6 +348,7 @@ All spec-kit command executions follow this 4-step protocol.
 - Reads the files/sections required for the given command from BASE_PATH
 - Filters and assembles the necessary information per command according to [context-injection-rules.md](reference/context-injection-rules.md)
 - Also references actual implementation results from preceding Features (under `specs/`) if available
+- **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See [context-injection-rules.md](reference/context-injection-rules.md) for details.
 
 ### 2. Checkpoint — User Confirmation
 
@@ -113,7 +366,8 @@ Feature: [Feature ID] - [Feature Name]
 [Show the actual assembled content organized by source.
  For example, for specify: show the FR-### list, SC-### list,
  business rules, and edge cases — the real text, not just counts.
- For plan: show the entity schemas, API contracts, and dependencies.]
+ For plan: show the entity schemas, API contracts, and dependencies.
+ For greenfield/add: note which sections are empty and will be defined from scratch.]
 
 ── Cross-Feature References ──────────────────────
 
@@ -167,13 +421,17 @@ Running `/smart-sdd pipeline` progresses through the entire workflow sequentiall
 ### Phase 0: Constitution Finalization
 
 1. Reads `BASE_PATH/constitution-seed.md`
+   - For greenfield/init: Uses the constitution-seed generated by the init command
+   - For rebuild: Uses the constitution-seed generated by `/reverse-spec`
 2. Shows the user a summary of the constitution-seed content and provides an opportunity to revise/supplement (Checkpoint)
 3. Provides the constitution-seed content as context when executing `/speckit.constitution`
-4. Initializes `sdd-state.md` and records the constitution completion
+4. Initializes `sdd-state.md` (if not already initialized) and records the constitution completion
+
+> **Note for `add` (incremental) mode**: When pipeline is run after `/smart-sdd add`, constitution already exists. Pipeline skips Phase 0 and proceeds directly to pending Features.
 
 ### Phase 1~N: Progress Features in Release Group Order
 
-Follows the Release Groups order from `BASE_PATH/roadmap.md`.
+Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed Features** — only processes Features with `pending` or `in_progress` status in `sdd-state.md`.
 
 **CRITICAL: Each Feature must complete ALL 6 steps (including implement and verify) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's verify step is complete.
 
@@ -216,7 +474,7 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 
 | Command | Prerequisite | Validation Method |
 |---------|-------------|-------------------|
-| `constitution` | reverse-spec artifacts exist | Check existence of `BASE_PATH/constitution-seed.md` |
+| `constitution` | constitution-seed exists | Check existence of `BASE_PATH/constitution-seed.md` |
 | `specify` | pre-context exists | Check existence of `BASE_PATH/features/[FID]/pre-context.md` |
 | `plan` | spec.md exists | Check existence of `specs/[NNN-feature-name]/spec.md` |
 | `tasks` | plan.md exists | Check existence of `specs/[NNN-feature-name]/plan.md` |
@@ -253,6 +511,7 @@ Output format:
 ```
 📊 Smart-SDD Progress Status
 
+Origin: [greenfield | reverse-spec]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
 Feature         | Tier | specify | plan | tasks | impl | verify
@@ -296,8 +555,8 @@ The context sources and content injected per command are defined in [context-inj
 | Command | Injection Source | Injected Content |
 |---------|-----------------|-----------------|
 | constitution | `constitution-seed.md` | Full content (source reference principles, architectural principles, best practices, Global Evolution operational principles) |
-| specify | `pre-context.md` → "For /speckit.specify" + `business-logic-map.md` (relevant Feature section) | Feature summary, FR-### drafts, SC-### drafts, edge cases, business rules |
-| plan | `pre-context.md` → "For /speckit.plan" + `entity-registry.md` (related entities) + `api-registry.md` (related APIs) | Dependencies, entity/API drafts, technical decisions, preceding Feature results |
+| specify | `pre-context.md` → "For /speckit.specify" + `business-logic-map.md` (relevant Feature section) | Feature summary, FR-### drafts, SC-### drafts, edge cases, business rules. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
+| plan | `pre-context.md` → "For /speckit.plan" + `entity-registry.md` (related entities) + `api-registry.md` (related APIs) | Dependencies, entity/API drafts, technical decisions, preceding Feature results. **If registries empty (early greenfield), skip registry injection** |
 | tasks | `plan.md` (spec-kit artifact) | Automatic execution based on plan |
 | implement | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks |
 | verify/analyze | `pre-context.md` → "For /speckit.analyze" | Cross-Feature verification points, impact scope |

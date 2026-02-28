@@ -280,10 +280,14 @@ Generation complete:
 - ...
 
 Next steps:
-1. Run the full pipeline with /smart-sdd pipeline, or proceed manually with the steps below
-2. Review specs/reverse-spec/constitution-seed.md and finalize the constitution with /speckit.constitution
-3. Run /speckit.specify in the order of Release Groups from specs/reverse-spec/roadmap.md
-   - Referencing each Feature's pre-context.md ensures that existing functionality is fully captured
+  /smart-sdd pipeline       — Run the full SDD pipeline (recommended)
+  /smart-sdd pipeline --auto — Run without stopping for per-step confirmation
+
+smart-sdd will automatically:
+  1. Finalize constitution based on constitution-seed.md
+  2. Progress Features in Release Group order (specify → plan → tasks → implement → verify)
+  3. Inject cross-Feature context from pre-context.md and registries at each step
+  4. Update entity-registry.md and api-registry.md as Features are completed
 ```
 
 ---

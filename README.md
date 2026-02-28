@@ -25,27 +25,35 @@ spec-kit is optimized for **Feature-local governance** (internal control within 
 
 Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
 
-Specifically, two custom skills implement a Global Evolution Layer that wraps the spec-kit workflow:
+Two custom skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting three distinct project modes:
 
 ```
-Existing source code ──→ /reverse-spec ──→ Global Evolution Layer artifacts ──→ /smart-sdd ──→ spec-kit SDD execution
-                         (reverse-analysis)  (roadmap, registries,               (orchestration)
-                                              pre-context, etc.)
+-- Greenfield -----------------------------------------------------------
+New project         --> /smart-sdd init --> Global Evolution Layer --> /smart-sdd pipeline
+
+-- Brownfield (incremental) ---------------------------------------------
+Existing smart-sdd  --> /smart-sdd add  --> updated Global Evolution --> /smart-sdd pipeline
+project                                    Layer
+
+-- Brownfield (rebuild) -------------------------------------------------
+Existing source     --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd pipeline
+code                   (reverse-analysis)  (roadmap, registries,
+                                           pre-context, etc.)
 ```
 
-### Why `/reverse-spec` Is Essential
+### When to Use `/reverse-spec`
 
-The `/reverse-spec` skill is not merely a documentation tool. It **generates the essential prerequisites for smart-sdd to function correctly**.
+The `/reverse-spec` skill is designed for the **full rebuild scenario** -- when you have an existing codebase and want to re-implement it using spec-kit SDD. It is not needed for greenfield projects or for adding Features to an existing smart-sdd project.
 
-The reason we reverse-analyze existing source code to extract entities, API contracts, business logic, and inter-Feature dependencies is that smart-sdd needs this information to **accurately inject cross-Feature context** when executing spec-kit commands for each Feature. Without reverse analysis, smart-sdd cannot know which entities to reference, which API contracts to comply with, or how each Feature depends on its predecessors.
+In the rebuild workflow, `/reverse-spec` **generates the essential prerequisites for smart-sdd to function correctly**. It reverse-analyzes existing source code to extract entities, API contracts, business logic, and inter-Feature dependencies. smart-sdd needs this information to **accurately inject cross-Feature context** when executing spec-kit commands for each Feature. Without reverse analysis, smart-sdd cannot know which entities to reference, which API contracts to comply with, or how each Feature depends on its predecessors.
 
-Furthermore, **reproducing and testing the existing implementation** is at the core of this approach. The extracted draft requirements (FR-###) and acceptance criteria (SC-###) are derived from what the existing system actually does, providing test criteria to verify that the redeveloped system accurately reproduces the original functionality.
+Furthermore, **reproducing and testing the existing implementation** is at the core of the rebuild approach. The extracted draft requirements (FR-###) and acceptance criteria (SC-###) are derived from what the existing system actually does, providing test criteria to verify that the redeveloped system accurately reproduces the original functionality.
 
 ---
 
 ## Skill Overview
 
-### 1. `/reverse-spec` — Reverse-Analyze Existing Source Code & Extract Global Evolution Layer
+### 1. `/reverse-spec` -- Reverse-Analyze Existing Source Code for Full Rebuild
 
 A skill that analyzes existing source code to extract **project-level global context** needed for spec-kit-based SDD redevelopment.
 
@@ -74,7 +82,7 @@ If the argument is omitted, the current directory is analyzed.
 
 #### Execution Workflow (5-Phase)
 
-##### Phase 0 — Strategy Questions
+##### Phase 0 -- Strategy Questions
 
 Two strategic questions at skill execution determine the direction of the artifacts. These can be answered interactively or pre-specified via CLI arguments (`--scope`, `--stack`):
 
@@ -89,10 +97,10 @@ Two strategic questions at skill execution determine the direction of the artifa
 
 | Option | Description | Source Code Reference Approach |
 |--------|------------|-------------------------------|
-| **Same** (Same Stack) | Use the same language, framework, and libraries as existing | **Implementation Reference** — Actively reuse existing implementation patterns. Document reasons when designing differently |
-| **New** (New Stack) | Migrate to an optimal modern technology stack | **Logic-Only Reference** — Extract only What/Why. Ignore How (implementation approach) and prioritize idiomatic patterns of the new stack |
+| **Same** (Same Stack) | Use the same language, framework, and libraries as existing | **Implementation Reference** -- Actively reuse existing implementation patterns. Document reasons when designing differently |
+| **New** (New Stack) | Migrate to an optimal modern technology stack | **Logic-Only Reference** -- Extract only What/Why. Ignore How (implementation approach) and prioritize idiomatic patterns of the new stack |
 
-##### Phase 1 — Project Scan
+##### Phase 1 -- Project Scan
 
 Automatically identifies the entire structure and technology stack of the target directory.
 
@@ -101,7 +109,7 @@ Automatically identifies the entire structure and technology stack of the target
 - **Project type classification**: backend, frontend, fullstack, mobile, library
 - **Module/package boundary identification**: Logical module boundaries, monorepo workspace recognition
 
-##### Phase 2 — Deep Analysis
+##### Phase 2 -- Deep Analysis
 
 Performs deep code analysis using patterns appropriate for the tech stack. Utilizes parallel sub-agents for large codebases.
 
@@ -134,7 +142,7 @@ Information extracted per endpoint: HTTP method/path, Request/Response schema, A
 
 **Inter-Module Dependency Mapping**: import/require analysis, Service call relationships, Shared utilities, Event-based coupling
 
-##### Phase 3 — Feature Classification & Importance Analysis
+##### Phase 3 -- Feature Classification & Importance Analysis
 
 Identifies logical functional units (Features) based on the analysis results. After constructing a dependency graph, **Feature IDs (F001, F002, ...) are assigned in topological sort order**, so the numbering order directly corresponds to the implementation order. Each Feature is comprehensively evaluated along **5 analysis axes**:
 
@@ -158,7 +166,7 @@ Based on the comprehensive evaluation, each Feature is classified into **3 Tiers
 - "Auth recommended as Tier 1: 7 Features directly depend on it, owns User entity, used as middleware for all APIs"
 - "Notification recommended as Tier 3: Independent module with no dependents, loosely coupled via event subscription"
 
-##### Phase 4 — Artifact Generation
+##### Phase 4 -- Artifact Generation
 
 Generates hierarchical artifacts based on the finalized analysis results.
 
@@ -190,7 +198,7 @@ Generates hierarchical artifacts based on the finalized analysis results.
 | `api-registry.md` | Complete API endpoint index, detailed contracts (Request/Response schemas), Cross-Feature dependencies | Cross-reference for writing `contracts/` during `/speckit.plan` |
 | `business-logic-map.md` | Per-Feature business rules, validations, workflows (flowcharts), Cross-Feature rules | Prevents omission of requirements/acceptance criteria during `/speckit.specify` |
 
-**Feature-Level Artifact — `pre-context.md`:**
+**Feature-Level Artifact -- `pre-context.md`:**
 
 Pre-prepares information needed for spec-kit's 3 core commands in dedicated sections per Feature:
 
@@ -203,12 +211,13 @@ Pre-prepares information needed for spec-kit's 3 core commands in dedicated sect
 
 ---
 
-### 2. `/smart-sdd` — spec-kit SDD Workflow Orchestrator
+### 2. `/smart-sdd` -- spec-kit SDD Workflow Orchestrator
 
-A skill that **wraps** spec-kit commands based on `/reverse-spec` artifacts, automatically injecting cross-Feature context at each step and maintaining the Global Evolution Layer.
+A skill that **wraps** spec-kit commands, automatically injecting cross-Feature context at each step and maintaining the Global Evolution Layer. Supports greenfield projects, incremental Feature additions, and full rebuilds from reverse-spec artifacts.
 
 #### Core Value
 
+- **Three project entry points**: `init` for greenfield, `add` for incremental, `pipeline` for all modes
 - **Wraps rather than replaces** spec-kit commands, unaffected by spec-kit updates
 - **Automatically assembles and injects** required cross-Feature information before each command execution
 - **Automatically updates** the Global Evolution Layer (entity-registry, api-registry, roadmap, subsequent pre-context) upon Feature completion
@@ -217,42 +226,61 @@ A skill that **wraps** spec-kit commands based on `/reverse-spec` artifacts, aut
 #### Usage
 
 ```bash
-# Pipeline Mode — Full sequential progression (with per-step confirmation)
-/smart-sdd pipeline
-/smart-sdd pipeline --auto             # Run without stopping for confirmation
-/smart-sdd pipeline --from ./path/to/reverse-spec-output
+# Greenfield -- New project setup
+/smart-sdd init                          # Interactive greenfield project setup
+/smart-sdd init --prd path/to/prd.md     # Setup from a PRD document
 
-# Step Mode — Execute a specific step for a specific Feature
-/smart-sdd constitution                # Finalize constitution (one-time)
-/smart-sdd specify F001                # Specify Feature F001
-/smart-sdd plan F001                   # Plan Feature F001
-/smart-sdd tasks F001                  # Generate tasks for Feature F001
-/smart-sdd implement F001              # Implement Feature F001
-/smart-sdd verify F001                 # Verify Feature F001
+# Brownfield (incremental) -- Add new Feature(s) to existing smart-sdd project
+/smart-sdd add                           # Interactive: define and add new Feature(s)
+
+# Pipeline -- Run the full SDD pipeline (after init, add, or reverse-spec)
+/smart-sdd pipeline                      # With per-step confirmation
+/smart-sdd pipeline --auto               # Without stopping for confirmation
+/smart-sdd pipeline --from ./path        # Read artifacts from specified path
+
+# Step Mode -- Execute a specific step for a specific Feature
+/smart-sdd constitution                  # Finalize constitution (one-time)
+/smart-sdd specify F001                  # Specify Feature F001
+/smart-sdd plan F001                     # Plan Feature F001
+/smart-sdd tasks F001                    # Generate tasks for Feature F001
+/smart-sdd implement F001               # Implement Feature F001
+/smart-sdd verify F001                   # Verify Feature F001
 
 # Status check
-/smart-sdd status                      # Check overall progress status
+/smart-sdd status                        # Check overall progress status
 
 # --auto can be combined with any command to skip confirmation
 /smart-sdd specify F001 --auto
+/smart-sdd pipeline --from ./path --auto
 ```
 
-#### Common Protocol: Assemble → Checkpoint → Execute → Update
+#### Three Project Modes
+
+| Aspect | Greenfield | Brownfield (incremental) | Brownfield (rebuild) |
+|--------|-----------|-------------------------|---------------------|
+| Use case | New project from scratch | Add Features to existing smart-sdd project | Full re-implementation of existing code |
+| Entry point | `/smart-sdd init` | `/smart-sdd add` | `/reverse-spec` then pipeline |
+| Prerequisite | None | Existing smart-sdd artifacts | Existing source code |
+| Entity/API registries | Empty, populated during plan | Already exist, updated | Generated by reverse-spec |
+| Constitution | Created during init | Already exists | Created from constitution-seed |
+| business-logic-map | Not generated | Already exists | Generated by reverse-spec |
+
+#### Common Protocol: Assemble --> Checkpoint --> Execute --> Update
 
 All spec-kit command executions follow this 4-step protocol:
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌─────────────┐
-│  1. Assemble │────▶│ 2. Checkpoint│────▶│  3. Execute  │────▶│  4. Update  │
-│  Context     │     │  User        │     │ spec-kit     │     │ Global      │
-│  Assembly    │     │  Confirmation│     │ Execution    │     │ Refresh     │
-└─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
++--------------+     +---------------+     +--------------+     +--------------+
+|  1. Assemble |---->| 2. Checkpoint |---->|  3. Execute  |---->|  4. Update   |
+|  Context     |     |  User         |     | spec-kit     |     | Global       |
+|  Assembly    |     |  Confirmation |     | Execution    |     | Refresh      |
++--------------+     +---------------+     +--------------+     +--------------+
 ```
 
 | Step | Description |
 |------|------------|
-| **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`) |
-| **Checkpoint** | Presents the assembled context to the user in summarized form, providing an opportunity to approve or modify. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
+| **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`). If a source file is missing or a section contains only placeholder text, that source is gracefully skipped |
+| **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
 | **Execute** | Executes the corresponding spec-kit command (`/speckit.specify`, `/speckit.plan`, etc.) with the approved context. The actual work is performed by spec-kit |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
 
@@ -263,8 +291,8 @@ Summary of what information is automatically injected before each spec-kit comma
 | Command | Injection Source | Injected Content |
 |---------|-----------------|-----------------|
 | `constitution` | `constitution-seed.md` | Full content (source reference principles, architecture principles, Best Practices, Global Evolution operational principles) |
-| `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | Feature summary, FR-### drafts, SC-### drafts, business rules, edge cases, original source reference |
-| `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions |
+| `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | Feature summary, FR-### drafts, SC-### drafts, business rules, edge cases, original source reference. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
+| `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions. **If registries empty (early greenfield), skip registry injection** |
 | `tasks` | `plan.md` (spec-kit artifact) | Automatic execution based on plan. No additional injection |
 | `implement` | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks. No additional injection |
 | `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature verification points, impact scope analysis |
@@ -277,16 +305,17 @@ Running `/smart-sdd pipeline` progresses through the entire workflow sequentiall
 
 ```
 Phase 0: Constitution Finalization
-    └─ Execute /speckit.constitution based on constitution-seed.md
+    +-- Execute /speckit.constitution based on constitution-seed.md
+    |   (Skipped if constitution already exists, e.g., after /smart-sdd add)
 
 Phase 1~N: Progress Features in Release Group Order
-    └─ For each Feature:
-       1. specify  → (pre-context + business-logic-map injection) → /speckit.specify
-       2. clarify  → Run /speckit.clarify only if [NEEDS CLARIFICATION] exists in the spec
-       3. plan     → (pre-context + entity-registry + api-registry injection) → /speckit.plan
-       4. tasks    → /speckit.tasks
-       5. implement → /speckit.implement
-       6. verify   → 3-phase verification (Execution verification + Cross-Feature verification + Global Evolution update)
+    +-- For each Feature:
+       1. specify  -> (pre-context + business-logic-map injection) -> /speckit.specify
+       2. clarify  -> Run /speckit.clarify only if [NEEDS CLARIFICATION] exists in the spec
+       3. plan     -> (pre-context + entity-registry + api-registry injection) -> /speckit.plan
+       4. tasks    -> /speckit.tasks
+       5. implement -> /speckit.implement
+       6. verify   -> 3-phase verification (Execution verification + Cross-Feature verification + Global Evolution update)
 ```
 
 #### Post-Feature Completion Processing
@@ -305,15 +334,15 @@ Tasks automatically performed by smart-sdd when all steps for a Feature are comp
 
 ```
 Phase 1: Execution Verification (Code Level)
-    └─ Run tests, Build check, Lint check
+    +-- Run tests, Build check, Lint check
 
 Phase 2: Cross-Feature Verification (Spec Level)
-    └─ Execute /speckit.analyze + Check cross-verification points in pre-context.md
-    └─ Analyze whether shared entities/APIs changed by this Feature affect other Features
+    +-- Execute /speckit.analyze + Check cross-verification points in pre-context.md
+    +-- Analyze whether shared entities/APIs changed by this Feature affect other Features
 
 Phase 3: Global Evolution Update
-    └─ Verify consistency between entity-registry/api-registry and actual implementation; update if discrepancies found
-    └─ Record verification results in sdd-state.md
+    +-- Verify consistency between entity-registry/api-registry and actual implementation; update if discrepancies found
+    +-- Record verification results in sdd-state.md
 ```
 
 #### Constitution Incremental Update
@@ -328,6 +357,7 @@ When new architecture principles are discovered during Feature progression:
 ```
 📊 Smart-SDD Progress Status
 
+Origin: [greenfield | reverse-spec]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
 Feature         | Tier | specify | plan | tasks | impl | verify
@@ -341,7 +371,7 @@ Overall progress: 1/4 Features completed (25%)
 Currently in progress: F002-product → plan step
 ```
 
-The state file includes Feature Progress, Feature Detail Log, Feature Mapping (Feature ID ↔ spec-kit Name), Global Evolution Log, and Constitution Update Log.
+The state file includes Feature Progress, Feature Detail Log, Feature Mapping (Feature ID to spec-kit Name), Global Evolution Log, and Constitution Update Log.
 
 ---
 
@@ -358,7 +388,7 @@ The state file includes Feature Progress, Feature Detail Log, Feature Mapping (F
 
 ## Constitution Best Practices
 
-The `constitution-seed.md` generated by `/reverse-spec` includes the following 5 recommended development principles:
+The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` includes the following 5 recommended development principles:
 
 | Principle | Core | Verification Criteria |
 |-----------|------|----------------------|
@@ -366,42 +396,109 @@ The `constitution-seed.md` generated by `/reverse-spec` includes the following 5
 | **II. Think Before Coding** | No assumptions. If unclear, mark as `[NEEDS CLARIFICATION]`. Explicitly record trade-offs | Every decision has an answer to "why?" |
 | **III. Simplicity First** | Implement only what is in the spec. No speculative feature additions/premature abstractions | All code is traceable to requirements |
 | **IV. Surgical Changes** | No "improving" adjacent code. Only clean up orphaned code caused by your own changes | Changed lines are traceable to tasks |
-| **V. Goal-Driven Execution** | Verifiable completion criteria required. "implement" → "tests pass" | Automated verification passes |
+| **V. Goal-Driven Execution** | Verifiable completion criteria required. "implement" leads to "tests pass" | Automated verification passes |
 
 ---
 
-## End-to-End Workflow Example
+## End-to-End Workflow Examples
 
-### Scenario: Redeveloping a legacy e-commerce system with React + FastAPI
+### Scenario 1: Greenfield -- Building a new task management app
+
+```
+1. /smart-sdd init
+   +-- Phase 1: Define project
+   |   +-- Name: "TaskFlow", Domain: SaaS productivity
+   |   +-- Stack: TypeScript + Next.js + Prisma + PostgreSQL
+   +-- Phase 2: Define Features interactively
+   |   +-- F001-auth (Tier 1): User registration, login, sessions
+   |   +-- F002-workspace (Tier 1): Team workspaces, member management
+   |   +-- F003-task (Tier 1): Task CRUD, assignment, status tracking
+   |   +-- F004-board (Tier 2): Kanban board views, drag-and-drop
+   |   +-- F005-notification (Tier 3): Email/in-app notifications
+   |   +-- Dependency graph validated, Release Groups proposed
+   +-- Phase 3: Constitution seed with 5 Best Practices (all selected)
+   +-- Phase 4: Generate artifacts under specs/reverse-spec/
+   |   +-- roadmap.md, constitution-seed.md
+   |   +-- entity-registry.md (empty), api-registry.md (empty)
+   |   +-- features/F001-auth/pre-context.md, ...
+   +-- Phase 5: Completion report
+
+2. /smart-sdd pipeline
+   +-- Phase 0: Finalize /speckit.constitution based on constitution-seed
+   +-- Release 1 (Foundation):
+   |   +-- F001-auth:
+   |       +-- Assemble: Gather auth pre-context (no business-logic-map, skip)
+   |       +-- Checkpoint: "Injecting Feature description, dependencies. Proceed?"
+   |       +-- Execute: Run /speckit.specify, /speckit.plan, etc.
+   |       +-- Update: Populate entity-registry with User, Session entities
+   |                    Populate api-registry with /auth/* endpoints
+   +-- Release 2 (Core):
+   |   +-- F002-workspace:
+   |   |   +-- Assemble: pre-context + entity-registry(User reference)
+   |   |   +-- (F001's finalized User schema takes priority)
+   |   |   +-- ...
+   |   +-- F003-task: ...
+   +-- Release 3 (Enhancement): F004-board, F005-notification
+```
+
+### Scenario 2: Brownfield (incremental) -- Adding notifications to an existing project
+
+```
+1. /smart-sdd add
+   +-- Phase 1: Current project state
+   |   +-- Features: 4 total (3 completed, 1 pending)
+   |   +-- Entities: 8 defined, APIs: 22 defined
+   +-- Phase 2: Define new Feature(s) interactively
+   |   +-- F005-notification (Tier 2): Real-time notifications for task updates
+   |   |   +-- Depends on: F001-auth (User entity), F003-task (Task events)
+   |   +-- F006-analytics (Tier 3): Dashboard with task completion metrics
+   |       +-- Depends on: F002-workspace, F003-task
+   +-- Phase 3: Checkpoint with updated dependency graph
+   +-- Phase 4: Update roadmap.md, create pre-context.md for new Features
+   +-- Phase 5: Completion report
+
+2. /smart-sdd pipeline
+   +-- Phase 0: Skipped (constitution already exists)
+   +-- Skips F001-F003 (completed), F004 (pending but already defined)
+   +-- Processes F004 (if pending), then F005-notification, F006-analytics
+       +-- F005-notification:
+           +-- Assemble: pre-context + entity-registry(User, Task) + api-registry
+           +-- (References finalized schemas from completed Features)
+           +-- specify -> plan -> tasks -> implement -> verify
+           +-- Update: Add Notification entity to entity-registry
+                        Add /notifications/* to api-registry
+```
+
+### Scenario 3: Brownfield (rebuild) -- Redeveloping a legacy e-commerce system with React + FastAPI
 
 ```
 1. /reverse-spec ./legacy-ecommerce --scope core --stack new
-   ├─ Phase 0: Select "Core" scope + "New" stack
-   ├─ Phase 1: Detect Django + jQuery tech stack
-   ├─ Phase 2: Extract 12 entities, 45 APIs, 78 business rules
-   ├─ Phase 3: Identify 8 Features, Tier classification + recommendation rationale
-   │   ├─ Tier 1: Auth, Product, Order (foundation features)
-   │   ├─ Tier 2: Cart, Payment, Search (core UX)
-   │   └─ Tier 3: Review, Notification (auxiliary features)
-   └─ Phase 4: Generate artifacts under specs/reverse-spec/
+   +-- Phase 0: Select "Core" scope + "New" stack
+   +-- Phase 1: Detect Django + jQuery tech stack
+   +-- Phase 2: Extract 12 entities, 45 APIs, 78 business rules
+   +-- Phase 3: Identify 8 Features, Tier classification + recommendation rationale
+   |   +-- Tier 1: Auth, Product, Order (foundation features)
+   |   +-- Tier 2: Cart, Payment, Search (core UX)
+   |   +-- Tier 3: Review, Notification (auxiliary features)
+   +-- Phase 4: Generate artifacts under specs/reverse-spec/
 
 2. /smart-sdd pipeline
-   ├─ Phase 0: Finalize /speckit.constitution based on constitution-seed
-   ├─ Release 1 (Foundation):
-   │   └─ F001-auth:
-   │       ├─ Assemble: Gather auth-related info from pre-context + business-logic-map
-   │       ├─ Checkpoint: "Injecting 5 FRs, 8 SCs, 4 business rules. Proceed?" → Approved
-   │       ├─ Execute: Run /speckit.specify
-   │       ├─ (plan, tasks, implement, verify proceed sequentially)
-   │       └─ Update: Reflect finalized User, Session in entity-registry
-   │                  Propagate User schema update to subsequent Feature pre-contexts
-   ├─ Release 2 (Core Business):
-   │   ├─ F002-product:
-   │   │   ├─ Assemble: Gather pre-context + entity-registry(User reference) + api-registry
-   │   │   ├─ (F001's finalized User schema takes priority over drafts)
-   │   │   └─ ...
-   │   └─ F003-order: ...
-   └─ Release 3 (Enhancement): ...
+   +-- Phase 0: Finalize /speckit.constitution based on constitution-seed
+   +-- Release 1 (Foundation):
+   |   +-- F001-auth:
+   |       +-- Assemble: Gather auth-related info from pre-context + business-logic-map
+   |       +-- Checkpoint: "Injecting 5 FRs, 8 SCs, 4 business rules. Proceed?" -> Approved
+   |       +-- Execute: Run /speckit.specify
+   |       +-- (plan, tasks, implement, verify proceed sequentially)
+   |       +-- Update: Reflect finalized User, Session in entity-registry
+   |                    Propagate User schema update to subsequent Feature pre-contexts
+   +-- Release 2 (Core Business):
+   |   +-- F002-product:
+   |   |   +-- Assemble: Gather pre-context + entity-registry(User reference) + api-registry
+   |   |   +-- (F001's finalized User schema takes priority over drafts)
+   |   |   +-- ...
+   |   +-- F003-order: ...
+   +-- Release 3 (Enhancement): ...
 ```
 
 ---
@@ -411,7 +508,7 @@ The `constitution-seed.md` generated by `/reverse-spec` includes the following 5
 | Aspect | spec-kit | spec-kit-skills |
 |--------|----------|-----------------|
 | **Role** | Feature-local SDD execution framework | Global Evolution Layer augmentation |
-| **Scope** | Spec↔Plan↔Tasks consistency within individual Features | Cross-Feature dependencies, release evolution, cross-references |
+| **Scope** | Spec/Plan/Tasks consistency within individual Features | Cross-Feature dependencies, release evolution, cross-references |
 | **Relationship** | Operates independently | Wraps spec-kit. Does not replace spec-kit commands |
 | **Coupling** | Fully functional without spec-kit-skills | Requires spec-kit |
 | **Compatibility** | Unaffected by spec-kit updates | Supplements via Constitution principles + artifacts, independent of spec-kit version |
