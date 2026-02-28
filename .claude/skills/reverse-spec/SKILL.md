@@ -82,6 +82,52 @@ Classify the project type based on the collected information:
 
 Upon completing Phase 1, report a summary of the detected tech stack and project structure to the user.
 
+### 1-5. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
+
+This step determines the concrete new tech stack **immediately after detecting the current stack**, so the user has a clear direction before deep analysis begins. Skip entirely if "Same Stack" was selected.
+
+**Step 1 — Current Stack Summary Table**:
+Present the current stack detected in Phase 1 as a categorized table:
+
+| Category | Current Technology | Version | Usage Context |
+|----------|--------------------|---------|---------------|
+| Language | e.g., Python | 3.10 | Backend |
+| Framework | e.g., Django | 4.2 | Web framework |
+| ORM/DB | e.g., PostgreSQL + Django ORM | 14 | Data layer |
+| Frontend | e.g., React | 18 | SPA |
+| Testing | e.g., pytest | 7.x | Unit/Integration |
+| Build/Deploy | e.g., Docker + GitHub Actions | — | CI/CD |
+
+**Step 2 — Recommended Stack Proposal**:
+For each category, propose 1~2 modern alternatives with rationale:
+
+| Category | Current | Recommended | Alternative | Rationale |
+|----------|---------|-------------|-------------|-----------|
+| Language | Python 3.10 | TypeScript 5.x | Go 1.22 | [Pros: type safety, ecosystem. Cons: migration cost] |
+| Framework | Django 4.2 | Next.js 14 (App Router) | Fastify | [Pros/cons/migration complexity] |
+| ... | ... | ... | ... | ... |
+
+For each recommendation, briefly evaluate:
+- **Pros**: Why this is a good fit for the project
+- **Cons**: Trade-offs, learning curve, ecosystem gaps
+- **Migration complexity**: Low / Medium / High — what makes migration easier or harder
+
+**Step 3 — User Confirmation (HARD STOP)**:
+Present the proposal table and ask the user via AskUserQuestion:
+- "Approve recommended stack as-is"
+- "Choose alternatives for some categories"
+- "Propose a different stack"
+
+**You MUST STOP and WAIT for the user's response.** Do NOT auto-approve or proceed without explicit user input.
+
+If the user chooses alternatives or proposes changes, update the table accordingly and re-confirm.
+
+**Step 4 — Finalize**:
+Record the finalized stack decisions. These will be used in:
+- Phase 4: `stack-migration.md` generation
+- Phase 4: `constitution-seed.md` (New Stack Strategy section)
+- Phase 4: Each Feature's `pre-context.md` (New Stack reference sections)
+
 ---
 
 ## Phase 2 — Deep Analysis
@@ -220,52 +266,6 @@ Examples:
 - "Notification recommended as Tier 3: Independent module with no reverse dependencies, loosely coupled via event subscription"
 
 Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
-
-### 3-4. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
-
-This step determines the concrete new tech stack. Skip entirely if "Same Stack" was selected.
-
-**Step 1 — Current Stack Summary Table**:
-Present the current stack detected in Phase 1 as a categorized table:
-
-| Category | Current Technology | Version | Usage Context |
-|----------|--------------------|---------|---------------|
-| Language | e.g., Python | 3.10 | Backend |
-| Framework | e.g., Django | 4.2 | Web framework |
-| ORM/DB | e.g., PostgreSQL + Django ORM | 14 | Data layer |
-| Frontend | e.g., React | 18 | SPA |
-| Testing | e.g., pytest | 7.x | Unit/Integration |
-| Build/Deploy | e.g., Docker + GitHub Actions | — | CI/CD |
-
-**Step 2 — Recommended Stack Proposal**:
-For each category, propose 1~2 modern alternatives with rationale:
-
-| Category | Current | Recommended | Alternative | Rationale |
-|----------|---------|-------------|-------------|-----------|
-| Language | Python 3.10 | TypeScript 5.x | Go 1.22 | [Pros: type safety, ecosystem. Cons: migration cost] |
-| Framework | Django 4.2 | Next.js 14 (App Router) | Fastify | [Pros/cons/migration complexity] |
-| ... | ... | ... | ... | ... |
-
-For each recommendation, briefly evaluate:
-- **Pros**: Why this is a good fit for the project
-- **Cons**: Trade-offs, learning curve, ecosystem gaps
-- **Migration complexity**: Low / Medium / High — what makes migration easier or harder
-
-**Step 3 — User Confirmation (HARD STOP)**:
-Present the proposal table and ask the user via AskUserQuestion:
-- "Approve recommended stack as-is"
-- "Choose alternatives for some categories"
-- "Propose a different stack"
-
-**You MUST STOP and WAIT for the user's response.** Do NOT auto-approve or proceed without explicit user input.
-
-If the user chooses alternatives or proposes changes, update the table accordingly and re-confirm.
-
-**Step 4 — Finalize**:
-Record the finalized stack decisions. These will be used in:
-- Phase 4: `stack-migration.md` generation
-- Phase 4: `constitution-seed.md` (New Stack Strategy section)
-- Phase 4: Each Feature's `pre-context.md` (New Stack reference sections)
 
 ---
 
