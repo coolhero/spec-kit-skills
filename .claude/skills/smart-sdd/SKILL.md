@@ -418,9 +418,23 @@ After displaying the assembled context above, you MUST:
 ### 3. Execute — spec-kit Command Execution
 
 Executes the corresponding spec-kit command with the approved context:
-- Invokes `speckit.[command]` via the Skill tool
+- Invokes the spec-kit skill via the Skill tool using **hyphen-based names**
 - Includes the assembled context content in the conversation so spec-kit can reference it
 - Feature artifacts created/modified by the spec-kit command are located under `specs/{NNN-feature}/`
+
+**Skill invocation name mapping** (the Skill tool requires hyphen names, not dot names):
+
+| Pipeline Step | Skill Name for Skill Tool |
+|---------------|--------------------------|
+| constitution | `speckit-constitution` |
+| specify | `speckit-specify` |
+| clarify | `speckit-clarify` |
+| plan | `speckit-plan` |
+| tasks | `speckit-tasks` |
+| implement | `speckit-implement` |
+| analyze (verify) | `speckit-analyze` |
+
+> **Note**: Throughout this document, `/speckit.specify`, `/speckit.plan`, etc. refer to the spec-kit commands conceptually. When actually invoking them via the Skill tool, use the hyphen-based names above (e.g., `Skill(speckit-specify)`).
 
 ### 4. Update — Global Evolution Layer Refresh
 
