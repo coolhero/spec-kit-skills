@@ -98,7 +98,18 @@ $ARGUMENTS parsing rules:
 - If `--from` is specified: use that path
 - If not specified: `./specs/reverse-spec/`
 
-**Pre-validation** (for all commands except `init` and `status`):
+**Pre-validation** (for all commands):
+
+**Step 0 — spec-kit installation check** (all commands including `init`):
+1. Check if spec-kit is available by running: `speckit --version` (or `which speckit`)
+2. If not found, automatically install it:
+   ```
+   uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+   ```
+3. Verify installation succeeded by running `speckit --version` again
+4. If installation fails, display the error and instruct the user to install manually
+
+**Step 1 — roadmap.md check** (for all commands except `init` and `status`):
 1. Check whether `roadmap.md` exists at BASE_PATH
 2. If not found, display:
    ```
@@ -108,9 +119,11 @@ $ARGUMENTS parsing rules:
      - /smart-sdd init --prd <path> — Start from a PRD document
      - /reverse-spec [target-dir]  — Reverse-analyze existing code for full rebuild
    ```
-3. `init` command: Skip pre-validation (init creates roadmap.md)
-4. `add` command: roadmap.md **must** exist (adding to an existing project)
-5. `status` command: If `sdd-state.md` does not exist, display "No project initialized yet" and suggest `init` or `reverse-spec`
+
+**Additional rules**:
+- `init` command: Skip Step 1 (init creates roadmap.md). Step 0 still applies.
+- `add` command: roadmap.md **must** exist (adding to an existing project)
+- `status` command: If `sdd-state.md` does not exist, display "No project initialized yet" and suggest `init` or `reverse-spec`
 
 > **Note**: BASE_PATH is relative to the CWD. All smart-sdd commands must be invoked from the same project directory.
 
@@ -172,7 +185,7 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
    - Propose grouping based on dependency layers and Tiers
    - Present to user for confirmation/adjustment
 
-6. **Checkpoint**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Ask for final approval.
+6. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.**
 
 #### Phase 3: Constitution Seed Definition
 
@@ -194,7 +207,7 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
    - Error handling patterns
    - Testing patterns
 
-4. **Checkpoint**: Display the complete constitution-seed content for final approval.
+4. **Checkpoint (HARD STOP)**: Display the complete constitution-seed content. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves.**
 
 #### Phase 4: Artifact Generation
 
@@ -296,12 +309,12 @@ Running `/smart-sdd add` adds new Feature(s) to an existing smart-sdd project.
 3. Define dependencies between new Features if applicable
 4. Assign Feature IDs: continue from the last existing ID
 
-#### Phase 3: Checkpoint
+#### Phase 3: Checkpoint (HARD STOP)
 
 1. Display new Feature(s) with Tier + dependencies
 2. Show the updated Dependency Graph (existing + new nodes)
 3. Propose Release Group placement
-4. Ask for user approval/modifications
+4. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves or requests modifications.**
 
 #### Phase 4: Artifact Updates
 
@@ -385,11 +398,19 @@ Review the above content. You can:
   - Edit the source files directly before proceeding
 ```
 
-Uses AskUserQuestion to obtain user approval or modifications. If the user requests changes, apply them and re-display the updated content for re-confirmation.
+**CRITICAL — Checkpoint is a HARD STOP. You MUST NOT proceed past the Checkpoint without explicit user approval.**
 
-**`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This applies to all commands and pipeline steps.
+After displaying the assembled context above, you MUST:
+1. Use AskUserQuestion to ask: "Approve and proceed?" with options: "Approve as-is", "Request modifications"
+2. **STOP and WAIT** for the user's response. Do NOT assume approval. Do NOT continue to the Execute step.
+3. Only after the user explicitly responds with approval (selects "Approve as-is" or says "yes"/"proceed"/"approved"), move to the Execute step.
+4. If the user requests changes, apply them, re-display the updated content, and ask again.
 
-**`--dangerously-skip-permissions` environment**: When Claude Code is run with `--dangerously-skip-permissions`, AskUserQuestion may not function. In this case, **Checkpoints are NOT automatically skipped** — instead, the assembled context is displayed and the user is prompted for confirmation via a regular text message in the conversation. The pipeline must still pause and wait for the user's response before proceeding. Only `--auto` explicitly opts out of Checkpoints; `--dangerously-skip-permissions` alone does not.
+**You are NOT allowed to approve on behalf of the user. "User approved" must come from an actual user action, not from your own judgment.**
+
+**`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This is the ONLY way to bypass Checkpoints.
+
+**`--dangerously-skip-permissions` environment**: When Claude Code is run with `--dangerously-skip-permissions`, AskUserQuestion may not function. In this case, **Checkpoints are NOT automatically skipped** — instead, the assembled context is displayed and you MUST ask for confirmation via a regular text message: "Do you approve the above context? (yes/no)". You MUST then STOP and WAIT for the user's text response before proceeding. Only `--auto` explicitly opts out of Checkpoints; `--dangerously-skip-permissions` alone does not.
 
 ### 3. Execute — spec-kit Command Execution
 
