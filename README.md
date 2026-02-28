@@ -144,7 +144,7 @@ Information extracted per endpoint: HTTP method/path, Request/Response schema, A
 
 ##### Phase 3 -- Feature Classification & Importance Analysis
 
-Identifies logical functional units (Features) based on the analysis results. After constructing a dependency graph, **Feature IDs (F001, F002, ...) are assigned in topological sort order**, so the numbering order directly corresponds to the implementation order. Each Feature is comprehensively evaluated along **5 analysis axes**:
+Identifies logical functional units (Features) based on the analysis results. After constructing a dependency graph, **Feature IDs (F001, F002, ...) are assigned by Tier first (all Tier 1, then Tier 2, then Tier 3), then by topological order within each Tier**, so the numbering keeps Tier grouping intact while respecting dependency order. Each Feature is comprehensively evaluated along **5 analysis axes**:
 
 | Analysis Axis | Criteria |
 |--------------|----------|

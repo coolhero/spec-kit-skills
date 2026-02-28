@@ -178,9 +178,10 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
    - Validate no circular dependencies exist
 
 4. **Assign Feature IDs**:
-   - Perform topological sort on the dependency graph
-   - Assign F001, F002, ... in topological order
-   - Features at the same level: Tier 1 first, then Tier 2, then Tier 3
+   - Group Features by Tier (Tier 1 → Tier 2 → Tier 3)
+   - Within each Tier, sort by topological order (dependency-based)
+   - Assign F001, F002, ... sequentially: all Tier 1 first, then Tier 2, then Tier 3
+   - This keeps Tier grouping intact while respecting dependency order within each Tier
 
 5. **Define Release Groups**:
    - Propose grouping based on dependency layers and Tiers

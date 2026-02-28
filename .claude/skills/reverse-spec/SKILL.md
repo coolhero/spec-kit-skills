@@ -306,10 +306,15 @@ Derive inter-Feature dependencies:
 Record dependency directions and types, and visualize them as a Mermaid diagram.
 
 **Feature ID Assignment Rules**:
-Assign Feature IDs in the order determined by topological sort of the dependency graph.
-- Features with no dependencies (zero preceding dependencies) receive the lowest numbers
-- Features at the same level are assigned in descending Tier order (Tier 1 → 2 → 3)
-- As a result, the F001, F002, ... sequence directly represents the **feasible implementation order**
+Assign Feature IDs by **Tier first, then topological sort within each Tier**:
+1. Group all Features by Tier (Tier 1 → Tier 2 → Tier 3)
+2. Within each Tier group, sort by topological order (dependency-based)
+3. Assign F001, F002, ... sequentially across the groups: all Tier 1 Features first, then all Tier 2, then all Tier 3
+
+This ensures:
+- All Tier 1 Features always have lower numbers than Tier 2/3
+- Within the same Tier, dependency order is respected
+- The F001, F002, ... sequence represents the **feasible implementation order** while keeping Tier grouping intact
 - These numbers also correspond to spec-kit's `specs/{NNN-feature}/` directory names (e.g., F001-auth → `specs/001-auth/`)
 
 ### 3-3. Importance Analysis and Tier Classification
