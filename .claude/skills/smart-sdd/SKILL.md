@@ -225,6 +225,7 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
    - Architecture Principles: From user input (if any), otherwise "Define as the project evolves"
    - Technical Constraints: From user input (if any)
    - Coding Conventions: From user input (if any)
+   - Project-Specific Recommended Principles: Based on the domain and tech stack from Phase 1 (e.g., e-commerce → Inventory Consistency, Payment Idempotency; SaaS → Tenant Isolation; real-time → Optimistic Updates). Use the recommendation categories in the constitution-seed template as a guide
    - Best Practices: From Phase 3 selections
    - Global Evolution Layer Operational Principles: Always included
 

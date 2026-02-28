@@ -291,6 +291,7 @@ Generate the following files in order. Each file follows the template structure 
 
 5. **`specs/reverse-spec/constitution-seed.md`** — See [constitution-seed-template.md](templates/constitution-seed-template.md)
    - Source code reference principles (branching by stack strategy), extracted architecture principles, technical constraints, coding conventions
+   - **Project-Specific Recommended Principles**: Based on the domain, architecture patterns, and technical traits observed in Phase 1~3, recommend additional constitution principles tailored to this project. Use the recommendation categories in the template (domain-driven, architecture-driven, scale-driven, quality-driven) as a guide. Each recommendation must cite a specific observed trait from the source analysis as evidence.
 
 6. **`specs/reverse-spec/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations

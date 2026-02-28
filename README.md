@@ -193,7 +193,7 @@ Generates hierarchical artifacts based on the finalized analysis results.
 | Artifact | Role | spec-kit Usage |
 |----------|------|---------------|
 | `roadmap.md` | Complete Feature evolution map. Tier-based Feature Catalog, Dependency Graph, Release Groups, Cross-Feature dependency mapping | Determines Feature execution order, dependency verification |
-| `constitution-seed.md` | Architecture principles, technical constraints, coding conventions extracted from existing code + recommended Best Practices (TDD, Simplicity First, etc.) + source code reference strategy (per-stack branching) | Used as draft when running `/speckit.constitution` |
+| `constitution-seed.md` | Architecture principles, technical constraints, coding conventions extracted from existing code + project-specific recommended principles (derived from domain/architecture/scale traits) + recommended Best Practices (TDD, Simplicity First, etc.) + source code reference strategy (per-stack branching) | Used as draft when running `/speckit.constitution` |
 | `entity-registry.md` | Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping. Includes Mermaid state diagrams | Cross-reference for writing `data-model.md` during `/speckit.plan` |
 | `api-registry.md` | Complete API endpoint index, detailed contracts (Request/Response schemas), Cross-Feature dependencies | Cross-reference for writing `contracts/` during `/speckit.plan` |
 | `business-logic-map.md` | Per-Feature business rules, validations, workflows (flowcharts), Cross-Feature rules | Prevents omission of requirements/acceptance criteria during `/speckit.specify` |

@@ -77,9 +77,54 @@
 
 ---
 
+## Project-Specific Recommended Principles
+
+> Principles recommended based on characteristics observed in the existing source code.
+> These are suggestions derived from the project's domain, architecture patterns, and technical traits.
+> Review and adopt/modify as appropriate for the redevelopment project.
+
+### [Recommended Principle Name]
+- **Observed Trait**: [What was observed in the source that triggers this recommendation — e.g., "Payment processing with external gateway integration", "Real-time WebSocket connections for chat"]
+- **Recommended Rule**: [Specific principle to adopt — e.g., "All payment operations must be idempotent", "Implement optimistic UI updates with server reconciliation"]
+- **Rationale**: [Why this principle is important for this type of project]
+
+### [Recommended Principle Name]
+- **Observed Trait**: [...]
+- **Recommended Rule**: [...]
+- **Rationale**: [...]
+
+<!--
+Recommendation categories to consider based on source analysis:
+
+Domain-driven:
+- Financial/Payment → Idempotency, Audit Trail, Decimal Precision
+- Multi-tenant SaaS → Tenant Isolation, Data Partitioning
+- Healthcare/PII → Data Encryption at Rest, Access Logging
+- Real-time → Optimistic Updates, Conflict Resolution, Graceful Degradation
+- E-commerce → Inventory Consistency, Cart Expiry, Price Integrity
+
+Architecture-driven:
+- Event-driven/Message queues → Event Idempotency, Dead Letter Handling, Eventual Consistency
+- Microservices → Circuit Breaker, Bulkhead, Distributed Tracing
+- Heavy async/background jobs → Job Idempotency, Retry Strategy, Timeout Policy
+- File/media handling → Streaming Upload, CDN Strategy, Cleanup Policy
+
+Scale/Performance-driven:
+- High-traffic APIs → Rate Limiting, Caching Strategy, Connection Pooling
+- Large datasets → Pagination Mandate, Query Optimization, Index Strategy
+- Search-heavy → Search Index Sync Strategy, Denormalization Policy
+
+Quality-driven:
+- No existing tests → Test Coverage Minimum Threshold
+- Complex state machines → State Transition Diagram Requirement
+- Heavy external integrations → Mock/Stub Strategy, Contract Testing
+-->
+
+---
+
 ## Recommended Development Principles (Best Practices)
 
-> Recommended principles for redevelopment. Modify/supplement as needed for your project.
+> Standard principles for redevelopment. Modify/supplement as needed for your project.
 
 ### I. Test-First (NON-NEGOTIABLE)
 - Write tests before implementing any feature
