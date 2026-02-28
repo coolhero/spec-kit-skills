@@ -2,8 +2,8 @@
 
 This document defines which sections of which files smart-sdd reads and injects as context before executing each spec-kit command.
 
-**BASE_PATH**: `specs/reverse-spec/` (or the path specified with `--from`)
-**SPEC_PATH**: `specs/` (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
+**BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
+**SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
 
 ---
 
