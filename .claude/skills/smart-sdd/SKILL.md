@@ -2,7 +2,6 @@
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, and full rebuild via reverse-spec.
 argument-hint: <command> [feature-id] [--from path] [--auto] [--prd path]
-disable-model-invocation: true
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
