@@ -1,18 +1,18 @@
 # Business Logic Map
 
-**Source**: [원본 소스 경로]
+**Source**: [Original source path]
 **Generated**: [DATE]
 
-> spec-kit /speckit.specify 시 수용 기준 작성의 선행 참조로 사용됩니다.
-> 각 Feature의 spec 작성 시, 여기에 정리된 비즈니스 규칙이 Requirements와
-> Success Criteria에 빠짐없이 반영되었는지 확인하세요.
+> Used as a preliminary reference when writing acceptance criteria during spec-kit /speckit.specify.
+> When writing specs for each Feature, verify that all business rules documented here are
+> fully reflected in Requirements and Success Criteria.
 
 ---
 
 ## Logic Index
 
-| Feature | 규칙 수 | 검증 수 | 워크플로우 수 | Cross-Feature 규칙 수 |
-|---------|---------|---------|-------------|---------------------|
+| Feature | Rules | Validations | Workflows | Cross-Feature Rules |
+|---------|-------|-------------|-----------|-------------------|
 | F001-auth | [N] | [N] | [N] | [N] |
 | F002-product | [N] | [N] | [N] | [N] |
 
@@ -22,60 +22,60 @@
 
 ### Core Rules
 
-| 규칙 ID | 설명 | 관련 Entity | 원본 위치 |
-|---------|------|------------|-----------|
-| BR-001 | 이메일은 시스템 전체에서 고유해야 함 | User | `[파일]:[라인]` |
-| BR-002 | 비밀번호는 bcrypt로 해싱하여 저장 | User | `[파일]:[라인]` |
-| BR-003 | JWT 토큰 유효기간은 24시간 | User | `[파일]:[라인]` |
-| BR-004 | 로그인 5회 실패 시 계정 30분 잠금 | User | `[파일]:[라인]` |
+| Rule ID | Description | Related Entity | Original Location |
+|---------|-------------|---------------|-------------------|
+| BR-001 | Email must be unique across the entire system | User | `[file]:[line]` |
+| BR-002 | Passwords must be hashed with bcrypt before storage | User | `[file]:[line]` |
+| BR-003 | JWT token validity period is 24 hours | User | `[file]:[line]` |
+| BR-004 | Account locked for 30 minutes after 5 failed login attempts | User | `[file]:[line]` |
 
 ### Validation Logic
 
-| 검증 ID | 대상 | 조건 | 에러 메시지 | 원본 위치 |
-|---------|------|------|------------|-----------|
-| VL-001 | email | RFC 5322 이메일 형식 | "유효한 이메일 주소를 입력하세요" | `[파일]:[라인]` |
-| VL-002 | password | 최소 8자, 대소문자+숫자+특수문자 | "비밀번호 형식이 올바르지 않습니다" | `[파일]:[라인]` |
+| Validation ID | Target | Condition | Error Message | Original Location |
+|---------------|--------|-----------|---------------|-------------------|
+| VL-001 | email | RFC 5322 email format | "Please enter a valid email address" | `[file]:[line]` |
+| VL-002 | password | Min 8 chars, upper+lower+digits+special chars | "Password format is invalid" | `[file]:[line]` |
 
 ### Workflows
 
-#### 사용자 등록 플로우
+#### User Registration Flow
 
 ```
-1. 이메일 중복 확인 → 중복 시 409 반환
-2. 비밀번호 해싱
-3. User 엔티티 생성
-4. 환영 이메일 발송 (비동기)
-5. JWT 토큰 발급
-6. 응답 반환
+1. Check email uniqueness → Return 409 if duplicate
+2. Hash password
+3. Create User entity
+4. Send welcome email (async)
+5. Issue JWT token
+6. Return response
 ```
 
-**원본 위치**: `[파일]:[라인]`
-**관련 Entity**: User
-**부수 효과**: 이메일 발송 (F007-notification 의존)
+**Original Location**: `[file]:[line]`
+**Related Entity**: User
+**Side Effects**: Email dispatch (depends on F007-notification)
 
-#### 로그인 플로우
+#### Login Flow
 
 ```
-1. 이메일로 User 조회 → 없으면 401
-2. 계정 잠금 상태 확인 → 잠겨있으면 403
-3. 비밀번호 검증 → 불일치 시 실패 횟수 증가
-4. 실패 횟수 >= 5이면 계정 잠금
-5. 성공 시 실패 횟수 초기화
-6. JWT 토큰 발급
-7. 마지막 로그인 시간 업데이트
+1. Look up User by email → 401 if not found
+2. Check account lock status → 403 if locked
+3. Verify password → Increment failure count on mismatch
+4. If failure count >= 5, lock account
+5. On success, reset failure count
+6. Issue JWT token
+7. Update last login timestamp
 ```
 
-**원본 위치**: `[파일]:[라인]`
-**관련 Entity**: User
-**상태 전이**: active → locked (5회 실패 시)
+**Original Location**: `[file]:[line]`
+**Related Entity**: User
+**State Transition**: active → locked (after 5 failures)
 
 ### Cross-Feature Rules
 
-| 규칙 ID | 설명 | 관련 Feature | 원본 위치 |
-|---------|------|-------------|-----------|
-| XR-001 | 모든 인증 필요 API는 Bearer 토큰 검증 미들웨어를 통과해야 함 | 전체 | `[파일]:[라인]` |
-| XR-002 | 사용자 삭제 시 관련 주문 데이터는 soft-delete | F003-order | `[파일]:[라인]` |
+| Rule ID | Description | Related Features | Original Location |
+|---------|-------------|-----------------|-------------------|
+| XR-001 | All authenticated API endpoints must pass through Bearer token verification middleware | All | `[file]:[line]` |
+| XR-002 | When a user is deleted, related order data must be soft-deleted | F003-order | `[file]:[line]` |
 
 ---
 
-<!-- 위 형식을 각 Feature별로 반복 -->
+<!-- Repeat the above format for each Feature -->

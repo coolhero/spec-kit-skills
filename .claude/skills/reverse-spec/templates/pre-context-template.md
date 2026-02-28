@@ -8,140 +8,140 @@
 
 ## Source Reference
 
-### 관련 원본 파일 목록
+### Related Original File List
 
-| 파일 경로 | 역할 |
+| File Path | Role |
 |-----------|------|
-| `[경로/파일명]` | [역할 설명: 예) User 모델 정의] |
-| `[경로/파일명]` | [역할 설명: 예) 인증 미들웨어] |
-| `[경로/파일명]` | [역할 설명: 예) 로그인 API 핸들러] |
-| `[경로/파일명]` | [역할 설명: 예) 인증 관련 테스트] |
+| `[path/filename]` | [Role description: e.g., User model definition] |
+| `[path/filename]` | [Role description: e.g., Authentication middleware] |
+| `[path/filename]` | [Role description: e.g., Login API handler] |
+| `[path/filename]` | [Role description: e.g., Authentication-related tests] |
 
-> 원본 소스는 복사하지 않고 원래 위치에서 직접 참조합니다.
-> /speckit.specify, /speckit.plan 진행 시 위 파일들을 읽어 기존 구현을 확인하세요.
+> Original sources are referenced directly from their original locations without copying.
+> When proceeding with /speckit.specify and /speckit.plan, read the above files to review existing implementations.
 
-### 참조 가이드
+### Reference Guide
 
-#### [동일 스택일 때] Implementation Reference
-- 기존 구현 패턴을 적극 참조하여 재활용
-- **주요 참조 포인트**: 디자인 패턴, 에러 처리 방식, 테스트 구조
-- **재사용 가능한 코드**:
-  - `[파일]:[함수명]` — [재사용 사유]
-  - `[파일]:[클래스명]` — [재사용 사유]
+#### [Same Stack] Implementation Reference
+- Actively reference and reuse existing implementation patterns
+- **Key reference points**: Design patterns, error handling approaches, test structure
+- **Reusable code**:
+  - `[file]:[function name]` — [Reuse rationale]
+  - `[file]:[class name]` — [Reuse rationale]
 
-#### [신규 스택일 때] Logic-Only Reference
-- 기존 코드는 비즈니스 로직/요구사항 이해 용도로만 참조
-- 구현 패턴, 라이브러리 사용법은 참조하지 않음
-- **추출할 것**: What(무엇을 하는가), Why(왜 하는가)
-- **무시할 것**: How(어떻게 구현했는가)
+#### [New Stack] Logic-Only Reference
+- Reference existing code only for understanding business logic/requirements
+- Do not reference implementation patterns or library usage
+- **Extract**: What (what it does), Why (why it does it)
+- **Ignore**: How (how it was implemented)
 
 ---
 
 ## For /speckit.specify
 
-> 이 섹션의 내용을 spec.md 작성 시 초안으로 활용하세요.
+> Use the content of this section as a draft when writing spec.md.
 
-### 기존 기능 요약
+### Existing Feature Summary
 
-[이 Feature가 기존 코드에서 수행하던 역할을 2-3문장으로 요약]
+[Summarize in 2-3 sentences the role this Feature played in the existing code]
 
-### 기존 사용자 시나리오
+### Existing User Scenarios
 
-| 우선순위 | 시나리오 | 설명 |
-|---------|---------|------|
-| P1 | [시나리오명] | [사용자가 수행하는 행동과 기대 결과] |
-| P2 | [시나리오명] | [사용자가 수행하는 행동과 기대 결과] |
+| Priority | Scenario | Description |
+|----------|----------|-------------|
+| P1 | [Scenario name] | [User action and expected outcome] |
+| P2 | [Scenario name] | [User action and expected outcome] |
 
-### 기존 요구사항 초안 (spec.md Requirements 섹션)
+### Draft Requirements (spec.md Requirements section)
 
-- **FR-001**: [기존 코드에서 추출한 기능 요구사항]
-- **FR-002**: [기존 코드에서 추출한 기능 요구사항]
-- **FR-003**: [기존 코드에서 추출한 기능 요구사항]
+- **FR-001**: [Functional requirement extracted from existing code]
+- **FR-002**: [Functional requirement extracted from existing code]
+- **FR-003**: [Functional requirement extracted from existing code]
 
-### 기존 수용 기준 초안 (spec.md Success Criteria 섹션)
+### Draft Acceptance Criteria (spec.md Success Criteria section)
 
-- **SC-001**: [기존 코드에서 추출한 성공 기준. 측정 가능한 형태로]
-- **SC-002**: [기존 코드에서 추출한 성공 기준]
+- **SC-001**: [Success criterion extracted from existing code. In measurable form]
+- **SC-002**: [Success criterion extracted from existing code]
 
-### 엣지 케이스
+### Edge Cases
 
-- [기존 코드에서 처리하고 있는 엣지 케이스 1]
-- [기존 코드에서 처리하고 있는 엣지 케이스 2]
+- [Edge case 1 handled in the existing code]
+- [Edge case 2 handled in the existing code]
 
 ---
 
 ## For /speckit.plan
 
-> 이 섹션의 내용을 plan.md 작성 시 참조하세요.
+> Reference the content of this section when writing plan.md.
 
-### 선행 Feature 의존성
+### Preceding Feature Dependencies
 
-| 의존 대상 | 의존 유형 | 구체적 내용 |
-|-----------|----------|------------|
-| F001-auth | 엔티티 참조 | User 엔티티를 FK로 참조 |
-| F001-auth | API 호출 | 인증 미들웨어(Bearer Token 검증) 사용 |
+| Dependency Target | Dependency Type | Specific Details |
+|-------------------|----------------|-----------------|
+| F001-auth | Entity reference | References User entity via FK |
+| F001-auth | API call | Uses authentication middleware (Bearer Token verification) |
 
-### 관련 엔티티 (data-model.md 초안)
+### Related Entities (data-model.md draft)
 
-#### 소유 엔티티
+#### Owned Entities
 
-**[EntityName]** — entity-registry.md의 해당 섹션 참조
+**[EntityName]** — Refer to the corresponding section in entity-registry.md
 
-| 필드명 | 타입 | 제약조건 | 설명 |
-|--------|------|---------|------|
+| Field Name | Type | Constraints | Description |
+|------------|------|------------|-------------|
 | [field] | [type] | [constraint] | [description] |
 
-#### 참조 엔티티 (다른 Feature 소유)
+#### Referenced Entities (owned by other Features)
 
-| Entity | 소유 Feature | 참조 방식 | 용도 |
-|--------|-------------|-----------|------|
-| User | F001-auth | FK (user_id) | [용도 설명] |
+| Entity | Owner Feature | Reference Type | Purpose |
+|--------|--------------|----------------|---------|
+| User | F001-auth | FK (user_id) | [Purpose description] |
 
-### 관련 API 계약 (contracts/ 초안)
+### Related API Contracts (contracts/ draft)
 
-#### 이 Feature가 제공하는 API
+#### APIs Provided by This Feature
 
-| Method | Path | 설명 |
-|--------|------|------|
-| [GET/POST/...] | [/api/...] | [설명] |
+| Method | Path | Description |
+|--------|------|-------------|
+| [GET/POST/...] | [/api/...] | [Description] |
 
-> 상세 스키마는 api-registry.md의 해당 섹션 참조
+> See the corresponding section in api-registry.md for detailed schemas
 
-#### 이 Feature가 소비하는 API (다른 Feature 제공)
+#### APIs Consumed by This Feature (provided by other Features)
 
-| Method | Path | Provider | 호출 목적 |
-|--------|------|----------|-----------|
-| [GET/POST/...] | [/api/...] | F001-auth | [호출 목적] |
+| Method | Path | Provider | Call Purpose |
+|--------|------|----------|-------------|
+| [GET/POST/...] | [/api/...] | F001-auth | [Call purpose] |
 
-### 기술적 결정사항
+### Technical Decisions
 
-#### [동일 스택]
-- **재활용 권장 패턴**: [기존 코드에서 사용한 패턴과 재활용 방법]
-- **기존 라이브러리**: [라이브러리명] — [사용 목적]
-- **기존 아키텍처 결정**: [결정 사항과 이유]
+#### [Same Stack]
+- **Recommended reuse patterns**: [Patterns used in existing code and how to reuse them]
+- **Existing libraries**: [Library name] — [Usage purpose]
+- **Existing architecture decisions**: [Decision and rationale]
 
-#### [신규 스택]
-- **기존 로직 요약**: [기존 구현의 핵심 로직을 기술 중립적으로 요약]
-- **권장 구현 접근법**: [신규 스택에서의 권장 접근 방식]
-- **주의사항**: [마이그레이션 시 주의할 점]
+#### [New Stack]
+- **Existing logic summary**: [Technology-neutral summary of existing implementation's core logic]
+- **Recommended implementation approach**: [Recommended approach in the new stack]
+- **Caveats**: [Migration considerations]
 
 ---
 
 ## For /speckit.analyze
 
-> 이 섹션의 내용을 /speckit.analyze 실행 시 교차 Feature 검증에 활용하세요.
+> Use the content of this section for cross-Feature verification during /speckit.analyze execution.
 
-### 교차 Feature 검증 포인트
+### Cross-Feature Verification Points
 
-| 검증 항목 | 대상 Feature | 검증 내용 |
-|-----------|-------------|-----------|
-| 엔티티 호환성 | F001-auth | User 엔티티의 필드 타입이 일치하는지 |
-| API 계약 호환성 | F001-auth | 인증 API의 요청/응답 스키마가 일치하는지 |
-| 비즈니스 규칙 일관성 | F003-order | [공유 규칙]이 양쪽에서 동일하게 적용되는지 |
+| Verification Item | Target Feature | Verification Content |
+|-------------------|---------------|---------------------|
+| Entity compatibility | F001-auth | Verify that User entity field types match |
+| API contract compatibility | F001-auth | Verify that authentication API request/response schemas match |
+| Business rule consistency | F003-order | Verify that [shared rule] is applied identically on both sides |
 
-### 이 Feature 변경 시 영향 범위
+### Impact Scope When This Feature Changes
 
-| 영향 대상 | 영향 유형 | 설명 |
-|-----------|----------|------|
-| F003-order | 엔티티 변경 영향 | [Entity] 스키마 변경 시 F003의 참조 코드 수정 필요 |
-| F005-cart | API 변경 영향 | [API] 응답 형식 변경 시 F005의 호출 코드 수정 필요 |
+| Impact Target | Impact Type | Description |
+|---------------|------------|-------------|
+| F003-order | Entity change impact | If [Entity] schema changes, F003's reference code needs modification |
+| F005-cart | API change impact | If [API] response format changes, F005's calling code needs modification |

@@ -1,31 +1,31 @@
 # SDD State Schema
 
-이 문서는 `sdd-state.md` 파일의 포맷을 정의한다. smart-sdd가 이 파일을 자동으로 생성하고 관리한다.
+This document defines the format of the `sdd-state.md` file. smart-sdd automatically creates and manages this file.
 
-**파일 위치**: `specs/reverse-spec/sdd-state.md` (또는 `--from`으로 지정된 BASE_PATH 하위)
+**File location**: `specs/reverse-spec/sdd-state.md` (or under the BASE_PATH specified with `--from`)
 
 ---
 
-## 파일 구조
+## File Structure
 
 ```markdown
 # SDD State
 
-**Project**: [프로젝트 이름]
-**Created**: [최초 생성 일시]
-**Last Updated**: [최종 갱신 일시]
-**Constitution Version**: [버전]
+**Project**: [Project name]
+**Created**: [Initial creation date/time]
+**Last Updated**: [Last updated date/time]
+**Constitution Version**: [Version]
 
 ---
 
 ## Constitution
 
-| 항목 | 값 |
-|------|-----|
+| Item | Value |
+|------|-------|
 | Status | [pending / completed] |
 | Version | [MAJOR.MINOR.PATCH] |
-| Completed At | [ISO 8601 일시] |
-| Updates | [증분 업데이트 횟수] |
+| Completed At | [ISO 8601 date/time] |
+| Updates | [Number of incremental updates] |
 
 ---
 
@@ -37,12 +37,12 @@
 | F002 | product | T1 | ✅ 01-18 | 🔄 | | | | in_progress |
 | F003 | order | T2 | | | | | | pending |
 
-### 상태 아이콘
-- ✅ : 완료 (뒤에 완료 날짜 MM-DD)
-- 🔄 : 진행 중
-- ❌ : 실패
-- ⏭️ : 스킵
-- (빈칸) : 미시작
+### Status Icons
+- ✅ : Completed (followed by completion date MM-DD)
+- 🔄 : In progress
+- ❌ : Failed
+- ⏭️ : Skipped
+- (blank) : Not started
 
 ---
 
@@ -50,26 +50,26 @@
 
 ### F001-auth
 
-| 단계 | 상태 | 시작 | 완료 | 비고 |
-|------|------|------|------|------|
-| specify | completed | 2024-01-15T10:00:00 | 2024-01-15T10:30:00 | FR 5개, SC 8개 |
-| plan | completed | 2024-01-16T09:00:00 | 2024-01-16T11:00:00 | 엔티티 3개, API 5개 |
-| tasks | completed | 2024-01-16T11:30:00 | 2024-01-16T12:00:00 | 태스크 12개 |
+| Step | Status | Started | Completed | Notes |
+|------|--------|---------|-----------|-------|
+| specify | completed | 2024-01-15T10:00:00 | 2024-01-15T10:30:00 | 5 FRs, 8 SCs |
+| plan | completed | 2024-01-16T09:00:00 | 2024-01-16T11:00:00 | 3 entities, 5 APIs |
+| tasks | completed | 2024-01-16T11:30:00 | 2024-01-16T12:00:00 | 12 tasks |
 | implement | completed | 2024-01-17T09:00:00 | 2024-01-17T16:00:00 | |
-| verify | completed | 2024-01-17T16:30:00 | 2024-01-17T17:00:00 | 테스트 24/24 통과 |
+| verify | completed | 2024-01-17T16:30:00 | 2024-01-17T17:00:00 | Tests 24/24 passed |
 
 ### F002-product
 
-| 단계 | 상태 | 시작 | 완료 | 비고 |
-|------|------|------|------|------|
-| specify | completed | 2024-01-18T09:00:00 | 2024-01-18T10:00:00 | FR 8개, SC 12개 |
+| Step | Status | Started | Completed | Notes |
+|------|--------|---------|-----------|-------|
+| specify | completed | 2024-01-18T09:00:00 | 2024-01-18T10:00:00 | 8 FRs, 12 SCs |
 | plan | in_progress | 2024-01-18T10:30:00 | | |
 
 ---
 
 ## Feature Mapping
 
-Feature ID와 spec-kit Feature Name(디렉토리명)의 매핑 테이블.
+Mapping table between Feature ID and spec-kit Feature Name (directory name).
 
 | Feature ID | spec-kit Name | spec-kit Path |
 |------------|---------------|---------------|
@@ -80,74 +80,74 @@ Feature ID와 spec-kit Feature Name(디렉토리명)의 매핑 테이블.
 
 ## Global Evolution Log
 
-Global Evolution Layer 파일의 업데이트 이력.
+Update history of Global Evolution Layer files.
 
-| 일시 | 트리거 Feature | 대상 파일 | 변경 내용 |
-|------|---------------|-----------|-----------|
-| 2024-01-16 | F001-auth (plan) | entity-registry.md | User, Session 엔티티 확정 반영 |
-| 2024-01-16 | F001-auth (plan) | api-registry.md | POST /auth/register, POST /auth/login 확정 반영 |
+| Date/Time | Trigger Feature | Target File | Change Description |
+|-----------|----------------|-------------|-------------------|
+| 2024-01-16 | F001-auth (plan) | entity-registry.md | Finalized User, Session entities applied |
+| 2024-01-16 | F001-auth (plan) | api-registry.md | Finalized POST /auth/register, POST /auth/login applied |
 | 2024-01-17 | F001-auth (implement) | roadmap.md | F001 status → completed |
-| 2024-01-17 | F001-auth (implement) | F002 pre-context.md | User 엔티티 참조 스키마 갱신 |
+| 2024-01-17 | F001-auth (implement) | F002 pre-context.md | User entity reference schema updated |
 
 ---
 
 ## Constitution Update Log
 
-Constitution 증분 업데이트 이력.
+Constitution incremental update history.
 
-| 버전 | 일시 | 트리거 | 변경 내용 |
-|------|------|--------|-----------|
-| 1.0.0 | 2024-01-15 | 최초 확정 | constitution-seed 기반 확정 |
-| 1.1.0 | 2024-01-17 | F001-auth implement | 인증 미들웨어 패턴 원칙 추가 |
+| Version | Date/Time | Trigger | Change Description |
+|---------|-----------|---------|-------------------|
+| 1.0.0 | 2024-01-15 | Initial finalization | Finalized based on constitution-seed |
+| 1.1.0 | 2024-01-17 | F001-auth implement | Added authentication middleware pattern principle |
 ```
 
 ---
 
-## 초기 상태 생성
+## Initial State Generation
 
-smart-sdd 최초 실행 시 (sdd-state.md가 없을 때) 아래 절차로 초기 상태를 생성한다:
+When smart-sdd runs for the first time (when sdd-state.md does not exist), the initial state is generated using the following procedure:
 
-1. `BASE_PATH/roadmap.md`를 읽어 Feature 목록과 Tier를 추출한다
-2. 모든 Feature의 모든 단계를 `pending`(빈칸)으로 초기화한다
-3. Feature Mapping 테이블은 비워두고, 각 Feature의 specify 완료 시 spec-kit Name을 매핑한다
-4. Constitution은 `pending`으로 초기화한다
-
----
-
-## 상태 업데이트 규칙
-
-### 단계 시작 시
-- 해당 셀을 🔄로 변경
-- Feature Detail Log에 시작 시각 기록
-- Feature Progress의 Status를 `in_progress`로 변경
-
-### 단계 완료 시
-- 해당 셀을 ✅ MM-DD로 변경
-- Feature Detail Log에 완료 시각과 비고 기록
-- `Last Updated` 갱신
-
-### 단계 실패 시
-- 해당 셀을 ❌로 변경
-- Feature Detail Log에 실패 사유 기록
-- Feature Progress의 Status는 `in_progress` 유지 (재시도 가능)
-
-### Feature 완료 시 (모든 단계 ✅)
-- Feature Progress의 Status를 `completed`로 변경
-- Global Evolution Log에 업데이트 이력 추가
-
-### 단계 스킵 시 (예: clarify 불필요)
-- 해당 셀을 ⏭️로 변경
-- Feature Detail Log에 스킵 사유 기록
+1. Read `BASE_PATH/roadmap.md` to extract the Feature list and Tiers
+2. Initialize all steps of all Features to `pending` (blank)
+3. Leave the Feature Mapping table empty; map the spec-kit Name when each Feature's specify step is completed
+4. Initialize Constitution to `pending`
 
 ---
 
-## 검증 결과 기록
+## State Update Rules
 
-verify 단계 완료 시 Feature Detail Log의 비고에 아래 정보를 기록:
+### When a Step Starts
+- Change the corresponding cell to 🔄
+- Record the start time in the Feature Detail Log
+- Change the Feature Progress Status to `in_progress`
+
+### When a Step Completes
+- Change the corresponding cell to ✅ MM-DD
+- Record the completion time and notes in the Feature Detail Log
+- Update `Last Updated`
+
+### When a Step Fails
+- Change the corresponding cell to ❌
+- Record the failure reason in the Feature Detail Log
+- Feature Progress Status remains `in_progress` (retry is possible)
+
+### When a Feature Completes (all steps ✅)
+- Change the Feature Progress Status to `completed`
+- Add update history to the Global Evolution Log
+
+### When a Step is Skipped (e.g., clarify not needed)
+- Change the corresponding cell to ⏭️
+- Record the skip reason in the Feature Detail Log
+
+---
+
+## Verification Result Recording
+
+When the verify step is completed, record the following information in the Notes column of the Feature Detail Log:
 
 ```
-테스트: [통과 수]/[전체 수] 통과
-빌드: [성공/실패]
-린트: [성공/실패/미설정]
-Cross-Feature: [검증 포인트 수]개 확인, [이슈 수]개 이슈
+Tests: [passed count]/[total count] passed
+Build: [success/failure]
+Lint: [success/failure/not configured]
+Cross-Feature: [verification point count] checked, [issue count] issues
 ```

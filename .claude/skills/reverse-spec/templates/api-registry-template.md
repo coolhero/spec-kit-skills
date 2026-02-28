@@ -1,31 +1,31 @@
 # API Registry
 
-**Source**: [원본 소스 경로]
+**Source**: [Original source path]
 **Generated**: [DATE]
-**Total Endpoints**: [N]개
+**Total Endpoints**: [N]
 
-> spec-kit /speckit.plan 시 contracts/ 작성의 선행 참조로 사용됩니다.
-> 각 Feature의 plan 작성 시, 제공 API는 contracts/에 그대로 반영하고,
-> 소비 API는 이 레지스트리에서 계약을 확인하여 호환성을 보장하세요.
+> Used as a preliminary reference when writing contracts/ during spec-kit /speckit.plan.
+> When writing the plan for each Feature, directly reflect provided APIs into contracts/,
+> and check contracts for consumed APIs in this registry to ensure compatibility.
 
 ---
 
 ## Endpoint Index
 
-| Method | Path | Feature | Auth | 설명 |
-|--------|------|---------|------|------|
-| GET | /api/users | F001-auth | Bearer Token | 사용자 목록 조회 |
-| POST | /api/users | F001-auth | Public | 사용자 등록 |
-| GET | /api/products | F002-product | Bearer Token | 상품 목록 조회 |
+| Method | Path | Feature | Auth | Description |
+|--------|------|---------|------|-------------|
+| GET | /api/users | F001-auth | Bearer Token | List users |
+| POST | /api/users | F001-auth | Public | Register user |
+| GET | /api/products | F002-product | Bearer Token | List products |
 
 ---
 
 ## Cross-Feature API Dependencies
 
-| API | Provider | Consumer(s) | 호출 목적 |
-|-----|----------|-------------|-----------|
-| `POST /api/auth/verify` | F001-auth | F002-product, F003-order | 토큰 검증 |
-| `GET /api/products/:id` | F002-product | F003-order, F005-cart | 상품 정보 조회 |
+| API | Provider | Consumer(s) | Call Purpose |
+|-----|----------|-------------|-------------|
+| `POST /api/auth/verify` | F001-auth | F002-product, F003-order | Token verification |
+| `GET /api/products/:id` | F002-product | F003-order, F005-cart | Product info lookup |
 
 ---
 
@@ -33,14 +33,14 @@
 
 ### POST /api/auth/register
 
-**원본 소스**: `[파일 경로]:[라인 번호]`
-**인증**: Public (인증 불필요)
+**Original Source**: `[file path]:[line number]`
+**Authentication**: Public (no authentication required)
 
 #### Request
 
 **Headers**:
-| 헤더 | 값 | 필수 |
-|------|-----|------|
+| Header | Value | Required |
+|--------|-------|----------|
 | Content-Type | application/json | Y |
 
 **Body**:
@@ -82,25 +82,25 @@
 ```
 
 #### Dependencies
-- **Entity**: User (생성)
-- **호출 API**: 없음
-- **Cross-Feature Consumers**: 없음 (독립 엔드포인트)
+- **Entity**: User (create)
+- **Called APIs**: None
+- **Cross-Feature Consumers**: None (standalone endpoint)
 
 ---
 
 ### GET /api/auth/me
 
-**원본 소스**: `[파일 경로]:[라인 번호]`
-**인증**: Bearer Token (required)
+**Original Source**: `[file path]:[line number]`
+**Authentication**: Bearer Token (required)
 
 #### Request
 
 **Headers**:
-| 헤더 | 값 | 필수 |
-|------|-----|------|
+| Header | Value | Required |
+|--------|-------|----------|
 | Authorization | Bearer {token} | Y |
 
-**Query Parameters**: 없음
+**Query Parameters**: None
 
 #### Response
 
@@ -122,9 +122,9 @@
 ```
 
 #### Dependencies
-- **Entity**: User (조회)
-- **Cross-Feature Consumers**: F002-product (사용자 프로필 표시), F003-order (주문자 정보)
+- **Entity**: User (read)
+- **Cross-Feature Consumers**: F002-product (user profile display), F003-order (orderer info)
 
 ---
 
-<!-- 위 형식을 각 API 그룹(Feature)별로 반복 -->
+<!-- Repeat the above format for each API group (per Feature) -->

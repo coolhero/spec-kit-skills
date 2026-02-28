@@ -1,308 +1,319 @@
 # spec-kit-skills
 
-**spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
+[한국어 README](README.ko.md)
+
+**A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
 ---
 
-## 목적
+## Purpose
 
-[spec-kit](https://github.com/github/spec-kit)은 Spec-Driven Development(SDD)를 실제 워크플로우로 구현하기 위한 Git 기반 실행 프레임워크입니다. 그러나 spec-kit에는 다음과 같은 전역 수준의 한계가 존재합니다.
+[spec-kit](https://github.com/github/spec-kit) is a Git-based execution framework for implementing Spec-Driven Development (SDD) as a practical workflow. However, spec-kit has the following project-level limitations.
 
-### spec-kit의 한계
+### Limitations of spec-kit
 
-spec-kit은 **Feature-local governance**(기능 단위 내부 통제)에 최적화되어 있으나, 아래와 같은 전역 수준의 관리 메커니즘이 기본 제공되지 않습니다:
+spec-kit is optimized for **Feature-local governance** (internal control within individual features), but lacks the following project-level management mechanisms out of the box:
 
-| 한계 | 영향 |
-|------|------|
-| Feature 간 교차 참조 부재 | `/speckit.plan`이 선행 Feature의 data-model, API 계약을 자동 참조하지 않아 호환 불가한 설계 발생 가능 |
-| Cross-Feature 분석 한계 | `/speckit.analyze`가 Feature 내부만 분석하여 Feature 간 엔티티/인터페이스 충돌 점검 불가 |
-| 에이전트 컨텍스트 부족 | "Recent Changes" 섹션이 최근 3개 Feature의 한 줄 요약만 누적. 데이터 모델/API/비즈니스 로직 수준의 맥락 미포함 |
-| 릴리즈 단위 관리 부재 | Feature 간 의존성, 우선순위, 릴리즈 그룹핑 관리 산출물이 없어 통합 계획이 프레임워크 외부에 의존 |
+| Limitation | Impact |
+|-----------|--------|
+| No cross-Feature references | `/speckit.plan` does not automatically reference preceding Features' data-model or API contracts, potentially leading to incompatible designs |
+| Limited cross-Feature analysis | `/speckit.analyze` only analyzes within a single Feature, unable to detect entity/interface conflicts between Features |
+| Insufficient agent context | The "Recent Changes" section only accumulates one-line summaries for the last 3 Features. Data model/API/business logic level context is not included |
+| No release-level management | No artifacts for managing Feature dependencies, priorities, and release grouping, leaving integration planning outside the framework |
 
-### 이 프로젝트의 해결 방안: Global Evolution Layer
+### This Project's Solution: Global Evolution Layer
 
-spec-kit의 커맨드 템플릿 자체를 수정하지 않고, **Constitution 원칙 + 프로젝트 수준 산출물 + 운영 스킬**로 한계를 보완합니다.
+Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
 
-구체적으로, 두 가지 커스텀 스킬을 통해 spec-kit 워크플로우를 감싸는(wrapping) Global Evolution Layer를 구현합니다:
+Specifically, two custom skills implement a Global Evolution Layer that wraps the spec-kit workflow:
 
 ```
-기존 소스코드 ──→ /reverse-spec ──→ Global Evolution Layer 산출물 ──→ /smart-sdd ──→ spec-kit SDD 실행
-                  (역분석/추출)      (roadmap, registries,              (오케스트레이션)
-                                      pre-context 등)
+Existing source code ──→ /reverse-spec ──→ Global Evolution Layer artifacts ──→ /smart-sdd ──→ spec-kit SDD execution
+                         (reverse-analysis)  (roadmap, registries,               (orchestration)
+                                              pre-context, etc.)
 ```
+
+### Why `/reverse-spec` Is Essential
+
+The `/reverse-spec` skill is not merely a documentation tool. It **generates the essential prerequisites for smart-sdd to function correctly**.
+
+The reason we reverse-analyze existing source code to extract entities, API contracts, business logic, and inter-Feature dependencies is that smart-sdd needs this information to **accurately inject cross-Feature context** when executing spec-kit commands for each Feature. Without reverse analysis, smart-sdd cannot know which entities to reference, which API contracts to comply with, or how each Feature depends on its predecessors.
+
+Furthermore, **reproducing and testing the existing implementation** is at the core of this approach. The extracted draft requirements (FR-###) and acceptance criteria (SC-###) are derived from what the existing system actually does, providing test criteria to verify that the redeveloped system accurately reproduces the original functionality.
 
 ---
 
-## 스킬 구성
+## Skill Overview
 
-### 1. `/reverse-spec` — 기존 소스코드 역분석 및 Global Evolution Layer 추출
+### 1. `/reverse-spec` — Reverse-Analyze Existing Source Code & Extract Global Evolution Layer
 
-기존 소스코드를 분석하여, spec-kit 기반 SDD 재개발에 필요한 **프로젝트 수준의 글로벌 컨텍스트**를 추출하는 스킬입니다.
+A skill that analyzes existing source code to extract **project-level global context** needed for spec-kit-based SDD redevelopment.
 
-#### 핵심 가치
+#### Core Value
 
-- 기존 코드의 엔티티, API, 비즈니스 로직, 모듈 의존성을 **자동 역추출**
-- Feature 단위로 분류하고, **5축 분석 기반 Tier 자동 추천** (Tier 1 필수 / Tier 2 권장 / Tier 3 선택)
-- spec-kit 각 커맨드에서 바로 활용 가능한 **계층형 산출물** 생성
+- **Automatic reverse-extraction** of entities, APIs, business logic, and module dependencies from existing code
+- Feature-level classification with **5-axis analysis-based Tier recommendations** (Tier 1 Essential / Tier 2 Recommended / Tier 3 Optional)
+- Generation of **hierarchical artifacts** directly usable by each spec-kit command
 
-#### 사용법
+#### Usage
 
 ```bash
 /reverse-spec [target-directory]
 ```
 
-인자를 생략하면 현재 디렉토리를 대상으로 분석합니다.
+If the argument is omitted, the current directory is analyzed.
 
-#### 실행 워크플로우 (5-Phase)
+#### Execution Workflow (5-Phase)
 
-##### Phase 0 — 전략 질문
+##### Phase 0 — Strategy Questions
 
-스킬 실행 시 두 가지 전략적 질문을 통해 산출물의 방향을 결정합니다:
+Two strategic questions at skill execution determine the direction of the artifacts:
 
-**질문 1: 구현 범위**
+**Question 1: Implementation Scope**
 
-| 옵션 | 설명 |
-|------|------|
-| **Core** | 프로젝트의 근간이 되는 핵심 기능만 재개발. 학습/프로토타이핑 목적 |
-| **Full** | 기존과 동일한 전체 기능을 재개발 |
+| Option | Description |
+|--------|------------|
+| **Core** | Redevelop only the core features that form the project's foundation. For learning/prototyping purposes |
+| **Full** | Redevelop the complete feature set identical to the existing system |
 
-**질문 2: 기술 스택 전략**
+**Question 2: Technology Stack Strategy**
 
-| 옵션 | 설명 | 소스코드 참조 방식 |
-|------|------|-------------------|
-| **Same** (동일 스택) | 기존과 동일한 언어, 프레임워크, 라이브러리 사용 | **Implementation Reference** — 기존 구현 패턴을 적극 재활용. 다르게 설계 시 변경 사유를 명시 |
-| **New** (신규 스택) | 최적의 현대적 기술 스택으로 전환 | **Logic-Only Reference** — What/Why만 추출. How(구현 방식)는 무시하고 신규 스택의 관용적 패턴을 우선 |
+| Option | Description | Source Code Reference Approach |
+|--------|------------|-------------------------------|
+| **Same** (Same Stack) | Use the same language, framework, and libraries as existing | **Implementation Reference** — Actively reuse existing implementation patterns. Document reasons when designing differently |
+| **New** (New Stack) | Migrate to an optimal modern technology stack | **Logic-Only Reference** — Extract only What/Why. Ignore How (implementation approach) and prioritize idiomatic patterns of the new stack |
 
-##### Phase 1 — 프로젝트 스캔
+##### Phase 1 — Project Scan
 
-대상 디렉토리의 전체 구조와 기술 스택을 자동 파악합니다.
+Automatically identifies the entire structure and technology stack of the target directory.
 
-- **디렉토리 구조 탐색**: 주요 소스 파일 패턴 (`**/*.{py,js,ts,jsx,tsx,java,go,rs,...}`) 탐색
-- **기술 스택 자동 감지**: `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `build.gradle` 등 설정 파일에서 언어/프레임워크/DB/테스트/빌드 도구 식별
-- **프로젝트 타입 판별**: backend, frontend, fullstack, mobile, library
-- **모듈/패키지 경계 식별**: 논리적 모듈 경계, 모노레포 워크스페이스 인식
+- **Directory structure exploration**: Scan major source file patterns (`**/*.{py,js,ts,jsx,tsx,java,go,rs,...}`)
+- **Automatic tech stack detection**: Identify language/framework/DB/test/build tools from config files (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `build.gradle`, etc.)
+- **Project type classification**: backend, frontend, fullstack, mobile, library
+- **Module/package boundary identification**: Logical module boundaries, monorepo workspace recognition
 
-##### Phase 2 — 심층 분석
+##### Phase 2 — Deep Analysis
 
-기술 스택에 맞는 패턴으로 코드를 심층 분석합니다. 대규모 코드베이스의 경우 병렬 서브에이전트를 활용합니다.
+Performs deep code analysis using patterns appropriate for the tech stack. Utilizes parallel sub-agents for large codebases.
 
-**데이터 모델 추출**:
+**Data Model Extraction**:
 
-| 기술 | 탐색 대상 |
-|------|-----------|
+| Technology | Scan Targets |
+|-----------|-------------|
 | Django | `models.py`, migrations |
-| SQLAlchemy/FastAPI | 모델 클래스, Alembic migrations |
-| TypeORM/Prisma | 엔티티 클래스, `schema.prisma` |
-| JPA/Hibernate | `@Entity` 클래스 |
-| Mongoose | Schema 정의 |
+| SQLAlchemy/FastAPI | Model classes, Alembic migrations |
+| TypeORM/Prisma | Entity classes, `schema.prisma` |
+| JPA/Hibernate | `@Entity` classes |
+| Mongoose | Schema definitions |
 | Rails | `app/models/`, migrations |
 
-각 엔티티에서 추출하는 정보: 필드(이름, 타입, 제약조건), 관계(1:1, 1:N, M:N), 유효성 검증 규칙, 상태 전이, 인덱스
+Information extracted per entity: Fields (name, type, constraints), Relationships (1:1, 1:N, M:N), Validation rules, State transitions, Indexes
 
-**API 엔드포인트 추출**:
+**API Endpoint Extraction**:
 
-| 기술 | 탐색 대상 |
-|------|-----------|
-| Express/Fastify | 라우터 파일, `router.get()` 등 |
+| Technology | Scan Targets |
+|-----------|-------------|
+| Express/Fastify | Router files, `router.get()`, etc. |
 | Django/DRF | `urls.py`, ViewSet, APIView |
-| FastAPI | `@app.get()`, `@router.post()` 데코레이터 |
-| Spring | `@RequestMapping`, `@GetMapping` 등 |
-| Next.js/Nuxt | `pages/api/`, `app/api/` 디렉토리 |
+| FastAPI | `@app.get()`, `@router.post()` decorators |
+| Spring | `@RequestMapping`, `@GetMapping`, etc. |
+| Next.js/Nuxt | `pages/api/`, `app/api/` directories |
 
-각 엔드포인트에서 추출하는 정보: HTTP 메서드/경로, 요청/응답 스키마, 인증/인가 요구사항, 미들웨어
+Information extracted per endpoint: HTTP method/path, Request/Response schema, Authentication/Authorization requirements, Middleware
 
-**비즈니스 로직 추출**: 비즈니스 규칙, 유효성 검증, 다단계 워크플로우, 외부 연동
+**Business Logic Extraction**: Business rules, Validations, Multi-step workflows, External integrations
 
-**모듈 간 의존성 매핑**: import/require 분석, 서비스 호출 관계, 공유 유틸리티, 이벤트 기반 결합
+**Inter-Module Dependency Mapping**: import/require analysis, Service call relationships, Shared utilities, Event-based coupling
 
-##### Phase 3 — Feature 분류 및 중요도 분석
+##### Phase 3 — Feature Classification & Importance Analysis
 
-분석 결과를 기반으로 논리적 기능 단위(Feature)를 식별합니다. 의존성 그래프를 구성한 후 **위상정렬 순서로 Feature ID(F001, F002, ...)를 배정**하여, 번호 순서가 곧 구현 가능 순서가 됩니다. 각 Feature를 **5가지 분석 축**으로 종합 평가합니다:
+Identifies logical functional units (Features) based on the analysis results. After constructing a dependency graph, **Feature IDs (F001, F002, ...) are assigned in topological sort order**, so the numbering order directly corresponds to the implementation order. Each Feature is comprehensively evaluated along **5 analysis axes**:
 
-| 분석 축 | 판단 기준 |
-|---------|-----------|
-| **구조적 근간** | 다른 Feature들이 이 Feature 없이 존재할 수 없는가. 피의존 횟수, import 깊이, 공유 엔티티 소유 수 |
-| **도메인 핵심** | 프로젝트의 존재 이유와 직결되는 기능인가. 프로젝트 도메인에서의 역할 (예: e-commerce면 상품/주문이 핵심) |
-| **데이터 소유권** | 핵심 엔티티를 정의하고 관리하는 기능인가. 소유 엔티티 수, 다른 Feature에서 참조되는 비율 |
-| **통합 허브** | 다른 Feature/외부 시스템과의 연결 지점인가. API provider 역할, 외부 연동 수 |
-| **비즈니스 복잡도** | 핵심 비즈니스 규칙이 집중된 기능인가. 비즈니스 규칙 수, 상태 전이, 유효성 검증 복잡도 |
+| Analysis Axis | Criteria |
+|--------------|----------|
+| **Structural Foundation** | Can other Features not exist without this Feature? Number of dependents, import depth, number of shared entities owned |
+| **Domain Core** | Is this feature directly tied to the project's reason for existence? Role within the project domain (e.g., for e-commerce, Product/Order are core) |
+| **Data Ownership** | Does this feature define and manage core entities? Number of owned entities, percentage referenced by other Features |
+| **Integration Hub** | Is this a connection point with other Features/external systems? API provider role, number of external integrations |
+| **Business Complexity** | Are core business rules concentrated in this feature? Number of business rules, state transitions, validation complexity |
 
-종합 평가 결과로 각 Feature를 **Tier 3단계**로 분류합니다:
+Based on the comprehensive evaluation, each Feature is classified into **3 Tiers**:
 
-| Tier | 의미 | 기준 |
-|------|------|------|
-| **Tier 1 (필수)** | 프로젝트의 근간. 이것 없이는 시스템이 성립하지 않음 | 재개발 시 반드시 포함 |
-| **Tier 2 (권장)** | 핵심 사용자 경험을 완성하는 기능 | 없어도 동작하지만 핵심 가치가 크게 저하 |
-| **Tier 3 (선택)** | 부가 기능, 관리 도구, 편의 기능 | 이후 단계에서 추가 가능 |
+| Tier | Meaning | Criteria |
+|------|---------|----------|
+| **Tier 1 (Essential)** | Project foundation. The system cannot exist without it | Must be included in redevelopment |
+| **Tier 2 (Recommended)** | Features that complete the core user experience | System works without it, but core value is significantly degraded |
+| **Tier 3 (Optional)** | Auxiliary features, admin tools, convenience features | Can be added in later stages |
 
-각 Feature에 대해 해당 Tier로 분류한 **구체적 이유**를 반드시 제시합니다. 예:
-- "인증(Auth)을 Tier 1로 추천: 7개 Feature가 직접 의존, User 엔티티의 소유자, 모든 API의 미들웨어로 사용됨"
-- "알림(Notification)을 Tier 3으로 추천: 독립적 모듈로 다른 Feature에 피의존 없음, 이벤트 구독 방식으로 느슨하게 결합"
+**Specific rationale** must be provided for each Feature's Tier classification. Examples:
+- "Auth recommended as Tier 1: 7 Features directly depend on it, owns User entity, used as middleware for all APIs"
+- "Notification recommended as Tier 3: Independent module with no dependents, loosely coupled via event subscription"
 
-##### Phase 4 — 산출물 생성
+##### Phase 4 — Artifact Generation
 
-확정된 분석 결과로 계층형 산출물을 생성합니다.
+Generates hierarchical artifacts based on the finalized analysis results.
 
-#### 산출물 구조
+#### Artifact Structure
 
 ```
 [target-directory]/specs/reverse-spec/
-├── roadmap.md                           # Feature 진화 맵 + Tier 분류 + 릴리즈 계획
-├── constitution-seed.md                 # constitution 초안 (소스 참조 원칙 + Best Practices)
-├── entity-registry.md                   # 공유 엔티티 레지스트리
-├── api-registry.md                      # API 계약 레지스트리
-├── business-logic-map.md                # 비즈니스 로직 맵
-├── stack-migration.md                   # 스택 마이그레이션 계획 (신규 스택 시에만)
+├── roadmap.md                           # Feature evolution map + Tier classification + Release plan
+├── constitution-seed.md                 # Constitution draft (source reference principles + Best Practices)
+├── entity-registry.md                   # Shared entity registry
+├── api-registry.md                      # API contract registry
+├── business-logic-map.md                # Business logic map
+├── stack-migration.md                   # Stack migration plan (only for new stack)
 └── features/
-    ├── F001-auth/pre-context.md         # Feature별 spec-kit 교차참조 정보
+    ├── F001-auth/pre-context.md         # Per-Feature spec-kit cross-reference info
     ├── F002-product/pre-context.md
     └── ...
 ```
 
-#### 산출물 상세
+#### Artifact Details
 
-**프로젝트 수준 산출물:**
+**Project-Level Artifacts:**
 
-| 산출물 | 역할 | spec-kit 활용 |
-|--------|------|--------------|
-| `roadmap.md` | 전체 Feature 진화 맵. Tier별 Feature Catalog, Dependency Graph, Release Groups, Cross-Feature 의존성 매핑 | Feature 진행 순서 결정, 의존성 확인 |
-| `constitution-seed.md` | 기존 코드에서 추출한 아키텍처 원칙, 기술 제약, 코딩 컨벤션 + 권장 Best Practices (TDD, Simplicity First 등) + 소스코드 참조 전략 (스택별 분기) | `/speckit.constitution` 실행 시 초안으로 사용 |
-| `entity-registry.md` | 전체 엔티티 목록, 필드, 관계, 유효성 규칙, Feature 간 공유 매핑. Mermaid 상태 다이어그램 포함 | `/speckit.plan` 시 `data-model.md` 작성의 교차 참조 |
-| `api-registry.md` | 전체 API 엔드포인트 인덱스, 상세 계약 (Request/Response 스키마), Cross-Feature 의존성 | `/speckit.plan` 시 `contracts/` 작성의 교차 참조 |
-| `business-logic-map.md` | Feature별 비즈니스 규칙, 유효성 검증, 워크플로우 (순서도), Cross-Feature 규칙 | `/speckit.specify` 시 요구사항/수용 기준 누락 방지 |
+| Artifact | Role | spec-kit Usage |
+|----------|------|---------------|
+| `roadmap.md` | Complete Feature evolution map. Tier-based Feature Catalog, Dependency Graph, Release Groups, Cross-Feature dependency mapping | Determines Feature execution order, dependency verification |
+| `constitution-seed.md` | Architecture principles, technical constraints, coding conventions extracted from existing code + recommended Best Practices (TDD, Simplicity First, etc.) + source code reference strategy (per-stack branching) | Used as draft when running `/speckit.constitution` |
+| `entity-registry.md` | Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping. Includes Mermaid state diagrams | Cross-reference for writing `data-model.md` during `/speckit.plan` |
+| `api-registry.md` | Complete API endpoint index, detailed contracts (Request/Response schemas), Cross-Feature dependencies | Cross-reference for writing `contracts/` during `/speckit.plan` |
+| `business-logic-map.md` | Per-Feature business rules, validations, workflows (flowcharts), Cross-Feature rules | Prevents omission of requirements/acceptance criteria during `/speckit.specify` |
 
-**Feature 수준 산출물 — `pre-context.md`:**
+**Feature-Level Artifact — `pre-context.md`:**
 
-각 Feature별로 spec-kit의 3개 핵심 커맨드에 필요한 정보를 섹션별로 미리 준비합니다:
+Pre-prepares information needed for spec-kit's 3 core commands in dedicated sections per Feature:
 
-| 섹션 | 대상 커맨드 | 내용 |
-|------|-----------|------|
-| Source Reference | 전체 | 관련 원본 파일 목록 + 스택 전략별 참조 가이드 (Implementation Reference vs Logic-Only Reference) |
-| For /speckit.specify | `/speckit.specify` | 기존 기능 요약, 사용자 시나리오, 요구사항 초안 (FR-###), 수용 기준 초안 (SC-###), 엣지 케이스 |
-| For /speckit.plan | `/speckit.plan` | 선행 Feature 의존성, 소유/참조 엔티티 스키마 초안, 제공/소비 API 계약 초안, 기술적 결정사항 |
-| For /speckit.analyze | `/speckit.analyze` | 교차 Feature 검증 포인트 (엔티티 호환성, API 계약 호환성, 비즈니스 규칙 일관성), 변경 시 영향 범위 |
+| Section | Target Command | Content |
+|---------|---------------|---------|
+| Source Reference | All | Related original file list + per-stack strategy reference guide (Implementation Reference vs Logic-Only Reference) |
+| For /speckit.specify | `/speckit.specify` | Existing feature summary, user scenarios, draft requirements (FR-###), draft acceptance criteria (SC-###), edge cases |
+| For /speckit.plan | `/speckit.plan` | Preceding Feature dependencies, owned/referenced entity schema drafts, provided/consumed API contract drafts, technical decisions |
+| For /speckit.analyze | `/speckit.analyze` | Cross-Feature verification points (entity compatibility, API contract compatibility, business rule consistency), impact scope on change |
 
 ---
 
-### 2. `/smart-sdd` — spec-kit SDD 워크플로우 오케스트레이터
+### 2. `/smart-sdd` — spec-kit SDD Workflow Orchestrator
 
-`/reverse-spec` 산출물을 기반으로 spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차 Feature 컨텍스트를 자동 주입하고 Global Evolution Layer를 유지보수하는 스킬입니다.
+A skill that **wraps** spec-kit commands based on `/reverse-spec` artifacts, automatically injecting cross-Feature context at each step and maintaining the Global Evolution Layer.
 
-#### 핵심 가치
+#### Core Value
 
-- spec-kit 커맨드를 **대체하지 않고 감싸는** 방식으로, spec-kit의 업데이트에 영향받지 않음
-- 각 커맨드 실행 전에 필요한 교차 Feature 정보를 **자동 조립하여 주입**
-- Feature 완료 시 Global Evolution Layer (entity-registry, api-registry, roadmap, 후속 pre-context)를 **자동 갱신**
-- 전체 진행 상태를 `sdd-state.md`로 **체계적 추적**
+- **Wraps rather than replaces** spec-kit commands, unaffected by spec-kit updates
+- **Automatically assembles and injects** required cross-Feature information before each command execution
+- **Automatically updates** the Global Evolution Layer (entity-registry, api-registry, roadmap, subsequent pre-context) upon Feature completion
+- **Systematic tracking** of overall progress via `sdd-state.md`
 
-#### 사용법
+#### Usage
 
 ```bash
-# Pipeline 모드 — 전체 순차 진행
+# Pipeline Mode — Full sequential progression
 /smart-sdd pipeline
 /smart-sdd pipeline --from ./path/to/reverse-spec-output
 
-# Step 모드 — 특정 Feature의 특정 단계만 실행
-/smart-sdd constitution                # constitution 확정 (최초 1회)
-/smart-sdd specify F001                # F001 Feature specify
-/smart-sdd plan F001                   # F001 Feature plan
-/smart-sdd tasks F001                  # F001 Feature tasks
-/smart-sdd implement F001              # F001 Feature implement
-/smart-sdd verify F001                 # F001 Feature 검증
+# Step Mode — Execute a specific step for a specific Feature
+/smart-sdd constitution                # Finalize constitution (one-time)
+/smart-sdd specify F001                # Specify Feature F001
+/smart-sdd plan F001                   # Plan Feature F001
+/smart-sdd tasks F001                  # Generate tasks for Feature F001
+/smart-sdd implement F001              # Implement Feature F001
+/smart-sdd verify F001                 # Verify Feature F001
 
-# 상태 확인
-/smart-sdd status                      # 전체 진행 상태 조회
+# Status check
+/smart-sdd status                      # Check overall progress status
 ```
 
-#### 공통 프로토콜: Assemble → Checkpoint → Execute → Update
+#### Common Protocol: Assemble → Checkpoint → Execute → Update
 
-모든 spec-kit 커맨드 실행은 이 4단계 프로토콜을 따릅니다:
+All spec-kit command executions follow this 4-step protocol:
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌─────────────┐
 │  1. Assemble │────▶│ 2. Checkpoint│────▶│  3. Execute  │────▶│  4. Update  │
-│  컨텍스트 조립 │     │  사용자 확인   │     │ spec-kit 실행│     │ 글로벌 갱신  │
+│  Context     │     │  User        │     │ spec-kit     │     │ Global      │
+│  Assembly    │     │  Confirmation│     │ Execution    │     │ Refresh     │
 └─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
 ```
 
-| 단계 | 설명 |
-|------|------|
-| **Assemble** | `specs/reverse-spec/`에서 해당 커맨드에 필요한 파일/섹션을 읽고, 커맨드별 주입 규칙에 따라 필터링하여 조립. 선행 Feature의 실제 구현 결과(`specs/{NNN-feature}/` 하위)도 함께 참조 |
-| **Checkpoint** | 조립된 컨텍스트를 요약 형태로 사용자에게 보여주고 승인/수정 기회 제공. 사용자가 수정을 요청하면 반영 후 재확인 |
-| **Execute** | 승인된 컨텍스트와 함께 해당 spec-kit 커맨드(`/speckit.specify`, `/speckit.plan` 등)를 실행. 실제 작업은 spec-kit이 수행 |
-| **Update** | 실행 결과를 반영하여 Global Evolution Layer 파일을 갱신. `sdd-state.md`에 진행 상태 기록 |
+| Step | Description |
+|------|------------|
+| **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`) |
+| **Checkpoint** | Presents the assembled context to the user in summarized form, providing an opportunity to approve or modify. If modifications are requested, applies changes and re-confirms |
+| **Execute** | Executes the corresponding spec-kit command (`/speckit.specify`, `/speckit.plan`, etc.) with the approved context. The actual work is performed by spec-kit |
+| **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
 
-#### 커맨드별 컨텍스트 주입
+#### Per-Command Context Injection
 
-각 spec-kit 커맨드 실행 전에 어떤 정보가 자동으로 주입되는지 정리합니다:
+Summary of what information is automatically injected before each spec-kit command execution:
 
-| 커맨드 | 주입 소스 | 주입 내용 |
-|--------|----------|-----------|
-| `constitution` | `constitution-seed.md` | 전체 내용 (소스 참조 원칙, 아키텍처 원칙, Best Practices, Global Evolution 운영 원칙) |
-| `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | 기능 요약, FR-### 초안, SC-### 초안, 비즈니스 규칙, 엣지 케이스, 원본 소스 참조 |
-| `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | 의존성 정보, 엔티티/API 스키마 초안 (또는 선행 Feature의 확정 스키마), 기술 결정 |
-| `tasks` | `plan.md` (spec-kit 산출물) | plan 기반 자동 실행. 추가 주입 없음 |
-| `implement` | `tasks.md` (spec-kit 산출물) | tasks 기반 자동 실행. 추가 주입 없음 |
-| `verify` | `pre-context.md` "For /speckit.analyze" + registries | 교차 Feature 검증 포인트, 영향 범위 분석 |
+| Command | Injection Source | Injected Content |
+|---------|-----------------|-----------------|
+| `constitution` | `constitution-seed.md` | Full content (source reference principles, architecture principles, Best Practices, Global Evolution operational principles) |
+| `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | Feature summary, FR-### drafts, SC-### drafts, business rules, edge cases, original source reference |
+| `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions |
+| `tasks` | `plan.md` (spec-kit artifact) | Automatic execution based on plan. No additional injection |
+| `implement` | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks. No additional injection |
+| `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature verification points, impact scope analysis |
 
-**선행 Feature 결과 우선 적용**: 의존하는 선행 Feature의 plan이 이미 완료되었으면, entity-registry/api-registry의 초안 대신 `specs/{NNN-feature}/`에 있는 **확정된 data-model.md와 contracts/**를 우선 참조합니다.
+**Preceding Feature results take priority**: If a dependent preceding Feature's plan is already complete, the **finalized data-model.md and contracts/** from `specs/{NNN-feature}/` are referenced instead of the drafts in entity-registry/api-registry.
 
-#### Pipeline 모드 상세
+#### Pipeline Mode Details
 
-`/smart-sdd pipeline` 실행 시 전체 워크플로우를 순차적으로 진행합니다:
+Running `/smart-sdd pipeline` progresses through the entire workflow sequentially:
 
 ```
-Phase 0: Constitution 확정
-    └─ constitution-seed.md 기반으로 /speckit.constitution 실행
+Phase 0: Constitution Finalization
+    └─ Execute /speckit.constitution based on constitution-seed.md
 
-Phase 1~N: Release Group 순서대로 Feature 진행
-    └─ 각 Feature마다:
-       1. specify  → (pre-context + business-logic-map 주입) → /speckit.specify
-       2. clarify  → spec에 [NEEDS CLARIFICATION]이 있을 때만 /speckit.clarify
-       3. plan     → (pre-context + entity-registry + api-registry 주입) → /speckit.plan
+Phase 1~N: Progress Features in Release Group Order
+    └─ For each Feature:
+       1. specify  → (pre-context + business-logic-map injection) → /speckit.specify
+       2. clarify  → Run /speckit.clarify only if [NEEDS CLARIFICATION] exists in the spec
+       3. plan     → (pre-context + entity-registry + api-registry injection) → /speckit.plan
        4. tasks    → /speckit.tasks
        5. implement → /speckit.implement
-       6. verify   → 3단계 검증 (실행 검증 + Cross-Feature 검증 + Global Evolution 갱신)
+       6. verify   → 3-phase verification (Execution verification + Cross-Feature verification + Global Evolution update)
 ```
 
-#### Feature 완료 후 자동 처리
+#### Post-Feature Completion Processing
 
-Feature의 모든 단계가 완료되면 smart-sdd가 자동으로 수행하는 작업:
+Tasks automatically performed by smart-sdd when all steps for a Feature are complete:
 
-| 처리 항목 | 내용 |
-|-----------|------|
-| entity-registry.md 갱신 | plan에서 확정된 `data-model.md`의 새 엔티티/변경사항 반영 |
-| api-registry.md 갱신 | plan에서 확정된 `contracts/`의 새 API/변경사항 반영 |
-| roadmap.md 업데이트 | 해당 Feature 상태를 `completed`로 변경 |
-| 후속 Feature pre-context.md 영향 분석 | 변경/추가된 엔티티/API로 영향받는 후속 Feature의 pre-context를 자동 갱신하고 사용자에게 보고 |
-| sdd-state.md 업데이트 | 각 단계의 완료 시각과 결과 기록 |
+| Processing Item | Content |
+|----------------|---------|
+| entity-registry.md update | Reflect new entities/changes from `data-model.md` finalized in the plan |
+| api-registry.md update | Reflect new APIs/changes from `contracts/` finalized in the plan |
+| roadmap.md update | Change Feature status to `completed` |
+| Subsequent Feature pre-context.md impact analysis | Automatically update pre-context of subsequent Features affected by changed/added entities/APIs and report to user |
+| sdd-state.md update | Record completion time and results for each step |
 
-#### Verify 3단계 검증
-
-```
-1단계: 실행 검증 (코드 레벨)
-    └─ 테스트 실행, 빌드 확인, 린트 체크
-
-2단계: Cross-Feature 검증 (spec 레벨)
-    └─ /speckit.analyze 실행 + pre-context.md의 교차 검증 포인트 확인
-    └─ 변경된 공유 엔티티/API가 다른 Feature에 영향을 주는지 분석
-
-3단계: Global Evolution 업데이트
-    └─ entity-registry/api-registry와 실제 구현의 정합성 확인 및 갱신
-    └─ sdd-state.md에 검증 결과 기록
-```
-
-#### Constitution 증분 업데이트
-
-Feature 진행 중 새로운 아키텍처 원칙이 발견되면:
-1. 사용자에게 "Constitution 업데이트 제안" 체크포인트 제공
-2. 승인 시 `/speckit.constitution`으로 MINOR 버전 업데이트
-3. 이미 완료된 Feature에 영향이 있으면 경고 표시
-
-#### 상태 추적 (`sdd-state.md`)
+#### 3-Phase Verification
 
 ```
-📊 Smart-SDD 진행 상태
+Phase 1: Execution Verification (Code Level)
+    └─ Run tests, Build check, Lint check
+
+Phase 2: Cross-Feature Verification (Spec Level)
+    └─ Execute /speckit.analyze + Check cross-verification points in pre-context.md
+    └─ Analyze whether shared entities/APIs changed by this Feature affect other Features
+
+Phase 3: Global Evolution Update
+    └─ Verify consistency between entity-registry/api-registry and actual implementation; update if discrepancies found
+    └─ Record verification results in sdd-state.md
+```
+
+#### Constitution Incremental Update
+
+When new architecture principles are discovered during Feature progression:
+1. Provide "Constitution update proposal" checkpoint to the user
+2. If approved, perform MINOR version update via `/speckit.constitution`
+3. Display warning if already completed Features are affected
+
+#### State Tracking (`sdd-state.md`)
+
+```
+📊 Smart-SDD Progress Status
 
 Constitution: ✅ v1.0.0 (2024-01-15)
 
@@ -313,68 +324,68 @@ F002-product    | T1   |   ✅    |  🔄  |       |      |
 F003-order      | T2   |         |      |       |      |
 F004-payment    | T2   |         |      |       |      |
 
-전체 진행률: 1/4 Features 완료 (25%)
-현재 진행: F002-product → plan 단계
+Overall progress: 1/4 Features completed (25%)
+Currently in progress: F002-product → plan step
 ```
 
-상태 파일에는 Feature Progress, Feature Detail Log, Feature Mapping (Feature ID ↔ spec-kit Name), Global Evolution Log, Constitution Update Log가 포함됩니다.
+The state file includes Feature Progress, Feature Detail Log, Feature Mapping (Feature ID ↔ spec-kit Name), Global Evolution Log, and Constitution Update Log.
 
 ---
 
-## 경로 규약
+## Path Conventions
 
-| 대상 | 경로 | 비고 |
-|------|------|------|
-| reverse-spec 산출물 | `specs/reverse-spec/` | 평탄화 구조. `/smart-sdd --from`으로 변경 가능 |
-| spec-kit 피처 산출물 | `specs/{NNN-feature}/` | spec-kit 고유 경로. smart-sdd가 건드리지 않음 |
-| spec-kit 인프라 | `.specify/` | 템플릿, 스크립트, constitution 저장 |
-| smart-sdd 상태 파일 | `specs/reverse-spec/sdd-state.md` | smart-sdd가 자동 생성/관리 |
+| Target | Path | Notes |
+|--------|------|-------|
+| reverse-spec artifacts | `specs/reverse-spec/` | Flat structure. Can be changed via `/smart-sdd --from` |
+| spec-kit feature artifacts | `specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
+| spec-kit infrastructure | `.specify/` | Templates, scripts, constitution storage |
+| smart-sdd state file | `specs/reverse-spec/sdd-state.md` | Automatically created/managed by smart-sdd |
 
 ---
 
 ## Constitution Best Practices
 
-`/reverse-spec`이 생성하는 `constitution-seed.md`에는 다음 5가지 권장 개발 원칙이 포함됩니다:
+The `constitution-seed.md` generated by `/reverse-spec` includes the following 5 recommended development principles:
 
-| 원칙 | 핵심 | 검증 기준 |
-|------|------|-----------|
-| **I. Test-First (NON-NEGOTIABLE)** | 테스트 먼저 작성. 테스트 없는 코드는 완료 불인정. spec.md의 Acceptance Scenario가 테스트의 원천 | 모든 테스트 통과 |
-| **II. Think Before Coding** | 가정 금지. 불명확하면 `[NEEDS CLARIFICATION]`으로 명시. 트레이드오프를 명시적으로 기록 | 모든 결정에 "왜?" 답변 존재 |
-| **III. Simplicity First** | spec 범위만 구현. 추측적 기능 추가/조기 추상화 금지 | 모든 코드가 요구사항으로 추적 가능 |
-| **IV. Surgical Changes** | 인접 코드 개선 금지. 자기 변경으로 발생한 고아 코드만 정리 | 변경 줄이 task로 추적 가능 |
-| **V. Goal-Driven Execution** | 검증 가능한 완료 기준 필수. "구현한다" → "테스트가 통과한다" | 자동화 검증 통과 |
+| Principle | Core | Verification Criteria |
+|-----------|------|----------------------|
+| **I. Test-First (NON-NEGOTIABLE)** | Write tests first. Code without tests is not considered complete. spec.md's Acceptance Scenarios are the source of test cases | All tests pass |
+| **II. Think Before Coding** | No assumptions. If unclear, mark as `[NEEDS CLARIFICATION]`. Explicitly record trade-offs | Every decision has an answer to "why?" |
+| **III. Simplicity First** | Implement only what is in the spec. No speculative feature additions/premature abstractions | All code is traceable to requirements |
+| **IV. Surgical Changes** | No "improving" adjacent code. Only clean up orphaned code caused by your own changes | Changed lines are traceable to tasks |
+| **V. Goal-Driven Execution** | Verifiable completion criteria required. "implement" → "tests pass" | Automated verification passes |
 
 ---
 
-## 전체 워크플로우 예시
+## End-to-End Workflow Example
 
-### 시나리오: 레거시 e-commerce 시스템을 React + FastAPI로 재개발
+### Scenario: Redeveloping a legacy e-commerce system with React + FastAPI
 
 ```
 1. /reverse-spec ./legacy-ecommerce
-   ├─ Phase 0: "Core" 범위 + "New" 스택 선택
-   ├─ Phase 1: Django + jQuery 기술 스택 감지
-   ├─ Phase 2: 12개 엔티티, 45개 API, 78개 비즈니스 규칙 추출
-   ├─ Phase 3: 8개 Feature 식별, Tier 분류 + 추천 이유 제시
-   │   ├─ Tier 1: Auth, Product, Order (근간 기능)
-   │   ├─ Tier 2: Cart, Payment, Search (핵심 UX)
-   │   └─ Tier 3: Review, Notification (부가 기능)
-   └─ Phase 4: specs/reverse-spec/ 하위에 산출물 생성
+   ├─ Phase 0: Select "Core" scope + "New" stack
+   ├─ Phase 1: Detect Django + jQuery tech stack
+   ├─ Phase 2: Extract 12 entities, 45 APIs, 78 business rules
+   ├─ Phase 3: Identify 8 Features, Tier classification + recommendation rationale
+   │   ├─ Tier 1: Auth, Product, Order (foundation features)
+   │   ├─ Tier 2: Cart, Payment, Search (core UX)
+   │   └─ Tier 3: Review, Notification (auxiliary features)
+   └─ Phase 4: Generate artifacts under specs/reverse-spec/
 
 2. /smart-sdd pipeline
-   ├─ Phase 0: constitution-seed 기반으로 /speckit.constitution 확정
+   ├─ Phase 0: Finalize /speckit.constitution based on constitution-seed
    ├─ Release 1 (Foundation):
    │   └─ F001-auth:
-   │       ├─ Assemble: pre-context + business-logic-map에서 auth 관련 정보 조립
-   │       ├─ Checkpoint: "FR-5개, SC-8개, 비즈니스 규칙 4개 주입. 진행?" → 승인
-   │       ├─ Execute: /speckit.specify 실행
-   │       ├─ (plan, tasks, implement, verify 순차 진행)
-   │       └─ Update: entity-registry에 User, Session 확정 반영
-   │                  후속 Feature pre-context에 User 스키마 갱신 전파
+   │       ├─ Assemble: Gather auth-related info from pre-context + business-logic-map
+   │       ├─ Checkpoint: "Injecting 5 FRs, 8 SCs, 4 business rules. Proceed?" → Approved
+   │       ├─ Execute: Run /speckit.specify
+   │       ├─ (plan, tasks, implement, verify proceed sequentially)
+   │       └─ Update: Reflect finalized User, Session in entity-registry
+   │                  Propagate User schema update to subsequent Feature pre-contexts
    ├─ Release 2 (Core Business):
    │   ├─ F002-product:
-   │   │   ├─ Assemble: pre-context + entity-registry(User 참조) + api-registry 조립
-   │   │   ├─ (F001의 확정된 User 스키마가 초안보다 우선 적용)
+   │   │   ├─ Assemble: Gather pre-context + entity-registry(User reference) + api-registry
+   │   │   ├─ (F001's finalized User schema takes priority over drafts)
    │   │   └─ ...
    │   └─ F003-order: ...
    └─ Release 3 (Enhancement): ...
@@ -382,50 +393,50 @@ F004-payment    | T2   |         |      |       |      |
 
 ---
 
-## spec-kit과의 관계
+## Relationship with spec-kit
 
-| 구분 | spec-kit | spec-kit-skills |
-|------|----------|-----------------|
-| **역할** | Feature-local SDD 실행 프레임워크 | Global Evolution Layer 보강 |
-| **범위** | 개별 Feature 내 Spec↔Plan↔Tasks 정합성 | Feature 간 의존성, 릴리즈 진화, 교차 참조 |
-| **관계** | 독립적으로 동작 | spec-kit을 감싸서(wrapping) 동작. spec-kit 커맨드를 대체하지 않음 |
-| **결합도** | spec-kit-skills 없이도 완전히 동작 | spec-kit이 반드시 필요 |
-| **호환성** | spec-kit 업데이트에 영향 없음 | Constitution 원칙 + 산출물로 보완하는 방식이므로 spec-kit 버전에 독립적 |
+| Aspect | spec-kit | spec-kit-skills |
+|--------|----------|-----------------|
+| **Role** | Feature-local SDD execution framework | Global Evolution Layer augmentation |
+| **Scope** | Spec↔Plan↔Tasks consistency within individual Features | Cross-Feature dependencies, release evolution, cross-references |
+| **Relationship** | Operates independently | Wraps spec-kit. Does not replace spec-kit commands |
+| **Coupling** | Fully functional without spec-kit-skills | Requires spec-kit |
+| **Compatibility** | Unaffected by spec-kit updates | Supplements via Constitution principles + artifacts, independent of spec-kit version |
 
 ---
 
-## 설치 및 설정
+## Installation & Setup
 
-### 사전 요구사항
+### Prerequisites
 
-- [Claude Code](https://claude.ai/claude-code) CLI가 설치되어 있어야 합니다
-- [spec-kit](https://github.com/github/spec-kit) 스킬이 설치되어 있어야 합니다 (`/smart-sdd` 사용 시)
+- [Claude Code](https://claude.ai/claude-code) CLI must be installed
+- [spec-kit](https://github.com/github/spec-kit) skill must be installed (for `/smart-sdd` usage)
 
-### 설치
+### Installation
 
-**방법 1: 글로벌 설치 (모든 프로젝트에서 사용)**
+**Method 1: Global Installation (use across all projects)**
 
 ```bash
-# 레포지토리 클론
-git clone https://github.com/your-org/spec-kit-skills.git
+# Clone the repository
+git clone https://github.com/coolhero/spec-kit-skills.git
 
-# 심볼릭 링크 생성
+# Create symbolic links
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
 ```
 
-**방법 2: 프로젝트 로컬 설치 (특정 프로젝트에서만 사용)**
+**Method 2: Project-Local Installation (use in a specific project only)**
 
 ```bash
-# 프로젝트 루트에서
+# From the project root
 mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
 ```
 
-### 설치 확인
+### Verify Installation
 
-Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
+Confirm the skills are recognized in Claude Code with the following commands:
 
 ```
 /reverse-spec --help
@@ -434,27 +445,26 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 
 ---
 
-## 프로젝트 구조
+## Project Structure
 
 ```
 spec-kit-skills/
 └── .claude/
     └── skills/
         ├── reverse-spec/
-        │   ├── SKILL.md                                 # 메인 스킬 정의 (5-Phase 워크플로우)
+        │   ├── SKILL.md                                 # Main skill definition (5-Phase workflow)
         │   ├── templates/
-        │   │   ├── roadmap-template.md                  # Feature 진화 맵 템플릿
-        │   │   ├── entity-registry-template.md           # 공유 엔티티 레지스트리 템플릿
-        │   │   ├── api-registry-template.md              # API 계약 레지스트리 템플릿
-        │   │   ├── business-logic-map-template.md        # 비즈니스 로직 맵 템플릿
-        │   │   ├── constitution-seed-template.md         # Constitution 초안 템플릿
-        │   │   └── pre-context-template.md               # Feature별 교차참조 정보 템플릿
+        │   │   ├── roadmap-template.md                  # Feature evolution map template
+        │   │   ├── entity-registry-template.md           # Shared entity registry template
+        │   │   ├── api-registry-template.md              # API contract registry template
+        │   │   ├── business-logic-map-template.md        # Business logic map template
+        │   │   ├── constitution-seed-template.md         # Constitution draft template
+        │   │   └── pre-context-template.md               # Per-Feature cross-reference info template
         │   └── reference/
-        │       └── speckit-compatibility.md              # spec-kit 연계 가이드
+        │       └── speckit-compatibility.md              # spec-kit integration guide
         └── smart-sdd/
-            ├── SKILL.md                                 # 메인 스킬 정의 (오케스트레이터)
+            ├── SKILL.md                                 # Main skill definition (orchestrator)
             └── reference/
-                ├── context-injection-rules.md            # 커맨드별 컨텍스트 주입 규칙
-                └── state-schema.md                      # sdd-state.md 스키마 정의
+                ├── context-injection-rules.md            # Per-command context injection rules
+                └── state-schema.md                      # sdd-state.md schema definition
 ```
-

@@ -1,45 +1,45 @@
 ---
 name: smart-sdd
-description: reverse-spec 산출물을 기반으로 spec-kit SDD 워크플로우를 오케스트레이션합니다. 각 단계에 교차 Feature 컨텍스트를 자동 주입하고 Global Evolution Layer를 유지합니다.
+description: Orchestrates the spec-kit SDD workflow based on reverse-spec artifacts. Automatically injects cross-Feature context at each step and maintains the Global Evolution Layer.
 argument-hint: <command> [feature-id] [--from path]
 disable-model-invocation: true
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
-# Smart-SDD: spec-kit 워크플로우 오케스트레이터
+# Smart-SDD: spec-kit Workflow Orchestrator
 
-reverse-spec 산출물을 기반으로 spec-kit 커맨드를 감싸서(wrapping), 각 단계에 교차 Feature 컨텍스트를 자동 주입하고 Global Evolution Layer를 유지보수한다.
+Wraps spec-kit commands based on reverse-spec artifacts, automatically injecting cross-Feature context at each step and maintaining the Global Evolution Layer.
 
-spec-kit 커맨드를 대체하지 않고, **컨텍스트 조립 → 사용자 확인 → spec-kit 실행 → Global Evolution 업데이트**의 4단계 프로토콜로 감싼다.
-
----
-
-## 사용법
-
-```
-/smart-sdd pipeline                    # 전체 파이프라인 실행
-/smart-sdd pipeline --from ./path      # 지정 경로에서 reverse-spec 산출물 읽기
-/smart-sdd constitution                # constitution 확정 (최초 1회)
-/smart-sdd specify F001                # F001 Feature specify
-/smart-sdd plan F001                   # F001 Feature plan
-/smart-sdd tasks F001                  # F001 Feature tasks
-/smart-sdd implement F001             # F001 Feature implement
-/smart-sdd verify F001                 # F001 Feature 검증
-/smart-sdd status                      # 전체 진행 상태 확인
-```
+Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Context Assembly → User Confirmation → spec-kit Execution → Global Evolution Update**.
 
 ---
 
-## 경로 규약
+## Usage
 
-| 대상 | 경로 | 비고 |
-|------|------|------|
-| reverse-spec 산출물 | `specs/reverse-spec/` | `--from` 인자로 변경 가능 |
-| spec-kit 피처 산출물 | `specs/{NNN-feature}/` | spec-kit 고유 경로. smart-sdd가 건드리지 않음 |
-| spec-kit constitution | `.specify/memory/constitution.md` | spec-kit 고유 경로 |
-| 상태 파일 | `specs/reverse-spec/sdd-state.md` | smart-sdd가 생성/관리 |
+```
+/smart-sdd pipeline                    # Run the full pipeline
+/smart-sdd pipeline --from ./path      # Read reverse-spec artifacts from specified path
+/smart-sdd constitution                # Finalize constitution (one-time)
+/smart-sdd specify F001                # Specify Feature F001
+/smart-sdd plan F001                   # Plan Feature F001
+/smart-sdd tasks F001                  # Generate tasks for Feature F001
+/smart-sdd implement F001             # Implement Feature F001
+/smart-sdd verify F001                 # Verify Feature F001
+/smart-sdd status                      # Check overall progress status
+```
 
-### reverse-spec 산출물 구조
+---
+
+## Path Conventions
+
+| Target | Path | Notes |
+|--------|------|-------|
+| reverse-spec artifacts | `specs/reverse-spec/` | Can be changed via `--from` argument |
+| spec-kit feature artifacts | `specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
+| spec-kit constitution | `.specify/memory/constitution.md` | Native spec-kit path |
+| State file | `specs/reverse-spec/sdd-state.md` | Created and managed by smart-sdd |
+
+### reverse-spec Artifact Structure
 
 ```
 specs/reverse-spec/
@@ -48,8 +48,8 @@ specs/reverse-spec/
 ├── entity-registry.md
 ├── api-registry.md
 ├── business-logic-map.md
-├── stack-migration.md              # (신규 스택 시에만)
-├── sdd-state.md                    # smart-sdd가 생성/관리하는 상태 파일
+├── stack-migration.md              # (only for new stack)
+├── sdd-state.md                    # State file created and managed by smart-sdd
 └── features/
     ├── F001-auth/pre-context.md
     ├── F002-product/pre-context.md
@@ -58,166 +58,166 @@ specs/reverse-spec/
 
 ---
 
-## 인자 파싱
+## Argument Parsing
 
-`$ARGUMENTS`를 파싱하여 command, feature-id, options를 추출한다.
+Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
-$ARGUMENTS 파싱 규칙:
-  첫 번째 토큰 → command (pipeline | constitution | specify | plan | tasks | implement | verify | status)
-  두 번째 토큰 → feature-id (F001 형태, command가 specify/plan/tasks/implement/verify일 때 필수)
-  --from <path> → reverse-spec 산출물 경로 (미지정 시 ./specs/reverse-spec/)
+$ARGUMENTS parsing rules:
+  First token  → command (pipeline | constitution | specify | plan | tasks | implement | verify | status)
+  Second token → feature-id (format: F001, required when command is specify/plan/tasks/implement/verify)
+  --from <path> → reverse-spec artifacts path (defaults to ./specs/reverse-spec/ if not specified)
 ```
 
-**BASE_PATH** 결정:
-- `--from` 지정 시: 해당 경로
-- 미지정 시: `./specs/reverse-spec/`
+**BASE_PATH** determination:
+- If `--from` is specified: use that path
+- If not specified: `./specs/reverse-spec/`
 
-**사전 검증**: BASE_PATH에 `roadmap.md`가 존재하는지 확인한다. 없으면 오류 메시지와 함께 `/reverse-spec`을 먼저 실행하라고 안내한다.
+**Pre-validation**: Checks whether `roadmap.md` exists at BASE_PATH. If not found, displays an error message and instructs the user to run `/reverse-spec` first.
 
 ---
 
-## 공통 프로토콜: Assemble → Checkpoint → Execute → Update
+## Common Protocol: Assemble → Checkpoint → Execute → Update
 
-모든 spec-kit 커맨드 실행은 이 4단계 프로토콜을 따른다.
+All spec-kit command executions follow this 4-step protocol.
 
-### 1. Assemble — 컨텍스트 조립
+### 1. Assemble — Context Assembly
 
-- BASE_PATH에서 해당 커맨드에 필요한 파일/섹션을 읽는다
-- [context-injection-rules.md](reference/context-injection-rules.md)에 따라 커맨드별 필요 정보를 필터링하여 조립한다
-- 선행 Feature의 실제 구현 결과 (`specs/` 하위)가 있으면 함께 참조한다
+- Reads the files/sections required for the given command from BASE_PATH
+- Filters and assembles the necessary information per command according to [context-injection-rules.md](reference/context-injection-rules.md)
+- Also references actual implementation results from preceding Features (under `specs/`) if available
 
-### 2. Checkpoint — 사용자 확인
+### 2. Checkpoint — User Confirmation
 
-조립된 컨텍스트를 **요약 형태**로 사용자에게 보여준다:
+Presents the assembled context to the user in a **summarized form**:
 
 ```
-📋 [command] 실행을 위한 컨텍스트:
+📋 Context for [command] execution:
 
 Feature: [Feature ID] - [Feature Name]
-주입할 정보:
-  - [소스 1]: [요약]
-  - [소스 2]: [요약]
+Injected information:
+  - [Source 1]: [Summary]
+  - [Source 2]: [Summary]
   - ...
 
-선행 조건: [충족 여부]
-교차 Feature 참고: [관련 Feature 목록]
+Prerequisites: [Met / Not met]
+Cross-Feature references: [List of related Features]
 
-이 컨텍스트로 /speckit.[command]를 실행하시겠습니까?
-수정할 내용이 있으면 알려주세요.
+Proceed with /speckit.[command] using this context?
+Let me know if there is anything to modify.
 ```
 
-AskUserQuestion으로 사용자의 승인/수정을 받는다.
+Uses AskUserQuestion to obtain user approval or modifications.
 
-### 3. Execute — spec-kit 커맨드 실행
+### 3. Execute — spec-kit Command Execution
 
-승인된 컨텍스트와 함께 해당 spec-kit 커맨드를 실행한다:
-- Skill 도구로 `speckit.[command]`를 호출한다
-- 조립된 컨텍스트 내용을 대화에 포함하여 spec-kit이 참조할 수 있게 한다
-- spec-kit 커맨드가 생성/수정하는 피처 산출물은 `specs/{NNN-feature}/` 하위에 위치한다
+Executes the corresponding spec-kit command with the approved context:
+- Invokes `speckit.[command]` via the Skill tool
+- Includes the assembled context content in the conversation so spec-kit can reference it
+- Feature artifacts created/modified by the spec-kit command are located under `specs/{NNN-feature}/`
 
-### 4. Update — Global Evolution Layer 갱신
+### 4. Update — Global Evolution Layer Refresh
 
-커맨드 실행 결과를 반영하여 글로벌 산출물을 업데이트한다:
+Updates global artifacts to reflect the command execution results:
 
-| 완료 단계 | 업데이트 대상 | 내용 |
-|-----------|-------------|------|
-| plan | `entity-registry.md` | plan에서 확정된 `data-model.md`의 새 엔티티/변경사항 반영 |
-| plan | `api-registry.md` | plan에서 확정된 `contracts/`의 새 API/변경사항 반영 |
-| implement | `roadmap.md` | Feature 상태를 completed로 변경 |
-| implement | 후속 Feature `pre-context.md` | 변경된 엔티티/API로 영향받는 pre-context 갱신 |
-| verify | `sdd-state.md` | 검증 결과 기록 |
+| Completed Step | Update Target | Content |
+|----------------|--------------|---------|
+| plan | `entity-registry.md` | Reflect new entities/changes from the `data-model.md` finalized in the plan |
+| plan | `api-registry.md` | Reflect new APIs/changes from the `contracts/` finalized in the plan |
+| implement | `roadmap.md` | Change Feature status to completed |
+| implement | Subsequent Feature `pre-context.md` | Update pre-context affected by changed entities/APIs |
+| verify | `sdd-state.md` | Record verification results |
 
-업데이트 후 사용자에게 변경 사항을 보고한다.
+Reports the changes to the user after the update.
 
 ---
 
-## Pipeline 모드
+## Pipeline Mode
 
-`/smart-sdd pipeline` 실행 시 전체 워크플로우를 순차적으로 진행한다.
+Running `/smart-sdd pipeline` progresses through the entire workflow sequentially.
 
-### Phase 0: Constitution 확정
+### Phase 0: Constitution Finalization
 
-1. `BASE_PATH/constitution-seed.md`를 읽는다
-2. 사용자에게 constitution-seed 내용 요약을 보여주고 수정/보완 기회를 준다 (Checkpoint)
-3. `/speckit.constitution` 실행 시 constitution-seed의 내용을 컨텍스트로 제공한다
-4. `sdd-state.md`를 초기화하고 constitution 완료를 기록한다
+1. Reads `BASE_PATH/constitution-seed.md`
+2. Shows the user a summary of the constitution-seed content and provides an opportunity to revise/supplement (Checkpoint)
+3. Provides the constitution-seed content as context when executing `/speckit.constitution`
+4. Initializes `sdd-state.md` and records the constitution completion
 
-### Phase 1~N: Release Group 순서대로 Feature 진행
+### Phase 1~N: Progress Features in Release Group Order
 
-`BASE_PATH/roadmap.md`의 Release Groups 순서를 따른다.
+Follows the Release Groups order from `BASE_PATH/roadmap.md`.
 
-각 Feature에 대해 아래 단계를 순서대로 실행한다:
+Executes the following steps in order for each Feature:
 
 ```
 1. specify  → Assemble → Checkpoint → /speckit.specify → Update
-2. clarify  → (spec에 [NEEDS CLARIFICATION]이 있을 때만 /speckit.clarify 실행)
+2. clarify  → (Only run /speckit.clarify if [NEEDS CLARIFICATION] exists in the spec)
 3. plan     → Assemble → Checkpoint → /speckit.plan → Update (entity-registry, api-registry)
-4. tasks    → /speckit.tasks 실행
-5. implement → /speckit.implement 실행
-6. verify   → 실행 검증 → Cross-Feature 검증 → Global Evolution 업데이트
+4. tasks    → Run /speckit.tasks
+5. implement → Run /speckit.implement
+6. verify   → Execution verification → Cross-Feature verification → Global Evolution update
 ```
 
-#### Feature 완료 후 처리
+#### Post-Feature Completion Processing
 
-Feature의 모든 단계가 완료되면:
+Once all steps for a Feature are complete:
 
-1. **entity-registry.md 갱신**: plan에서 확정된 data-model.md의 엔티티를 반영
-2. **api-registry.md 갱신**: plan에서 확정된 contracts/의 API를 반영
-3. **roadmap.md 업데이트**: 해당 Feature 상태를 `completed`로 변경
-4. **후속 Feature pre-context.md 영향 분석**:
-   - 변경/추가된 엔티티를 참조하는 후속 Feature의 pre-context.md를 찾는다
-   - 변경/추가된 API를 소비하는 후속 Feature의 pre-context.md를 찾는다
-   - 영향받는 pre-context.md의 관련 섹션을 갱신한다
-   - 갱신 내용을 사용자에게 보고한다
-5. **sdd-state.md 업데이트**: 각 단계의 완료 시각과 결과를 기록
-
----
-
-## Step 모드
-
-단일 커맨드만 실행한다. 선행 조건을 검증한 후 공통 프로토콜(Assemble → Checkpoint → Execute → Update)을 실행한다.
-
-### 선행 조건 검증
-
-| 커맨드 | 선행 조건 | 검증 방법 |
-|--------|----------|-----------|
-| `constitution` | reverse-spec 산출물 존재 | `BASE_PATH/constitution-seed.md` 존재 확인 |
-| `specify` | pre-context 존재 | `BASE_PATH/features/[FID]/pre-context.md` 존재 확인 |
-| `plan` | spec.md 존재 | `specs/[NNN-feature-name]/spec.md` 존재 확인 |
-| `tasks` | plan.md 존재 | `specs/[NNN-feature-name]/plan.md` 존재 확인 |
-| `implement` | tasks.md 존재 | `specs/[NNN-feature-name]/tasks.md` 존재 확인 |
-| `verify` | implement 완료 | `sdd-state.md`에서 implement 완료 확인 |
-
-선행 조건이 미충족이면 오류 메시지와 함께 필요한 이전 단계를 안내한다.
-
-### Feature ID → spec-kit Feature Name 매핑
-
-`sdd-state.md`의 Feature 매핑 테이블 또는 `roadmap.md`의 Feature Catalog에서 Feature ID(F001)를 spec-kit이 사용하는 Feature Name(예: `001-auth`)으로 변환한다.
+1. **Update entity-registry.md**: Reflect entities from the data-model.md finalized in the plan
+2. **Update api-registry.md**: Reflect APIs from the contracts/ finalized in the plan
+3. **Update roadmap.md**: Change the Feature status to `completed`
+4. **Impact analysis on subsequent Feature pre-context.md**:
+   - Find pre-context.md of subsequent Features that reference changed/added entities
+   - Find pre-context.md of subsequent Features that consume changed/added APIs
+   - Update the relevant sections in the affected pre-context.md files
+   - Report the updates to the user
+5. **Update sdd-state.md**: Record the completion time and result for each step
 
 ---
 
-## Constitution 증분 업데이트
+## Step Mode
 
-Feature 진행 중 새로운 아키텍처 원칙이나 컨벤션이 발견되면:
+Executes a single command. Validates prerequisites, then runs the common protocol (Assemble → Checkpoint → Execute → Update).
 
-1. **체크포인트 표시**: "Constitution 업데이트를 제안합니다: [원칙 내용]"
-2. **사용자 승인**: AskUserQuestion으로 승인 여부를 확인한다
-3. **업데이트 실행**: 승인 시 `/speckit.constitution`으로 MINOR 버전 업데이트
-4. **영향 분석**: 이미 완료된 Feature에 영향이 있으면 경고를 표시한다
+### Prerequisite Validation
+
+| Command | Prerequisite | Validation Method |
+|---------|-------------|-------------------|
+| `constitution` | reverse-spec artifacts exist | Check existence of `BASE_PATH/constitution-seed.md` |
+| `specify` | pre-context exists | Check existence of `BASE_PATH/features/[FID]/pre-context.md` |
+| `plan` | spec.md exists | Check existence of `specs/[NNN-feature-name]/spec.md` |
+| `tasks` | plan.md exists | Check existence of `specs/[NNN-feature-name]/plan.md` |
+| `implement` | tasks.md exists | Check existence of `specs/[NNN-feature-name]/tasks.md` |
+| `verify` | implement completed | Confirm implement completion in `sdd-state.md` |
+
+If prerequisites are not met, displays an error message and guides the user to the required preceding step.
+
+### Feature ID → spec-kit Feature Name Mapping
+
+Converts a Feature ID (F001) to the Feature Name used by spec-kit (e.g., `001-auth`) using the Feature mapping table in `sdd-state.md` or the Feature Catalog in `roadmap.md`.
 
 ---
 
-## Status 커맨드
+## Constitution Incremental Update
 
-`/smart-sdd status` 실행 시 `sdd-state.md`를 읽어 전체 진행 상황을 표시한다.
+When new architectural principles or conventions are discovered during Feature progression:
 
-[state-schema.md](reference/state-schema.md)에 정의된 스키마를 따른다.
+1. **Checkpoint indication**: "Proposing a Constitution update: [principle content]"
+2. **User approval**: Uses AskUserQuestion to confirm approval
+3. **Execute update**: If approved, performs a MINOR version update via `/speckit.constitution`
+4. **Impact analysis**: Displays a warning if already completed Features are affected
 
-출력 형식:
+---
+
+## Status Command
+
+Running `/smart-sdd status` reads `sdd-state.md` and displays the overall progress.
+
+Follows the schema defined in [state-schema.md](reference/state-schema.md).
+
+Output format:
 
 ```
-📊 Smart-SDD 진행 상태
+📊 Smart-SDD Progress Status
 
 Constitution: ✅ v1.0.0 (2024-01-15)
 
@@ -228,53 +228,53 @@ F002-product    | T1   |   ✅    |  🔄  |       |      |
 F003-order      | T2   |         |      |       |      |
 F004-payment    | T2   |         |      |       |      |
 
-전체 진행률: 1/4 Features 완료 (25%)
-현재 진행: F002-product → plan 단계
+Overall progress: 1/4 Features completed (25%)
+Currently in progress: F002-product → plan step
 ```
 
 ---
 
-## Verify 커맨드
+## Verify Command
 
-`/smart-sdd verify [FID]` 실행 시 3단계 검증을 수행한다.
+Running `/smart-sdd verify [FID]` performs a 3-phase verification.
 
-### 1단계: 실행 검증
-- 테스트 실행: `sdd-state.md`에서 프로젝트의 테스트 명령을 확인하고 실행
-- 빌드 확인: 빌드 명령을 실행하여 에러가 없는지 확인
-- 린트 확인: 린트 도구가 설정되어 있으면 실행
+### Phase 1: Execution Verification
+- Run tests: Check and execute the project's test command from `sdd-state.md`
+- Build check: Run the build command and confirm no errors
+- Lint check: Run the lint tool if configured
 
-### 2단계: Cross-Feature 검증
-- `/speckit.analyze` 실행하여 Feature 분석을 수행
-- `pre-context.md`의 "For /speckit.analyze" 섹션의 교차 검증 포인트를 확인
-- 해당 Feature가 변경한 공유 엔티티/API가 다른 Feature에 영향을 주는지 분석
+### Phase 2: Cross-Feature Verification
+- Run `/speckit.analyze` to perform Feature analysis
+- Check the cross-verification points in the "For /speckit.analyze" section of `pre-context.md`
+- Analyze whether shared entities/APIs changed by this Feature affect other Features
 
-### 3단계: Global Evolution 업데이트
-- entity-registry.md: 실제 구현된 엔티티 스키마와 registry가 일치하는지 확인, 불일치 시 갱신
-- api-registry.md: 실제 구현된 API 계약과 registry가 일치하는지 확인, 불일치 시 갱신
-- sdd-state.md: 검증 결과(성공/실패, 테스트 결과, 검증 시각) 기록
-
----
-
-## 커맨드별 컨텍스트 주입 상세
-
-커맨드별로 주입하는 컨텍스트 소스와 내용은 [context-injection-rules.md](reference/context-injection-rules.md)에 정의되어 있다. 아래는 요약이다.
-
-| 커맨드 | 주입 소스 | 주입 내용 |
-|--------|----------|-----------|
-| constitution | `constitution-seed.md` | 전체 내용 (소스 참조 원칙, 아키텍처 원칙, best practices, Global Evolution 운영 원칙) |
-| specify | `pre-context.md` → "For /speckit.specify" + `business-logic-map.md` (해당 Feature 섹션) | 기능 요약, FR-### 초안, SC-### 초안, 엣지 케이스, 비즈니스 규칙 |
-| plan | `pre-context.md` → "For /speckit.plan" + `entity-registry.md` (관련 엔티티) + `api-registry.md` (관련 API) | 의존성, 엔티티/API 초안, 기술 결정, 선행 Feature 결과 |
-| tasks | `plan.md` (spec-kit 산출물) | plan 기반 자동 실행 |
-| implement | `tasks.md` (spec-kit 산출물) | tasks 기반 자동 실행 |
-| verify/analyze | `pre-context.md` → "For /speckit.analyze" | 교차 Feature 검증 포인트, 영향 범위 |
+### Phase 3: Global Evolution Update
+- entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found
+- api-registry.md: Verify that the actually implemented API contracts match the registry; update if discrepancies are found
+- sdd-state.md: Record verification results (success/failure, test results, verification time)
 
 ---
 
-## 주의사항
+## Per-Command Context Injection Details
 
-- spec-kit 커맨드의 동작을 변경하거나 오버라이드하지 않는다. 컨텍스트를 주입하고 결과를 활용할 뿐이다.
-- spec-kit이 관리하는 파일(`specs/{NNN-feature}/`, `.specify/`)을 직접 수정하지 않는다. spec-kit 커맨드를 통해서만 변경한다.
-- Global Evolution Layer 파일(`entity-registry.md`, `api-registry.md`, `roadmap.md`)은 Update 단계에서만 수정한다.
-- `sdd-state.md`가 없으면 최초 실행으로 간주하고 초기 상태 파일을 생성한다.
-- 컨텍스트 주입 상세 규칙은 반드시 [context-injection-rules.md](reference/context-injection-rules.md)를 참조한다.
-- 상태 파일 스키마는 [state-schema.md](reference/state-schema.md)를 참조한다.
+The context sources and content injected per command are defined in [context-injection-rules.md](reference/context-injection-rules.md). Below is a summary.
+
+| Command | Injection Source | Injected Content |
+|---------|-----------------|-----------------|
+| constitution | `constitution-seed.md` | Full content (source reference principles, architectural principles, best practices, Global Evolution operational principles) |
+| specify | `pre-context.md` → "For /speckit.specify" + `business-logic-map.md` (relevant Feature section) | Feature summary, FR-### drafts, SC-### drafts, edge cases, business rules |
+| plan | `pre-context.md` → "For /speckit.plan" + `entity-registry.md` (related entities) + `api-registry.md` (related APIs) | Dependencies, entity/API drafts, technical decisions, preceding Feature results |
+| tasks | `plan.md` (spec-kit artifact) | Automatic execution based on plan |
+| implement | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks |
+| verify/analyze | `pre-context.md` → "For /speckit.analyze" | Cross-Feature verification points, impact scope |
+
+---
+
+## Important Notes
+
+- Does not alter or override spec-kit command behavior. Only injects context and utilizes results.
+- Does not directly modify files managed by spec-kit (`specs/{NNN-feature}/`, `.specify/`). Changes are made only through spec-kit commands.
+- Global Evolution Layer files (`entity-registry.md`, `api-registry.md`, `roadmap.md`) are modified only during the Update step.
+- If `sdd-state.md` does not exist, it is treated as a first run and an initial state file is created.
+- For detailed context injection rules, refer to [context-injection-rules.md](reference/context-injection-rules.md).
+- For state file schema, refer to [state-schema.md](reference/state-schema.md).

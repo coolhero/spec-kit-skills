@@ -1,113 +1,113 @@
-# Reverse-Spec ↔ Spec-Kit 호환성 가이드
+# Reverse-Spec ↔ Spec-Kit Compatibility Guide
 
-이 문서는 `/reverse-spec` 스킬의 산출물을 spec-kit 워크플로우에서 어떻게 활용하는지 설명합니다.
+This document explains how to utilize the outputs of the `/reverse-spec` skill within the spec-kit workflow.
 
 ---
 
-## 산출물 ↔ Spec-Kit 커맨드 매핑
+## Output ↔ Spec-Kit Command Mapping
 
-| Reverse-Spec 산출물 | Spec-Kit 커맨드 | 사용 방법 |
+| Reverse-Spec Output | Spec-Kit Command | Usage |
 |--------------------|-----------------|-----------|
-| `constitution-seed.md` | `/speckit.constitution` | 초안으로 로딩하여 원칙 수립. 기존 코드에서 추출한 아키텍처 원칙과 소스 참조 전략을 constitution에 반영 |
-| `roadmap.md` Feature Catalog | `/speckit.specify` | Feature 설명의 입력 소스. Tier별 Feature 목록에서 구현 대상을 선택하고 설명을 입력값으로 사용 |
-| `pre-context.md` → For /speckit.specify | `/speckit.specify` | spec.md의 Requirements(FR-###)와 Success Criteria(SC-###) 초안으로 활용 |
-| `entity-registry.md` | `/speckit.plan` | data-model.md 작성 시 전역 엔티티 참조. 교차 Feature 엔티티 충돌 방지 |
-| `api-registry.md` | `/speckit.plan` | contracts/ 작성 시 전역 API 계약 참조. 교차 Feature API 일관성 보장 |
-| `pre-context.md` → For /speckit.plan | `/speckit.plan` | 선행 Feature 의존성, 관련 엔티티/API 초안, 기술적 결정사항 참조 |
-| `business-logic-map.md` | `/speckit.specify` | 기존 비즈니스 규칙 누락 방지. spec 작성 시 모든 규칙이 반영되었는지 체크 |
-| `pre-context.md` → For /speckit.analyze | `/speckit.analyze` | 교차 Feature 검증 포인트로 Feature 간 일관성 검증 |
+| `constitution-seed.md` | `/speckit.constitution` | Load as a draft to establish principles. Reflect architecture principles and source reference strategies extracted from existing code into the constitution |
+| `roadmap.md` Feature Catalog | `/speckit.specify` | Input source for Feature descriptions. Select implementation targets from the tier-based Feature list and use the descriptions as input |
+| `pre-context.md` → For /speckit.specify | `/speckit.specify` | Use as drafts for spec.md Requirements (FR-###) and Success Criteria (SC-###) |
+| `entity-registry.md` | `/speckit.plan` | Global entity reference when writing data-model.md. Prevents cross-Feature entity conflicts |
+| `api-registry.md` | `/speckit.plan` | Global API contract reference when writing contracts/. Ensures cross-Feature API consistency |
+| `pre-context.md` → For /speckit.plan | `/speckit.plan` | Reference for preceding Feature dependencies, related entity/API drafts, and technical decisions |
+| `business-logic-map.md` | `/speckit.specify` | Prevents omission of existing business rules. Checks that all rules are reflected when writing specs |
+| `pre-context.md` → For /speckit.analyze | `/speckit.analyze` | Cross-Feature validation points to verify consistency between Features |
 
 ---
 
-## 워크플로우: Pre-Extract → Spec-Kit 진행 순서
+## Workflow: Pre-Extract → Spec-Kit Progression Order
 
-### Step 1: Constitution 확정
-
-```
-1. specs/reverse-spec/constitution-seed.md를 읽는다
-2. /speckit.constitution 실행 시 constitution-seed.md의 내용을 입력으로 제공한다
-3. 스택 전략에 맞는 소스코드 참조 원칙을 선택하여 constitution에 포함시킨다
-4. Global Evolution Layer 운영 원칙을 constitution에 포함시킨다
-5. 추출된 아키텍처 원칙을 검토하고 재개발에 맞게 수정/보완한다
-```
-
-### Step 2: Feature 순서대로 Specify → Plan → Tasks → Implement
+### Step 1: Finalize Constitution
 
 ```
-roadmap.md의 Release Group 순서를 따른다:
+1. Read specs/reverse-spec/constitution-seed.md
+2. When running /speckit.constitution, provide the contents of constitution-seed.md as input
+3. Select source code reference principles that match the stack strategy and include them in the constitution
+4. Include Global Evolution Layer operational principles in the constitution
+5. Review the extracted architecture principles and modify/supplement them for redevelopment
+```
+
+### Step 2: Specify → Plan → Tasks → Implement in Feature Order
+
+```
+Follow the Release Group order in roadmap.md:
   Release 1 (Foundation) → Release 2 (Core Business) → Release 3 (Enhancement) → ...
 
-각 Feature 진행 시:
-  1. specs/reverse-spec/features/F00N-xxx/pre-context.md를 읽는다
-  2. /speckit.specify 실행:
-     - pre-context.md의 "For /speckit.specify" 섹션을 참조
-     - Source Reference의 원본 파일을 읽어 기존 구현 확인
-     - 기존 요구사항 초안(FR-###)과 수용 기준 초안(SC-###)을 활용
-  3. /speckit.plan 실행:
-     - pre-context.md의 "For /speckit.plan" 섹션을 참조
-     - entity-registry.md에서 관련 엔티티 스키마 확인
-     - api-registry.md에서 관련 API 계약 확인
-     - 선행 Feature 의존성을 반영한 설계
+For each Feature:
+  1. Read specs/reverse-spec/features/F00N-xxx/pre-context.md
+  2. Run /speckit.specify:
+     - Refer to the "For /speckit.specify" section in pre-context.md
+     - Read the original files from Source Reference to review existing implementation
+     - Use the draft requirements (FR-###) and draft acceptance criteria (SC-###)
+  3. Run /speckit.plan:
+     - Refer to the "For /speckit.plan" section in pre-context.md
+     - Check related entity schemas in entity-registry.md
+     - Check related API contracts in api-registry.md
+     - Design reflecting preceding Feature dependencies
   4. /speckit.tasks → /speckit.implement
-  5. 완료 후: entity-registry.md, api-registry.md를 최신 상태로 업데이트
+  5. After completion: Update entity-registry.md and api-registry.md to the latest state
 ```
 
 ---
 
-## 포맷 호환성 상세
+## Format Compatibility Details
 
 ### Entity Registry → Spec-Kit data-model.md
 
-| Entity Registry 필드 | data-model.md 대응 |
-|----------------------|-------------------|
-| Fields 테이블 | Entities → Fields 섹션 |
-| Relationships 테이블 | Entities → Relationships 섹션 |
-| Validation Rules 테이블 | Entities → Validation Rules 섹션 |
-| State Transitions 다이어그램 | Entities → State Transitions 섹션 |
-| Indexes 테이블 | Entities → Indexes 섹션 |
+| Entity Registry Field | data-model.md Mapping |
+|----------------------|----------------------|
+| Fields table | Entities → Fields section |
+| Relationships table | Entities → Relationships section |
+| Validation Rules table | Entities → Validation Rules section |
+| State Transitions diagram | Entities → State Transitions section |
+| Indexes table | Entities → Indexes section |
 
-**변환 방법**: Entity Registry에서 해당 Feature가 소유하는 엔티티 섹션을 발췌하여 data-model.md에 배치한다. 참조 엔티티는 "External Entity" 주석과 함께 스키마를 포함한다.
+**Conversion Method**: Extract the entity sections owned by the relevant Feature from the Entity Registry and place them in data-model.md. For referenced entities, include the schema with an "External Entity" annotation.
 
 ### API Registry → Spec-Kit contracts/
 
-| API Registry 필드 | contracts/ 대응 |
-|-------------------|----------------|
-| Method + Path | Contract 파일명 (예: `post-auth-register.md`) |
-| Request Body/Parameters | Request Schema 섹션 |
-| Response (상태코드별) | Response Schema 섹션 |
-| Auth | Authentication 섹션 |
-| Dependencies | Dependencies 섹션 |
+| API Registry Field | contracts/ Mapping |
+|-------------------|-------------------|
+| Method + Path | Contract filename (e.g., `post-auth-register.md`) |
+| Request Body/Parameters | Request Schema section |
+| Response (by status code) | Response Schema section |
+| Auth | Authentication section |
+| Dependencies | Dependencies section |
 
-**변환 방법**: API Registry에서 해당 Feature가 제공하는 API 섹션을 발췌하여 contracts/ 디렉토리의 개별 파일로 분리한다.
+**Conversion Method**: Extract the API sections provided by the relevant Feature from the API Registry and separate them into individual files in the contracts/ directory.
 
 ### Business Logic Map → Spec-Kit spec.md
 
-| Business Logic Map 필드 | spec.md 대응 |
-|-------------------------|-------------|
+| Business Logic Map Field | spec.md Mapping |
+|-------------------------|----------------|
 | Core Rules | Requirements (FR-###) |
 | Validation Logic | Acceptance Scenarios (Given/When/Then) |
 | Workflows | User Scenarios & Testing |
 | Cross-Feature Rules | Requirements + Edge Cases |
 
-**변환 방법**: Business Logic Map의 규칙들을 spec-kit의 요구사항 형식(FR-###)과 수용 시나리오(Given/When/Then)로 변환한다.
+**Conversion Method**: Convert the rules from the Business Logic Map into spec-kit's requirements format (FR-###) and acceptance scenarios (Given/When/Then).
 
 ---
 
-## Global Evolution Layer 유지보수
+## Global Evolution Layer Maintenance
 
-spec-kit으로 Feature를 구현한 후, 글로벌 산출물을 최신 상태로 유지해야 한다:
+After implementing Features with spec-kit, the global outputs must be kept up to date:
 
-### 업데이트 시점
+### When to Update
 
-| 이벤트 | 업데이트 대상 |
-|--------|-------------|
-| Feature plan 완료 | entity-registry.md (새 엔티티 추가), api-registry.md (새 API 추가) |
-| Feature implement 완료 | roadmap.md (Feature 상태 업데이트), pre-context.md (실제 구현 반영) |
-| Feature 간 의존성 변경 | roadmap.md Dependency Graph, 관련 pre-context.md 의존성 섹션 |
-| 새 Feature 추가 | roadmap.md Feature Catalog, 새 pre-context.md 생성 |
+| Event | Update Target |
+|-------|--------------|
+| Feature plan completed | entity-registry.md (add new entities), api-registry.md (add new APIs) |
+| Feature implementation completed | roadmap.md (update Feature status), pre-context.md (reflect actual implementation) |
+| Cross-Feature dependency changes | roadmap.md Dependency Graph, dependency sections in related pre-context.md |
+| New Feature added | roadmap.md Feature Catalog, create new pre-context.md |
 
-### 업데이트 규칙
+### Update Rules
 
-1. **엔티티 스키마 변경 시**: entity-registry.md에서 해당 엔티티를 업데이트하고, 참조 Feature의 pre-context.md에서 교차 검증 포인트를 확인한다
-2. **API 계약 변경 시**: api-registry.md에서 해당 API를 업데이트하고, Consumer Feature의 pre-context.md에서 호환성을 검증한다
-3. **Feature 추가/삭제 시**: roadmap.md의 Feature Catalog, Dependency Graph, Release Groups를 업데이트한다
+1. **When entity schema changes**: Update the entity in entity-registry.md and verify cross-validation points in the pre-context.md of referencing Features
+2. **When API contract changes**: Update the API in api-registry.md and verify compatibility in the pre-context.md of consumer Features
+3. **When Features are added/removed**: Update the Feature Catalog, Dependency Graph, and Release Groups in roadmap.md

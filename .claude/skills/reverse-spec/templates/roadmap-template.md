@@ -1,6 +1,6 @@
 # Project Roadmap: [PROJECT_NAME]
 
-**Source**: [원본 소스 경로]
+**Source**: [Original source path]
 **Generated**: [DATE]
 **Strategy**: Scope: [core|full] | Stack: [same|new]
 
@@ -8,68 +8,68 @@
 
 ## Project Overview
 
-### 기존 프로젝트 요약
-- **프로젝트 설명**: [프로젝트가 해결하는 문제, 대상 사용자]
-- **도메인**: [e-commerce, SaaS, CMS, 교육 플랫폼, 금융 서비스 등]
-- **아키텍처 타입**: [모놀리식, 마이크로서비스, 서버리스, MVC 등]
+### Existing Project Summary
+- **Project Description**: [Problem the project solves, target users]
+- **Domain**: [e-commerce, SaaS, CMS, education platform, financial service, etc.]
+- **Architecture Type**: [Monolithic, microservice, serverless, MVC, etc.]
 
-### 기술 스택
-| 영역 | 기술 | 버전 |
-|------|------|------|
-| 언어 | [언어] | [버전] |
-| 프레임워크 | [프레임워크] | [버전] |
-| DB/스토리지 | [DB] | [버전] |
-| 테스트 | [테스트 프레임워크] | [버전] |
-| 빌드/배포 | [도구] | [버전] |
+### Tech Stack
+| Area | Technology | Version |
+|------|-----------|---------|
+| Language | [Language] | [Version] |
+| Framework | [Framework] | [Version] |
+| DB/Storage | [DB] | [Version] |
+| Testing | [Test framework] | [Version] |
+| Build/Deploy | [Tool] | [Version] |
 
-### 프로젝트 규모
-- 소스 파일 수: [N]개
-- 엔티티 수: [N]개
-- API 엔드포인트 수: [N]개
-- 식별된 Feature 수: [N]개
+### Project Scale
+- Source files: [N]
+- Entities: [N]
+- API endpoints: [N]
+- Identified Features: [N]
 
 ---
 
 ## Rebuild Strategy
 
-### 구현 범위: [Core / Full]
-- [Core인 경우] Tier 1 Feature만 재개발. 학습/프로토타이핑 목적.
-- [Full인 경우] 기존과 동일한 전체 기능을 재개발.
+### Implementation Scope: [Core / Full]
+- [If Core] Redevelop only Tier 1 Features. For learning/prototyping purposes.
+- [If Full] Redevelop the full set of features identical to the existing system.
 
-### 기술 스택 전략: [Same / New]
-- [Same인 경우] 기존과 동일한 기술 스택을 사용. 구현 패턴 재활용 가능.
-- [New인 경우] 최적의 현대적 기술 스택으로 전환. `specs/reverse-spec/stack-migration.md` 참조.
+### Tech Stack Strategy: [Same / New]
+- [If Same] Use the same tech stack as existing. Implementation patterns can be reused.
+- [If New] Migrate to an optimal modern tech stack. See `specs/reverse-spec/stack-migration.md`.
 
 ---
 
 ## Feature Catalog
 
-### Tier 1 — 필수
-> 프로젝트의 근간. 이것 없이는 시스템이 성립하지 않음.
+### Tier 1 — Essential
+> Foundation of the project. The system cannot function without these.
 
-| ID | Feature | 설명 | 추천 이유 |
-|----|---------|------|-----------|
-| F001 | [feature-name] | [1-2문장 설명] | [구체적 분류 이유] |
+| ID | Feature | Description | Rationale |
+|----|---------|-------------|-----------|
+| F001 | [feature-name] | [1-2 sentence description] | [Specific classification rationale] |
 
-### Tier 2 — 권장
-> 핵심 사용자 경험을 완성하는 기능. 없어도 동작하지만 핵심 가치가 크게 저하됨.
+### Tier 2 — Recommended
+> Features that complete the core user experience. System works without them but core value is significantly diminished.
 
-| ID | Feature | 설명 | 추천 이유 |
-|----|---------|------|-----------|
-| F00N | [feature-name] | [1-2문장 설명] | [구체적 분류 이유] |
+| ID | Feature | Description | Rationale |
+|----|---------|-------------|-----------|
+| F00N | [feature-name] | [1-2 sentence description] | [Specific classification rationale] |
 
-### Tier 3 — 선택
-> 부가 기능, 관리 도구, 편의 기능. 이후 단계에서 추가 가능.
+### Tier 3 — Optional
+> Supplementary features, admin tools, convenience features. Can be added in later phases.
 
-| ID | Feature | 설명 | 추천 이유 |
-|----|---------|------|-----------|
-| F00N | [feature-name] | [1-2문장 설명] | [구체적 분류 이유] |
+| ID | Feature | Description | Rationale |
+|----|---------|-------------|-----------|
+| F00N | [feature-name] | [1-2 sentence description] | [Specific classification rationale] |
 
 ---
 
 ## Dependency Graph
 
-### 시각화
+### Visualization
 
 ```mermaid
 graph TD
@@ -78,58 +78,58 @@ graph TD
     F002 --> F004[F004: feature-name]
 ```
 
-### 의존성 테이블
+### Dependency Table
 
-| Feature | 의존 대상 | 의존 유형 | 의존 내용 |
-|---------|-----------|-----------|-----------|
-| F002 | F001 | 엔티티 참조 | User 엔티티를 FK로 참조 |
-| F003 | F001 | API 호출 | 인증 미들웨어 사용 |
+| Feature | Depends On | Dependency Type | Dependency Details |
+|---------|------------|-----------------|-------------------|
+| F002 | F001 | Entity reference | References User entity via FK |
+| F003 | F001 | API call | Uses authentication middleware |
 
 ---
 
 ## Release Groups
 
-Feature를 의존성 순서에 따라 릴리즈 그룹으로 묶는다. 선행 그룹이 완료되어야 후행 그룹을 시작할 수 있다.
+Features are grouped into release groups based on dependency order. A preceding group must be completed before the subsequent group can begin.
 
 ### Release 1: Foundation
-> [설명: 다른 모든 Feature의 기반이 되는 핵심 인프라]
+> [Description: Core infrastructure that all other Features are built upon]
 
-| 순서 | Feature | Tier | 비고 |
-|------|---------|------|------|
-| 1 | F001-[name] | Tier 1 | [비고] |
+| Order | Feature | Tier | Notes |
+|-------|---------|------|-------|
+| 1 | F001-[name] | Tier 1 | [Notes] |
 
 ### Release 2: Core Business
-> [설명: 핵심 비즈니스 로직]
+> [Description: Core business logic]
 
-| 순서 | Feature | Tier | 비고 |
-|------|---------|------|------|
-| 2 | F00N-[name] | Tier 1 | [비고] |
+| Order | Feature | Tier | Notes |
+|-------|---------|------|-------|
+| 2 | F00N-[name] | Tier 1 | [Notes] |
 
 ### Release 3: Enhancement
-> [설명: 사용자 경험 완성]
+> [Description: User experience completion]
 
-| 순서 | Feature | Tier | 비고 |
-|------|---------|------|------|
-| 3 | F00N-[name] | Tier 2 | [비고] |
+| Order | Feature | Tier | Notes |
+|-------|---------|------|-------|
+| 3 | F00N-[name] | Tier 2 | [Notes] |
 
 ---
 
 ## Cross-Feature Entity Dependencies
 
-Feature 간 공유되는 엔티티를 매핑한다. spec-kit /speckit.plan 시 data-model.md 작성의 교차 참조로 사용된다.
+Maps entities shared across Features. Used as a cross-reference when writing data-model.md during spec-kit /speckit.plan.
 
-| Entity | 소유 Feature | 참조 Feature | 참조 방식 |
-|--------|-------------|-------------|-----------|
-| User | F001-auth | F002-product, F003-order | FK 참조 |
-| Product | F002-product | F003-order, F005-cart | FK 참조 |
+| Entity | Owner Feature | Referencing Features | Reference Type |
+|--------|--------------|---------------------|----------------|
+| User | F001-auth | F002-product, F003-order | FK reference |
+| Product | F002-product | F003-order, F005-cart | FK reference |
 
 ---
 
 ## Cross-Feature API Dependencies
 
-Feature 간 API 호출 관계를 매핑한다. spec-kit /speckit.plan 시 contracts/ 작성의 교차 참조로 사용된다.
+Maps API call relationships between Features. Used as a cross-reference when writing contracts/ during spec-kit /speckit.plan.
 
-| API | Provider Feature | Consumer Feature | 호출 목적 |
-|-----|-----------------|------------------|-----------|
-| `POST /auth/verify` | F001-auth | F002-product, F003-order | 토큰 검증 |
-| `GET /products/:id` | F002-product | F003-order | 상품 정보 조회 |
+| API | Provider Feature | Consumer Features | Call Purpose |
+|-----|-----------------|-------------------|-------------|
+| `POST /auth/verify` | F001-auth | F002-product, F003-order | Token verification |
+| `GET /products/:id` | F002-product | F003-order | Product info lookup |
