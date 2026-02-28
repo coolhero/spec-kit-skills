@@ -173,20 +173,26 @@ Running `/smart-sdd pipeline` progresses through the entire workflow sequentiall
 
 Follows the Release Groups order from `BASE_PATH/roadmap.md`.
 
-Executes the following steps in order for each Feature:
+**CRITICAL: Each Feature must complete ALL 6 steps (including implement and verify) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's verify step is complete.
+
+Executes the following steps **strictly in order** for each Feature:
 
 ```
-1. specify  → Assemble → Checkpoint → /speckit.specify → Update
-2. clarify  → (Only run /speckit.clarify if [NEEDS CLARIFICATION] exists in the spec)
-3. plan     → Assemble → Checkpoint → /speckit.plan → Update (entity-registry, api-registry)
-4. tasks    → Run /speckit.tasks
-5. implement → Run /speckit.implement
-6. verify   → Execution verification → Cross-Feature verification → Global Evolution update
+1. specify   → Assemble → Checkpoint → /speckit.specify → Update
+2. clarify   → (Only run /speckit.clarify if [NEEDS CLARIFICATION] exists in the spec)
+3. plan      → Assemble → Checkpoint → /speckit.plan → Update (entity-registry, api-registry)
+4. tasks     → Checkpoint → /speckit.tasks
+5. implement → Checkpoint → /speckit.implement (MUST execute — actual code is written here)
+6. verify    → Execution verification → Cross-Feature verification → Global Evolution update
+
+── Feature DONE ── only now proceed to the next Feature ──
 ```
+
+> **Why implement cannot be skipped**: The entire purpose of this pipeline is to produce working, tested code. Specs and plans without implementation have no value. The implement step writes the actual source code, and the verify step confirms it works. Subsequent Features depend on the preceding Feature's **actual implementation** (not just its plan) to ensure cross-Feature consistency.
 
 #### Post-Feature Completion Processing
 
-Once all steps for a Feature are complete:
+Once **all 6 steps** for a Feature are complete (including implement and verify):
 
 1. **Update entity-registry.md**: Reflect entities from the data-model.md finalized in the plan
 2. **Update api-registry.md**: Reflect APIs from the contracts/ finalized in the plan
@@ -298,6 +304,7 @@ The context sources and content injected per command are defined in [context-inj
 
 ## Important Notes
 
+- **NEVER skip implement or verify.** Each Feature must go through all 6 steps (specify → clarify → plan → tasks → implement → verify) before moving to the next Feature. Creating specs/plans for multiple Features without implementing them defeats the purpose of this pipeline.
 - Does not alter or override spec-kit command behavior. Only injects context and utilizes results.
 - Does not directly modify files managed by spec-kit (`specs/`). Changes are made only through spec-kit commands.
 - Global Evolution Layer files (`entity-registry.md`, `api-registry.md`, `roadmap.md`) are modified only during the Update step.
