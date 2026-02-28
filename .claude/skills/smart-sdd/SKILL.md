@@ -492,26 +492,31 @@ If the path does not exist, warn the user and ask for correction. **Do NOT proce
 
 Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed Features** — only processes Features with `pending` or `in_progress` status in `sdd-state.md`.
 
-**CRITICAL: Each Feature must complete ALL 6 steps (including implement and verify) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's verify step is complete.
+**CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
 Executes the following steps **strictly in order** for each Feature:
 
 ```
-1. specify   → Assemble → Checkpoint → /speckit.specify → Update
-2. clarify   → (Only run /speckit.clarify if [NEEDS CLARIFICATION] exists in the spec)
-3. plan      → Assemble → Checkpoint → /speckit.plan → Update (entity-registry, api-registry)
-4. tasks     → Checkpoint → /speckit.tasks
-5. implement → Checkpoint → /speckit.implement (MUST execute — actual code is written here)
-6. verify    → Execution verification → Cross-Feature verification → Global Evolution update
+0. pre-flight → Ensure on main branch (clean state)
+1. specify    → Assemble → Checkpoint → /speckit.specify → Update
+                (spec-kit creates Feature branch: {NNN}-{short-name})
+2. clarify    → (Only run /speckit.clarify if [NEEDS CLARIFICATION] exists in the spec)
+3. plan       → Assemble → Checkpoint → /speckit.plan → Update (entity-registry, api-registry)
+4. tasks      → Checkpoint → /speckit.tasks
+5. implement  → Checkpoint → /speckit.implement (MUST execute — actual code is written here)
+6. verify     → Execution verification → Cross-Feature verification → Global Evolution update
+7. merge      → Checkpoint (HARD STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
+
+> **Git branching**: spec-kit automatically creates a Feature branch during `/speckit.specify`. All subsequent steps (plan through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [Git Branch Management](#git-branch-management) for details.
 
 > **Why implement cannot be skipped**: The entire purpose of this pipeline is to produce working, tested code. Specs and plans without implementation have no value. The implement step writes the actual source code, and the verify step confirms it works. Subsequent Features depend on the preceding Feature's **actual implementation** (not just its plan) to ensure cross-Feature consistency.
 
 #### Post-Feature Completion Processing
 
-Once **all 6 steps** for a Feature are complete (including implement and verify):
+Once **all steps** for a Feature are complete (including implement, verify, and merge):
 
 1. **Update entity-registry.md**: Reflect entities from the data-model.md finalized in the plan
 2. **Update api-registry.md**: Reflect APIs from the contracts/ finalized in the plan
@@ -522,6 +527,11 @@ Once **all 6 steps** for a Feature are complete (including implement and verify)
    - Update the relevant sections in the affected pre-context.md files
    - Report the updates to the user
 5. **Update sdd-state.md**: Record the completion time and result for each step
+6. **Merge Feature branch to main**: See [Git Branch Management](#git-branch-management)
+   - Commit all Global Evolution Layer updates on the Feature branch
+   - Present merge summary to user (HARD STOP)
+   - Merge to main after user approval
+   - Return to main branch, ready for the next Feature
 
 ---
 
@@ -534,13 +544,15 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 | Command | Prerequisite | Validation Method |
 |---------|-------------|-------------------|
 | `constitution` | constitution-seed exists | Check existence of `BASE_PATH/constitution-seed.md` |
-| `specify` | pre-context exists | Check existence of `BASE_PATH/features/[FID]/pre-context.md` |
-| `plan` | spec.md exists | Check existence of `specs/[NNN-feature-name]/spec.md` |
-| `tasks` | plan.md exists | Check existence of `specs/[NNN-feature-name]/plan.md` |
-| `implement` | tasks.md exists | Check existence of `specs/[NNN-feature-name]/tasks.md` |
-| `verify` | implement completed | Confirm implement completion in `sdd-state.md` |
+| `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]/pre-context.md`. Verify current branch is `main` (spec-kit will create the Feature branch) |
+| `plan` | spec.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/spec.md`. Verify current branch matches the Feature |
+| `tasks` | plan.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/plan.md`. Verify current branch matches the Feature |
+| `implement` | tasks.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/tasks.md`. Verify current branch matches the Feature |
+| `verify` | implement completed, on Feature branch | Confirm implement completion in `sdd-state.md`. Verify current branch matches the Feature |
 
 If prerequisites are not met, displays an error message and guides the user to the required preceding step.
+
+**Branch validation**: For `plan` through `verify`, the current git branch must be the Feature branch (pattern: `{NNN}-*`). If not on the correct branch, display the expected branch name and guide the user. For `specify`, the current branch should be `main` — if already on a Feature branch, warn the user.
 
 ### Feature ID → spec-kit Feature Name Mapping
 
@@ -573,12 +585,12 @@ Output format:
 Origin: [greenfield | reverse-spec]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify
-----------------|------|---------|------|-------|------|-------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅
-F002-product    | T1   |   ✅    |  🔄  |       |      |
-F003-order      | T2   |         |      |       |      |
-F004-payment    | T2   |         |      |       |      |
+Feature         | Tier | specify | plan | tasks | impl | verify | merge
+----------------|------|---------|------|-------|------|--------|------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅
+F002-product    | T1   |   ✅    |  🔄  |       |      |        |
+F003-order      | T2   |         |      |       |      |        |
+F004-payment    | T2   |         |      |       |      |        |
 
 Overall progress: 1/4 Features completed (25%)
 Currently in progress: F002-product → plan step
@@ -607,6 +619,112 @@ Running `/smart-sdd verify [FID]` performs a 3-phase verification.
 
 ---
 
+## Git Branch Management
+
+smart-sdd integrates with spec-kit's Feature branch workflow to ensure each Feature is developed in isolation and merged to main only after successful verification.
+
+### Branch Lifecycle
+
+```
+main ─── (start) ──→ /speckit.specify creates branch {NNN}-{short-name}
+                          │
+                          ├── plan, tasks, implement, verify (all on Feature branch)
+                          │
+                          ├── Post-Feature updates (entity-registry, api-registry, etc.)
+                          │
+                          ├── Merge Checkpoint (HARD STOP — user approval)
+                          │
+main ←── (merge) ────────┘
+```
+
+### Pre-Flight: Before Starting a Feature
+
+Before executing `specify` for a new Feature:
+
+1. **Verify current branch is `main`**: Run `git branch --show-current`
+   - If not on main: Display warning and ask user whether to switch to main first
+   - If there are uncommitted changes: Warn the user and ask how to proceed (stash, commit, or abort)
+2. **Ensure main is up to date**: Run `git status` to check for uncommitted changes
+   - If the project has a remote: Suggest `git pull` but do not force it
+
+### During Feature Development (specify → verify)
+
+spec-kit handles the branch creation automatically during `/speckit.specify`:
+- Creates branch `{NNN}-{short-name}` and switches to it
+- All subsequent commands (`plan`, `tasks`, `implement`, `verify`) execute on this Feature branch
+- smart-sdd validates the current branch matches the expected Feature branch before each step
+
+**Branch validation** (for `plan`, `tasks`, `implement`, `verify`):
+1. Run `git branch --show-current` to get the current branch name
+2. Extract the numeric prefix (e.g., `001` from `001-user-auth`)
+3. Match against the Feature's spec-kit Name prefix in `sdd-state.md`'s Feature Mapping
+4. If mismatch: Display the expected branch and current branch, ask user to switch
+
+### Post-Feature Merge: After verify Completes
+
+After verify completes and Global Evolution Layer updates are applied:
+
+**Step 1 — Commit Global Evolution updates on the Feature branch**:
+All Post-Feature Completion updates (entity-registry.md, api-registry.md, roadmap.md, pre-context.md updates, sdd-state.md) are committed on the Feature branch before merging.
+
+**Step 2 — Merge Checkpoint (HARD STOP)**:
+Present the merge summary to the user via AskUserQuestion:
+
+```
+🔀 Feature merge: [FID] - [Feature Name]
+
+Branch: {NNN}-{short-name} → main
+
+── Changes Summary ─────────────────────────────
+  Commits: [N commits on this branch]
+  Files changed: [count]
+  Tests: [pass count]/[total] passed
+  Build: [success/failure]
+
+── Global Evolution Updates ────────────────────
+  entity-registry.md: [changes summary]
+  api-registry.md: [changes summary]
+  roadmap.md: [Feature] → completed
+  sdd-state.md: updated
+
+─────────────────────────────────────────────────
+```
+
+Options:
+- "Merge to main" — Proceed with merge
+- "Review changes first" — Show detailed diff before merging
+- "Skip merge (stay on branch)" — Keep the branch for manual merge later
+
+**You MUST STOP and WAIT for the user's response. Do NOT auto-merge.**
+
+**Step 3 — Execute merge** (only after user approval):
+1. Switch to main: `git checkout main`
+2. Merge the Feature branch: `git merge {NNN}-{short-name}`
+   - Use the default merge strategy (no squash, no rebase — preserving commit history)
+   - If merge conflicts occur: Report the conflicts to the user and **stop**. Do NOT attempt to resolve merge conflicts automatically.
+3. Verify the merge was clean: `git status`
+4. Record the merge in `sdd-state.md` Feature Detail Log
+
+**Step 4 — Post-merge cleanup**:
+- Do NOT delete the Feature branch automatically
+- Display: "Feature branch `{NNN}-{short-name}` has been merged to main. You may delete it with `git branch -d {NNN}-{short-name}` if no longer needed."
+
+### Step Mode Branch Handling
+
+When using Step Mode (e.g., `/smart-sdd verify F001`):
+- Each command validates the current branch as described in Prerequisite Validation
+- After `verify` in Step Mode, the merge step is **not** automatically triggered. The user must explicitly run the pipeline or manually merge.
+- To trigger the merge for a completed Feature in Step Mode, the user can run `/smart-sdd pipeline` which will detect the completed-but-unmerged Feature and proceed with the merge Checkpoint.
+
+### Non-Git Projects
+
+If the project directory is not a git repository:
+- Skip all branch management (pre-flight, validation, merge)
+- Display a one-time notice: "No git repository detected. Branch management is disabled."
+- All other smart-sdd functionality works normally
+
+---
+
 ## Per-Command Context Injection Details
 
 The context sources and content injected per command are defined in [context-injection-rules.md](reference/context-injection-rules.md). Below is a summary.
@@ -624,7 +742,8 @@ The context sources and content injected per command are defined in [context-inj
 
 ## Important Notes
 
-- **NEVER skip implement or verify.** Each Feature must go through all 6 steps (specify → clarify → plan → tasks → implement → verify) before moving to the next Feature. Creating specs/plans for multiple Features without implementing them defeats the purpose of this pipeline.
+- **NEVER skip implement or verify.** Each Feature must go through all steps (specify → clarify → plan → tasks → implement → verify → merge) before moving to the next Feature. Creating specs/plans for multiple Features without implementing them defeats the purpose of this pipeline.
+- **Git branch discipline**: Each Feature is developed on its own branch. Never start a new Feature without merging (or explicitly skipping) the previous Feature's branch. This ensures main always reflects the latest stable state.
 - Does not alter or override spec-kit command behavior. Only injects context and utilizes results.
 - Does not directly modify files managed by spec-kit (`specs/`). Changes are made only through spec-kit commands.
 - Global Evolution Layer files (`entity-registry.md`, `api-registry.md`, `roadmap.md`) are modified only during the Update step.

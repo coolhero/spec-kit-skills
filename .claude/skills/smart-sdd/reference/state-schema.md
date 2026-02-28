@@ -33,11 +33,11 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 ## Feature Progress
 
-| Feature ID | Feature Name | Tier | specify | plan | tasks | implement | verify | Status |
-|------------|-------------|------|---------|------|-------|-----------|--------|--------|
-| F001 | auth | T1 | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | completed |
-| F002 | product | T1 | ✅ 01-18 | 🔄 | | | | in_progress |
-| F003 | order | T2 | | | | | | pending |
+| Feature ID | Feature Name | Tier | specify | plan | tasks | implement | verify | merge | Status |
+|------------|-------------|------|---------|------|-------|-----------|--------|-------|--------|
+| F001 | auth | T1 | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
+| F002 | product | T1 | ✅ 01-18 | 🔄 | | | | | in_progress |
+| F003 | order | T2 | | | | | | | pending |
 
 ### Status Icons
 - ✅ : Completed (followed by completion date MM-DD)
@@ -59,6 +59,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 | tasks | completed | 2024-01-16T11:30:00 | 2024-01-16T12:00:00 | 12 tasks |
 | implement | completed | 2024-01-17T09:00:00 | 2024-01-17T16:00:00 | |
 | verify | completed | 2024-01-17T16:30:00 | 2024-01-17T17:00:00 | Tests 24/24 passed |
+| merge | completed | 2024-01-17T17:05:00 | 2024-01-17T17:06:00 | Branch 001-user-auth → main |
 
 ### F002-product
 
@@ -71,12 +72,12 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 ## Feature Mapping
 
-Mapping table between Feature ID and spec-kit Feature Name (directory name).
+Mapping table between Feature ID, spec-kit Feature Name (directory name), and git branch.
 
-| Feature ID | spec-kit Name | spec-kit Path |
-|------------|---------------|---------------|
-| F001 | 001-auth | specs/001-auth/ |
-| F002 | 002-product | specs/002-product/ |
+| Feature ID | spec-kit Name | spec-kit Path | Branch | Merged |
+|------------|---------------|---------------|--------|--------|
+| F001 | 001-auth | specs/001-auth/ | 001-user-auth | ✅ |
+| F002 | 002-product | specs/002-product/ | 002-product-catalog | |
 
 ---
 
@@ -111,7 +112,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 
 1. Read `BASE_PATH/roadmap.md` to extract the Feature list and Tiers
 2. Initialize all steps of all Features to `pending` (blank)
-3. Leave the Feature Mapping table empty; map the spec-kit Name when each Feature's specify step is completed
+3. Leave the Feature Mapping table empty; map the spec-kit Name and Branch when each Feature's specify step is completed (spec-kit creates the branch during specify)
 4. Initialize Constitution to `pending`
 5. Set Origin based on how artifacts were generated:
    - `greenfield` — if initialized by `/smart-sdd init`
@@ -141,8 +142,9 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Record the failure reason in the Feature Detail Log
 - Feature Progress Status remains `in_progress` (retry is possible)
 
-### When a Feature Completes (all steps ✅)
+### When a Feature Completes (all steps including merge ✅)
 - Change the Feature Progress Status to `completed`
+- Mark the Feature as `✅` in the Merged column of the Feature Mapping table
 - Add update history to the Global Evolution Log
 
 ### When a Step is Skipped (e.g., clarify not needed)

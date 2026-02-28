@@ -303,12 +303,15 @@ Phase 0: Constitution 확정
 
 Phase 1~N: Release Group 순서대로 Feature 진행
     └─ 각 Feature마다:
+       0. pre-flight → main 브랜치 확인 (클린 상태)
        1. specify  → (pre-context + business-logic-map 주입) → /speckit.specify
+                     (spec-kit이 Feature 브랜치 자동 생성: {NNN}-{short-name})
        2. clarify  → spec에 [NEEDS CLARIFICATION]이 있을 때만 /speckit.clarify
        3. plan     → (pre-context + entity-registry + api-registry 주입) → /speckit.plan
        4. tasks    → /speckit.tasks
        5. implement → /speckit.implement
        6. verify   → 3단계 검증 (실행 검증 + Cross-Feature 검증 + Global Evolution 갱신)
+       7. merge    → Checkpoint (HARD STOP) → Feature 브랜치를 main에 머지
 ```
 
 > **`add` (incremental) 모드 참고**: `/smart-sdd add` 이후 pipeline을 실행하면 constitution이 이미 존재하므로 Phase 0을 건너뛰고 pending 상태의 Feature부터 바로 진행합니다.
@@ -324,6 +327,7 @@ Feature의 모든 단계가 완료되면 smart-sdd가 자동으로 수행하는 
 | roadmap.md 업데이트 | 해당 Feature 상태를 `completed`로 변경 |
 | 후속 Feature pre-context.md 영향 분석 | 변경/추가된 엔티티/API로 영향받는 후속 Feature의 pre-context를 자동 갱신하고 사용자에게 보고 |
 | sdd-state.md 업데이트 | 각 단계의 완료 시각과 결과 기록 |
+| Feature 브랜치 머지 | 모든 업데이트를 Feature 브랜치에 커밋한 후, 사용자 확인(HARD STOP)을 받고 main에 머지. 다음 Feature는 main에서 시작 |
 
 #### Verify 3단계 검증
 
@@ -355,12 +359,12 @@ Feature 진행 중 새로운 아키텍처 원칙이 발견되면:
 Origin: [greenfield | reverse-spec]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify
-----------------|------|---------|------|-------|------|-------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅
-F002-product    | T1   |   ✅    |  🔄  |       |      |
-F003-order      | T2   |         |      |       |      |
-F004-payment    | T2   |         |      |       |      |
+Feature         | Tier | specify | plan | tasks | impl | verify | merge
+----------------|------|---------|------|-------|------|--------|------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅
+F002-product    | T1   |   ✅    |  🔄  |       |      |        |
+F003-order      | T2   |         |      |       |      |        |
+F004-payment    | T2   |         |      |       |      |        |
 
 전체 진행률: 1/4 Features 완료 (25%)
 현재 진행: F002-product → plan 단계

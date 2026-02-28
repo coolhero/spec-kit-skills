@@ -430,3 +430,13 @@ Review the verification plan. You can:
    - Build results
    - Cross-Feature verification results
    - Overall verification status (pass/fail)
+
+### After Merge Completion
+
+1. Update `BASE_PATH/sdd-state.md`:
+   - Record the merge step as completed in Feature Progress and Feature Detail Log
+   - Update Feature Mapping: record the Branch name and mark Merged as ✅
+   - Change the Feature Status to `completed`
+   - Record in Global Evolution Log: "Branch {NNN}-{short-name} merged to main"
+2. Verify that main branch is clean after merge (`git status`)
+3. The next Feature's `specify` step can now be started from the main branch

@@ -310,12 +310,15 @@ Phase 0: Constitution Finalization
 
 Phase 1~N: Progress Features in Release Group Order
     +-- For each Feature:
+       0. pre-flight -> Ensure on main branch (clean state)
        1. specify  -> (pre-context + business-logic-map injection) -> /speckit.specify
+                      (spec-kit creates Feature branch: {NNN}-{short-name})
        2. clarify  -> Run /speckit.clarify only if [NEEDS CLARIFICATION] exists in the spec
        3. plan     -> (pre-context + entity-registry + api-registry injection) -> /speckit.plan
        4. tasks    -> /speckit.tasks
        5. implement -> /speckit.implement
        6. verify   -> 3-phase verification (Execution verification + Cross-Feature verification + Global Evolution update)
+       7. merge    -> Checkpoint (HARD STOP) -> Merge Feature branch to main
 ```
 
 #### Post-Feature Completion Processing
@@ -329,6 +332,7 @@ Tasks automatically performed by smart-sdd when all steps for a Feature are comp
 | roadmap.md update | Change Feature status to `completed` |
 | Subsequent Feature pre-context.md impact analysis | Automatically update pre-context of subsequent Features affected by changed/added entities/APIs and report to user |
 | sdd-state.md update | Record completion time and results for each step |
+| Feature branch merge | Commit all updates on the Feature branch, then merge to main after user confirmation (HARD STOP). Next Feature starts from main |
 
 #### 3-Phase Verification
 
@@ -360,12 +364,12 @@ When new architecture principles are discovered during Feature progression:
 Origin: [greenfield | reverse-spec]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify
-----------------|------|---------|------|-------|------|-------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅
-F002-product    | T1   |   ✅    |  🔄  |       |      |
-F003-order      | T2   |         |      |       |      |
-F004-payment    | T2   |         |      |       |      |
+Feature         | Tier | specify | plan | tasks | impl | verify | merge
+----------------|------|---------|------|-------|------|--------|------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅
+F002-product    | T1   |   ✅    |  🔄  |       |      |        |
+F003-order      | T2   |         |      |       |      |        |
+F004-payment    | T2   |         |      |       |      |        |
 
 Overall progress: 1/4 Features completed (25%)
 Currently in progress: F002-product → plan step
