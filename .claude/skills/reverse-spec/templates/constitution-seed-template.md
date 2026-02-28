@@ -115,7 +115,7 @@ Scale/Performance-driven:
 - Search-heavy → Search Index Sync Strategy, Denormalization Policy
 
 Quality-driven:
-- No existing tests → Test Coverage Minimum Threshold
+- No existing tests → Behavioral Characterization Tests (capture existing behavior before refactoring)
 - Complex state machines → State Transition Diagram Requirement
 - Heavy external integrations → Mock/Stub Strategy, Contract Testing
 -->
