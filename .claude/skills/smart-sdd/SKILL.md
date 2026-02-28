@@ -100,13 +100,15 @@ $ARGUMENTS parsing rules:
 **Pre-validation** (for all commands):
 
 **Step 0 — spec-kit installation check** (all commands including `init`):
-1. Check if spec-kit is available by running: `speckit --version` (or `which speckit`)
+1. Check if spec-kit is available by running: `which specify`
 2. If not found, automatically install it:
    ```
    uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
    ```
-3. Verify installation succeeded by running `speckit --version` again
+3. Verify installation succeeded by running `which specify` again
 4. If installation fails, display the error and instruct the user to install manually
+
+> **Note**: The spec-kit CLI binary is named `specify` (not `speckit`). The Claude Code skills are invoked via `/speckit.*` (e.g., `/speckit.specify`, `/speckit.plan`), but the underlying CLI command is `specify`.
 
 **Step 1 — roadmap.md check** (for all commands except `init` and `status`):
 1. Check whether `roadmap.md` exists at BASE_PATH
