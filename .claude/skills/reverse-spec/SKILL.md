@@ -86,7 +86,7 @@ Upon completing Phase 1, report a summary of the detected tech stack and project
 
 This step determines the concrete new tech stack **immediately after detecting the current stack**, so the user has a clear direction before deep analysis begins. Skip entirely if "Same Stack" was selected.
 
-**Step 1 — Current Stack Summary Table**:
+**Step 1 — Current Stack Summary**:
 Present the current stack detected in Phase 1 as a categorized table:
 
 | Category | Current Technology | Version | Usage Context |
@@ -98,29 +98,96 @@ Present the current stack detected in Phase 1 as a categorized table:
 | Testing | e.g., pytest | 7.x | Unit/Integration |
 | Build/Deploy | e.g., Docker + GitHub Actions | — | CI/CD |
 
-**Step 2 — Recommended Stack Proposal**:
-For each category, propose 1~2 modern alternatives with rationale:
+Adapt the categories to match the actual project. Add or remove rows as needed (e.g., add "State Management", "Editor", "AI/ML SDK" if relevant; remove "Frontend" if the project is backend-only).
 
-| Category | Current | Recommended | Alternative | Rationale |
-|----------|---------|-------------|-------------|-----------|
-| Language | Python 3.10 | TypeScript 5.x | Go 1.22 | [Pros: type safety, ecosystem. Cons: migration cost] |
-| Framework | Django 4.2 | Next.js 14 (App Router) | Fastify | [Pros/cons/migration complexity] |
-| ... | ... | ... | ... | ... |
+**Step 2 — Per-Category Stack Negotiation (HARD STOP per category)**:
+For **each category**, present the recommendation and ask the user to confirm **individually**. This allows fine-grained control over each technology choice.
 
-For each recommendation, briefly evaluate:
-- **Pros**: Why this is a good fit for the project
-- **Cons**: Trade-offs, learning curve, ecosystem gaps
-- **Migration complexity**: Low / Medium / High — what makes migration easier or harder
+For each category:
+1. Show the current technology and 1~2 recommended alternatives with brief rationale:
+   ```
+   📋 [Category]: [Current Technology] → ?
 
-**Step 3 — User Confirmation (HARD STOP)**:
-Present the proposal table and ask the user via AskUserQuestion:
-- "Approve recommended stack as-is"
-- "Choose alternatives for some categories"
-- "Propose a different stack"
+   | Option | Technology | Rationale |
+   |--------|-----------|-----------|
+   | Recommended | [Tech A] | [Pros, cons, migration complexity] |
+   | Alternative | [Tech B] | [Pros, cons, migration complexity] |
+   | Keep Current | [Current] | [Why keeping it might make sense] |
+   ```
+2. Ask the user via AskUserQuestion with options:
+   - "[Recommended Tech] (Recommended)"
+   - "[Alternative Tech]"
+   - "Keep [Current Tech]"
+   - "Accept all remaining recommendations" — **skip all subsequent categories** and auto-apply the recommended option for each. Immediately jump to Step 3 (Final Summary).
+3. **STOP and WAIT** for the user's response before moving to the next category.
+4. If the user selects "Other", accept their custom input and record it.
+5. If the user selects "Accept all remaining recommendations", stop the per-category loop. Apply the recommended option for every remaining category and proceed directly to Step 3 (Final Summary and Confirmation), where the user can still review and revise if needed.
 
-**You MUST STOP and WAIT for the user's response.** Do NOT auto-approve or proceed without explicit user input.
+**Category dependency chain**: Categories have cascading constraints — each choice narrows the viable options for subsequent categories. Process them in this dependency order:
 
-If the user chooses alternatives or proposes changes, update the table accordingly and re-confirm.
+```
+Language ──→ Framework ──→ ORM/DB ──→ Testing
+                │                       │
+                ├──→ State Mgmt         │
+                ├──→ UI Library         │
+                └──→ Build/Deploy ──────┘
+```
+
+1. **Language** — Constrains everything. Must be decided first.
+2. **Framework** — Constrained by Language. (e.g., TypeScript → Next.js/Nuxt/Fastify, not Django)
+3. **ORM/DB** — Constrained by Language + Framework. (e.g., TypeScript + Next.js → Prisma/Drizzle, not SQLAlchemy)
+4. **Remaining categories** — Constrained by the above. (e.g., Framework choice determines viable state management, UI library, and testing options)
+
+**Critical rule**: When presenting options for each category, **only propose technologies that are compatible with all previously confirmed choices**. Explicitly state why the recommendations fit the already-decided stack.
+
+```
+📋 [Category]: [Current] → ? (constrained by: [list confirmed choices])
+
+| Option | Technology | Rationale |
+|--------|-----------|-----------|
+| Recommended | [Tech A] | [Why this fits with confirmed Language + Framework + ...] |
+| Alternative | [Tech B] | [Why this also works, trade-offs vs recommended] |
+| Keep Current | [Current] | [Compatibility note — may or may not work with new stack] |
+```
+
+If "Keep Current" is **incompatible** with previously confirmed choices (e.g., keeping Django ORM after choosing TypeScript), mark it clearly:
+- "⚠️ Keep [Current] — **Incompatible** with [confirmed choice]. Would require a bridge/adapter."
+
+Example flow:
+```
+📋 Language: Python 3.10 → ?
+  → User selects "TypeScript 5.x"
+
+📋 Framework: Django 4.2 → ? (constrained by: TypeScript)
+  Options only include TypeScript-compatible frameworks
+  → User selects "Next.js 14"
+
+📋 ORM/DB: Django ORM + PostgreSQL → ? (constrained by: TypeScript + Next.js)
+  Options only include TypeScript ORMs that work with Next.js
+  ⚠️ "Keep Django ORM" marked as Incompatible with TypeScript
+  → User selects "Prisma + PostgreSQL"
+
+📋 State Management: Redux Toolkit → ? (constrained by: TypeScript + Next.js + React)
+  Options only include React-compatible state libraries
+  → User selects "Zustand"
+
+... (continue for remaining categories)
+```
+
+**Step 3 — Final Summary and Confirmation**:
+After all categories are decided, present the complete migration table:
+
+| Category | Current | New | Migration Complexity |
+|----------|---------|-----|---------------------|
+| Language | Python 3.10 | TypeScript 5.x | Medium |
+| Framework | Django 4.2 | Next.js 14 | High |
+| ... | ... | ... | ... |
+
+Ask via AskUserQuestion: "Confirm the final stack decisions?"
+- "Confirm and proceed"
+- "Revise some choices"
+
+If "Revise some choices", ask which categories to revisit and re-run Step 2 for those categories only.
 
 **Step 4 — Finalize**:
 Record the finalized stack decisions. These will be used in:
