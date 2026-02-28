@@ -163,7 +163,57 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
    - If PRD was provided: Present extracted feature candidates and ask for confirmation/additions/removals
    - If no PRD: Ask the user to list the major features of their project
 
-2. **For each Feature, define**:
+2. **Feature Granularity Selection (HARD STOP)**:
+   After the initial feature list is compiled, present multiple granularity options. The same project can be decomposed at different levels, and the right choice depends on project goals, team size, and desired iteration speed.
+
+   Present 2-3 granularity levels with concrete Feature lists for each:
+
+   | Level | Name | Description | Typical Feature Count |
+   |-------|------|-------------|----------------------|
+   | **Coarse** | Domain-level | One Feature per major business domain. Fewer total Features, larger scope each | 4-8 Features |
+   | **Standard** | Module-level | One Feature per logical module. Balanced scope and count. Recommended for most projects | 8-15 Features |
+   | **Fine** | Capability-level | One Feature per distinct user-facing capability. Smaller scope, more Features | 15-30 Features |
+
+   For each level, show a concrete Feature list derived from the brainstorm:
+   ```
+   📋 Feature Granularity Options:
+
+   ── Option A: Coarse (Domain-level) ──────────────
+   [N] Features total
+     • auth — All authentication, authorization, and user management
+     • core — Main business logic (CRUD + workflows)
+     • admin — Admin panel + analytics
+   Pros: Faster pipeline, fewer cross-Feature dependencies
+   Cons: Larger Features (harder to review/test in isolation)
+
+   ── Option B: Standard (Module-level) — Recommended ──
+   [N] Features total
+     • auth — User registration, login, sessions
+     • user-profile — User profiles, preferences
+     • [domain-feature-1] — ...
+     • [domain-feature-2] — ...
+   Pros: Balanced scope, manageable review cycles
+   Cons: Moderate number of Features to track
+
+   ── Option C: Fine (Capability-level) ────────────
+   [N] Features total
+     • user-register — User registration only
+     • user-login — Login + session management
+     • ...
+   Pros: Granular tracking, easier isolated testing
+   Cons: Many Features, more cross-Feature dependencies
+   ```
+
+   Use AskUserQuestion with options:
+   - "Option B: Standard (Module-level) (Recommended)"
+   - "Option A: Coarse (Domain-level)"
+   - "Option C: Fine (Capability-level)"
+
+   **You MUST STOP and WAIT for the user's response. Do NOT proceed until the user selects a granularity level.**
+
+   If the user selects "Other", they can describe a custom granularity or request specific merges/splits.
+
+3. **For each Feature (after granularity is selected), define**:
    - Feature name (concise English, e.g., "auth", "product", "order")
    - Description (1-2 sentences)
    - Tier classification (present Tier definitions, let user assign or confirm suggestion):
@@ -172,22 +222,22 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
      - Tier 3 (Optional): Auxiliary, can be added later
    - Classification rationale (1 sentence)
 
-3. **Define dependencies between Features**:
+4. **Define dependencies between Features**:
    - For each Feature: "Which other Features does this depend on?"
    - Record dependency type (entity reference, API call, shared logic)
    - Validate no circular dependencies exist
 
-4. **Assign Feature IDs**:
+5. **Assign Feature IDs**:
    - Group Features by Tier (Tier 1 → Tier 2 → Tier 3)
    - Within each Tier, sort by topological order (dependency-based)
    - Assign F001, F002, ... sequentially: all Tier 1 first, then Tier 2, then Tier 3
    - This keeps Tier grouping intact while respecting dependency order within each Tier
 
-5. **Define Release Groups**:
+6. **Define Release Groups**:
    - Propose grouping based on dependency layers and Tiers
    - Present to user for confirmation/adjustment
 
-6. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.**
+7. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.**
 
 #### Phase 3: Constitution Seed Definition
 
@@ -618,13 +668,16 @@ Running `/smart-sdd verify [FID]` performs a 3-phase verification.
 ### Phase 3: Demo-Ready Verification (only if VI. Demo-Ready Delivery is in the constitution)
 - Check that `demos/F00N-name.md` exists for the Feature
 - Check that a demo surface exists (not just tests): CLI command, demo script, demo page, or API playground
-- If either is missing, **block verification** and instruct the user:
+- Check that `demos/F00N-name.md` includes a **Demo Components** table categorizing each component as Demo-only or Promotable with a clear Fate
+- Check that demo-only components are marked with `// @demo-only` and promotable components with `// @demo-scaffold — will be extended by F00N-[feature]`
+- If any check fails, **block verification** and instruct the user:
   ```
   ❌ Demo-Ready verification failed for [FID] - [Feature Name]:
-    - [Missing: demos/F00N-name.md | Missing: demo surface implementation]
+    - [Missing: demos/F00N-name.md | Missing: demo surface implementation | Missing: Demo Components table | Missing: component markers]
 
   "Tests pass" alone does not satisfy Demo-Ready Delivery.
-  Please implement a minimal demo surface and create demos/F00N-name.md.
+  Please implement a minimal demo surface, create demos/F00N-name.md with Demo Components table,
+  and mark all demo code with appropriate category markers.
   ```
 - Update `demos/README.md` (Demo Hub) with the Feature's demo status
 

@@ -335,13 +335,23 @@ Before or during implementation, if the Feature's `pre-context.md` has a non-emp
 
 After `/speckit.implement` completes, if the constitution includes "Demo-Ready Delivery":
 
-1. **Determine the Feature's demo surface type** based on what was implemented:
+1. **Clean up obsolete demo-only components from previous Features**:
+   - Check `demos/` directory for `F00N-name.md` files of **already completed** Features
+   - In each completed Feature's `demos/F00N-name.md`, check the **Demo Components** table
+   - If any component has Category = "Demo-only" and Fate = "Remove after F0XX-[current-feature]", **remove that component** (delete the file/directory) and update the Demo Components table
+   - Report removed demo-only components to the user
+
+2. **Determine the Feature's demo surface type** based on what was implemented:
    - Has UI components → demo via the running app (document the route/page)
    - Backend/API only → create a demo script (`demos/scripts/demo-F00N.sh` or `.ts`) that invokes the API and displays results
    - Data/logic layer only → create a CLI command or demo script that exercises the core logic with sample data
    - Pipeline/engine → create a demo script that runs the pipeline with sample input and shows output
 
-2. **Create `demos/F00N-name.md`** with:
+3. **Categorize each demo component** as either:
+   - **Demo-only**: Mock data, demo scripts, temporary UI scaffolding. Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed when the real Feature replaces it
+   - **Promotable**: Minimal but real implementation that future Features will extend. Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
+
+4. **Create `demos/F00N-name.md`** with:
    ```markdown
    # Demo: [Feature Name]
 
@@ -355,11 +365,17 @@ After `/speckit.implement` completes, if the constitution includes "Demo-Ready D
    1. [Step-by-step instructions with expected results]
    2. ...
 
+   ## Demo Components
+   | Component | Location | Category | Fate |
+   |-----------|----------|----------|------|
+   | [component name] | [file path] | Demo-only | Remove after F0XX-[feature] |
+   | [component name] | [file path] | Promotable | Extended by F0XX-[feature] |
+
    ## Validation Scenarios
    See [specs/{NNN-feature}/quickstart.md](../specs/{NNN-feature}/quickstart.md) for detailed validation.
    ```
 
-3. **Update `demos/README.md`** (Demo Hub):
+5. **Update `demos/README.md`** (Demo Hub):
    - Create if it doesn't exist (first Feature with demo)
    - Add the Feature to the index with status and link
 

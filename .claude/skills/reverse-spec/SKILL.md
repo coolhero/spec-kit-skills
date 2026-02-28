@@ -296,6 +296,73 @@ Define the following for each Feature:
 
 > Do not assign Feature IDs at this point. IDs will be assigned based on topological sort after constructing the dependency graph in 3-2.
 
+### 3-1b. Feature Granularity Selection (HARD STOP)
+
+After identifying Feature boundaries, present **multiple granularity options** to the user. The same codebase can be decomposed at different levels of granularity, and the right choice depends on project goals, team size, and desired iteration speed.
+
+**Step 1 — Prepare granularity proposals**:
+Analyze the identified Features and propose 2-3 granularity levels:
+
+| Level | Name | Description | Typical Feature Count |
+|-------|------|-------------|----------------------|
+| **Coarse** | Domain-level | One Feature per major business domain. Larger scope per Feature, fewer total Features. Good for small teams or quick prototyping | 4-8 Features |
+| **Standard** | Module-level | One Feature per logical module/service boundary. Balanced scope and count. Recommended for most projects | 8-15 Features |
+| **Fine** | Capability-level | One Feature per distinct user-facing capability. Smaller scope per Feature, more total Features. Good for large teams or when granular tracking is needed | 15-30 Features |
+
+**Step 2 — Present the proposals**:
+For each granularity level, show a concrete Feature list derived from the analysis:
+
+```
+📋 Feature Granularity Options:
+
+── Option A: Coarse (Domain-level) ──────────────
+[N] Features total
+  • auth — User authentication + authorization + roles
+  • catalog — Products + categories + search
+  • commerce — Cart + orders + payment + shipping
+  • admin — Admin panel + analytics + reports
+Pros: Faster pipeline, fewer cross-Feature dependencies
+Cons: Larger Features (harder to review/test in isolation)
+
+── Option B: Standard (Module-level) — Recommended ──
+[N] Features total
+  • auth — User registration, login, sessions
+  • user-profile — User profiles, preferences
+  • product — Product CRUD, categories
+  • search — Product search, filtering
+  • cart — Shopping cart management
+  • order — Order placement, status tracking
+  • payment — Payment processing
+  • admin — Admin dashboard, reports
+Pros: Balanced scope, manageable review cycles
+Cons: Moderate number of Features to track
+
+── Option C: Fine (Capability-level) ────────────
+[N] Features total
+  • user-register — User registration
+  • user-login — Login + session management
+  • user-roles — Role-based access control
+  • product-crud — Product create/read/update/delete
+  • product-category — Category management
+  • product-search — Search + filtering
+  • ...
+Pros: Granular tracking, easier isolated testing
+Cons: Many Features, more cross-Feature dependencies
+```
+
+**Step 3 — User selection**:
+Use AskUserQuestion to ask the user:
+- "Option B: Standard (Module-level) (Recommended)"
+- "Option A: Coarse (Domain-level)"
+- "Option C: Fine (Capability-level)"
+
+**You MUST STOP and WAIT for the user's response. Do NOT proceed until the user selects a granularity level.**
+
+If the user selects "Other", they can describe a custom granularity or request specific merges/splits of the proposed Features.
+
+**Step 4 — Apply the selected granularity**:
+Reconstruct the Feature list according to the selected level. If Coarse is selected, merge related Features. If Fine is selected, split Features into smaller units. Then proceed to 3-2 with the finalized Feature list.
+
 ### 3-2. Dependency Graph Construction and Feature ID Assignment
 Derive inter-Feature dependencies:
 - **Direct Dependency**: Uses another Feature's modules via import/require

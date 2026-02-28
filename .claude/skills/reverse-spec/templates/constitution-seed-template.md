@@ -179,6 +179,19 @@ Quality-driven:
   - API endpoints → Simple API test page or curl-based demo script
   - Data layer / Store → CLI or minimal UI that performs CRUD and displays state changes
   - Pipeline / Engine → Demo script that runs the pipeline with sample data and shows output
+- **Demo code separation strategy**: Clearly distinguish demo-only code from production code
+  - **Demo-only code** (mock data, demo scripts, temporary UI scaffolding): Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed or replaced when the real Feature is implemented
+  - **Promotable code** (minimal but real implementation that future Features will extend): Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
+  - Each `demos/F00N-name.md` must declare which category each demo component falls into:
+    ```
+    ## Demo Components
+    | Component | Location | Category | Fate |
+    |-----------|----------|----------|------|
+    | Mock provider data | demos/fixtures/providers.json | Demo-only | Remove after F002-provider UI |
+    | Demo CLI runner | demos/scripts/demo-F001.ts | Demo-only | Remove after full UI |
+    | Settings page shell | src/pages/settings.tsx | Promotable | Extended by F005-settings |
+    ```
+  - During subsequent Feature implementation, check `demos/` for demo-only components marked for removal and clean them up
 - **Verification criterion**: `A non-developer stakeholder can follow demos/F00N-name.md and verify the Feature works — "npm test passes" alone does NOT satisfy this criterion`
 
 ---
