@@ -252,7 +252,7 @@ All spec-kit command executions follow this 4-step protocol:
 | Step | Description |
 |------|------------|
 | **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`) |
-| **Checkpoint** | Presents the assembled context to the user in summarized form, providing an opportunity to approve or modify. If modifications are requested, applies changes and re-confirms. **Skipped in `--auto` mode** (summary is still displayed but execution proceeds immediately) |
+| **Checkpoint** | Presents the assembled context to the user in summarized form, providing an opportunity to approve or modify. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
 | **Execute** | Executes the corresponding spec-kit command (`/speckit.specify`, `/speckit.plan`, etc.) with the approved context. The actual work is performed by spec-kit |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
 

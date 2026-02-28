@@ -6,6 +6,8 @@ This document defines which sections of which files smart-sdd reads and injects 
 **SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
 
 > **`--auto` mode**: When `--auto` is specified, all Checkpoint steps below are skipped — the context summary is still displayed for transparency, but execution proceeds immediately without waiting for user approval.
+>
+> **`--dangerously-skip-permissions` environment**: When AskUserQuestion is unavailable, Checkpoints are still enforced — the assembled context is displayed and a regular text message asks the user for confirmation. Only `--auto` skips Checkpoints.
 
 ---
 
