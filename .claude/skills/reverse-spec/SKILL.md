@@ -460,9 +460,15 @@ Generate the following files in order. Each file follows the template structure 
 
 For each Feature, generate `specs/reverse-spec/features/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](templates/pre-context-template.md).
 
+**Path Convention**: All file paths in pre-context.md's Source Reference and Static Resources sections MUST be **relative to the target directory** (the source being analyzed). Do NOT use absolute paths. The `Source Root` header in the template references `$SOURCE_ROOT`, whose actual value is stored as `Source Path` in `sdd-state.md` and resolved at runtime by smart-sdd.
+
+For example, if the target directory is `/Users/dev/legacy-app`:
+- ✅ `src/main/index.ts`
+- ❌ `/Users/dev/legacy-app/src/main/index.ts`
+
 Contents to include in each pre-context.md:
-- **Source Reference**: List of related original files + reference guide by stack strategy
-- **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
+- **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
+- **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
 - **For /speckit.specify**: Existing feature summary, draft requirements (FR-###), draft acceptance criteria (SC-###)
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts, technical decisions
 - **For /speckit.analyze**: Cross-Feature verification points

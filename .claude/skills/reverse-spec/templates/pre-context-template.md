@@ -8,17 +8,21 @@
 
 ## Source Reference
 
+**Source Root**: `$SOURCE_ROOT`
+
+> All file paths below are **relative to Source Root**. The actual Source Root value is stored in `sdd-state.md` → `Source Path` field and resolved at runtime by smart-sdd.
+
 ### Related Original File List
 
 | File Path | Role |
 |-----------|------|
-| `[path/filename]` | [Role description: e.g., User model definition] |
-| `[path/filename]` | [Role description: e.g., Authentication middleware] |
-| `[path/filename]` | [Role description: e.g., Login API handler] |
-| `[path/filename]` | [Role description: e.g., Authentication-related tests] |
+| `[relative/path/filename]` | [Role description: e.g., User model definition] |
+| `[relative/path/filename]` | [Role description: e.g., Authentication middleware] |
+| `[relative/path/filename]` | [Role description: e.g., Login API handler] |
+| `[relative/path/filename]` | [Role description: e.g., Authentication-related tests] |
 
 > Original sources are referenced directly from their original locations without copying.
-> When proceeding with /speckit.specify and /speckit.plan, read the above files to review existing implementations.
+> When proceeding with /speckit.specify and /speckit.plan, resolve each path as `[Source Root]/[File Path]` and read the files to review existing implementations.
 
 ### Reference Guide
 
@@ -39,12 +43,13 @@
 
 > Non-code files used by this Feature that must be **copied from the original source** during implementation.
 > These files cannot be regenerated — they must be copied as-is and placed in the appropriate location in the new project.
+> Source Path is **relative to Source Root** (same as file paths above). Resolve as `[Source Root]/[Source Path]` at runtime.
 
 | Source Path | Type | Target Path | Usage |
 |-------------|------|-------------|-------|
-| `[original/path/logo.svg]` | Image | `[new/path/logo.svg]` | [e.g., App logo displayed in header] |
-| `[original/path/locales/en.json]` | i18n | `[new/path/locales/en.json]` | [e.g., English translation strings] |
-| `[original/path/fonts/custom.woff2]` | Font | `[new/path/fonts/custom.woff2]` | [e.g., Custom brand font] |
+| `[relative/path/logo.svg]` | Image | `[new/path/logo.svg]` | [e.g., App logo displayed in header] |
+| `[relative/path/locales/en.json]` | i18n | `[new/path/locales/en.json]` | [e.g., English translation strings] |
+| `[relative/path/fonts/custom.woff2]` | Font | `[new/path/fonts/custom.woff2]` | [e.g., Custom brand font] |
 
 > If no static resources are associated with this Feature, write "None".
 > If resources need modification (e.g., resizing images, updating translation keys), note it in the Usage column.

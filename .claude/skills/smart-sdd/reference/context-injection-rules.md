@@ -98,14 +98,16 @@ Review the above content. You can:
 
 ### Source Reference Path Resolution
 
-The file paths listed in pre-context.md's Source Reference are **relative to the original source directory**. To resolve them:
+File paths in pre-context.md's Source Reference and Static Resources are **relative to Source Root** (i.e., the original source directory). The pre-context.md header shows `Source Root: $SOURCE_ROOT` as a placeholder — the actual value is stored in `sdd-state.md` → `Source Path` field.
 
-1. Read `Source Path` from `sdd-state.md` to get the base path for source references
-2. Resolve each file path in Source Reference relative to the Source Path
-3. **Before injecting**, verify that the resolved files actually exist. If a file is missing (e.g., source was moved/deleted), note it in the Checkpoint: "⚠️ Source file not found: [path]"
+To resolve file paths at runtime:
 
-| Mode | Source Path | Path Resolution |
-|------|------------|-----------------|
+1. Read `Source Path` from `sdd-state.md` to get the Source Root value
+2. For each relative path in Source Reference / Static Resources, resolve as: `[Source Path]/[relative path]`
+3. **Before injecting**, verify that the resolved files actually exist. If a file is missing (e.g., source was moved/deleted), note it in the Checkpoint: "⚠️ Source file not found: [resolved path]"
+
+| Mode | Source Path (= Source Root) | Path Resolution |
+|------|---------------------------|-----------------|
 | **reverse-spec (rebuild)** | Absolute path (e.g., `/Users/dev/old-project`) | Prepend Source Path to each relative file in Source Reference |
 | **add (incremental)** | `.` (CWD) | Files are in the current working directory — resolve relative to CWD. Read the existing source to understand current implementation before specifying changes |
 | **greenfield** | `N/A` | Skip Source Reference entirely — no existing source to reference |
@@ -320,9 +322,9 @@ Only a simplified checkpoint is displayed:
 
 Before or during implementation, if the Feature's `pre-context.md` has a non-empty Static Resources section:
 
-1. Read `Source Path` from `sdd-state.md` to resolve the original file locations
+1. Read `Source Path` from `sdd-state.md` to get the Source Root value
 2. For each resource listed in the Static Resources table:
-   - **Copy** the file from `[Source Path]/[Source Path column]` to `[Target Path column]` in the new project
+   - **Copy** the file from `[Source Path]/[relative Source Path column]` to `[Target Path column]` in the new project
    - Create target directories if they don't exist
    - If the source file is not found, warn: "⚠️ Static resource not found: [path]. Manual action required."
 3. If any resources have modification notes (in the Usage column), display them to the user after copying
