@@ -316,15 +316,15 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
    - Global Evolution Layer Operational Principles: Always included
 
 3. **`entity-registry.md`**: Empty registry with headers only
-   - Note: "Entities will be populated as Features are planned via /speckit.plan."
+   - Note: "Entities will be populated as Features are planned via speckit-plan."
 
 4. **`api-registry.md`**: Empty registry with headers only
-   - Note: "Endpoints will be populated as Features are planned via /speckit.plan."
+   - Note: "Endpoints will be populated as Features are planned via speckit-plan."
 
 5. **`features/F00N-name/pre-context.md`** (per Feature): Simplified greenfield format
    - Source Reference: "N/A — Greenfield project"
    - For /speckit.specify: Feature description + dependencies only (no FR/SC drafts)
-   - For /speckit.plan: Dependencies + empty entity/API draft sections (note: "Define during /speckit.plan")
+   - For /speckit.plan: Dependencies + empty entity/API draft sections (note: "Define during plan step")
    - For /speckit.analyze: Dependency-based cross-Feature verification points
 
 6. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Active Tiers: `T1,T2,T3`, all Features set to `pending`
@@ -352,7 +352,7 @@ Next steps:
 
 #### Init and --auto Mode
 
-When `--auto` is specified, Phase 2 and Phase 3 Checkpoints are skipped (content is displayed but proceeds immediately). However, interactive Q&A in Phases 1-3 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 5 Best Practices, AI-suggested Tier assignments and Release Groups).
+When `--auto` is specified, Phase 2 and Phase 3 Checkpoints are skipped (content is displayed but proceeds immediately). However, interactive Q&A in Phases 1-3 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 6 Best Practices, AI-suggested Tier assignments and Release Groups).
 
 #### Init and --dangerously-skip-permissions
 
@@ -518,7 +518,7 @@ If the Skill tool returns "Unknown skill" for a `speckit-*` command (e.g., skill
 
 ### 4. Update — Global Evolution Layer Refresh
 
-Updates global artifacts to reflect the command execution results:
+Updates global artifacts to reflect the command execution results. For detailed update rules per step, see [context-injection-rules.md → Post-Step Update Rules Detail](reference/context-injection-rules.md#post-step-update-rules-detail).
 
 | Completed Step | Update Target | Content |
 |----------------|--------------|---------|
@@ -527,6 +527,7 @@ Updates global artifacts to reflect the command execution results:
 | implement | `roadmap.md` | Change Feature status to completed |
 | implement | Subsequent Feature `pre-context.md` | Update pre-context affected by changed entities/APIs |
 | verify | `sdd-state.md` | Record verification results |
+| merge | `sdd-state.md` | Record merge completion, update Feature Mapping |
 
 Reports the changes to the user after the update.
 
@@ -951,7 +952,7 @@ spec-kit handles the branch creation automatically during `speckit-specify`:
 
 **Branch validation** (for `plan`, `tasks`, `implement`, `verify`):
 1. Run `git branch --show-current` to get the current branch name
-2. Extract the numeric prefix (e.g., `001` from `001-user-auth`)
+2. Extract the numeric prefix (e.g., `001` from `001-auth`)
 3. Match against the Feature's spec-kit Name prefix in `sdd-state.md`'s Feature Mapping
 4. If mismatch: Display the expected branch and current branch, ask user to switch
 

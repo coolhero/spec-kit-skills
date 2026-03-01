@@ -450,7 +450,14 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] API contract compatibility: [specific check]
   - [ ] Business rule consistency: [specific check]
 
-── Phase 3: Global Evolution Consistency ─────────
+── Phase 3: Demo-Ready Verification ──────────────
+[Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
+  - [ ] demos/F00N-name.md exists
+  - [ ] Demo surface implemented (not just tests)
+  - [ ] Demo Components table with Category and Fate
+  - [ ] Component markers (@demo-only / @demo-scaffold)
+
+── Phase 4: Global Evolution Consistency ─────────
 [List entities/APIs to verify against registry]
   - entity-registry: [entities to check]
   - api-registry: [APIs to check]
