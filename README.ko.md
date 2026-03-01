@@ -560,6 +560,89 @@ specs/reverse-spec/
 | **결합도** | spec-kit-skills 없이도 완전히 동작 | spec-kit이 반드시 필요 |
 | **호환성** | spec-kit 업데이트에 영향 없음 | Constitution 원칙 + 산출물로 보완하는 방식이므로 spec-kit 버전에 독립적 |
 
+### reverse-spec 산출물을 spec-kit 단독으로 사용하기 (smart-sdd 없이)
+
+smart-sdd 오케스트레이터 없이 reverse-spec 산출물을 spec-kit 커맨드에 직접 활용할 수 있습니다. smart-sdd가 자동화하는 컨텍스트 조립을 수동으로 수행하면 됩니다.
+
+**동작 원리**: spec-kit 커맨드는 CLI 인자가 아닌 **대화 스레드**를 통해 컨텍스트를 받습니다. reverse-spec 산출물의 관련 섹션을 읽어 메시지에 포함한 뒤 spec-kit 커맨드를 호출하면, Claude가 해당 컨텍스트를 참조하여 커맨드를 실행합니다.
+
+#### 커맨드별 컨텍스트 가이드
+
+**`/speckit.constitution`**
+```
+아래 파일을 읽고 constitution의 기초로 사용해줘:
+[specs/reverse-spec/constitution-seed.md 내용 붙여넣기]
+
+/speckit.constitution
+```
+
+**`/speckit.specify` (특정 Feature)**
+```
+Feature F001-auth를 specify 하려고 해. reverse-spec에서 추출된 컨텍스트:
+
+## 요구사항 및 수용 기준 초안
+[specs/reverse-spec/features/F001-auth/pre-context.md의 "For /speckit.specify" 섹션 붙여넣기]
+
+## 비즈니스 규칙
+[specs/reverse-spec/business-logic-map.md에서 F001-auth 섹션 붙여넣기]
+
+## 원본 소스 참조
+[pre-context.md의 "Source Reference" 섹션 — 나열된 소스 파일을 읽어 구현 컨텍스트 확인]
+
+/speckit.specify
+```
+
+**`/speckit.plan` (특정 Feature)**
+```
+Feature F002-product를 plan 하려고 해. 교차 Feature 컨텍스트:
+
+## 의존성 및 엔티티/API 초안
+[specs/reverse-spec/features/F002-product/pre-context.md의 "For /speckit.plan" 섹션 붙여넣기]
+
+## 공유 엔티티 레지스트리
+[specs/reverse-spec/entity-registry.md에서 관련 엔티티 붙여넣기]
+
+## API 레지스트리
+[specs/reverse-spec/api-registry.md에서 관련 API 붙여넣기]
+
+## 선행 Feature 결과 (F001이 이미 완료된 경우)
+[specs/001-auth/plan/data-model.md와 contracts/ 붙여넣기 — 확정 스키마가 레지스트리 초안보다 우선]
+
+/speckit.plan
+```
+
+**`/speckit.tasks`** 및 **`/speckit.implement`**
+- spec-kit 자체 산출물(`plan.md`, `tasks.md`)을 기반으로 동작하므로 추가 reverse-spec 컨텍스트 불필요.
+- implement 시: 해당 Feature의 `pre-context.md`에서 Static Resources와 Environment Variables를 확인하여 사전 설정.
+
+**`/speckit.analyze` (교차 Feature 검증)**
+```
+Feature F002-product를 교차 Feature 의존성 기준으로 검증해줘:
+
+## 검증 포인트
+[specs/reverse-spec/features/F002-product/pre-context.md의 "For /speckit.analyze" 섹션 붙여넣기]
+
+## 현재 엔티티 레지스트리
+[specs/reverse-spec/entity-registry.md 붙여넣기]
+
+## 현재 API 레지스트리
+[specs/reverse-spec/api-registry.md 붙여넣기]
+
+/speckit.analyze
+```
+
+#### smart-sdd 없이 잃는 것
+
+| 기능 | smart-sdd | 수동 spec-kit |
+|-----|-----------|--------------|
+| 커맨드별 컨텍스트 조립 | 자동 | 관련 섹션을 직접 읽고 붙여넣기 |
+| 교차 Feature 컨텍스트 필터링 | Feature별 자동 필터링 | 직접 필터링 |
+| Global Evolution Layer 갱신 | 각 단계 후 자동 갱신 | 레지스트리 직접 수동 갱신 |
+| Pipeline 상태 추적 | `sdd-state.md` | 직접 진행 상태 관리 |
+| 선행 Feature 결과 우선 적용 | 확정 스키마 자동 감지 | 직접 확인 후 참조 |
+| 환경 변수 설정 체크포인트 | 자동 수집 + HARD STOP | `.env` 직접 확인 |
+| Feature 브랜치 관리 | 자동 생성/머지 | git 브랜치 직접 관리 |
+
 ---
 
 ## 설치 및 설정
