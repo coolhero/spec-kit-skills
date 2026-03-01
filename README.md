@@ -306,8 +306,9 @@ Summary of what information is automatically injected before each spec-kit comma
 | `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | Feature summary, FR-### drafts, SC-### drafts, business rules, edge cases, original source reference. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
 | `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions. **If registries empty (early greenfield), skip registry injection** |
 | `tasks` | `plan.md` (spec-kit artifact) | Automatic execution based on plan. No additional injection |
+| `analyze` | `spec.md` + `plan.md` + `tasks.md` (spec-kit artifacts) | Cross-artifact consistency analysis (gaps, duplications, ambiguities). Runs before implement |
 | `implement` | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks. No additional injection |
-| `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature verification points, impact scope analysis |
+| `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature entity/API consistency, impact scope analysis |
 
 **Preceding Feature results take priority**: If a dependent preceding Feature's plan is already complete, the **finalized data-model.md and contracts/** from `specs/{NNN-feature}/` are referenced instead of the drafts in entity-registry/api-registry.
 
@@ -334,9 +335,10 @@ Phase 1~N: Progress Features in Release Group Order
        2. clarify  -> Run /speckit-clarify only if [NEEDS CLARIFICATION] exists in the spec
        3. plan     -> (pre-context + entity-registry + api-registry injection) -> /speckit-plan
        4. tasks    -> /speckit-tasks
-       5. implement -> (env var notice for new vars) -> /speckit-implement
-       6. verify   -> 3-phase verification (Execution verification + Cross-Feature verification + Global Evolution update)
-       7. merge    -> Checkpoint (HARD STOP) -> Merge Feature branch to main
+       5. analyze  -> /speckit-analyze (cross-artifact consistency check before implement)
+       6. implement -> (env var notice for new vars) -> /speckit-implement
+       7. verify   -> 3-phase verification (Test/Build/Lint + Cross-Feature consistency + Global Evolution update)
+       8. merge    -> Checkpoint (HARD STOP) -> Merge Feature branch to main
 ```
 
 #### Post-Feature Completion Processing
@@ -352,14 +354,18 @@ Tasks automatically performed by smart-sdd when all steps for a Feature are comp
 | sdd-state.md update | Record completion time and results for each step |
 | Feature branch merge | Commit all updates on the Feature branch, then merge to main after user confirmation (HARD STOP). Next Feature starts from main |
 
-#### 3-Phase Verification
+#### Pre-Implementation Analysis (analyze step)
+
+After tasks are generated, `speckit-analyze` runs a READ-ONLY consistency check across spec.md, plan.md, and tasks.md. CRITICAL issues block implementation; other findings are informational.
+
+#### 3-Phase Verification (verify step)
 
 ```
 Phase 1: Execution Verification (Code Level)
     +-- Run tests, Build check, Lint check
 
-Phase 2: Cross-Feature Verification (Spec Level)
-    +-- Execute /speckit-analyze + Check cross-verification points in pre-context.md
+Phase 2: Cross-Feature Consistency Verification
+    +-- Check cross-verification points in pre-context.md
     +-- Analyze whether shared entities/APIs changed by this Feature affect other Features
 
 Phase 3: Global Evolution Update
@@ -618,11 +624,11 @@ I'm planning Feature F002-product. Here is the cross-Feature context:
 - These operate on spec-kit's own outputs (`plan.md`, `tasks.md`) — no additional reverse-spec context needed.
 - For implement: check the Feature's `pre-context.md` for Static Resources and Environment Variables that may need setup.
 
-**`/speckit-analyze` (cross-Feature verification)**
+**`/speckit-analyze` (cross-artifact consistency check — run after tasks, before implement)**
 ```
-Verify Feature F002-product against cross-Feature dependencies:
+Analyze cross-artifact consistency for Feature F002-product:
 
-## Verification Points
+## Additional Cross-Feature Verification Context
 [paste "For /speckit.analyze" section from specs/reverse-spec/features/F002-product/pre-context.md]
 
 ## Current Entity Registry

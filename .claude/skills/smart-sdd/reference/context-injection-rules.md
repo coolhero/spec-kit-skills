@@ -417,7 +417,68 @@ Review the generated tasks. You can:
 
 ---
 
-## 5. Implement
+## 5. Analyze
+
+### Read Targets
+
+| File | Section | Filtering |
+|------|---------|-----------|
+| `SPEC_PATH/[feature-name]/spec.md` | Entire file | Current Feature |
+| `SPEC_PATH/[feature-name]/plan.md` | Entire file | Current Feature |
+| `SPEC_PATH/[feature-name]/tasks.md` | Entire file | Current Feature |
+
+### Injected Content
+
+- `speckit-analyze` reads all three core artifacts (spec.md, plan.md, tasks.md) automatically
+- No additional context injection needed (analyze operates on spec-kit's own artifacts)
+
+### Checkpoint
+
+```
+📋 Analyze execution: [FID] - [Feature Name]
+speckit-analyze will check consistency across spec.md, plan.md, and tasks.md.
+Do you want to proceed?
+```
+
+### Review Display Content
+
+After `speckit-analyze` completes, display the analysis report for user review:
+
+```
+📋 Review: Analysis report for [FID] - [Feature Name]
+
+── Analysis Summary ─────────────────────────────
+[Show key metrics: total requirements, total tasks, coverage %,
+ critical issues count, high/medium/low counts]
+
+── CRITICAL Issues (if any) ─────────────────────
+[List each CRITICAL finding with location and recommendation.
+ These MUST be resolved before proceeding to implement.]
+
+── HIGH/MEDIUM Issues (if any) ──────────────────
+[List significant findings. User may proceed but should consider addressing.]
+
+── Coverage Gaps ────────────────────────────────
+[Requirements with no tasks, tasks with no requirements]
+
+── Constitution Alignment ───────────────────────
+[Any violations of constitution principles]
+
+──────────────────────────────────────────────────
+```
+
+**If CRITICAL issues exist**:
+- Display: "❌ CRITICAL issues found. These must be resolved before implementation."
+- Offer options: "Resolve now (re-run specify/plan/tasks)", "View full report"
+- Do NOT allow proceeding to implement until CRITICAL issues are addressed
+
+**If no CRITICAL issues**:
+- Display findings summary
+- Options: "Approve and proceed to implement", "Address issues first", "View full report"
+
+---
+
+## 6. Implement
 
 ### Read Targets
 
@@ -550,7 +611,9 @@ Review the implementation. You can:
 
 ---
 
-## 6. Verify / Analyze
+## 7. Verify
+
+> **Note**: `speckit-analyze` is NOT used in this step. Cross-artifact consistency (spec ↔ plan ↔ tasks) was already verified in step 5 (Analyze) before implementation. This step focuses on post-implementation validation.
 
 > **Greenfield/add note**: For greenfield or add-origin projects, cross-Feature verification points in pre-context.md may be limited to dependency-based checks only (no source-code-derived verification points). The verify command works the same way — it just has fewer pre-defined verification items.
 
@@ -558,16 +621,16 @@ Review the implementation. You can:
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.analyze" section | Relevant Feature only |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.analyze" section | Cross-Feature verification points (entity compatibility, API contracts) |
 | `BASE_PATH/entity-registry.md` | Entities modified by the Feature | Change tracking |
 | `BASE_PATH/api-registry.md` | APIs modified by the Feature | Change tracking |
 | `SPEC_PATH/[feature-name]/` | data-model.md, contracts/ | Actual implementation results |
 
 ### Injected Content
 
-- **Cross-Feature verification points**: Cross-verification checklist from pre-context
+- **Cross-Feature verification points**: Cross-verification checklist from pre-context (entity compatibility, API contract compatibility, business rule consistency)
 - **Impact scope analysis**: List of other Features referencing the modified entities/APIs
-- **Consistency verification**: Whether entity-registry/api-registry matches the actual implementation
+- **Implementation consistency verification**: Whether entity-registry/api-registry matches the actual implemented code
 
 ### Checkpoint Display Content
 

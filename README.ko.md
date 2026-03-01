@@ -298,8 +298,9 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 | `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | 기능 요약, FR-### 초안, SC-### 초안, 비즈니스 규칙, 엣지 케이스, 원본 소스 참조. **business-logic-map.md가 없으면 (greenfield/add) 비즈니스 로직 주입 생략** |
 | `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | 의존성 정보, 엔티티/API 스키마 초안 (또는 선행 Feature의 확정 스키마), 기술 결정. **레지스트리가 비어 있으면 (초기 greenfield) 레지스트리 주입 생략** |
 | `tasks` | `plan.md` (spec-kit 산출물) | plan 기반 자동 실행. 추가 주입 없음 |
+| `analyze` | `spec.md` + `plan.md` + `tasks.md` (spec-kit 산출물) | 교차 산출물 일관성 분석 (갭, 중복, 모호성). implement 전에 실행 |
 | `implement` | `tasks.md` (spec-kit 산출물) | tasks 기반 자동 실행. 추가 주입 없음 |
-| `verify` | `pre-context.md` "For /speckit.analyze" + registries | 교차 Feature 검증 포인트, 영향 범위 분석 |
+| `verify` | `pre-context.md` "For /speckit.analyze" + registries | 교차 Feature 엔티티/API 일관성, 영향 범위 분석 |
 
 **선행 Feature 결과 우선 적용**: 의존하는 선행 Feature의 plan이 이미 완료되었으면, entity-registry/api-registry의 초안 대신 `specs/{NNN-feature}/`에 있는 **확정된 data-model.md와 contracts/**를 우선 참조합니다.
 
@@ -325,9 +326,10 @@ Phase 1~N: Release Group 순서대로 Feature 진행
        2. clarify  → spec에 [NEEDS CLARIFICATION]이 있을 때만 /speckit-clarify
        3. plan     → (pre-context + entity-registry + api-registry 주입) → /speckit-plan
        4. tasks    → /speckit-tasks
-       5. implement → (신규 환경 변수 알림) → /speckit-implement
-       6. verify   → 3단계 검증 (실행 검증 + Cross-Feature 검증 + Global Evolution 갱신)
-       7. merge    → Checkpoint (HARD STOP) → Feature 브랜치를 main에 머지
+       5. analyze  → /speckit-analyze (implement 전 교차 산출물 일관성 검증)
+       6. implement → (신규 환경 변수 알림) → /speckit-implement
+       7. verify   → 3단계 검증 (테스트/빌드/린트 + Cross-Feature 일관성 + Global Evolution 갱신)
+       8. merge    → Checkpoint (HARD STOP) → Feature 브랜치를 main에 머지
 ```
 
 > **`add` (incremental) 모드 참고**: `/smart-sdd add` 이후 pipeline을 실행하면 constitution이 이미 존재하므로 Phase 0을 건너뛰고 pending 상태의 Feature부터 바로 진행합니다.
@@ -345,14 +347,18 @@ Feature의 모든 단계가 완료되면 smart-sdd가 자동으로 수행하는 
 | sdd-state.md 업데이트 | 각 단계의 완료 시각과 결과 기록 |
 | Feature 브랜치 머지 | 모든 업데이트를 Feature 브랜치에 커밋한 후, 사용자 확인(HARD STOP)을 받고 main에 머지. 다음 Feature는 main에서 시작 |
 
-#### Verify 3단계 검증
+#### 구현 전 분석 (analyze 단계)
+
+tasks 생성 후, `speckit-analyze`가 spec.md, plan.md, tasks.md 간의 READ-ONLY 일관성 분석을 수행합니다. CRITICAL 이슈가 있으면 implement를 차단하고, 그 외 발견사항은 참고용입니다.
+
+#### Verify 3단계 검증 (verify 단계)
 
 ```
 1단계: 실행 검증 (코드 레벨)
     └─ 테스트 실행, 빌드 확인, 린트 체크
 
-2단계: Cross-Feature 검증 (spec 레벨)
-    └─ /speckit-analyze 실행 + pre-context.md의 교차 검증 포인트 확인
+2단계: Cross-Feature 일관성 검증
+    └─ pre-context.md의 교차 검증 포인트 확인
     └─ 변경된 공유 엔티티/API가 다른 Feature에 영향을 주는지 분석
 
 3단계: Global Evolution 업데이트
@@ -627,11 +633,11 @@ Feature F002-product를 plan 하려고 해. 교차 Feature 컨텍스트:
 - spec-kit 자체 산출물(`plan.md`, `tasks.md`)을 기반으로 동작하므로 추가 reverse-spec 컨텍스트 불필요.
 - implement 시: 해당 Feature의 `pre-context.md`에서 Static Resources와 Environment Variables를 확인하여 사전 설정.
 
-**`/speckit-analyze` (교차 Feature 검증)**
+**`/speckit-analyze` (교차 산출물 일관성 검증 — tasks 후, implement 전 실행)**
 ```
-Feature F002-product를 교차 Feature 의존성 기준으로 검증해줘:
+Feature F002-product의 교차 산출물 일관성을 분석해줘:
 
-## 검증 포인트
+## 추가 Cross-Feature 검증 컨텍스트
 [specs/reverse-spec/features/F002-product/pre-context.md의 "For /speckit.analyze" 섹션 붙여넣기]
 
 ## 현재 엔티티 레지스트리

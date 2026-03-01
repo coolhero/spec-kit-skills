@@ -37,6 +37,7 @@ Does not replace spec-kit commands, but wraps them with a 5-step protocol: **Con
 /smart-sdd specify F001                  # Specify Feature F001
 /smart-sdd plan F001                     # Plan Feature F001
 /smart-sdd tasks F001                    # Generate tasks for Feature F001
+/smart-sdd analyze F001                  # Analyze cross-artifact consistency (before implement)
 /smart-sdd implement F001               # Implement Feature F001
 /smart-sdd verify F001                   # Verify Feature F001
 
@@ -92,8 +93,8 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | expand | pipeline | constitution | specify | plan | tasks | implement | verify | status)
-  Second token → feature-id (format: F001, required when command is specify/plan/tasks/implement/verify)
+  First token  → command (init | add | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | status)
+  Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
   --from <path> → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>  → Path to PRD document (only for init command)
   --auto        → Skip Checkpoint confirmation and execute all steps automatically
@@ -736,15 +737,33 @@ Executes the following steps **strictly in order** for each Feature:
 0. pre-flight → Ensure on main branch (clean state)
 1. specify    → Assemble → Checkpoint → speckit-specify → Review → Update
                 (spec-kit creates Feature branch: {NNN}-{short-name})
-2. clarify    → (Only run speckit-clarify if [NEEDS CLARIFICATION] exists in the spec)
+2. clarify    → Auto-scan spec.md for ambiguities → speckit-clarify (if needed)
 3. plan       → Assemble → Checkpoint → speckit-plan → Review → Update (entity-registry, api-registry)
 4. tasks      → Checkpoint → speckit-tasks → Review
-5. implement  → Env notice (new vars only) → Checkpoint → speckit-implement → Review
-6. verify     → Execution verification → Cross-Feature verification → Global Evolution update
-7. merge      → Checkpoint (HARD STOP) → Merge Feature branch to main → Cleanup
+5. analyze    → speckit-analyze → Review (CRITICAL issues block implement)
+6. implement  → Env notice (new vars only) → Checkpoint → speckit-implement → Review
+7. verify     → Test/Build/Lint → Cross-Feature entity/API consistency → Demo-Ready → Global Evolution update
+8. merge      → Checkpoint (HARD STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
+
+#### Clarify Trigger (after specify Review)
+
+After `speckit-specify` completes and the user approves the Review, **automatically scan** the generated `spec.md` for ambiguities before proceeding to plan:
+
+1. **Scan for explicit markers**: Search `spec.md` for `[NEEDS CLARIFICATION]`, `[TBD]`, `[TODO]`, `???`, or `<placeholder>` markers
+2. **Scan for vague qualifiers**: Check for ambiguous adjectives without measurable criteria (e.g., "fast", "scalable", "intuitive", "robust")
+3. **If ambiguities found**:
+   - Display: "⚠️ Ambiguities detected in spec.md. Running speckit-clarify to resolve them."
+   - Execute `speckit-clarify` via the Common Protocol (Assemble → Checkpoint → Execute → Review → Update)
+   - `speckit-clarify` will ask the user up to 5 questions interactively and update spec.md directly
+   - After clarify completes, re-scan to verify ambiguities are resolved
+   - If unresolved ambiguities remain, display them and ask if the user wants to run clarify again or proceed
+4. **If no ambiguities found**: Skip clarify and proceed directly to plan
+   - Display: "✅ No critical ambiguities detected in spec.md. Proceeding to plan."
+
+**`--auto` mode**: Clarify scan still runs. If ambiguities are found, `speckit-clarify` executes but uses its own recommendation/suggestion as the default answer for each question (clarify's built-in "recommended" option). The user can still intervene if watching.
 
 #### Per-Feature Environment Variable Notice (implement step)
 
@@ -796,7 +815,8 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 | `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]/pre-context.md`. Verify current branch is `main` (spec-kit will create the Feature branch) |
 | `plan` | spec.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/spec.md`. Verify current branch matches the Feature |
 | `tasks` | plan.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/plan.md`. Verify current branch matches the Feature |
-| `implement` | tasks.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/tasks.md`. Verify current branch matches the Feature |
+| `analyze` | tasks.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/tasks.md`. Verify current branch matches the Feature |
+| `implement` | analyze completed (no CRITICAL issues), on Feature branch | Confirm analyze completion in `sdd-state.md`. Check no CRITICAL issues remain. Verify current branch matches the Feature |
 | `verify` | implement completed, on Feature branch | Confirm implement completion in `sdd-state.md`. Verify current branch matches the Feature |
 
 If prerequisites are not met, displays an error message and guides the user to the required preceding step.
@@ -945,19 +965,40 @@ Auto-include the dependency Feature.
 
 ---
 
+## Analyze Command
+
+Running `/smart-sdd analyze [FID]` executes `speckit-analyze` to verify cross-artifact consistency **before implementation**.
+
+**When**: After `tasks` step completes, before `implement` step.
+
+**What it does**: `speckit-analyze` is a READ-ONLY analysis that checks consistency across spec.md, plan.md, and tasks.md. It identifies gaps, duplications, ambiguities, and inconsistencies.
+
+**Workflow**:
+1. Execute `speckit-analyze` via the Common Protocol (Assemble → Checkpoint → Execute → Review → Update)
+2. Review the analysis report:
+   - If **CRITICAL** issues exist: Block implementation. The user must resolve them first (re-run specify, plan, or tasks as needed)
+   - If only **HIGH/MEDIUM/LOW** issues: Display findings, user may proceed or address them
+3. Record analysis results in `sdd-state.md`
+
+**Prerequisite**: `tasks.md` must exist for the Feature (`speckit-analyze` requires all three artifacts: spec.md, plan.md, tasks.md)
+
+> **Note**: `speckit-analyze` checks intra-Feature artifact consistency (spec ↔ plan ↔ tasks). Cross-Feature entity/API consistency is checked separately during `verify` (after implementation).
+
+---
+
 ## Verify Command
 
-Running `/smart-sdd verify [FID]` performs a 3-phase verification.
+Running `/smart-sdd verify [FID]` performs post-implementation verification. This step runs **after implement** to validate that the actual code works correctly and is consistent with the broader project.
 
 ### Phase 1: Execution Verification
 - Run tests: Check and execute the project's test command from `sdd-state.md`
 - Build check: Run the build command and confirm no errors
 - Lint check: Run the lint tool if configured
 
-### Phase 2: Cross-Feature Verification
-- Run `speckit-analyze` to perform Feature analysis
+### Phase 2: Cross-Feature Consistency Verification
 - Check the cross-verification points in the "For /speckit.analyze" section of `pre-context.md`
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
+- Verify that entity-registry.md and api-registry.md match the actual implementation
 
 ### Phase 3: Demo-Ready Verification (only if VI. Demo-Ready Delivery is in the constitution)
 - Check that `demos/F00N-name.md` exists for the Feature
@@ -1100,14 +1141,15 @@ The context sources and content injected per command are defined in [context-inj
 | specify | `pre-context.md` → "For /speckit.specify" + `business-logic-map.md` (relevant Feature section) | Feature summary, FR-### drafts, SC-### drafts, edge cases, business rules. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
 | plan | `pre-context.md` → "For /speckit.plan" + `entity-registry.md` (related entities) + `api-registry.md` (related APIs) | Dependencies, entity/API drafts, technical decisions, preceding Feature results. **If registries empty (early greenfield), skip registry injection** |
 | tasks | `plan.md` (spec-kit artifact) | Automatic execution based on plan |
+| analyze | `spec.md` + `plan.md` + `tasks.md` (spec-kit artifacts) | Cross-artifact consistency analysis (gaps, duplications, ambiguities). Runs before implement |
 | implement | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks |
-| verify/analyze | `pre-context.md` → "For /speckit.analyze" | Cross-Feature verification points, impact scope |
+| verify | `pre-context.md` → "For /speckit.analyze" + registries | Cross-Feature entity/API consistency, impact scope analysis |
 
 ---
 
 ## Important Notes
 
-- **NEVER skip implement or verify.** Each Feature must go through all steps (specify → clarify → plan → tasks → implement → verify → merge) before moving to the next Feature. Creating specs/plans for multiple Features without implementing them defeats the purpose of this pipeline.
+- **NEVER skip analyze, implement, or verify.** Each Feature must go through all steps (specify → clarify → plan → tasks → analyze → implement → verify → merge) before moving to the next Feature. Creating specs/plans for multiple Features without implementing them defeats the purpose of this pipeline.
 - **Git branch discipline**: Each Feature is developed on its own branch. Never start a new Feature without merging (or explicitly skipping) the previous Feature's branch. This ensures main always reflects the latest stable state.
 - Does not alter or override spec-kit command behavior. Only injects context and utilizes results.
 - Does not directly modify files managed by spec-kit (`specs/`). Changes are made only through spec-kit commands.
