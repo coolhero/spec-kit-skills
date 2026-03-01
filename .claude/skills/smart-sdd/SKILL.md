@@ -496,6 +496,11 @@ After displaying the assembled context above, you MUST:
 
 **You are NOT allowed to approve on behalf of the user. "User approved" must come from an actual user action, not from your own judgment.**
 
+**Empty or missing response handling**: If AskUserQuestion returns an empty response, a blank string, or no meaningful selection, this is NOT approval. You MUST:
+- Display: "⚠️ No approval received. Please confirm: approve the above context? (yes/no)"
+- STOP and WAIT again. Repeat until a clear affirmative or negative response is received.
+- NEVER interpret silence, empty response, or lack of explicit rejection as implicit approval.
+
 **`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This is the ONLY way to bypass Checkpoints.
 
 **`--dangerously-skip-permissions` environment**: When Claude Code is run with `--dangerously-skip-permissions`, AskUserQuestion may not function. In this case, **Checkpoints are NOT automatically skipped** — instead, the assembled context is displayed and you MUST ask for confirmation via a regular text message: "Do you approve the above context? (yes/no)". You MUST then STOP and WAIT for the user's text response before proceeding. Only `--auto` explicitly opts out of Checkpoints; `--dangerously-skip-permissions` alone does not.
