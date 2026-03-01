@@ -14,6 +14,8 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 **Project**: [Project name]
 **Origin**: [greenfield | reverse-spec]
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
+**Scope**: [core | full]
+**Active Tiers**: [T1 | T1,T2 | T1,T2,T3]
 **Created**: [Initial creation date/time]
 **Last Updated**: [Last updated date/time]
 **Constitution Version**: [Version]
@@ -37,13 +39,14 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 |------------|-------------|------|---------|------|-------|-----------|--------|-------|--------|
 | F001 | auth | T1 | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
 | F002 | product | T1 | ✅ 01-18 | 🔄 | | | | | in_progress |
-| F003 | order | T2 | | | | | | | pending |
+| F003 | order | T2 | | | | | | | deferred |
 
 ### Status Icons
 - ✅ : Completed (followed by completion date MM-DD)
 - 🔄 : In progress
 - ❌ : Failed
 - ⏭️ : Skipped
+- 🔒 : Deferred (outside current Active Tiers, activate via `/smart-sdd expand`)
 - (blank) : Not started
 
 ---
@@ -122,6 +125,16 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
    - `greenfield` → `N/A` (no existing source code)
    - `reverse-spec` → Extract from the `**Source**:` field in `BASE_PATH/roadmap.md` (the original target-directory path used during `/reverse-spec`)
    - `add` (incremental) → `.` (source is the current working directory)
+7. Set Scope:
+   - `reverse-spec` → Read from `**Strategy**: Scope: [core|full]` in `BASE_PATH/roadmap.md`
+   - `greenfield` (init) → Always `full`
+   - If roadmap.md has no Scope info (legacy projects) → Default to `full`
+8. Set Active Tiers based on Scope:
+   - `core` → `T1`
+   - `full` → `T1,T2,T3`
+9. Set initial Feature Status based on Active Tiers:
+   - Features whose Tier is included in Active Tiers → `pending` (blank)
+   - Features whose Tier is NOT in Active Tiers → `deferred`
 
 ---
 
@@ -150,6 +163,11 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 ### When a Step is Skipped (e.g., clarify not needed)
 - Change the corresponding cell to ⏭️
 - Record the skip reason in the Feature Detail Log
+
+### When Scope is Expanded (via /smart-sdd expand)
+- Update the `Active Tiers` field to the new value (e.g., `T1` → `T1,T2`)
+- Change `deferred` Features whose Tier matches the newly activated Tiers to `pending`
+- Record the expansion in Global Evolution Log: "Scope expanded: T1 → T1,T2"
 
 ---
 

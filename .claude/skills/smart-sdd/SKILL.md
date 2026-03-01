@@ -40,6 +40,12 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd implement F001               # Implement Feature F001
 /smart-sdd verify F001                   # Verify Feature F001
 
+# Scope expansion (brownfield rebuild with scope=core)
+/smart-sdd expand                        # Interactive: select which Tiers to activate
+/smart-sdd expand T2                     # Activate Tier 2 Features
+/smart-sdd expand T2,T3                  # Activate Tier 2 and Tier 3 Features
+/smart-sdd expand full                   # Activate all remaining deferred Features
+
 # Status check
 /smart-sdd status                        # Check overall progress status
 
@@ -86,7 +92,7 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | pipeline | constitution | specify | plan | tasks | implement | verify | status)
+  First token  → command (init | add | expand | pipeline | constitution | specify | plan | tasks | implement | verify | status)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/implement/verify)
   --from <path> → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>  → Path to PRD document (only for init command)
@@ -293,7 +299,7 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
    - For /speckit.plan: Dependencies + empty entity/API draft sections (note: "Define during /speckit.plan")
    - For /speckit.analyze: Dependency-based cross-Feature verification points
 
-6. **`sdd-state.md`**: Initialize with Origin: `greenfield`, all Features set to `pending`
+6. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Active Tiers: `T1,T2,T3`, all Features set to `pending`
 
 7. **Not generated**: `business-logic-map.md` (no existing logic to map), `stack-migration.md` (no existing stack)
 
@@ -526,6 +532,23 @@ If the path does not exist, warn the user and ask for correction. **Do NOT proce
 
 **You MUST STOP and WAIT for the user's response.** Do NOT auto-confirm.
 
+**Step 3 — Scope display**:
+Read `Scope` and `Active Tiers` from `sdd-state.md` and display scope information:
+
+| Active Tiers | Display |
+|-------------|---------|
+| `T1` | "📋 Scope: Core — Only Tier 1 Features will be processed. Use `/smart-sdd expand` to add Tier 2/3 later." |
+| `T1,T2` | "📋 Scope: Expanded — Tier 1 + Tier 2 Features will be processed. Tier 3 deferred." |
+| `T1,T2,T3` | "📋 Scope: Full — All Features will be processed." |
+
+If deferred Features exist, list them:
+```
+⏸️ Deferred Features (not in current scope):
+  F005-review (Tier 3), F006-notification (Tier 3)
+```
+
+This step is informational only — no user confirmation required.
+
 ### Phase 0: Constitution Finalization
 
 **Skip check**: Before executing, check if `SPEC_PATH/constitution.md` (i.e., `specs/constitution.md`) already exists. If it does, skip Phase 0 entirely and proceed to Phase 1. This covers:
@@ -543,7 +566,7 @@ If the path does not exist, warn the user and ask for correction. **Do NOT proce
 
 ### Phase 1~N: Progress Features in Release Group Order
 
-Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed Features** — only processes Features with `pending` or `in_progress` status in `sdd-state.md`.
+Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed and deferred Features** — only processes Features with `pending` or `in_progress` status in `sdd-state.md`. Features with `deferred` status (outside current Active Tiers) are not processed. Use `/smart-sdd expand` to activate deferred Features.
 
 **CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
@@ -605,6 +628,13 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 
 If prerequisites are not met, displays an error message and guides the user to the required preceding step.
 
+**Deferred Feature check**: Before checking other prerequisites, verify the Feature's status in `sdd-state.md`. If the Feature is `deferred` (outside current Active Tiers), display:
+```
+❌ [FID]-[name] is deferred (Tier [N], outside current scope: [Active Tiers]).
+Run /smart-sdd expand [Tier] first to activate Tier [N] Features.
+```
+Do NOT proceed with the step.
+
 **Branch validation**: For `plan` through `verify`, the current git branch must be the Feature branch (pattern: `{NNN}-*`). If not on the correct branch, display the expected branch name and guide the user. For `specify`, the current branch should be `main` — if already on a Feature branch, warn the user.
 
 ### Feature ID → spec-kit Feature Name Mapping
@@ -636,17 +666,86 @@ Output format:
 📊 Smart-SDD Progress Status
 
 Origin: [greenfield | reverse-spec]
+Scope: [core | full] | Active Tiers: [T1 | T1,T2 | T1,T2,T3]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify | merge
-----------------|------|---------|------|-------|------|--------|------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅
-F002-product    | T1   |   ✅    |  🔄  |       |      |        |
-F003-order      | T2   |         |      |       |      |        |
-F004-payment    | T2   |         |      |       |      |        |
+Feature         | Tier | specify | plan | tasks | impl | verify | merge | Status
+----------------|------|---------|------|-------|------|--------|-------|----------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅  | completed
+F002-product    | T1   |   ✅    |  🔄  |       |      |        |      | in_progress
+F003-cart       | T2   |         |      |       |      |        |      | 🔒 deferred
+F004-payment    | T2   |         |      |       |      |        |      | 🔒 deferred
 
-Overall progress: 1/4 Features completed (25%)
-Currently in progress: F002-product → plan step
+Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
+💡 Use /smart-sdd expand to activate deferred Features
+```
+
+> If Scope is `full` and Active Tiers is `T1,T2,T3` (no deferred Features), the Scope line and deferred hint are omitted for cleaner output.
+
+---
+
+## Expand Command — Activate Deferred Tiers
+
+Running `/smart-sdd expand` activates additional Tiers that were deferred by `scope=core` during `/reverse-spec`.
+
+### Usage
+
+```
+/smart-sdd expand              # Interactive: select which Tiers to activate
+/smart-sdd expand T2           # Activate Tier 2 Features
+/smart-sdd expand T2,T3        # Activate Tier 2 and Tier 3 Features
+/smart-sdd expand full         # Activate all remaining deferred Features
+```
+
+### Expand Workflow
+
+**Step 1 — Current state check**:
+1. Read `sdd-state.md` → Active Tiers, deferred Features
+2. If no deferred Features exist: Display "All Features are already active. Nothing to expand." and exit.
+3. Display current state:
+
+```
+📊 Current Scope:
+  Active Tiers: T1
+  Active Features: F001-auth ✅, F002-product 🔄, F003-order (pending)
+  Deferred Features: F004-cart (T2), F005-payment (T2), F006-review (T3)
+```
+
+**Step 2 — Tier selection (HARD STOP)**:
+If no argument was provided, ask via AskUserQuestion:
+- "Activate Tier 2 (Recommended)" — adds [N] Features
+- "Activate Tier 2 + Tier 3" — adds [N] Features
+- "Activate specific Features only" — select individual Features via Other input
+
+**You MUST STOP and WAIT for the user's response. Do NOT auto-select.**
+
+**Step 3 — Dependency validation**:
+For each Feature being activated, verify that all its dependencies are either:
+- Already completed, or
+- Already active (`pending` or `in_progress`), or
+- Also being activated in this expansion
+
+If a dependency is still deferred and NOT being activated:
+```
+⚠️ F005-payment depends on F004-cart (deferred). F004-cart will also be activated.
+```
+Auto-include the dependency Feature.
+
+**Step 4 — Apply expansion**:
+1. Update `sdd-state.md`:
+   - Update `Active Tiers` to the new value
+   - Change matched `deferred` Features to `pending`
+2. Record in Global Evolution Log: "Scope expanded: T1 → T1,T2"
+3. Display completion:
+
+```
+✅ Scope expanded: T1 → T1,T2
+  Activated Features:
+    F004-cart (T2) → pending
+    F005-payment (T2) → pending
+
+  Next: /smart-sdd pipeline    — Resume pipeline (picks up newly activated Features)
+        /smart-sdd specify F004 — Start specifying a specific Feature
 ```
 
 ---

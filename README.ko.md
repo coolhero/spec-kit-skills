@@ -248,6 +248,11 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 /smart-sdd implement F001               # F001 Feature implement
 /smart-sdd verify F001                   # F001 Feature 검증
 
+# Scope 확장 (brownfield rebuild에서 scope=core 사용 시)
+/smart-sdd expand                        # 대화형: 활성화할 Tier 선택
+/smart-sdd expand T2                     # Tier 2 Feature 활성화
+/smart-sdd expand full                   # 보류된 모든 Feature 활성화
+
 # 상태 확인
 /smart-sdd status                        # 전체 진행 상태 조회
 
@@ -258,11 +263,11 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 
 #### 세 가지 프로젝트 모드
 
-| 모드 | 커맨드 | 사용 시점 | Global Evolution Layer 생성 방식 | Feature 세분화 | 다음 단계 |
-|------|--------|----------|--------------------------------|--------------|----------|
-| **Greenfield** | `/smart-sdd init` | 신규 프로젝트를 처음부터 시작할 때 | 대화형 Q&A (또는 PRD 문서)로 Feature, 의존성, 원칙 정의 | Coarse/Standard/Fine 중 선택 | `/smart-sdd pipeline` |
-| **Brownfield (incremental)** | `/smart-sdd add` | 기존 smart-sdd 프로젝트에 새 기능을 추가할 때 | 기존 산출물에 새 Feature 추가. roadmap, pre-context 갱신 | N/A (기존 Feature에 추가) | `/smart-sdd pipeline` 또는 `/smart-sdd specify F00N` |
-| **Brownfield (rebuild)** | `/reverse-spec` | 기존 소스코드를 전체 재개발할 때 | 기존 코드 역분석으로 전체 산출물 자동 생성 | Coarse/Standard/Fine 중 선택 | `/smart-sdd pipeline` |
+| 모드 | 커맨드 | 사용 시점 | Global Evolution Layer 생성 방식 | Feature 세분화 | Scope | 다음 단계 |
+|------|--------|----------|--------------------------------|--------------|-------|----------|
+| **Greenfield** | `/smart-sdd init` | 신규 프로젝트를 처음부터 시작할 때 | 대화형 Q&A (또는 PRD 문서)로 Feature, 의존성, 원칙 정의 | Coarse/Standard/Fine 중 선택 | 항상 Full | `/smart-sdd pipeline` |
+| **Brownfield (incremental)** | `/smart-sdd add` | 기존 smart-sdd 프로젝트에 새 기능을 추가할 때 | 기존 산출물에 새 Feature 추가. roadmap, pre-context 갱신 | N/A (기존 Feature에 추가) | 기존 scope 유지 | `/smart-sdd pipeline` 또는 `/smart-sdd specify F00N` |
+| **Brownfield (rebuild)** | `/reverse-spec` | 기존 소스코드를 전체 재개발할 때 | 기존 코드 역분석으로 전체 산출물 자동 생성 | Coarse/Standard/Fine 중 선택 | Core 또는 Full. `/smart-sdd expand`로 확장 가능 | `/smart-sdd pipeline` |
 
 #### 공통 프로토콜: Assemble → Checkpoint → Execute → Update
 
@@ -361,20 +366,21 @@ Feature 진행 중 새로운 아키텍처 원칙이 발견되면:
 📊 Smart-SDD 진행 상태
 
 Origin: [greenfield | reverse-spec]
+Scope: core | Active Tiers: T1
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify | merge
-----------------|------|---------|------|-------|------|--------|------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅
-F002-product    | T1   |   ✅    |  🔄  |       |      |        |
-F003-order      | T2   |         |      |       |      |        |
-F004-payment    | T2   |         |      |       |      |        |
+Feature         | Tier | specify | plan | tasks | impl | verify | merge | Status
+----------------|------|---------|------|-------|------|--------|-------|----------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅  | completed
+F002-product    | T1   |   ✅    |  🔄  |       |      |        |      | in_progress
+F003-order      | T2   |         |      |       |      |        |      | 🔒 deferred
+F004-payment    | T2   |         |      |       |      |        |      | 🔒 deferred
 
-전체 진행률: 1/4 Features 완료 (25%)
-현재 진행: F002-product → plan 단계
+Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
+💡 Use /smart-sdd expand to activate deferred Features
 ```
 
-상태 파일에는 Feature Progress, Feature Detail Log, Feature Mapping (Feature ID <-> spec-kit Name), Global Evolution Log, Constitution Update Log가 포함됩니다.
+상태 파일에는 Feature Progress, Feature Detail Log, Feature Mapping (Feature ID <-> spec-kit Name), Global Evolution Log, Constitution Update Log가 포함됩니다. `scope=core`일 때 Active Tiers 밖의 Feature는 `deferred`로 표시되어 pipeline에서 건너뛰며, `/smart-sdd expand`로 활성화할 때까지 보류됩니다.
 
 ---
 
@@ -510,25 +516,28 @@ specs/reverse-spec/
    │   ├─ Tier 1: Auth, Product, Order (근간 기능)
    │   ├─ Tier 2: Cart, Payment, Search (핵심 UX)
    │   └─ Tier 3: Review, Notification (부가 기능)
-   └─ Phase 4: specs/reverse-spec/ 하위에 산출물 생성
+   └─ Phase 4: 전체 8개 Feature의 산출물 생성 (scope에 관계없이)
 
 2. /smart-sdd pipeline
+   ├─ Scope: "Core — Tier 1만 진행. 보류: Cart, Payment, Search (T2), Review, Notification (T3)"
    ├─ Phase 0: constitution-seed 기반으로 /speckit.constitution 확정
-   ├─ Release 1 (Foundation):
-   │   └─ F001-auth:
-   │       ├─ Assemble: pre-context + business-logic-map에서 auth 관련 정보 조립
-   │       ├─ Checkpoint: "FR-5개, SC-8개, 비즈니스 규칙 4개 주입. 진행?" → 승인
-   │       ├─ Execute: /speckit.specify 실행
-   │       ├─ (plan, tasks, implement, verify 순차 진행)
-   │       └─ Update: entity-registry에 User, Session 확정 반영
-   │                  후속 Feature pre-context에 User 스키마 갱신 전파
-   ├─ Release 2 (Core Business):
-   │   ├─ F002-product:
-   │   │   ├─ Assemble: pre-context + entity-registry(User 참조) + api-registry 조립
-   │   │   ├─ (F001의 확정된 User 스키마가 초안보다 우선 적용)
-   │   │   └─ ...
-   │   └─ F003-order: ...
-   └─ Release 3 (Enhancement): ...
+   ├─ Tier 1 Feature만 진행 (scope=core):
+   │   ├─ F001-auth:
+   │   │   ├─ Assemble: pre-context + business-logic-map에서 auth 관련 정보 조립
+   │   │   ├─ Checkpoint: "FR-5개, SC-8개, 비즈니스 규칙 4개 주입. 진행?" → 승인
+   │   │   ├─ Execute: /speckit.specify 실행
+   │   │   ├─ (plan, tasks, implement, verify 순차 진행)
+   │   │   └─ Update: entity-registry에 User, Session 확정 반영
+   │   └─ F002-product, F003-order 동일하게 진행
+   └─ Pipeline 완료 (Tier 1 완료). Tier 2/3는 보류 상태 유지.
+
+3. (이후) /smart-sdd expand T2
+   ├─ Cart, Payment, Search → pending으로 활성화
+   └─ /smart-sdd pipeline → 새로 활성화된 Tier 2 Feature 진행
+
+4. (이후) /smart-sdd expand full
+   ├─ Review, Notification → pending으로 활성화
+   └─ /smart-sdd pipeline → 남은 모든 Feature 완료
 ```
 
 ---

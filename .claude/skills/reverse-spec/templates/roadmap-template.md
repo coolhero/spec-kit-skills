@@ -33,8 +33,8 @@
 ## Rebuild Strategy
 
 ### Implementation Scope: [Core / Full]
-- [If Core] Redevelop only Tier 1 Features. For learning/prototyping purposes.
-- [If Full] Redevelop the full set of features identical to the existing system.
+- [If Core] Pipeline initially processes only Tier 1 Features. Tier 2/3 Features are generated but deferred in `sdd-state.md`. Use `/smart-sdd expand` to activate additional Tiers when ready.
+- [If Full] Pipeline processes all Features (Tier 1/2/3).
 
 ### Tech Stack Strategy: [Same / New]
 - [If Same] Use the same tech stack as existing. Implementation patterns can be reused.

@@ -431,6 +431,8 @@ Present the classification results to the user via AskUserQuestion and obtain ap
 
 Generate hierarchical deliverables from the finalized analysis results. Create a `specs/reverse-spec/` directory in the **current working directory** (CWD), NOT in the target directory. The target directory is the source being analyzed and must remain untouched.
 
+> **Scope = Core**: All Features (Tier 1/2/3) are included in the generated artifacts (roadmap.md, pre-context.md, etc.) regardless of scope. The scope only determines which Features smart-sdd will initially process during pipeline — Tier 2/3 Features are marked as `deferred` in `sdd-state.md` and skipped by the pipeline until activated via `/smart-sdd expand`. This ensures Tier 2/3 Features are ready for immediate activation without re-running `/reverse-spec`.
+
 ### 4-1. Project-Level Deliverables
 
 Generate the following files in order. Each file follows the template structure found in this skill's `templates/` directory.
