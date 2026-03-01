@@ -396,8 +396,19 @@ Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
 |------|------|------|
 | Global Evolution 산출물 | `specs/reverse-spec/` | CWD 기준 상대 경로. `/smart-sdd --from`으로 변경 가능 |
 | spec-kit 피처 산출물 | `specs/{NNN-feature}/` | spec-kit 고유 경로. smart-sdd가 건드리지 않음 |
-| spec-kit constitution | `specs/constitution.md` | spec-kit 고유 경로 |
+| spec-kit constitution | `.specify/memory/constitution.md` | spec-kit 고유 작업 경로 |
 | smart-sdd 상태 파일 | `specs/reverse-spec/sdd-state.md` | smart-sdd가 자동 생성/관리 |
+
+### Feature 네이밍 규약
+
+smart-sdd와 spec-kit은 약간 다른 네이밍 형식을 사용하지만, **short-name**은 항상 동일합니다:
+
+| 시스템 | 형식 | 예시 |
+|--------|------|------|
+| smart-sdd (pre-context, roadmap, state) | `F{NNN}-{short-name}` | `F001-auth` |
+| spec-kit (specs/ 디렉토리, git branch) | `{NNN}-{short-name}` | `001-auth` |
+
+변환: `F` prefix를 제거하거나 추가. 매핑은 `sdd-state.md` → Feature Mapping 테이블에서 추적됩니다.
 
 ### Global Evolution Layer 산출물 구조
 

@@ -403,8 +403,19 @@ The state file includes Feature Progress, Feature Detail Log, Feature Mapping (F
 |--------|------|-------|
 | reverse-spec artifacts | `specs/reverse-spec/` | Flat structure. Can be changed via `/smart-sdd --from` |
 | spec-kit feature artifacts | `specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
-| spec-kit constitution | `specs/constitution.md` | Native spec-kit path |
+| spec-kit constitution | `.specify/memory/constitution.md` | spec-kit native working path |
 | smart-sdd state file | `specs/reverse-spec/sdd-state.md` | Automatically created/managed by smart-sdd |
+
+### Feature Naming Convention
+
+smart-sdd and spec-kit use slightly different naming formats, but the **short-name** is always identical:
+
+| System | Format | Example |
+|--------|--------|---------|
+| smart-sdd (pre-context, roadmap, state) | `F{NNN}-{short-name}` | `F001-auth` |
+| spec-kit (specs/ directory, git branch) | `{NNN}-{short-name}` | `001-auth` |
+
+Conversion: strip or prepend `F` prefix. The mapping is tracked in `sdd-state.md` → Feature Mapping table.
 
 ---
 

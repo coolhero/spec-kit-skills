@@ -62,7 +62,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 | tasks | completed | 2024-01-16T11:30:00 | 2024-01-16T12:00:00 | 12 tasks |
 | implement | completed | 2024-01-17T09:00:00 | 2024-01-17T16:00:00 | |
 | verify | completed | 2024-01-17T16:30:00 | 2024-01-17T17:00:00 | Tests 24/24 passed |
-| merge | completed | 2024-01-17T17:05:00 | 2024-01-17T17:06:00 | Branch 001-user-auth → main |
+| merge | completed | 2024-01-17T17:05:00 | 2024-01-17T17:06:00 | Branch 001-auth → main |
 
 ### F002-product
 
@@ -75,12 +75,12 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 ## Feature Mapping
 
-Mapping table between Feature ID, spec-kit Feature Name (directory name), and git branch.
+Mapping table between Feature ID, spec-kit Feature Name (directory name), and git branch. The `short-name` portion MUST be identical across smart-sdd Feature ID and spec-kit Name (e.g., `F001-auth` ↔ `001-auth`).
 
 | Feature ID | spec-kit Name | spec-kit Path | Branch | Merged |
 |------------|---------------|---------------|--------|--------|
-| F001 | 001-auth | specs/001-auth/ | 001-user-auth | ✅ |
-| F002 | 002-product | specs/002-product/ | 002-product-catalog | |
+| F001 | 001-auth | specs/001-auth/ | 001-auth | ✅ |
+| F002 | 002-product | specs/002-product/ | 002-product | |
 
 ---
 
