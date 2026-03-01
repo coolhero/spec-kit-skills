@@ -16,8 +16,8 @@ spec-kit is optimized for **Feature-local governance** (internal control within 
 
 | Limitation | Impact |
 |-----------|--------|
-| No cross-Feature references | `/speckit.plan` does not automatically reference preceding Features' data-model or API contracts, potentially leading to incompatible designs |
-| Limited cross-Feature analysis | `/speckit.analyze` only analyzes within a single Feature, unable to detect entity/interface conflicts between Features |
+| No cross-Feature references | `/speckit-plan` does not automatically reference preceding Features' data-model or API contracts, potentially leading to incompatible designs |
+| Limited cross-Feature analysis | `/speckit-analyze` only analyzes within a single Feature, unable to detect entity/interface conflicts between Features |
 | Insufficient agent context | The "Recent Changes" section only accumulates one-line summaries for the last 3 Features. Data model/API/business logic level context is not included |
 | No release-level management | No artifacts for managing Feature dependencies, priorities, and release grouping, leaving integration planning outside the framework |
 
@@ -197,10 +197,10 @@ Generates hierarchical artifacts based on the finalized analysis results.
 | Artifact | Role | spec-kit Usage |
 |----------|------|---------------|
 | `roadmap.md` | Complete Feature evolution map. Tier-based Feature Catalog, Dependency Graph, Release Groups, Cross-Feature dependency mapping | Determines Feature execution order, dependency verification |
-| `constitution-seed.md` | Architecture principles, technical constraints, coding conventions extracted from existing code + project-specific recommended principles (derived from domain/architecture/scale traits) + recommended Best Practices (TDD, Simplicity First, etc.) + source code reference strategy (per-stack branching) | Used as draft when running `/speckit.constitution` |
-| `entity-registry.md` | Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping. Includes Mermaid state diagrams | Cross-reference for writing `data-model.md` during `/speckit.plan` |
-| `api-registry.md` | Complete API endpoint index, detailed contracts (Request/Response schemas), Cross-Feature dependencies | Cross-reference for writing `contracts/` during `/speckit.plan` |
-| `business-logic-map.md` | Per-Feature business rules, validations, workflows (flowcharts), Cross-Feature rules | Prevents omission of requirements/acceptance criteria during `/speckit.specify` |
+| `constitution-seed.md` | Architecture principles, technical constraints, coding conventions extracted from existing code + project-specific recommended principles (derived from domain/architecture/scale traits) + recommended Best Practices (TDD, Simplicity First, etc.) + source code reference strategy (per-stack branching) | Used as draft when running `/speckit-constitution` |
+| `entity-registry.md` | Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping. Includes Mermaid state diagrams | Cross-reference for writing `data-model.md` during `/speckit-plan` |
+| `api-registry.md` | Complete API endpoint index, detailed contracts (Request/Response schemas), Cross-Feature dependencies | Cross-reference for writing `contracts/` during `/speckit-plan` |
+| `business-logic-map.md` | Per-Feature business rules, validations, workflows (flowcharts), Cross-Feature rules | Prevents omission of requirements/acceptance criteria during `/speckit-specify` |
 
 **Feature-Level Artifact -- `pre-context.md`:**
 
@@ -209,9 +209,9 @@ Pre-prepares information needed for spec-kit's 3 core commands in dedicated sect
 | Section | Target Command | Content |
 |---------|---------------|---------|
 | Source Reference | All | Related original file list + per-stack strategy reference guide (Implementation Reference vs Logic-Only Reference) |
-| For /speckit.specify | `/speckit.specify` | Existing feature summary, user scenarios, draft requirements (FR-###), draft acceptance criteria (SC-###), edge cases |
-| For /speckit.plan | `/speckit.plan` | Preceding Feature dependencies, owned/referenced entity schema drafts, provided/consumed API contract drafts, technical decisions |
-| For /speckit.analyze | `/speckit.analyze` | Cross-Feature verification points (entity compatibility, API contract compatibility, business rule consistency), impact scope on change |
+| For /speckit.specify | `/speckit-specify` | Existing feature summary, user scenarios, draft requirements (FR-###), draft acceptance criteria (SC-###), edge cases |
+| For /speckit.plan | `/speckit-plan` | Preceding Feature dependencies, owned/referenced entity schema drafts, provided/consumed API contract drafts, technical decisions |
+| For /speckit.analyze | `/speckit-analyze` | Cross-Feature verification points (entity compatibility, API contract compatibility, business rule consistency), impact scope on change |
 
 ---
 
@@ -292,7 +292,7 @@ All spec-kit command executions follow this 4-step protocol:
 |------|------------|
 | **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`). If a source file is missing or a section contains only placeholder text, that source is gracefully skipped |
 | **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
-| **Execute** | Executes the corresponding spec-kit command (`/speckit.specify`, `/speckit.plan`, etc.) with the approved context. The actual work is performed by spec-kit |
+| **Execute** | Executes the corresponding spec-kit command (`/speckit-specify`, `/speckit-plan`, etc.) with the approved context. The actual work is performed by spec-kit |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
 
 #### Per-Command Context Injection
@@ -316,7 +316,7 @@ Running `/smart-sdd pipeline` progresses through the entire workflow sequentiall
 
 ```
 Phase 0: Constitution Finalization
-    +-- Execute /speckit.constitution based on constitution-seed.md
+    +-- Execute /speckit-constitution based on constitution-seed.md
     |   (Skipped if constitution already exists, e.g., after /smart-sdd add)
 
 Environment Setup (before first implement):
@@ -328,12 +328,12 @@ Environment Setup (before first implement):
 Phase 1~N: Progress Features in Release Group Order
     +-- For each Feature:
        0. pre-flight -> Ensure on main branch (clean state)
-       1. specify  -> (pre-context + business-logic-map injection) -> /speckit.specify
+       1. specify  -> (pre-context + business-logic-map injection) -> /speckit-specify
                       (spec-kit creates Feature branch: {NNN}-{short-name})
-       2. clarify  -> Run /speckit.clarify only if [NEEDS CLARIFICATION] exists in the spec
-       3. plan     -> (pre-context + entity-registry + api-registry injection) -> /speckit.plan
-       4. tasks    -> /speckit.tasks
-       5. implement -> (env var notice for new vars) -> /speckit.implement
+       2. clarify  -> Run /speckit-clarify only if [NEEDS CLARIFICATION] exists in the spec
+       3. plan     -> (pre-context + entity-registry + api-registry injection) -> /speckit-plan
+       4. tasks    -> /speckit-tasks
+       5. implement -> (env var notice for new vars) -> /speckit-implement
        6. verify   -> 3-phase verification (Execution verification + Cross-Feature verification + Global Evolution update)
        7. merge    -> Checkpoint (HARD STOP) -> Merge Feature branch to main
 ```
@@ -358,7 +358,7 @@ Phase 1: Execution Verification (Code Level)
     +-- Run tests, Build check, Lint check
 
 Phase 2: Cross-Feature Verification (Spec Level)
-    +-- Execute /speckit.analyze + Check cross-verification points in pre-context.md
+    +-- Execute /speckit-analyze + Check cross-verification points in pre-context.md
     +-- Analyze whether shared entities/APIs changed by this Feature affect other Features
 
 Phase 3: Global Evolution Update
@@ -370,7 +370,7 @@ Phase 3: Global Evolution Update
 
 When new architecture principles are discovered during Feature progression:
 1. Provide "Constitution update proposal" checkpoint to the user
-2. If approved, perform MINOR version update via `/speckit.constitution`
+2. If approved, perform MINOR version update via `/speckit-constitution`
 3. Display warning if already completed Features are affected
 
 #### State Tracking (`sdd-state.md`)
@@ -452,12 +452,12 @@ The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` inc
    +-- Phase 5: Completion report
 
 2. /smart-sdd pipeline
-   +-- Phase 0: Finalize /speckit.constitution based on constitution-seed
+   +-- Phase 0: Finalize /speckit-constitution based on constitution-seed
    +-- Release 1 (Foundation):
    |   +-- F001-auth:
    |       +-- Assemble: Gather auth pre-context (no business-logic-map, skip)
    |       +-- Checkpoint: "Injecting Feature description, dependencies. Proceed?"
-   |       +-- Execute: Run /speckit.specify, /speckit.plan, etc.
+   |       +-- Execute: Run /speckit-specify, /speckit-plan, etc.
    |       +-- Update: Populate entity-registry with User, Session entities
    |                    Populate api-registry with /auth/* endpoints
    +-- Release 2 (Core):
@@ -518,13 +518,13 @@ The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` inc
 
 2. /smart-sdd pipeline
    +-- Scope: "Core — Tier 1 only. Deferred: Cart, Payment, Search (T2), Review, Notification (T3)"
-   +-- Phase 0: Finalize /speckit.constitution based on constitution-seed
+   +-- Phase 0: Finalize /speckit-constitution based on constitution-seed
    +-- Environment Setup: "DATABASE_URL, JWT_SECRET, ... required. Please set up .env"
    +-- Tier 1 Features only (scope=core):
    |   +-- F001-auth:
    |       +-- Assemble: Gather auth-related info from pre-context + business-logic-map
    |       +-- Checkpoint: "Injecting 5 FRs, 8 SCs, 4 business rules. Proceed?" -> Approved
-   |       +-- Execute: Run /speckit.specify
+   |       +-- Execute: Run /speckit-specify
    |       +-- (plan, tasks, implement, verify proceed sequentially)
    |       +-- Update: Reflect finalized User, Session in entity-registry
    |   +-- F002-product, F003-order proceed similarly
@@ -559,15 +559,15 @@ If you want to use reverse-spec artifacts directly with spec-kit commands — wi
 
 #### Per-Command Context Guide
 
-**`/speckit.constitution`**
+**`/speckit-constitution`**
 ```
 Read the following file and use it as the basis for the constitution:
 [paste contents of specs/reverse-spec/constitution-seed.md]
 
-/speckit.constitution
+/speckit-constitution
 ```
 
-**`/speckit.specify` (for a specific Feature)**
+**`/speckit-specify` (for a specific Feature)**
 ```
 I'm specifying Feature F001-auth. Here is the context from reverse-spec:
 
@@ -580,10 +580,10 @@ I'm specifying Feature F001-auth. Here is the context from reverse-spec:
 ## Original Source Reference
 [paste "Source Reference" section from pre-context.md — read the listed source files for implementation context]
 
-/speckit.specify
+/speckit-specify
 ```
 
-**`/speckit.plan` (for a specific Feature)**
+**`/speckit-plan` (for a specific Feature)**
 ```
 I'm planning Feature F002-product. Here is the cross-Feature context:
 
@@ -599,14 +599,14 @@ I'm planning Feature F002-product. Here is the cross-Feature context:
 ## Preceding Feature Results (if F001 is already completed)
 [paste specs/001-auth/plan/data-model.md and contracts/ — finalized schemas take priority over registry drafts]
 
-/speckit.plan
+/speckit-plan
 ```
 
-**`/speckit.tasks`** and **`/speckit.implement`**
+**`/speckit-tasks`** and **`/speckit-implement`**
 - These operate on spec-kit's own outputs (`plan.md`, `tasks.md`) — no additional reverse-spec context needed.
 - For implement: check the Feature's `pre-context.md` for Static Resources and Environment Variables that may need setup.
 
-**`/speckit.analyze` (cross-Feature verification)**
+**`/speckit-analyze` (cross-Feature verification)**
 ```
 Verify Feature F002-product against cross-Feature dependencies:
 
@@ -619,7 +619,7 @@ Verify Feature F002-product against cross-Feature dependencies:
 ## Current API Registry
 [paste specs/reverse-spec/api-registry.md]
 
-/speckit.analyze
+/speckit-analyze
 ```
 
 #### What You Lose Without smart-sdd
