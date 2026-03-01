@@ -54,6 +54,22 @@
 > If no static resources are associated with this Feature, write "None".
 > If resources need modification (e.g., resizing images, updating translation keys), note it in the Usage column.
 
+### Environment Variables
+
+> Environment variables required by this Feature at runtime. Variables marked as `secret` must NOT have their actual values recorded here — only the variable name and purpose.
+
+| Variable | Category | Required | Description | Example |
+|----------|----------|----------|-------------|---------|
+| `[VAR_NAME]` | [secret/config/feature-flag] | [Yes/No] | [Purpose description] | [Placeholder or example value] |
+
+**Shared variables** (defined by other Features but also used here):
+
+| Variable | Owner Feature | Usage in This Feature |
+|----------|--------------|----------------------|
+| `DATABASE_URL` | F001-auth | DB connection for user data queries |
+
+> If this Feature introduces no new environment variables, write "None — uses only shared variables from preceding Features" or "None".
+
 ---
 
 ## For /speckit.specify

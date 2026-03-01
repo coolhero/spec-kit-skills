@@ -310,6 +310,12 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 Phase 0: Constitution 확정
     └─ constitution-seed.md 기반으로 /speckit.constitution 실행
 
+Environment Setup (첫 implement 전):
+    └─ 활성 Feature들의 pre-context.md에서 필요 환경 변수 수집
+    └─ .env 파일의 누락 변수 확인
+    └─ HARD STOP: 사용자에게 .env 파일 생성/수정 안내
+       (시크릿 값은 대화에 입력하지 않고, 사용자가 직접 .env 파일 편집)
+
 Phase 1~N: Release Group 순서대로 Feature 진행
     └─ 각 Feature마다:
        0. pre-flight → main 브랜치 확인 (클린 상태)
@@ -318,7 +324,7 @@ Phase 1~N: Release Group 순서대로 Feature 진행
        2. clarify  → spec에 [NEEDS CLARIFICATION]이 있을 때만 /speckit.clarify
        3. plan     → (pre-context + entity-registry + api-registry 주입) → /speckit.plan
        4. tasks    → /speckit.tasks
-       5. implement → /speckit.implement
+       5. implement → (신규 환경 변수 알림) → /speckit.implement
        6. verify   → 3단계 검증 (실행 검증 + Cross-Feature 검증 + Global Evolution 갱신)
        7. merge    → Checkpoint (HARD STOP) → Feature 브랜치를 main에 머지
 ```
@@ -506,7 +512,7 @@ specs/reverse-spec/
 1. /reverse-spec ./legacy-ecommerce --scope core --stack new
    ├─ Phase 0: "Core" 범위 + "New" 스택 선택
    ├─ Phase 1: Django + jQuery 기술 스택 감지
-   ├─ Phase 2: 12개 엔티티, 45개 API, 78개 비즈니스 규칙 추출
+   ├─ Phase 2: 12개 엔티티, 45개 API, 78개 비즈니스 규칙, 15개 환경 변수 추출
    ├─ Phase 3: Feature 경계 식별 + 세분화 수준 선택
    │   ├─ 세분화 옵션:
    │   │   A. Coarse (4 Features): auth, catalog, commerce, admin
@@ -517,10 +523,12 @@ specs/reverse-spec/
    │   ├─ Tier 2: Cart, Payment, Search (핵심 UX)
    │   └─ Tier 3: Review, Notification (부가 기능)
    └─ Phase 4: 전체 8개 Feature의 산출물 생성 (scope에 관계없이)
+              + 탐지된 환경 변수로 .env.example 생성
 
 2. /smart-sdd pipeline
    ├─ Scope: "Core — Tier 1만 진행. 보류: Cart, Payment, Search (T2), Review, Notification (T3)"
    ├─ Phase 0: constitution-seed 기반으로 /speckit.constitution 확정
+   ├─ Environment Setup: "DATABASE_URL, JWT_SECRET, ... 필요. .env 파일을 설정해 주세요"
    ├─ Tier 1 Feature만 진행 (scope=core):
    │   ├─ F001-auth:
    │   │   ├─ Assemble: pre-context + business-logic-map에서 auth 관련 정보 조립

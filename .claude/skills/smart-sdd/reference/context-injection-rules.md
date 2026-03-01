@@ -317,6 +317,7 @@ Only a simplified checkpoint is displayed:
 |------|---------|-----------|
 | `SPEC_PATH/[feature-name]/tasks.md` | Entire file | Current Feature |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Static Resources" section | **If present and non-empty** |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
 
 ### Static Resource Handling
 
@@ -332,6 +333,21 @@ Before or during implementation, if the Feature's `pre-context.md` has a non-emp
 
 **Greenfield projects**: Skip — no Static Resources section exists.
 **Incremental (add) projects**: Source Path = `.`, so resources are already in place. Skip copying but verify the files exist at the expected paths.
+
+### Environment Variable Handling
+
+Before implementation, if the Feature's `pre-context.md` has a non-empty Environment Variables section:
+
+1. Check if a `.env` file exists in the project root
+2. If `.env` exists: Cross-reference Feature's required variables by checking for the **presence** of variable names
+   - For each missing required variable: Include in the Checkpoint display
+3. If this is the **first implement step in the pipeline**: Trigger the full Environment Setup Checkpoint (see Pipeline Mode → Environment Setup in SKILL.md)
+4. For subsequent Features: Display an informational notice for **new** variables only (not a HARD STOP)
+
+**Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names (e.g., check if a line starts with `VARIABLE_NAME=`). Never display, log, or reference actual secret values.
+
+**Greenfield projects**: Environment Variables section may be empty or contain "TBD" entries. Display TBD entries as reminders during implementation.
+**Incremental (add) projects**: `.env` should already exist. Verify new variables are present.
 
 ### Demo-Ready Delivery (only if VI. Demo-Ready Delivery is in the constitution)
 

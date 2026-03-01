@@ -227,6 +227,9 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
      - Tier 2 (Recommended): Completes core UX, system works without but value diminished
      - Tier 3 (Optional): Auxiliary, can be added later
    - Classification rationale (1 sentence)
+   - **Environment variables** (optional): Variables this Feature will need at runtime
+     - Variable name, category (`secret` / `config` / `feature-flag`), required/optional, description
+     - If the user doesn't know yet, mark as "TBD — will be determined during plan/implement"
 
 4. **Define dependencies between Features**:
    - For each Feature: "Which other Features does this depend on?"
@@ -564,6 +567,60 @@ This step is informational only — no user confirmation required.
 3. Provides the constitution-seed content as context when executing `/speckit.constitution`
 4. Records the constitution completion in `sdd-state.md`
 
+### Environment Setup (before first implement)
+
+When the pipeline reaches the **first Feature's implement step** (i.e., the very first time implement runs in this pipeline session):
+
+**Step 1 — Collect required env vars**:
+Read all `pre-context.md` files for **active** (non-deferred) Features and aggregate the Environment Variables sections.
+
+**Step 2 — Check for existing .env**:
+- If `.env` exists in CWD: Check for the **presence** of required variable names (do NOT read actual values)
+  - ✅ Found: list vars that are present
+  - ❌ Missing: list vars that are needed but not in `.env`
+- If `.env` does not exist: All vars are missing
+
+**Step 3 — Environment Setup Checkpoint (HARD STOP)**:
+Display the aggregated env var requirements and guide the user:
+
+```
+📋 Environment Setup Required
+
+The following environment variables are needed for implementation and testing:
+
+── Secrets (must be set by you) ──────────────────
+  DATABASE_URL        — [Required] Database connection string
+  JWT_SECRET          — [Required] JWT signing secret
+  OPENAI_API_KEY      — [Optional] AI feature integration
+
+── Configuration ─────────────────────────────────
+  PORT                — [Optional] Server port (default: 3000)
+  NODE_ENV            — [Optional] Environment mode
+
+Status: .env file [exists / does not exist]
+  ✅ DATABASE_URL — already set
+  ❌ JWT_SECRET — missing
+  ❌ OPENAI_API_KEY — missing
+
+👉 Please create or update your .env file with the required values.
+   A .env.example file is available as a template.
+
+⚠️ I will NOT ask you to paste secret values here.
+   Edit the .env file directly in your editor.
+```
+
+Use AskUserQuestion:
+- "Environment is ready — proceed with implementation"
+- "Skip for now — I'll set up env vars later"
+
+If "Skip for now":
+- Display a warning: "⚠️ Tests may fail due to missing environment variables."
+- Proceed but record in `sdd-state.md` Global Evolution Log: "Environment: partial (user skipped setup)"
+
+**Important**: This checkpoint runs only **once** (before the first implement). Subsequent Features do NOT re-trigger the full env setup, but individual Feature implement steps will note any NEW env vars introduced by that Feature (see below).
+
+**Skip conditions**: If no Features have Environment Variables in their pre-context.md, skip this checkpoint entirely.
+
 ### Phase 1~N: Progress Features in Release Group Order
 
 Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed and deferred Features** — only processes Features with `pending` or `in_progress` status in `sdd-state.md`. Features with `deferred` status (outside current Active Tiers) are not processed. Use `/smart-sdd expand` to activate deferred Features.
@@ -579,12 +636,25 @@ Executes the following steps **strictly in order** for each Feature:
 2. clarify    → (Only run /speckit.clarify if [NEEDS CLARIFICATION] exists in the spec)
 3. plan       → Assemble → Checkpoint → /speckit.plan → Update (entity-registry, api-registry)
 4. tasks      → Checkpoint → /speckit.tasks
-5. implement  → Checkpoint → /speckit.implement (MUST execute — actual code is written here)
+5. implement  → Env notice (new vars only) → Checkpoint → /speckit.implement
 6. verify     → Execution verification → Cross-Feature verification → Global Evolution update
 7. merge      → Checkpoint (HARD STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
+
+#### Per-Feature Environment Variable Notice (implement step)
+
+Before running `/speckit.implement`, check the current Feature's `pre-context.md` for Environment Variables. If the Feature introduces **new** variables (not shared from preceding Features), display an informational notice:
+
+```
+📋 New environment variables for [FID]-[name]:
+  STRIPE_SECRET_KEY — [Required] Payment processing API key
+
+👉 Ensure these are added to your .env file before proceeding.
+```
+
+This is informational — NOT a HARD STOP (the full env setup was already confirmed before the first implement). If the user hasn't completed the initial env setup, they were already warned.
 
 > **Git branching**: spec-kit automatically creates a Feature branch during `/speckit.specify`. All subsequent steps (plan through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [Git Branch Management](#git-branch-management) for details.
 

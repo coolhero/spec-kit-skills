@@ -274,7 +274,30 @@ Extract from the service layer, utilities, and domain logic:
 - Shared utilities, common type usage relationships
 - Event/message-based coupling relationships
 
-Upon completing Phase 2, report a summary of the number of entities, APIs, and business rules discovered.
+### 2-5. Environment Variable Extraction
+Scan the codebase for environment variable usage to identify runtime configuration requirements.
+
+| Detection Target | Search Patterns |
+|-----------------|-----------------|
+| Env files | `.env`, `.env.example`, `.env.local`, `.env.development`, `.env.production` |
+| Node.js | `process.env.VARIABLE_NAME` |
+| Python | `os.environ`, `os.getenv()`, `settings.py` env reads, `python-dotenv` usage |
+| Go | `os.Getenv()` |
+| Java/Spring | `@Value("${...}")`, `application.properties`, `application.yml` env references |
+| Ruby/Rails | `ENV["..."]`, `ENV.fetch(...)`, `credentials.yml.enc` |
+| Generic | `dotenv` config files, Docker Compose `environment:` sections |
+
+For each discovered environment variable, extract:
+- **Variable name** (e.g., `DATABASE_URL`, `OPENAI_API_KEY`)
+- **Category**: `secret` (API keys, passwords, tokens) | `config` (URLs, ports, modes) | `feature-flag` (toggle switches)
+- **Required/Optional**: Whether the app fails without it
+- **Source file(s)**: Where it is referenced
+- **Feature association**: Which Feature(s) use this variable (based on file→Feature mapping from Phase 3)
+- **Example value**: From `.env.example` if available (NEVER extract actual values from `.env`)
+
+⚠️ NEVER read or record actual secret values from `.env` files. Only read `.env.example` or detect variable names from code patterns.
+
+Upon completing Phase 2, report a summary of the number of entities, APIs, business rules, and environment variables discovered.
 
 ---
 
@@ -456,6 +479,20 @@ Generate the following files in order. Each file follows the template structure 
 6. **`specs/reverse-spec/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations
 
+7. **`.env.example`** (project root, only if env vars were detected in Phase 2-5):
+   - Generated at CWD root (NOT inside `specs/reverse-spec/`)
+   - Lists all detected env vars with category comments and placeholder values
+   - Groups by Feature association (shared vars first, then per-Feature)
+   - Format:
+     ```
+     # ── Shared (used by multiple Features) ──
+     DATABASE_URL=postgresql://localhost:5432/myapp
+
+     # ── F001-auth ──
+     JWT_SECRET=your-jwt-secret-here
+     OAUTH_CLIENT_ID=your-oauth-client-id
+     ```
+
 ### 4-2. Feature-Level Deliverables
 
 For each Feature, generate `specs/reverse-spec/features/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](templates/pre-context-template.md).
@@ -469,6 +506,7 @@ For example, if the target directory is `/Users/dev/legacy-app`:
 Contents to include in each pre-context.md:
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
+- **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features
 - **For /speckit.specify**: Existing feature summary, draft requirements (FR-###), draft acceptance criteria (SC-###)
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts, technical decisions
 - **For /speckit.analyze**: Cross-Feature verification points
@@ -487,6 +525,7 @@ Generation complete:
 - specs/reverse-spec/features/F001-xxx/pre-context.md
 - specs/reverse-spec/features/F002-xxx/pre-context.md
 - ...
+- .env.example (if environment variables were detected)
 
 Next steps:
   /smart-sdd pipeline       — Run the full SDD pipeline (recommended)
