@@ -15,7 +15,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 **Origin**: [greenfield | reverse-spec]
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
 **Scope**: [core | full]
-**Active Tiers**: [T1 | T1,T2 | T1,T2,T3]
+**Active Tiers**: [T1 | T1,T2 | T1,T2,T3] ← core scope only; omit this line for full scope
 **Created**: [Initial creation date/time]
 **Last Updated**: [Last updated date/time]
 **Constitution Version**: [Version]
@@ -34,6 +34,16 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 ---
 
 ## Feature Progress
+
+**Full scope** (no Tier column):
+
+| Feature ID | Feature Name | specify | plan | tasks | implement | verify | merge | Status |
+|------------|-------------|---------|------|-------|-----------|--------|-------|--------|
+| F001 | auth | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
+| F002 | product | ✅ 01-18 | 🔄 | | | | | in_progress |
+| F003 | order | | | | | | | pending |
+
+**Core scope** (with Tier column):
 
 | Feature ID | Feature Name | Tier | specify | plan | tasks | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|-----------|--------|-------|--------|
@@ -130,11 +140,11 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
    - `greenfield` (init) → Always `full`
    - If roadmap.md has no Scope info (legacy projects) → Default to `full`
 8. Set Active Tiers based on Scope:
-   - `core` → `T1`
-   - `full` → `T1,T2,T3`
-9. Set initial Feature Status based on Active Tiers:
-   - Features whose Tier is included in Active Tiers → `pending` (blank)
-   - Features whose Tier is NOT in Active Tiers → `deferred`
+   - `core` → `T1` (only Tier 1 Features are initially active)
+   - `full` → omit the `Active Tiers` field entirely (all Features are active, no Tier concept)
+9. Set initial Feature Status:
+   - `core` → Features whose Tier is in Active Tiers → `pending` (blank), others → `deferred`
+   - `full` → all Features → `pending` (no deferred Features, no Tier column in progress table)
 
 ---
 
@@ -164,10 +174,11 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Change the corresponding cell to ⏭️
 - Record the skip reason in the Feature Detail Log
 
-### When Scope is Expanded (via /smart-sdd expand)
+### When Scope is Expanded (via /smart-sdd expand — core scope only)
 - Update the `Active Tiers` field to the new value (e.g., `T1` → `T1,T2`)
 - Change `deferred` Features whose Tier matches the newly activated Tiers to `pending`
 - Record the expansion in Global Evolution Log: "Scope expanded: T1 → T1,T2"
+- Note: This rule only applies to `core` scope projects. `full` scope has no deferred Features.
 
 ---
 

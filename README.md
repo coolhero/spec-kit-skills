@@ -60,7 +60,8 @@ A skill that analyzes existing source code to extract **project-level global con
 #### Core Value
 
 - **Automatic reverse-extraction** of entities, APIs, business logic, and module dependencies from existing code
-- Feature-level classification with **5-axis analysis-based Tier recommendations** (Tier 1 Essential / Tier 2 Recommended / Tier 3 Optional)
+- **Core scope**: Feature-level classification with **5-axis analysis-based Tier recommendations** (Tier 1 Essential / Tier 2 Recommended / Tier 3 Optional) for incremental development
+- **Full scope**: Pure dependency-based ordering without Tier classification — all Features processed equally
 - Generation of **hierarchical artifacts** directly usable by each spec-kit command
 
 #### Usage
@@ -148,7 +149,16 @@ Identifies logical functional units (Features) based on the analysis results.
 
 **Feature Granularity Selection**: After identifying Feature boundaries, `/reverse-spec` presents 2-3 granularity options (Coarse/Standard/Fine) with concrete Feature lists for each level. The user selects the appropriate decomposition level based on their project goals, team size, and desired iteration speed. This ensures the Feature count and scope match the project's needs.
 
-After constructing a dependency graph, **Feature IDs (F001, F002, ...) are assigned by Tier first (all Tier 1, then Tier 2, then Tier 3), then by topological order within each Tier**, so the numbering keeps Tier grouping intact while respecting dependency order. Each Feature is comprehensively evaluated along **5 analysis axes**:
+After constructing a dependency graph, **Feature IDs (F001, F002, ...)** are assigned based on the scope:
+
+- **Full scope**: Pure topological sort (dependency-based) — no Tier classification
+- **Core scope**: Tier first (all Tier 1, then Tier 2, then Tier 3), then topological order within each Tier
+
+**Tier Classification (Core Scope Only)**:
+
+> In full scope, this step is skipped entirely. All Features are treated equally and ordered by dependency topology.
+
+For core scope, each Feature is comprehensively evaluated along **5 analysis axes**:
 
 | Analysis Axis | Criteria |
 |--------------|----------|

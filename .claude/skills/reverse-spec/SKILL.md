@@ -396,6 +396,8 @@ Derive inter-Feature dependencies:
 Record dependency directions and types, and visualize them as a Mermaid diagram.
 
 **Feature ID Assignment Rules**:
+
+**If Scope = Core**:
 Assign Feature IDs by **Tier first, then topological sort within each Tier**:
 1. Group all Features by Tier (Tier 1 → Tier 2 → Tier 3)
 2. Within each Tier group, sort by topological order (dependency-based)
@@ -405,9 +407,24 @@ This ensures:
 - All Tier 1 Features always have lower numbers than Tier 2/3
 - Within the same Tier, dependency order is respected
 - The F001, F002, ... sequence represents the **feasible implementation order** while keeping Tier grouping intact
-- These numbers also correspond to spec-kit's `specs/{NNN-feature}/` directory names (e.g., F001-auth → `specs/001-auth/`)
 
-### 3-3. Importance Analysis and Tier Classification
+**If Scope = Full**:
+Assign Feature IDs by **pure topological sort** (dependency-based):
+1. Sort all Features by topological order — Features with no dependencies first, then Features that depend only on already-ordered Features
+2. Assign F001, F002, ... sequentially
+3. No Tier classification is performed — all Features are treated equally
+
+This ensures:
+- The F001, F002, ... sequence represents the optimal implementation order based solely on dependencies
+- No unnecessary classification overhead for full rebuilds
+
+**Common**: These numbers also correspond to spec-kit's `specs/{NNN-feature}/` directory names (e.g., F001-auth → `specs/001-auth/`)
+
+### 3-3. Importance Analysis and Tier Classification (Core Scope Only)
+
+> **This phase is SKIPPED when Scope = Full.** In full mode, all Features are implemented without prioritization — Feature ordering is determined solely by dependency-based topological sort (Phase 3-2). Skip directly to Phase 4.
+
+**If Scope = Core**:
 
 First, identify the project domain: understand what kind of system the project is (e-commerce, SaaS, CMS, education platform, financial service, etc.) and determine which features are foundational within that domain.
 
@@ -454,7 +471,9 @@ Present the classification results to the user via AskUserQuestion and obtain ap
 
 Generate hierarchical deliverables from the finalized analysis results. Create a `specs/reverse-spec/` directory in the **current working directory** (CWD), NOT in the target directory. The target directory is the source being analyzed and must remain untouched.
 
-> **Scope = Core**: All Features (Tier 1/2/3) are included in the generated artifacts (roadmap.md, pre-context.md, etc.) regardless of scope. The scope only determines which Features smart-sdd will initially process during pipeline — Tier 2/3 Features are marked as `deferred` in `sdd-state.md` and skipped by the pipeline until activated via `/smart-sdd expand`. This ensures Tier 2/3 Features are ready for immediate activation without re-running `/reverse-spec`.
+> **Scope = Core**: All Features are included in generated artifacts (roadmap.md, pre-context.md, etc.) regardless of Tier. The Tier classification only determines which Features smart-sdd will initially process — Tier 2/3 Features are marked as `deferred` in `sdd-state.md` and skipped by the pipeline until activated via `/smart-sdd expand`. This ensures Tier 2/3 Features are ready for immediate activation without re-running `/reverse-spec`.
+>
+> **Scope = Full**: All Features are included without Tier classification. No Features are deferred. The `Tier` column is omitted from roadmap.md and sdd-state.md.
 
 ### 4-1. Project-Level Deliverables
 

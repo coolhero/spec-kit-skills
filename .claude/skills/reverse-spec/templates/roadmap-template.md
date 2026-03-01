@@ -33,8 +33,8 @@
 ## Rebuild Strategy
 
 ### Implementation Scope: [Core / Full]
-- [If Core] Pipeline initially processes only Tier 1 Features. Tier 2/3 Features are generated but deferred in `sdd-state.md`. Use `/smart-sdd expand` to activate additional Tiers when ready.
-- [If Full] Pipeline processes all Features (Tier 1/2/3).
+- [If Core] Features are classified into Tiers (Tier 1/2/3). Pipeline initially processes only Tier 1 Features. Tier 2/3 Features are generated but deferred in `sdd-state.md`. Use `/smart-sdd expand` to activate additional Tiers when ready.
+- [If Full] All Features are processed without Tier classification. Ordering is based purely on dependency topology.
 
 ### Tech Stack Strategy: [Same / New]
 - [If Same] Use the same tech stack as existing. Implementation patterns can be reused.
@@ -44,26 +44,40 @@
 
 ## Feature Catalog
 
-### Tier 1 — Essential
+<!-- Use the section matching your Scope -->
+
+### [Core Scope] Feature Catalog by Tier
+
+#### Tier 1 — Essential
 > Foundation of the project. The system cannot function without these.
 
 | ID | Feature | Description | Rationale |
 |----|---------|-------------|-----------|
-| F001 | [feature-name] | [1-2 sentence description] | [Specific classification rationale] |
+| F001 | [feature-name] | [1-2 sentence description] | [Tier classification rationale] |
 
-### Tier 2 — Recommended
+#### Tier 2 — Recommended
 > Features that complete the core user experience. System works without them but core value is significantly diminished.
 
 | ID | Feature | Description | Rationale |
 |----|---------|-------------|-----------|
-| F00N | [feature-name] | [1-2 sentence description] | [Specific classification rationale] |
+| F00N | [feature-name] | [1-2 sentence description] | [Tier classification rationale] |
 
-### Tier 3 — Optional
+#### Tier 3 — Optional
 > Supplementary features, admin tools, convenience features. Can be added in later phases.
 
 | ID | Feature | Description | Rationale |
 |----|---------|-------------|-----------|
-| F00N | [feature-name] | [1-2 sentence description] | [Specific classification rationale] |
+| F00N | [feature-name] | [1-2 sentence description] | [Tier classification rationale] |
+
+### [Full Scope] Feature Catalog
+
+> All Features listed in dependency-based implementation order. No Tier classification.
+
+| ID | Feature | Description | Dependencies |
+|----|---------|-------------|--------------|
+| F001 | [feature-name] | [1-2 sentence description] | — |
+| F002 | [feature-name] | [1-2 sentence description] | F001 |
+| F003 | [feature-name] | [1-2 sentence description] | F001, F002 |
 
 ---
 
@@ -91,26 +105,46 @@ graph TD
 
 Features are grouped into release groups based on dependency order. A preceding group must be completed before the subsequent group can begin.
 
+<!-- Use the table format matching your Scope -->
+
 ### Release 1: Foundation
 > [Description: Core infrastructure that all other Features are built upon]
 
+<!-- Core Scope: -->
 | Order | Feature | Tier | Notes |
 |-------|---------|------|-------|
 | 1 | F001-[name] | Tier 1 | [Notes] |
 
+<!-- Full Scope: -->
+| Order | Feature | Dependencies | Notes |
+|-------|---------|--------------|-------|
+| 1 | F001-[name] | — | [Notes] |
+
 ### Release 2: Core Business
 > [Description: Core business logic]
 
+<!-- Core Scope: -->
 | Order | Feature | Tier | Notes |
 |-------|---------|------|-------|
 | 2 | F00N-[name] | Tier 1 | [Notes] |
 
+<!-- Full Scope: -->
+| Order | Feature | Dependencies | Notes |
+|-------|---------|--------------|-------|
+| 2 | F00N-[name] | F001 | [Notes] |
+
 ### Release 3: Enhancement
 > [Description: User experience completion]
 
+<!-- Core Scope: -->
 | Order | Feature | Tier | Notes |
 |-------|---------|------|-------|
 | 3 | F00N-[name] | Tier 2 | [Notes] |
+
+<!-- Full Scope: -->
+| Order | Feature | Dependencies | Notes |
+|-------|---------|--------------|-------|
+| 3 | F00N-[name] | F001, F002 | [Notes] |
 
 ---
 

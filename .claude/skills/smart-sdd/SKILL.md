@@ -41,7 +41,7 @@ Does not replace spec-kit commands, but wraps them with a 5-step protocol: **Con
 /smart-sdd implement F001               # Implement Feature F001
 /smart-sdd verify F001                   # Verify Feature F001
 
-# Scope expansion (brownfield rebuild with scope=core)
+# Scope expansion (core scope only — brownfield rebuild with scope=core)
 /smart-sdd expand                        # Interactive: select which Tiers to activate
 /smart-sdd expand T2                     # Activate Tier 2 Features
 /smart-sdd expand T2,T3                  # Activate Tier 2 and Tier 3 Features
@@ -248,11 +248,6 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
 3. **For each Feature (after granularity is selected), define**:
    - Feature name (concise English, e.g., "auth", "product", "order")
    - Description (1-2 sentences)
-   - Tier classification (present Tier definitions, let user assign or confirm suggestion):
-     - Tier 1 (Essential): System cannot function without it
-     - Tier 2 (Recommended): Completes core UX, system works without but value diminished
-     - Tier 3 (Optional): Auxiliary, can be added later
-   - Classification rationale (1 sentence)
    - **Environment variables** (optional): Variables this Feature will need at runtime
      - Variable name, category (`secret` / `config` / `feature-flag`), required/optional, description
      - If the user doesn't know yet, mark as "TBD — will be determined during plan/implement"
@@ -263,10 +258,9 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
    - Validate no circular dependencies exist
 
 5. **Assign Feature IDs**:
-   - Group Features by Tier (Tier 1 → Tier 2 → Tier 3)
-   - Within each Tier, sort by topological order (dependency-based)
-   - Assign F001, F002, ... sequentially: all Tier 1 first, then Tier 2, then Tier 3
-   - This keeps Tier grouping intact while respecting dependency order within each Tier
+   - Sort all Features by topological order (dependency-based) — Features with no dependencies first
+   - Assign F001, F002, ... sequentially
+   - Greenfield projects always use `Scope: full`, so no Tier classification is needed
 
 6. **Define Release Groups**:
    - Propose grouping based on dependency layers and Tiers
@@ -328,7 +322,7 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
    - For /speckit.plan: Dependencies + empty entity/API draft sections (note: "Define during plan step")
    - For /speckit.analyze: Dependency-based cross-Feature verification points
 
-6. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Active Tiers: `T1,T2,T3`, all Features set to `pending`
+6. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, all Features set to `pending` (no Active Tiers field — full scope has no Tier concept)
 
 7. **Not generated**: `business-logic-map.md` (no existing logic to map), `stack-migration.md` (no existing stack)
 
@@ -393,14 +387,14 @@ Running `/smart-sdd add` adds new Feature(s) to an existing smart-sdd project.
 1. Ask the user: "Describe the Feature(s) you want to add"
    - Feature name, description
    - Which existing Features it depends on (entity references, API calls, etc.)
-   - Tier classification (default: Tier 2)
+   - Tier classification: Only if the project uses `core` scope (read from `sdd-state.md`). Default: Tier 2. If project scope is `full`, no Tier assignment needed.
 2. Multiple Features can be added at once (iterative)
 3. Define dependencies between new Features if applicable
 4. Assign Feature IDs: continue from the last existing ID
 
 #### Phase 3: Checkpoint (HARD STOP)
 
-1. Display new Feature(s) with Tier + dependencies
+1. Display new Feature(s) with dependencies (and Tier, if `core` scope)
 2. Show the updated Dependency Graph (existing + new nodes)
 3. Propose Release Group placement
 4. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves or requests modifications.**
@@ -428,8 +422,8 @@ Running `/smart-sdd add` adds new Feature(s) to an existing smart-sdd project.
 
 ```
 ✅ Added N new Feature(s) to the project:
-  F006-notifications (Tier 2) — depends on F001-auth, F003-order
-  F007-analytics (Tier 3) — depends on F002-product
+  F006-notifications — depends on F001-auth, F003-order [Tier 2 if core scope]
+  F007-analytics — depends on F002-product [Tier 3 if core scope]
 
 Updated: roadmap.md, sdd-state.md
 Created: features/F006-notifications/pre-context.md, features/F007-analytics/pre-context.md
@@ -640,15 +634,22 @@ If the path does not exist, warn the user and ask for correction. **Do NOT proce
 **You MUST STOP and WAIT for the user's response.** Do NOT auto-confirm.
 
 **Step 3 — Scope display**:
-Read `Scope` and `Active Tiers` from `sdd-state.md` and display scope information:
+Read `Scope` from `sdd-state.md` and display scope information:
+
+| Scope | Display |
+|-------|---------|
+| `full` | "📋 Scope: Full — All Features will be processed." |
+| `core` | Read `Active Tiers` and display per the table below |
+
+**Active Tiers display (core scope only)**:
 
 | Active Tiers | Display |
 |-------------|---------|
 | `T1` | "📋 Scope: Core — Only Tier 1 Features will be processed. Use `/smart-sdd expand` to add Tier 2/3 later." |
 | `T1,T2` | "📋 Scope: Expanded — Tier 1 + Tier 2 Features will be processed. Tier 3 deferred." |
-| `T1,T2,T3` | "📋 Scope: Full — All Features will be processed." |
+| `T1,T2,T3` | "📋 Scope: Core (All Tiers active) — All Features will be processed." |
 
-If deferred Features exist, list them:
+If deferred Features exist (core scope only), list them:
 ```
 ⏸️ Deferred Features (not in current scope):
   F005-review (Tier 3), F006-notification (Tier 3)
@@ -821,7 +822,7 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 
 If prerequisites are not met, displays an error message and guides the user to the required preceding step.
 
-**Deferred Feature check**: Before checking other prerequisites, verify the Feature's status in `sdd-state.md`. If the Feature is `deferred` (outside current Active Tiers), display:
+**Deferred Feature check** (core scope only — full scope has no deferred Features): Before checking other prerequisites, verify the Feature's status in `sdd-state.md`. If the Feature is `deferred` (outside current Active Tiers), display:
 ```
 ❌ [FID]-[name] is deferred (Tier [N], outside current scope: [Active Tiers]).
 Run /smart-sdd expand [Tier] first to activate Tier [N] Features.
@@ -875,13 +876,30 @@ Running `/smart-sdd status` reads `sdd-state.md` and displays the overall progre
 
 Follows the schema defined in [state-schema.md](reference/state-schema.md).
 
-Output format:
+Output format varies by scope:
 
+**Full scope** (no Tier concept):
 ```
 📊 Smart-SDD Progress Status
 
 Origin: [greenfield | reverse-spec]
-Scope: [core | full] | Active Tiers: [T1 | T1,T2 | T1,T2,T3]
+Constitution: ✅ v1.0.0 (2024-01-15)
+
+Feature         | specify | plan | tasks | impl | verify | merge | Status
+----------------|---------|------|-------|------|--------|-------|----------
+F001-auth       |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅  | completed
+F002-product    |   ✅    |  🔄  |       |      |        |      | in_progress
+F003-cart       |         |      |       |      |        |      | pending
+
+Active: 1/3 completed, 1/3 in progress
+```
+
+**Core scope** (with Tier column):
+```
+📊 Smart-SDD Progress Status
+
+Origin: [greenfield | reverse-spec]
+Scope: core | Active Tiers: [T1 | T1,T2 | T1,T2,T3]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
 Feature         | Tier | specify | plan | tasks | impl | verify | merge | Status
@@ -895,11 +913,11 @@ Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
 💡 Use /smart-sdd expand to activate deferred Features
 ```
 
-> If Scope is `full` and Active Tiers is `T1,T2,T3` (no deferred Features), the Scope line and deferred hint are omitted for cleaner output.
-
 ---
 
-## Expand Command — Activate Deferred Tiers
+## Expand Command — Activate Deferred Tiers (Core Scope Only)
+
+> **Note**: The expand command is only available for `core` scope projects. In `full` scope, all Features are already active — running expand will display "All Features are already active. Nothing to expand." and exit.
 
 Running `/smart-sdd expand` activates additional Tiers that were deferred by `scope=core` during `/reverse-spec`.
 
