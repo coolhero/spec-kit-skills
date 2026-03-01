@@ -13,7 +13,7 @@ Wraps spec-kit commands with cross-Feature context injection and Global Evolutio
 - **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
 - **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`
 
-Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Context Assembly → User Confirmation → spec-kit Execution → Global Evolution Update**.
+Does not replace spec-kit commands, but wraps them with a 5-step protocol: **Context Assembly → Pre-Execution Checkpoint → spec-kit Execution → Artifact Review → Global Evolution Update**.
 
 ---
 
@@ -440,9 +440,9 @@ Next steps:
 
 ---
 
-## Common Protocol: Assemble → Checkpoint → Execute → Update
+## Common Protocol: Assemble → Checkpoint → Execute → Review → Update
 
-All spec-kit command executions follow this 4-step protocol.
+All spec-kit command executions follow this 5-step protocol.
 
 ### 1. Assemble — Context Assembly
 
@@ -521,7 +521,71 @@ If the Skill tool returns "Unknown skill" for a `speckit-*` command (e.g., skill
 3. This ensures the pipeline can continue even when skills aren't registered in the current session
 4. Display: "ℹ️ Using inline execution for speckit-[command] (skill not yet registered in this session)"
 
-### 4. Update — Global Evolution Layer Refresh
+### 4. Review — Artifact Review
+
+After spec-kit command execution completes, present the generated/modified artifacts to the user for review.
+
+**Review Display Format**:
+
+Each command produces different artifacts. Display the **key content** of the generated artifact(s):
+
+| Command | Artifact to Review | Key Content to Display |
+|---------|-------------------|----------------------|
+| constitution | `.specify/memory/constitution.md` | Full finalized constitution (principles, constraints, conventions, best practices) |
+| specify | `specs/{NNN-feature}/spec.md` | Requirements (FR-###), Success Criteria (SC-###), scope boundaries |
+| plan | `specs/{NNN-feature}/plan.md` + `data-model.md` + `contracts/` | Architecture decisions, data model schemas, API contracts, implementation phases |
+| tasks | `specs/{NNN-feature}/tasks.md` | Task breakdown, task order, estimated complexity |
+| implement | Source code files | Summary of files created/modified, test results, build status |
+
+Display format:
+
+```
+📋 Review: [command] result for [FID] - [Feature Name]
+
+── Generated Artifact ──────────────────────────
+[Show the key sections of the generated artifact.
+ Not the entire file — focus on the decision-making content:
+ - For spec.md: list FR-### and SC-### with descriptions
+ - For plan.md: architecture overview, data-model summary, API contract list
+ - For tasks.md: task list with order and dependencies
+ - For constitution: full content (it's a one-time critical document)
+ - For implement: file list, test pass/fail summary]
+
+── Differences from Pre-context ────────────────
+[If applicable: highlight where spec-kit's output differs from
+ the draft in pre-context.md — added requirements, changed schemas, etc.]
+
+──────────────────────────────────────────────────
+
+Review the generated artifact. You can:
+  - Approve and continue to the next step
+  - Request modifications (spec-kit will regenerate)
+  - Edit the artifact files directly
+```
+
+For detailed per-command Review Display Content, see [context-injection-rules.md](reference/context-injection-rules.md).
+
+**CRITICAL — Review is a HARD STOP (same rules as Checkpoint).**
+
+You MUST:
+1. Use AskUserQuestion to ask: "Approve the result?" with options: "Approve", "Request modifications", "Edit manually"
+2. **STOP and WAIT** for the user's response. Do NOT assume approval. Do NOT continue to the Update step.
+3. If "Request modifications": Ask what to change, re-execute the spec-kit command with the feedback, and re-display the Review.
+4. If "Edit manually": Wait for the user to signal they are done editing, then proceed to Update.
+5. Only after the user explicitly responds with approval (selects "Approve" or says "yes"/"approved"), move to the Update step.
+
+**You are NOT allowed to approve on behalf of the user. "User approved" must come from an actual user action, not from your own judgment.**
+
+**Empty or missing response handling**: If AskUserQuestion returns an empty response, a blank string, or no meaningful selection, this is NOT approval. You MUST:
+- Display: "⚠️ No approval received. Please confirm: approve the generated artifact? (yes/no)"
+- STOP and WAIT again. Repeat until a clear affirmative or negative response is received.
+- NEVER interpret silence, empty response, or lack of explicit rejection as implicit approval.
+
+**`--auto` mode**: When `--auto` is specified, the Review step is skipped. The generated artifact summary is still **displayed** to the user (for transparency), but execution proceeds immediately to Update without waiting for approval.
+
+**`--dangerously-skip-permissions` environment**: When AskUserQuestion is unavailable, Review is still enforced — the artifact summary is displayed and you MUST ask for confirmation via a regular text message: "Do you approve the generated artifact? (yes/no)". You MUST then STOP and WAIT for the user's text response before proceeding.
+
+### 5. Update — Global Evolution Layer Refresh
 
 Updates global artifacts to reflect the command execution results. For detailed update rules per step, see [context-injection-rules.md → Post-Step Update Rules Detail](reference/context-injection-rules.md#post-step-update-rules-detail).
 
@@ -670,12 +734,12 @@ Executes the following steps **strictly in order** for each Feature:
 
 ```
 0. pre-flight → Ensure on main branch (clean state)
-1. specify    → Assemble → Checkpoint → speckit-specify → Update
+1. specify    → Assemble → Checkpoint → speckit-specify → Review → Update
                 (spec-kit creates Feature branch: {NNN}-{short-name})
 2. clarify    → (Only run speckit-clarify if [NEEDS CLARIFICATION] exists in the spec)
-3. plan       → Assemble → Checkpoint → speckit-plan → Update (entity-registry, api-registry)
-4. tasks      → Checkpoint → speckit-tasks
-5. implement  → Env notice (new vars only) → Checkpoint → speckit-implement
+3. plan       → Assemble → Checkpoint → speckit-plan → Review → Update (entity-registry, api-registry)
+4. tasks      → Checkpoint → speckit-tasks → Review
+5. implement  → Env notice (new vars only) → Checkpoint → speckit-implement → Review
 6. verify     → Execution verification → Cross-Feature verification → Global Evolution update
 7. merge      → Checkpoint (HARD STOP) → Merge Feature branch to main → Cleanup
 
@@ -722,7 +786,7 @@ Once **all steps** for a Feature are complete (including implement, verify, and 
 
 ## Step Mode
 
-Executes a single command. Validates prerequisites, then runs the common protocol (Assemble → Checkpoint → Execute → Update).
+Executes a single command. Validates prerequisites, then runs the common protocol (Assemble → Checkpoint → Execute → Review → Update).
 
 ### Prerequisite Validation
 

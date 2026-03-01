@@ -5,9 +5,9 @@ This document defines which sections of which files smart-sdd reads and injects 
 **BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
 **SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
 
-> **`--auto` mode**: When `--auto` is specified, all Checkpoint steps below are skipped — the context summary is still displayed for transparency, but execution proceeds immediately without waiting for user approval.
+> **`--auto` mode**: When `--auto` is specified, all Checkpoint and Review steps below are skipped — the context summary and artifact review are still displayed for transparency, but execution proceeds immediately without waiting for user approval.
 >
-> **`--dangerously-skip-permissions` environment**: When AskUserQuestion is unavailable, Checkpoints are still enforced — the assembled context is displayed and a regular text message asks the user for confirmation. Only `--auto` skips Checkpoints.
+> **`--dangerously-skip-permissions` environment**: When AskUserQuestion is unavailable, Checkpoints and Reviews are still enforced — the content is displayed and a regular text message asks the user for confirmation. Only `--auto` skips Checkpoints and Reviews.
 
 ---
 
@@ -82,6 +82,28 @@ Review the above content. You can:
   - Approve as-is to proceed with speckit-constitution
   - Request modifications (add/remove/change principles)
   - Edit constitution-seed.md directly before proceeding
+```
+
+### Review Display Content
+
+After `speckit-constitution` completes, display the finalized constitution for user review:
+
+```
+📋 Review: Constitution finalized
+
+── Finalized Constitution ──────────────────────
+[Show the full content of .specify/memory/constitution.md.
+ Constitution is a one-time critical document — display everything:
+ - All principles with descriptions
+ - All constraints
+ - All conventions
+ - All best practices]
+
+──────────────────────────────────────────────────
+Review the finalized constitution. You can:
+  - Approve as-is
+  - Request modifications (re-run speckit-constitution with feedback)
+  - Edit .specify/memory/constitution.md directly
 ```
 
 ---
@@ -173,6 +195,39 @@ Review the above content. You can:
   - Approve as-is to proceed with speckit-specify
   - Request modifications (add/remove/change requirements or criteria)
   - Edit pre-context.md or business-logic-map.md directly before proceeding
+```
+
+### Review Display Content
+
+After `speckit-specify` completes, display the generated spec for user review:
+
+```
+📋 Review: spec.md for [FID] - [Feature Name]
+
+── Requirements ─────────────────────────────────
+[List each FR-### with its full description]
+  FR-001: ...
+  FR-002: ...
+
+── Success Criteria ─────────────────────────────
+[List each SC-### with its full description]
+  SC-001: ...
+  SC-002: ...
+
+── Scope ────────────────────────────────────────
+[In-scope and out-of-scope items from spec.md]
+
+── Differences from Draft ───────────────────────
+[Compare with pre-context.md "Draft Requirements" and "Draft Acceptance Criteria":
+ - Added: requirements/criteria that spec-kit added beyond the drafts
+ - Removed: draft items that were dropped
+ - Changed: items whose scope or description significantly changed]
+
+──────────────────────────────────────────────────
+Review the generated spec. You can:
+  - Approve as-is
+  - Request modifications (re-run speckit-specify with feedback)
+  - Edit spec.md directly
 ```
 
 ---
@@ -284,6 +339,38 @@ Review the above content. You can:
   - Edit entity-registry.md, api-registry.md, or pre-context.md directly before proceeding
 ```
 
+### Review Display Content
+
+After `speckit-plan` completes, display the generated plan for user review:
+
+```
+📋 Review: plan.md for [FID] - [Feature Name]
+
+── Architecture Overview ────────────────────────
+[Key architecture decisions from plan.md]
+
+── Data Model ───────────────────────────────────
+[Entity schemas from data-model.md — fields, types, relationships]
+
+── API Contracts ────────────────────────────────
+[Endpoints from contracts/ — method, path, request/response summary]
+
+── Implementation Phases ────────────────────────
+[Phase breakdown with deliverables from plan.md]
+
+── Differences from Draft ───────────────────────
+[Compare with pre-context.md "Related Entities" and "Related API Contracts":
+ - Added: entities/APIs that spec-kit added beyond the drafts
+ - Changed: schemas or contracts whose structure significantly changed
+ - Architecture decisions that differ from "Technical Decisions" draft]
+
+──────────────────────────────────────────────────
+Review the generated plan. You can:
+  - Approve as-is
+  - Request modifications (re-run speckit-plan with feedback)
+  - Edit plan.md, data-model.md, or contracts/ directly
+```
+
 ---
 
 ## 4. Tasks
@@ -305,6 +392,27 @@ Only a simplified checkpoint is displayed:
 ```
 📋 Tasks generation: [FID] - [Feature Name]
 speckit-tasks will be executed based on plan.md. Do you want to proceed?
+```
+
+### Review Display Content
+
+After `speckit-tasks` completes, display the generated tasks for user review:
+
+```
+📋 Review: tasks.md for [FID] - [Feature Name]
+
+── Task List ────────────────────────────────────
+[List each task with:
+ - Task number and name
+ - Description
+ - Dependencies (which tasks must complete first)
+ - Estimated complexity (if available)]
+
+──────────────────────────────────────────────────
+Review the generated tasks. You can:
+  - Approve as-is
+  - Request modifications (re-run speckit-tasks with feedback)
+  - Edit tasks.md directly
 ```
 
 ---
@@ -409,6 +517,35 @@ Only a simplified checkpoint is displayed:
 ```
 📋 Implement execution: [FID] - [Feature Name]
 speckit-implement will be executed based on tasks.md. Do you want to proceed?
+```
+
+### Review Display Content
+
+After `speckit-implement` completes, display the implementation summary for user review:
+
+```
+📋 Review: Implementation for [FID] - [Feature Name]
+
+── Files Created/Modified ───────────────────────
+[List of files with brief description of each:
+ - New files: path — purpose
+ - Modified files: path — what changed]
+
+── Test Results ─────────────────────────────────
+[Test pass/fail summary: X/Y tests passed]
+
+── Build Status ─────────────────────────────────
+[Build success/failure]
+
+── Demo Status (if Demo-Ready Delivery active) ──
+[Demo surface created: yes/no
+ demos/F00N-name.md: created/updated]
+
+──────────────────────────────────────────────────
+Review the implementation. You can:
+  - Approve and proceed to verify
+  - Request modifications
+  - Note issues for manual fix
 ```
 
 ---

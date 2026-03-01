@@ -269,22 +269,23 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 | **Brownfield (incremental)** | `/smart-sdd add` | 기존 smart-sdd 프로젝트에 새 기능을 추가할 때 | 기존 산출물에 새 Feature 추가. roadmap, pre-context 갱신 | N/A (기존 Feature에 추가) | 기존 scope 유지 | `/smart-sdd pipeline` 또는 `/smart-sdd specify F00N` |
 | **Brownfield (rebuild)** | `/reverse-spec` | 기존 소스코드를 전체 재개발할 때 | 기존 코드 역분석으로 전체 산출물 자동 생성 | Coarse/Standard/Fine 중 선택 | Core 또는 Full. `/smart-sdd expand`로 확장 가능 | `/smart-sdd pipeline` |
 
-#### 공통 프로토콜: Assemble → Checkpoint → Execute → Update
+#### 공통 프로토콜: Assemble → Checkpoint → Execute → Review → Update
 
-모든 spec-kit 커맨드 실행은 이 4단계 프로토콜을 따릅니다:
+모든 spec-kit 커맨드 실행은 이 5단계 프로토콜을 따릅니다:
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌─────────────┐
-│  1. Assemble │────▶│ 2. Checkpoint│────▶│  3. Execute  │────▶│  4. Update  │
-│  컨텍스트 조립 │     │  사용자 확인   │     │ spec-kit 실행│     │ 글로벌 갱신  │
-└─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌────────────┐     ┌─────────────┐
+│  1. Assemble │────▶│ 2. Checkpoint│────▶│  3. Execute  │────▶│  4. Review │────▶│  5. Update  │
+│  컨텍스트 조립 │     │ 실행 전 확인   │     │ spec-kit 실행│     │ 산출물 검토 │     │ 글로벌 갱신  │
+└─────────────┘     └──────────────┘     └─────────────┘     └────────────┘     └─────────────┘
 ```
 
 | 단계 | 설명 |
 |------|------|
 | **Assemble** | `specs/reverse-spec/`에서 해당 커맨드에 필요한 파일/섹션을 읽고, 커맨드별 주입 규칙에 따라 필터링하여 조립. 선행 Feature의 실제 구현 결과(`specs/{NNN-feature}/` 하위)도 함께 참조. **Graceful degradation**: 소스 파일이 없거나 섹션에 플레이스홀더("N/A", "none yet")만 있는 경우 해당 소스는 건너뜀 |
-| **Checkpoint** | 조립된 컨텍스트를 **실제 내용**과 함께 사용자에게 보여주고 승인/수정 기회 제공. 사용자가 수정을 요청하면 반영 후 재확인. **`--auto` 모드에서만 생략** (요약은 표시하되 즉시 실행 진행). `--dangerously-skip-permissions` 환경에서는 AskUserQuestion 대신 일반 텍스트 메시지로 확인 요청 |
+| **Checkpoint** | 조립된 컨텍스트를 **실제 내용**과 함께 사용자에게 보여주고 실행 전 승인/수정 기회 제공. 사용자가 수정을 요청하면 반영 후 재확인. **`--auto` 모드에서만 생략** (요약은 표시하되 즉시 실행 진행). `--dangerously-skip-permissions` 환경에서는 AskUserQuestion 대신 일반 텍스트 메시지로 확인 요청 |
 | **Execute** | 승인된 컨텍스트와 함께 해당 spec-kit 커맨드(`/speckit-specify`, `/speckit-plan` 등)를 실행. 실제 작업은 spec-kit이 수행 |
+| **Review** | 실행 후 생성/수정된 산출물을 사용자에게 보여주고 검토 기회 제공. 승인, 수정 요청(재실행), 또는 직접 편집 가능. **HARD STOP** — Checkpoint과 동일한 규칙 적용. **`--auto` 모드에서만 생략** |
 | **Update** | 실행 결과를 반영하여 Global Evolution Layer 파일을 갱신. `sdd-state.md`에 진행 상태 기록 |
 
 #### 커맨드별 컨텍스트 주입
