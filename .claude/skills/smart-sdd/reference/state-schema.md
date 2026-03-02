@@ -57,6 +57,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 - ❌ : Failed
 - ⏭️ : Skipped
 - 🔒 : Deferred (outside current Active Tiers, activate via `/smart-sdd expand`)
+- 🔀 : Needs re-execution (Feature restructured via `/smart-sdd restructure` — affected steps must be re-run)
 - (blank) : Not started
 
 ---
@@ -104,6 +105,17 @@ Update history of Global Evolution Layer files.
 | 2024-01-16 | F001-auth (plan) | api-registry.md | Finalized POST /auth/register, POST /auth/login applied |
 | 2024-01-17 | F001-auth (implement) | roadmap.md | F001 status → completed |
 | 2024-01-17 | F001-auth (implement) | F002 pre-context.md | User entity reference schema updated |
+
+---
+
+## Restructure Log
+
+Feature restructuring history. Recorded when `/smart-sdd restructure` is executed.
+
+| Date/Time | Operation | Details | Affected Features |
+|-----------|-----------|---------|-------------------|
+| 2024-01-20T14:00:00 | merge | F004-cart + F005-wishlist → F004-shopping | F004 (restructured), F005 (removed), F006 (dependency updated) |
+| 2024-01-22T10:00:00 | split | F003-product → F003-product-catalog + F008-product-search | F003 (restructured), F008 (created), F006 (dependency updated) |
 
 ---
 
@@ -179,6 +191,20 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Change `deferred` Features whose Tier matches the newly activated Tiers to `pending`
 - Record the expansion in Global Evolution Log: "Scope expanded: T1 → T1,T2"
 - Note: This rule only applies to `core` scope projects. `full` scope has no deferred Features.
+
+### When a Feature is Restructured (via /smart-sdd restructure)
+- Change affected step cells to 🔀 (all steps from the first affected step onward)
+- Change Feature Progress Status to `restructured`
+- Record the restructure operation in the Restructure Log
+- If the Feature is **deleted**: remove the row from Feature Progress table entirely
+- If a **new Feature** is created (e.g., split): add a new row with all steps blank (`pending`)
+- If a Feature is **merged** into another: remove the absorbed Feature's row; update the surviving Feature's row
+- Update `Last Updated`
+
+### When a Restructured Feature Resumes
+- When a 🔀 step starts execution, follow normal "When a Step Starts" rules (🔀 → 🔄)
+- The 🔀 is replaced by 🔄, then ✅ upon completion
+- When all 🔀 steps are re-executed successfully, change Status from `restructured` to `in_progress` or `completed` as appropriate
 
 ---
 
