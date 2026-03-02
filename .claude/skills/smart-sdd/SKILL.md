@@ -708,59 +708,11 @@ Execute the **full Common Protocol** (Assemble → Checkpoint → Execute → Re
 4. **Review (HARD STOP)**: Read `.specify/memory/constitution.md` and display the full finalized content. MUST use AskUserQuestion with "Approve", "Request modifications", "Edit manually" and WAIT for explicit approval. **Constitution is the most critical artifact — it governs all subsequent Features. Do NOT skip this Review.**
 5. **Update**: Record the constitution completion in `sdd-state.md`
 
-### Environment Setup (before first implement)
+### Per-Feature Environment Variable Check (before each implement)
 
-When the pipeline reaches the **first Feature's implement step** (i.e., the very first time implement runs in this pipeline session):
+Environment variables are checked **per Feature, at implement time** — not aggregated upfront. This ensures variables are only requested when the Feature that needs them is about to be implemented.
 
-**Step 1 — Collect required env vars**:
-Read all `pre-context.md` files for **active** (non-deferred) Features and aggregate the Environment Variables sections.
-
-**Step 2 — Check for existing .env**:
-- If `.env` exists in CWD: Check for the **presence** of required variable names (do NOT read actual values)
-  - ✅ Found: list vars that are present
-  - ❌ Missing: list vars that are needed but not in `.env`
-- If `.env` does not exist: All vars are missing
-
-**Step 3 — Environment Setup Checkpoint (HARD STOP)**:
-Display the aggregated env var requirements and guide the user:
-
-```
-📋 Environment Setup Required
-
-The following environment variables are needed for implementation and testing:
-
-── Secrets (must be set by you) ──────────────────
-  DATABASE_URL        — [Required] Database connection string
-  JWT_SECRET          — [Required] JWT signing secret
-  OPENAI_API_KEY      — [Optional] AI feature integration
-
-── Configuration ─────────────────────────────────
-  PORT                — [Optional] Server port (default: 3000)
-  NODE_ENV            — [Optional] Environment mode
-
-Status: .env file [exists / does not exist]
-  ✅ DATABASE_URL — already set
-  ❌ JWT_SECRET — missing
-  ❌ OPENAI_API_KEY — missing
-
-👉 Please create or update your .env file with the required values.
-   A .env.example file is available as a template.
-
-⚠️ I will NOT ask you to paste secret values here.
-   Edit the .env file directly in your editor.
-```
-
-Use AskUserQuestion:
-- "Environment is ready — proceed with implementation"
-- "Skip for now — I'll set up env vars later"
-
-If "Skip for now":
-- Display a warning: "⚠️ Tests may fail due to missing environment variables."
-- Proceed but record in `sdd-state.md` Global Evolution Log: "Environment: partial (user skipped setup)"
-
-**Important**: This checkpoint runs only **once** (before the first implement). Subsequent Features do NOT re-trigger the full env setup, but individual Feature implement steps will note any NEW env vars introduced by that Feature (see below).
-
-**Skip conditions**: If no Features have Environment Variables in their pre-context.md, skip this checkpoint entirely.
+**Skip conditions**: If the current Feature's `pre-context.md` has no Environment Variables section or it contains only "None" / "TBD", skip this check entirely.
 
 ### Phase 1~N: Progress Features in Release Group Order
 
@@ -780,7 +732,7 @@ Executes the following steps **strictly in order** for each Feature.
 3. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
 4. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
 5. analyze    → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
-6. implement  → Env notice → Checkpoint(STOP) → speckit-implement → Review(STOP)
+6. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
 7. verify     → Test/Build/Lint → Cross-Feature consistency → Demo-Ready → Update
 8. merge      → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
@@ -806,18 +758,48 @@ After `speckit-specify` completes and the user approves the Review, **automatica
 
 **`--auto` mode**: Clarify scan still runs. If ambiguities are found, `speckit-clarify` executes but uses its own recommendation/suggestion as the default answer for each question (clarify's built-in "recommended" option). The user can still intervene if watching.
 
-#### Per-Feature Environment Variable Notice (implement step)
+#### Per-Feature Environment Variable Check (implement step)
 
-Before running `speckit-implement`, check the current Feature's `pre-context.md` for Environment Variables. If the Feature introduces **new** variables (not shared from preceding Features), display an informational notice:
+Before running `speckit-implement`, read the current Feature's `pre-context.md` → "Environment Variables" section and check for required variables:
+
+**Step 1 — Collect this Feature's required env vars**:
+Read `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Environment Variables" section.
+Include both Feature-owned variables AND shared variables listed in the "Shared variables" sub-table.
+
+**Step 2 — Check .env file**:
+- If `.env` exists: Check for the **presence** of each required variable name (do NOT read actual values)
+- If `.env` does not exist: All variables are missing
+
+**Step 3 — Display and confirm (HARD STOP if missing required vars)**:
 
 ```
-📋 New environment variables for [FID]-[name]:
-  STRIPE_SECRET_KEY — [Required] Payment processing API key
+📋 Environment Variables for [FID]-[name]:
 
-👉 Ensure these are added to your .env file before proceeding.
+── Required ────────────────────────────────────
+  ✅ DATABASE_URL     — already set
+  ❌ STRIPE_SECRET_KEY — missing [secret] Payment processing API key
+  ❌ STRIPE_WEBHOOK_SECRET — missing [secret] Webhook verification
+
+── Optional ────────────────────────────────────
+  ✅ LOG_LEVEL        — already set
+  ❌ SENTRY_DSN       — missing [config] Error tracking (optional)
+
+⚠️ I will NOT ask you to paste secret values here.
+   Edit the .env file directly in your editor.
 ```
 
-This is informational — NOT a HARD STOP (the full env setup was already confirmed before the first implement). If the user hasn't completed the initial env setup, they were already warned.
+**If any REQUIRED variables are missing**:
+Use AskUserQuestion (HARD STOP):
+- "Environment is ready — I've added the missing variables"
+- "Skip for now — proceed without them"
+
+If "Environment is ready": Re-check `.env` to verify the missing variables are now present. If still missing, display which ones and ask again.
+If "Skip for now": Display warning "⚠️ Tests may fail due to missing environment variables." and proceed.
+
+**If all required variables are present** (or the Feature has no env vars):
+Display: "✅ All required environment variables for [FID]-[name] are set." and proceed without stopping.
+
+> **Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names.
 
 > **Git branching**: spec-kit automatically creates a Feature branch during `speckit-specify`. All subsequent steps (plan through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [Git Branch Management](#git-branch-management) for details.
 

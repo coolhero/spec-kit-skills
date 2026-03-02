@@ -533,16 +533,17 @@ Before or during implementation, if the Feature's `pre-context.md` has a non-emp
 
 Before implementation, if the Feature's `pre-context.md` has a non-empty Environment Variables section:
 
-1. Check if a `.env` file exists in the project root
-2. If `.env` exists: Cross-reference Feature's required variables by checking for the **presence** of variable names
-   - For each missing required variable: Include in the Checkpoint display
-3. If this is the **first implement step in the pipeline**: Trigger the full Environment Setup Checkpoint (see Pipeline Mode → Environment Setup in SKILL.md)
-4. For subsequent Features: Display an informational notice for **new** variables only (not a HARD STOP)
+1. Read the Feature's `pre-context.md` → "Environment Variables" section (both owned and shared variables)
+2. Check if a `.env` file exists in the project root
+3. If `.env` exists: Check for the **presence** of each required variable name (do NOT read actual values)
+4. Display a summary showing which variables are set (✅) and which are missing (❌)
+5. **If any REQUIRED variables are missing**: HARD STOP — use AskUserQuestion with "Environment is ready" / "Skip for now" and WAIT for user response. If "ready", re-check to verify. If "skip", warn and proceed.
+6. **If all required variables are present**: Display "✅ All set" and proceed without stopping.
 
 **Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names (e.g., check if a line starts with `VARIABLE_NAME=`). Never display, log, or reference actual secret values.
 
 **Greenfield projects**: Environment Variables section may be empty or contain "TBD" entries. Display TBD entries as reminders during implementation.
-**Incremental (add) projects**: `.env` should already exist. Verify new variables are present.
+**Incremental (add) projects**: `.env` should already exist. Verify required variables are present.
 
 ### Demo-Ready Delivery (only if VI. Demo-Ready Delivery is in the constitution)
 
