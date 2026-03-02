@@ -109,7 +109,9 @@ $ARGUMENTS parsing rules:
 
 **Pre-validation** (for all commands):
 
-**Step 0 — Git and spec-kit installation check** (all commands including `init`):
+**Step 0 — Git and spec-kit installation check** (all commands except `init`):
+
+> **`init` command**: Skips this Step 0 entirely. The `init` command has its own Pre-Phase that handles git setup and branch selection.
 
 **0a. Git repository check**:
 1. Check if the current directory is a git repository: `git rev-parse --is-inside-work-tree`
@@ -157,7 +159,7 @@ $ARGUMENTS parsing rules:
    ```
 
 **Additional rules**:
-- `init` command: Skip Step 1 (init creates roadmap.md). Step 0 still applies.
+- `init` command: Skip Steps 0 and 1 (init has its own Pre-Phase and creates roadmap.md).
 - `add` command: roadmap.md **must** exist (adding to an existing project)
 - `restructure` command: `roadmap.md`, `entity-registry.md`, `api-registry.md`, and `sdd-state.md` must all exist (same prerequisites as `add`)
 - `status` command: If `sdd-state.md` does not exist, display "No project initialized yet" and suggest `init` or `reverse-spec`

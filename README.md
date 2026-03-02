@@ -459,6 +459,23 @@ smart-sdd and spec-kit use slightly different naming formats, but the **short-na
 
 Conversion: strip or prepend `F` prefix. The mapping is tracked in `sdd-state.md` → Feature Mapping table.
 
+### Global Evolution Layer Artifact Structure
+
+```
+specs/reverse-spec/
+├── roadmap.md
+├── constitution-seed.md
+├── entity-registry.md
+├── api-registry.md
+├── business-logic-map.md           # (rebuild mode only)
+├── stack-migration.md              # (rebuild + new stack only)
+├── sdd-state.md                    # Automatically created/managed by smart-sdd
+└── features/
+    ├── F001-auth/pre-context.md
+    ├── F002-product/pre-context.md
+    └── ...
+```
+
 ---
 
 ## Constitution Best Practices
