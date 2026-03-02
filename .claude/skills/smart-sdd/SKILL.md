@@ -824,6 +824,49 @@ Once **all steps** for a Feature are complete (including implement, verify, and 
    - Merge to main after user approval
    - Return to main branch, ready for the next Feature
 
+#### Next Step Guidance (after each Feature completion)
+
+After completing a Feature (or when the pipeline is interrupted/paused), ALWAYS display guidance on what to do next:
+
+**If more Features remain in the pipeline**:
+```
+✅ [FID]-[name] completed!
+
+📊 Progress: [completed]/[total] Features done
+  Next Feature: [next-FID]-[next-name]
+
+Next steps:
+  /smart-sdd pipeline       — Continue pipeline (resumes from [next-FID])
+  /smart-sdd specify [next-FID] — Start the next Feature manually
+  /smart-sdd status         — View overall progress
+```
+
+**If all Features are completed**:
+```
+🎉 All Features completed!
+
+📊 Final Status: [total]/[total] Features done
+  Constitution: ✅ v[version]
+
+All Features have been implemented, verified, and merged to main.
+
+Next steps:
+  /smart-sdd status         — View final progress report
+  /smart-sdd add            — Add new Features to the project
+```
+
+**If the pipeline is interrupted mid-Feature** (e.g., context limit, user pauses):
+```
+⏸️ Pipeline paused at [FID]-[name] → [current-step]
+
+To resume:
+  /smart-sdd pipeline       — Resume from where you left off
+  /smart-sdd [step] [FID]   — Resume a specific step (e.g., /smart-sdd implement F003)
+  /smart-sdd status         — Check current state
+```
+
+> **This guidance is MANDATORY.** Never end a pipeline session without displaying next steps. The user must always know how to continue.
+
 ---
 
 ## Step Mode
