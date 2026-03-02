@@ -1146,6 +1146,16 @@ Automatically analyze all affected artifacts for each operation:
 - Identify all entities/APIs owned by the deleted Feature
 - Propose resolution: reassign entities/APIs to another Feature, or remove them
 - Propose dependency resolution for downstream Features: remove the dependency, or redirect to another Feature
+- **If the Feature is `completed`**: Its code is already merged into main. The restructure command removes the Feature from Global Evolution Layer artifacts (roadmap, registries, sdd-state, pre-context) but does NOT remove the merged code. Flag this prominently in the Impact Summary:
+  ```
+  ⚠️ COMPLETED FEATURE DELETION
+  F001-auth is already implemented and merged to main.
+  Restructure will remove it from project artifacts only.
+  Code removal from the codebase is YOUR responsibility:
+    - Review and manually remove F001-auth related code
+    - Update/remove tests associated with F001-auth
+    - Downstream Features referencing F001-auth code may break
+  ```
 
 #### Phase 4: Impact Summary Display (HARD STOP)
 
