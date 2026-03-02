@@ -106,6 +106,8 @@ Review the finalized constitution. You can:
   - Edit .specify/memory/constitution.md directly
 ```
 
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update without explicit approval.
+
 ---
 
 ## 2. Specify
@@ -229,6 +231,8 @@ Review the generated spec. You can:
   - Request modifications (re-run speckit-specify with feedback)
   - Edit spec.md directly
 ```
+
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to clarify/plan without explicit approval.
 
 ---
 
@@ -371,6 +375,8 @@ Review the generated plan. You can:
   - Edit plan.md, data-model.md, or contracts/ directly
 ```
 
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update/tasks without explicit approval.
+
 ---
 
 ## 4. Tasks
@@ -414,6 +420,8 @@ Review the generated tasks. You can:
   - Request modifications (re-run speckit-tasks with feedback)
   - Edit tasks.md directly
 ```
+
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to analyze without explicit approval.
 
 ---
 
@@ -475,6 +483,8 @@ After `speckit-analyze` completes, display the analysis report for user review:
 **If no CRITICAL issues**:
 - Display findings summary
 - Options: "Approve and proceed to implement", "Address issues first", "View full report"
+
+**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to implement without explicit approval.
 
 ---
 
@@ -608,6 +618,8 @@ Review the implementation. You can:
   - Request modifications
   - Note issues for manual fix
 ```
+
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Note issues" and WAIT for the user's response. Do NOT proceed to verify without explicit approval.
 
 ---
 

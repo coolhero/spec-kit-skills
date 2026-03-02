@@ -463,7 +463,11 @@ Next steps:
 
 ## Common Protocol: Assemble → Checkpoint → Execute → Review → Update
 
-All spec-kit command executions follow this 5-step protocol.
+**All spec-kit command executions follow this 5-step protocol. Each step MUST be executed in order. No step may be skipped (unless `--auto` mode is active). In particular, Review (Step 4) is a HARD STOP that requires explicit user approval via AskUserQuestion before proceeding to Update (Step 5).**
+
+> ⚠️ **The most common failure mode is skipping Review.** After executing a spec-kit command (Step 3), you MUST stop, display the generated artifacts, and ask the user for approval. Do NOT proceed to Update without Review. Do NOT combine Execute and Update into a single flow.
+>
+> **`--auto` mode summary**: When `--auto` is specified, BOTH Checkpoint (Step 2) and Review (Step 4) are skipped — their content is still displayed for transparency, but execution proceeds immediately without waiting for user approval. This is the ONLY way to bypass these stops. Without `--auto`, every Checkpoint and Review is a mandatory HARD STOP.
 
 ### 1. Assemble — Context Assembly
 
@@ -542,7 +546,9 @@ If the Skill tool returns "Unknown skill" for a `speckit-*` command (e.g., skill
 3. This ensures the pipeline can continue even when skills aren't registered in the current session
 4. Display: "ℹ️ Using inline execution for speckit-[command] (skill not yet registered in this session)"
 
-### 4. Review — Artifact Review
+**⚠️ MANDATORY NEXT STEP: After Execute completes, you MUST proceed to Review (Step 4). Do NOT skip to Update. Do NOT continue the pipeline. STOP here and present the generated artifacts to the user.**
+
+### 4. Review — Artifact Review (HARD STOP — MANDATORY)
 
 After spec-kit command execution completes, present the generated/modified artifacts to the user for review.
 
@@ -758,22 +764,26 @@ Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed 
 
 **CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
-Executes the following steps **strictly in order** for each Feature:
+Executes the following steps **strictly in order** for each Feature.
+
+**Every "Review" below is a HARD STOP — you MUST use AskUserQuestion and WAIT for explicit user approval before continuing.**
 
 ```
 0. pre-flight → Ensure on main branch (clean state)
-1. specify    → Assemble → Checkpoint → speckit-specify → Review → Update
+1. specify    → Assemble → Checkpoint(STOP) → speckit-specify → Review(STOP) → Update
                 (spec-kit creates Feature branch: {NNN}-{short-name})
 2. clarify    → Auto-scan spec.md for ambiguities → speckit-clarify (if needed)
-3. plan       → Assemble → Checkpoint → speckit-plan → Review → Update (entity-registry, api-registry)
-4. tasks      → Checkpoint → speckit-tasks → Review
-5. analyze    → speckit-analyze → Review (CRITICAL issues block implement)
-6. implement  → Env notice (new vars only) → Checkpoint → speckit-implement → Review
-7. verify     → Test/Build/Lint → Cross-Feature entity/API consistency → Demo-Ready → Global Evolution update
-8. merge      → Checkpoint (HARD STOP) → Merge Feature branch to main → Cleanup
+3. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
+4. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
+5. analyze    → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
+6. implement  → Env notice → Checkpoint(STOP) → speckit-implement → Review(STOP)
+7. verify     → Test/Build/Lint → Cross-Feature consistency → Demo-Ready → Update
+8. merge      → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
+
+> **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip. The only exception is `--auto` mode.
 
 #### Clarify Trigger (after specify Review)
 
