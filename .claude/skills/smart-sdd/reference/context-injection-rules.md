@@ -86,24 +86,23 @@ Review the above content. You can:
 
 ### Review Display Content
 
-After `speckit-constitution` completes, display the finalized constitution for user review:
+After `speckit-constitution` completes:
 
+**Files to read**:
+1. `.specify/memory/constitution.md` — Read the **entire file** and display its full content
+
+**Display format**:
 ```
 📋 Review: Constitution finalized
 
 ── Finalized Constitution ──────────────────────
-[Show the full content of .specify/memory/constitution.md.
- Constitution is a one-time critical document — display everything:
+[Full content of .specify/memory/constitution.md:
  - All principles with descriptions
  - All constraints
  - All conventions
  - All best practices]
 
 ──────────────────────────────────────────────────
-Review the finalized constitution. You can:
-  - Approve as-is
-  - Request modifications (re-run speckit-constitution with feedback)
-  - Edit .specify/memory/constitution.md directly
 ```
 
 **HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update without explicit approval.
@@ -201,18 +200,24 @@ Review the above content. You can:
 
 ### Review Display Content
 
-After `speckit-specify` completes, display the generated spec for user review:
+After `speckit-specify` completes:
 
+**Files to read**:
+1. `specs/{NNN-feature}/spec.md` — Read the **entire file** and extract FR-###, SC-###, scope sections
+2. `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Draft Requirements" and "Draft Acceptance Criteria" sections (for diff comparison)
+
+**Display format**:
 ```
 📋 Review: spec.md for [FID] - [Feature Name]
+📄 File: specs/{NNN-feature}/spec.md
 
 ── Requirements ─────────────────────────────────
-[List each FR-### with its full description]
+[List each FR-### with its full description from spec.md]
   FR-001: ...
   FR-002: ...
 
 ── Success Criteria ─────────────────────────────
-[List each SC-### with its full description]
+[List each SC-### with its full description from spec.md]
   SC-001: ...
   SC-002: ...
 
@@ -220,16 +225,12 @@ After `speckit-specify` completes, display the generated spec for user review:
 [In-scope and out-of-scope items from spec.md]
 
 ── Differences from Draft ───────────────────────
-[Compare with pre-context.md "Draft Requirements" and "Draft Acceptance Criteria":
+[Compare spec.md content with pre-context.md drafts:
  - Added: requirements/criteria that spec-kit added beyond the drafts
  - Removed: draft items that were dropped
  - Changed: items whose scope or description significantly changed]
 
 ──────────────────────────────────────────────────
-Review the generated spec. You can:
-  - Approve as-is
-  - Request modifications (re-run speckit-specify with feedback)
-  - Edit spec.md directly
 ```
 
 **HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to clarify/plan without explicit approval.
@@ -345,10 +346,18 @@ Review the above content. You can:
 
 ### Review Display Content
 
-After `speckit-plan` completes, display the generated plan for user review:
+After `speckit-plan` completes:
 
+**Files to read**:
+1. `specs/{NNN-feature}/plan.md` — Read the **entire file** and extract architecture decisions, implementation phases
+2. `specs/{NNN-feature}/data-model.md` — Read the **entire file** and extract entity schemas (fields, types, relationships)
+3. `specs/{NNN-feature}/contracts/*.md` — Read **all contract files** and extract endpoints (method, path, request/response)
+4. `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Related Entities", "Related API Contracts", "Technical Decisions" sections (for diff comparison)
+
+**Display format**:
 ```
 📋 Review: plan.md for [FID] - [Feature Name]
+📄 Files: specs/{NNN-feature}/plan.md, data-model.md, contracts/
 
 ── Architecture Overview ────────────────────────
 [Key architecture decisions from plan.md]
@@ -363,16 +372,12 @@ After `speckit-plan` completes, display the generated plan for user review:
 [Phase breakdown with deliverables from plan.md]
 
 ── Differences from Draft ───────────────────────
-[Compare with pre-context.md "Related Entities" and "Related API Contracts":
+[Compare with pre-context.md drafts:
  - Added: entities/APIs that spec-kit added beyond the drafts
  - Changed: schemas or contracts whose structure significantly changed
  - Architecture decisions that differ from "Technical Decisions" draft]
 
 ──────────────────────────────────────────────────
-Review the generated plan. You can:
-  - Approve as-is
-  - Request modifications (re-run speckit-plan with feedback)
-  - Edit plan.md, data-model.md, or contracts/ directly
 ```
 
 **HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update/tasks without explicit approval.
@@ -402,10 +407,15 @@ speckit-tasks will be executed based on plan.md. Do you want to proceed?
 
 ### Review Display Content
 
-After `speckit-tasks` completes, display the generated tasks for user review:
+After `speckit-tasks` completes:
 
+**Files to read**:
+1. `specs/{NNN-feature}/tasks.md` — Read the **entire file** and extract the task list
+
+**Display format**:
 ```
 📋 Review: tasks.md for [FID] - [Feature Name]
+📄 File: specs/{NNN-feature}/tasks.md
 
 ── Task List ────────────────────────────────────
 [List each task with:
@@ -415,10 +425,6 @@ After `speckit-tasks` completes, display the generated tasks for user review:
  - Estimated complexity (if available)]
 
 ──────────────────────────────────────────────────
-Review the generated tasks. You can:
-  - Approve as-is
-  - Request modifications (re-run speckit-tasks with feedback)
-  - Edit tasks.md directly
 ```
 
 **HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to analyze without explicit approval.
@@ -450,10 +456,20 @@ Do you want to proceed?
 
 ### Review Display Content
 
-After `speckit-analyze` completes, display the analysis report for user review:
+After `speckit-analyze` completes:
 
+**Files to read**:
+1. `specs/{NNN-feature}/spec.md` — Re-read to cross-reference requirements coverage
+2. `specs/{NNN-feature}/plan.md` — Re-read to cross-reference architecture alignment
+3. `specs/{NNN-feature}/tasks.md` — Re-read to cross-reference task coverage
+4. The analyze output itself (displayed by speckit-analyze during execution)
+
+> Note: `speckit-analyze` produces its report as console output, not as a file. Capture and display the analysis results from the command execution output.
+
+**Display format**:
 ```
 📋 Review: Analysis report for [FID] - [Feature Name]
+📄 Analyzed: specs/{NNN-feature}/spec.md, plan.md, tasks.md
 
 ── Analysis Summary ─────────────────────────────
 [Show key metrics: total requirements, total tasks, coverage %,
@@ -592,13 +608,22 @@ speckit-implement will be executed based on tasks.md. Do you want to proceed?
 
 ### Review Display Content
 
-After `speckit-implement` completes, display the implementation summary for user review:
+After `speckit-implement` completes:
 
+**Files to read**:
+1. `specs/{NNN-feature}/tasks.md` — Re-read to cross-reference which tasks were completed
+2. All source files created/modified during implementation — use `git diff --name-only` on the Feature branch to identify them
+3. Test output — capture from the test run during implementation
+4. Build output — capture from the build step during implementation
+5. `demos/{FID}-{name}.md` — If Demo-Ready Delivery is active, read this file
+
+**Display format**:
 ```
 📋 Review: Implementation for [FID] - [Feature Name]
+📄 Branch: {NNN}-{short-name}
 
 ── Files Created/Modified ───────────────────────
-[List of files with brief description of each:
+[List of files from git diff --name-only:
  - New files: path — purpose
  - Modified files: path — what changed]
 
@@ -613,10 +638,6 @@ After `speckit-implement` completes, display the implementation summary for user
  demos/F00N-name.md: created/updated]
 
 ──────────────────────────────────────────────────
-Review the implementation. You can:
-  - Approve and proceed to verify
-  - Request modifications
-  - Note issues for manual fix
 ```
 
 **HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Note issues" and WAIT for the user's response. Do NOT proceed to verify without explicit approval.
