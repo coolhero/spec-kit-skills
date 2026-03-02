@@ -598,25 +598,12 @@ Review the generated artifact. You can:
 
 For detailed per-command Review Display Content, see [context-injection-rules.md](reference/context-injection-rules.md).
 
-**CRITICAL — Review is a HARD STOP (same rules as Checkpoint).**
+**CRITICAL — Review is a HARD STOP. All Checkpoint rules apply identically** (empty response handling, `--auto` mode, `--dangerously-skip-permissions` — see Checkpoint section above).
 
-You MUST:
-1. Use AskUserQuestion to ask: "Approve the result?" with options: "Approve", "Request modifications", "Edit manually"
-2. **STOP and WAIT** for the user's response. Do NOT assume approval. Do NOT continue to the Update step.
-3. If "Request modifications": Ask what to change, re-execute the spec-kit command with the feedback, and re-display the Review.
-4. If "Edit manually": Wait for the user to signal they are done editing, then proceed to Update.
-5. Only after the user explicitly responds with approval (selects "Approve" or says "yes"/"approved"), move to the Update step.
-
-**You are NOT allowed to approve on behalf of the user. "User approved" must come from an actual user action, not from your own judgment.**
-
-**Empty or missing response handling**: If AskUserQuestion returns an empty response, a blank string, or no meaningful selection, this is NOT approval. You MUST:
-- Display: "⚠️ No approval received. Please confirm: approve the generated artifact? (yes/no)"
-- STOP and WAIT again. Repeat until a clear affirmative or negative response is received.
-- NEVER interpret silence, empty response, or lack of explicit rejection as implicit approval.
-
-**`--auto` mode**: When `--auto` is specified, the Review step is skipped. The generated artifact summary is still **displayed** to the user (for transparency), but execution proceeds immediately to Update without waiting for approval.
-
-**`--dangerously-skip-permissions` environment**: When AskUserQuestion is unavailable, Review is still enforced — the artifact summary is displayed and you MUST ask for confirmation via a regular text message: "Do you approve the generated artifact? (yes/no)". You MUST then STOP and WAIT for the user's text response before proceeding.
+Additional Review-specific options:
+- Use AskUserQuestion with options: "Approve", "Request modifications", "Edit manually"
+- If "Request modifications": Ask what to change, re-execute the spec-kit command with feedback, and re-display the Review.
+- If "Edit manually": Wait for the user to signal they are done editing, then proceed to Update.
 
 ### 5. Update — Global Evolution Layer Refresh
 
@@ -801,7 +788,7 @@ If "Environment is ready": Re-check `.env` to verify the missing variables are n
 If "Skip for now": Display warning "⚠️ Tests may fail due to missing environment variables." and proceed.
 
 **If all required variables are present** (or the Feature has no env vars):
-Display: "✅ All required environment variables for [FID]-[name] are set." and proceed without stopping.
+Display: "✅ All required environment variables for [FID]-[name] are set." and proceed directly to Checkpoint (no HARD STOP needed).
 
 > **Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names.
 

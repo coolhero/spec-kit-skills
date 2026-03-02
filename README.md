@@ -261,6 +261,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 /smart-sdd specify F001                  # Specify Feature F001
 /smart-sdd plan F001                     # Plan Feature F001
 /smart-sdd tasks F001                    # Generate tasks for Feature F001
+/smart-sdd analyze F001                  # Analyze cross-artifact consistency (before implement)
 /smart-sdd implement F001               # Implement Feature F001
 /smart-sdd verify F001                   # Verify Feature F001
 
@@ -270,6 +271,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 # Scope expansion (brownfield rebuild with scope=core)
 /smart-sdd expand                        # Interactive: select which Tiers to activate
 /smart-sdd expand T2                     # Activate Tier 2 Features
+/smart-sdd expand T2,T3                  # Activate Tier 2 and Tier 3 Features
 /smart-sdd expand full                   # Activate all remaining deferred Features
 
 # Status check

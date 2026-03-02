@@ -259,6 +259,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 /smart-sdd specify F001                  # F001 Feature specify
 /smart-sdd plan F001                     # F001 Feature plan
 /smart-sdd tasks F001                    # F001 Feature tasks
+/smart-sdd analyze F001                  # F001 교차 산출물 일관성 분석 (implement 전)
 /smart-sdd implement F001               # F001 Feature implement
 /smart-sdd verify F001                   # F001 Feature 검증
 
@@ -268,6 +269,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 # Scope 확장 (brownfield rebuild에서 scope=core 사용 시)
 /smart-sdd expand                        # 대화형: 활성화할 Tier 선택
 /smart-sdd expand T2                     # Tier 2 Feature 활성화
+/smart-sdd expand T2,T3                  # Tier 2, Tier 3 Feature 활성화
 /smart-sdd expand full                   # 보류된 모든 Feature 활성화
 
 # 상태 확인
