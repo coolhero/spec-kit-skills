@@ -293,7 +293,7 @@ If the user selects "Create a new branch", ask for the branch name via "Other" i
    - Greenfield projects always use `Scope: full`, so no Tier classification is needed
 
 6. **Define Release Groups**:
-   - Propose grouping based on dependency layers and Tiers
+   - Propose grouping based on dependency layers (Features with no dependencies first, then Features that depend on completed groups)
    - Present to user for confirmation/adjustment
 
 7. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.**
@@ -712,15 +712,9 @@ Execute the **full Common Protocol** (Assemble → Checkpoint → Execute → Re
 4. **Review (HARD STOP)**: Read `.specify/memory/constitution.md` and display the full finalized content. MUST use AskUserQuestion with "Approve", "Request modifications", "Edit manually" and WAIT for explicit approval. **Constitution is the most critical artifact — it governs all subsequent Features. Do NOT skip this Review.**
 5. **Update**: Record the constitution completion in `sdd-state.md`
 
-### Per-Feature Environment Variable Check (before each implement)
-
-Environment variables are checked **per Feature, at implement time** — not aggregated upfront. This ensures variables are only requested when the Feature that needs them is about to be implemented.
-
-**Skip conditions**: If the current Feature's `pre-context.md` has no Environment Variables section or it contains only "None" / "TBD", skip this check entirely.
-
 ### Phase 1~N: Progress Features in Release Group Order
 
-Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed and deferred Features** — only processes Features with `pending` or `in_progress` status in `sdd-state.md`. Features with `deferred` status (outside current Active Tiers) are not processed. Use `/smart-sdd expand` to activate deferred Features.
+Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed and deferred Features** — only processes Features with `pending`, `in_progress`, or `restructured` status in `sdd-state.md`. Features with `deferred` status (outside current Active Tiers) are not processed. Use `/smart-sdd expand` to activate deferred Features. Features with `restructured` status are processed starting from their first 🔀 step (see [Restructure Command](#restructure-command--feature-structure-modification)).
 
 **CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
@@ -763,6 +757,10 @@ After `speckit-specify` completes and the user approves the Review, **automatica
 **`--auto` mode**: Clarify scan still runs. If ambiguities are found, `speckit-clarify` executes but uses its own recommendation/suggestion as the default answer for each question (clarify's built-in "recommended" option). The user can still intervene if watching.
 
 #### Per-Feature Environment Variable Check (implement step)
+
+Environment variables are checked **per Feature, at implement time** — not aggregated upfront. This ensures variables are only requested when the Feature that needs them is about to be implemented.
+
+**Skip conditions**: If the current Feature's `pre-context.md` has no Environment Variables section or it contains only "None" / "TBD", skip this check entirely.
 
 Before running `speckit-implement`, read the current Feature's `pre-context.md` → "Environment Variables" section and check for required variables:
 

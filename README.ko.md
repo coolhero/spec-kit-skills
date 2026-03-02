@@ -353,12 +353,6 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 Phase 0: Constitution 확정
     └─ constitution-seed.md 기반으로 /speckit-constitution 실행
 
-Environment Setup (첫 implement 전):
-    └─ 활성 Feature들의 pre-context.md에서 필요 환경 변수 수집
-    └─ .env 파일의 누락 변수 확인
-    └─ HARD STOP: 사용자에게 .env 파일 생성/수정 안내
-       (시크릿 값은 대화에 입력하지 않고, 사용자가 직접 .env 파일 편집)
-
 Phase 1~N: Release Group 순서대로 Feature 진행
     └─ 각 Feature마다:
        0. pre-flight → main 브랜치 확인 (클린 상태)
@@ -368,7 +362,7 @@ Phase 1~N: Release Group 순서대로 Feature 진행
        3. plan     → (pre-context + entity-registry + api-registry 주입) → /speckit-plan
        4. tasks    → /speckit-tasks
        5. analyze  → /speckit-analyze (implement 전 교차 산출물 일관성 검증)
-       6. implement → (신규 환경 변수 알림) → /speckit-implement
+       6. implement → Feature별 환경 변수 확인 (필수 변수 누락 시 HARD STOP) → /speckit-implement
        7. verify   → 3단계 검증 (테스트/빌드/린트 + Cross-Feature 일관성 + Global Evolution 갱신)
        8. merge    → Checkpoint (HARD STOP) → Feature 브랜치를 main에 머지
 ```
@@ -434,7 +428,7 @@ Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
 💡 Use /smart-sdd expand to activate deferred Features
 ```
 
-상태 파일에는 Feature Progress, Feature Detail Log, Feature Mapping (Feature ID <-> spec-kit Name), Global Evolution Log, Constitution Update Log가 포함됩니다. `scope=core`일 때 Active Tiers 밖의 Feature는 `deferred`로 표시되어 pipeline에서 건너뛰며, `/smart-sdd expand`로 활성화할 때까지 보류됩니다.
+상태 파일에는 Feature Progress, Feature Detail Log, Feature Mapping (Feature ID <-> spec-kit Name), Global Evolution Log, Restructure Log, Constitution Update Log가 포함됩니다. `scope=core`일 때 Active Tiers 밖의 Feature는 `deferred`로 표시되어 pipeline에서 건너뛰며, `/smart-sdd expand`로 활성화할 때까지 보류됩니다. `/smart-sdd restructure`로 수정된 Feature는 `restructured`로 표시되며, 영향받는 단계에 재실행 마크(🔀)가 설정됩니다.
 
 ---
 
@@ -509,11 +503,11 @@ specs/reverse-spec/
    │   │   A. Coarse (3 Features): auth, core-app, admin
    │   │   B. Standard (5 Features) — 권장 ← 선택됨
    │   │   C. Fine (9 Features): register, login, workspace, task-crud, ...
-   │   ├─ F001-auth (Tier 1): 사용자 인증 및 팀 관리
-   │   ├─ F002-project (Tier 1): 프로젝트 CRUD 및 멤버 관리
-   │   ├─ F003-task (Tier 1): 태스크 CRUD, 상태 전이, 담당자 배정
-   │   ├─ F004-dashboard (Tier 2): 프로젝트/태스크 현황 대시보드
-   │   └─ F005-notification (Tier 3): 태스크 변경 알림
+   │   ├─ F001-auth: 사용자 인증 및 팀 관리
+   │   ├─ F002-project: 프로젝트 CRUD 및 멤버 관리
+   │   ├─ F003-task: 태스크 CRUD, 상태 전이, 담당자 배정
+   │   ├─ F004-dashboard: 프로젝트/태스크 현황 대시보드
+   │   └─ F005-notification: 태스크 변경 알림
    ├─ Phase 3: Constitution Seed 정의
    │   └─ 6개 Best Practices 전체 채택 + 프로젝트 컨벤션 추가
    ├─ Phase 4: 산출물 생성
@@ -587,7 +581,6 @@ specs/reverse-spec/
 2. /smart-sdd pipeline
    ├─ Scope: "Core — Tier 1만 진행. 보류: Cart, Payment, Search (T2), Review, Notification (T3)"
    ├─ Phase 0: constitution-seed 기반으로 /speckit-constitution 확정
-   ├─ Environment Setup: "DATABASE_URL, JWT_SECRET, ... 필요. .env 파일을 설정해 주세요"
    ├─ Tier 1 Feature만 진행 (scope=core):
    │   ├─ F001-auth:
    │   │   ├─ Assemble: pre-context + business-logic-map에서 auth 관련 정보 조립
@@ -699,7 +692,7 @@ Feature F002-product의 교차 산출물 일관성을 분석해줘:
 | Global Evolution Layer 갱신 | 각 단계 후 자동 갱신 | 레지스트리 직접 수동 갱신 |
 | Pipeline 상태 추적 | `sdd-state.md` | 직접 진행 상태 관리 |
 | 선행 Feature 결과 우선 적용 | 확정 스키마 자동 감지 | 직접 확인 후 참조 |
-| 환경 변수 설정 체크포인트 | 자동 수집 + HARD STOP | `.env` 직접 확인 |
+| Feature별 환경 변수 검증 | 각 Feature의 implement 단계에서 HARD STOP | `.env` 직접 확인 |
 | Feature 브랜치 관리 | 자동 생성/머지 | git 브랜치 직접 관리 |
 
 ---

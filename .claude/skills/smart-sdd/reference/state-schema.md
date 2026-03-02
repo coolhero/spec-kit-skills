@@ -51,7 +51,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 | F002 | product | T1 | ✅ 01-18 | 🔄 | | | | | in_progress |
 | F003 | order | T2 | | | | | | | deferred |
 
-### Status Icons
+### Step Status Icons
 - ✅ : Completed (followed by completion date MM-DD)
 - 🔄 : In progress
 - ❌ : Failed
@@ -59,6 +59,13 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 - 🔒 : Deferred (outside current Active Tiers, activate via `/smart-sdd expand`)
 - 🔀 : Needs re-execution (Feature restructured via `/smart-sdd restructure` — affected steps must be re-run)
 - (blank) : Not started
+
+### Feature Status Values
+- `pending` : Not yet started (all steps blank)
+- `in_progress` : At least one step has started
+- `completed` : All steps (including merge) are ✅
+- `deferred` : Outside current Active Tiers (core scope only)
+- `restructured` : Feature was modified via `/smart-sdd restructure` — has 🔀 steps that need re-execution
 
 ---
 
