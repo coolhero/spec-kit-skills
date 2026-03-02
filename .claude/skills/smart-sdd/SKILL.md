@@ -703,7 +703,11 @@ Execute the **full Common Protocol** (Assemble → Checkpoint → Execute → Re
 
 ### Phase 1~N: Progress Features in Release Group Order
 
-Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed and deferred Features** — only processes Features with `pending`, `in_progress`, or `restructured` status in `sdd-state.md`. Features with `deferred` status (outside current Active Tiers) are not processed. Use `/smart-sdd expand` to activate deferred Features. Features with `restructured` status are processed starting from their first 🔀 step (see [Restructure Command](#restructure-command--feature-structure-modification)).
+Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed and deferred Features** — only processes Features with `pending`, `in_progress`, or `restructured` status in `sdd-state.md`.
+
+- **Core scope**: Initially only Tier 1 Features are active (`Active Tiers: T1` in `sdd-state.md`). Tier 2/3 Features are `deferred` and skipped until activated via `/smart-sdd expand`.
+- **Full scope**: All Features are active — no deferred Features exist.
+- **Restructured Features**: Processed starting from their first 🔀 step (see [Restructure Command](#restructure-command--feature-structure-modification)).
 
 **CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
@@ -1045,7 +1049,7 @@ Running `/smart-sdd restructure` modifies the Feature structure of an existing p
 
 **Prerequisite**: `roadmap.md`, `entity-registry.md`, `api-registry.md`, and `sdd-state.md` must already exist at BASE_PATH.
 
-**When to use**: When the user requests Feature structure changes during pipeline execution (e.g., "F003 is too big, let's split it", "Merge F004 and F005", "Remove F006").
+**When to use**: When the user requests Feature structure changes — before, during, or after pipeline execution (e.g., "F003 is too big, let's split it", "Merge F004 and F005", "Remove F006"). For `pending`/`deferred` Features, the Impact Analysis is naturally lightweight since no spec-kit artifacts or entity/API ownership exist yet.
 
 ### Supported Operations
 
