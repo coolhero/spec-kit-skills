@@ -173,6 +173,32 @@ Running `/smart-sdd init` sets up a new project by interactively defining Featur
 
 ### Init Workflow
 
+#### Pre-Phase: Git Repository Setup
+
+Before starting project setup, ensure the CWD has a git repository.
+
+**Step 1 — Check existing git repo**:
+Run `git rev-parse --is-inside-work-tree` in CWD.
+
+- **If git repo already exists**: Skip to Step 3 (branch option).
+- **If no git repo**: Proceed to Step 2.
+
+**Step 2 — Initialize git repo**:
+1. Run `git init` in CWD
+2. Create a `.gitignore` with sensible defaults:
+   - Always include: `node_modules/`, `.env`, `.env.*`, `__pycache__/`, `*.pyc`, `.DS_Store`, `dist/`, `build/`, `.venv/`, `venv/`
+   - Add stack-specific entries if the user already specified the tech stack (from `--prd` or conversation)
+3. Display: "✅ Git repository initialized with .gitignore"
+
+**Step 3 — Branch option (HARD STOP)**:
+Ask the user via AskUserQuestion whether to work on the current branch or create a dedicated branch:
+- "Stay on current branch (Recommended)" — Continue on the current branch (usually `main`)
+- "Create a new branch" — Create and checkout a new branch for the SDD work
+
+If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
+
+> **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
+
 #### Phase 1: Project Definition
 
 1. **If `--prd` is provided**: Read the PRD document and extract:

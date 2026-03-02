@@ -20,7 +20,41 @@ $ARGUMENTS parsing rules:
   --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
 ```
 
-Execute the following 5 Phases in order. Report progress to the user after completing each Phase.
+Execute the following phases in order. Report progress to the user after completing each Phase.
+
+---
+
+## Pre-Phase — Git Repository Setup
+
+Before starting analysis, ensure the CWD (output directory) has a git repository. This enables branch-based workflow management throughout the SDD pipeline.
+
+**Step 1 — Check existing git repo**:
+Run `git rev-parse --is-inside-work-tree` in CWD.
+
+- **If git repo already exists**: Skip to Step 3 (branch option).
+- **If no git repo**: Proceed to Step 2.
+
+**Step 2 — Initialize git repo**:
+1. Run `git init` in CWD
+2. Create a `.gitignore` with sensible defaults for the detected tech stack:
+   - Always include: `node_modules/`, `.env`, `.env.*`, `__pycache__/`, `*.pyc`, `.DS_Store`, `dist/`, `build/`, `.venv/`, `venv/`
+   - Add stack-specific entries based on the target project's tech stack (detected from config files in the target directory):
+     - Node.js: `node_modules/`, `coverage/`, `.next/`, `.nuxt/`
+     - Python: `__pycache__/`, `*.egg-info/`, `.venv/`
+     - Go: vendor/ (if not using modules)
+     - Java: `target/`, `*.class`, `.gradle/`
+     - Rust: `target/`
+   - If tech stack is not yet known (target not analyzed), use the universal defaults only
+3. Display: "✅ Git repository initialized with .gitignore"
+
+**Step 3 — Branch option (HARD STOP)**:
+Ask the user via AskUserQuestion whether to work on the current branch or create a dedicated branch:
+- "Stay on current branch (Recommended)" — Continue on the current branch (usually `main`)
+- "Create a new branch" — Create and checkout a new branch for the SDD work
+
+If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
+
+> **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
 ---
 

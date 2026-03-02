@@ -81,7 +81,11 @@ If the argument is omitted, the current directory is analyzed.
 
 > **Note**: When running with `--dangerously-skip-permissions`, interactive prompts (AskUserQuestion) may be auto-skipped. Always provide `--scope` and `--stack` arguments in such environments to ensure correct strategy selection.
 
-#### Execution Workflow (5-Phase)
+#### Execution Workflow
+
+##### Pre-Phase -- Git Repository Setup
+
+Ensures the output directory (CWD) has a git repository before analysis begins. If no git repo exists, initializes one with a `.gitignore` tailored to the project's tech stack. Optionally creates a dedicated branch for the SDD work (e.g., `sdd-setup`). If a git repo already exists, this step is skipped (branch option still offered).
 
 ##### Phase 0 -- Strategy Questions
 
