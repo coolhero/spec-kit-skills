@@ -613,10 +613,13 @@ Updates global artifacts to reflect the command execution results. For detailed 
 |----------------|--------------|---------|
 | plan | `entity-registry.md` | Reflect new entities/changes from the `data-model.md` finalized in the plan |
 | plan | `api-registry.md` | Reflect new APIs/changes from the `contracts/` finalized in the plan |
+| analyze | `sdd-state.md` | Record analysis results (issues found, severity levels) |
 | implement | `roadmap.md` | Change Feature status to completed |
 | implement | Subsequent Feature `pre-context.md` | Update pre-context affected by changed entities/APIs |
 | verify | `sdd-state.md` | Record verification results |
-| merge | `sdd-state.md` | Record merge completion, update Feature Mapping |
+| verify | `entity-registry.md` | Verify and update if actual implementation differs from registry |
+| verify | `api-registry.md` | Verify and update if actual implementation differs from registry |
+| merge | `sdd-state.md` | Record merge completion, update Feature Mapping, change Status to `completed` |
 
 Reports the changes to the user after the update.
 
@@ -802,21 +805,29 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 #### Post-Feature Completion Processing
 
-Once **all steps** for a Feature are complete (including implement, verify, and merge):
+Updates are distributed across the pipeline steps (see the Update table above for per-step triggers). The following summarizes the cumulative effect after a Feature completes all steps:
 
-1. **Update entity-registry.md**: Reflect entities from the data-model.md finalized in the plan
-2. **Update api-registry.md**: Reflect APIs from the contracts/ finalized in the plan
-3. **Update roadmap.md**: Change the Feature status to `completed`
+**After plan** (Update step):
+1. **entity-registry.md**: Reflect new/changed entities from `data-model.md`
+2. **api-registry.md**: Reflect new/changed APIs from `contracts/`
+
+**After implement** (Update step):
+3. **roadmap.md**: Change the Feature status to `completed`
 4. **Impact analysis on subsequent Feature pre-context.md**:
    - Find pre-context.md of subsequent Features that reference changed/added entities
    - Find pre-context.md of subsequent Features that consume changed/added APIs
    - Update the relevant sections in the affected pre-context.md files
    - Report the updates to the user
-5. **Update sdd-state.md**: Record the completion time and result for each step
+
+**After verify** (Update step):
+5. **sdd-state.md**: Record verification results (test/build/lint/cross-Feature)
+
+**After verify, before merge** (Merge Checkpoint):
 6. **Merge Feature branch to main**: See [Git Branch Management](#git-branch-management)
    - Commit all Global Evolution Layer updates on the Feature branch
    - Present merge summary to user (HARD STOP)
    - Merge to main after user approval
+   - **sdd-state.md**: Record merge completion, update Feature Mapping, change Feature Status to `completed`
    - Return to main branch, ready for the next Feature
 
 #### Next Step Guidance (after each Feature completion)
@@ -873,7 +884,7 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 | Command | Prerequisite | Validation Method |
 |---------|-------------|-------------------|
 | `constitution` | constitution-seed exists | Check existence of `BASE_PATH/constitution-seed.md` |
-| `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]/pre-context.md`. Verify current branch is `main` (spec-kit will create the Feature branch) |
+| `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]-[name]/pre-context.md`. Verify current branch is `main` (spec-kit will create the Feature branch) |
 | `plan` | spec.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/spec.md`. Verify current branch matches the Feature |
 | `tasks` | plan.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/plan.md`. Verify current branch matches the Feature |
 | `analyze` | tasks.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/tasks.md`. Verify current branch matches the Feature |
@@ -945,11 +956,11 @@ Output format varies by scope:
 Origin: [greenfield | reverse-spec]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | specify | plan | tasks | impl | verify | merge | Status
-----------------|---------|------|-------|------|--------|-------|----------
-F001-auth       |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅  | completed
-F002-product    |   ✅    |  🔄  |       |      |        |      | in_progress
-F003-cart       |         |      |       |      |        |      | pending
+Feature         | specify | plan | tasks | analyze | implement | verify | merge | Status
+----------------|---------|------|-------|---------|-----------|--------|-------|----------
+F001-auth       |   ✅    |  ✅  |  ✅   |   ✅    |    ✅     |   ✅   |  ✅  | completed
+F002-product    |   ✅    |  🔄  |       |         |           |        |      | in_progress
+F003-cart       |         |      |       |         |           |        |      | pending
 
 Active: 1/3 completed, 1/3 in progress
 ```
@@ -962,12 +973,12 @@ Origin: [greenfield | reverse-spec]
 Scope: core | Active Tiers: [T1 | T1,T2 | T1,T2,T3]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify | merge | Status
-----------------|------|---------|------|-------|------|--------|-------|----------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅  | completed
-F002-product    | T1   |   ✅    |  🔄  |       |      |        |      | in_progress
-F003-cart       | T2   |         |      |       |      |        |      | 🔒 deferred
-F004-payment    | T2   |         |      |       |      |        |      | 🔒 deferred
+Feature         | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status
+----------------|------|---------|------|-------|---------|-----------|--------|-------|----------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |   ✅    |    ✅     |   ✅   |  ✅  | completed
+F002-product    | T1   |   ✅    |  🔄  |       |         |           |        |      | in_progress
+F003-cart       | T2   |         |      |       |         |           |        |      | 🔒 deferred
+F004-payment    | T2   |         |      |       |         |           |        |      | 🔒 deferred
 
 Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
 💡 Use /smart-sdd expand to activate deferred Features
@@ -1322,7 +1333,7 @@ Running `/smart-sdd analyze [FID]` executes `speckit-analyze` to verify cross-ar
 Running `/smart-sdd verify [FID]` performs post-implementation verification. This step runs **after implement** to validate that the actual code works correctly and is consistent with the broader project.
 
 ### Phase 1: Execution Verification
-- Run tests: Check and execute the project's test command from `sdd-state.md`
+- Run tests: Detect and execute the project's test command (from `package.json` scripts, `pyproject.toml`, `Makefile`, etc.)
 - Build check: Run the build command and confirm no errors
 - Lint check: Run the lint tool if configured
 

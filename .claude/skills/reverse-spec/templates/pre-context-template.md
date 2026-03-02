@@ -1,7 +1,7 @@
 # Pre-Context: [Feature Name]
 
 **Feature ID**: [F00N]
-**Tier**: [Tier 1 / Tier 2 / Tier 3 (Core scope) | N/A (Full scope)]
+**Tier**: [Tier 1 / Tier 2 / Tier 3 (Core scope only — omit this line for Full scope)]
 **Generated**: [DATE]
 
 ---

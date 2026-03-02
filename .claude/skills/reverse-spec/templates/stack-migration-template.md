@@ -2,7 +2,7 @@
 
 **Source Project**: [Original project path]
 **Generated**: [DATE]
-**Decision Made In**: Phase 3-4 (Stack Strategy Details)
+**Decision Made In**: Phase 1-6 (Stack Strategy Details)
 
 ---
 

@@ -37,19 +37,19 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 **Full scope** (no Tier column):
 
-| Feature ID | Feature Name | specify | plan | tasks | implement | verify | merge | Status |
-|------------|-------------|---------|------|-------|-----------|--------|-------|--------|
-| F001 | auth | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
-| F002 | product | ✅ 01-18 | 🔄 | | | | | in_progress |
-| F003 | order | | | | | | | pending |
+| Feature ID | Feature Name | specify | plan | tasks | analyze | implement | verify | merge | Status |
+|------------|-------------|---------|------|-------|---------|-----------|--------|-------|--------|
+| F001 | auth | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
+| F002 | product | ✅ 01-18 | 🔄 | | | | | | in_progress |
+| F003 | order | | | | | | | | pending |
 
 **Core scope** (with Tier column):
 
-| Feature ID | Feature Name | Tier | specify | plan | tasks | implement | verify | merge | Status |
-|------------|-------------|------|---------|------|-------|-----------|--------|-------|--------|
-| F001 | auth | T1 | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
-| F002 | product | T1 | ✅ 01-18 | 🔄 | | | | | in_progress |
-| F003 | order | T2 | | | | | | | deferred |
+| Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
+|------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
+| F001 | auth | T1 | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
+| F002 | product | T1 | ✅ 01-18 | 🔄 | | | | | | in_progress |
+| F003 | order | T2 | | | | | | | | deferred |
 
 ### Step Status Icons
 - ✅ : Completed (followed by completion date MM-DD)
@@ -78,6 +78,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 | specify | completed | 2024-01-15T10:00:00 | 2024-01-15T10:30:00 | 5 FRs, 8 SCs |
 | plan | completed | 2024-01-16T09:00:00 | 2024-01-16T11:00:00 | 3 entities, 5 APIs |
 | tasks | completed | 2024-01-16T11:30:00 | 2024-01-16T12:00:00 | 12 tasks |
+| analyze | completed | 2024-01-16T12:30:00 | 2024-01-16T12:45:00 | No CRITICAL issues |
 | implement | completed | 2024-01-17T09:00:00 | 2024-01-17T16:00:00 | |
 | verify | completed | 2024-01-17T16:30:00 | 2024-01-17T17:00:00 | Tests 24/24 passed |
 | merge | completed | 2024-01-17T17:05:00 | 2024-01-17T17:06:00 | Branch 001-auth → main |
@@ -189,9 +190,11 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Mark the Feature as `✅` in the Merged column of the Feature Mapping table
 - Add update history to the Global Evolution Log
 
-### When a Step is Skipped (e.g., clarify not needed)
+### When a Step is Skipped (e.g., analyze has no CRITICAL issues)
 - Change the corresponding cell to ⏭️
 - Record the skip reason in the Feature Detail Log
+
+> **Note on `clarify`**: `clarify` is a conditional sub-step of `specify` — it runs only when ambiguity markers are found in the spec. It is NOT tracked as a separate column in the Feature Progress table. If clarify was executed, note it in the Feature Detail Log under the `specify` row (e.g., "5 FRs, 8 SCs (clarify executed)").
 
 ### When Scope is Expanded (via /smart-sdd expand — core scope only)
 - Update the `Active Tiers` field to the new value (e.g., `T1` → `T1,T2`)

@@ -10,7 +10,7 @@ This document explains how to utilize the outputs of the `/reverse-spec` skill w
 |--------------------|-----------------|-----------|
 | `constitution-seed.md` | `/speckit.constitution` | Load as a draft to establish principles. Reflect architecture principles and source reference strategies extracted from existing code into the constitution |
 | `roadmap.md` Feature Catalog | `/speckit.specify` | Input source for Feature descriptions. Select implementation targets from the tier-based Feature list and use the descriptions as input |
-| `pre-context.md` → For /speckit.specify | `/speckit.specify` | Use as drafts for spec.md Requirements (FR-###) and Success Criteria (SC-###) |
+| `pre-context.md` → For /speckit.specify | `/speckit.specify` | Use as drafts for spec.md Requirements (FR-###) and Success Criteria (SC-###). Also provides existing user scenarios and edge cases |
 | `entity-registry.md` | `/speckit.plan` | Global entity reference when writing data-model.md. Prevents cross-Feature entity conflicts |
 | `api-registry.md` | `/speckit.plan` | Global API contract reference when writing contracts/. Ensures cross-Feature API consistency |
 | `pre-context.md` → For /speckit.plan | `/speckit.plan` | Reference for preceding Feature dependencies, related entity/API drafts, and technical decisions |
@@ -48,9 +48,11 @@ For each Feature:
      - Check related entity schemas in entity-registry.md
      - Check related API contracts in api-registry.md
      - Design reflecting preceding Feature dependencies
-  4. /speckit.tasks → /speckit.implement
+  4. /speckit.tasks → /speckit.analyze (cross-artifact consistency check) → /speckit.implement
   5. After completion: Update entity-registry.md and api-registry.md to the latest state
 ```
+
+> **Tip**: `/smart-sdd pipeline` automates the above workflow with cross-Feature context injection at each step. See the `/smart-sdd` skill for details.
 
 ---
 

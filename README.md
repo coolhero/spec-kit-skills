@@ -128,6 +128,8 @@ Performs deep code analysis using patterns appropriate for the tech stack. Utili
 | JPA/Hibernate | `@Entity` classes |
 | Mongoose | Schema definitions |
 | Rails | `app/models/`, migrations |
+| Sequelize | Model definitions, migrations |
+| Go | Struct definitions + DB tags (GORM, sqlx) |
 
 Information extracted per entity: Fields (name, type, constraints), Relationships (1:1, 1:N, M:N), Validation rules, State transitions, Indexes
 
@@ -140,6 +142,8 @@ Information extracted per entity: Fields (name, type, constraints), Relationship
 | FastAPI | `@app.get()`, `@router.post()` decorators |
 | Spring | `@RequestMapping`, `@GetMapping`, etc. |
 | Next.js/Nuxt | `pages/api/`, `app/api/` directories |
+| Rails | `config/routes.rb`, controllers |
+| Go (net/http, Gin, Echo) | Router registration, handler functions |
 
 Information extracted per endpoint: HTTP method/path, Request/Response schema, Authentication/Authorization requirements, Middleware
 
@@ -191,17 +195,19 @@ Generates hierarchical artifacts based on the finalized analysis results.
 #### Artifact Structure
 
 ```
-[current-working-directory]/specs/reverse-spec/
-├── roadmap.md                           # Feature evolution map + Tier classification + Release plan
-├── constitution-seed.md                 # Constitution draft (source reference principles + Best Practices)
-├── entity-registry.md                   # Shared entity registry
-├── api-registry.md                      # API contract registry
-├── business-logic-map.md                # Business logic map
-├── stack-migration.md                   # Stack migration plan (only for new stack)
-└── features/
-    ├── F001-auth/pre-context.md         # Per-Feature spec-kit cross-reference info
-    ├── F002-product/pre-context.md
-    └── ...
+[current-working-directory]/
+├── .env.example                                 # (if env vars detected)
+└── specs/reverse-spec/
+    ├── roadmap.md                               # Feature evolution map + Tier classification + Release plan
+    ├── constitution-seed.md                     # Constitution draft (source reference principles + Best Practices)
+    ├── entity-registry.md                       # Shared entity registry
+    ├── api-registry.md                          # API contract registry
+    ├── business-logic-map.md                    # Business logic map
+    ├── stack-migration.md                       # Stack migration plan (only for new stack)
+    └── features/
+        ├── F001-auth/pre-context.md             # Per-Feature spec-kit cross-reference info
+        ├── F002-product/pre-context.md
+        └── ...
 ```
 
 #### Artifact Details
@@ -223,6 +229,8 @@ Pre-prepares information needed for spec-kit's 3 core commands in dedicated sect
 | Section | Target Command | Content |
 |---------|---------------|---------|
 | Source Reference | All | Related original file list + per-stack strategy reference guide (Implementation Reference vs Logic-Only Reference) |
+| Static Resources | All | Non-code files (images, fonts, i18n) used by this Feature with source/target paths |
+| Environment Variables | All | Variables this Feature requires at runtime (Feature-owned and shared) |
 | For /speckit.specify | `/speckit-specify` | Existing feature summary, user scenarios, draft requirements (FR-###), draft acceptance criteria (SC-###), edge cases |
 | For /speckit.plan | `/speckit-plan` | Preceding Feature dependencies, owned/referenced entity schema drafts, provided/consumed API contract drafts, technical decisions |
 | For /speckit.analyze | `/speckit-analyze` | Cross-Feature verification points (entity compatibility, API contract compatibility, business rule consistency), impact scope on change |
@@ -374,28 +382,29 @@ Phase 1~N: Progress Features in Release Group Order
        4. tasks    -> /speckit-tasks
        5. analyze  -> /speckit-analyze (cross-artifact consistency check before implement)
        6. implement -> Per-Feature env var check (HARD STOP if missing) -> /speckit-implement
-       7. verify   -> 3-phase verification (Test/Build/Lint + Cross-Feature consistency + Global Evolution update)
+       7. verify   -> 4-phase verification (Test/Build/Lint + Cross-Feature consistency + Demo-Ready + Global Evolution update)
        8. merge    -> Checkpoint (HARD STOP) -> Merge Feature branch to main
 ```
 
 #### Post-Feature Completion Processing
 
-Tasks automatically performed by smart-sdd when all steps for a Feature are complete:
+Tasks automatically performed by smart-sdd at different pipeline steps:
 
-| Processing Item | Content |
-|----------------|---------|
-| entity-registry.md update | Reflect new entities/changes from `data-model.md` finalized in the plan |
-| api-registry.md update | Reflect new APIs/changes from `contracts/` finalized in the plan |
-| roadmap.md update | Change Feature status to `completed` |
-| Subsequent Feature pre-context.md impact analysis | Automatically update pre-context of subsequent Features affected by changed/added entities/APIs and report to user |
-| sdd-state.md update | Record completion time and results for each step |
-| Feature branch merge | Commit all updates on the Feature branch, then merge to main after user confirmation (HARD STOP). Next Feature starts from main |
+| Timing | Processing Item | Content |
+|--------|----------------|---------|
+| After **plan** | entity-registry.md update | Reflect new entities/changes from `data-model.md` finalized in the plan |
+| After **plan** | api-registry.md update | Reflect new APIs/changes from `contracts/` finalized in the plan |
+| After **implement** | roadmap.md update | Change Feature status to `completed` |
+| After **implement** | Subsequent Feature pre-context.md impact analysis | Automatically update pre-context of subsequent Features affected by changed/added entities/APIs and report to user |
+| After **verify** | sdd-state.md update | Record completion time and results for each step |
+| After **verify** | entity-registry/api-registry verification | Verify consistency between registries and actual implementation; update if discrepancies found |
+| After **verify** | Feature branch merge | Commit all updates on the Feature branch, then merge to main after user confirmation (HARD STOP). Next Feature starts from main |
 
 #### Pre-Implementation Analysis (analyze step)
 
 After tasks are generated, `speckit-analyze` runs a READ-ONLY consistency check across spec.md, plan.md, and tasks.md. CRITICAL issues block implementation; other findings are informational.
 
-#### 3-Phase Verification (verify step)
+#### 4-Phase Verification (verify step)
 
 ```
 Phase 1: Execution Verification (Code Level)
@@ -405,7 +414,13 @@ Phase 2: Cross-Feature Consistency Verification
     +-- Check cross-verification points in pre-context.md
     +-- Analyze whether shared entities/APIs changed by this Feature affect other Features
 
-Phase 3: Global Evolution Update
+Phase 3: Demo-Ready Verification (only if Demo-Ready Delivery is in the constitution)
+    +-- Check demos/F00N-name.md exists and is complete
+    +-- Verify demo surface (CLI command, demo script, or demo page) is functional
+    +-- Verify Demo Components table documents all demo-specific code
+    +-- Check component markers (@demo-only / @demo-scaffold) are present
+
+Phase 4: Global Evolution Update
     +-- Verify consistency between entity-registry/api-registry and actual implementation; update if discrepancies found
     +-- Record verification results in sdd-state.md
 ```
@@ -426,12 +441,12 @@ Origin: [greenfield | reverse-spec]
 Scope: core | Active Tiers: T1
 Constitution: ✅ v1.0.0 (2024-01-15)
 
-Feature         | Tier | specify | plan | tasks | impl | verify | merge | Status
-----------------|------|---------|------|-------|------|--------|-------|----------
-F001-auth       | T1   |   ✅    |  ✅  |  ✅   |  ✅  |   ✅   |  ✅  | completed
-F002-product    | T1   |   ✅    |  🔄  |       |      |        |      | in_progress
-F003-order      | T2   |         |      |       |      |        |      | 🔒 deferred
-F004-payment    | T2   |         |      |       |      |        |      | 🔒 deferred
+Feature         | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status
+----------------|------|---------|------|-------|---------|-----------|--------|-------|----------
+F001-auth       | T1   |   ✅    |  ✅  |  ✅   |   ✅    |    ✅     |   ✅   |  ✅  | completed
+F002-product    | T1   |   ✅    |  🔄  |       |         |           |        |      | in_progress
+F003-order      | T2   |         |      |       |         |           |        |      | 🔒 deferred
+F004-payment    | T2   |         |      |       |         |           |        |      | 🔒 deferred
 
 Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
 💡 Use /smart-sdd expand to activate deferred Features
@@ -547,7 +562,7 @@ The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` inc
 1. /smart-sdd add
    +-- Phase 1: Current project state
    |   +-- Features: 4 total (3 completed, 1 pending)
-   |   +-- Entities: 8 defined, APIs: 22 defined
+   |   +-- Entities: 8 defined, APIs: 23 defined
    +-- Phase 2: Define new Feature(s) interactively
    |   +-- F005-notification (Tier 2): Real-time notifications for task updates
    |   |   +-- Depends on: F001-auth (User entity), F003-task (Task events)

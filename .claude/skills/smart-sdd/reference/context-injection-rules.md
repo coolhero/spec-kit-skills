@@ -154,7 +154,7 @@ To resolve file paths at runtime:
 
 When a completed preceding Feature exists and the current Feature depends on it:
 1. Check the dependency relationship in `BASE_PATH/roadmap.md`
-2. If the preceding Feature's `SPEC_PATH/[feature-name]/spec.md` exists, reference the relevant requirements
+2. If the preceding Feature's `SPEC_PATH/[NNN-feature]/spec.md` exists, reference the relevant requirements
 3. Display "Preceding Feature [FID] spec referenced" information at the Checkpoint
 
 ### Checkpoint Display Content
@@ -247,7 +247,7 @@ After `speckit-specify` completes:
 | `BASE_PATH/entity-registry.md` | Related entity sections | See rules below |
 | `BASE_PATH/api-registry.md` | Related API sections | See rules below |
 | `BASE_PATH/stack-migration.md` | Category Details + Per-Feature row | **Only if New Stack strategy**. See rules below |
-| `SPEC_PATH/[feature-name]/spec.md` | Entire file | Finalized spec for the current Feature |
+| `SPEC_PATH/[NNN-feature]/spec.md` | Entire file | Finalized spec for the current Feature |
 
 ### Entity Registry Filtering Rules
 
@@ -282,7 +282,7 @@ This context helps the plan step make technology decisions aligned with the new 
 
 Reference the actual implementation results of dependent preceding Features:
 1. Check the dependency relationship in `BASE_PATH/roadmap.md`
-2. If the preceding Feature's `SPEC_PATH/[feature-name]/plan.md` exists:
+2. If the preceding Feature's `SPEC_PATH/[NNN-feature]/plan.md` exists:
    - Read the finalized schema for shared entities from `data-model.md`
    - Read the finalized contract for APIs to consume from `contracts/`
 3. This information **takes precedence over** the drafts in entity-registry/api-registry
@@ -390,7 +390,7 @@ After `speckit-plan` completes:
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `SPEC_PATH/[feature-name]/plan.md` | Entire file | Current Feature |
+| `SPEC_PATH/[NNN-feature]/plan.md` | Entire file | Current Feature |
 
 ### Injected Content
 
@@ -437,9 +437,9 @@ After `speckit-tasks` completes:
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `SPEC_PATH/[feature-name]/spec.md` | Entire file | Current Feature |
-| `SPEC_PATH/[feature-name]/plan.md` | Entire file | Current Feature |
-| `SPEC_PATH/[feature-name]/tasks.md` | Entire file | Current Feature |
+| `SPEC_PATH/[NNN-feature]/spec.md` | Entire file | Current Feature |
+| `SPEC_PATH/[NNN-feature]/plan.md` | Entire file | Current Feature |
+| `SPEC_PATH/[NNN-feature]/tasks.md` | Entire file | Current Feature |
 
 ### Injected Content
 
@@ -510,7 +510,7 @@ After `speckit-analyze` completes:
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `SPEC_PATH/[feature-name]/tasks.md` | Entire file | Current Feature |
+| `SPEC_PATH/[NNN-feature]/tasks.md` | Entire file | Current Feature |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Static Resources" section | **If present and non-empty** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
 
@@ -658,7 +658,7 @@ After `speckit-implement` completes:
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.analyze" section | Cross-Feature verification points (entity compatibility, API contracts) |
 | `BASE_PATH/entity-registry.md` | Entities modified by the Feature | Change tracking |
 | `BASE_PATH/api-registry.md` | APIs modified by the Feature | Change tracking |
-| `SPEC_PATH/[feature-name]/` | data-model.md, contracts/ | Actual implementation results |
+| `SPEC_PATH/[NNN-feature]/` | data-model.md, contracts/ | Actual implementation results |
 
 ### Injected Content
 
@@ -705,6 +705,49 @@ Review the verification plan. You can:
   - Add or remove verification items
 ```
 
+### Review Display Content
+
+After verification execution completes:
+
+**Display format**:
+```
+📋 Review: Verification results for [FID] - [Feature Name]
+
+── Phase 1: Execution Verification ───────────────
+  Tests: [passed count]/[total count] passed
+  Build: [success/failure]
+  Lint: [success/failure/not configured]
+
+── Phase 2: Cross-Feature Consistency ─────────────
+[Results for each cross-verification point]
+  - ✅/❌ Entity compatibility: [result]
+  - ✅/❌ API contract compatibility: [result]
+  - ✅/❌ Business rule consistency: [result]
+
+── Phase 3: Demo-Ready Verification ───────────────
+[Only if Demo-Ready Delivery is in the constitution]
+  - ✅/❌ demos/F00N-name.md exists
+  - ✅/❌ Demo surface implemented
+  - ✅/❌ Demo Components table present
+  - ✅/❌ Component markers present
+
+── Phase 4: Global Evolution Consistency ───────────
+  - entity-registry: [match/discrepancies found]
+  - api-registry: [match/discrepancies found]
+
+──────────────────────────────────────────────────
+```
+
+**If any Phase fails**:
+- Display: "❌ Verification failed. Issues must be resolved before merge."
+- Options: "Fix issues and re-verify", "View full report"
+
+**If all Phases pass**:
+- Display: "✅ All verification checks passed."
+- Options: "Approve and proceed to merge", "Review details", "Re-run verification"
+
+**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to merge without explicit approval.
+
 ---
 
 ## Post-Step Update Rules Detail
@@ -733,7 +776,11 @@ Review the verification plan. You can:
 
 ### After Verify Completion
 
-1. Record the verification results in `BASE_PATH/sdd-state.md`:
+1. Verify entity-registry.md and api-registry.md match the actual implementation:
+   - Compare `SPEC_PATH/[NNN-feature]/data-model.md` with `BASE_PATH/entity-registry.md`
+   - Compare `SPEC_PATH/[NNN-feature]/contracts/` with `BASE_PATH/api-registry.md`
+   - Update registries if discrepancies are found
+2. Record the verification results in `BASE_PATH/sdd-state.md`:
    - Test results (pass/fail, execution time)
    - Build results
    - Cross-Feature verification results
