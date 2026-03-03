@@ -16,6 +16,9 @@ This document explains how to utilize the outputs of the `/reverse-spec` skill w
 | `pre-context.md` → For /speckit.plan | `/speckit.plan` | Reference for preceding Feature dependencies, related entity/API drafts, and technical decisions |
 | `business-logic-map.md` | `/speckit.specify` | Prevents omission of existing business rules. Checks that all rules are reflected when writing specs |
 | `pre-context.md` → For /speckit.analyze | `/speckit.analyze` | Cross-Feature validation points to verify consistency between Features |
+| `coverage-baseline.md` | `/smart-sdd parity` | Used for intentional exclusion filtering during parity checks |
+| `stack-migration.md` | `/speckit.plan` | Referenced for migration implications when planning Feature implementation |
+| `.env.example` | Project setup | Used during project setup for environment variable configuration |
 
 ---
 

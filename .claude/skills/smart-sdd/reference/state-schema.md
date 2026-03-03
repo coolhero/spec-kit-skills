@@ -101,6 +101,8 @@ Mapping table between Feature ID, spec-kit Feature Name (directory name), and gi
 | F001 | 001-auth | specs/001-auth/ | 001-auth | ✅ |
 | F002 | 002-product | specs/002-product/ | 002-product | |
 
+> **Population timing**: Feature ID is set when Feature is created (init/add). spec-kit Name, Path, and Branch are set after `specify` completes (spec-kit creates the branch during specify). Merged is set to ✅ after `merge` completes.
+
 ---
 
 ## Global Evolution Log
@@ -204,6 +206,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 ### When a Step is Skipped (e.g., analyze has no CRITICAL issues)
 - Change the corresponding cell to ⏭️
 - Record the skip reason in the Feature Detail Log
+- Update `Last Updated`
 
 > **Note on `clarify`**: `clarify` is a conditional sub-step of `specify` — it runs only when ambiguity markers are found in the spec. It is NOT tracked as a separate column in the Feature Progress table. If clarify was executed, note it in the Feature Detail Log under the `specify` row (e.g., "5 FRs, 8 SCs (clarify executed)").
 
@@ -226,6 +229,13 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Change `deferred` Features whose Tier matches the newly activated Tiers to `pending`
 - Record the expansion in Global Evolution Log: "Scope expanded: T1 → T1,T2"
 - Note: This rule only applies to `core` scope projects. `full` scope has no deferred Features.
+- Update `Last Updated`
+
+### When Features are Added (via /smart-sdd add)
+- Add new Feature rows to Feature Progress table (all step cells blank, Status = `pending`)
+- Add new Feature rows to Feature Mapping table (Feature ID filled, spec-kit Name/Path/Branch blank until specify)
+- Record "Feature F{NNN}-{name} added" in Global Evolution Log
+- Update `Last Updated`
 
 ### When Parity Check is Executed (via /smart-sdd parity)
 - Add a new entry to the Parity Check Log with:
@@ -257,9 +267,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - The 🔀 is replaced by 🔄, then ✅ upon completion
 - When all 🔀 steps are re-executed successfully, change Status from `restructured` to `in_progress` or `completed` as appropriate
 
----
-
-## Verification Result Recording
+### When Verify Step Completes — Result Recording
 
 When the verify step is completed, record the following information in the Notes column of the Feature Detail Log:
 

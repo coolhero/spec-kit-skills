@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-03 15:52 KST
+[English README](README.md) | Last updated: 2026-03-03 16:11 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -191,22 +191,7 @@ Core scope에서는 각 Feature를 **5가지 분석 축**으로 종합 평가합
 
 #### 산출물 구조
 
-```
-[current-working-directory]/
-├── .env.example                                # 탐지된 환경 변수 템플릿 (rebuild 시 자동 생성)
-└── specs/reverse-spec/
-    ├── roadmap.md                              # Feature 진화 맵 + Tier 분류 + 릴리즈 계획
-    ├── constitution-seed.md                    # constitution 초안 (소스 참조 원칙 + Best Practices)
-    ├── entity-registry.md                      # 공유 엔티티 레지스트리
-    ├── api-registry.md                         # API 계약 레지스트리
-    ├── business-logic-map.md                   # 비즈니스 로직 맵
-    ├── stack-migration.md                      # 스택 마이그레이션 계획 (신규 스택 시에만)
-    ├── coverage-baseline.md                    # 소스 커버리지 베이스라인 (rebuild 전용)
-    └── features/
-        ├── F001-auth/pre-context.md            # Feature별 spec-kit 교차참조 정보
-        ├── F002-product/pre-context.md
-        └── ...
-```
+전체 디렉토리 구조는 아래 [Global Evolution Layer 산출물 구조](#global-evolution-layer-artifact-structure) 참조. 주요 산출물: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-registry.md`, `business-logic-map.md`, Feature별 `pre-context.md` (`features/` 하위).
 
 #### 산출물 상세
 
@@ -514,6 +499,8 @@ specs/reverse-spec/
     └── ...
 ```
 
+> 환경 변수가 탐지된 경우 프로젝트 루트에 `.env.example`도 생성됩니다.
+
 ---
 
 ## Constitution Best Practices
@@ -549,9 +536,9 @@ specs/reverse-spec/
    │   │   B. Standard (5 Features) — 권장 ← 선택됨
    │   │   C. Fine (9 Features): register, login, workspace, task-crud, ...
    │   ├─ F001-auth: 사용자 인증 및 팀 관리
-   │   ├─ F002-project: 프로젝트 CRUD 및 멤버 관리
-   │   ├─ F003-task: 태스크 CRUD, 상태 전이, 담당자 배정
-   │   ├─ F004-dashboard: 프로젝트/태스크 현황 대시보드
+   │   ├─ F002-workspace: 팀 워크스페이스, 멤버 관리
+   │   ├─ F003-task: 태스크 CRUD, 담당자 배정, 상태 추적
+   │   ├─ F004-board: 칸반 보드 뷰, 드래그 앤 드롭
    │   └─ F005-notification: 태스크 변경 알림
    ├─ Phase 3: Constitution Seed 정의
    │   └─ 6개 Best Practices 전체 채택 + 프로젝트 컨벤션 추가
@@ -566,10 +553,10 @@ specs/reverse-spec/
    │   └─ F001-auth → specify → plan → tasks → implement → verify
    │       └─ Update: entity-registry에 User, Team 확정 반영
    ├─ Release 2 (Core):
-   │   ├─ F002-project → (User 참조) → specify → ... → verify
-   │   └─ F003-task → (Project 참조) → specify → ... → verify
+   │   ├─ F002-workspace → (User 참조) → specify → ... → verify
+   │   └─ F003-task → (Workspace 참조) → specify → ... → verify
    ├─ Release 3 (Enhancement):
-   │   ├─ F004-dashboard → specify → ... → verify
+   │   ├─ F004-board → specify → ... → verify
    │   └─ F005-notification → specify → ... → verify
    └─ 전체 완료
 ```
@@ -796,7 +783,9 @@ spec-kit-skills/
         │   │   ├── api-registry-template.md              # API 계약 레지스트리 템플릿
         │   │   ├── business-logic-map-template.md        # 비즈니스 로직 맵 템플릿
         │   │   ├── constitution-seed-template.md         # Constitution 초안 템플릿
-        │   │   └── pre-context-template.md               # Feature별 교차참조 정보 템플릿
+        │   │   ├── coverage-baseline-template.md        # 소스 커버리지 베이스라인 템플릿
+        │   │   ├── pre-context-template.md               # Feature별 교차참조 정보 템플릿
+        │   │   └── stack-migration-template.md           # 스택 마이그레이션 계획 템플릿
         │   └── reference/
         │       └── speckit-compatibility.md              # spec-kit 연계 가이드
         └── smart-sdd/

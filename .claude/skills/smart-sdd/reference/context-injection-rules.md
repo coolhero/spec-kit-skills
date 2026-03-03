@@ -2,6 +2,18 @@
 
 This document defines which sections of which files smart-sdd reads and injects as context before executing each spec-kit command.
 
+## Shared Patterns
+
+The following patterns apply to ALL commands below:
+
+**HARD STOP pattern**: Every Review section ends with a HARD STOP. The canonical procedure is defined in SKILL.md Step 4b (ReviewApproval). Per-command sections below only specify the **options** — the LOOP/re-ask/empty-response handling is always the same.
+
+**"Files You Can Edit" block**: Every Review display includes a "Files You Can Edit" block listing the exact artifact paths. The user can edit these files externally, then select "I've finished editing" to continue.
+
+**Checkpoint pattern**: All Checkpoints are HARD STOPs per SKILL.md Step 2. Even simplified Checkpoints (single-line message) require AskUserQuestion and WAIT.
+
+---
+
 **BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
 **SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
 
@@ -109,7 +121,7 @@ You can open and edit this file directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
 
 ---
 
@@ -241,7 +253,7 @@ You can open and edit this file directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
 
 ---
 
@@ -318,7 +330,7 @@ You can open and edit this file directly, then select
 
 **If remaining ambiguities exist**: Offer to re-run clarify or proceed.
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Run clarify again", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+**HARD STOP** (ReviewApproval): Options: "Approve", "Run clarify again", "I've finished editing"
 
 ---
 
@@ -471,7 +483,7 @@ You can open and edit these files directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
 
 ---
 
@@ -522,7 +534,7 @@ You can open and edit this file directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
 
 ---
 
@@ -601,9 +613,9 @@ directly, then select "I've finished editing" to re-analyze.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with the following options and WAIT. **Empty/blank response = NOT approval — re-ask.**
-- If CRITICAL issues: options "Resolve now (re-run specify/plan/tasks)", "I've finished editing", "View full report"
-- If no CRITICAL issues: options "Approve", "Address issues first", "I've finished editing"
+**HARD STOP** (ReviewApproval):
+- If CRITICAL issues: Options: "Resolve now", "I've finished editing", "View full report"
+- If no CRITICAL issues: Options: "Approve", "Address issues first", "I've finished editing"
 
 ---
 
@@ -750,7 +762,7 @@ You can open and edit any of these files directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
 
 ---
 
@@ -865,9 +877,9 @@ If issues were found, you can fix them directly, then select
 **If all Phases pass**:
 - Display: "✅ All verification checks passed."
 
-**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with the following options and WAIT. **Empty/blank response = NOT approval — re-ask.**
-- If failed: options "Fix issues and re-verify", "I've finished editing", "View full report"
-- If passed: options "Approve", "I've finished editing", "Re-run verification"
+**HARD STOP** (ReviewApproval):
+- If any phase failed: Options: "Fix issues and re-verify", "I've finished editing", "View full report"
+- If all phases passed: Options: "Approve", "I've finished editing", "Re-run verification"
 
 ---
 
@@ -927,19 +939,11 @@ No Checkpoint/Review cycle. The parity command displays progress after each of i
 
 ### After Constitution Completion
 
-1. Update `BASE_PATH/sdd-state.md`:
-   - Set Constitution Status to `completed`
-   - Set Constitution Version to the version from the generated file (e.g., `1.0.0`)
-   - Set Constitution Completed At to current ISO 8601 timestamp
-   - Add entry to Constitution Update Log: "Initial finalization"
-2. Update `Last Updated` in sdd-state.md
+Update `sdd-state.md` per [state-schema.md → When Constitution is Finalized](state-schema.md). No Global Evolution Layer artifact updates.
 
 ### After Analyze Completion
 
-1. Update `BASE_PATH/sdd-state.md`:
-   - Record analysis results in Feature Detail Log: number of issues found, severity levels (CRITICAL/WARNING/INFO)
-   - If CRITICAL issues exist, note them in the Feature Detail Log
-2. No Global Evolution Layer artifacts are updated during analyze (registries are not modified)
+Update `sdd-state.md` per generic step-completion rules in [state-schema.md](state-schema.md). Record analysis results (issue count, severity) in Feature Detail Log. No Global Evolution Layer artifact updates.
 
 ### After Plan Completion
 
@@ -984,3 +988,13 @@ No Checkpoint/Review cycle. The parity command displays progress after each of i
    - Record in Global Evolution Log: "Branch {NNN}-{short-name} merged to main"
 2. Verify that main branch is clean after merge (`git status`)
 3. The next Feature's `specify` step can now be started from the main branch
+
+### After Specify Completion
+
+Update `sdd-state.md` per generic step-completion rules in [state-schema.md](state-schema.md). Additionally:
+- Populate the Feature Mapping table: record spec-kit Name, spec-kit Path, and Branch (spec-kit creates the branch during specify)
+- No Global Evolution Layer artifact updates
+
+### After Tasks Completion
+
+Update `sdd-state.md` per generic step-completion rules in [state-schema.md](state-schema.md). No Global Evolution Layer artifact updates.

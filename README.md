@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-03 15:52 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-03 16:11 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -194,22 +194,7 @@ Generates hierarchical artifacts based on the finalized analysis results.
 
 #### Artifact Structure
 
-```
-[current-working-directory]/
-├── .env.example                                 # (if env vars detected)
-└── specs/reverse-spec/
-    ├── roadmap.md                               # Feature evolution map + Tier classification + Release plan
-    ├── constitution-seed.md                     # Constitution draft (source reference principles + Best Practices)
-    ├── entity-registry.md                       # Shared entity registry
-    ├── api-registry.md                          # API contract registry
-    ├── business-logic-map.md                    # Business logic map
-    ├── stack-migration.md                       # Stack migration plan (only for new stack)
-    ├── coverage-baseline.md                     # Source coverage baseline (rebuild mode only)
-    └── features/
-        ├── F001-auth/pre-context.md             # Per-Feature spec-kit cross-reference info
-        ├── F002-product/pre-context.md
-        └── ...
-```
+See [Global Evolution Layer Artifact Structure](#global-evolution-layer-artifact-structure) below for the complete directory tree. Key outputs: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-registry.md`, `business-logic-map.md`, and per-Feature `pre-context.md` files under `features/`.
 
 #### Artifact Details
 
@@ -517,6 +502,8 @@ specs/reverse-spec/
     └── ...
 ```
 
+> Also generates `.env.example` at the project root if environment variables were detected.
+
 ---
 
 ## Constitution Best Practices
@@ -800,7 +787,9 @@ spec-kit-skills/
         │   │   ├── api-registry-template.md              # API contract registry template
         │   │   ├── business-logic-map-template.md        # Business logic map template
         │   │   ├── constitution-seed-template.md         # Constitution draft template
-        │   │   └── pre-context-template.md               # Per-Feature cross-reference info template
+        │   │   ├── coverage-baseline-template.md        # Source coverage baseline template
+        │   │   ├── pre-context-template.md               # Per-Feature cross-reference info template
+        │   │   └── stack-migration-template.md           # Stack migration plan template
         │   └── reference/
         │       └── speckit-compatibility.md              # spec-kit integration guide
         └── smart-sdd/

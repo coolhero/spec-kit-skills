@@ -524,24 +524,11 @@ Review the above content. You can:
   - Edit the source files directly before proceeding
 ```
 
-**CRITICAL — Checkpoint is a HARD STOP. You MUST NOT proceed past the Checkpoint without explicit user approval.**
+**HARD STOP**: After displaying the context, call AskUserQuestion with options "Approve as-is" and "Request modifications". STOP and WAIT. Empty/blank response = NOT approval — re-ask. If changes requested, apply and re-ask.
 
-After displaying the assembled context above, you MUST:
-1. Use AskUserQuestion to ask: "Approve and proceed?" with options: "Approve as-is", "Request modifications"
-2. **STOP and WAIT** for the user's response. Do NOT assume approval. Do NOT continue to the Execute step.
-3. Only after the user explicitly responds with approval (selects "Approve as-is" or says "yes"/"proceed"/"approved"), move to the Execute step.
-4. If the user requests changes, apply them, re-display the updated content, and ask again.
-
-**You are NOT allowed to approve on behalf of the user. "User approved" must come from an actual user action, not from your own judgment.**
-
-**Empty or missing response handling**: If AskUserQuestion returns an empty response, a blank string, or no meaningful selection, this is NOT approval. You MUST:
-- Display: "⚠️ No approval received. Please confirm: approve the above context? (yes/no)"
-- STOP and WAIT again. Repeat until a clear affirmative or negative response is received.
-- NEVER interpret silence, empty response, or lack of explicit rejection as implicit approval.
-
-**`--auto` mode**: When `--auto` is specified, the Checkpoint step is skipped. The assembled context is still **displayed** to the user (for transparency), but execution proceeds immediately without waiting for approval. This is the ONLY way to bypass Checkpoints.
-
-**`--dangerously-skip-permissions` environment**: When Claude Code is run with `--dangerously-skip-permissions`, AskUserQuestion may not function. In this case, **Checkpoints are NOT automatically skipped** — instead, the assembled context is displayed and you MUST ask for confirmation via a regular text message: "Do you approve the above context? (yes/no)". You MUST then STOP and WAIT for the user's text response before proceeding. Only `--auto` explicitly opts out of Checkpoints; `--dangerously-skip-permissions` alone does not.
+**Mode overrides**:
+- `--auto`: Skip the HARD STOP. Content is still displayed for transparency but execution proceeds immediately.
+- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Do you approve? yes/no") and WAIT for text response. Checkpoints are NOT auto-skipped — only `--auto` does that.
 
 ### 3. Execute — spec-kit Command Execution
 
@@ -656,13 +643,11 @@ PROCEDURE ReviewApproval:
       CONTINUE LOOP
 ```
 
-**Rules**:
-- You are NOT allowed to approve on behalf of the user.
-- Empty response, blank string, no selection = NOT approval. ALWAYS re-ask.
-- NEVER interpret silence or lack of rejection as implicit approval.
-- `--auto` mode: Skip the LOOP entirely (content from Step 4a is still displayed for transparency).
-- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message asking "Approve / Request modifications / I've finished editing?" and WAIT for text response.
-- **Per-command option overrides**: Some commands use context-specific options instead of the standard set (e.g., Clarify uses "Run clarify again", Analyze uses outcome-dependent options, Verify uses pass/fail-specific options). See [context-injection-rules.md](reference/context-injection-rules.md) for per-command Review Display Content and options.
+**Mode overrides**:
+- `--auto`: Skip the LOOP entirely (Step 4a content is still displayed for transparency).
+- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Approve / Request modifications / I've finished editing?") and WAIT for text response.
+
+**Per-command option overrides**: Some commands use context-specific options (e.g., Clarify: "Run clarify again", Analyze: outcome-dependent, Verify: pass/fail-specific). See [context-injection-rules.md](reference/context-injection-rules.md) for details.
 
 ### 5. Update — Global Evolution Layer Refresh
 
@@ -771,9 +756,7 @@ Display the constitution-seed content per [context-injection-rules.md §1 Checkp
 
 #### Phase 0-3. Execute
 
-Provide the constitution-seed content as context and execute `speckit-constitution`.
-
-**⚠️ AFTER speckit-constitution COMPLETES: DO NOT stop here. DO NOT just show a summary and wait. You MUST immediately continue to Phase 0-4 Review below. The Review is a SEPARATE mandatory step.**
+Provide the constitution-seed content as context and execute `speckit-constitution`. Then immediately proceed to Phase 0-4 Review (per the Execute → Review rule in Common Protocol Step 3).
 
 #### Phase 0-4. Review (HARD STOP — MANDATORY)
 
@@ -891,35 +874,6 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 > **Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names.
 
 > **Git branching**: spec-kit automatically creates a Feature branch during `speckit-specify`. All subsequent steps (plan through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [Git Branch Management](#git-branch-management) for details.
-
-> **Why implement cannot be skipped**: The entire purpose of this pipeline is to produce working, tested code. Specs and plans without implementation have no value. The implement step writes the actual source code, and the verify step confirms it works. Subsequent Features depend on the preceding Feature's **actual implementation** (not just its plan) to ensure cross-Feature consistency.
-
-#### Post-Feature Completion Processing
-
-Updates are distributed across the pipeline steps (see the Update table above for per-step triggers). The following summarizes the cumulative effect after a Feature completes all steps:
-
-**After plan** (Update step):
-1. **entity-registry.md**: Reflect new/changed entities from `data-model.md`
-2. **api-registry.md**: Reflect new/changed APIs from `contracts/`
-
-**After implement** (Update step):
-3. **roadmap.md**: Change the Feature status to `completed`
-4. **Impact analysis on subsequent Feature pre-context.md**:
-   - Find pre-context.md of subsequent Features that reference changed/added entities
-   - Find pre-context.md of subsequent Features that consume changed/added APIs
-   - Update the relevant sections in the affected pre-context.md files
-   - Report the updates to the user
-
-**After verify** (Update step):
-5. **sdd-state.md**: Record verification results (test/build/lint/cross-Feature)
-
-**After verify, before merge** (Merge Checkpoint):
-6. **Merge Feature branch to main**: See [Git Branch Management](#git-branch-management)
-   - Commit all Global Evolution Layer updates on the Feature branch
-   - Present merge summary to user (HARD STOP)
-   - Merge to main after user approval
-   - **sdd-state.md**: Record merge completion, update Feature Mapping, change Feature Status to `completed`
-   - Return to main branch, ready for the next Feature
 
 #### Next Step Guidance (after each Feature completion)
 
@@ -1783,27 +1737,5 @@ If the project directory is not a git repository:
 
 ## Per-Command Context Injection Details
 
-The context sources and content injected per command are defined in [context-injection-rules.md](reference/context-injection-rules.md). Below is a summary.
-
-| Command | Injection Source | Injected Content |
-|---------|-----------------|-----------------|
-| constitution | `constitution-seed.md` | Full content (source reference principles, architectural principles, best practices, Global Evolution operational principles) |
-| specify | `pre-context.md` → "For /speckit.specify" + `business-logic-map.md` (relevant Feature section) | Feature summary, FR-### drafts, SC-### drafts, edge cases, business rules. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
-| plan | `pre-context.md` → "For /speckit.plan" + `entity-registry.md` (related entities) + `api-registry.md` (related APIs) | Dependencies, entity/API drafts, technical decisions, preceding Feature results. **If registries empty (early greenfield), skip registry injection** |
-| tasks | `plan.md` (spec-kit artifact) | Automatic execution based on plan |
-| analyze | `spec.md` + `plan.md` + `tasks.md` (spec-kit artifacts) | Cross-artifact consistency analysis (gaps, duplications, ambiguities). Runs before implement |
-| implement | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks |
-| verify | `pre-context.md` → "For /speckit.analyze" + registries | Cross-Feature entity/API consistency, impact scope analysis |
-
----
-
-## Important Notes
-
-- **NEVER skip analyze, implement, or verify.** Each Feature must go through all steps (specify → clarify → plan → tasks → analyze → implement → verify → merge) before moving to the next Feature. Creating specs/plans for multiple Features without implementing them defeats the purpose of this pipeline.
-- **Git branch discipline**: Each Feature is developed on its own branch. Never start a new Feature without merging (or explicitly skipping) the previous Feature's branch. This ensures main always reflects the latest stable state.
-- Does not alter or override spec-kit command behavior. Only injects context and utilizes results.
-- Does not directly modify files managed by spec-kit (`specs/`). Changes are made only through spec-kit commands.
-- Global Evolution Layer files (`entity-registry.md`, `api-registry.md`, `roadmap.md`) are modified only during the Update step.
-- If `sdd-state.md` does not exist, it is treated as a first run and an initial state file is created.
-- For detailed context injection rules, refer to [context-injection-rules.md](reference/context-injection-rules.md).
-- For state file schema, refer to [state-schema.md](reference/state-schema.md).
+For detailed per-command context injection rules, refer to [context-injection-rules.md](reference/context-injection-rules.md).
+For the sdd-state.md file schema, refer to [state-schema.md](reference/state-schema.md).
