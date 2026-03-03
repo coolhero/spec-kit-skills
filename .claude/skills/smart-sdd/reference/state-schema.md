@@ -57,7 +57,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 - ❌ : Failed
 - ⏭️ : Skipped
 - 🔒 : Deferred (outside current Active Tiers, activate via `/smart-sdd expand`)
-- 🔀 : Needs re-execution (Feature restructured via `/smart-sdd restructure` — affected steps must be re-run)
+- 🔀 : Needs re-execution (Feature affected by `/smart-sdd restructure` or `/smart-sdd parity` — affected steps must be re-run)
 - (blank) : Not started
 
 ### Feature Status Values
@@ -194,6 +194,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Change the corresponding cell to ❌
 - Record the failure reason in the Feature Detail Log
 - Feature Progress Status remains `in_progress` (retry is possible)
+- Update `Last Updated`
 
 ### When a Feature Completes (all steps including merge ✅)
 - Change the Feature Progress Status to `completed`
@@ -205,6 +206,20 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Record the skip reason in the Feature Detail Log
 
 > **Note on `clarify`**: `clarify` is a conditional sub-step of `specify` — it runs only when ambiguity markers are found in the spec. It is NOT tracked as a separate column in the Feature Progress table. If clarify was executed, note it in the Feature Detail Log under the `specify` row (e.g., "5 FRs, 8 SCs (clarify executed)").
+
+### When Constitution is Finalized (Phase 0 completion)
+- Set Constitution Status to `completed`
+- Set Constitution Version to the version from the generated file (e.g., `1.0.0`)
+- Set Constitution Completed At to current ISO 8601 timestamp
+- Set Constitution Updates to `0`
+- Add entry to Constitution Update Log: version, date, "Initial finalization"
+- Update `Last Updated`
+
+### When Constitution is Incrementally Updated (during Feature pipeline)
+- Increment Constitution Version (MINOR bump, e.g., `1.0.0` → `1.1.0`)
+- Increment Constitution Updates count
+- Add entry to Constitution Update Log: new version, date, trigger Feature, change description
+- Update `Last Updated`
 
 ### When Scope is Expanded (via /smart-sdd expand — core scope only)
 - Update the `Active Tiers` field to the new value (e.g., `T1` → `T1,T2`)

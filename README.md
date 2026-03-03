@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-03 13:30 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-03 13:41 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -204,6 +204,7 @@ Generates hierarchical artifacts based on the finalized analysis results.
     ├── api-registry.md                          # API contract registry
     ├── business-logic-map.md                    # Business logic map
     ├── stack-migration.md                       # Stack migration plan (only for new stack)
+    ├── coverage-baseline.md                     # Source coverage baseline (rebuild mode only)
     └── features/
         ├── F001-auth/pre-context.md             # Per-Feature spec-kit cross-reference info
         ├── F002-product/pre-context.md

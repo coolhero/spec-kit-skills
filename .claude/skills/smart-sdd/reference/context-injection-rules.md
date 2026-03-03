@@ -925,6 +925,22 @@ No Checkpoint/Review cycle. The parity command displays progress after each of i
 
 ## Post-Step Update Rules Detail
 
+### After Constitution Completion
+
+1. Update `BASE_PATH/sdd-state.md`:
+   - Set Constitution Status to `completed`
+   - Set Constitution Version to the version from the generated file (e.g., `1.0.0`)
+   - Set Constitution Completed At to current ISO 8601 timestamp
+   - Add entry to Constitution Update Log: "Initial finalization"
+2. Update `Last Updated` in sdd-state.md
+
+### After Analyze Completion
+
+1. Update `BASE_PATH/sdd-state.md`:
+   - Record analysis results in Feature Detail Log: number of issues found, severity levels (CRITICAL/WARNING/INFO)
+   - If CRITICAL issues exist, note them in the Feature Detail Log
+2. No Global Evolution Layer artifacts are updated during analyze (registries are not modified)
+
 ### After Plan Completion
 
 1. Read `SPEC_PATH/[NNN-feature-name]/data-model.md`

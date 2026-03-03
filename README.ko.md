@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-03 13:30 KST
+[English README](README.md) | Last updated: 2026-03-03 13:41 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -201,6 +201,7 @@ Core scope에서는 각 Feature를 **5가지 분석 축**으로 종합 평가합
     ├── api-registry.md                         # API 계약 레지스트리
     ├── business-logic-map.md                   # 비즈니스 로직 맵
     ├── stack-migration.md                      # 스택 마이그레이션 계획 (신규 스택 시에만)
+    ├── coverage-baseline.md                    # 소스 커버리지 베이스라인 (rebuild 전용)
     └── features/
         ├── F001-auth/pre-context.md            # Feature별 spec-kit 교차참조 정보
         ├── F002-product/pre-context.md
