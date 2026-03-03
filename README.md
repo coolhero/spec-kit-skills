@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 08:26 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 08:34 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -104,6 +104,8 @@ Two strategic questions at skill execution determine the direction of the artifa
 |--------|------------|-------------------------------|
 | **Same** (Same Stack) | Use the same language, framework, and libraries as existing | **Implementation Reference** -- Actively reuse existing implementation patterns. Document reasons when designing differently |
 | **New** (New Stack) | Migrate to an optimal modern technology stack | **Logic-Only Reference** -- Extract only What/Why. Ignore How (implementation approach) and prioritize idiomatic patterns of the new stack |
+
+**Question 3: Project Identity** (rebuild only) -- If the new project has a different name from the original (e.g., "Cherry Studio" → "Angdu Studio"), naming prefix mappings are collected and applied throughout all generated artifacts. Original project-specific names are flagged for renaming during coverage baseline classification.
 
 ##### Phase 1 -- Project Scan
 

@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. A Reverse Specification skill that extracts specs from existing implementations.
-argument-hint: [target-directory] [--scope core|full] [--stack same|new]
+argument-hint: [target-directory] [--scope core|full] [--stack same|new] [--name new-project-name]
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
 
@@ -18,6 +18,7 @@ $ARGUMENTS parsing rules:
   Positional    → target-directory (path to analyze, defaults to "." if not specified)
   --scope <val> → Implementation scope: "core" or "full" (skips Phase 0 Question 1 if provided)
   --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
+  --name <val>  → New project name (skips Phase 0 Question 3 if provided; implies rename from detected project name)
 ```
 
 Execute the following phases in order. Report progress to the user after completing each Phase.
@@ -76,7 +77,24 @@ Determine the direction of the deliverables. Each question can be answered via C
 
 Record both responses and reference them throughout all subsequent Phases.
 
-> **Note**: When running with `--dangerously-skip-permissions`, AskUserQuestion will be auto-skipped. Always provide `--scope` and `--stack` arguments in such environments to ensure correct strategy selection.
+### Question 3: Project Identity (rebuild only)
+
+When analyzing existing source code for rebuild, the original project's naming (class names, service names, branding) will appear throughout the codebase. If the new project has a different identity, this must be captured early so artifacts use the correct naming.
+
+Ask via AskUserQuestion:
+- "Is the new project name different from the original?"
+  - **Yes — new name**: User provides the new project name (e.g., "Cherry Studio" → "Angdu Studio")
+  - **No — same name**: Keep the original project name as-is
+
+If the user selects "Yes":
+1. Record the **original project name** and **new project name**
+2. Ask the user to provide **naming prefix mappings** if applicable (e.g., `Cherry` → `Angdu`, `CS` → `AS`). These are optional — the user can skip if they want to decide later.
+3. Store these mappings for use in:
+   - **Phase 4 artifacts**: Replace original project name references with the new name in `roadmap.md`, `constitution-seed.md`, and `pre-context.md` descriptions
+   - **Phase 4-3 coverage baseline**: When classifying unmapped items, highlight items containing the original project name prefix (e.g., "CherryINOAuth") and suggest renamed versions (e.g., "AngduINOAuth" or "INOAuth")
+   - **constitution-seed.md**: Include a "Naming Conventions" section documenting the old → new mapping
+
+> **Note**: This question can be skipped via `--name <new-name>` argument. If `--dangerously-skip-permissions` is set without `--name`, the original project name is kept as-is.
 
 ---
 
@@ -538,6 +556,7 @@ Generate the following files in order. Each file follows the template structure 
 
 5. **`specs/reverse-spec/constitution-seed.md`** — See [constitution-seed-template.md](templates/constitution-seed-template.md)
    - Source code reference principles (branching by stack strategy), extracted architecture principles, technical constraints, coding conventions
+   - **Naming Conventions** (if project identity changed in Phase 0 Question 3): Include a mapping section documenting original → new naming patterns (e.g., `Cherry` → `Angdu`, `CS` → `AS`). This section guides `speckit-constitution` and `speckit-implement` to use the new project naming consistently.
    - **Recommended Development Principles (Best Practices)**: Test-First, Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Demo-Ready Delivery
    - **Global Evolution Layer Operational Principles**: Rules for maintaining cross-Feature context
    - **Project-Specific Recommended Principles**: Based on the domain, architecture patterns, and technical traits observed in Phase 1~3, recommend additional constitution principles tailored to this project. Use the recommendation categories in the template (domain-driven, architecture-driven, scale-driven, quality-driven) as a guide. Each recommendation must cite a specific observed trait from the source analysis as evidence.
@@ -616,6 +635,8 @@ For each metric category, identify items in the source that were NOT mapped to a
 - Test files not associated with any Feature
 
 Group the unmapped items by apparent category/module (e.g., "middleware files", "admin endpoints", "utility models") to minimize the number of user interactions in Step 3.
+
+**Project identity renaming**: If Phase 0 Question 3 established a new project name, highlight items containing the original project name prefix in the unmapped items list (e.g., "⚠️ CherryINOAuth — contains original project name"). When the user classifies these items, suggest renamed versions using the new project naming (e.g., "AngduINOAuth" or "INOAuth").
 
 #### Step 3 — Classification (HARD STOP)
 
