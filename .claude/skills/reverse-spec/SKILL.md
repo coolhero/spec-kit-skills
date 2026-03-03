@@ -154,26 +154,35 @@ Present the current stack detected in Phase 1 as a categorized table:
 Adapt the categories to match the actual project. Add or remove rows as needed (e.g., add "State Management", "Editor", "AI/ML SDK" if relevant; remove "Frontend" if the project is backend-only).
 
 **Step 2 — Per-Category Stack Negotiation (HARD STOP per category)**:
-For **every category detected in Step 1**, present the recommendation and ask the user to confirm **individually**. This allows fine-grained control over each technology choice.
 
-**⚠️ CRITICAL: Do NOT pre-filter or skip categories.** Even if the current technology is modern and the best recommendation is "Keep Current", you MUST still present the category to the user with alternatives. The user decides whether to keep or change — not the agent. Skipping categories removes the user's ability to make informed choices.
+You MUST iterate through **every single category** from Step 1's table, **one at a time**, and call AskUserQuestion for each. There is no exception to this rule.
 
-For each category:
-1. Show the current technology and 1~2 recommended alternatives with brief rationale (if no strong alternative exists, still show at least one option alongside "Keep Current" with a note explaining why keeping is recommended):
+**PROHIBITED behaviors:**
+- ❌ Batching multiple categories into a single question
+- ❌ Deciding on behalf of the user that a category is "already optimal" or "already modern"
+- ❌ Showing a summary table with "Keep" pre-filled for categories the user never confirmed
+- ❌ Saying "All other categories: Keep current" — the user MUST confirm each one
+- ❌ Presenting only "migration candidates" while skipping stable categories
+
+**The ONLY way to skip remaining categories** is when the user explicitly selects the "Accept all remaining recommendations" option in AskUserQuestion. The agent NEVER decides to skip.
+
+For each category (one at a time, in dependency order):
+1. Show the current technology, 1~2 alternatives, AND "Keep Current" with rationale for each:
    ```
-   📋 [Category]: [Current Technology] → ?
+   📋 [Category]: [Current Technology] → ? (constrained by: [confirmed choices])
 
    | Option | Technology | Rationale |
    |--------|-----------|-----------|
-   | Recommended | [Tech A] | [Pros, cons, migration complexity] |
-   | Alternative | [Tech B] | [Pros, cons, migration complexity] |
-   | Keep Current | [Current] | [Why keeping it might make sense] |
+   | Recommended | [Tech A] | [Why this fits, migration complexity] |
+   | Alternative | [Tech B] | [Trade-offs vs recommended] |
+   | Keep Current (Recommended) | [Current] | [Why keeping makes sense — mark as Recommended if current is optimal] |
    ```
-2. Ask the user via AskUserQuestion with options:
-   - "[Recommended Tech] (Recommended)"
+   When the current technology IS the best choice, mark "Keep Current" as "(Recommended)" and still provide 1~2 alternatives so the user can see what other options exist.
+2. Call AskUserQuestion with options:
+   - "[Recommended option] (Recommended)" — could be a new tech OR "Keep [Current]" if current is best
    - "[Alternative Tech]"
-   - "Keep [Current Tech]"
-   - "Accept all remaining recommendations" — **skip all subsequent categories** and auto-apply the recommended option for each. Immediately jump to Step 3 (Final Summary).
+   - "[Keep/Change option]" — whichever wasn't already listed as Recommended
+   - "Accept all remaining recommendations" — skip subsequent categories and auto-apply recommended for each
 3. **STOP and WAIT** for the user's response before moving to the next category.
 4. If the user selects "Other", accept their custom input and record it.
 5. If the user selects "Accept all remaining recommendations", stop the per-category loop. Apply the recommended option for every remaining category and proceed directly to Step 3 (Final Summary and Confirmation), where the user can still review and revise if needed.
