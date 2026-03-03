@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-03 16:11 KST
+[English README](README.md) | Last updated: 2026-03-04 08:26 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -187,7 +187,28 @@ Core scope에서는 각 Feature를 **5가지 분석 축**으로 종합 평가합
 
 ##### Phase 4 --- 산출물 생성
 
-확정된 분석 결과로 계층형 산출물을 생성합니다.
+확정된 분석 결과로 계층형 산출물을 생성합니다: `roadmap.md`, `constitution-seed.md`, 레지스트리, Feature별 `pre-context.md` 파일 등.
+
+**소스 커버리지 베이스라인 (Phase 4-3, rebuild 전용)**:
+
+산출물 생성 후, `/reverse-spec`는 원본 소스 코드가 추출된 Feature들에 얼마나 반영되었는지 측정합니다. 소스 파일, API 엔드포인트, DB 엔티티, 테스트 파일을 자동 스캔하여 커버리지 비율을 계산합니다:
+
+| 항목 | 원본 | 매핑됨 | 커버리지 |
+|------|------|--------|----------|
+| 소스 파일 | 1,720 | 812 | 47.2% |
+| API 엔드포인트 | 24 | 25 | 96.0% |
+| DB 테이블 | 12 | 12 | 100% |
+| 테스트 파일 | 214 | 0 | 0% |
+
+*(실제 프로젝트 예시)*
+
+매핑되지 않은 항목은 논리적 카테고리(예: 공유 UI 컴포넌트, 유틸리티, 훅)별로 그룹화되어 **대화형 분류**로 제시됩니다 — 사용자가 각 그룹에 대해 결정합니다:
+- **횡단 관심사**로 표시 (constitution에 기록)
+- **기존 Feature에 할당**
+- **새 Feature 생성**
+- **의도적 제외**로 표시 (사유 코드 포함)
+
+결과는 `coverage-baseline.md`로 저장되며, 파이프라인 완료 후 [패리티 검사](#패리티-검사-brownfield-rebuild)에서 구현 누락을 감지하는 데 활용됩니다.
 
 #### 산출물 구조
 

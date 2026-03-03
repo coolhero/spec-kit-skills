@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-03 16:11 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 08:26 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -190,7 +190,28 @@ Based on the comprehensive evaluation, each Feature is classified into **3 Tiers
 
 ##### Phase 4 -- Artifact Generation
 
-Generates hierarchical artifacts based on the finalized analysis results.
+Generates hierarchical artifacts based on the finalized analysis results: `roadmap.md`, `constitution-seed.md`, registries, per-Feature `pre-context.md` files, and more.
+
+**Source Coverage Baseline (Phase 4-3, rebuild mode only)**:
+
+After artifact generation, `/reverse-spec` measures how much of the original source code is covered by the extracted Features. An automated scan counts source files, API endpoints, DB entities, and test files, then calculates coverage ratios:
+
+| Metric | Source | Mapped | Coverage |
+|--------|--------|--------|----------|
+| Source files | 1,720 | 812 | 47.2% |
+| API endpoints | 24 | 25 | 96.0% |
+| DB tables | 12 | 12 | 100% |
+| Test files | 214 | 0 | 0% |
+
+*(Example from a real project)*
+
+Unmapped items are grouped by logical category (e.g., shared UI components, utilities, hooks) and presented for **interactive classification** -- the user decides for each group whether to:
+- Flag as **cross-cutting concern** (noted in constitution)
+- **Assign to an existing Feature**
+- **Create a new Feature**
+- Mark as **intentional exclusion** (with reason code)
+
+The result is saved as `coverage-baseline.md`, which feeds into the post-pipeline [Parity Check](#parity-checking-brownfield-rebuild) to detect implementation gaps.
 
 #### Artifact Structure
 
