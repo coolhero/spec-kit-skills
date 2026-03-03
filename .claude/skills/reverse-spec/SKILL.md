@@ -154,10 +154,12 @@ Present the current stack detected in Phase 1 as a categorized table:
 Adapt the categories to match the actual project. Add or remove rows as needed (e.g., add "State Management", "Editor", "AI/ML SDK" if relevant; remove "Frontend" if the project is backend-only).
 
 **Step 2 — Per-Category Stack Negotiation (HARD STOP per category)**:
-For **each category**, present the recommendation and ask the user to confirm **individually**. This allows fine-grained control over each technology choice.
+For **every category detected in Step 1**, present the recommendation and ask the user to confirm **individually**. This allows fine-grained control over each technology choice.
+
+**⚠️ CRITICAL: Do NOT pre-filter or skip categories.** Even if the current technology is modern and the best recommendation is "Keep Current", you MUST still present the category to the user with alternatives. The user decides whether to keep or change — not the agent. Skipping categories removes the user's ability to make informed choices.
 
 For each category:
-1. Show the current technology and 1~2 recommended alternatives with brief rationale:
+1. Show the current technology and 1~2 recommended alternatives with brief rationale (if no strong alternative exists, still show at least one option alongside "Keep Current" with a note explaining why keeping is recommended):
    ```
    📋 [Category]: [Current Technology] → ?
 
