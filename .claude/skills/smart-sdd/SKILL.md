@@ -552,13 +552,22 @@ If the Skill tool returns "Unknown skill" for a `speckit-*` command (e.g., skill
 3. This ensures the pipeline can continue even when skills aren't registered in the current session
 4. Display: "ℹ️ Using inline execution for speckit-[command] (skill not yet registered in this session)"
 
-**⚠️ MANDATORY NEXT STEP: After Execute completes, you MUST proceed to Review (Step 4). Do NOT skip to Update. Do NOT continue the pipeline. STOP here and present the generated artifacts to the user.**
+#### Execute Error Handling
+
+If the spec-kit command fails (error, crash, partial output):
+1. Display the error message to the user
+2. Use AskUserQuestion with options: "Retry", "Abort step", "Troubleshoot"
+3. If "Retry": Re-run the Execute step
+4. If "Abort step": Record failure in sdd-state.md, do NOT proceed to Review
+5. If "Troubleshoot": Help the user diagnose and fix the issue, then offer to retry
+
+**⚠️ MANDATORY NEXT STEP: After Execute completes successfully, you MUST proceed to Review (Step 4). Do NOT skip to Update. Do NOT continue the pipeline. STOP here and present the generated artifacts to the user.**
 
 ### 4. Review — Artifact Review (HARD STOP — MANDATORY)
 
 After spec-kit command execution completes, present the generated/modified artifacts to the user for review.
 
-**Review Display Format**:
+#### Step 4a. Display the Review Content
 
 Each command produces different artifacts. Display the **key content** of the generated artifact(s):
 
@@ -588,30 +597,60 @@ Display format:
 [If applicable: highlight where spec-kit's output differs from
  the draft in pre-context.md — added requirements, changed schemas, etc.]
 
+── Files You Can Edit ─────────────────────────
+[List the EXACT file paths that were created/modified by this step:]
+  📄 [absolute-path-to-artifact-1]
+  📄 [absolute-path-to-artifact-2]
+  ...
+You can open and edit these files directly, then select
+"I've finished editing" to continue.
 ──────────────────────────────────────────────────
-
-Review the generated artifact. You can:
-  - Approve and continue to the next step
-  - Request modifications (spec-kit will regenerate)
-  - Edit the artifact files directly
 ```
 
 For detailed per-command Review Display Content, see [context-injection-rules.md](reference/context-injection-rules.md).
 
-**CRITICAL — Review is a HARD STOP.**
+#### Step 4b. Ask for User Approval (HARD STOP)
 
-After displaying the review content, you MUST:
-1. Use AskUserQuestion with options: "Approve", "Request modifications", "Edit manually"
-2. **STOP and WAIT** for the user's response. Do NOT assume approval. Do NOT continue to Update.
-3. **Validate the response**: The user MUST explicitly select one of the options or type a clear affirmative (e.g., "yes", "approved", "looks good").
-4. **Empty or missing response = NOT approved**: If AskUserQuestion returns an empty response, a blank string, or no meaningful selection:
-   - Display: "⚠️ No approval received. The generated artifact needs your review. Please select: Approve / Request modifications / Edit manually"
-   - Call AskUserQuestion AGAIN. Repeat until a clear response is received.
-   - NEVER interpret silence, empty response, or lack of explicit rejection as implicit approval.
-5. If "Request modifications": Ask what to change, re-execute the spec-kit command with feedback, and re-display the Review.
-6. If "Edit manually": Wait for the user to signal they are done editing, then proceed to Update.
+You MUST follow this exact procedure. No exceptions.
 
-**`--auto` mode**: Review is skipped (content still displayed). **`--dangerously-skip-permissions`**: Display content and ask via text message; WAIT for text response.
+```
+PROCEDURE ReviewApproval:
+  LOOP:
+    response = AskUserQuestion(
+      options: ["Approve", "Request modifications", "I've finished editing"]
+    )
+
+    IF response is empty, blank, or has no meaningful selection:
+      Display "⚠️ No approval received. Please review the artifact above and select one option."
+      CONTINUE LOOP  ← ask again, do NOT proceed
+
+    IF response == "Approve" OR user typed "yes"/"approved"/"looks good"/"lgtm":
+      BREAK LOOP → proceed to Step 5 (Update)
+
+    IF response == "Request modifications":
+      Ask user what to change
+      Re-execute spec-kit command with feedback
+      Go back to Step 4a (re-display Review with updated content)
+      CONTINUE LOOP
+
+    IF response == "I've finished editing":
+      Re-read the artifact file(s) to pick up user's changes
+      Display a brief summary of what changed
+      response2 = AskUserQuestion(options: ["Approve changes", "Edit more"])
+      IF response2 == "Approve changes": BREAK LOOP → proceed to Step 5
+      IF response2 == "Edit more": CONTINUE LOOP
+
+    OTHERWISE (unrecognized response):
+      Display "Please select: Approve / Request modifications / I've finished editing"
+      CONTINUE LOOP
+```
+
+**Rules**:
+- You are NOT allowed to approve on behalf of the user.
+- Empty response, blank string, no selection = NOT approval. ALWAYS re-ask.
+- NEVER interpret silence or lack of rejection as implicit approval.
+- `--auto` mode: Skip the LOOP entirely (content from Step 4a is still displayed for transparency).
+- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message asking "Approve / Request modifications / Edit manually?" and WAIT for text response.
 
 ### 5. Update — Global Evolution Layer Refresh
 
@@ -733,9 +772,9 @@ Executes the following steps **strictly in order** for each Feature.
 2. clarify    → Auto-scan spec.md for ambiguities → speckit-clarify (if needed)
 3. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
 4. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
-5. analyze    → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
+5. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
 6. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
-7. verify     → Test/Build/Lint → Cross-Feature consistency → Demo-Ready → Update
+7. verify     → Checkpoint(STOP) → Test/Build/Lint → Cross-Feature → Demo-Ready → Review(STOP) → Update
 8. merge      → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──

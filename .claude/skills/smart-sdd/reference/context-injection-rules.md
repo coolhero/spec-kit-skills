@@ -102,10 +102,14 @@ After `speckit-constitution` completes:
  - All conventions
  - All best practices]
 
+── Files You Can Edit ─────────────────────────
+  📄 .specify/memory/constitution.md
+You can open and edit this file directly, then select
+"I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received. Please select: Approve / Request modifications / Edit manually" and call AskUserQuestion AGAIN. Repeat until a clear response is received.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
 
 ---
 
@@ -230,10 +234,91 @@ After `speckit-specify` completes:
  - Removed: draft items that were dropped
  - Changed: items whose scope or description significantly changed]
 
+── Files You Can Edit ─────────────────────────
+  📄 specs/{NNN-feature}/spec.md
+You can open and edit this file directly, then select
+"I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to clarify/plan without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
+
+---
+
+## 2a. Clarify (conditional — triggered after Specify Review)
+
+> Clarify is a conditional sub-step. It runs **only** when the spec.md scan detects ambiguities (see SKILL.md "Clarify Trigger" section). If no ambiguities are found, skip directly to Plan.
+
+### Read Targets
+
+| File | Section | Filtering |
+|------|---------|-----------|
+| `SPEC_PATH/[NNN-feature]/spec.md` | Entire file | Scan for ambiguity markers and vague qualifiers |
+
+### Ambiguity Scan
+
+Before executing `speckit-clarify`, scan `spec.md` for:
+1. **Explicit markers**: `[NEEDS CLARIFICATION]`, `[TBD]`, `[TODO]`, `???`, `<placeholder>`
+2. **Vague qualifiers**: Adjectives without measurable criteria (e.g., "fast", "scalable", "intuitive", "robust")
+
+If **no ambiguities found**: Display "✅ No critical ambiguities detected in spec.md. Proceeding to plan." and skip this section entirely.
+
+### Checkpoint Display Content
+
+If ambiguities are found:
+
+```
+📋 Ambiguities detected in spec.md for [FID] - [Feature Name]
+
+── Explicit Markers ─────────────────────────────
+[List each marker with its location in spec.md:
+ - Line/section: "[NEEDS CLARIFICATION] ..."
+ - Line/section: "[TBD] ..."]
+
+── Vague Qualifiers ─────────────────────────────
+[List each vague term with context:
+ - "fast response time" — no measurable threshold defined
+ - "scalable architecture" — no concrete scaling target]
+
+──────────────────────────────────────────────────
+⚠️ Running speckit-clarify to resolve these ambiguities.
+```
+
+### Injected Content
+
+- The list of detected ambiguities (for speckit-clarify to focus on)
+- `speckit-clarify` will interactively ask up to 5 questions and update spec.md directly
+
+### Review Display Content
+
+After `speckit-clarify` completes:
+
+**Files to read**:
+1. `specs/{NNN-feature}/spec.md` — Re-read the **entire file** and identify what changed (compare with pre-clarify content)
+
+**Display format**:
+```
+📋 Review: Clarify results for [FID] - [Feature Name]
+📄 File: specs/{NNN-feature}/spec.md
+
+── Resolved Ambiguities ────────────────────────
+[For each ambiguity that was resolved:
+ - Before: "[TBD] response time"
+ - After: "Response time under 200ms for 95th percentile"]
+
+── Remaining Ambiguities (if any) ──────────────
+[List any markers/qualifiers still present in spec.md]
+
+── Files You Can Edit ─────────────────────────
+  📄 specs/{NNN-feature}/spec.md
+You can open and edit this file directly, then select
+"I've finished editing" to continue.
+──────────────────────────────────────────────────
+```
+
+**If remaining ambiguities exist**: Offer to re-run clarify or proceed.
+
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Run clarify again", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
 
 ---
 
@@ -377,10 +462,16 @@ After `speckit-plan` completes:
  - Changed: schemas or contracts whose structure significantly changed
  - Architecture decisions that differ from "Technical Decisions" draft]
 
+── Files You Can Edit ─────────────────────────
+  📄 specs/{NNN-feature}/plan.md
+  📄 specs/{NNN-feature}/data-model.md
+  📄 specs/{NNN-feature}/contracts/*.md
+You can open and edit these files directly, then select
+"I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update/tasks without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
 
 ---
 
@@ -424,10 +515,14 @@ After `speckit-tasks` completes:
  - Dependencies (which tasks must complete first)
  - Estimated complexity (if available)]
 
+── Files You Can Edit ─────────────────────────
+  📄 specs/{NNN-feature}/tasks.md
+You can open and edit this file directly, then select
+"I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to analyze without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
 
 ---
 
@@ -493,14 +588,22 @@ After `speckit-analyze` completes:
 
 **If CRITICAL issues exist**:
 - Display: "❌ CRITICAL issues found. These must be resolved before implementation."
-- Offer options: "Resolve now (re-run specify/plan/tasks)", "View full report"
 - Do NOT allow proceeding to implement until CRITICAL issues are addressed
 
-**If no CRITICAL issues**:
-- Display findings summary
-- Options: "Approve and proceed to implement", "Address issues first", "View full report"
+**Display for all cases** (append after the analysis summary):
+```
+── Files You Can Edit ─────────────────────────
+  📄 specs/{NNN-feature}/spec.md
+  📄 specs/{NNN-feature}/plan.md
+  📄 specs/{NNN-feature}/tasks.md
+If issues were found, you can edit the source artifacts
+directly, then select "I've finished editing" to re-analyze.
+──────────────────────────────────────────────────
+```
 
-**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to implement without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with the following options and WAIT. **Empty/blank response = NOT approval — re-ask.**
+- If CRITICAL issues: options "Resolve now (re-run specify/plan/tasks)", "I've finished editing", "View full report"
+- If no CRITICAL issues: options "Approve", "Address issues first", "I've finished editing"
 
 ---
 
@@ -638,10 +741,16 @@ After `speckit-implement` completes:
 [Demo surface created: yes/no
  demos/F00N-name.md: created/updated]
 
+── Files You Can Edit ─────────────────────────
+  📄 All source files listed above under "Files Created/Modified"
+  📄 specs/{NNN-feature}/tasks.md  (to adjust remaining tasks)
+  📄 demos/{FID}-{name}.md  (if Demo-Ready Delivery active)
+You can open and edit any of these files directly, then select
+"I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Note issues" and WAIT for the user's response. Do NOT proceed to verify without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with options "Approve", "Request modifications", "I've finished editing" and WAIT. **Empty/blank response = NOT approval — re-ask.**
 
 ---
 
@@ -738,15 +847,27 @@ After verification execution completes:
 ──────────────────────────────────────────────────
 ```
 
+**Append to all cases** (after the verification results):
+```
+── Files You Can Edit ─────────────────────────
+  📄 Source files in the Feature branch (fix failing tests/build)
+  📄 specs/{NNN-feature}/data-model.md  (fix entity discrepancies)
+  📄 specs/{NNN-feature}/contracts/*.md  (fix API discrepancies)
+  📄 demos/{FID}-{name}.md  (fix demo issues, if applicable)
+If issues were found, you can fix them directly, then select
+"I've finished editing" to re-verify.
+──────────────────────────────────────────────────
+```
+
 **If any Phase fails**:
 - Display: "❌ Verification failed. Issues must be resolved before merge."
-- Options: "Fix issues and re-verify", "View full report"
 
 **If all Phases pass**:
 - Display: "✅ All verification checks passed."
-- Options: "Approve and proceed to merge", "Review details", "Re-run verification"
 
-**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to merge without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
+**HARD STOP**: Follow the `ReviewApproval` procedure defined in SKILL.md Step 4b. Call AskUserQuestion with the following options and WAIT. **Empty/blank response = NOT approval — re-ask.**
+- If failed: options "Fix issues and re-verify", "I've finished editing", "View full report"
+- If passed: options "Approve", "I've finished editing", "Re-run verification"
 
 ---
 
