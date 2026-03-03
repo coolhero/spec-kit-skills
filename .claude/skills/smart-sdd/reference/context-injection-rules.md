@@ -105,7 +105,7 @@ After `speckit-constitution` completes:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received. Please select: Approve / Request modifications / Edit manually" and call AskUserQuestion AGAIN. Repeat until a clear response is received.**
 
 ---
 
@@ -233,7 +233,7 @@ After `speckit-specify` completes:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to clarify/plan without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to clarify/plan without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
 
 ---
 
@@ -380,7 +380,7 @@ After `speckit-plan` completes:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update/tasks without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to Update/tasks without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
 
 ---
 
@@ -427,7 +427,7 @@ After `speckit-tasks` completes:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to analyze without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Edit manually" and WAIT for the user's response. Do NOT proceed to analyze without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
 
 ---
 
@@ -500,7 +500,7 @@ After `speckit-analyze` completes:
 - Display findings summary
 - Options: "Approve and proceed to implement", "Address issues first", "View full report"
 
-**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to implement without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to implement without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
 
 ---
 
@@ -641,7 +641,7 @@ After `speckit-implement` completes:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Note issues" and WAIT for the user's response. Do NOT proceed to verify without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion with options "Approve", "Request modifications", "Note issues" and WAIT for the user's response. Do NOT proceed to verify without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
 
 ---
 
@@ -746,7 +746,7 @@ After verification execution completes:
 - Display: "✅ All verification checks passed."
 - Options: "Approve and proceed to merge", "Review details", "Re-run verification"
 
-**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to merge without explicit approval.
+**HARD STOP**: You MUST call AskUserQuestion and WAIT for the user's response. Do NOT proceed to merge without explicit approval. **If the response is empty, blank, or has no meaningful selection — this is NOT approval. Display "⚠️ No approval received." and call AskUserQuestion AGAIN.**
 
 ---
 
