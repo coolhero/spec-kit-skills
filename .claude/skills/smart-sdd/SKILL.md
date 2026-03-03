@@ -13,7 +13,7 @@ Wraps spec-kit commands with cross-Feature context injection and Global Evolutio
 - **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
 - **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`
 
-Does not replace spec-kit commands, but wraps them with a 5-step protocol: **Context Assembly → Pre-Execution Checkpoint → spec-kit Execution → Artifact Review → Global Evolution Update**.
+Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Context Assembly → Pre-Execution Checkpoint → spec-kit Execution + Artifact Review → Global Evolution Update**.
 
 ---
 
@@ -474,13 +474,13 @@ Next steps:
 
 ---
 
-## Common Protocol: Assemble → Checkpoint → Execute → Review → Update
+## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
-**All spec-kit command executions follow this 5-step protocol. Each step MUST be executed in order. No step may be skipped (unless `--auto` mode is active). In particular, Review (Step 4) is a HARD STOP that requires explicit user approval via AskUserQuestion before proceeding to Update (Step 5).**
+**All spec-kit command executions follow this 4-step protocol. Each step MUST be executed in order. No step may be skipped (unless `--auto` mode is active). In particular, Execute (Step 3) includes a mandatory Review HARD STOP — the spec-kit command runs, then the Review is presented, all in one continuous action.**
 
 > ⚠️ **The most common failure mode is skipping Review.** After executing a spec-kit command (Step 3), you MUST stop, display the generated artifacts, and ask the user for approval. Do NOT proceed to Update without Review. Do NOT combine Execute and Update into a single flow.
 >
-> **`--auto` mode summary**: When `--auto` is specified, BOTH Checkpoint (Step 2) and Review (Step 4) are skipped — their content is still displayed for transparency, but execution proceeds immediately without waiting for user approval. This is the ONLY way to bypass these stops. Without `--auto`, every Checkpoint and Review is a mandatory HARD STOP.
+> **`--auto` mode summary**: When `--auto` is specified, BOTH Checkpoint (Step 2) and Review (Step 3b-c) are skipped — their content is still displayed for transparency, but execution proceeds immediately without waiting for user approval. This is the ONLY way to bypass these stops. Without `--auto`, every Checkpoint and Review is a mandatory HARD STOP.
 
 ### 1. Assemble — Context Assembly
 
@@ -555,17 +555,11 @@ If the spec-kit command fails (error, crash, partial output):
 4. If "Abort step": Record failure in sdd-state.md, do NOT proceed to Review
 5. If "Troubleshoot": Help the user diagnose and fix the issue, then offer to retry
 
-**⚠️ CRITICAL — SUPPRESS spec-kit "Next step" output**: spec-kit commands print their own "Next phase:" or "Next step:" suggestions when they complete (e.g., "Next phase: /speckit.clarify or /speckit.plan"). **These suggestions are for standalone spec-kit usage ONLY.**
-- **When running through smart-sdd, ALWAYS IGNORE them.** The smart-sdd orchestrator (this SKILL.md) controls the workflow — spec-kit does not.
-- **Do NOT relay spec-kit's "Next phase/step" messages to the user.** If you show them, the user may invoke spec-kit directly, bypassing smart-sdd's context injection and state tracking. Instead, after Execute completes, proceed to Review silently.
+**⚠️ CRITICAL — SUPPRESS spec-kit output**: spec-kit commands print "Next phase:", "Suggested commit:", and other messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
 
-**⚠️ MANDATORY NEXT ACTION: After Execute completes successfully, you MUST IMMEDIATELY proceed to Review (Step 4) below. Do NOT stop. Do NOT summarize and wait. Do NOT suggest next steps to the user. Do NOT skip to Update. Read the generated artifact(s) and display the Review content RIGHT NOW.**
+**Execute and Review are ONE continuous action.** After the spec-kit command completes, you MUST — without stopping, without summarizing, without waiting — immediately continue to display the Review content below. There is no pause between Execute and Review.
 
-### 4. Review — Artifact Review (HARD STOP — MANDATORY)
-
-After spec-kit command execution completes, present the generated/modified artifacts to the user for review.
-
-#### Step 4a. Display the Review Content
+#### Step 3b. Display the Review Content
 
 Each command produces different artifacts. Display the **key content** of the generated artifact(s):
 
@@ -607,7 +601,7 @@ You can open and edit these files directly, then select
 
 For detailed per-command Review Display Content, see [context-injection-rules.md](reference/context-injection-rules.md).
 
-#### Step 4b. Ask for User Approval (HARD STOP)
+#### Step 3c. Ask for User Approval (HARD STOP)
 
 You MUST follow this exact procedure. No exceptions.
 
@@ -623,19 +617,19 @@ PROCEDURE ReviewApproval:
       CONTINUE LOOP  ← ask again, do NOT proceed
 
     IF response == "Approve" OR user typed "yes"/"approved"/"looks good"/"lgtm":
-      BREAK LOOP → proceed to Step 5 (Update)
+      BREAK LOOP → proceed to Step 4 (Update)
 
     IF response == "Request modifications":
       Ask user what to change
       Re-execute spec-kit command with feedback
-      Go back to Step 4a (re-display Review with updated content)
+      Go back to Step 3b (re-display Review with updated content)
       CONTINUE LOOP
 
     IF response == "I've finished editing":
       Re-read the artifact file(s) to pick up user's changes
       Display a brief summary of what changed
       response2 = AskUserQuestion(options: ["Approve changes", "Edit more"])
-      IF response2 == "Approve changes": BREAK LOOP → proceed to Step 5
+      IF response2 == "Approve changes": BREAK LOOP → proceed to Step 4
       IF response2 == "Edit more": CONTINUE LOOP
 
     OTHERWISE (unrecognized response):
@@ -644,12 +638,12 @@ PROCEDURE ReviewApproval:
 ```
 
 **Mode overrides**:
-- `--auto`: Skip the LOOP entirely (Step 4a content is still displayed for transparency).
+- `--auto`: Skip the LOOP entirely (Step 3b content is still displayed for transparency).
 - `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Approve / Request modifications / I've finished editing?") and WAIT for text response.
 
 **Per-command option overrides**: Some commands use context-specific options (e.g., Clarify: "Run clarify again", Analyze: outcome-dependent, Verify: pass/fail-specific). See [context-injection-rules.md](reference/context-injection-rules.md) for details.
 
-### 5. Update — Global Evolution Layer Refresh
+### 4. Update — Global Evolution Layer Refresh
 
 Updates global artifacts to reflect the command execution results. For detailed update rules per step, see [context-injection-rules.md → Post-Step Update Rules Detail](reference/context-injection-rules.md#post-step-update-rules-detail).
 
@@ -738,10 +732,10 @@ This step is informational only — no user confirmation required.
 
 **If constitution has not been finalized**:
 
-Execute the **full Common Protocol** — same 5-step flow as Features:
+Execute the **full Common Protocol** — same 4-step flow as Features:
 
 ```
-constitution → Assemble → Checkpoint(STOP) → speckit-constitution → Review(STOP) → Update
+constitution → Assemble → Checkpoint(STOP) → speckit-constitution + Review(STOP) → Update
 ```
 
 #### Phase 0-1. Assemble
@@ -754,21 +748,21 @@ Read `BASE_PATH/constitution-seed.md`:
 
 Display the constitution-seed content per [context-injection-rules.md §1 Checkpoint Display Content](reference/context-injection-rules.md#checkpoint-display-content). Provide the user an opportunity to revise/supplement. MUST use AskUserQuestion and WAIT for approval before proceeding.
 
-#### Phase 0-3. Execute
+#### Phase 0-3. Execute + Review (HARD STOP)
 
-Provide the constitution-seed content as context and execute `speckit-constitution`. Then immediately proceed to Phase 0-4 Review (per the Execute → Review rule in Common Protocol Step 3).
+This is ONE continuous step — do NOT stop between execution and review.
 
-#### Phase 0-4. Review (HARD STOP — MANDATORY)
+1. Provide the constitution-seed content as context and execute `speckit-constitution`
+2. **Ignore any "Suggested commit" or "Next step" output from speckit-constitution**
+3. Read `.specify/memory/constitution.md` — the **entire file**
+4. Display the Review content per [context-injection-rules.md §1 Review Display Content](reference/context-injection-rules.md#review-display-content)
+5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
+6. Call AskUserQuestion with options: "Approve", "Request modifications", "I've finished editing"
+7. WAIT for explicit approval. **Empty/blank response = NOT approval — re-ask.**
 
-1. Read `.specify/memory/constitution.md` — the **entire file**
-2. Display the Review content per [context-injection-rules.md §1 Review Display Content](reference/context-injection-rules.md#review-display-content)
-3. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
-4. Follow the **ReviewApproval** procedure (SKILL.md Step 4b) — call AskUserQuestion with "Approve", "Request modifications", "I've finished editing"
-5. WAIT for explicit approval. **Empty/blank response = NOT approval — re-ask.**
+Constitution is the most critical artifact — it governs all subsequent Features.
 
-Constitution is the most critical artifact — it governs all subsequent Features. Do NOT skip this Review under any circumstances.
-
-#### Phase 0-5. Update
+#### Phase 0-4. Update
 
 Record the constitution completion in `sdd-state.md`:
 - Set Constitution Status to `completed`
@@ -817,7 +811,7 @@ After `speckit-specify` completes and the user approves the Review, **automatica
 2. **Scan for vague qualifiers**: Check for ambiguous adjectives without measurable criteria (e.g., "fast", "scalable", "intuitive", "robust")
 3. **If ambiguities found**:
    - Display: "⚠️ Ambiguities detected in spec.md. Running speckit-clarify to resolve them."
-   - Execute `speckit-clarify` via the Common Protocol (Assemble → Checkpoint → Execute → Review → Update)
+   - Execute `speckit-clarify` via the Common Protocol (Assemble → Checkpoint → Execute+Review → Update)
    - `speckit-clarify` will ask the user up to 5 questions interactively and update spec.md directly
    - After clarify completes, re-scan to verify ambiguities are resolved
    - If unresolved ambiguities remain, display them and ask if the user wants to run clarify again or proceed
@@ -1361,7 +1355,7 @@ Running `/smart-sdd analyze [FID]` executes `speckit-analyze` to verify cross-ar
 **What it does**: `speckit-analyze` is a READ-ONLY analysis that checks consistency across spec.md, plan.md, and tasks.md. It identifies gaps, duplications, ambiguities, and inconsistencies.
 
 **Workflow**:
-1. Execute `speckit-analyze` via the Common Protocol (Assemble → Checkpoint → Execute → Review → Update)
+1. Execute `speckit-analyze` via the Common Protocol (Assemble → Checkpoint → Execute+Review → Update)
 2. Review the analysis report:
    - If **CRITICAL** issues exist: Block implementation. The user must resolve them first (re-run specify, plan, or tasks as needed)
    - If only **HIGH/MEDIUM/LOW** issues: Display findings, user may proceed or address them
@@ -1414,7 +1408,7 @@ Running `/smart-sdd verify [FID]` performs post-implementation verification. Thi
 
 ## Parity Command — Brownfield Source Parity Check
 
-Running `/smart-sdd parity` compares the original source code against implemented Features to identify functionality gaps after the pipeline completes. This is a utility command — it does NOT follow the Common Protocol (Assemble → Checkpoint → Execute → Review → Update) but has its own multi-phase workflow.
+Running `/smart-sdd parity` compares the original source code against implemented Features to identify functionality gaps after the pipeline completes. This is a utility command — it does NOT follow the Common Protocol (Assemble → Checkpoint → Execute+Review → Update) but has its own multi-phase workflow.
 
 ### Prerequisites
 

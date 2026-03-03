@@ -6,7 +6,7 @@ This document defines which sections of which files smart-sdd reads and injects 
 
 The following patterns apply to ALL commands below:
 
-**HARD STOP pattern**: Every Review section ends with a HARD STOP. The canonical procedure is defined in SKILL.md Step 4b (ReviewApproval). Per-command sections below only specify the **options** — the LOOP/re-ask/empty-response handling is always the same.
+**HARD STOP pattern**: Every Review section ends with a HARD STOP. The canonical procedure is defined in SKILL.md Step 3c (ReviewApproval). Per-command sections below only specify the **options** — the LOOP/re-ask/empty-response handling is always the same.
 
 **"Files You Can Edit" block**: Every Review display includes a "Files You Can Edit" block listing the exact artifact paths. The user can edit these files externally, then select "I've finished editing" to continue.
 
@@ -885,7 +885,7 @@ If issues were found, you can fix them directly, then select
 
 ## 8. Parity (Utility Command — Not Part of Common Protocol)
 
-> The parity command has its own multi-phase workflow (see SKILL.md "Parity Command" section). It does NOT follow the Common Protocol (Assemble → Checkpoint → Execute → Review → Update) and does NOT wrap a spec-kit command. This section documents only the read targets and update rules.
+> The parity command has its own multi-phase workflow (see SKILL.md "Parity Command" section). It does NOT follow the Common Protocol (Assemble → Checkpoint → Execute+Review → Update) and does NOT wrap a spec-kit command. This section documents only the read targets and update rules.
 
 ### Read Targets
 

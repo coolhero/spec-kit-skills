@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-04 08:34 KST
+[English README](README.md) | Last updated: 2026-03-04 08:42 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -336,23 +336,22 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 
 파이프라인 실행 중 Feature 정의를 수정해야 할 때 `/smart-sdd restructure`를 사용합니다. 분할, 병합, 요구사항 이동, 의존성 변경, 삭제를 지원하며, 모든 변경사항은 관련 아티펙트(roadmap, 레지스트리, pre-context, sdd-state)에 자동 전파됩니다. 실행 전 사용자 승인을 받습니다.
 
-#### 공통 프로토콜: Assemble → Checkpoint → Execute → Review → Update
+#### 공통 프로토콜: Assemble → Checkpoint → Execute+Review → Update
 
-모든 spec-kit 커맨드 실행은 이 5단계 프로토콜을 따릅니다:
+모든 spec-kit 커맨드 실행은 이 4단계 프로토콜을 따릅니다:
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌────────────┐     ┌─────────────┐
-│  1. Assemble │────▶│ 2. Checkpoint│────▶│  3. Execute  │────▶│  4. Review │────▶│  5. Update  │
-│  컨텍스트 조립 │     │ 실행 전 확인   │     │ spec-kit 실행│     │ 산출물 검토 │     │ 글로벌 갱신  │
-└─────────────┘     └──────────────┘     └─────────────┘     └────────────┘     └─────────────┘
+┌─────────────┐     ┌──────────────┐     ┌──────────────────────┐     ┌─────────────┐
+│  1. Assemble │────▶│ 2. Checkpoint│────▶│  3. Execute + Review │────▶│  4. Update  │
+│  컨텍스트 조립 │     │ 실행 전 확인   │     │ spec-kit 실행 + 검토  │     │ 글로벌 갱신  │
+└─────────────┘     └──────────────┘     └──────────────────────┘     └─────────────┘
 ```
 
 | 단계 | 설명 |
 |------|------|
 | **Assemble** | `specs/reverse-spec/`에서 해당 커맨드에 필요한 파일/섹션을 읽고, 커맨드별 주입 규칙에 따라 필터링하여 조립. 선행 Feature의 실제 구현 결과(`specs/{NNN-feature}/` 하위)도 함께 참조. **Graceful degradation**: 소스 파일이 없거나 섹션에 플레이스홀더("N/A", "none yet")만 있는 경우 해당 소스는 건너뜀 |
 | **Checkpoint** | 조립된 컨텍스트를 **실제 내용**과 함께 사용자에게 보여주고 실행 전 승인/수정 기회 제공. 사용자가 수정을 요청하면 반영 후 재확인. **`--auto` 모드에서만 생략** (요약은 표시하되 즉시 실행 진행). `--dangerously-skip-permissions` 환경에서는 AskUserQuestion 대신 일반 텍스트 메시지로 확인 요청 |
-| **Execute** | 승인된 컨텍스트와 함께 해당 spec-kit 커맨드(`/speckit-specify`, `/speckit-plan` 등)를 실행. 실제 작업은 spec-kit이 수행 |
-| **Review** | 실행 후 생성/수정된 산출물을 사용자에게 보여주고 검토 기회 제공. 승인, 수정 요청(재실행), 또는 직접 편집 가능. **HARD STOP** — Checkpoint과 동일한 규칙 적용. **`--auto` 모드에서만 생략** |
+| **Execute+Review** | 해당 spec-kit 커맨드를 실행한 후 **멈추지 않고 즉시** 생성/수정된 산출물을 사용자에게 보여줌. 승인, 수정 요청(재실행), 또는 직접 편집 가능. **HARD STOP** — Checkpoint과 동일한 규칙 적용. Execute와 Review는 하나의 연속 동작으로, 에이전트가 그 사이에서 멈추는 것을 방지. **Review는 `--auto` 모드에서만 생략** |
 | **Update** | 실행 결과를 반영하여 Global Evolution Layer 파일을 갱신. `sdd-state.md`에 진행 상태 기록 |
 
 #### 커맨드별 컨텍스트 주입

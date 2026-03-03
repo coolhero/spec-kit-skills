@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 08:34 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 08:42 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -340,24 +340,23 @@ Key practical differences:
 
 During pipeline execution, Feature definitions can be modified using `/smart-sdd restructure`. This command supports splitting, merging, moving requirements, changing dependencies, and deleting Features. All changes are automatically propagated to every affected artifact (roadmap, registries, pre-context files, sdd-state) with user approval before execution.
 
-#### Common Protocol: Assemble --> Checkpoint --> Execute --> Review --> Update
+#### Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
-All spec-kit command executions follow this 5-step protocol:
+All spec-kit command executions follow this 4-step protocol:
 
 ```
-+--------------+     +---------------+     +--------------+     +------------+     +--------------+
-|  1. Assemble |---->| 2. Checkpoint |---->|  3. Execute  |---->|  4. Review |---->|  5. Update   |
-|  Context     |     |  Pre-Exec     |     | spec-kit     |     | Artifact   |     | Global       |
-|  Assembly    |     |  Confirmation |     | Execution    |     | Review     |     | Refresh      |
-+--------------+     +---------------+     +--------------+     +------------+     +--------------+
++--------------+     +---------------+     +------------------------+     +--------------+
+|  1. Assemble |---->| 2. Checkpoint |---->|  3. Execute + Review   |---->|  4. Update   |
+|  Context     |     |  Pre-Exec     |     | spec-kit Execution +   |     | Global       |
+|  Assembly    |     |  Confirmation |     | Artifact Review        |     | Refresh      |
++--------------+     +---------------+     +------------------------+     +--------------+
 ```
 
 | Step | Description |
 |------|------------|
 | **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`). If a source file is missing or a section contains only placeholder text, that source is gracefully skipped |
 | **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify before execution. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
-| **Execute** | Executes the corresponding spec-kit command (`/speckit-specify`, `/speckit-plan`, etc.) with the approved context. The actual work is performed by spec-kit |
-| **Review** | Presents the generated/modified artifacts to the user for review after execution. The user can approve, request modifications (re-execute), or edit artifacts directly. **HARD STOP** — same rules as Checkpoint. **Skipped only in `--auto` mode** |
+| **Execute+Review** | Executes the corresponding spec-kit command and **immediately** — without stopping — presents the generated/modified artifacts for review. The user can approve, request modifications (re-execute), or edit artifacts directly. **HARD STOP** — same rules as Checkpoint. Execute and Review are ONE continuous action to prevent agent from stopping between them. **Review skipped only in `--auto` mode** |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
 
 #### Per-Command Context Injection
