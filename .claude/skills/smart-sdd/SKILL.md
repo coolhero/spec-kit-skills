@@ -566,7 +566,11 @@ If the spec-kit command fails (error, crash, partial output):
 4. If "Abort step": Record failure in sdd-state.md, do NOT proceed to Review
 5. If "Troubleshoot": Help the user diagnose and fix the issue, then offer to retry
 
-**⚠️ MANDATORY NEXT STEP: After Execute completes successfully, you MUST proceed to Review (Step 4). Do NOT skip to Update. Do NOT continue the pipeline. STOP here and present the generated artifacts to the user.**
+**⚠️ CRITICAL — SUPPRESS spec-kit "Next step" output**: spec-kit commands print their own "Next phase:" or "Next step:" suggestions when they complete (e.g., "Next phase: /speckit.clarify or /speckit.plan"). **These suggestions are for standalone spec-kit usage ONLY.**
+- **When running through smart-sdd, ALWAYS IGNORE them.** The smart-sdd orchestrator (this SKILL.md) controls the workflow — spec-kit does not.
+- **Do NOT relay spec-kit's "Next phase/step" messages to the user.** If you show them, the user may invoke spec-kit directly, bypassing smart-sdd's context injection and state tracking. Instead, after Execute completes, proceed to Review silently.
+
+**⚠️ MANDATORY NEXT ACTION: After Execute completes successfully, you MUST IMMEDIATELY proceed to Review (Step 4) below. Do NOT stop. Do NOT summarize and wait. Do NOT suggest next steps to the user. Do NOT skip to Update. Read the generated artifact(s) and display the Review content RIGHT NOW.**
 
 ### 4. Review — Artifact Review (HARD STOP — MANDATORY)
 
@@ -816,6 +820,8 @@ Executes the following steps **strictly in order** for each Feature.
 ```
 
 > **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip. The only exception is `--auto` mode.
+>
+> **CRITICAL**: After each `speckit-*` command completes, it prints its own "Next phase:" or "Next step:" message. **IGNORE these messages completely — do NOT show them to the user.** smart-sdd controls the flow: after Execute, you MUST immediately proceed to the Review(STOP) step, not follow spec-kit's suggestions.
 
 #### Clarify Trigger (after specify Review)
 
