@@ -127,6 +127,16 @@ Feature restructuring history. Recorded when `/smart-sdd restructure` is execute
 
 ---
 
+## Parity Check Log
+
+Parity check execution history. Recorded when `/smart-sdd parity` is executed. Only applicable to brownfield rebuild projects (Origin: `reverse-spec`).
+
+| Date/Time | Source Path | Structural Parity | Logic Parity | Gaps Found | New Features | Exclusions | Deferred | Status |
+|-----------|------------|-------------------|-------------|------------|-------------|------------|----------|--------|
+| 2024-02-01T10:00:00 | /Users/dev/old-project | 95.6% | 90.5% | 8 | 2 | 3 | 1 | completed |
+
+---
+
 ## Constitution Update Log
 
 Constitution incremental update history.
@@ -201,6 +211,22 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Change `deferred` Features whose Tier matches the newly activated Tiers to `pending`
 - Record the expansion in Global Evolution Log: "Scope expanded: T1 → T1,T2"
 - Note: This rule only applies to `core` scope projects. `full` scope has no deferred Features.
+
+### When Parity Check is Executed (via /smart-sdd parity)
+- Add a new entry to the Parity Check Log with:
+  - Date/time of execution
+  - Source path used (resolved from `--source` argument or sdd-state.md)
+  - Structural and logic parity percentages
+  - Number of gaps found, new Features created, intentional exclusions, and deferred items
+  - Status: `completed` or `in_progress`
+- If new Features were created via the `add` workflow:
+  - Add new Feature rows to Feature Progress table with all steps blank (`pending`)
+  - Record "Feature F00N-name added via parity check" in Global Evolution Log
+- If existing Features were flagged for re-execution:
+  - Mark affected steps with 🔀 from specify onward in Feature Progress table
+  - Change Feature Status to `restructured`
+  - Record in Restructure Log: "parity-driven re-specification for F00N-name"
+- Update `Last Updated`
 
 ### When a Feature is Restructured (via /smart-sdd restructure)
 - Change affected step cells to 🔀 (all steps from the first affected step onward)

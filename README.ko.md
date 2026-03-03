@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-03 11:21:08 KST
+[English README](README.md) | Last updated: 2026-03-03 13:21 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -286,6 +286,10 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 # 상태 확인
 /smart-sdd status                        # 전체 진행 상태 조회
 
+# 패리티 검사 (brownfield rebuild 전용 — 파이프라인 완료 후)
+/smart-sdd parity                        # 원본 소스 대비 패리티 검사
+/smart-sdd parity --source ./old-project # 소스 경로 명시적 지정
+
 # --auto는 모든 커맨드와 조합 가능 (확인 단계 생략)
 /smart-sdd specify F001 --auto
 /smart-sdd pipeline --from ./path --auto
@@ -451,6 +455,23 @@ Active: 1/4 completed, 1/4 in progress | Deferred: 2 (Tier 2)
 
 상태 파일에는 Feature Progress, Feature Detail Log, Feature Mapping (Feature ID <-> spec-kit Name), Global Evolution Log, Restructure Log, Constitution Update Log가 포함됩니다. `scope=core`일 때 Active Tiers 밖의 Feature는 `deferred`로 표시되어 pipeline에서 건너뛰며, `/smart-sdd expand`로 활성화할 때까지 보류됩니다. `/smart-sdd restructure`로 수정된 Feature는 `restructured`로 표시되며, 영향받는 단계에 재실행 마크(🔀)가 설정됩니다.
 
+#### 패리티 검사 (Brownfield Rebuild)
+
+Brownfield rebuild 모드에서 모든 Feature가 파이프라인을 완료한 후, `/smart-sdd parity`를 실행하여 원본 소스 대비 구현 패리티를 검증합니다.
+
+패리티 검사는 두 가지 유형의 gap을 다룹니다:
+- **Gap A (추출 누락)**: `/reverse-spec` 분석 시 원본 소스에서 놓친 항목. `/reverse-spec` 분석 완료 시(Phase 4-3) 생성되는 `coverage-baseline.md`로 완화.
+- **Gap B (구현 누락)**: `/reverse-spec`이 정확히 추출했으나 파이프라인에서 완전히 구현되지 않은 항목. `/smart-sdd parity` 명령어로 감지.
+
+parity 명령어는 5개 페이즈로 실행됩니다:
+1. **구조적 패리티** (자동) — 원본 소스에서 엔드포인트, 엔티티, 라우트, 테스트를 파싱. 레지스트리 및 구현된 코드와 비교. `coverage-baseline.md`의 의도적 제외 항목 필터링.
+2. **로직 패리티** (반자동) — `business-logic-map.md` 규칙을 구현된 FR-### 매핑과 비교. 원본 테스트 케이스를 새 테스트와 비교.
+3. **Gap 리포트** — gap 테이블과 자동 그룹핑이 포함된 `parity-report.md` 생성.
+4. **보완 계획** (그룹별 HARD STOP) — 사용자가 그룹별로 결정: 새 Feature 생성(`/smart-sdd add` 연계), 의도적 제외(6가지 사유 코드: `deprecated`, `replaced`, `third-party`, `deferred`, `out-of-scope`, `covered-differently`), 유예, 또는 기존 Feature에 추가.
+5. **완료 리포트** — 최종 패리티 백분율 및 다음 단계 표시.
+
+횡단 관심사 gap(예: rate limiting, CORS)은 이중 처리: constitution 업데이트(아키텍처 원칙) + 인프라 Feature(실제 구현 코드).
+
 ---
 
 ## 경로 규약
@@ -483,6 +504,8 @@ specs/reverse-spec/
 ├── api-registry.md
 ├── business-logic-map.md           # (rebuild 모드에서만)
 ├── stack-migration.md              # (rebuild + 신규 스택에서만)
+├── coverage-baseline.md            # (rebuild 전용 — /reverse-spec Phase 4-3이 생성)
+├── parity-report.md                # (rebuild 전용 — /smart-sdd parity가 생성)
 ├── sdd-state.md                    # smart-sdd가 자동 생성/관리하는 상태 파일
 └── features/
     ├── F001-auth/pre-context.md

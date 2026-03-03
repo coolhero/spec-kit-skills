@@ -566,7 +566,85 @@ Contents to include in each pre-context.md:
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts (owned + referenced entities, provided + consumed APIs), technical decisions
 - **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
 
-### 4-3. Completion Report
+### 4-3. Source Coverage Baseline
+
+After generating all deliverables, perform an automated source surface measurement to quantify how much of the original source code is covered by the extracted Features. This establishes a baseline for later parity checking via `/smart-sdd parity`.
+
+#### Step 1 — Automated Surface Measurement
+
+Parse the original source (target directory) and compare against the generated artifacts. Reuse detection patterns from Phase 2 — do NOT re-parse from scratch; compare Phase 2 results against the generated artifact inventories:
+
+| Metric | Source (parse from target) | Mapped (from artifacts) | Comparison Method |
+|--------|---------------------------|------------------------|-------------------|
+| Source files | Glob all source files (exclude vendor/build/test dirs) | Count files listed in all pre-context.md Source Reference tables | File path matching |
+| API endpoints | Parse route definitions (Phase 2-2 tech-stack-specific patterns) | Count entries in api-registry.md | Method + path matching |
+| DB models/entities | Parse model/entity definitions (Phase 2-1 patterns) | Count entries in entity-registry.md | Entity name matching |
+| Test files | Glob test file patterns (`**/*test*`, `**/*spec*`, `**/__tests__/**`) | Count test files listed in pre-context.md Source Reference | File path matching |
+| Business rules | Count rules identified in Phase 2-3 | Count entries in business-logic-map.md | Rule ID matching |
+
+Display the metrics table to the user:
+
+```
+📊 Source Coverage Analysis:
+
+| Metric          | Source | Mapped | Coverage |
+|-----------------|--------|--------|----------|
+| Source files    | 87     | 72     | 82.8%    |
+| API endpoints   | 45     | 43     | 95.6%    |
+| DB entities     | 20     | 19     | 95.0%    |
+| Test files      | 34     | 28     | 82.4%    |
+| Business rules  | 42     | 40     | 95.2%    |
+```
+
+#### Step 2 — Unmapped Items Identification
+
+For each metric category, identify items in the source that were NOT mapped to any Feature:
+- Source files not listed in any pre-context.md Source Reference
+- Endpoints parsed from routes but not in api-registry.md
+- Models parsed from source but not in entity-registry.md
+- Test files not associated with any Feature
+
+Group the unmapped items by apparent category/module (e.g., "middleware files", "admin endpoints", "utility models") to minimize the number of user interactions in Step 3.
+
+#### Step 3 — Classification (HARD STOP)
+
+For each unmapped group, use AskUserQuestion and WAIT for the user's response:
+
+```
+📋 Unmapped Items: [Group Name] ([N] items)
+
+  [file/endpoint/entity list]
+
+Classification:
+```
+
+Options:
+- **"Assign to Feature [FID]"** — Add to existing Feature's pre-context.md Source Reference. Ask which FID if not obvious from context.
+- **"Create new Feature"** — Collect Feature name and description from user. Add to roadmap.md Feature Catalog (with next available ID). Generate pre-context.md for the new Feature.
+- **"Cross-cutting concern"** — Flag for constitution-seed.md update (add principle) or future infrastructure Feature. Record in coverage-baseline.md.
+- **"Intentional exclusion"** — Record with one of 6 exclusion reasons: `deprecated`, `replaced`, `third-party`, `deferred`, `out-of-scope`, `covered-differently`. If `deferred`, link to the relevant deferred Feature in roadmap.md.
+
+**Empty/blank response = NOT classified — re-ask.** You MUST obtain an explicit classification for every group.
+
+If user selects "Create new Feature" for any items:
+- Assign the next available Feature ID (continuing the existing sequence)
+- Add to roadmap.md Feature Catalog (with appropriate Tier for core scope, or dependency position for full scope)
+- Generate pre-context.md for the new Feature using the [pre-context-template](templates/pre-context-template.md)
+- The new Feature will be picked up by smart-sdd when the pipeline runs
+
+#### Step 4 — Generate coverage-baseline.md
+
+Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-template](templates/coverage-baseline-template.md):
+- Populate Surface Metrics table with the measured values from Step 1
+- Record all unmapped items with their user-assigned classifications from Step 3
+- Record all intentional exclusions with their reasons and descriptions
+- Add coverage notes from the classification process
+
+#### `--dangerously-skip-permissions` handling
+
+When AskUserQuestion is unavailable, display unmapped items via regular text and ask for classification via text message. Items without explicit classification are marked as `unclassified` in coverage-baseline.md for later review via `/smart-sdd parity`.
+
+### 4-4. Completion Report
 
 Report the complete list of generated deliverables and next-step guidance to the user:
 
@@ -578,6 +656,7 @@ Generation complete:
 - specs/reverse-spec/api-registry.md
 - specs/reverse-spec/business-logic-map.md
 - specs/reverse-spec/stack-migration.md          (if New Stack strategy)
+- specs/reverse-spec/coverage-baseline.md
 - specs/reverse-spec/features/F001-xxx/pre-context.md
 - specs/reverse-spec/features/F002-xxx/pre-context.md
 - ...
@@ -586,6 +665,7 @@ Generation complete:
 Next steps:
   /smart-sdd pipeline       — Run the full SDD pipeline (recommended)
   /smart-sdd pipeline --auto — Run without stopping for per-step confirmation
+  /smart-sdd parity          — Check implementation parity against original source (after pipeline completes)
 
 smart-sdd will automatically:
   1. Finalize constitution based on constitution-seed.md
