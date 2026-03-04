@@ -692,13 +692,17 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    > A markdown file with instructions is **documentation, NOT a demo script**.
    > The demo MUST be a script that runs with `./demos/F00N-name.sh` — no human reading required.
 
-   **CORRECT — executable script with coverage mapping:**
+   **CORRECT — executable script with coverage mapping and interactive mode:**
    ```bash
    #!/usr/bin/env bash
    # Demo: [Feature Name]
    #
    # Purpose: Demonstrates [Feature Name] by exercising core scenarios
    #          derived from spec.md acceptance criteria.
+   #
+   # Usage:
+   #   ./demos/F00N-name.sh              # Test mode (default) — automated assertions, exit
+   #   ./demos/F00N-name.sh --interactive # Interactive mode — try the Feature yourself
    #
    # Coverage (maps to spec.md):
    #   ✅ FR-001 [Requirement name]   → Test 1: [what this test does]
@@ -713,13 +717,27 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    # Prerequisites: [What must be running/installed]
    set -euo pipefail
 
+   MODE="${1:---test}"
    TOTAL=0; PASSED=0; FAILED=0
+
+   # --- Cleanup handler ---
+   cleanup() {
+     echo ""
+     echo "Cleaning up..."
+     [Commands to clean up — e.g., stop server, remove temp data]
+     if [ "$MODE" = "--test" ]; then
+       echo "=== Demo complete: ${PASSED}/${TOTAL} passed, ${FAILED} failed ==="
+     fi
+   }
+   trap cleanup EXIT
 
    echo "=== Demo: [Feature Name] ==="
    echo ""
 
    # Setup
    [Commands to prepare the demo environment — e.g., start server, seed DB]
+
+   # ─── Automated Tests ────────────────────────────────────────
 
    # --- Test 1: [Short description] (FR-001, SC-001) ---
    echo "[1/N] Testing [what]..."
@@ -736,24 +754,55 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    echo "  ✅ [What was verified]"
    PASSED=$((PASSED+1))
 
-   # Teardown
-   [Commands to clean up — e.g., stop server, remove temp data]
-
    echo ""
-   echo "=== Demo complete: ${PASSED}/${TOTAL} passed, ${FAILED} failed ==="
+   echo "=== Tests: ${PASSED}/${TOTAL} passed, ${FAILED} failed ==="
+
+   # ─── Interactive Mode ───────────────────────────────────────
+
+   if [ "$MODE" = "--interactive" ] || [ "$MODE" = "-i" ]; then
+     echo ""
+     echo "══════════════════════════════════════════════════"
+     echo "  🎮 Interactive Mode — Try it yourself!"
+     echo "══════════════════════════════════════════════════"
+     echo ""
+     echo "The Feature is running. Here's what you can try:"
+     echo ""
+     [Print concrete examples the user can copy-paste and run:]
+     echo "  # Example 1: [What to try]"
+     echo "  [Actual command the user can run — e.g., curl http://localhost:3000/api/users]"
+     echo ""
+     echo "  # Example 2: [What to try]"
+     echo "  [Actual command — e.g., open http://localhost:3000/dashboard in a browser]"
+     echo ""
+     echo "Press Ctrl+C to stop."
+     echo ""
+     # Keep the service running until user interrupts
+     wait || true
+   fi
    ```
 
    **Key requirements:**
    - The script must be executable (`chmod +x`) and self-contained
+   - **Two modes REQUIRED**:
+     - `--test` (default): Automated assertions → passed/total summary → exit. Used by `verify` phase
+     - `--interactive` / `-i`: After automated tests pass, keep the Feature running and print "Try it yourself" examples with concrete commands the user can copy-paste. Exit on Ctrl+C
    - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to a demo test. Mark untestable items with ⬜ and reason
    - **Each test step must state what it verifies** (FR/SC reference + expected behavior)
-   - **Summary line at the end**: Show passed/total count
+   - **Summary line**: Show passed/total count (in both modes)
+   - **Interactive examples REQUIRED**: At least 2-3 concrete commands/URLs the user can try (e.g., `curl` commands, browser URLs, CLI invocations)
    - Aim for **maximum coverage** of the Feature's functional requirements — skip only what genuinely cannot be automated (e.g., manual UI interaction on a non-headless platform)
    - **Use `curl`, `pnpm exec`, `node -e`, `electron --inspect`, etc. — NOT prose instructions**
+   - **Interactive mode by Feature type**:
+     - Has UI → Keep server running, print URLs to open in browser
+     - Backend/API → Keep server running, print curl/httpie examples
+     - CLI/Library → Print sample commands to run in another terminal
+     - Data layer → Keep sandbox running, print CRUD command examples
 
 5. **Update `demos/README.md`** (Demo Hub — index of all Feature demos):
    - Create if it doesn't exist (first Feature with demo)
-   - Add the Feature with its demo command: `./demos/F00N-name.sh`
+   - Add the Feature with both demo commands:
+     - `./demos/F00N-name.sh` — run automated tests
+     - `./demos/F00N-name.sh --interactive` — try it yourself
 
 ### Injected Content
 
@@ -856,9 +905,11 @@ Show the **actual verification checklist** so the user can see what will be chec
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
   - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
   - [ ] Demo script is NOT markdown (reject if file contains "## Demo Steps" or manual instructions)
-  - [ ] Demo script executes without errors
+  - [ ] Demo script supports --test (default) and --interactive modes
+  - [ ] Demo script executes without errors (--test mode)
   - [ ] FR/SC Coverage header maps spec.md FR-###/SC-### to test steps
   - [ ] Coverage ≥ 50% of FR/SC items (warn if below)
+  - [ ] Interactive mode prints concrete "Try it yourself" examples (≥ 2)
   - [ ] Demo Components header comment with Category and Fate
   - [ ] Component markers (@demo-only / @demo-scaffold)
 
@@ -899,8 +950,10 @@ After verification execution completes:
 [Only if Demo-Ready Delivery is in the constitution]
   - ✅/❌ Executable demo script exists (demos/F00N-name.sh)
   - ✅/❌ Demo script is executable (not markdown)
-  - ✅/❌ Demo script executed successfully
+  - ✅/❌ Demo script supports --test and --interactive modes
+  - ✅/❌ Demo script executed successfully (--test mode)
   - ✅/❌ FR/SC Coverage mapping present (≥ 50% of spec FR/SC items)
+  - ✅/❌ Interactive mode has "Try it yourself" examples (≥ 2)
   - ✅/❌ Demo Components header comment present
   - ✅/❌ Component markers present
 

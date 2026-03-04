@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-04 21:30 KST
+[English README](README.md) | Last updated: 2026-03-05 00:30 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -495,7 +495,8 @@ tasks 생성 후, `speckit-analyze`가 spec.md, plan.md, tasks.md 간의 READ-ON
 
 3단계: Demo-Ready 검증 (constitution에 VI. Demo-Ready Delivery가 있는 경우만) — 실패 시 BLOCK
     └─ 실행 가능한 데모 스크립트 존재 확인 (demos/F00N-name.sh 또는 .ts/.py 등)
-    └─ 데모 스크립트 실행 및 정상 완료 확인
+    └─ 두 가지 모드 지원 확인: --test (기본값) 및 --interactive (직접 체험)
+    └─ 데모 스크립트 실행 (--test 모드) 및 정상 완료 확인
     └─ Demo Components 헤더 및 컴포넌트 마커 (@demo-only, @demo-scaffold) 확인
     └─ 하나라도 실패 → 검증 차단
 
@@ -732,7 +733,7 @@ specs/reverse-spec/
 | **III. Simplicity First** | spec 범위만 구현. 추측적 기능 추가/조기 추상화 금지 | 모든 코드가 요구사항으로 추적 가능 |
 | **IV. Surgical Changes** | 인접 코드 개선 금지. 자기 변경으로 발생한 고아 코드만 정리 | 변경 줄이 task로 추적 가능 |
 | **V. Goal-Driven Execution** | 검증 가능한 완료 기준 필수. "구현한다" → "테스트가 통과한다" | 자동화 검증 통과 |
-| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)를 제공하며, **spec.md의 FR-###/SC-###에 매핑**하여 가능한 한 모든 기능 요구사항을 검증. 각 테스트 단계는 무엇을 왜 검증하는지 명시(FR/SC 참조 + 기대 동작)하고 passed/total 요약을 출력. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류 | `demos/F00N-name.sh` 실행으로 Feature 기능을 검증하고 passed/total 리포트 출력 |
+| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)를 **두 가지 모드**로 제공: `--test` (기본값: 자동화 검증 → passed/total → 종료)와 `--interactive` (Feature를 실행 상태로 유지하여 사용자가 **직접 써볼 수 있는** 복사-붙여넣기 예제 제공). **spec.md의 FR-###/SC-###에 매핑**하여 가능한 한 모든 기능 요구사항을 검증. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류 | `./demos/F00N-name.sh`로 검증 (test 모드); `--interactive`로 사용자가 직접 체험 |
 
 ### spec-kit과의 관계
 

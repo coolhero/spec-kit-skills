@@ -17,13 +17,16 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 >
 > This rule applies to ALL Checkpoints and ALL Reviews. Violating this rule means the user loses control of the workflow. There are no exceptions.
 >
-> **Rule 2: Demo = Executable Script, NEVER Markdown**
-> When Demo-Ready Delivery is active, the demo MUST be an **executable script** (`demos/F00N-name.sh` or `.ts`/`.py`).
-> - ✅ CORRECT: `demos/F001-auth.sh` containing `#!/usr/bin/env bash` + executable commands
-> - ❌ WRONG: A markdown file with "## Demo Steps" and manual instructions like "Open settings" or "Click button"
+> **Rule 2: Demo = Executable Script with Two Modes, NEVER Markdown**
+> When Demo-Ready Delivery is active, the demo MUST be an **executable script** (`demos/F00N-name.sh` or `.ts`/`.py`) with **two modes**:
+> - `--test` (default): Automated assertions → passed/total → exit. Used by `verify`
+> - `--interactive` / `-i`: After tests pass, keep the Feature running so the user can **try it themselves**. Print concrete commands/URLs to copy-paste. Exit on Ctrl+C
+> - ✅ CORRECT: `demos/F001-auth.sh` containing `#!/usr/bin/env bash` + test mode + interactive mode with "Try it yourself" examples
+> - ❌ WRONG: A script that only runs tests and exits (no interactive mode)
+> - ❌ WRONG: A markdown file with "## Demo Steps" and manual instructions
 > - ❌ WRONG: Showing demo steps as text in the chat instead of writing a script file
 >
-> A demo that requires a human to read and follow steps is NOT a demo — it is documentation. The script must run autonomously.
+> A demo that only runs tests and exits is a **test suite**, not a demo. Users must be able to `--interactive` and actually use the Feature.
 
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with three project modes:
 
@@ -333,7 +336,7 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
    - III. Simplicity First — Implement only what is in the spec. No speculative additions
    - IV. Surgical Changes — No "improving" adjacent code. Only clean up own changes
    - V. Goal-Driven Execution — Verifiable completion criteria required
-   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Provide an **executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc.) that **maps to spec.md's FR-###/SC-###** and exercises as many functional requirements as possible. Each test step states what it verifies (FR/SC ref + expected behavior) and the script prints a passed/total summary
+   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Provide an **executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc.) with **two modes**: `--test` (default, automated assertions + passed/total) and `--interactive` (keep Feature running so users can try it themselves with concrete copy-paste examples). The script **maps to spec.md's FR-###/SC-###** and exercises as many functional requirements as possible
 
 2. **User selection**: All 6 are selected by default. The user can:
    - Deselect specific practices
@@ -1471,7 +1474,14 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - The demo script must be executable and self-contained: running it should demonstrate the Feature without manual steps
 - If a markdown demo file was generated instead, **delete it** and create a proper executable script
 
-**Step 2 — Check coverage mapping and demo components**:
+**Step 2 — Check two-mode support (--test and --interactive)**:
+- The demo script MUST support two execution modes:
+  - `--test` (default): Automated assertions → passed/total summary → exit. This is what `verify` runs
+  - `--interactive` / `-i`: After automated tests pass, keep the Feature running and print "Try it yourself" examples with concrete commands/URLs the user can copy-paste. Exit on Ctrl+C
+- **REJECT if**: the script has no interactive mode (i.e., only runs tests and exits with no `--interactive` handling)
+- Interactive mode must include at least 2 concrete, copy-pasteable examples (e.g., curl commands, browser URLs, CLI invocations)
+
+**Step 3 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to specific demo tests
   - Each FR/SC should be either ✅ (covered by a test) or ⬜ (skipped with reason)
   - **Aim for maximum coverage** — every functional requirement should have a corresponding demo test unless genuinely untestable
@@ -1481,19 +1491,21 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - Demo-only components are marked with `// @demo-only` (removed after all Features complete)
 - Promotable components are marked with `// @demo-scaffold — will be extended by F00N-[feature]`
 
-**Step 3 — Execute the demo script**:
-- Run the demo script and verify it completes without errors
+**Step 4 — Execute the demo script (test mode)**:
+- Run the demo script in test mode (`--test`) and verify it completes without errors
 - If the demo requires a running server (e.g., web app), start the server, verify the demo endpoints/pages respond correctly, then stop the server
 - Capture the demo output (stdout/stderr) for the Review display
 
 **If any check fails**, display and BLOCK:
 ```
 ❌ Demo-Ready verification failed for [FID] - [Feature Name]:
-  - [Missing: demos/F00N-name.sh | Script execution failed: <error> | Missing: Demo Components header | Missing: component markers]
+  - [Missing: demos/F00N-name.sh | Script execution failed: <error> | Missing: --interactive mode | Missing: Demo Components header | Missing: component markers]
 
 "Tests pass" alone does not satisfy Demo-Ready Delivery.
-Please create an executable demo script at demos/F00N-name.sh that demonstrates the Feature,
-and mark all demo code with appropriate category markers.
+Please create an executable demo script at demos/F00N-name.sh with:
+  - Test mode (default): automated assertions with passed/total summary
+  - Interactive mode (--interactive): lets users try the Feature themselves
+  - Demo Components with appropriate category markers
 ```
 
 **Use AskUserQuestion** with options:
@@ -1502,7 +1514,9 @@ and mark all demo code with appropriate category markers.
 
 **Do NOT proceed to Phase 4** until the demo script exists and executes successfully.
 
-- Update `demos/README.md` (Demo Hub) with the Feature's demo status and the command to run the demo
+- Update `demos/README.md` (Demo Hub) with the Feature's demo status and both commands:
+  - `./demos/F00N-name.sh` — run automated tests
+  - `./demos/F00N-name.sh --interactive` — try it yourself
 
 ### Phase 4: Global Evolution Update
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found

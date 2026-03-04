@@ -161,7 +161,7 @@ Quality-driven:
 - **Verification criterion**: `Automated verification (tests, build, lint) must pass upon each task completion`
 
 ### VI. Demo-Ready Delivery
-- Each Feature must be demonstrable upon completion — not just passing tests, but runnable and visually/functionally verifiable
+- Each Feature must be demonstrable upon completion — not just passing tests, but runnable and visually/functionally verifiable **by the user**
 - Maintain a centralized `demos/` directory at the project root with **executable demo scripts** per Feature:
   ```
   demos/
@@ -171,6 +171,9 @@ Quality-driven:
   └── ...
   ```
 - Each demo script (`demos/F00N-name.sh` or `.ts`/`.py`/etc. matching the project's language) must be:
+  - **Two-mode**: Support `--test` (default) and `--interactive` / `-i` execution modes:
+    - `--test`: Automated assertions → passed/total summary → exit. Used by `verify` phase
+    - `--interactive`: After tests pass, keep the Feature running and print "Try it yourself" examples with concrete commands/URLs the user can copy-paste. Exit on Ctrl+C
   - **Executable**: `chmod +x` and self-contained — running it demonstrates the Feature without manual steps
   - **Coverage-mapped**: Include a Coverage header comment mapping each FR-###/SC-### from spec.md to a specific demo test (✅ covered / ⬜ skipped with reason). Aim for maximum coverage of the Feature's functional requirements:
     ```bash
@@ -181,13 +184,17 @@ Quality-driven:
     ```
   - **Self-documenting**: Each test step states what it verifies and why (FR/SC reference + expected behavior). Include a Demo Components header listing each component as Demo-only or Promotable
   - **Summarized**: Print a final `passed/total` result line so the outcome is immediately clear
-  - **Verifiable**: The script is executed during `verify` and must complete without errors
-- "Demo-ready" means: running `./demos/F00N-name.sh` exercises **as many of the Feature's functional requirements as possible** and reports pass/fail results — without requiring other incomplete Features or manual intervention
-- **Demo script by Feature type**:
-  - Has UI → Script starts the server, verifies demo endpoints/pages respond, then shuts down
-  - Backend/API only → Script invokes API endpoints and displays results
-  - Data layer / Store → Script performs CRUD operations and displays state changes
-  - Pipeline / Engine → Script runs the pipeline with sample data and shows output
+  - **Interactive**: In `--interactive` mode, print at least 2 concrete, copy-pasteable examples so users can actually try the Feature
+  - **Verifiable**: The script is executed during `verify` (test mode) and must complete without errors
+- "Demo-ready" means:
+  - `./demos/F00N-name.sh` exercises **as many of the Feature's functional requirements as possible** and reports pass/fail results — without requiring other incomplete Features or manual intervention
+  - `./demos/F00N-name.sh --interactive` lets the **user actually try the Feature** with concrete examples
+- **Demo interactive mode by Feature type**:
+  - Has UI → Keep server running, print URLs to open in browser
+  - Backend/API only → Keep server running, print curl/httpie examples to try
+  - CLI/Library → Print sample commands to run in another terminal
+  - Data layer / Store → Keep sandbox running, print CRUD command examples
+  - Pipeline / Engine → Print commands to run the pipeline with custom data
 - **Demo code separation strategy**: Clearly distinguish demo-only code from production code
   - **Demo-only code** (mock data, temporary UI scaffolding): Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed or replaced when the real Feature is implemented
   - **Promotable code** (minimal but real implementation that future Features will extend): Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
@@ -199,7 +206,7 @@ Quality-driven:
     #   Settings page shell | src/pages/settings.tsx | Promotable | Extended by F005-settings
     ```
   - During subsequent Feature implementation, check `demos/` for demo-only components marked for removal and clean them up
-- **Verification criterion**: `Running ./demos/F00N-name.sh demonstrates the Feature works — "npm test passes" alone does NOT satisfy this criterion`
+- **Verification criterion**: `Running ./demos/F00N-name.sh verifies the Feature works (test mode), and ./demos/F00N-name.sh --interactive lets the user try it — "npm test passes" alone does NOT satisfy this criterion`
 
 ---
 
