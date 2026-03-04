@@ -13,6 +13,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 **Project**: [Project name]
 **Origin**: [greenfield | reverse-spec]
+**Domain**: [app | data-science] ← domain profile used; default "app"
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
 **Scope**: [core | full]
 **Active Tiers**: [T1 | T1,T2 | T1,T2,T3] ← core scope only; omit this line for full scope
@@ -160,22 +161,23 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 2. Initialize all steps of all Features to `pending` (blank)
 3. Leave the Feature Mapping table empty; map the spec-kit Name and Branch when each Feature's specify step is completed (spec-kit creates the branch during specify)
 4. Initialize Constitution to `pending`
-5. Set Origin based on how artifacts were generated:
+5. Set Domain based on the `--domain` argument (default: `app`)
+6. Set Origin based on how artifacts were generated:
    - `greenfield` — if initialized by `/smart-sdd init`
    - `reverse-spec` — if initialized from `/reverse-spec` artifacts
    - Origin does not change when Features are added later via `/smart-sdd add`
-6. Set Source Path based on the project mode:
+7. Set Source Path based on the project mode:
    - `greenfield` → `N/A` (no existing source code)
    - `reverse-spec` → Extract from the `**Source**:` field in `BASE_PATH/roadmap.md` (the original target-directory path used during `/reverse-spec`)
    - `add` (incremental) → `.` (source is the current working directory)
-7. Set Scope:
+8. Set Scope:
    - `reverse-spec` → Read from `**Strategy**: Scope: [core|full]` in `BASE_PATH/roadmap.md`
    - `greenfield` (init) → Always `full`
    - If roadmap.md has no Scope info (legacy projects) → Default to `full`
-8. Set Active Tiers based on Scope:
+9. Set Active Tiers based on Scope:
    - `core` → `T1` (only Tier 1 Features are initially active)
    - `full` → omit the `Active Tiers` field entirely (all Features are active, no Tier concept)
-9. Set initial Feature Status:
+10. Set initial Feature Status:
    - `core` → Features whose Tier is in Active Tiers → `pending` (blank), others → `deferred`
    - `full` → all Features → `pending` (no deferred Features, no Tier column in progress table)
 

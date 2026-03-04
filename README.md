@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 17:36 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 22:00 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -775,6 +775,10 @@ You can use reverse-spec artifacts directly with spec-kit commands without smart
 
 **What you lose**: automatic context assembly/filtering, auto-updates to registries and roadmap, pipeline state tracking (`sdd-state.md`), preceding Feature result priority, per-Feature env var verification, and Feature branch management.
 
+### Domain Profiles (Planned)
+
+Currently optimized for **application development** (backend, frontend, fullstack, mobile, library). Domain-specific analysis profiles for **data science**, **AI/ML**, **embedded systems**, and other specialized domains are planned. The `domains/` directory in each skill contains the profile schema (`_schema.md`) and existing profiles. Use `--domain` to select a profile (default: `app`).
+
 ### Project Structure
 
 ```
@@ -783,6 +787,10 @@ spec-kit-skills/
     └── skills/
         ├── reverse-spec/
         │   ├── SKILL.md                                 # Main skill definition (5-Phase workflow)
+        │   ├── domains/                                 # Domain-specific analysis profiles
+        │   │   ├── _schema.md                           # Domain profile schema
+        │   │   ├── app.md                               # Application domain (default)
+        │   │   └── data-science.md                      # Data science domain (template)
         │   ├── templates/
         │   │   ├── roadmap-template.md                  # Feature evolution map template
         │   │   ├── entity-registry-template.md           # Shared entity registry template
@@ -796,9 +804,21 @@ spec-kit-skills/
         │       └── speckit-compatibility.md              # spec-kit integration guide
         ├── smart-sdd/
         │   ├── SKILL.md                                 # Main skill definition (orchestrator)
+        │   ├── commands/                                # Per-command workflow details
+        │   │   ├── init.md                              # Greenfield setup workflow
+        │   │   ├── add.md                               # Brownfield incremental workflow
+        │   │   ├── pipeline.md                          # Pipeline + step mode workflows
+        │   │   ├── restructure.md                       # Feature restructuring workflow
+        │   │   ├── expand.md                            # Tier expansion workflow
+        │   │   └── parity.md                            # Source parity verification
+        │   ├── domains/                                 # Domain-specific behavior profiles
+        │   │   ├── _schema.md                           # Domain profile schema
+        │   │   ├── app.md                               # Application domain (default)
+        │   │   └── data-science.md                      # Data science domain (template)
         │   └── reference/
         │       ├── context-injection-rules.md            # Per-command context injection rules
-        │       └── state-schema.md                      # sdd-state.md schema definition
+        │       ├── state-schema.md                      # sdd-state.md schema definition
+        │       └── branch-management.md                 # Git branch management reference
         └── speckit-diff/
             ├── SKILL.md                                 # Compatibility analyzer skill
             └── reference/

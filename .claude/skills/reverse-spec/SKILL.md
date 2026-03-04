@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. A Reverse Specification skill that extracts specs from existing implementations.
-argument-hint: [target-directory] [--scope core|full] [--stack same|new] [--name new-project-name]
+argument-hint: [target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app]
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
 
@@ -19,6 +19,7 @@ $ARGUMENTS parsing rules:
   --scope <val> → Implementation scope: "core" or "full" (skips Phase 0 Question 1 if provided)
   --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
   --name <val>  → New project name (skips Phase 0 Question 3 if provided; implies rename from detected project name)
+  --domain <val> → Project domain profile: "app" (default). Determines analysis axes, registries, and Feature boundary heuristics
 ```
 
 Execute the following phases in order. Report progress to the user after completing each Phase.
@@ -56,6 +57,21 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 **If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 
 > **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
+
+---
+
+## Domain Profile
+
+The `--domain` argument selects the domain profile that governs domain-specific behavior throughout all Phases. Default: `app`.
+
+**Loading**: Read `domains/{domain}.md` before starting Phase 1. The profile defines:
+- **Analysis Axes** (Phase 2): What to extract during deep analysis
+- **Project Type Classification** (Phase 1): How to classify the project
+- **Registries** (Phase 4): Which registry files to generate
+- **Feature Boundary Heuristics** (Phase 3): How to identify Feature boundaries
+- **Tier Classification Axes** (Phase 3): How to evaluate Feature importance (core scope)
+
+For the default `app` domain, detailed extraction patterns for each technology stack are defined in `domains/app.md`.
 
 ---
 
@@ -148,12 +164,7 @@ Read configuration files to identify the tech stack:
 | Build/Deploy | Dockerfile, docker-compose, CI/CD configuration, Makefile |
 
 ### 1-3. Project Type Classification
-Classify the project type based on the collected information:
-- **backend**: API server, service
-- **frontend**: SPA, SSR web app
-- **fullstack**: Backend + Frontend integrated
-- **mobile**: iOS/Android app
-- **library**: Reusable library/package
+Classify the project type based on the collected information. Use the project types defined in `domains/{domain}.md` § Project Type Classification.
 
 ### 1-4. Module/Package Boundary Identification
 - Identify logical module boundaries from the directory structure
@@ -323,23 +334,16 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 ## Phase 2 — Deep Analysis
 
+> **Domain Profile**: Read `domains/{domain}.md` § Analysis Axes for the domain-specific extraction targets used throughout this Phase.
+
 Perform deep analysis using patterns appropriate to the tech stack identified in Phase 1. For large codebases, leverage parallel sub-agents via the Task tool.
 
 ### 2-1. Data Model Extraction
-Extract entities from appropriate sources depending on the tech stack:
+Extract entities from appropriate sources depending on the tech stack identified in Phase 1.
 
-| Technology | Search Targets |
-|------------|----------------|
-| Django | `models.py`, migrations |
-| SQLAlchemy/FastAPI | Model classes, Alembic migrations |
-| TypeORM/Prisma | Entity classes, `schema.prisma` |
-| Sequelize | Model definitions, migrations |
-| JPA/Hibernate | `@Entity` classes |
-| Mongoose | Schema definitions |
-| Go | struct definitions + DB tags |
-| Rails | `app/models/`, migrations |
+> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → Data Model for the technology-to-search-target mapping.
 
-Information to extract from each entity:
+For each entity, extract:
 - Entity name, fields (name, type, constraints)
 - Relationships (1:1, 1:N, M:N, target entity)
 - Validation rules
@@ -347,19 +351,11 @@ Information to extract from each entity:
 - Indexes, unique constraints
 
 ### 2-2. API Endpoint Extraction
-Extract APIs from appropriate sources depending on the tech stack:
+Extract APIs from appropriate sources depending on the tech stack identified in Phase 1.
 
-| Technology | Search Targets |
-|------------|----------------|
-| Express/Fastify | Router files, `app.use()`, `router.get()`, etc. |
-| Django/DRF | `urls.py`, ViewSet, APIView |
-| FastAPI | `@app.get()`, `@router.post()`, etc. decorators |
-| Spring | `@RequestMapping`, `@GetMapping`, etc. |
-| Rails | `config/routes.rb`, controllers |
-| Next.js/Nuxt | `pages/api/`, `app/api/` directories |
-| Go (net/http, Gin, Echo) | Router registration, handler functions |
+> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → API Endpoints for the technology-to-search-target mapping.
 
-Information to extract from each endpoint:
+For each endpoint, extract:
 - HTTP method, path
 - Request parameters, body schema
 - Response schema (per status code)
@@ -367,6 +363,9 @@ Information to extract from each endpoint:
 - Middleware/interceptors
 
 ### 2-3. Business Logic Extraction
+
+> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → Business Logic for technology-specific search patterns.
+
 Extract from the service layer, utilities, and domain logic:
 - **Business Rules**: Conditional logic, policy enforcement, calculation logic
 - **Validation**: Input validation, state transition conditions, business constraints
@@ -382,15 +381,7 @@ Extract from the service layer, utilities, and domain logic:
 ### 2-5. Environment Variable Extraction
 Scan the codebase for environment variable usage to identify runtime configuration requirements.
 
-| Detection Target | Search Patterns |
-|-----------------|-----------------|
-| Env files | `.env`, `.env.example`, `.env.local`, `.env.development`, `.env.production` |
-| Node.js | `process.env.VARIABLE_NAME` |
-| Python | `os.environ`, `os.getenv()`, `settings.py` env reads, `python-dotenv` usage |
-| Go | `os.Getenv()` |
-| Java/Spring | `@Value("${...}")`, `application.properties`, `application.yml` env references |
-| Ruby/Rails | `ENV["..."]`, `ENV.fetch(...)`, `credentials.yml.enc` |
-| Generic | `dotenv` config files, Docker Compose `environment:` sections |
+> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → Environment Variables for the technology-to-search-pattern mapping.
 
 For each discovered environment variable, extract:
 - **Variable name** (e.g., `DATABASE_URL`, `OPENAI_API_KEY`)
@@ -416,7 +407,9 @@ For each source file identified in Phase 1, extract a **function-level inventory
 - **P3 (nice-to-have)**: Utility functions, convenience methods, edge-case handlers. Can be deferred
 
 **How to extract efficiently**:
-- Scan for `export function`, `export class`, `module.exports`, public methods, route handlers, decorated functions, etc. (adapt patterns to the detected tech stack)
+
+> **Extraction patterns**: See `domains/{domain}.md` § Analysis Axes → Source Behaviors for the technology-specific scan patterns.
+
 - Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
 - Skip internal/private helpers that are implementation details, not behaviors
 
@@ -429,17 +422,9 @@ This inventory feeds into each Feature's `pre-context.md` → "Source Behavior I
 Third-party UI libraries (editors, charts, form builders, calendars, etc.) provide user-facing capabilities through **configuration and plugins**, not through exported functions. These capabilities are invisible to function-level analysis but represent significant functionality that must be reproduced.
 
 **Step 1 — Identify UI library dependencies**:
-Scan `package.json` (or equivalent) for UI component libraries. Common categories:
+Scan `package.json` (or equivalent) for UI component libraries.
 
-| Category | Example Libraries |
-|----------|-------------------|
-| Rich text editors | Toast UI Editor, TipTap, ProseMirror, Slate, Quill, CodeMirror, Monaco |
-| Charts/visualization | Chart.js, D3, ECharts, Recharts, Nivo |
-| Form builders | Formik, React Hook Form (with complex UI), Ant Design Form |
-| Drag & drop | dnd-kit, react-beautiful-dnd, SortableJS |
-| Calendars | FullCalendar, react-big-calendar |
-| Maps | Leaflet, Mapbox GL, Google Maps |
-| Media players | Video.js, Plyr, Howler |
+> **Library categories**: See `domains/{domain}.md` § Analysis Axes → UI Components for the category-to-library mapping.
 
 **Step 2 — Extract activated features per library**:
 For each identified UI library, read the initialization/configuration code to extract:
@@ -465,11 +450,7 @@ Upon completing Phase 2, report a summary of the number of entities, APIs, busin
 ## Phase 3 — Feature Classification and Importance Analysis
 
 ### 3-1. Feature Boundary Identification
-Identify logical functional units (Features) based on the Phase 2 analysis results:
-- Domain module boundaries (e.g., auth, product, order, payment)
-- Service boundaries (in the case of microservice architectures)
-- Route groups (based on API path prefixes)
-- Entity clusters (groups of closely related entities)
+Identify logical functional units (Features) based on the Phase 2 analysis results, using the boundary heuristics defined in `domains/{domain}.md` § Feature Boundary Heuristics.
 
 Define the following for each Feature:
 - Feature name (concise English name)
@@ -598,27 +579,7 @@ This ensures:
 
 First, identify the project domain: understand what kind of system the project is (e-commerce, SaaS, CMS, education platform, financial service, etc.) and determine which features are foundational within that domain.
 
-Evaluate each Feature comprehensively across 5 analysis axes:
-
-**Analysis Axis 1 — Structural Foundation**
-- Can other Features not exist without this Feature?
-- Basis for judgment: Number of reverse dependencies, import depth, number of shared entities owned
-
-**Analysis Axis 2 — Domain Core**
-- Is this feature directly tied to the project's reason for existence?
-- Basis for judgment: Role within the project domain (e.g., for e-commerce, products/orders are core)
-
-**Analysis Axis 3 — Data Ownership**
-- Does this feature define and manage core entities?
-- Basis for judgment: Number of owned entities, ratio of entities referenced by other Features
-
-**Analysis Axis 4 — Integration Hub**
-- Is this a connection point with other Features/external systems?
-- Basis for judgment: Role as API provider, number of external integrations, number of events published
-
-**Analysis Axis 5 — Business Complexity**
-- Are core business rules concentrated in this feature?
-- Basis for judgment: Number of business rules, number of state transitions, validation complexity
+Evaluate each Feature comprehensively across the analysis axes defined in `domains/{domain}.md` § Tier Classification Axes.
 
 Assign each Feature to a Tier based on the comprehensive evaluation results:
 
