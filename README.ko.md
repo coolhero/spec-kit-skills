@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-04 17:10 KST
+[English README](README.md) | Last updated: 2026-03-04 17:16 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -740,7 +740,7 @@ specs/reverse-spec/
 | **III. Simplicity First** | spec 범위만 구현. 추측적 기능 추가/조기 추상화 금지 | 모든 코드가 요구사항으로 추적 가능 |
 | **IV. Surgical Changes** | 인접 코드 개선 금지. 자기 변경으로 발생한 고아 코드만 정리 | 변경 줄이 task로 추적 가능 |
 | **V. Goal-Driven Execution** | 검증 가능한 완료 기준 필수. "구현한다" → "테스트가 통과한다" | 자동화 검증 통과 |
-| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)가 **실제 동작하는 Feature를 실행**하여 사용자가 직접 체험할 수 있어야 함. 스크립트가 서비스를 시작하고, 구체적인 "이렇게 써보세요" 안내(URL, curl 명령어)를 출력하며, Ctrl+C까지 실행 유지. `--ci` 플래그로 자동화 헬스체크(`verify`에서 사용). Coverage 헤더는 **spec.md의 FR-###/SC-###에 매핑**하여 사용자가 뭘 체험할 수 있는지 표시. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류. **데모 작업 주입**: tasks.md에 데모 관련 작업이 없으면 경고 표시. **제한 검증(limited-verify)**: verify Phase 1/3이 외부 의존성으로 통과 불가 시, 사용자가 사유와 함께 ⚠️ 제한 검증을 인정할 수 있으며 — 머지는 리마인더와 함께 허용 | `./demos/F00N-name.sh` 실행으로 Feature 실물을 체험 — 보고, 쓰고, 상호작용 |
+| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 **실행 가능한 데모 스크립트** (`demos/F00N-name.sh`)로 제공. 서비스 시작 → "이렇게 써보세요" 안내 출력 → Ctrl+C까지 유지. `--ci` 플래그로 자동화 헬스체크. 데모 코드는 `@demo-only` / `@demo-scaffold` 마커로 분류. 외부 의존성으로 Phase 1/3 통과 불가 시 ⚠️ 제한 검증 인정 가능 | `./demos/F00N-name.sh` 실행으로 Feature 실물 체험 — 보고, 쓰고, 상호작용 |
 
 ### spec-kit과의 관계
 
@@ -754,86 +754,17 @@ specs/reverse-spec/
 
 #### reverse-spec 산출물을 spec-kit 단독으로 사용하기 (smart-sdd 없이)
 
-smart-sdd 오케스트레이터 없이 reverse-spec 산출물을 spec-kit 커맨드에 직접 활용할 수 있습니다. smart-sdd가 자동화하는 컨텍스트 조립을 수동으로 수행하면 됩니다.
+smart-sdd 없이도 reverse-spec 산출물을 spec-kit 커맨드에 직접 활용할 수 있습니다. 관련 섹션을 대화에 붙여넣은 뒤 spec-kit 커맨드를 호출하면 Claude가 해당 컨텍스트를 참조합니다.
 
-**동작 원리**: spec-kit 커맨드는 CLI 인자가 아닌 **대화 스레드**를 통해 컨텍스트를 받습니다. reverse-spec 산출물의 관련 섹션을 읽어 메시지에 포함한 뒤 spec-kit 커맨드를 호출하면, Claude가 해당 컨텍스트를 참조하여 커맨드를 실행합니다.
+| 커맨드 | 호출 전 붙여넣을 내용 |
+|--------|---------------------|
+| `/speckit-constitution` | `constitution-seed.md` 전체 내용 |
+| `/speckit-specify` | `pre-context.md` "For /speckit.specify" 섹션 + `business-logic-map.md` Feature 섹션 + Source Reference 섹션 |
+| `/speckit-plan` | `pre-context.md` "For /speckit.plan" 섹션 + `entity-registry.md` + `api-registry.md` + 선행 Feature의 확정 `data-model.md` / `contracts/` (있는 경우) |
+| `/speckit-tasks`, `/speckit-implement` | 추가 컨텍스트 불필요 (spec-kit 자체 산출물로 동작). `pre-context.md`에서 Static Resources와 Environment Variables 확인 |
+| `/speckit-analyze` | `pre-context.md` "For /speckit.analyze" 섹션 + `entity-registry.md` + `api-registry.md` |
 
-##### 커맨드별 컨텍스트 가이드
-
-**`/speckit-constitution`**
-```
-아래 파일을 읽고 constitution의 기초로 사용해줘:
-[specs/reverse-spec/constitution-seed.md 내용 붙여넣기]
-
-/speckit-constitution
-```
-
-**`/speckit-specify` (특정 Feature)**
-```
-Feature F001-auth를 specify 하려고 해. reverse-spec에서 추출된 컨텍스트:
-
-## 요구사항 및 수용 기준 초안
-[specs/reverse-spec/features/F001-auth/pre-context.md의 "For /speckit.specify" 섹션 붙여넣기]
-
-## 비즈니스 규칙
-[specs/reverse-spec/business-logic-map.md에서 F001-auth 섹션 붙여넣기]
-
-## 원본 소스 참조
-[pre-context.md의 "Source Reference" 섹션 — 나열된 소스 파일을 읽어 구현 컨텍스트 확인]
-
-/speckit-specify
-```
-
-**`/speckit-plan` (특정 Feature)**
-```
-Feature F002-product를 plan 하려고 해. 교차 Feature 컨텍스트:
-
-## 의존성 및 엔티티/API 초안
-[specs/reverse-spec/features/F002-product/pre-context.md의 "For /speckit.plan" 섹션 붙여넣기]
-
-## 공유 엔티티 레지스트리
-[specs/reverse-spec/entity-registry.md에서 관련 엔티티 붙여넣기]
-
-## API 레지스트리
-[specs/reverse-spec/api-registry.md에서 관련 API 붙여넣기]
-
-## 선행 Feature 결과 (F001이 이미 완료된 경우)
-[specs/001-auth/plan/data-model.md와 contracts/ 붙여넣기 — 확정 스키마가 레지스트리 초안보다 우선]
-
-/speckit-plan
-```
-
-**`/speckit-tasks`** 및 **`/speckit-implement`**
-- spec-kit 자체 산출물(`plan.md`, `tasks.md`)을 기반으로 동작하므로 추가 reverse-spec 컨텍스트 불필요.
-- implement 시: 해당 Feature의 `pre-context.md`에서 Static Resources와 Environment Variables를 확인하여 사전 설정.
-
-**`/speckit-analyze` (교차 산출물 일관성 검증 — tasks 후, implement 전 실행)**
-```
-Feature F002-product의 교차 산출물 일관성을 분석해줘:
-
-## 추가 Cross-Feature 검증 컨텍스트
-[specs/reverse-spec/features/F002-product/pre-context.md의 "For /speckit.analyze" 섹션 붙여넣기]
-
-## 현재 엔티티 레지스트리
-[specs/reverse-spec/entity-registry.md 붙여넣기]
-
-## 현재 API 레지스트리
-[specs/reverse-spec/api-registry.md 붙여넣기]
-
-/speckit-analyze
-```
-
-##### smart-sdd 없이 잃는 것
-
-| 기능 | smart-sdd | 수동 spec-kit |
-|-----|-----------|--------------|
-| 커맨드별 컨텍스트 조립 | 자동 | 관련 섹션을 직접 읽고 붙여넣기 |
-| 교차 Feature 컨텍스트 필터링 | Feature별 자동 필터링 | 직접 필터링 |
-| Global Evolution Layer 갱신 | 각 단계 후 자동 갱신 | 레지스트리 직접 수동 갱신 |
-| Pipeline 상태 추적 | `sdd-state.md` | 직접 진행 상태 관리 |
-| 선행 Feature 결과 우선 적용 | 확정 스키마 자동 감지 | 직접 확인 후 참조 |
-| Feature별 환경 변수 검증 | 각 Feature의 implement 단계에서 HARD STOP | `.env` 직접 확인 |
-| Feature 브랜치 관리 | 자동 생성/머지 | git 브랜치 직접 관리 |
+**잃는 것**: 자동 컨텍스트 조립/필터링, 레지스트리·roadmap 자동 갱신, 파이프라인 상태 추적(`sdd-state.md`), 선행 Feature 결과 우선 적용, Feature별 환경 변수 검증, Feature 브랜치 관리.
 
 ### 프로젝트 구조
 
