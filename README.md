@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 08:42 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 09:46 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -298,6 +298,11 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 /smart-sdd parity                        # Check parity against original source
 /smart-sdd parity --source ./old-project # Specify source path explicitly
 
+# Check spec-kit compatibility (independent — works from any session)
+/speckit-diff                            # Auto-clone latest spec-kit from GitHub and compare
+/speckit-diff --local ./spec-kit-repo    # Compare against local spec-kit source
+/speckit-diff --output report.md         # Write report to file
+
 # --auto can be combined with any command to skip confirmation
 /smart-sdd specify F001 --auto
 /smart-sdd pipeline --from ./path --auto
@@ -482,6 +487,16 @@ The parity command runs in 5 phases:
 5. **Completion Report** — Display final parity percentages and next steps.
 
 Cross-cutting gaps (e.g., rate limiting, CORS) receive dual treatment: constitution update (architectural principle) AND infrastructure Feature (actual implementation code).
+
+### 3. `/speckit-diff` -- Spec-Kit Version Compatibility Analyzer
+
+A utility skill that checks whether the current spec-kit-skills are compatible with the latest spec-kit version. Works independently — no dependency on reverse-spec, smart-sdd, or any active project.
+
+**How it works**: Auto-clones the latest spec-kit from GitHub, compares structural signatures (skill sections, template formats, script interfaces, CLI flags, directory conventions) against a stored baseline from when spec-kit-skills was last verified. Produces a clear **COMPATIBLE / NOT COMPATIBLE** verdict followed by a prioritized impact report mapping each change to specific spec-kit-skills files.
+
+**5 analysis dimensions**: Skill changes, Template format changes, Script interface changes, Workflow sequence changes, Directory structure changes
+
+**Priority levels**: P1 (Breaking — must fix), P2 (Compatibility — should fix), P3 (Enhancement — optional)
 
 ---
 
@@ -814,9 +829,26 @@ spec-kit-skills/
         │   │   └── stack-migration-template.md           # Stack migration plan template
         │   └── reference/
         │       └── speckit-compatibility.md              # spec-kit integration guide
-        └── smart-sdd/
-            ├── SKILL.md                                 # Main skill definition (orchestrator)
+        ├── smart-sdd/
+        │   ├── SKILL.md                                 # Main skill definition (orchestrator)
+        │   └── reference/
+        │       ├── context-injection-rules.md            # Per-command context injection rules
+        │       └── state-schema.md                      # sdd-state.md schema definition
+        └── speckit-diff/
+            ├── SKILL.md                                 # Compatibility analyzer skill
             └── reference/
-                ├── context-injection-rules.md            # Per-command context injection rules
-                └── state-schema.md                      # sdd-state.md schema definition
+                └── integration-surface.md               # Spec-kit baseline (structural signatures)
 ```
+
+---
+
+## Maintenance
+
+### Spec-Kit Compatibility Baseline
+
+When modifying spec-kit-skills (smart-sdd, reverse-spec, or their reference files), always check whether the changes affect spec-kit integration points. If spec-kit itself has been updated, run `/speckit-diff` to identify required changes.
+
+After applying changes for a new spec-kit version, **update the baseline**:
+1. Run `/speckit-diff` to verify all changes are applied (verdict should be COMPATIBLE)
+2. Update `.claude/skills/speckit-diff/reference/integration-surface.md` to reflect the new spec-kit version
+3. Commit the updated baseline together with the spec-kit-skills changes

@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-04 08:42 KST
+[English README](README.md) | Last updated: 2026-03-04 09:46 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -299,6 +299,11 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 /smart-sdd parity                        # 원본 소스 대비 패리티 검사
 /smart-sdd parity --source ./old-project # 소스 경로 명시적 지정
 
+# spec-kit 호환성 검사 (독립 실행 — 어떤 세션에서든 가능)
+/speckit-diff                            # GitHub에서 최신 spec-kit을 자동 clone하여 비교
+/speckit-diff --local ./spec-kit-repo    # 로컬 spec-kit 소스와 비교
+/speckit-diff --output report.md         # 리포트를 파일로 저장
+
 # --auto는 모든 커맨드와 조합 가능 (확인 단계 생략)
 /smart-sdd specify F001 --auto
 /smart-sdd pipeline --from ./path --auto
@@ -479,6 +484,16 @@ parity 명령어는 5개 페이즈로 실행됩니다:
 5. **완료 리포트** — 최종 패리티 백분율 및 다음 단계 표시.
 
 횡단 관심사 gap(예: rate limiting, CORS)은 이중 처리: constitution 업데이트(아키텍처 원칙) + 인프라 Feature(실제 구현 코드).
+
+### 3. `/speckit-diff` -- Spec-Kit 버전 호환성 분석기
+
+현재 spec-kit-skills가 최신 spec-kit 버전과 호환되는지 확인하는 유틸리티 스킬입니다. reverse-spec, smart-sdd, 또는 활성 프로젝트에 대한 의존성 없이 **독립적으로 실행** 가능합니다.
+
+**작동 방식**: GitHub에서 최신 spec-kit을 자동 clone하여 구조적 서명(스킬 섹션, 템플릿 포맷, 스크립트 인터페이스, CLI 플래그, 디렉토리 규약)을 저장된 baseline과 비교합니다. 명확한 **COMPATIBLE / NOT COMPATIBLE** 판정을 먼저 출력한 후, 각 변경사항을 spec-kit-skills의 특정 파일에 매핑한 우선순위별 영향 리포트를 생성합니다.
+
+**5가지 분석 차원**: 스킬 변경, 템플릿 포맷 변경, 스크립트 인터페이스 변경, 워크플로우 순서 변경, 디렉토리 구조 변경
+
+**우선순위 수준**: P1 (Breaking — 반드시 수정), P2 (Compatibility — 수정 권장), P3 (Enhancement — 선택적)
 
 ---
 
@@ -810,9 +825,26 @@ spec-kit-skills/
         │   │   └── stack-migration-template.md           # 스택 마이그레이션 계획 템플릿
         │   └── reference/
         │       └── speckit-compatibility.md              # spec-kit 연계 가이드
-        └── smart-sdd/
-            ├── SKILL.md                                 # 메인 스킬 정의 (오케스트레이터)
+        ├── smart-sdd/
+        │   ├── SKILL.md                                 # 메인 스킬 정의 (오케스트레이터)
+        │   └── reference/
+        │       ├── context-injection-rules.md            # 커맨드별 컨텍스트 주입 규칙
+        │       └── state-schema.md                      # sdd-state.md 스키마 정의
+        └── speckit-diff/
+            ├── SKILL.md                                 # 호환성 분석 스킬
             └── reference/
-                ├── context-injection-rules.md            # 커맨드별 컨텍스트 주입 규칙
-                └── state-schema.md                      # sdd-state.md 스키마 정의
+                └── integration-surface.md               # Spec-kit baseline (구조적 서명)
 ```
+
+---
+
+## 유지보수
+
+### Spec-Kit 호환성 Baseline
+
+spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 해당 변경이 spec-kit 연동 지점에 영향을 미치는지 항상 확인하세요. spec-kit 자체가 업데이트된 경우 `/speckit-diff`를 실행하여 필요한 변경사항을 파악하세요.
+
+새 spec-kit 버전에 대한 변경사항 적용 후 **baseline을 업데이트**합니다:
+1. `/speckit-diff`를 실행하여 모든 변경이 적용되었는지 확인 (판정: COMPATIBLE)
+2. `.claude/skills/speckit-diff/reference/integration-surface.md`를 새 spec-kit 버전에 맞게 업데이트
+3. 업데이트된 baseline을 spec-kit-skills 변경사항과 함께 커밋
