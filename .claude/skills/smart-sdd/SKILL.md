@@ -858,7 +858,7 @@ Executes the following steps **strictly in order** for each Feature.
 5. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
 6. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
 7. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → Review(STOP) → Update
-8. merge      → Verify-gate(BLOCK if not success) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
+8. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
@@ -1453,8 +1453,16 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 **Use AskUserQuestion** with options:
 - "Fix and re-verify" — user will fix, then re-run `/smart-sdd verify`
 - "Show failure details" — display full test/build/lint output
+- "Acknowledge limited verification" — proceed with ⚠️ limited-verify (requires reason)
 
-**Do NOT proceed to Phase 2** until all three checks pass. Do NOT allow the user to "skip" failed checks — there is no skip option.
+**Do NOT proceed to Phase 2** until all three checks pass **OR** the user explicitly acknowledges limited verification.
+
+**Limited-verify exception path**: If the user selects "Acknowledge limited verification":
+1. Ask for the reason (e.g., "Tests require external service not available", "Build depends on Feature B not yet merged", "DB migration requires completed Feature C")
+2. Record in `sdd-state.md` Feature Detail Log → verify row Notes: `⚠️ LIMITED — [reason]`
+3. Set the verify step icon to `⚠️` (not ✅) in Feature Progress
+4. Proceed to Phase 2 — but the merge step will display a reminder that this Feature has limited verification
+5. **This is NOT a skip** — the limitation is tracked and visible in status reports
 
 > **Build prerequisites**: If the build fails due to missing setup steps (e.g., `pnpm approve-builds`, native module compilation), include the specific prerequisite command in the error message so the user knows what to run.
 
@@ -1509,8 +1517,15 @@ Please create a demo script at demos/F00N-name.sh that:
 **Use AskUserQuestion** with options:
 - "Fix and re-verify" — user will fix, then re-run `/smart-sdd verify`
 - "Show failure details" — display full demo script output
+- "Acknowledge limited verification" — proceed with ⚠️ limited-verify (requires reason)
 
-**Do NOT proceed to Phase 4** until the demo script exists and `--ci` health check passes.
+**Do NOT proceed to Phase 4** until the demo passes **OR** the user explicitly acknowledges limited verification.
+
+**Limited-verify exception path** (same as Phase 1): If the user selects "Acknowledge limited verification":
+1. Ask for the reason (e.g., "Demo requires Feature B's UI not yet built", "No frontend in this Feature — pure library")
+2. Append to `sdd-state.md` Feature Detail Log → verify Notes: `⚠️ DEMO-LIMITED — [reason]`
+3. If Phase 1 already passed normally, set verify icon to `⚠️` (limited) instead of ✅
+4. Proceed to Phase 4
 
 - Update `demos/README.md` (Demo Hub) with the Feature's demo and what the user can experience:
   - `./demos/F00N-name.sh` — launches [brief description of the live demo experience]
@@ -1518,7 +1533,10 @@ Please create a demo script at demos/F00N-name.sh that:
 ### Phase 4: Global Evolution Update
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found
 - api-registry.md: Verify that the actually implemented API contracts match the registry; update if discrepancies are found
-- sdd-state.md: Record verification results — **status MUST be one of `success` or `failure`**, plus test pass/fail counts, build result, and verification timestamp. The merge step checks this status as a gate condition.
+- sdd-state.md: Record verification results — **status MUST be one of `success`, `limited`, or `failure`**, plus test pass/fail counts, build result, and verification timestamp. The merge step checks this status as a gate condition.
+  - `success`: All phases passed normally
+  - `limited`: User acknowledged limited verification in Phase 1 or Phase 3 (⚠️ marker). Merge is allowed with a reminder
+  - `failure`: One or more phases failed without acknowledgment. Merge is blocked
 
 ---
 
@@ -1786,14 +1804,20 @@ After verify completes and Global Evolution Layer updates are applied:
 
 **Step 0 — Verify-Success Gate (BLOCKING)**:
 Before ANY merge activity, check the Feature's verification status in `sdd-state.md`:
-- If the Feature's last verification result is **not `success`** (or if no verification was recorded): **BLOCK the merge**.
+- If the Feature's last verification result is **not `success` and not `limited`** (or if no verification was recorded): **BLOCK the merge**.
   ```
   ❌ Cannot merge [FID] - [Feature Name]: Verification has not passed.
   Last verify result: [failure/not recorded]
 
   Run `/smart-sdd verify [FID]` and ensure all checks pass before merging.
   ```
-- Only proceed to Step 1 if verify status is `success`.
+- If verify status is `limited` (⚠️): Allow merge but display a reminder:
+  ```
+  ⚠️ [FID] - [Feature Name] has limited verification:
+    [reason from verify Notes]
+  Proceeding with merge — re-verify when the limitation is resolved.
+  ```
+- Only proceed to Step 1 if verify status is `success` or `limited`.
 
 **Step 1 — Commit Global Evolution updates on the Feature branch**:
 All Post-Feature Completion updates (entity-registry.md, api-registry.md, roadmap.md, pre-context.md updates, sdd-state.md) are committed on the Feature branch before merging.

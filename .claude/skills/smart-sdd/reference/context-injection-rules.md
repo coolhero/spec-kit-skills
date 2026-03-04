@@ -515,6 +515,25 @@ After `speckit-tasks` completes:
 **Files to read**:
 1. `specs/{NNN-feature}/tasks.md` — Read the **entire file** and extract the task list
 
+**Demo task injection check** (only if VI. Demo-Ready Delivery is in the constitution):
+After reading tasks.md, scan the task list for demo-related tasks (keywords: "demo", "demo script", "demo data", "demo route", "demo page", "demo fixture", "demos/"). If **no demo tasks are found**, append a warning block to the Review display:
+
+```
+── ⚠️ Demo Tasks Missing ──────────────────────────
+Demo-Ready Delivery is active but tasks.md has no demo tasks.
+Deferring demo work causes "batch-at-the-end" anti-pattern.
+
+Recommended tasks to add (insert after the last implementation task):
+  1. Create demo data fixtures (seed data for the demo)
+  2. Create demo surface (demo route/page/CLI wrapper that launches the Feature)
+  3. Write executable demo script (demos/F00N-name.sh)
+
+Add these tasks now or add them during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+> **Rationale**: Demo surfaces (routes, pages, data fixtures) should be built incrementally during `implement`, not deferred until all Features are complete. Injecting demo tasks into `tasks.md` at this stage prevents the "batch-at-the-end" anti-pattern where demo code is rushed or skipped.
+
 **Display format**:
 ```
 📋 Review: tasks.md for [FID] - [Feature Name]
@@ -526,6 +545,9 @@ After `speckit-tasks` completes:
  - Description
  - Dependencies (which tasks must complete first)
  - Estimated complexity (if available)]
+
+── ⚠️ Demo Tasks Missing ──────────────────────────
+[Only if Demo-Ready Delivery active AND no demo tasks found in tasks.md]
 
 ── Files You Can Edit ─────────────────────────
   📄 specs/{NNN-feature}/tasks.md
@@ -929,6 +951,10 @@ Show the **actual verification checklist** so the user can see what will be chec
 Review the verification plan. You can:
   - Approve as-is to proceed
   - Add or remove verification items
+
+Note: If Phase 1 or Phase 3 cannot pass due to external
+dependencies (e.g., requires another Feature's code), you may
+"Acknowledge limited verification" — recorded as ⚠️ in state.
 ```
 
 ### Review Display Content
@@ -964,6 +990,12 @@ After verification execution completes:
   - entity-registry: [match/discrepancies found]
   - api-registry: [match/discrepancies found]
 
+── Limited Verification (if applicable) ────────────
+[Only shown if user acknowledged limited verification in Phase 1 or Phase 3]
+  ⚠️ Phase 1: [reason] (or "N/A — passed normally")
+  ⚠️ Phase 3: [reason] (or "N/A — passed normally")
+  Overall status: limited (merge allowed with reminder)
+
 ──────────────────────────────────────────────────
 ```
 
@@ -985,9 +1017,13 @@ If issues were found, you can fix them directly, then select
 **If all Phases pass**:
 - Display: "✅ All verification checks passed."
 
+**If limited verification was acknowledged** (Phase 1 or Phase 3):
+- Display: "⚠️ Verification completed with limitations. Merge allowed — re-verify when limitations are resolved."
+
 **HARD STOP** (ReviewApproval):
-- If any phase failed: Options: "Fix issues and re-verify", "I've finished editing", "View full report"
+- If any phase failed: Options: "Fix issues and re-verify", "I've finished editing", "Acknowledge limited verification"
 - If all phases passed: Options: "Approve", "I've finished editing", "Re-run verification"
+- If limited verification: Options: "Approve (with ⚠️ limited status)", "Fix issues and re-verify", "I've finished editing"
 
 ---
 
@@ -1085,7 +1121,8 @@ Update `sdd-state.md` per generic step-completion rules in [state-schema.md](sta
    - Test results (pass/fail, execution time)
    - Build results
    - Cross-Feature verification results
-   - Overall verification status (pass/fail)
+   - Overall verification status (`success` / `limited` / `failure`)
+   - If limited: record `⚠️ LIMITED — [reason]` and/or `⚠️ DEMO-LIMITED — [reason]` in Notes
 
 ### After Merge Completion
 

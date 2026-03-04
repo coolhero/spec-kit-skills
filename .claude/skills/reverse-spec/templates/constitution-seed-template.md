@@ -192,6 +192,7 @@ Quality-driven:
   - Data layer / Store → Provide seeded database, user performs real CRUD operations
   - Pipeline / Engine → Provide sample input, user runs the pipeline and sees real output
 - **Demo artifacts**: During `implement`, create the surfaces users will interact with — demo routes, demo pages, demo data fixtures, demo CLI wrappers. These are what make the demo real, not assertions
+- **Demo tasks in tasks.md**: Every Feature's `tasks.md` must include demo-related tasks (demo data preparation, demo surface creation, demo script writing). Demo work is done incrementally during `implement` — not deferred to the end
 - **Demo code separation strategy**: Clearly distinguish demo-only code from production code
   - **Demo-only code** (mock data, temporary UI scaffolding): Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed or replaced when the real Feature is implemented
   - **Promotable code** (minimal but real implementation that future Features will extend): Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
@@ -203,6 +204,7 @@ Quality-driven:
     #   Settings page shell | src/pages/settings.tsx | Promotable | Extended by F005-settings
     ```
   - During subsequent Feature implementation, check `demos/` for demo-only components marked for removal and clean them up
+- **Limited verification**: If a Feature cannot be fully verified (e.g., tests depend on unmerged Feature, no frontend for pure library), the user may acknowledge "limited verification" with a mandatory reason. This is recorded as ⚠️ in progress tracking — merge is allowed, but re-verification is expected when the limitation is resolved
 - **Verification criterion**: `Running ./demos/F00N-name.sh launches the Feature and the user can experience it — "npm test passes" alone does NOT satisfy this criterion`
 
 ---

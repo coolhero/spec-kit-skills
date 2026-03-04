@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 01:00 KST
+[English README](README.md) | Last updated: 2026-03-05 03:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -454,7 +454,7 @@ Phase 1~N: Release Group 순서대로 Feature 진행
                      (spec-kit이 Feature 브랜치 자동 생성: {NNN}-{short-name})
        2. clarify  → spec에 [NEEDS CLARIFICATION]이 있을 때만 /speckit-clarify
        3. plan     → (pre-context + entity-registry + api-registry 주입) → /speckit-plan
-       4. tasks    → /speckit-tasks
+       4. tasks    → /speckit-tasks (+ Demo-Ready 활성화 시 데모 작업 주입 체크)
        5. analyze  → /speckit-analyze (implement 전 교차 산출물 일관성 검증)
        6. implement → Feature별 환경 변수 확인 (필수 변수 누락 시 HARD STOP) → /speckit-implement
        7. verify   → 4단계 검증 (실행 검증 + 교차-Feature 일관성 + Demo-Ready 검증 + Global Evolution 갱신)
@@ -487,7 +487,7 @@ tasks 생성 후, `speckit-analyze`가 spec.md, plan.md, tasks.md 간의 READ-ON
 ```
 1단계: 실행 검증 — 실패 시 BLOCK
     └─ 테스트 실행, 빌드 확인, 린트 체크
-    └─ 하나라도 실패 → 검증 차단, 머지 불가
+    └─ 하나라도 실패 → 차단, 또는 사용자가 "제한 검증 인정" 선택 가능 (⚠️)
 
 2단계: 교차-Feature 일관성
     └─ pre-context.md의 검증 포인트 확인
@@ -498,11 +498,11 @@ tasks 생성 후, `speckit-analyze`가 spec.md, plan.md, tasks.md 간의 READ-ON
     └─ 사용자를 위한 구체적 "이렇게 써보세요" 안내 존재 확인 (URL, 명령어 ≥ 2개)
     └─ --ci 헬스체크 실행 및 통과 확인
     └─ Demo Components 헤더 및 컴포넌트 마커 (@demo-only, @demo-scaffold) 확인
-    └─ 하나라도 실패 → 검증 차단
+    └─ 하나라도 실패 → 차단, 또는 사용자가 "제한 검증 인정" 선택 가능 (⚠️)
 
 4단계: Global Evolution 업데이트
     └─ entity-registry/api-registry 검증 및 갱신
-    └─ sdd-state.md에 검증 결과 기록
+    └─ sdd-state.md에 검증 결과 기록 (상태: success / limited / failure)
 ```
 
 #### Constitution 증분 업데이트
@@ -733,7 +733,7 @@ specs/reverse-spec/
 | **III. Simplicity First** | spec 범위만 구현. 추측적 기능 추가/조기 추상화 금지 | 모든 코드가 요구사항으로 추적 가능 |
 | **IV. Surgical Changes** | 인접 코드 개선 금지. 자기 변경으로 발생한 고아 코드만 정리 | 변경 줄이 task로 추적 가능 |
 | **V. Goal-Driven Execution** | 검증 가능한 완료 기준 필수. "구현한다" → "테스트가 통과한다" | 자동화 검증 통과 |
-| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)가 **실제 동작하는 Feature를 실행**하여 사용자가 직접 체험할 수 있어야 함. 스크립트가 서비스를 시작하고, 구체적인 "이렇게 써보세요" 안내(URL, curl 명령어)를 출력하며, Ctrl+C까지 실행 유지. `--ci` 플래그로 자동화 헬스체크(`verify`에서 사용). Coverage 헤더는 **spec.md의 FR-###/SC-###에 매핑**하여 사용자가 뭘 체험할 수 있는지 표시. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류 | `./demos/F00N-name.sh` 실행으로 Feature 실물을 체험 — 보고, 쓰고, 상호작용 |
+| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)가 **실제 동작하는 Feature를 실행**하여 사용자가 직접 체험할 수 있어야 함. 스크립트가 서비스를 시작하고, 구체적인 "이렇게 써보세요" 안내(URL, curl 명령어)를 출력하며, Ctrl+C까지 실행 유지. `--ci` 플래그로 자동화 헬스체크(`verify`에서 사용). Coverage 헤더는 **spec.md의 FR-###/SC-###에 매핑**하여 사용자가 뭘 체험할 수 있는지 표시. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류. **데모 작업 주입**: tasks.md에 데모 관련 작업이 없으면 경고 표시. **제한 검증(limited-verify)**: verify Phase 1/3이 외부 의존성으로 통과 불가 시, 사용자가 사유와 함께 ⚠️ 제한 검증을 인정할 수 있으며 — 머지는 리마인더와 함께 허용 | `./demos/F00N-name.sh` 실행으로 Feature 실물을 체험 — 보고, 쓰고, 상호작용 |
 
 ### spec-kit과의 관계
 

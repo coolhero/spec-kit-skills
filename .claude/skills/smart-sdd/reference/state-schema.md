@@ -55,6 +55,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 - ✅ : Completed (followed by completion date MM-DD)
 - 🔄 : In progress
 - ❌ : Failed
+- ⚠️ : Limited (verify only — user acknowledged limited verification with a recorded reason; merge is allowed with reminder)
 - ⏭️ : Skipped
 - 🔒 : Deferred (outside current Active Tiers, activate via `/smart-sdd expand`)
 - 🔀 : Needs re-execution (Feature affected by `/smart-sdd restructure` or `/smart-sdd parity` — affected steps must be re-run)
@@ -277,3 +278,9 @@ Build: [success/failure]
 Lint: [success/failure/not configured]
 Cross-Feature: [verification point count] checked, [issue count] issues
 ```
+
+**If limited verification was acknowledged** (user selected "Acknowledge limited verification" in Phase 1 or Phase 3):
+- Set the verify step icon to `⚠️` (not ✅) in Feature Progress
+- Append to Notes: `⚠️ LIMITED — [reason]` and/or `⚠️ DEMO-LIMITED — [reason]`
+- The overall verify status is `limited` (not `success`) — merge is allowed with a reminder
+- Example Notes: `Tests: 12/12 passed; Build: success; ⚠️ DEMO-LIMITED — No frontend; pure data layer library`
