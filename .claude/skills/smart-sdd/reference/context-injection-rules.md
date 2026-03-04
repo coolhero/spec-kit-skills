@@ -681,6 +681,18 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    - **Promotable**: Minimal but real implementation that future Features will extend. Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
 
 4. **Create executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language):
+
+   > **⚠️ ANTI-PATTERN — DO NOT DO THIS:**
+   > ```markdown
+   > # F001 Auth Demo          ← WRONG: This is a markdown document
+   > ## Demo Steps              ← WRONG: Manual instructions for a human to follow
+   > 1. Open the browser       ← WRONG: Not executable by a machine
+   > 2. Click "Login"          ← WRONG: Requires human interaction
+   > ```
+   > A markdown file with instructions is **documentation, NOT a demo script**.
+   > The demo MUST be a script that runs with `./demos/F00N-name.sh` — no human reading required.
+
+   **CORRECT — executable script:**
    ```bash
    #!/usr/bin/env bash
    # Demo: [Feature Name]
@@ -703,6 +715,7 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    echo "=== Demo complete ==="
    ```
    The script must be executable (`chmod +x`) and self-contained — running it should demonstrate the Feature without manual steps.
+   **Use `curl`, `pnpm exec`, `node -e`, `electron --inspect`, etc. — NOT prose instructions.**
 
 5. **Update `demos/README.md`** (Demo Hub — index of all Feature demos):
    - Create if it doesn't exist (first Feature with demo)

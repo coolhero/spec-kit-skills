@@ -7,14 +7,23 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 
 # Smart-SDD: spec-kit Workflow Orchestrator
 
-> **🚨 MANDATORY RULE — READ FIRST 🚨**
+> **🚨 MANDATORY RULES — READ FIRST 🚨**
 >
+> **Rule 1: HARD STOP Enforcement**
 > Every HARD STOP in this skill uses AskUserQuestion. After EVERY AskUserQuestion call:
 > 1. **CHECK the response** — is it empty, blank, or missing a selection?
 > 2. **If empty → call AskUserQuestion AGAIN.** Do NOT proceed. Do NOT treat empty as approval.
 > 3. **Only proceed when the user has explicitly selected an option** ("Approve", "Request modifications", etc.)
 >
 > This rule applies to ALL Checkpoints and ALL Reviews. Violating this rule means the user loses control of the workflow. There are no exceptions.
+>
+> **Rule 2: Demo = Executable Script, NEVER Markdown**
+> When Demo-Ready Delivery is active, the demo MUST be an **executable script** (`demos/F00N-name.sh` or `.ts`/`.py`).
+> - ✅ CORRECT: `demos/F001-auth.sh` containing `#!/usr/bin/env bash` + executable commands
+> - ❌ WRONG: A markdown file with "## Demo Steps" and manual instructions like "Open settings" or "Click button"
+> - ❌ WRONG: Showing demo steps as text in the chat instead of writing a script file
+>
+> A demo that requires a human to read and follow steps is NOT a demo — it is documentation. The script must run autonomously.
 
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with three project modes:
 
@@ -1457,9 +1466,12 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
 
-**Step 1 — Check demo script exists**:
+**Step 1 — Check demo script exists AND is an executable script (NOT markdown)**:
 - Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
+- **REJECT if**: the file is `.md`, contains `## Demo Steps`, or consists of prose instructions instead of executable commands
+- **REJECT if**: the file lacks a shebang line (`#!/usr/bin/env bash` or equivalent) for `.sh` files
 - The demo script must be executable and self-contained: running it should demonstrate the Feature without manual steps
+- If a markdown demo file was generated instead, **delete it** and create a proper executable script
 
 **Step 2 — Check demo components are documented**:
 - The demo script must include a **Demo Components** header comment listing each component as Demo-only or Promotable
