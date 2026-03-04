@@ -855,7 +855,10 @@ Show the **actual verification checklist** so the user can see what will be chec
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
   - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
+  - [ ] Demo script is NOT markdown (reject if file contains "## Demo Steps" or manual instructions)
   - [ ] Demo script executes without errors
+  - [ ] FR/SC Coverage header maps spec.md FR-###/SC-### to test steps
+  - [ ] Coverage ≥ 50% of FR/SC items (warn if below)
   - [ ] Demo Components header comment with Category and Fate
   - [ ] Component markers (@demo-only / @demo-scaffold)
 
@@ -895,7 +898,9 @@ After verification execution completes:
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]
   - ✅/❌ Executable demo script exists (demos/F00N-name.sh)
+  - ✅/❌ Demo script is executable (not markdown)
   - ✅/❌ Demo script executed successfully
+  - ✅/❌ FR/SC Coverage mapping present (≥ 50% of spec FR/SC items)
   - ✅/❌ Demo Components header comment present
   - ✅/❌ Component markers present
 

@@ -226,7 +226,7 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 - "Stay on current branch (Recommended)" — Continue on the current branch (usually `main`)
 - "Create a new branch" — Create and checkout a new branch for the SDD work
 
-If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
+**If response is empty → re-ask** (per MANDATORY RULE 1). If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 
 > **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
@@ -298,7 +298,7 @@ If the user selects "Create a new branch", ask for the branch name via "Other" i
    - "Option A: Coarse (Domain-level)"
    - "Option C: Fine (Capability-level)"
 
-   **You MUST STOP and WAIT for the user's response. Do NOT proceed until the user selects a granularity level.**
+   **If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT proceed until the user selects a granularity level.
 
    If the user selects "Other", they can describe a custom granularity or request specific merges/splits.
 
@@ -323,7 +323,7 @@ If the user selects "Create a new branch", ask for the branch name via "Other" i
    - Propose grouping based on dependency layers (Features with no dependencies first, then Features that depend on completed groups)
    - Present to user for confirmation/adjustment
 
-7. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.**
+7. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT proceed to Phase 3 until the user explicitly approves.
 
 #### Phase 3: Constitution Seed Definition
 
@@ -346,7 +346,7 @@ If the user selects "Create a new branch", ask for the branch name via "Other" i
    - Error handling patterns
    - Testing patterns
 
-4. **Checkpoint (HARD STOP)**: Display the complete constitution-seed content. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves.**
+4. **Checkpoint (HARD STOP)**: Display the complete constitution-seed content. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves.** **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 #### Phase 4: Artifact Generation
 
@@ -454,7 +454,7 @@ Running `/smart-sdd add` adds new Feature(s) to an existing smart-sdd project.
 1. Display new Feature(s) with dependencies (and Tier, if `core` scope)
 2. Show the updated Dependency Graph (existing + new nodes)
 3. Propose Release Group placement
-4. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves or requests modifications.**
+4. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 4 until the user explicitly approves or requests modifications.** **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 #### Phase 4: Artifact Updates
 
@@ -595,7 +595,7 @@ If the Skill tool returns "Unknown skill" for a `speckit-*` command (e.g., skill
 
 If the spec-kit command fails (error, crash, partial output):
 1. Display the error message to the user
-2. Use AskUserQuestion with options: "Retry", "Abort step", "Troubleshoot"
+2. Use AskUserQuestion with options: "Retry", "Abort step", "Troubleshoot". **If response is empty → re-ask** (per MANDATORY RULE 1).
 3. If "Retry": Re-run the Execute step
 4. If "Abort step": Record failure in sdd-state.md, do NOT proceed to Review
 5. If "Troubleshoot": Help the user diagnose and fix the issue, then offer to retry
@@ -757,7 +757,7 @@ For **reverse-spec** mode, present to the user via AskUserQuestion:
 If the user selects "Update path", accept the new path via "Other" input, verify it exists, and update `sdd-state.md`.
 If the path does not exist, warn the user and ask for correction. **Do NOT proceed until a valid source path is confirmed** (source reference is essential for brownfield development).
 
-**You MUST STOP and WAIT for the user's response.** Do NOT auto-confirm.
+**You MUST STOP and WAIT for the user's response.** Do NOT auto-confirm. **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 **Step 3 — Scope display**:
 Read `Scope` from `sdd-state.md` and display scope information:
@@ -920,7 +920,7 @@ Use AskUserQuestion (HARD STOP):
 - "Environment is ready — I've added the missing variables"
 - "Skip for now — proceed without them"
 
-If "Environment is ready": Re-check `.env` to verify the missing variables are now present. If still missing, display which ones and ask again.
+**If response is empty → re-ask** (per MANDATORY RULE 1). If "Environment is ready": Re-check `.env` to verify the missing variables are now present. If still missing, display which ones and ask again.
 If "Skip for now": Display warning "⚠️ Tests may fail due to missing environment variables." and proceed.
 
 **If all required variables are present** (or the Feature has no env vars):
@@ -1119,7 +1119,7 @@ If no argument was provided, ask via AskUserQuestion:
 - "Activate Tier 2 + Tier 3" — adds [N] Features
 - "Activate specific Features only" — select individual Features via Other input
 
-**You MUST STOP and WAIT for the user's response. Do NOT auto-select.**
+**If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT auto-select.
 
 **Step 3 — Dependency validation**:
 For each Feature being activated, verify that all its dependencies are either:
@@ -1313,9 +1313,7 @@ Display the analysis results in a structured format and request user approval:
 - specs/005-wishlist/ directory will NOT be deleted (cleanup command provided after completion)
 ```
 
-**Use AskUserQuestion** to request approval. If the user requests modifications, return to Phase 2 and re-analyze.
-
-> **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 5 until the user explicitly approves.**
+**Use AskUserQuestion** to request approval (options: "Approve changes", "Request modifications"). **If response is empty → re-ask** (per MANDATORY RULE 1). If the user requests modifications, return to Phase 2 and re-analyze. Do NOT proceed to Phase 5 until the user explicitly approves.
 
 #### Phase 5: Execute Changes
 
@@ -1817,7 +1815,7 @@ Options:
 - "Review changes first" — Show detailed diff before merging
 - "Skip merge (stay on branch)" — Keep the branch for manual merge later
 
-**You MUST STOP and WAIT for the user's response. Do NOT auto-merge.**
+**If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT auto-merge.
 
 **Step 3 — Execute merge** (only after user approval):
 1. Switch to main: `git checkout main`
