@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 00:30 KST
+[English README](README.md) | Last updated: 2026-03-05 01:30 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -844,27 +844,26 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 2. `.claude/skills/speckit-diff/reference/integration-surface.md`를 새 spec-kit 버전에 맞게 업데이트
 3. 업데이트된 baseline을 spec-kit-skills 변경사항과 함께 커밋
 
-#### Claude Code 프로젝트 메모리 (`MEMORY.md`)
+#### 설계 결정 이력 (`history.md`)
 
-이 프로젝트는 Claude Code의 [프로젝트 메모리](https://docs.anthropic.com/en/docs/claude-code) 기능을 사용하여 대화 세션 간 영구적인 컨텍스트를 유지합니다. 메모리 파일 위치:
+`history.md` 파일은 프로젝트 개발 과정에서 내린 아키텍처 및 설계 결정을 기록합니다. 두 가지 용도로 활용됩니다:
 
-```
-~/.claude/projects/-Users-{username}-...-spec-kit-skills/memory/MEMORY.md
-```
+**1. spec-kit-skills 개발 기여자용**
 
-Claude Code는 모든 대화의 시스템 프롬프트에 `MEMORY.md`를 자동으로 로드하여, 에이전트가 매번 코드베이스를 재탐색하지 않고도 프로젝트 아키텍처, 핵심 파일 위치, 네이밍 규약, 워크플로우 규칙을 즉시 인지할 수 있게 합니다.
+프로젝트가 *왜* 현재와 같은 구조로 되어 있는지를 이해할 수 있습니다. 각 항목은 결정 사항, 선택한 방향, 그리고 근거를 기록하여 — 새 기능 추가나 기존 동작 수정 시 일관성을 유지하기 쉽게 합니다.
 
-**메모리에 포함된 정보**:
+**2. spec-kit-skills를 프로젝트에 적용하는 사용자용**
 
-| 섹션 | 목적 |
+스킬의 동작 방식에 담긴 설계 철학을 이해할 수 있습니다. 예를 들어, HARD STOP이 왜 회피 불가능한지, 데모 스크립트가 왜 마크다운이 아닌 실행 가능한 형태여야 하는지, 5축 Tier 분류가 왜 더 단순한 방식 대신 채택되었는지 등을 확인할 수 있습니다.
+
+주요 기록 항목:
+
+| 날짜 | 주제 |
 |------|------|
-| Project Overview | 한 줄 프로젝트 설명 |
-| Key Files | 핵심 파일 경로 빠른 참조 테이블 |
-| Architecture | 세 스킬의 관계와 동작 방식 |
-| Artifact Paths | 생성 파일 위치 (CWD 기준 상대 경로) |
-| Key Conventions | Feature 네이밍, scope 규칙, HARD STOP 정책, spec-kit CLI 이름 |
-| Workflow Rules | 푸시 전 타임스탬프 업데이트, 심볼릭 링크 설정, spec-kit 연동 업데이트 프로토콜 |
+| 2026-02-28 | 초기 아키텍처, HARD STOP 철학, 세 가지 프로젝트 모드 |
+| 2026-03-01 | 데모 기반 전달, 스코프 시스템 (core/full), Feature 세분화 |
+| 2026-03-02 | 파이프라인 강화, Feature 재구성 프로토콜 |
+| 2026-03-03 | 리뷰 시스템 개편, 패리티 검증 시스템 |
+| 2026-03-04 | speckit-diff 유틸리티, 도메인 프로필 시스템, 컨텍스트 최적화 |
 
-**왜 중요한가**: 스킬(SKILL.md)은 *에이전트가 할 수 있는 것*을 정의하고, 프로젝트 메모리는 *에이전트가 이미 알고 있는 것*을 정의합니다. 메모리 없이는 새 대화마다 제로 컨텍스트에서 시작하여 README, SKILL.md, reference 파일을 읽어야 합니다. 메모리가 있으면 아키텍처 인지 상태에서 시작하여 바로 작업에 착수할 수 있습니다.
-
-> **기여자 안내**: 새 스킬을 추가하거나, 아티펙트 경로를 변경하거나, 규약을 수정한 경우 Claude Code의 `/memory` 명령으로 `MEMORY.md`를 동기화해 주세요.
+> 중요한 설계 결정을 내릴 때마다 `history.md`에 항목을 추가하여 향후 참조를 위한 근거를 보존하세요.

@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 00:30 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 01:30 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -850,27 +850,26 @@ After applying changes for a new spec-kit version, **update the baseline**:
 2. Update `.claude/skills/speckit-diff/reference/integration-surface.md` to reflect the new spec-kit version
 3. Commit the updated baseline together with the spec-kit-skills changes
 
-#### Claude Code Project Memory (`MEMORY.md`)
+#### Design Decision History (`history.md`)
 
-This project uses Claude Code's [project memory](https://docs.anthropic.com/en/docs/claude-code) to maintain persistent context across conversation sessions. The memory file lives at:
+The `history.md` file records architectural and design decisions made throughout the project's development. It serves two purposes:
 
-```
-~/.claude/projects/-Users-{username}-...-spec-kit-skills/memory/MEMORY.md
-```
+**1. For contributors developing spec-kit-skills**
 
-Claude Code automatically loads `MEMORY.md` into every conversation's system prompt, giving the agent immediate awareness of project architecture, key file locations, naming conventions, and workflow rules — without needing to re-explore the codebase each time.
+Understanding *why* the project is structured the way it is. Each entry documents the decision, the choice made, and the rationale — making it easier to maintain consistency when adding new features or modifying existing behavior.
 
-**What's in the memory**:
+**2. For users applying spec-kit-skills to their projects**
 
-| Section | Purpose |
-|---------|---------|
-| Project Overview | One-line project description |
-| Key Files | Quick-reference table of critical file paths |
-| Architecture | How the three skills relate and operate |
-| Artifact Paths | Where generated files live (CWD-relative) |
-| Key Conventions | Feature naming, scope rules, HARD STOP policy, spec-kit CLI names |
-| Workflow Rules | Timestamp update before push, symlink setup, spec-kit integration update protocol |
+Understanding the design philosophy behind the skills' behavior. For example, why HARD STOPs are inescapable, why demo scripts must be executable (not markdown), or why 5-axis Tier classification was chosen over simpler approaches.
 
-**Why this matters**: Skills (SKILL.md) define *what the agent can do*; project memory defines *what the agent already knows*. Without memory, every new conversation starts from zero context — the agent would need to read README, SKILL.md, and reference files before doing any work. With memory, it starts with architectural awareness and can jump directly into tasks.
+Key topics covered:
 
-> **For contributors**: If you add a new skill, change artifact paths, or modify conventions, update `MEMORY.md` via Claude Code's `/memory` command to keep it in sync.
+| Date | Topic |
+|------|-------|
+| 2026-02-28 | Initial architecture, HARD STOP philosophy, three project modes |
+| 2026-03-01 | Demo-ready delivery, scope system (core/full), Feature granularity |
+| 2026-03-02 | Pipeline hardening, Feature restructure protocol |
+| 2026-03-03 | Review system overhaul, parity checking system |
+| 2026-03-04 | speckit-diff utility, domain profile system, context optimization |
+
+> When making significant design decisions, add an entry to `history.md` to preserve the rationale for future reference.
