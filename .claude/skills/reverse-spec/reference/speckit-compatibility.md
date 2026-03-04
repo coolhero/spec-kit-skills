@@ -34,7 +34,7 @@ This document explains how to utilize the outputs of the `/reverse-spec` skill w
 5. Review the extracted architecture principles and modify/supplement them for redevelopment
 ```
 
-### Step 2: Specify → Plan → Tasks → Implement in Feature Order
+### Step 2: Specify → Plan → Tasks → Analyze → Implement → Verify → Merge in Feature Order
 
 ```
 Follow the Release Group order in roadmap.md:
@@ -50,9 +50,12 @@ For each Feature:
      - Refer to the "For /speckit.plan" section in pre-context.md
      - Check related entity schemas in entity-registry.md
      - Check related API contracts in api-registry.md
+     - Reference stack-migration.md when using New Stack strategy
      - Design reflecting preceding Feature dependencies
   4. /speckit.tasks → /speckit.analyze (cross-artifact consistency check) → /speckit.implement
-  5. After completion: Update entity-registry.md and api-registry.md to the latest state
+  5. Verify: Run tests/build/lint (BLOCKS on failure), cross-Feature consistency, demo script execution
+  6. Merge: Verify-success gate → merge Feature branch to main
+  7. After completion: Update entity-registry.md and api-registry.md to the latest state
 ```
 
 > **Tip**: `/smart-sdd pipeline` automates the above workflow with cross-Feature context injection at each step. See the `/smart-sdd` skill for details.

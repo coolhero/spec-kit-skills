@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 13:11 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 13:30 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -65,6 +65,7 @@ git clone https://github.com/coolhero/spec-kit-skills.git
 # Create symbolic links
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
+ln -s /path/to/spec-kit-skills/.claude/skills/speckit-diff ~/.claude/skills/speckit-diff
 ```
 
 **Method 2: Project-Local Installation (use in a specific project only)**
@@ -74,6 +75,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-s
 mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
+cp -r /path/to/spec-kit-skills/.claude/skills/speckit-diff .claude/skills/
 ```
 
 ### Verify Installation
@@ -102,7 +104,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 
 Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
 
-Two custom skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting three distinct project modes:
+Three custom skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting three distinct project modes:
 
 ### When to Use `/reverse-spec`
 
@@ -165,7 +167,7 @@ A skill that analyzes existing source code to extract **project-level global con
 #### Usage
 
 ```bash
-/reverse-spec [target-directory] [--scope core|full] [--stack same|new]
+/reverse-spec [target-directory] [--scope core|full] [--stack same|new] [--name new-project-name]
 ```
 
 If the argument is omitted, the current directory is analyzed.
@@ -176,6 +178,7 @@ If the argument is omitted, the current directory is analyzed.
 | `--scope full` | Set implementation scope to Full (skip interactive prompt) |
 | `--stack same` | Use the same tech stack as existing project (skip interactive prompt) |
 | `--stack new` | Migrate to a new tech stack (skip interactive prompt) |
+| `--name <name>` | Set new project name for identity renaming (e.g., original → new brand) |
 
 > **Note**: When running with `--dangerously-skip-permissions`, interactive prompts (AskUserQuestion) may be auto-skipped. Always provide `--scope` and `--stack` arguments in such environments to ensure correct strategy selection.
 

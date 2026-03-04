@@ -929,7 +929,7 @@ To resume:
 
 ## Step Mode
 
-Executes a single command. Validates prerequisites, then runs the common protocol (Assemble → Checkpoint → Execute → Review → Update).
+Executes a single command. Validates prerequisites, then runs the common protocol (Assemble → Checkpoint → Execute+Review → Update).
 
 ### Prerequisite Validation
 
