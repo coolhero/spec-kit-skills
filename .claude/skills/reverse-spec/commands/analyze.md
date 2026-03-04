@@ -306,7 +306,7 @@ Extract business rules, validation, workflows, and external integrations from th
 Analyze import/require statements, service call relationships, shared utilities, and event-based coupling. See `domains/{domain}.md` § Inter-Module Dependency Mapping for details.
 
 ### 2-5. Environment Variable Extraction
-Scan the codebase for environment variable usage to identify runtime configuration requirements. See `domains/{domain}.md` § Environment Variables for the technology-to-search-pattern mapping and per-variable extraction details.
+Scan the codebase for environment variable usage to identify runtime configuration requirements. See `domains/{domain}.md` § Environment Variable Extraction for the technology-to-search-pattern mapping and per-variable extraction details.
 
 ⚠️ NEVER read or record actual secret values from `.env` files. Only read `.env.example` or detect variable names from code patterns.
 
