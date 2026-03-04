@@ -777,7 +777,21 @@ You can use reverse-spec artifacts directly with spec-kit commands without smart
 
 ### Domain Profiles (Planned)
 
-Currently optimized for **application development** (backend, frontend, fullstack, mobile, library). Domain-specific analysis profiles for **data science**, **AI/ML**, **embedded systems**, and other specialized domains are planned. The `domains/` directory in each skill contains the profile schema (`_schema.md`) and existing profiles. Use `--domain` to select a profile (default: `app`).
+Currently optimized for **application development** (backend, frontend, fullstack, mobile, library). Domain-specific analysis profiles for **data science**, **AI/ML**, **embedded systems**, and other specialized domains are planned.
+
+**Design philosophy**: The skill architecture separates concerns into three layers:
+
+```
+Core Workflow (domain-agnostic)     ← Phases, checkpoints, pipeline orchestration
+    ↓ reads
+Domain Profile (swappable)          ← Analysis axes, extraction patterns, demo/verify conventions
+    ↓ applies to
+Tech Stack (detected at runtime)    ← Framework-specific file patterns, ORM types, API styles
+```
+
+Changing the domain profile changes *what* gets analyzed and *how* artifacts are structured, without altering the underlying workflow engine. Each project uses a single domain profile — hybrid domains (e.g., AI-serving apps) receive dedicated profiles rather than composing multiple profiles.
+
+The `domains/` directory in each skill contains the profile schema (`_schema.md`) and existing profiles. Use `--domain` to select a profile (default: `app`).
 
 ### Project Structure
 

@@ -1,7 +1,7 @@
 ---
 name: speckit-diff
 description: Analyzes spec-kit version differences and identifies required updates to spec-kit-skills (smart-sdd + reverse-spec). Auto-clones latest spec-kit from GitHub and compares against baseline. Read-only analysis producing a compatibility verdict and impact report.
-argument-hint: [--output path] [--local path]
+argument-hint: "[--output path] [--local path]"
 allowed-tools: [Read, Grep, Glob, Bash, Write, AskUserQuestion]
 ---
 
