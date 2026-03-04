@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 01:30 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 22:00 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -8,13 +8,14 @@
 
 ## Overview
 
-Three Claude Code custom skills that add a **Global Evolution Layer** to [spec-kit](https://github.com/github/spec-kit) SDD workflows:
+Four Claude Code custom skills that add a **Global Evolution Layer** to [spec-kit](https://github.com/github/spec-kit) SDD workflows:
 
 | Skill | Purpose | When to Use |
 |-------|---------|-------------|
 | `/reverse-spec` | Reverse-analyzes existing source code → generates cross-Feature context artifacts | Brownfield rebuild (full re-implementation) |
 | `/smart-sdd` | Wraps spec-kit commands with cross-Feature context injection + progress tracking | All modes: greenfield, incremental, rebuild |
 | `/speckit-diff` | *(Utility)* Checks spec-kit version compatibility, produces impact report | Anytime — after spec-kit updates |
+| `/case-study` | *(Utility)* Generates Case Study reports from execution artifacts | After completing reverse-spec + smart-sdd |
 
 ### Why This Exists
 
@@ -61,11 +62,19 @@ code                   (reverse-analysis)  (roadmap, registries,
 ```bash
 # Clone the repository
 git clone https://github.com/coolhero/spec-kit-skills.git
+cd spec-kit-skills
 
-# Create symbolic links
+# Run install script (creates symlinks for all skills)
+./install.sh
+```
+
+Or manually create symbolic links:
+
+```bash
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
 ln -s /path/to/spec-kit-skills/.claude/skills/speckit-diff ~/.claude/skills/speckit-diff
+ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-study
 ```
 
 **Method 2: Project-Local Installation (use in a specific project only)**
@@ -76,6 +85,7 @@ mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/speckit-diff .claude/skills/
+cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```
 
 ### Verify Installation
@@ -95,6 +105,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 | Existing codebase rebuild | `/reverse-spec ./path/to/source` |
 | Add to existing project | `/smart-sdd add` |
 | Check spec-kit compatibility | `/speckit-diff` |
+| Generate Case Study report | `/case-study init` → record observations → `/case-study generate` |
 
 ---
 
@@ -800,7 +811,9 @@ spec-kit-skills/
 └── .claude/
     └── skills/
         ├── reverse-spec/
-        │   ├── SKILL.md                                 # Main skill definition (5-Phase workflow)
+        │   ├── SKILL.md                                 # Main skill definition (overview + routing)
+        │   ├── commands/
+        │   │   └── analyze.md                           # 5-Phase analysis workflow
         │   ├── domains/                                 # Domain-specific analysis profiles
         │   │   ├── _schema.md                           # Domain profile schema
         │   │   ├── app.md                               # Application domain (default)
@@ -842,10 +855,21 @@ spec-kit-skills/
         │       │   └── parity.md
         │       ├── state-schema.md                      # sdd-state.md schema definition
         │       └── branch-management.md                 # Git branch management reference
-        └── speckit-diff/
-            ├── SKILL.md                                 # Compatibility analyzer skill
-            └── reference/
-                └── integration-surface.md               # Spec-kit baseline (structural signatures)
+        ├── speckit-diff/
+        │   ├── SKILL.md                                 # Compatibility analyzer skill (overview + routing)
+        │   ├── commands/
+        │   │   └── diff.md                              # 4-Phase diff workflow
+        │   └── reference/
+        │       └── integration-surface.md               # Spec-kit baseline (structural signatures)
+        └── case-study/
+            ├── SKILL.md                                 # Case Study generator skill (overview + routing)
+            ├── commands/
+            │   ├── init.md                              # Initialize observation logging
+            │   └── generate.md                          # Generate Case Study report
+            ├── reference/
+            │   └── recording-protocol.md                # Milestone-based recording guide
+            └── templates/
+                └── case-study-log-template.md            # Observation log template
 ```
 
 ### Maintenance
@@ -880,5 +904,28 @@ Key topics covered:
 | 2026-03-02 | Pipeline hardening, Feature restructure protocol |
 | 2026-03-03 | Review system overhaul, parity checking system |
 | 2026-03-04 | speckit-diff utility, domain profile system, context optimization |
+| 2026-03-05 | Unified commands/ structure, case-study skill |
 
 > When making significant design decisions, add an entry to `history.md` to preserve the rationale for future reference.
+
+---
+
+### Case Study Workflow
+
+The `/case-study` skill generates structured reports from SDD workflow execution. Here's the typical workflow:
+
+```
+Step 1: Initialize logging
+  /case-study init ./my-project       → Creates case-study-log.md + shows recording protocol
+
+Step 2: Run the SDD workflow
+  /reverse-spec ./source-code         → Record M1-M4 observations in case-study-log.md
+  /smart-sdd pipeline                 → Record M5-M6 observations per Feature
+
+Step 3: Generate the report
+  /case-study generate ./my-project              → English report
+  /case-study generate ./my-project --lang ko    → Korean report
+  /case-study generate ./my-project --output case-study.md  → Save to file
+```
+
+The report combines **quantitative data** (automatically extracted from sdd-state.md, registries, and spec-kit artifacts) with **qualitative observations** (manually recorded at 8 milestones during execution). Even without observations, a metrics-only report is generated from the available artifacts.

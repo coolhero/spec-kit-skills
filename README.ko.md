@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 01:30 KST
+[English README](README.md) | Last updated: 2026-03-05 22:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -8,13 +8,14 @@
 
 ## 개요
 
-[spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 **Global Evolution Layer**를 추가하는 Claude Code 커스텀 스킬 3종:
+[spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 **Global Evolution Layer**를 추가하는 Claude Code 커스텀 스킬 4종:
 
 | 스킬 | 목적 | 사용 시점 |
 |------|------|-----------|
 | `/reverse-spec` | 기존 소스코드 역분석 → 교차 Feature 컨텍스트 아티펙트 생성 | Brownfield rebuild (전체 재구현) |
 | `/smart-sdd` | spec-kit 커맨드를 교차 Feature 컨텍스트 주입 + 진행 추적으로 래핑 | 모든 모드: greenfield, incremental, rebuild |
 | `/speckit-diff` | *(유틸리티)* spec-kit 버전 호환성 검사, 영향 리포트 생성 | 언제든 — spec-kit 업데이트 후 |
+| `/case-study` | *(유틸리티)* 실행 아티펙트에서 Case Study 보고서 생성 | reverse-spec + smart-sdd 완료 후 |
 
 ### 이 프로젝트가 필요한 이유
 
@@ -58,11 +59,19 @@ spec-kit은 Feature 단위 거버넌스에 특화되어 있지만, 교차 Featur
 ```bash
 # 레포지토리 클론
 git clone https://github.com/coolhero/spec-kit-skills.git
+cd spec-kit-skills
 
-# 심볼릭 링크 생성
+# 설치 스크립트 실행 (모든 스킬의 심볼릭 링크 자동 생성)
+./install.sh
+```
+
+또는 수동으로 심볼릭 링크 생성:
+
+```bash
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
 ln -s /path/to/spec-kit-skills/.claude/skills/speckit-diff ~/.claude/skills/speckit-diff
+ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-study
 ```
 
 **방법 2: 프로젝트 로컬 설치 (특정 프로젝트에서만 사용)**
@@ -73,6 +82,7 @@ mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/speckit-diff .claude/skills/
+cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```
 
 ### 설치 확인
@@ -92,6 +102,7 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 | 기존 코드베이스 재구축 | `/reverse-spec ./path/to/source` |
 | 기존 프로젝트에 추가 | `/smart-sdd add` |
 | spec-kit 호환성 검사 | `/speckit-diff` |
+| Case Study 보고서 생성 | `/case-study init` → 관찰 기록 → `/case-study generate` |
 
 ---
 
@@ -794,7 +805,9 @@ spec-kit-skills/
 └── .claude/
     └── skills/
         ├── reverse-spec/
-        │   ├── SKILL.md                                 # 메인 스킬 정의 (5-Phase 워크플로우)
+        │   ├── SKILL.md                                 # 메인 스킬 정의 (개요 + 라우팅)
+        │   ├── commands/
+        │   │   └── analyze.md                           # 5-Phase 분석 워크플로우
         │   ├── domains/                                 # 도메인별 분석 프로필
         │   │   ├── _schema.md                           # 도메인 프로필 스키마
         │   │   ├── app.md                               # 애플리케이션 도메인 (기본값)
@@ -836,10 +849,21 @@ spec-kit-skills/
         │       │   └── parity.md
         │       ├── state-schema.md                      # sdd-state.md 스키마 정의
         │       └── branch-management.md                 # Git 브랜치 관리 참조
-        └── speckit-diff/
-            ├── SKILL.md                                 # 호환성 분석 스킬
-            └── reference/
-                └── integration-surface.md               # Spec-kit baseline (구조적 서명)
+        ├── speckit-diff/
+        │   ├── SKILL.md                                 # 호환성 분석 스킬 (개요 + 라우팅)
+        │   ├── commands/
+        │   │   └── diff.md                              # 4-Phase 비교 워크플로우
+        │   └── reference/
+        │       └── integration-surface.md               # Spec-kit baseline (구조적 서명)
+        └── case-study/
+            ├── SKILL.md                                 # Case Study 생성 스킬 (개요 + 라우팅)
+            ├── commands/
+            │   ├── init.md                              # 관찰 로깅 초기화
+            │   └── generate.md                          # Case Study 보고서 생성
+            ├── reference/
+            │   └── recording-protocol.md                # 마일스톤별 기록 가이드
+            └── templates/
+                └── case-study-log-template.md            # 관찰 로그 템플릿
 ```
 
 ### 유지보수
@@ -874,5 +898,28 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 | 2026-03-02 | 파이프라인 강화, Feature 재구성 프로토콜 |
 | 2026-03-03 | 리뷰 시스템 개편, 패리티 검증 시스템 |
 | 2026-03-04 | speckit-diff 유틸리티, 도메인 프로필 시스템, 컨텍스트 최적화 |
+| 2026-03-05 | commands/ 구조 통일, case-study 스킬 |
 
 > 중요한 설계 결정을 내릴 때마다 `history.md`에 항목을 추가하여 향후 참조를 위한 근거를 보존하세요.
+
+---
+
+### Case Study 워크플로우
+
+`/case-study` 스킬은 SDD 워크플로우 실행 결과에서 구조화된 보고서를 생성합니다. 일반적인 워크플로우:
+
+```
+Step 1: 로깅 초기화
+  /case-study init ./my-project       → case-study-log.md 생성 + 기록 프로토콜 표시
+
+Step 2: SDD 워크플로우 실행
+  /reverse-spec ./source-code         → M1-M4 관찰 사항을 case-study-log.md에 기록
+  /smart-sdd pipeline                 → Feature별 M5-M6 관찰 사항 기록
+
+Step 3: 보고서 생성
+  /case-study generate ./my-project              → 영어 보고서
+  /case-study generate ./my-project --lang ko    → 한국어 보고서
+  /case-study generate ./my-project --output case-study.md  → 파일로 저장
+```
+
+보고서는 **정량 데이터** (sdd-state.md, 레지스트리, spec-kit 아티펙트에서 자동 추출)와 **정성적 관찰** (실행 중 8개 마일스톤에서 수동 기록)을 결합합니다. 관찰 기록이 없어도 아티펙트에서 메트릭만으로 보고서를 생성할 수 있습니다.
