@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 22:00 KST
+[English README](README.md) | Last updated: 2026-03-06 01:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -899,6 +899,7 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 | 2026-03-03 | 리뷰 시스템 개편, 패리티 검증 시스템 |
 | 2026-03-04 | speckit-diff 유틸리티, 도메인 프로필 시스템, 컨텍스트 최적화 |
 | 2026-03-05 | commands/ 구조 통일, case-study 스킬 |
+| 2026-03-06 | **v2 재설계**: 사용자 의도 모델, adopt 커맨드, 데모 레이어링, SBI 커버리지 추적, 스크립트 아키텍처 ([설계 문서](v2-design.md)) |
 
 > 중요한 설계 결정을 내릴 때마다 `history.md`에 항목을 추가하여 향후 참조를 위한 근거를 보존하세요.
 

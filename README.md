@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 22:00 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-06 01:00 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -905,6 +905,7 @@ Key topics covered:
 | 2026-03-03 | Review system overhaul, parity checking system |
 | 2026-03-04 | speckit-diff utility, domain profile system, context optimization |
 | 2026-03-05 | Unified commands/ structure, case-study skill |
+| 2026-03-06 | **v2 redesign**: user intent model, adopt command, demo layering, SBI coverage tracking, script architecture ([design doc](v2-design.md)) |
 
 > When making significant design decisions, add an entry to `history.md` to preserve the rationale for future reference.
 
