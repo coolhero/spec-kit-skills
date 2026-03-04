@@ -1466,10 +1466,31 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 
 > **Build prerequisites**: If the build fails due to missing setup steps (e.g., `pnpm approve-builds`, native module compilation), include the specific prerequisite command in the error message so the user knows what to run.
 
-### Phase 2: Cross-Feature Consistency Verification
+### Phase 2: Cross-Feature Consistency + Behavior Completeness Verification
+
+**Step 1 — Cross-Feature consistency**:
 - Check the cross-verification points in the "For /speckit.analyze" section of `pre-context.md`
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
 - Verify that entity-registry.md and api-registry.md match the actual implementation
+
+**Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `reverse-spec`):
+If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:
+
+1. Read the Source Behavior Inventory table (function/method list with P1/P2/P3 priorities)
+2. Read the Feature's `spec.md` FR-### list
+3. For each P1/P2 behavior, check if a corresponding FR-### exists that covers the behavior
+4. Display a coverage summary:
+   ```
+   📊 Source Behavior Coverage for [FID]:
+     P1 behaviors: [covered]/[total] ([%])
+     P2 behaviors: [covered]/[total] ([%])
+     P3 behaviors: [covered]/[total] (informational)
+     Uncovered P1: [list function names]
+     Uncovered P2: [list function names]
+   ```
+5. **If any P1 behavior is uncovered**: Display a warning — `⚠️ [N] P1 source behaviors not covered by FR-###. These may represent missing functionality.`
+   - This is a **warning, not a blocker** — the user may proceed but should consider whether the omission is intentional
+6. If no Source Behavior Inventory exists (greenfield/add), skip this step
 
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
 
@@ -1569,11 +1590,14 @@ Parse the original source and compare against implemented code.
 - All DB models/entities (ORM models, schema definitions)
 - All route registrations (pages, views)
 - All test files
+- All UI component features (from Phase 2-7 — library configs, toolbar items, plugins, editing modes)
+- All source behaviors (from Phase 2-6 — exported functions, public methods, handlers)
 
 **Step 2 — Implementation inventory**:
 - Read `BASE_PATH/api-registry.md` for all defined endpoints
 - Read `BASE_PATH/entity-registry.md` for all defined entities
-- Scan implemented source code on the main branch for actually implemented endpoints, entities, routes
+- Read pre-context.md "UI Component Features" sections for all Features (if present)
+- Scan implemented source code on the main branch for actually implemented endpoints, entities, routes, UI component features
 
 **Step 3 — Exclusion filtering**:
 - If `BASE_PATH/coverage-baseline.md` exists: read the Intentional Exclusions table
@@ -1586,12 +1610,14 @@ Parse the original source and compare against implemented code.
 📊 Structural Parity: [Project Name]
    Source: [resolved source path]
 
-| Category       | Original | Implemented | Excluded | Gap | Parity  |
-|----------------|----------|-------------|----------|-----|---------|
-| API endpoints  | 45       | 42          | 1        | 2   | 95.6%   |
-| DB entities    | 20       | 18          | 1        | 1   | 94.7%   |
-| Routes/pages   | 38       | 35          | 2        | 1   | 97.2%   |
-| Test files     | 30       | 25          | 0        | 5   | 83.3%   |
+| Category            | Original | Implemented | Excluded | Gap | Parity  |
+|---------------------|----------|-------------|----------|-----|---------|
+| API endpoints       | 45       | 42          | 1        | 2   | 95.6%   |
+| DB entities         | 20       | 18          | 1        | 1   | 94.7%   |
+| Routes/pages        | 38       | 35          | 2        | 1   | 97.2%   |
+| UI component features | 12     | 4           | 0        | 8   | 33.3%   |
+| Source behaviors    | 85       | 72          | 3        | 10  | 87.8%   |
+| Test files          | 30       | 25          | 0        | 5   | 83.3%   |
 
 Deferred items (from coverage-baseline.md): 12 endpoints, 3 entities
 ```

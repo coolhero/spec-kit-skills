@@ -39,6 +39,39 @@
 - **Extract**: What (what it does), Why (why it does it)
 - **Ignore**: How (how it was implemented)
 
+### Source Behavior Inventory
+
+> Function-level inventory of exported/public behaviors in this Feature's source files.
+> Extracted during `/reverse-spec` Phase 2 to ensure no functionality is lost during rebuild.
+> Each entry represents a discrete behavior that should map to one or more FR-### in spec.md.
+
+| Source File | Function/Method | Behavior Description | Priority |
+|-------------|----------------|---------------------|----------|
+| `[relative/path/service.ts]` | `registerUser()` | [Creates new user account with email verification] | P1 |
+| `[relative/path/service.ts]` | `loginUser()` | [Authenticates user with email/password, returns JWT] | P1 |
+| `[relative/path/middleware.ts]` | `requireAuth()` | [Validates JWT token, attaches user to request] | P1 |
+| `[relative/path/service.ts]` | `resetPassword()` | [Sends password reset email with time-limited token] | P2 |
+
+> **Priority**: P1 = core behavior (must implement), P2 = important (should implement), P3 = nice-to-have (can defer).
+> **How to use**: During `/speckit.specify`, ensure each P1/P2 behavior maps to at least one FR-###. During `/smart-sdd verify`, check implementation coverage against this inventory.
+> If this Feature has no source files (greenfield/add), write "N/A — no source to inventory".
+
+### UI Component Features
+
+> **Only present for frontend/fullstack projects** with third-party UI component libraries.
+> Lists user-facing capabilities provided by UI libraries that must be reproduced in the new implementation.
+> These features are configured via library options/plugins — they don't appear as exported functions and would be missed by function-level analysis.
+> Omit this section for backend-only, library, or CLI projects.
+
+| Component | Library | Feature | Category |
+|-----------|---------|---------|----------|
+| `[ComponentName]` | `[library@version]` | [e.g., Bold/Italic/Strikethrough toolbar] | [text-formatting] |
+| `[ComponentName]` | `[library@version]` | [e.g., Markdown ↔ WYSIWYG mode toggle] | [editing-mode] |
+| `[ComponentName]` | custom plugin | [e.g., Wiki-link autolink `[[title]]`] | [navigation] |
+
+> **New Stack migration note** (if applicable): For each library, suggest equivalent options in the new stack.
+> **How to use**: During `/speckit.specify`, ensure each UI feature maps to an FR-###. During `/speckit.plan`, decide on the library/approach. During `/smart-sdd parity`, compare against this list.
+
 ### Naming Remapping
 
 > **Only present when the project identity changed** (Phase 0 Question 3). Omit this section entirely if the project name is unchanged.

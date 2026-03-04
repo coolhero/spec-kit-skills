@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 16:50 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 17:10 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -254,6 +254,10 @@ Information extracted per endpoint: HTTP method/path, Request/Response schema, A
 
 **Inter-Module Dependency Mapping**: import/require analysis, Service call relationships, Shared utilities, Event-based coupling
 
+**Source Behavior Inventory**: Exported functions, public methods, request handlers per source file — with priority classification (P1 core / P2 important / P3 nice-to-have). Prevents functionality loss by ensuring every significant behavior maps to an FR-### during specify
+
+**UI Component Feature Extraction** (frontend/fullstack only): Third-party UI library capabilities (toolbar items, plugins, editing modes) that are configured via library options, not exported as functions. These are invisible to function-level analysis but represent significant user-facing functionality
+
 ##### Phase 3 -- Feature Classification & Importance Analysis
 
 Identifies logical functional units (Features) based on the analysis results.
@@ -339,6 +343,8 @@ Pre-prepares information needed for spec-kit's 3 core commands in dedicated sect
 | Section | Target Command | Content |
 |---------|---------------|---------|
 | Source Reference | All | Related original file list + per-stack strategy reference guide (Implementation Reference vs Logic-Only Reference) |
+| Source Behavior Inventory | `/speckit-specify`, verify | Function-level behavior list with P1/P2/P3 priorities — ensures FR-### coverage |
+| UI Component Features | `/speckit-specify`, `/speckit-plan`, parity | Third-party UI library capabilities (toolbar items, plugins, modes) |
 | Static Resources | All | Non-code files (images, fonts, i18n) used by this Feature with source/target paths |
 | Environment Variables | All | Variables this Feature requires at runtime (Feature-owned and shared) |
 | For /speckit.specify | `/speckit-specify` | Existing feature summary, user scenarios, draft requirements (FR-###), draft acceptance criteria (SC-###), edge cases |
@@ -494,9 +500,10 @@ Phase 1: Execution Verification (Code Level) — BLOCKS on failure
     +-- Run tests, Build check, Lint check
     +-- If ANY check fails → BLOCKED, or user may "Acknowledge limited verification" (⚠️)
 
-Phase 2: Cross-Feature Consistency Verification
+Phase 2: Cross-Feature Consistency + Behavior Completeness
     +-- Check cross-verification points in pre-context.md
     +-- Analyze whether shared entities/APIs changed by this Feature affect other Features
+    +-- Source behavior completeness check: P1/P2 behaviors vs FR-### coverage (rebuild only)
 
 Phase 3: Demo-Ready Verification (only if Demo-Ready Delivery is in the constitution) — BLOCKS on failure
     +-- Check demo script exists and launches a real Feature (NOT a test-only script)
@@ -548,7 +555,7 @@ Parity checking addresses two types of gaps:
 - **Gap B (implementation gap)**: Items correctly captured by `/reverse-spec` but not fully implemented during the pipeline. Detected by the `/smart-sdd parity` command.
 
 The parity command runs in 5 phases:
-1. **Structural Parity** (automated) — Parse original source for endpoints, entities, routes, tests. Compare against registries and implemented code. Filter items marked as intentional exclusions in `coverage-baseline.md`.
+1. **Structural Parity** (automated) — Parse original source for endpoints, entities, routes, tests, source behaviors, and UI component features. Compare against registries, behavior inventories, and implemented code. Filter items marked as intentional exclusions in `coverage-baseline.md`.
 2. **Logic Parity** (semi-automated) — Compare `business-logic-map.md` rules against implemented FR-### mappings. Check original test cases against new tests.
 3. **Gap Report** — Generate `parity-report.md` with gaps table and auto-suggested grouping.
 4. **Remediation Plan** (HARD STOP per group) — User decides per group: create new Feature (via `/smart-sdd add`), intentional exclusion (6 reason codes: `deprecated`, `replaced`, `third-party`, `deferred`, `out-of-scope`, `covered-differently`), defer, or add to existing Feature.

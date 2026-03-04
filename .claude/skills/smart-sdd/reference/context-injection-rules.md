@@ -132,6 +132,8 @@ You can open and edit this file directly, then select
 | File | Section | Filtering |
 |------|---------|-----------|
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild mode)** — ensure FR-### cover all P1/P2 behaviors |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in requirements |
@@ -163,6 +165,8 @@ To resolve file paths at runtime:
 - **Feature summary**: Feature description and scope from pre-context
 - **Draft requirements (FR-###)**: Draft Functional Requirements extracted from pre-context
 - **Draft acceptance criteria (SC-###)**: Draft Success Criteria / Acceptance Scenario extracted from pre-context
+- **Source behavior inventory**: If present, the function-level behavior list with priorities — remind that each P1/P2 behavior should map to at least one FR-###. This prevents functionality loss during rebuild
+- **UI component features**: If present, the third-party UI library capabilities — remind that each UI feature should map to an FR-###. These features (toolbar items, editing modes, plugins) are invisible to function-level analysis
 - **Business rules**: List of rules for the Feature from business-logic-map (skipped if business-logic-map.md does not exist)
 - **Edge cases**: Edge cases found in pre-context and business-logic-map
 - **Original source reference**: File list from Source Reference (skipped if Source Reference is N/A)
@@ -196,6 +200,17 @@ Feature: [FID] - [Feature Name]
 [List each SC-### with its full description]
   SC-001: ...
   SC-002: ...
+
+── Source Behavior Inventory (rebuild only) ──────
+[If present in pre-context — list P1/P2 behaviors]
+  P1: registerUser(), loginUser(), requireAuth() ...
+  P2: resetPassword(), updateProfile() ...
+  ⚠️ Ensure each P1/P2 behavior maps to at least one FR-###.
+
+── UI Component Features (frontend/fullstack rebuild) ─
+[If present in pre-context — list UI library capabilities]
+  NoteEditor (@toast-ui/editor): Bold/Italic toolbar, WYSIWYG mode, ...
+  ⚠️ Ensure each UI feature maps to an FR-###.
 
 ── Business Rules (from business-logic-map) ──────
 [List each business rule with its description]
@@ -923,13 +938,16 @@ You can open and edit any of these files directly, then select
 | File | Section | Filtering |
 |------|---------|-----------|
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.analyze" section | Cross-Feature verification points (entity compatibility, API contracts) |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild mode)** — for behavior completeness check |
 | `BASE_PATH/entity-registry.md` | Entities modified by the Feature | Change tracking |
 | `BASE_PATH/api-registry.md` | APIs modified by the Feature | Change tracking |
+| `SPEC_PATH/[NNN-feature]/spec.md` | FR-### list | For behavior completeness cross-reference |
 | `SPEC_PATH/[NNN-feature]/` | data-model.md, contracts/ | Actual implementation results |
 
 ### Injected Content
 
 - **Cross-Feature verification points**: Cross-verification checklist from pre-context (entity compatibility, API contract compatibility, business rule consistency)
+- **Source behavior completeness**: If Source Behavior Inventory exists in pre-context, cross-reference P1/P2 behaviors against FR-### in spec.md to detect uncovered functionality
 - **Impact scope analysis**: List of other Features referencing the modified entities/APIs
 - **Implementation consistency verification**: Whether entity-registry/api-registry matches the actual implemented code
 
@@ -950,6 +968,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] Entity compatibility: [specific check]
   - [ ] API contract compatibility: [specific check]
   - [ ] Business rule consistency: [specific check]
+  - [ ] Source behavior completeness: [P1: N behaviors, P2: N behaviors] (rebuild only)
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
@@ -999,6 +1018,8 @@ After verification execution completes:
   - ✅/❌ Entity compatibility: [result]
   - ✅/❌ API contract compatibility: [result]
   - ✅/❌ Business rule consistency: [result]
+  - Source behavior coverage: P1 [N]/[N] ([%]), P2 [N]/[N] ([%])
+    [⚠️ Uncovered P1: funcA, funcB (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]

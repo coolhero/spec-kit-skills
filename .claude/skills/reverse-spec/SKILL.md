@@ -360,7 +360,63 @@ For each discovered environment variable, extract:
 
 ⚠️ NEVER read or record actual secret values from `.env` files. Only read `.env.example` or detect variable names from code patterns.
 
-Upon completing Phase 2, report a summary of the number of entities, APIs, business rules, and environment variables discovered.
+### 2-6. Source Behavior Inventory
+
+For each source file identified in Phase 1, extract a **function-level inventory** of exported/public behaviors. This captures discrete units of functionality that structural extraction (entities, APIs) may miss.
+
+**What to extract**:
+- Exported functions, public methods, request handlers, event listeners, middleware, CLI commands
+- For each: function/method name, one-line behavior description, priority classification
+
+**Priority classification**:
+- **P1 (core)**: Behaviors directly tied to the Feature's primary purpose. Must be implemented
+- **P2 (important)**: Supporting behaviors that complete the Feature's functionality. Should be implemented
+- **P3 (nice-to-have)**: Utility functions, convenience methods, edge-case handlers. Can be deferred
+
+**How to extract efficiently**:
+- Scan for `export function`, `export class`, `module.exports`, public methods, route handlers, decorated functions, etc. (adapt patterns to the detected tech stack)
+- Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
+- Skip internal/private helpers that are implementation details, not behaviors
+
+This inventory feeds into each Feature's `pre-context.md` → "Source Behavior Inventory" section (Phase 4-2) and is used by `/smart-sdd verify` for Feature-level completeness checking.
+
+### 2-7. UI Component Feature Extraction (Frontend/Fullstack Projects Only)
+
+> Skip this step entirely for backend-only, library, or CLI projects.
+
+Third-party UI libraries (editors, charts, form builders, calendars, etc.) provide user-facing capabilities through **configuration and plugins**, not through exported functions. These capabilities are invisible to function-level analysis but represent significant functionality that must be reproduced.
+
+**Step 1 — Identify UI library dependencies**:
+Scan `package.json` (or equivalent) for UI component libraries. Common categories:
+
+| Category | Example Libraries |
+|----------|-------------------|
+| Rich text editors | Toast UI Editor, TipTap, ProseMirror, Slate, Quill, CodeMirror, Monaco |
+| Charts/visualization | Chart.js, D3, ECharts, Recharts, Nivo |
+| Form builders | Formik, React Hook Form (with complex UI), Ant Design Form |
+| Drag & drop | dnd-kit, react-beautiful-dnd, SortableJS |
+| Calendars | FullCalendar, react-big-calendar |
+| Maps | Leaflet, Mapbox GL, Google Maps |
+| Media players | Video.js, Plyr, Howler |
+
+**Step 2 — Extract activated features per library**:
+For each identified UI library, read the initialization/configuration code to extract:
+- **Activated features**: Toolbar items, plugins, modes, options enabled in the config
+- **Custom extensions**: Custom plugins, overrides, hooks built on top of the library
+- **User interaction patterns**: Keyboard shortcuts, drag-drop behavior, paste handling, mode toggles
+
+**Step 3 — Record as UI Component Features**:
+For each component, produce a feature inventory:
+
+| Component | Library | Feature | Category |
+|-----------|---------|---------|----------|
+| `NoteEditor` | `@toast-ui/editor 3.2` | Bold/Italic/Strikethrough toolbar | text-formatting |
+| `NoteEditor` | `@toast-ui/editor 3.2` | Markdown ↔ WYSIWYG mode toggle | editing-mode |
+| `NoteEditor` | custom plugin | Wiki-link autolink `[[title]]` | navigation |
+
+This inventory feeds into each Feature's `pre-context.md` → "UI Component Features" section (Phase 4-2) and is compared during `/smart-sdd parity` → UI Feature Parity.
+
+Upon completing Phase 2, report a summary of the number of entities, APIs, business rules, environment variables, source behaviors, and UI component features discovered.
 
 ---
 
@@ -599,6 +655,8 @@ For example, if the target directory is `/Users/dev/legacy-app`:
 
 Contents to include in each pre-context.md:
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
+- **Source Behavior Inventory**: Function-level inventory from Phase 2-6, filtered to this Feature's associated files. Each entry: source file, function/method name, behavior description, priority (P1/P2/P3). This ensures no source-level functionality is lost during the extraction pipeline
+- **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
 - **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features
@@ -621,6 +679,8 @@ Parse the original source (target directory) and compare against the generated a
 | Source files | Glob all source files (exclude vendor/build/test dirs) | Count files listed in all pre-context.md Source Reference tables | File path matching |
 | API endpoints | Parse route definitions (Phase 2-2 tech-stack-specific patterns) | Count entries in api-registry.md | Method + path matching |
 | DB models/entities | Parse model/entity definitions (Phase 2-1 patterns) | Count entries in entity-registry.md | Entity name matching |
+| Source behaviors | Count exported functions/methods (Phase 2-6) | Count entries in all pre-context.md Source Behavior Inventory tables | Function name matching |
+| UI component features | Count library features (Phase 2-7, if applicable) | Count entries in all pre-context.md UI Component Features tables | Feature name matching |
 | Test files | Glob test file patterns (`**/*test*`, `**/*spec*`, `**/__tests__/**`) | Count test files listed in pre-context.md Source Reference | File path matching |
 | Business rules | Count rules identified in Phase 2-3 | Count entries in business-logic-map.md | Rule ID matching |
 
@@ -629,13 +689,15 @@ Display the metrics table to the user:
 ```
 📊 Source Coverage Analysis:
 
-| Metric          | Source | Mapped | Coverage |
-|-----------------|--------|--------|----------|
-| Source files    | 87     | 72     | 82.8%    |
-| API endpoints   | 45     | 43     | 95.6%    |
-| DB entities     | 20     | 19     | 95.0%    |
+| Metric               | Source | Mapped | Coverage |
+|----------------------|--------|--------|----------|
+| Source files         | 87     | 72     | 82.8%    |
+| API endpoints        | 45     | 43     | 95.6%    |
+| DB entities          | 20     | 19     | 95.0%    |
 | Test files      | 34     | 28     | 82.4%    |
-| Business rules  | 42     | 40     | 95.2%    |
+| Source behaviors  | 85     | 72     | 84.7%    |
+| UI features      | 12     | 12     | 100%     |
+| Business rules   | 42     | 40     | 95.2%    |
 ```
 
 #### Step 2 — Unmapped Items Identification
@@ -644,6 +706,8 @@ For each metric category, identify items in the source that were NOT mapped to a
 - Source files not listed in any pre-context.md Source Reference
 - Endpoints parsed from routes but not in api-registry.md
 - Models parsed from source but not in entity-registry.md
+- Source behaviors (exported functions) not listed in any pre-context.md Source Behavior Inventory
+- UI component features not listed in any pre-context.md UI Component Features (if applicable)
 - Test files not associated with any Feature
 
 Group the unmapped items by apparent category/module (e.g., "middleware files", "admin endpoints", "utility models") to minimize the number of user interactions in Step 3.
