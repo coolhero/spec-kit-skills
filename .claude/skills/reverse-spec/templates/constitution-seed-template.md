@@ -162,37 +162,36 @@ Quality-driven:
 
 ### VI. Demo-Ready Delivery
 - Each Feature must be demonstrable upon completion — not just passing tests, but runnable and visually/functionally verifiable
-- spec-kit generates `quickstart.md` per Feature during `/speckit.plan` (validation scenarios). When this principle is active, `quickstart.md` must also include a **Demo** section with step-by-step instructions for launching and interacting with the Feature
-- Maintain a centralized `demos/` directory at the project root that aggregates per-Feature demo entry points:
+- Maintain a centralized `demos/` directory at the project root with **executable demo scripts** per Feature:
   ```
   demos/
-  ├── README.md              # Demo Hub — index of all Feature demos with status
-  ├── F001-auth.md           # Links to quickstart.md + demo-specific setup/instructions
-  ├── F002-product.md
+  ├── README.md              # Demo Hub — index of all Feature demos with run commands
+  ├── F001-auth.sh           # Executable demo script for Feature F001
+  ├── F002-product.sh
   └── ...
   ```
-- Each `demos/F00N-name.md` must contain: Prerequisites, Setup commands, Demo walkthrough (step-by-step), Expected results, and a link back to `specs/{NNN-feature}/quickstart.md` for detailed validation scenarios
-- "Demo-ready" means: the Feature can be started, exercised through its core user flows, and the results observed — without requiring other incomplete Features
-- If the Feature has no UI, **implement a minimal demo surface** (CLI command, simple demo page, API playground, or script) that exercises the core functionality and displays results. "Tests only" is NOT demo-ready
-- **Minimal demo surface examples by Feature type**:
-  - Backend logic without UI → CLI command or demo script that invokes the logic and prints results
-  - API endpoints → Simple API test page or curl-based demo script
-  - Data layer / Store → CLI or minimal UI that performs CRUD and displays state changes
-  - Pipeline / Engine → Demo script that runs the pipeline with sample data and shows output
+- Each demo script (`demos/F00N-name.sh` or `.ts`/`.py`/etc. matching the project's language) must be:
+  - **Executable**: `chmod +x` and self-contained — running it demonstrates the Feature without manual steps
+  - **Self-documenting**: Include a Demo Components header comment listing each component as Demo-only or Promotable
+  - **Verifiable**: The script is executed during `verify` and must complete without errors
+- "Demo-ready" means: running `./demos/F00N-name.sh` exercises the Feature's core user flows and displays results — without requiring other incomplete Features or manual intervention
+- **Demo script by Feature type**:
+  - Has UI → Script starts the server, verifies demo endpoints/pages respond, then shuts down
+  - Backend/API only → Script invokes API endpoints and displays results
+  - Data layer / Store → Script performs CRUD operations and displays state changes
+  - Pipeline / Engine → Script runs the pipeline with sample data and shows output
 - **Demo code separation strategy**: Clearly distinguish demo-only code from production code
-  - **Demo-only code** (mock data, demo scripts, temporary UI scaffolding): Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed or replaced when the real Feature is implemented
+  - **Demo-only code** (mock data, temporary UI scaffolding): Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed or replaced when the real Feature is implemented
   - **Promotable code** (minimal but real implementation that future Features will extend): Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
-  - Each `demos/F00N-name.md` must declare which category each demo component falls into:
-    ```
-    ## Demo Components
-    | Component | Location | Category | Fate |
-    |-----------|----------|----------|------|
-    | Mock provider data | demos/fixtures/providers.json | Demo-only | Remove after F002-provider UI |
-    | Demo CLI runner | demos/scripts/demo-F001.ts | Demo-only | Remove after full UI |
-    | Settings page shell | src/pages/settings.tsx | Promotable | Extended by F005-settings |
+  - Each demo script must declare component categories in its header comment:
+    ```bash
+    # Demo Components:
+    #   Mock provider data | demos/fixtures/providers.json | Demo-only | Remove after F002-provider UI
+    #   Demo CLI runner | demos/scripts/demo-F001.ts | Demo-only | Remove after full UI
+    #   Settings page shell | src/pages/settings.tsx | Promotable | Extended by F005-settings
     ```
   - During subsequent Feature implementation, check `demos/` for demo-only components marked for removal and clean them up
-- **Verification criterion**: `A non-developer stakeholder can follow demos/F00N-name.md and verify the Feature works — "npm test passes" alone does NOT satisfy this criterion`
+- **Verification criterion**: `Running ./demos/F00N-name.sh demonstrates the Feature works — "npm test passes" alone does NOT satisfy this criterion`
 
 ---
 

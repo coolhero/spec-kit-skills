@@ -118,7 +118,7 @@ $ARGUMENTS parsing rules:
 
 **Step 0 — Git and spec-kit installation check** (all commands except `init`):
 
-> **`init` command**: Skips this Step 0 entirely. The `init` command has its own Pre-Phase that handles git setup and branch selection.
+> **`init` command**: Skips Steps 0 and 1 entirely. The `init` command has its own Pre-Phase that handles git setup, branch selection, and roadmap creation.
 
 **0a. Git repository check**:
 1. Check if the current directory is a git repository: `git rev-parse --is-inside-work-tree`

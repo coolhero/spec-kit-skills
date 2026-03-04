@@ -665,54 +665,54 @@ Before implementation, if the Feature's `pre-context.md` has a non-empty Environ
 After `speckit-implement` completes, if the constitution includes "Demo-Ready Delivery":
 
 1. **Clean up obsolete demo-only components from previous Features**:
-   - Check `demos/` directory for `F00N-name.md` files of **already completed** Features
-   - In each completed Feature's `demos/F00N-name.md`, check the **Demo Components** table
-   - If any component has Category = "Demo-only" and Fate = "Remove after F0XX-[current-feature]", **remove that component** (delete the file/directory) and update the Demo Components table
+   - Check `demos/` directory for demo scripts of **already completed** Features
+   - In each completed Feature's demo script, check the **Demo Components** header comment
+   - If any component has Category = "Demo-only" and Fate = "Remove after F0XX-[current-feature]", **remove that component** (delete the file/directory) and update the demo script's header comment
    - Report removed demo-only components to the user
 
 2. **Determine the Feature's demo surface type** based on what was implemented:
-   - Has UI components → demo via the running app (document the route/page)
-   - Backend/API only → create a demo script (`demos/scripts/demo-F00N.sh` or `.ts`) that invokes the API and displays results
-   - Data/logic layer only → create a CLI command or demo script that exercises the core logic with sample data
-   - Pipeline/engine → create a demo script that runs the pipeline with sample input and shows output
+   - Has UI components → demo script starts the server, opens/tests the route, and shuts down
+   - Backend/API only → demo script invokes the API endpoints and displays results
+   - Data/logic layer only → demo script exercises the core logic with sample data
+   - Pipeline/engine → demo script runs the pipeline with sample input and shows output
 
 3. **Categorize each demo component** as either:
-   - **Demo-only**: Mock data, demo scripts, temporary UI scaffolding. Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed when the real Feature replaces it
+   - **Demo-only**: Mock data, temporary UI scaffolding. Mark with `// @demo-only` comment. Will be removed when the real Feature replaces it
    - **Promotable**: Minimal but real implementation that future Features will extend. Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
 
-4. **Create `demos/F00N-name.md`** with:
-   ```markdown
+4. **Create executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language):
+   ```bash
+   #!/usr/bin/env bash
    # Demo: [Feature Name]
+   #
+   # Demo Components:
+   #   [component name] | [file path] | Demo-only | Remove after F0XX-[feature]
+   #   [component name] | [file path] | Promotable | Extended by F0XX-[feature]
+   #
+   # Prerequisites: [What must be running/installed]
+   set -euo pipefail
 
-   ## Prerequisites
-   [What must be running/installed]
+   echo "=== Demo: [Feature Name] ==="
 
-   ## Setup
+   # Setup
    [Commands to prepare the demo environment]
 
-   ## Demo Walkthrough
-   1. [Step-by-step instructions with expected results]
-   2. ...
+   # Demo steps
+   [Executable commands that demonstrate the Feature]
 
-   ## Demo Components
-   | Component | Location | Category | Fate |
-   |-----------|----------|----------|------|
-   | [component name] | [file path] | Demo-only | Remove after F0XX-[feature] |
-   | [component name] | [file path] | Promotable | Extended by F0XX-[feature] |
-
-   ## Validation Scenarios
-   See [specs/{NNN-feature}/quickstart.md](../specs/{NNN-feature}/quickstart.md) for detailed validation.
+   echo "=== Demo complete ==="
    ```
+   The script must be executable (`chmod +x`) and self-contained — running it should demonstrate the Feature without manual steps.
 
-5. **Update `demos/README.md`** (Demo Hub):
+5. **Update `demos/README.md`** (Demo Hub — index of all Feature demos):
    - Create if it doesn't exist (first Feature with demo)
-   - Add the Feature to the index with status and link
+   - Add the Feature with its demo command: `./demos/F00N-name.sh`
 
 ### Injected Content
 
 - Automatically executes `speckit-implement` based on tasks.md
 - Static resource copy instructions from pre-context.md (if applicable)
-- If Demo-Ready Delivery is active: demo surface implementation + `demos/F00N-name.md` creation
+- If Demo-Ready Delivery is active: demo surface implementation + executable demo script creation (`demos/F00N-name.sh`)
 
 ### Checkpoint
 
@@ -731,7 +731,7 @@ After `speckit-implement` completes:
 2. All source files created/modified during implementation — use `git diff --name-only` on the Feature branch to identify them
 3. Test output — capture from the test run during implementation
 4. Build output — capture from the build step during implementation
-5. `demos/{FID}-{name}.md` — If Demo-Ready Delivery is active, read this file
+5. `demos/{FID}-{name}.sh` (or `.ts`/`.py`/etc.) — If Demo-Ready Delivery is active, read the demo script
 
 **Display format**:
 ```
@@ -751,12 +751,12 @@ After `speckit-implement` completes:
 
 ── Demo Status (if Demo-Ready Delivery active) ──
 [Demo surface created: yes/no
- demos/F00N-name.md: created/updated]
+ demos/F00N-name.sh: created/updated]
 
 ── Files You Can Edit ─────────────────────────
   📄 All source files listed above under "Files Created/Modified"
   📄 specs/{NNN-feature}/tasks.md  (to adjust remaining tasks)
-  📄 demos/{FID}-{name}.md  (if Demo-Ready Delivery active)
+  📄 demos/{FID}-{name}.sh  (if Demo-Ready Delivery active)
 You can open and edit any of these files directly, then select
 "I've finished editing" to continue.
 ──────────────────────────────────────────────────
@@ -807,9 +807,9 @@ Show the **actual verification checklist** so the user can see what will be chec
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
-  - [ ] demos/F00N-name.md exists
-  - [ ] Demo surface implemented (not just tests)
-  - [ ] Demo Components table with Category and Fate
+  - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
+  - [ ] Demo script executes without errors
+  - [ ] Demo Components header comment with Category and Fate
   - [ ] Component markers (@demo-only / @demo-scaffold)
 
 ── Phase 4: Global Evolution Consistency ─────────
@@ -847,9 +847,9 @@ After verification execution completes:
 
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]
-  - ✅/❌ demos/F00N-name.md exists
-  - ✅/❌ Demo surface implemented
-  - ✅/❌ Demo Components table present
+  - ✅/❌ Executable demo script exists (demos/F00N-name.sh)
+  - ✅/❌ Demo script executed successfully
+  - ✅/❌ Demo Components header comment present
   - ✅/❌ Component markers present
 
 ── Phase 4: Global Evolution Consistency ───────────
@@ -865,7 +865,7 @@ After verification execution completes:
   📄 Source files in the Feature branch (fix failing tests/build)
   📄 specs/{NNN-feature}/data-model.md  (fix entity discrepancies)
   📄 specs/{NNN-feature}/contracts/*.md  (fix API discrepancies)
-  📄 demos/{FID}-{name}.md  (fix demo issues, if applicable)
+  📄 demos/{FID}-{name}.sh  (fix demo issues, if applicable)
 If issues were found, you can fix them directly, then select
 "I've finished editing" to re-verify.
 ──────────────────────────────────────────────────
