@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-04 22:00 KST
+[English README](README.md) | Last updated: 2026-03-05 00:30 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -843,3 +843,28 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 1. `/speckit-diff`를 실행하여 모든 변경이 적용되었는지 확인 (판정: COMPATIBLE)
 2. `.claude/skills/speckit-diff/reference/integration-surface.md`를 새 spec-kit 버전에 맞게 업데이트
 3. 업데이트된 baseline을 spec-kit-skills 변경사항과 함께 커밋
+
+#### Claude Code 프로젝트 메모리 (`MEMORY.md`)
+
+이 프로젝트는 Claude Code의 [프로젝트 메모리](https://docs.anthropic.com/en/docs/claude-code) 기능을 사용하여 대화 세션 간 영구적인 컨텍스트를 유지합니다. 메모리 파일 위치:
+
+```
+~/.claude/projects/-Users-{username}-...-spec-kit-skills/memory/MEMORY.md
+```
+
+Claude Code는 모든 대화의 시스템 프롬프트에 `MEMORY.md`를 자동으로 로드하여, 에이전트가 매번 코드베이스를 재탐색하지 않고도 프로젝트 아키텍처, 핵심 파일 위치, 네이밍 규약, 워크플로우 규칙을 즉시 인지할 수 있게 합니다.
+
+**메모리에 포함된 정보**:
+
+| 섹션 | 목적 |
+|------|------|
+| Project Overview | 한 줄 프로젝트 설명 |
+| Key Files | 핵심 파일 경로 빠른 참조 테이블 |
+| Architecture | 세 스킬의 관계와 동작 방식 |
+| Artifact Paths | 생성 파일 위치 (CWD 기준 상대 경로) |
+| Key Conventions | Feature 네이밍, scope 규칙, HARD STOP 정책, spec-kit CLI 이름 |
+| Workflow Rules | 푸시 전 타임스탬프 업데이트, 심볼릭 링크 설정, spec-kit 연동 업데이트 프로토콜 |
+
+**왜 중요한가**: 스킬(SKILL.md)은 *에이전트가 할 수 있는 것*을 정의하고, 프로젝트 메모리는 *에이전트가 이미 알고 있는 것*을 정의합니다. 메모리 없이는 새 대화마다 제로 컨텍스트에서 시작하여 README, SKILL.md, reference 파일을 읽어야 합니다. 메모리가 있으면 아키텍처 인지 상태에서 시작하여 바로 작업에 착수할 수 있습니다.
+
+> **기여자 안내**: 새 스킬을 추가하거나, 아티펙트 경로를 변경하거나, 규약을 수정한 경우 Claude Code의 `/memory` 명령으로 `MEMORY.md`를 동기화해 주세요.

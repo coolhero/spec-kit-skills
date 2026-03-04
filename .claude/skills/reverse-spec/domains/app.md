@@ -96,7 +96,7 @@ Extract from the service layer, utilities, and domain logic:
 - Shared utilities, common type usage relationships
 - Event/message-based coupling relationships
 
-### 3-6. Test Coverage Scan (Phase 2-5 — Environment Variables)
+### 3-6. Environment Variable Extraction (Phase 2-5)
 
 Scan the codebase for environment variable usage to identify runtime configuration requirements.
 

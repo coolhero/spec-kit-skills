@@ -153,15 +153,7 @@ Identify the overall structure and tech stack of the target directory.
 - Identify exclusion targets such as `.gitignore`, `node_modules/`, `venv/`, etc.
 
 ### 1-2. Tech Stack Detection
-Read configuration files to identify the tech stack:
-
-| Detection Target | Files to Search |
-|------------------|-----------------|
-| Language/Version | `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `build.gradle`, `pom.xml`, `Gemfile`, `composer.json`, `.python-version`, `.nvmrc`, `.tool-versions` |
-| Framework | Identify frameworks from dependency lists (React, Next.js, Django, FastAPI, Spring, Express, Rails, etc.) |
-| DB/Storage | ORM configuration, migration files, connection settings |
-| Testing | Test framework configuration, test directory structure |
-| Build/Deploy | Dockerfile, docker-compose, CI/CD configuration, Makefile |
+Read configuration files to identify the tech stack. See `domains/{domain}.md` § Tech Stack Detection for the detection-target-to-file mapping.
 
 ### 1-3. Project Type Classification
 Classify the project type based on the collected information. Use the project types defined in `domains/{domain}.md` § Project Type Classification.
@@ -339,76 +331,25 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 Perform deep analysis using patterns appropriate to the tech stack identified in Phase 1. For large codebases, leverage parallel sub-agents via the Task tool.
 
 ### 2-1. Data Model Extraction
-Extract entities from appropriate sources depending on the tech stack identified in Phase 1.
-
-> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → Data Model for the technology-to-search-target mapping.
-
-For each entity, extract:
-- Entity name, fields (name, type, constraints)
-- Relationships (1:1, 1:N, M:N, target entity)
-- Validation rules
-- State transitions (enum, state machine)
-- Indexes, unique constraints
+Extract entities from appropriate sources depending on the tech stack identified in Phase 1. See `domains/{domain}.md` § Data Model Extraction for the technology-to-search-target mapping and extraction details.
 
 ### 2-2. API Endpoint Extraction
-Extract APIs from appropriate sources depending on the tech stack identified in Phase 1.
-
-> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → API Endpoints for the technology-to-search-target mapping.
-
-For each endpoint, extract:
-- HTTP method, path
-- Request parameters, body schema
-- Response schema (per status code)
-- Authentication/authorization requirements
-- Middleware/interceptors
+Extract APIs from appropriate sources depending on the tech stack identified in Phase 1. See `domains/{domain}.md` § API Endpoint Extraction for the technology-to-search-target mapping and extraction details.
 
 ### 2-3. Business Logic Extraction
-
-> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → Business Logic for technology-specific search patterns.
-
-Extract from the service layer, utilities, and domain logic:
-- **Business Rules**: Conditional logic, policy enforcement, calculation logic
-- **Validation**: Input validation, state transition conditions, business constraints
-- **Workflows**: Multi-step processes, state machines, event chains
-- **External Integrations**: External API calls, message queues, event publishing/subscribing
+Extract business rules, validation, workflows, and external integrations from the service layer and domain logic. See `domains/{domain}.md` § Business Logic Extraction for extraction categories.
 
 ### 2-4. Inter-Module Dependency Mapping
-- Analyze import/require statements to identify dependencies between modules
-- Service call relationships (dependency injection, direct calls)
-- Shared utilities, common type usage relationships
-- Event/message-based coupling relationships
+Analyze import/require statements, service call relationships, shared utilities, and event-based coupling. See `domains/{domain}.md` § Inter-Module Dependency Mapping for details.
 
 ### 2-5. Environment Variable Extraction
-Scan the codebase for environment variable usage to identify runtime configuration requirements.
-
-> **Extraction targets**: See `domains/{domain}.md` § Analysis Axes → Environment Variables for the technology-to-search-pattern mapping.
-
-For each discovered environment variable, extract:
-- **Variable name** (e.g., `DATABASE_URL`, `OPENAI_API_KEY`)
-- **Category**: `secret` (API keys, passwords, tokens) | `config` (URLs, ports, modes) | `feature-flag` (toggle switches)
-- **Required/Optional**: Whether the app fails without it
-- **Source file(s)**: Where it is referenced
-- **Feature association**: Determined during Phase 4 (pre-context generation), based on file→Feature mapping from Phase 3
-- **Example value**: From `.env.example` if available (NEVER extract actual values from `.env`)
+Scan the codebase for environment variable usage to identify runtime configuration requirements. See `domains/{domain}.md` § Environment Variables for the technology-to-search-pattern mapping and per-variable extraction details.
 
 ⚠️ NEVER read or record actual secret values from `.env` files. Only read `.env.example` or detect variable names from code patterns.
 
 ### 2-6. Source Behavior Inventory
 
-For each source file identified in Phase 1, extract a **function-level inventory** of exported/public behaviors. This captures discrete units of functionality that structural extraction (entities, APIs) may miss.
-
-**What to extract**:
-- Exported functions, public methods, request handlers, event listeners, middleware, CLI commands
-- For each: function/method name, one-line behavior description, priority classification
-
-**Priority classification**:
-- **P1 (core)**: Behaviors directly tied to the Feature's primary purpose. Must be implemented
-- **P2 (important)**: Supporting behaviors that complete the Feature's functionality. Should be implemented
-- **P3 (nice-to-have)**: Utility functions, convenience methods, edge-case handlers. Can be deferred
-
-**How to extract efficiently**:
-
-> **Extraction patterns**: See `domains/{domain}.md` § Analysis Axes → Source Behaviors for the technology-specific scan patterns.
+For each source file identified in Phase 1, extract a **function-level inventory** of exported/public behaviors (P1 core / P2 important / P3 nice-to-have). This captures discrete units of functionality that structural extraction (entities, APIs) may miss. See `domains/{domain}.md` § Source Behavior Inventory for extraction targets, priority classification, and scan patterns.
 
 - Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
 - Skip internal/private helpers that are implementation details, not behaviors
@@ -419,27 +360,7 @@ This inventory feeds into each Feature's `pre-context.md` → "Source Behavior I
 
 > Skip this step entirely for backend-only, library, or CLI projects.
 
-Third-party UI libraries (editors, charts, form builders, calendars, etc.) provide user-facing capabilities through **configuration and plugins**, not through exported functions. These capabilities are invisible to function-level analysis but represent significant functionality that must be reproduced.
-
-**Step 1 — Identify UI library dependencies**:
-Scan `package.json` (or equivalent) for UI component libraries.
-
-> **Library categories**: See `domains/{domain}.md` § Analysis Axes → UI Components for the category-to-library mapping.
-
-**Step 2 — Extract activated features per library**:
-For each identified UI library, read the initialization/configuration code to extract:
-- **Activated features**: Toolbar items, plugins, modes, options enabled in the config
-- **Custom extensions**: Custom plugins, overrides, hooks built on top of the library
-- **User interaction patterns**: Keyboard shortcuts, drag-drop behavior, paste handling, mode toggles
-
-**Step 3 — Record as UI Component Features**:
-For each component, produce a feature inventory:
-
-| Component | Library | Feature | Category |
-|-----------|---------|---------|----------|
-| `NoteEditor` | `@toast-ui/editor 3.2` | Bold/Italic/Strikethrough toolbar | text-formatting |
-| `NoteEditor` | `@toast-ui/editor 3.2` | Markdown ↔ WYSIWYG mode toggle | editing-mode |
-| `NoteEditor` | custom plugin | Wiki-link autolink `[[title]]` | navigation |
+Third-party UI libraries provide user-facing capabilities through **configuration and plugins**, not through exported functions — invisible to function-level analysis but significant functionality that must be reproduced. See `domains/{domain}.md` § UI Component Feature Extraction for the 3-step process (identify → extract → record) and library category mapping.
 
 This inventory feeds into each Feature's `pre-context.md` → "UI Component Features" section (Phase 4-2) and is compared during `/smart-sdd parity` → UI Feature Parity.
 
@@ -579,20 +500,7 @@ This ensures:
 
 First, identify the project domain: understand what kind of system the project is (e-commerce, SaaS, CMS, education platform, financial service, etc.) and determine which features are foundational within that domain.
 
-Evaluate each Feature comprehensively across the analysis axes defined in `domains/{domain}.md` § Tier Classification Axes.
-
-Assign each Feature to a Tier based on the comprehensive evaluation results:
-
-| Tier | Meaning | Criteria |
-|------|---------|----------|
-| **Tier 1 (Essential)** | Foundation of the project. The system cannot function without it | Must be included in redevelopment |
-| **Tier 2 (Recommended)** | Features that complete the core user experience | System works without them but core value is significantly diminished |
-| **Tier 3 (Optional)** | Supplementary features, admin tools, convenience features | Can be added in later phases |
-
-For each Feature, a **specific rationale** for the assigned Tier must be provided.
-Examples:
-- "Auth recommended as Tier 1: 7 Features directly depend on it, owns the User entity, used as middleware for all APIs"
-- "Notification recommended as Tier 3: Independent module with no reverse dependencies, loosely coupled via event subscription"
+Evaluate each Feature comprehensively across the analysis axes and assign to Tier 1 (Essential) / Tier 2 (Recommended) / Tier 3 (Optional). See `domains/{domain}.md` § Tier Classification Axes for the evaluation criteria and Tier definitions. For each Feature, a **specific rationale** for the assigned Tier must be provided.
 
 Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. **If response is empty → re-ask.** If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
 

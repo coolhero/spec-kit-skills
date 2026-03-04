@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 22:00 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 00:30 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -849,3 +849,28 @@ After applying changes for a new spec-kit version, **update the baseline**:
 1. Run `/speckit-diff` to verify all changes are applied (verdict should be COMPATIBLE)
 2. Update `.claude/skills/speckit-diff/reference/integration-surface.md` to reflect the new spec-kit version
 3. Commit the updated baseline together with the spec-kit-skills changes
+
+#### Claude Code Project Memory (`MEMORY.md`)
+
+This project uses Claude Code's [project memory](https://docs.anthropic.com/en/docs/claude-code) to maintain persistent context across conversation sessions. The memory file lives at:
+
+```
+~/.claude/projects/-Users-{username}-...-spec-kit-skills/memory/MEMORY.md
+```
+
+Claude Code automatically loads `MEMORY.md` into every conversation's system prompt, giving the agent immediate awareness of project architecture, key file locations, naming conventions, and workflow rules — without needing to re-explore the codebase each time.
+
+**What's in the memory**:
+
+| Section | Purpose |
+|---------|---------|
+| Project Overview | One-line project description |
+| Key Files | Quick-reference table of critical file paths |
+| Architecture | How the three skills relate and operate |
+| Artifact Paths | Where generated files live (CWD-relative) |
+| Key Conventions | Feature naming, scope rules, HARD STOP policy, spec-kit CLI names |
+| Workflow Rules | Timestamp update before push, symlink setup, spec-kit integration update protocol |
+
+**Why this matters**: Skills (SKILL.md) define *what the agent can do*; project memory defines *what the agent already knows*. Without memory, every new conversation starts from zero context — the agent would need to read README, SKILL.md, and reference files before doing any work. With memory, it starts with architectural awareness and can jump directly into tasks.
+
+> **For contributors**: If you add a new skill, change artifact paths, or modify conventions, update `MEMORY.md` via Claude Code's `/memory` command to keep it in sync.
