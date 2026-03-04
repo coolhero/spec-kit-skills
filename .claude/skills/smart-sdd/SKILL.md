@@ -524,11 +524,38 @@ Review the above content. You can:
   - Edit the source files directly before proceeding
 ```
 
-**HARD STOP**: After displaying the context, call AskUserQuestion with options "Approve as-is" and "Request modifications". STOP and WAIT. Empty/blank response = NOT approval — re-ask. If changes requested, apply and re-ask.
+**HARD STOP**: You MUST follow this exact procedure. No exceptions.
+
+```
+PROCEDURE CheckpointApproval:
+  LOOP:
+    response = AskUserQuestion(
+      options: ["Approve as-is", "Request modifications"]
+    )
+
+    IF response is empty, blank, or has no meaningful selection:
+      Display "⚠️ No approval received. Please review the context above and select one option."
+      CONTINUE LOOP  ← ask again, do NOT proceed
+
+    IF response == "Approve as-is" OR user typed "yes"/"approved"/"lgtm":
+      BREAK LOOP → proceed to Step 3 (Execute+Review)
+
+    IF response == "Request modifications":
+      Ask user what to change
+      Apply modifications to the context
+      Re-display the updated context summary
+      CONTINUE LOOP  ← ask for approval again
+
+    OTHERWISE (unrecognized response):
+      Display "Please select: Approve as-is / Request modifications"
+      CONTINUE LOOP
+```
+
+**⚠️ CRITICAL**: After AskUserQuestion returns, you MUST check the response BEFORE doing anything else. If the response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed to Execute.
 
 **Mode overrides**:
-- `--auto`: Skip the HARD STOP. Content is still displayed for transparency but execution proceeds immediately.
-- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Do you approve? yes/no") and WAIT for text response. Checkpoints are NOT auto-skipped — only `--auto` does that.
+- `--auto`: Skip the LOOP entirely. Content is still displayed for transparency but execution proceeds immediately.
+- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Approve as-is / Request modifications?") and WAIT for text response. Checkpoints are NOT auto-skipped — only `--auto` does that.
 
 ### 3. Execute — spec-kit Command Execution
 
@@ -650,6 +677,8 @@ PROCEDURE ReviewApproval:
       CONTINUE LOOP
 ```
 
+**⚠️ CRITICAL**: After AskUserQuestion returns, you MUST check the response BEFORE doing anything else. If the response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed to Update.
+
 **Mode overrides**:
 - `--auto`: Skip the LOOP entirely (Step 3b content is still displayed for transparency).
 - `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Approve / Request modifications / I've finished editing?") and WAIT for text response.
@@ -759,7 +788,7 @@ Read `BASE_PATH/constitution-seed.md`:
 
 #### Phase 0-2. Checkpoint (HARD STOP)
 
-Display the constitution-seed content per [context-injection-rules.md §1 Checkpoint Display Content](reference/context-injection-rules.md#checkpoint-display-content). Provide the user an opportunity to revise/supplement. MUST use AskUserQuestion and WAIT for approval before proceeding.
+Display the constitution-seed content per [context-injection-rules.md §1 Checkpoint Display Content](reference/context-injection-rules.md#checkpoint-display-content). Then follow **PROCEDURE CheckpointApproval** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
 
 #### Phase 0-3. Execute + Review (HARD STOP)
 
@@ -770,8 +799,7 @@ Display the constitution-seed content per [context-injection-rules.md §1 Checkp
 3. **In the SAME response** — read `.specify/memory/constitution.md` — the **entire file**
 4. Display the Review content per [context-injection-rules.md §1 Review Display Content](reference/context-injection-rules.md#review-display-content)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
-6. Call AskUserQuestion with options: "Approve", "Request modifications", "I've finished editing"
-7. WAIT for explicit approval. **Empty/blank response = NOT approval — re-ask.**
+6. Follow **PROCEDURE ReviewApproval** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
 
 Constitution is the most critical artifact — it governs all subsequent Features.
 
