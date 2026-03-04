@@ -38,3 +38,14 @@ Verification steps to execute during the `verify` command.
 | **Required** | Whether failure blocks the pipeline (`BLOCKING` or `optional`) |
 | **Detection** | How to find/run the relevant tool |
 | **Description** | What this step checks |
+
+### 4. Adoption-Specific Behavior
+
+Behavior differences when wrapping existing code with SDD docs (adoption mode).
+
+| Field | Description |
+|-------|-------------|
+| **Verify treatment** | How test/build/lint failures are treated in adoption (non-blocking vs blocking) |
+| **Demo pattern** | How to demo existing code vs newly built code |
+| **Injection framing** | How spec-kit command prompts differ: "extract what exists" vs "define what to build" |
+| **Feature status** | Post-adoption status value and its implications for incremental mode |

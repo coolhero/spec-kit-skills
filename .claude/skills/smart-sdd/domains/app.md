@@ -72,3 +72,39 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 - User can select "Acknowledge limited verification" at the verify Checkpoint
 - Status recorded as `limited` instead of `success`
 - Merge step accepts `limited` status with warning
+
+---
+
+## 4. Adoption-Specific Behavior
+
+Behavior differences when Origin = `adoption` (wrapping existing code with SDD docs, not rewriting).
+
+### Verify Treatment in Adoption
+
+| Check | Rebuild/Greenfield | Adoption |
+|-------|-------------------|----------|
+| **Test failure** | ❌ BLOCKS merge | ⚠️ Record as "pre-existing issue" — non-blocking |
+| **No tests** | ❌ BLOCKS merge | Record as "no tests — baseline" — recommend adding via incremental |
+| **Build failure** | ❌ BLOCKS merge | Record only — adoption documents code as-is |
+| **Lint failure** | ❌ BLOCKS merge | Record only — adoption documents code as-is |
+| **Demo-Ready** | Required (if constitution VI active) | Optional — existing code may not have demo infrastructure |
+
+### Demo Pattern in Adoption
+
+- If existing code has a runnable server/app: use existing startup command as demo basis
+- If existing code is a library with no UI: skip Feature Demo, defer to Integration Demo
+- Demo scripts document how to run the **existing** code, not new code
+
+### Injection Framing
+
+| Step | Rebuild/Greenfield | Adoption |
+|------|-------------------|----------|
+| **specify** | "Define what to build" | "Extract what exists" — document current behavior as FR/SC |
+| **plan** | "Design new architecture" | "Document existing architecture as-is" |
+| **verify** | Test new code — failure blocks | Run existing tests — baseline only |
+
+### Feature Status
+
+Adopted Features use `status: adopted` (not `completed`). This signals to incremental mode:
+- "This Feature has code but may have legacy patterns"
+- Incremental Features that depend on adopted Features should respect existing patterns while applying constitution principles gradually

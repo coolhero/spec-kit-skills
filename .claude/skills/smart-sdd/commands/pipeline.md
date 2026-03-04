@@ -247,7 +247,7 @@ Before Phase 0, initialize the state and validate the source path.
 If `BASE_PATH/sdd-state.md` does not exist, create it:
 1. Read `BASE_PATH/roadmap.md` to extract the Feature list and Tiers
 2. Generate `sdd-state.md` following the [state-schema.md](reference/state-schema.md) format
-3. Set Origin based on the project type (`greenfield` or `reverse-spec`)
+3. Set Origin based on the project type (`greenfield` or `rebuild`)
 4. Set Source Path (see state-schema.md for rules per mode)
 
 **Step 2 — Source Path verification (HARD STOP)**:

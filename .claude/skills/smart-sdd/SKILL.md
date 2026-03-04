@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]"
+argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|specify|plan|tasks|analyze|implement|verify|restructure|expand|parity|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
@@ -33,6 +33,7 @@ Wraps spec-kit commands with cross-Feature context injection and Global Evolutio
 - **Greenfield**: New project from scratch via `/smart-sdd init`
 - **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
 - **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`
+- **Brownfield (adoption)**: Wrap existing code with SDD documentation via `/smart-sdd adopt`
 
 Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Context Assembly → Pre-Execution Checkpoint → spec-kit Execution + Artifact Review → Global Evolution Update**.
 
@@ -47,6 +48,11 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 
 # Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
+
+# Adoption — Wrap existing code with SDD documentation (after reverse-spec)
+/smart-sdd adopt                         # Adopt existing code with SDD docs
+/smart-sdd adopt --auto                  # Without stopping for confirmation
+/smart-sdd adopt --from ./path           # Read artifacts from specified path
 
 # Pipeline — Run the full SDD pipeline (after init, add, or reverse-spec)
 /smart-sdd pipeline                      # With per-step confirmation
@@ -125,7 +131,7 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | status | parity)
+  First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | status | parity)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
   --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>    → Path to PRD document (only for init command)
@@ -259,6 +265,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 |---------|---------------|-------------|
 | `init` | `commands/init.md` | Greenfield project setup |
 | `add` | `commands/add.md` | Add Features to existing project |
+| `adopt` | `commands/adopt.md` | SDD adoption pipeline — wrap existing code with SDD docs |
 | `pipeline` | `commands/pipeline.md` | Full SDD pipeline execution |
 | `constitution`, `specify`, `plan`, `tasks`, `analyze`, `implement`, `verify` | `commands/pipeline.md` | Step mode — execute a specific pipeline step |
 | `restructure` | `commands/restructure.md` | Modify Feature structure |
@@ -284,7 +291,7 @@ Output format varies by scope:
 ```
 📊 Smart-SDD Progress Status
 
-Origin: [greenfield | reverse-spec]
+Origin: [greenfield | rebuild | adoption]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
 Feature         | specify | plan | tasks | analyze | implement | verify | merge | Status
@@ -300,7 +307,7 @@ Active: 1/3 completed, 1/3 in progress
 ```
 📊 Smart-SDD Progress Status
 
-Origin: [greenfield | reverse-spec]
+Origin: [greenfield | rebuild | adoption]
 Scope: core | Active Tiers: [T1 | T1,T2 | T1,T2,T3]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
@@ -372,6 +379,6 @@ When creating `specs/history.md` for the first time, use this header:
 ## References
 
 - Shared injection patterns: [context-injection-rules.md](reference/context-injection-rules.md)
-- Per-command injection details: [injection/{command}.md](reference/injection/) (constitution, specify, plan, tasks, analyze, implement, verify, parity)
+- Per-command injection details: [injection/{command}.md](reference/injection/) (constitution, specify, plan, tasks, analyze, implement, verify, parity, adopt-specify, adopt-plan, adopt-verify)
 - State file schema: [state-schema.md](reference/state-schema.md)
 - Git branch management: [branch-management.md](reference/branch-management.md)

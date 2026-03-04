@@ -148,6 +148,30 @@ Features are grouped into release groups based on dependency order. A preceding 
 
 ---
 
+## Demo Groups
+
+> Demo Groups define user-facing scenarios that span multiple Features. Each group represents an end-to-end user journey that can be demonstrated when all constituent Features are verified.
+> Defined during `/reverse-spec` Phase 3-1c based on Feature dependencies and business scenarios.
+
+### DG-01: [Scenario Name]
+- **Scenario**: [End-to-end user journey description — e.g., "User browses products, adds to cart, and completes purchase"]
+- **Features**: F001-xxx, F002-yyy, F003-zzz
+- **SBI Coverage**: B001–B010, B015–B020
+- **Integration Demo**: When all Features in this group reach `completed` or `adopted` status, an Integration Demo is triggered to verify the end-to-end scenario.
+
+### DG-02: [Scenario Name]
+- **Scenario**: [End-to-end user journey description]
+- **Features**: F004-xxx, F005-yyy
+- **SBI Coverage**: B011–B014, B021–B025
+- **Integration Demo**: [Same trigger rule]
+
+> **Notes**:
+> - Each Feature should belong to at least one Demo Group (except infrastructure/cross-cutting Features).
+> - SBI Coverage lists the B### IDs from the constituent Features' Source Behavior Inventories.
+> - Demo Group progress is tracked in `sdd-state.md` → Demo Group Progress section.
+
+---
+
 ## Cross-Feature Entity Dependencies
 
 Maps entities shared across Features. Used as a cross-reference when writing data-model.md during spec-kit /speckit.plan.

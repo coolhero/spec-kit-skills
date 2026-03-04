@@ -45,15 +45,16 @@
 > Extracted during `/reverse-spec` Phase 2 to ensure no functionality is lost during rebuild.
 > Each entry represents a discrete behavior that should map to one or more FR-### in spec.md.
 
-| Source File | Function/Method | Behavior Description | Priority |
-|-------------|----------------|---------------------|----------|
-| `[relative/path/service.ts]` | `registerUser()` | [Creates new user account with email verification] | P1 |
-| `[relative/path/service.ts]` | `loginUser()` | [Authenticates user with email/password, returns JWT] | P1 |
-| `[relative/path/middleware.ts]` | `requireAuth()` | [Validates JWT token, attaches user to request] | P1 |
-| `[relative/path/service.ts]` | `resetPassword()` | [Sends password reset email with time-limited token] | P2 |
+| ID | Source File | Function/Method | Behavior Description | Priority |
+|----|-------------|----------------|---------------------|----------|
+| B001 | `[relative/path/service.ts]` | `registerUser()` | [Creates new user account with email verification] | P1 |
+| B002 | `[relative/path/service.ts]` | `loginUser()` | [Authenticates user with email/password, returns JWT] | P1 |
+| B003 | `[relative/path/middleware.ts]` | `requireAuth()` | [Validates JWT token, attaches user to request] | P1 |
+| B004 | `[relative/path/service.ts]` | `resetPassword()` | [Sends password reset email with time-limited token] | P2 |
 
+> **ID**: Globally unique SBI identifier (B001, B002, ...) assigned sequentially across all Features during `/reverse-spec` Phase 4-2. IDs are unique project-wide — if F001 has B001–B010, F002 starts at B011.
 > **Priority**: P1 = core behavior (must implement), P2 = important (should implement), P3 = nice-to-have (can defer).
-> **How to use**: During `/speckit.specify`, ensure each P1/P2 behavior maps to at least one FR-###. During `/smart-sdd verify`, check implementation coverage against this inventory.
+> **How to use**: During `/speckit.specify`, ensure each P1/P2 behavior maps to at least one FR-### with `[source: B###]` tag. During `/smart-sdd verify`, check implementation coverage against this inventory. SBI coverage is tracked in `sdd-state.md` → Source Behavior Coverage section.
 > If this Feature has no source files (greenfield/add), write "N/A — no source to inventory".
 
 ### UI Component Features

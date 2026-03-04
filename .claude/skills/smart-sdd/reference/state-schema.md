@@ -12,7 +12,7 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 # SDD State
 
 **Project**: [Project name]
-**Origin**: [greenfield | reverse-spec]
+**Origin**: [greenfield | rebuild | adoption]
 **Domain**: [app | data-science] ← domain profile used; default "app"
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
 **Scope**: [core | full]
@@ -65,7 +65,8 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 ### Feature Status Values
 - `pending` : Not yet started (all steps blank)
 - `in_progress` : At least one step has started
-- `completed` : All steps (including merge) are ✅
+- `completed` : All steps (including merge) are ✅ — code was built from SDD specs (greenfield/rebuild)
+- `adopted` : All adopt steps (specify → plan → analyze → verify → merge) are ✅ — existing code wrapped with SDD docs (adoption only). Distinct from `completed`: signals legacy code that may have pre-existing issues
 - `deferred` : Outside current Active Tiers (core scope only)
 - `restructured` : Feature was modified via `/smart-sdd restructure` — has 🔀 steps that need re-execution
 
@@ -133,11 +134,68 @@ Feature restructuring history. Recorded when `/smart-sdd restructure` is execute
 
 ## Parity Check Log
 
-Parity check execution history. Recorded when `/smart-sdd parity` is executed. Only applicable to brownfield rebuild projects (Origin: `reverse-spec`).
+Parity check execution history. Recorded when `/smart-sdd parity` is executed. Only applicable to brownfield rebuild projects (Origin: `rebuild`).
 
 | Date/Time | Source Path | Structural Parity | Logic Parity | Gaps Found | New Features | Exclusions | Deferred | Status |
 |-----------|------------|-------------------|-------------|------------|-------------|------------|----------|--------|
 | 2024-02-01T10:00:00 | /Users/dev/old-project | 95.6% | 90.5% | 8 | 2 | 3 | 1 | completed |
+
+---
+
+## Source Behavior Coverage
+
+Tracks mapping from Source Behavior Inventory (SBI) entries to Functional Requirements. Only populated for projects with Origin `rebuild` or `adoption` (greenfield has no SBI).
+
+| SBI | Priority | FR | Feature | Status |
+|-----|----------|----|---------|--------|
+| B001 | P1 | FR-001 | F001-auth | ✅ verified |
+| B002 | P2 | FR-002 | F001-auth | ✅ verified |
+| B003 | P2 | — | — | ❌ unmapped |
+| B004 | P1 | FR-005 | F002-product | 🔄 in_progress |
+| B005 | P3 | — | — | 🔒 deferred |
+
+**Summary:**
+P1: 15/15 (100%) ✅
+P2: 22/28 (79%) ⚠️
+P3: 5/12 (42%)
+Overall: 42/55 (76%)
+
+### SBI Status Values
+- `✅ verified` : Mapped to FR-###, Feature verify passed
+- `🔄 in_progress` : Mapped to FR-###, Feature not yet verified
+- `❌ unmapped` : No FR-### mapping exists yet
+- `🔒 deferred` : Outside current Active Tiers (core scope only)
+
+### Coverage Policy
+- **P1 behaviors: 100% coverage mandatory** regardless of scope mode
+- P2/P3 not in Active Tiers → `deferred` status
+- After Core completion, deferred items become incremental candidates
+
+---
+
+## Demo Group Progress
+
+Tracks demo groups defined in `roadmap.md`. Each group represents a user scenario that spans multiple Features. Only populated when Demo Groups exist in the roadmap.
+
+| Group | Scenario | Features | Completed | Status | Last Demo |
+|-------|----------|----------|-----------|--------|-----------|
+| DG-01 | User Purchase Flow | F001,F002,F003,F005 | 3/4 | ⏳ F005 pending | — |
+| DG-02 | Admin Dashboard | F001,F004,F006 | 1/3 | ⏳ F004,F006 pending | 2024-01-20 |
+
+### Demo Group Status Values
+- `✅ All verified` : All Features in group verified; Integration Demo completed
+- `⏳ [Feature list] pending` : Waiting for listed Features to complete verify
+- `🔄 re-run needed ([reason])` : Integration Demo invalidated (e.g., new Feature added to group)
+
+### Integration Demo Trigger
+When the last pending Feature in a group completes verify, display HARD STOP:
+"All Features in [Group] verified. Run Integration Demo for [Scenario]?"
+
+### Integration Demo Invalidation
+When a Feature is added to an existing demo group (via incremental `add`):
+- Previous Integration Demo result is invalidated
+- Status changes to `🔄 re-run needed (F00N added)`
+- Re-triggered when all Features (including new one) are verified
 
 ---
 
@@ -164,14 +222,16 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 5. Set Domain based on the `--domain` argument (default: `app`)
 6. Set Origin based on how artifacts were generated:
    - `greenfield` — if initialized by `/smart-sdd init`
-   - `reverse-spec` — if initialized from `/reverse-spec` artifacts
+   - `rebuild` — if initialized from `/reverse-spec` artifacts for rebuild workflow (`/smart-sdd pipeline`)
+   - `adoption` — if initialized from `/reverse-spec` artifacts for adoption workflow (`/smart-sdd adopt`)
    - Origin does not change when Features are added later via `/smart-sdd add`
 7. Set Source Path based on the project mode:
    - `greenfield` → `N/A` (no existing source code)
-   - `reverse-spec` → Extract from the `**Source**:` field in `BASE_PATH/roadmap.md` (the original target-directory path used during `/reverse-spec`)
+   - `rebuild` / `adoption` → Extract from the `**Source**:` field in `BASE_PATH/roadmap.md` (the original target-directory path used during `/reverse-spec`)
    - `add` (incremental) → `.` (source is the current working directory)
 8. Set Scope:
-   - `reverse-spec` → Read from `**Strategy**: Scope: [core|full]` in `BASE_PATH/roadmap.md`
+   - `rebuild` → Read from `**Strategy**: Scope: [core|full]` in `BASE_PATH/roadmap.md`
+   - `adoption` → Always `full` (must document everything)
    - `greenfield` (init) → Always `full`
    - If roadmap.md has no Scope info (legacy projects) → Default to `full`
 9. Set Active Tiers based on Scope:
@@ -205,6 +265,19 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - Change the Feature Progress Status to `completed`
 - Mark the Feature as `✅` in the Merged column of the Feature Mapping table
 - Add update history to the Global Evolution Log
+
+### When a Feature is Adopted (adoption pipeline — all adopt steps including merge ✅)
+- Change the Feature Progress Status to `adopted` (NOT `completed`)
+- Mark the Feature as `✅` in the Merged column of the Feature Mapping table
+- Add update history to the Global Evolution Log
+- Note: `adopted` Features have no `tasks` or `implement` steps — these columns show `⏭️` (skipped)
+
+### When Verify Completes in Adoption Mode
+- Test failure → record as "pre-existing issue" in Notes (NOT a blocker)
+- No tests present → record as "no tests — baseline" in Notes (NOT a blocker)
+- Build/lint failure → record only; adoption's purpose is documentation, not code changes
+- Set verify step icon to `⚠️` if any pre-existing issues found, `✅` otherwise
+- Notes format: `Tests: [result]; Build: [result]; Pre-existing: [count] issues`
 
 ### When a Step is Skipped (e.g., analyze has no CRITICAL issues)
 - Change the corresponding cell to ⏭️
@@ -255,6 +328,18 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
   - Change Feature Status to `restructured`
   - Record in Restructure Log: "parity-driven re-specification for F00N-name"
 - Update `Last Updated`
+
+### When SBI Coverage Changes (after specify or verify — rebuild/adoption only)
+- After `specify` completes: scan spec.md for `[source: B###]` tags → update Source Behavior Coverage table (SBI → FR → Feature mapping, Status → `🔄 in_progress`)
+- After `verify` completes: update matched SBI entries to `✅ verified`
+- Recalculate P1/P2/P3 summary percentages
+- If P1 coverage < 100% after all Active Tier Features are verified: display warning
+
+### When Demo Group Progress Changes (after verify)
+- After `verify` completes: check if the verified Feature is the last pending Feature in any demo group
+- If yes → update Demo Group Status to `✅ All verified` and display Integration Demo trigger (HARD STOP)
+- If no → update completed count (e.g., `3/4`)
+- When a Feature is added to an existing group via `add`: change group Status to `🔄 re-run needed (F00N added)`
 
 ### When a Feature is Restructured (via /smart-sdd restructure)
 - Change affected step cells to 🔀 (all steps from the first affected step onward)

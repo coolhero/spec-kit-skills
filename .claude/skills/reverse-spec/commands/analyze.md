@@ -421,7 +421,47 @@ Use AskUserQuestion to ask the user:
 If the user selects "Other", they can describe a custom granularity or request specific merges/splits of the proposed Features.
 
 **Step 4 — Apply the selected granularity**:
-Reconstruct the Feature list according to the selected level. If Coarse is selected, merge related Features. If Fine is selected, split Features into smaller units. Then proceed to 3-2 with the finalized Feature list.
+Reconstruct the Feature list according to the selected level. If Coarse is selected, merge related Features. If Fine is selected, split Features into smaller units. Then proceed to 3-1c with the finalized Feature list.
+
+### 3-1c. Demo Group Definition (HARD STOP)
+
+After the Feature list is finalized (3-1b Step 4), define Demo Groups — end-to-end user scenarios that span multiple Features and serve as integration verification milestones.
+
+**Step 1 — Analyze and propose Demo Groups**:
+Based on the finalized Feature list, propose 2–4 Demo Groups by analyzing:
+- Feature dependency chains (Features that form a complete user flow)
+- Business scenario boundaries (distinct user journeys)
+- SBI entries from Phase 2 that span multiple Features
+
+For each proposed group:
+```
+── DG-01: [Scenario Name] ──────────────────
+Scenario: [End-to-end user journey description]
+Features: F001-xxx, F002-yyy, F003-zzz
+Related SBI: [Summary of behaviors this scenario covers]
+```
+
+**Step 2 — User approval**:
+Present the proposed Demo Groups via AskUserQuestion:
+- "Accept proposed Demo Groups"
+- "Modify grouping" (user can reassign Features between groups)
+- "Add more groups"
+- "Skip Demo Groups" (not recommended — disables Integration Demo triggers)
+
+**You MUST STOP and WAIT for the user's response. Do NOT proceed until the user approves Demo Groups. If response is empty → re-ask.**
+
+**Step 3 — Record decision**:
+After approval, **append** to `specs/history.md` under the current session's Architecture Decisions table:
+
+| Decision | Choice | Details |
+|----------|--------|---------|
+| Demo Groups | [N] groups defined | [Group names: DG-01 Scenario, DG-02 Scenario, ...] |
+
+The Demo Groups will be written to `roadmap.md` in Phase 4-1 and tracked in `sdd-state.md` → Demo Group Progress section.
+
+> **Note**: Infrastructure or cross-cutting Features (e.g., shared utilities, configuration) may not belong to any Demo Group. This is acceptable — they support other Features but don't represent user-facing scenarios.
+
+Then proceed to 3-2.
 
 ### 3-2. Dependency Graph Construction and Feature ID Assignment
 Derive inter-Feature dependencies:
@@ -499,7 +539,7 @@ Generate hierarchical deliverables in `specs/reverse-spec/` (in CWD — see Outp
 Generate the following files in order. Each file follows the template structure found in this skill's `templates/` directory.
 
 1. **`specs/reverse-spec/roadmap.md`** — See [roadmap-template.md](templates/roadmap-template.md)
-   - Project Overview, Rebuild Strategy, Feature Catalog (by Tier for Core scope / by dependency order for Full scope), Dependency Graph, Release Groups, Cross-Feature Entity Dependencies, Cross-Feature API Dependencies
+   - Project Overview, Rebuild Strategy, Feature Catalog (by Tier for Core scope / by dependency order for Full scope), Dependency Graph, Release Groups, **Demo Groups** (from Phase 3-1c), Cross-Feature Entity Dependencies, Cross-Feature API Dependencies
 
 2. **`specs/reverse-spec/entity-registry.md`** — See [entity-registry-template.md](templates/entity-registry-template.md)
    - Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping
@@ -544,9 +584,26 @@ For example, if the target directory is `/Users/dev/legacy-app`:
 - ✅ `src/main/index.ts`
 - ❌ `/Users/dev/legacy-app/src/main/index.ts`
 
+#### B### ID Assignment Rules
+
+When populating the Source Behavior Inventory (SBI) table in each pre-context.md, assign globally unique **B### IDs** to every SBI entry:
+
+1. **Sequential numbering**: B001, B002, B003, ... across the entire project (not per-Feature)
+2. **Feature order**: Assign IDs following Feature ID order — F001's SBI entries get the lowest B### numbers, then F002's entries continue from where F001 left off, and so on
+3. **Within a Feature**: Order entries by Priority (P1 first, then P2, then P3), then alphabetically by function name within the same priority
+4. **Uniqueness**: Each B### ID is unique project-wide. If F001 has entries B001–B010, F002 starts at B011
+5. **Demo Group SBI**: After assigning all B### IDs, update each Demo Group definition in roadmap.md with the SBI Coverage field listing the B### ranges from its constituent Features
+
+Example:
+```
+F001-auth (10 entries): B001–B010
+F002-product (8 entries): B011–B018
+F003-order (12 entries): B019–B030
+```
+
 Contents to include in each pre-context.md:
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
-- **Source Behavior Inventory**: Function-level inventory from Phase 2-6, filtered to this Feature's associated files. Each entry: source file, function/method name, behavior description, priority (P1/P2/P3). This ensures no source-level functionality is lost during the extraction pipeline
+- **Source Behavior Inventory**: Function-level inventory from Phase 2-6, filtered to this Feature's associated files. Each entry: **B### ID**, source file, function/method name, behavior description, priority (P1/P2/P3). This ensures no source-level functionality is lost during the extraction pipeline
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
@@ -685,8 +742,12 @@ Generation complete:
 - ...
 - .env.example                                    (if environment variables were detected)
 
+SBI: [N] source behaviors tracked (B001–B[N]) across [M] Features
+Demo Groups: [K] groups defined — Integration Demos trigger when all Features in a group are verified
+
 Next steps:
-  /smart-sdd pipeline       — Run the full SDD pipeline (recommended)
+  /smart-sdd pipeline       — Run the full SDD pipeline for rebuild (recommended)
+  /smart-sdd adopt          — Run the adoption pipeline to wrap existing code with SDD docs
   /smart-sdd pipeline --auto — Run without stopping for per-step confirmation
   /smart-sdd parity          — Check implementation parity against original source (after pipeline completes)
 
@@ -695,4 +756,5 @@ smart-sdd will automatically:
   2. Progress Features in Release Group order (specify → plan → tasks → analyze → implement → verify → merge)
   3. Inject cross-Feature context from pre-context.md, business-logic-map.md, and registries at each step
   4. Update entity-registry.md and api-registry.md as Features are completed
+  5. Track SBI coverage (B### → FR-### mapping) and Demo Group progress in sdd-state.md
 ```

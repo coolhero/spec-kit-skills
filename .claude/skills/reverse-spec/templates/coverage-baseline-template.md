@@ -12,6 +12,7 @@
 | Metric | Source Total | Mapped to Features | Coverage | Notes |
 |--------|------------|-------------------|----------|-------|
 | Source files | [N] | [M] | [%] | Excludes vendor/build/test directories |
+| Source behaviors (SBI) | [N] | [M] | [%] | B### entries across all pre-context.md SBI tables |
 | API endpoints | [N] | [M] | [%] | Parsed from route definitions vs api-registry.md entries |
 | DB models/entities | [N] | [M] | [%] | Parsed from model files vs entity-registry.md entries |
 | Test files | [N] | [M] | [%] | Total test files vs mapped to Features |
