@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-04 17:16 KST
+[English README](README.md) | Last updated: 2026-03-04 17:36 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -692,6 +692,7 @@ parity 명령어는 5개 페이즈로 실행됩니다:
 
 | 대상 | 경로 | 비고 |
 |------|------|------|
+| 결정 이력 | `specs/history.md` | 자동 생성. `/reverse-spec`과 `/smart-sdd` 공유 |
 | Global Evolution 산출물 | `specs/reverse-spec/` | CWD 기준 상대 경로. `/smart-sdd --from`으로 변경 가능 |
 | spec-kit 피처 산출물 | `specs/{NNN-feature}/` | spec-kit 고유 경로. smart-sdd가 건드리지 않음 |
 | spec-kit constitution | `.specify/memory/constitution.md` | spec-kit 고유 작업 경로 |
@@ -711,20 +712,22 @@ smart-sdd와 spec-kit은 약간 다른 네이밍 형식을 사용하지만, **sh
 #### Global Evolution Layer 산출물 구조
 
 ```
-specs/reverse-spec/
-├── roadmap.md
-├── constitution-seed.md
-├── entity-registry.md
-├── api-registry.md
-├── business-logic-map.md           # (rebuild 모드에서만)
-├── stack-migration.md              # (rebuild + 신규 스택에서만)
-├── coverage-baseline.md            # (rebuild 전용 — /reverse-spec Phase 4-3이 생성)
-├── parity-report.md                # (rebuild 전용 — /smart-sdd parity가 생성)
-├── sdd-state.md                    # smart-sdd가 자동 생성/관리하는 상태 파일
-└── features/
-    ├── F001-auth/pre-context.md
-    ├── F002-product/pre-context.md
-    └── ...
+specs/
+├── history.md                          # 결정 이력 (자동 생성, 양 스킬 공유)
+└── reverse-spec/
+    ├── roadmap.md
+    ├── constitution-seed.md
+    ├── entity-registry.md
+    ├── api-registry.md
+    ├── business-logic-map.md           # (rebuild 모드에서만)
+    ├── stack-migration.md              # (rebuild + 신규 스택에서만)
+    ├── coverage-baseline.md            # (rebuild 전용 — /reverse-spec Phase 4-3이 생성)
+    ├── parity-report.md                # (rebuild 전용 — /smart-sdd parity가 생성)
+    ├── sdd-state.md                    # smart-sdd가 자동 생성/관리하는 상태 파일
+    └── features/
+        ├── F001-auth/pre-context.md
+        ├── F002-product/pre-context.md
+        └── ...
 ```
 
 > 환경 변수가 탐지된 경우 프로젝트 루트에 `.env.example`도 생성됩니다.

@@ -96,6 +96,35 @@ If the user selects "Yes":
 
 > **Note**: This question can be skipped via `--name <new-name>` argument. If `--dangerously-skip-permissions` is set without `--name`, the original project name is kept as-is.
 
+### Decision History Recording — Strategy
+
+After all Phase 0 questions are answered, **append** to `specs/history.md` (create if it doesn't exist with this header):
+
+```markdown
+# Decision History
+
+> Auto-generated during `/reverse-spec` and `/smart-sdd` execution.
+> Records key strategic and architectural decisions with rationale.
+```
+
+Add a dated section under the header:
+
+```markdown
+---
+
+## [YYYY-MM-DD] /reverse-spec — Project Setup
+
+### Strategy Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Scope | core / full | [user's reason if stated, otherwise "—"] |
+| Stack | same / new | [user's reason if stated, otherwise "—"] |
+| Project Identity | [original] → [new] / Same | [user's reason if stated, otherwise "—"] |
+```
+
+**Rules**: APPEND only — never overwrite existing entries. One row per decision. Record the user's reasoning if stated; write "—" if not.
+
 ---
 
 ## Phase 1 — Project Scan
@@ -276,6 +305,19 @@ Record the finalized stack decisions. These will be used in:
 - Phase 4: `stack-migration.md` generation
 - Phase 4: `constitution-seed.md` (New Stack Strategy section)
 - Phase 4: Each Feature's `pre-context.md` (New Stack reference sections)
+
+**Decision History Recording — Stack Choices**:
+After Step 4 completes, **append** to `specs/history.md` under the current session's section:
+
+```markdown
+### Per-Category Stack Choices (New Stack)
+
+| Category | Original | Chosen | Reason |
+|----------|----------|--------|--------|
+| [Category] | [current tech] | [chosen tech] | [user's reason or "—"] |
+```
+
+One row per category decided in Step 2. Record the user's reasoning for each choice if stated.
 
 ---
 
@@ -592,6 +634,21 @@ Examples:
 - "Notification recommended as Tier 3: Independent module with no reverse dependencies, loosely coupled via event subscription"
 
 Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. **If response is empty → re-ask.** If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
+
+### Decision History Recording — Architecture
+
+After Phase 3 is complete (granularity selected, dependencies mapped, Tier classification approved if core scope), **append** to `specs/history.md` under the current session's section:
+
+```markdown
+### Architecture Decisions
+
+| Decision | Choice | Details |
+|----------|--------|---------|
+| Feature Granularity | Coarse / Standard / Fine | [N] Features |
+| Tier Adjustments | [summary of user modifications] | [details, or "None — accepted AI recommendation as-is"] |
+```
+
+Record each user modification to the AI's Tier proposals (e.g., "Moved Search from T2 → T1"). If scope is `full`, omit the Tier Adjustments row.
 
 ---
 
