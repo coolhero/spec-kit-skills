@@ -830,7 +830,16 @@ spec-kit-skills/
         │   │   ├── app.md                               # Application domain (default)
         │   │   └── data-science.md                      # Data science domain (template)
         │   └── reference/
-        │       ├── context-injection-rules.md            # Per-command context injection rules
+        │       ├── context-injection-rules.md            # Shared injection patterns
+        │       ├── injection/                            # Per-command context injection rules
+        │       │   ├── constitution.md
+        │       │   ├── specify.md                       # Includes Clarify
+        │       │   ├── plan.md
+        │       │   ├── tasks.md
+        │       │   ├── analyze.md
+        │       │   ├── implement.md
+        │       │   ├── verify.md
+        │       │   └── parity.md
         │       ├── state-schema.md                      # sdd-state.md schema definition
         │       └── branch-management.md                 # Git branch management reference
         └── speckit-diff/

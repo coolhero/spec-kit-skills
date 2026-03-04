@@ -398,6 +398,8 @@ After identifying Feature boundaries, present **multiple granularity options** t
 **Step 1 — Prepare granularity proposals**:
 Analyze the identified Features and propose 2-3 granularity levels:
 
+> **Note**: This table is shared with `/smart-sdd init` § Phase 2. Keep both in sync when modifying.
+
 | Level | Name | Description | Typical Feature Count |
 |-------|------|-------------|----------------------|
 | **Coarse** | Domain-level | One Feature per major business domain. Larger scope per Feature, fewer total Features. Good for small teams or quick prototyping | 4-8 Features |

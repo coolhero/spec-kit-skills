@@ -824,7 +824,16 @@ spec-kit-skills/
         │   │   ├── app.md                               # 애플리케이션 도메인 (기본값)
         │   │   └── data-science.md                      # 데이터 사이언스 도메인 (템플릿)
         │   └── reference/
-        │       ├── context-injection-rules.md            # 커맨드별 컨텍스트 주입 규칙
+        │       ├── context-injection-rules.md            # 공유 주입 패턴
+        │       ├── injection/                            # 커맨드별 컨텍스트 주입 규칙
+        │       │   ├── constitution.md
+        │       │   ├── specify.md                       # Clarify 포함
+        │       │   ├── plan.md
+        │       │   ├── tasks.md
+        │       │   ├── analyze.md
+        │       │   ├── implement.md
+        │       │   ├── verify.md
+        │       │   └── parity.md
         │       ├── state-schema.md                      # sdd-state.md 스키마 정의
         │       └── branch-management.md                 # Git 브랜치 관리 참조
         └── speckit-diff/

@@ -224,7 +224,7 @@ For reverse-spec domain profiles (analysis axes, registries, etc.), see `../reve
 ```
 
 ### 1. Assemble — Context Assembly
-Reads files/sections required for the given command from BASE_PATH. Filters and assembles information per command according to [context-injection-rules.md](reference/context-injection-rules.md). Graceful degradation: missing files or placeholder sections are skipped.
+Reads files/sections required for the given command from BASE_PATH. Filters and assembles information per command according to the per-command injection rules in [`reference/injection/{command}.md`](reference/injection/). Graceful degradation per [context-injection-rules.md](reference/context-injection-rules.md) § Missing/Sparse Content Handling.
 
 ### 2. Checkpoint — User Confirmation (HARD STOP)
 Presents the assembled context with **actual content** (not just counts). The user reviews what will be injected and approves or requests modifications. Uses **PROCEDURE CheckpointApproval** (Approve as-is / Request modifications loop).
@@ -239,7 +239,7 @@ Invokes the corresponding `speckit-[command]` via the Skill tool with the approv
 Review uses **PROCEDURE ReviewApproval** (Approve / Request modifications / I've finished editing loop).
 
 ### 4. Update — Global Evolution Layer Refresh
-Updates global artifacts (registries, state, roadmap) to reflect command results. See [context-injection-rules.md](reference/context-injection-rules.md) for per-command update rules.
+Updates global artifacts (registries, state, roadmap) to reflect command results. See per-command injection rules in [`reference/injection/{command}.md`](reference/injection/) for update rules.
 
 **HARD STOP rules**: Both Checkpoint (Step 2) and Review (Step 3) require explicit user approval via AskUserQuestion. After AskUserQuestion returns, ALWAYS check the response — if empty, re-ask. Never proceed on empty.
 
@@ -267,7 +267,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `status` | *(inline below)* | Check progress |
 
 For all commands: also read `domains/{domain}.md` for domain-specific behavior.
-For pipeline/step commands: also read `reference/context-injection-rules.md` for per-command context injection details.
+For pipeline/step commands: also read `reference/injection/{command}.md` for per-command injection details (shared patterns in `reference/context-injection-rules.md`).
 For git branch operations: see `reference/branch-management.md`.
 
 ---
@@ -371,6 +371,7 @@ When creating `specs/history.md` for the first time, use this header:
 
 ## References
 
-- Per-command context injection details: [context-injection-rules.md](reference/context-injection-rules.md)
+- Shared injection patterns: [context-injection-rules.md](reference/context-injection-rules.md)
+- Per-command injection details: [injection/{command}.md](reference/injection/) (constitution, specify, plan, tasks, analyze, implement, verify, parity)
 - State file schema: [state-schema.md](reference/state-schema.md)
 - Git branch management: [branch-management.md](reference/branch-management.md)

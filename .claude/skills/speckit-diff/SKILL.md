@@ -186,25 +186,25 @@ SKILL CHANGES:
 
 TEMPLATE CHANGES:
   spec-template.md changed →
-    .claude/skills/smart-sdd/reference/context-injection-rules.md section 2 (Specify Review)
+    .claude/skills/smart-sdd/reference/injection/specify.md (Specify Review)
     .claude/skills/reverse-spec/templates/pre-context-template.md
     .claude/skills/reverse-spec/reference/speckit-compatibility.md (Business Logic Map → spec.md)
 
   plan-template.md changed →
-    .claude/skills/smart-sdd/reference/context-injection-rules.md section 3 (Plan Review)
+    .claude/skills/smart-sdd/reference/injection/plan.md (Plan Review)
     .claude/skills/reverse-spec/templates/entity-registry-template.md
     .claude/skills/reverse-spec/templates/api-registry-template.md
     .claude/skills/reverse-spec/reference/speckit-compatibility.md (Entity Registry → data-model.md)
 
   tasks-template.md changed →
-    .claude/skills/smart-sdd/reference/context-injection-rules.md section 4 (Tasks Review)
+    .claude/skills/smart-sdd/reference/injection/tasks.md (Tasks Review)
 
   constitution-template.md changed →
-    .claude/skills/smart-sdd/reference/context-injection-rules.md section 1 (Constitution Review)
+    .claude/skills/smart-sdd/reference/injection/constitution.md (Constitution Review)
     .claude/skills/reverse-spec/templates/constitution-seed-template.md
 
   checklist-template.md changed →
-    .claude/skills/smart-sdd/reference/context-injection-rules.md (if checklist step is tracked)
+    .claude/skills/smart-sdd/reference/context-injection-rules.md (shared patterns)
 
   agent-file-template.md changed →
     (No direct impact — spec-kit-skills does not generate agent files)

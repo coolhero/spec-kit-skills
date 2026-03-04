@@ -66,11 +66,13 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 
    Present 2-3 granularity levels with concrete Feature lists for each:
 
+   > **Note**: This table is shared with `/reverse-spec` § 3-1b. Keep both in sync when modifying.
+
    | Level | Name | Description | Typical Feature Count |
    |-------|------|-------------|----------------------|
-   | **Coarse** | Domain-level | One Feature per major business domain. Fewer total Features, larger scope each | 4-8 Features |
-   | **Standard** | Module-level | One Feature per logical module. Balanced scope and count. Recommended for most projects | 8-15 Features |
-   | **Fine** | Capability-level | One Feature per distinct user-facing capability. Smaller scope, more Features | 15-30 Features |
+   | **Coarse** | Domain-level | One Feature per major business domain. Larger scope per Feature, fewer total Features. Good for small teams or quick prototyping | 4-8 Features |
+   | **Standard** | Module-level | One Feature per logical module/service boundary. Balanced scope and count. Recommended for most projects | 8-15 Features |
+   | **Fine** | Capability-level | One Feature per distinct user-facing capability. Smaller scope per Feature, more total Features. Good for large teams or when granular tracking is needed | 15-30 Features |
 
    For each level, show a concrete Feature list derived from the brainstorm:
    ```

@@ -1,7 +1,7 @@
 # Pipeline Execution — Common Protocol + Feature Pipeline
 
 > Reference: Read after `/smart-sdd pipeline` or any step-mode command (constitution, specify, plan, tasks, analyze, implement, verify) is invoked. For shared rules (MANDATORY RULES, --auto), see SKILL.md.
-> For per-command context injection details, also read `reference/context-injection-rules.md` § [relevant command].
+> For per-command context injection details, read `reference/injection/{command}.md` (shared patterns in `reference/context-injection-rules.md`).
 > For git branch operations, also read `reference/branch-management.md`.
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
@@ -15,9 +15,9 @@
 ### 1. Assemble — Context Assembly
 
 - Reads the files/sections required for the given command from BASE_PATH
-- Filters and assembles the necessary information per command according to [context-injection-rules.md](reference/context-injection-rules.md)
+- Filters and assembles the necessary information per command according to [`reference/injection/{command}.md`](../reference/injection/)
 - Also references actual implementation results from preceding Features (under `specs/`) if available
-- **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See [context-injection-rules.md](reference/context-injection-rules.md) for details.
+- **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See [`reference/context-injection-rules.md`](../reference/context-injection-rules.md) § Missing/Sparse Content Handling for details.
 
 ### 2. Checkpoint — User Confirmation
 
@@ -217,7 +217,7 @@ PROCEDURE ReviewApproval:
 
 ### 4. Update — Global Evolution Layer Refresh
 
-Updates global artifacts to reflect the command execution results. For detailed update rules per step, see [context-injection-rules.md → Post-Step Update Rules Detail](reference/context-injection-rules.md#post-step-update-rules-detail).
+Updates global artifacts to reflect the command execution results. For detailed update rules per step, see the Post-Step Update Rules in the corresponding [reference/injection/{command}.md](reference/injection/).
 
 | Completed Step | Update Target | Content |
 |----------------|--------------|---------|
@@ -318,7 +318,7 @@ Read `BASE_PATH/constitution-seed.md`:
 
 #### Phase 0-2. Checkpoint (HARD STOP)
 
-Display the constitution-seed content per [context-injection-rules.md §1 Checkpoint Display Content](reference/context-injection-rules.md#checkpoint-display-content). Then follow **PROCEDURE CheckpointApproval** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
+Display the constitution-seed content per [injection/constitution.md → Checkpoint Display Content](reference/injection/constitution.md). Then follow **PROCEDURE CheckpointApproval** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
 
 #### Phase 0-3. Execute + Review (HARD STOP)
 
@@ -327,7 +327,7 @@ Display the constitution-seed content per [context-injection-rules.md §1 Checkp
 1. Provide the constitution-seed content as context and execute `speckit-constitution`
 2. **In the SAME response** — ignore any "Suggested commit" or "Next step" output from speckit-constitution
 3. **In the SAME response** — read `.specify/memory/constitution.md` — the **entire file**
-4. Display the Review content per [context-injection-rules.md §1 Review Display Content](reference/context-injection-rules.md#review-display-content)
+4. Display the Review content per [injection/constitution.md → Review Display Content](reference/injection/constitution.md)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
 6. Follow **PROCEDURE ReviewApproval** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
 

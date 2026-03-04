@@ -253,22 +253,34 @@ Examples:
 
 ## 8. Parity Dimensions
 
-| Dimension | Type | Compare |
-|-----------|------|---------|
-| API endpoints | Structural | Method + path coverage between source and rebuilt |
-| DB entities | Structural | Entity names, field counts, relationship types |
-| Test files | Structural | Test file count and naming correspondence |
-| UI components | Structural | Component count and library feature coverage |
-| Business rules | Logic | Rule-by-rule match of conditions and outcomes |
-| State transitions | Logic | State machine states, transitions, and guard conditions |
+> **Note**: Execution-time parity details (how comparisons run) are in `../../smart-sdd/domains/app.md` § Parity Dimensions. This section defines what to compare.
+
+### Structural Parity
+
+| Category | What to Compare |
+|----------|----------------|
+| API endpoints | Route definitions, controllers, endpoint decorators — match original routes |
+| DB entities | Schema definitions, model classes — match original table/collection structure |
+| Test files | Test file presence and coverage scope — match original test coverage |
+| UI components | Component tree structure, page routes — match original frontend structure (frontend/fullstack only) |
+| Source behaviors | Exported functions, public methods, handlers — match P1/P2 behaviors from Source Behavior Inventory |
+
+### Logic Parity
+
+| Category | What to Compare |
+|----------|----------------|
+| Business rules | State transitions, validation rules, authorization checks — match original business logic |
+| Test cases | Test scenario coverage — original test cases should have equivalents |
 
 ---
 
 ## 9. Verify Steps
 
-| Step | Required | Description |
-|------|----------|-------------|
-| Test | Yes (BLOCKING) | Run test suite; failure blocks pipeline progression |
-| Build | Yes (BLOCKING) | Run build command; failure blocks pipeline progression |
-| Lint | Yes (BLOCKING) | Run linter; failure blocks pipeline progression |
-| Demo-ready | Conditional | If constitution Best Practice VI (Demo-Ready Delivery) is active, verify demo script exists and runs successfully |
+> **Note**: Execution-time verification details (detection patterns, limited verification) are in `../../smart-sdd/domains/app.md` § Verify Steps.
+
+| Step | Required | Detection | Description |
+|------|----------|-----------|-------------|
+| **Test** | Yes (BLOCKING) | Detect from `package.json` scripts, `pyproject.toml`, `Makefile`, `Cargo.toml` | Run unit + integration tests. Failure blocks pipeline |
+| **Build** | Yes (BLOCKING) | Detect build command from project config | Run project build. Failure blocks pipeline |
+| **Lint** | Yes (BLOCKING) | Detect lint tool from project config | Run lint check. Failure blocks pipeline |
+| **Demo-Ready** | Conditional (if constitution VI active) | Check `demos/F00N-name.sh` exists | Execute demo script with `--ci` flag. Verify health check passes |
