@@ -692,10 +692,19 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    > A markdown file with instructions is **documentation, NOT a demo script**.
    > The demo MUST be a script that runs with `./demos/F00N-name.sh` — no human reading required.
 
-   **CORRECT — executable script:**
+   **CORRECT — executable script with coverage mapping:**
    ```bash
    #!/usr/bin/env bash
    # Demo: [Feature Name]
+   #
+   # Purpose: Demonstrates [Feature Name] by exercising core scenarios
+   #          derived from spec.md acceptance criteria.
+   #
+   # Coverage (maps to spec.md):
+   #   ✅ FR-001 [Requirement name]   → Test 1: [what this test does]
+   #   ✅ FR-002 [Requirement name]   → Test 2: [what this test does]
+   #   ✅ FR-003 [Requirement name]   → Test 3: [what this test does]
+   #   ⬜ FR-004 [Requirement name]   → Skipped: [reason, e.g., requires external service]
    #
    # Demo Components:
    #   [component name] | [file path] | Demo-only | Remove after F0XX-[feature]
@@ -704,18 +713,43 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    # Prerequisites: [What must be running/installed]
    set -euo pipefail
 
+   TOTAL=0; PASSED=0; FAILED=0
+
    echo "=== Demo: [Feature Name] ==="
+   echo ""
 
    # Setup
-   [Commands to prepare the demo environment]
+   [Commands to prepare the demo environment — e.g., start server, seed DB]
 
-   # Demo steps
-   [Executable commands that demonstrate the Feature]
+   # --- Test 1: [Short description] (FR-001, SC-001) ---
+   echo "[1/N] Testing [what]..."
+   TOTAL=$((TOTAL+1))
+   [Executable commands that verify the behavior]
+   # Assert: [expected outcome]
+   echo "  ✅ [What was verified]"
+   PASSED=$((PASSED+1))
 
-   echo "=== Demo complete ==="
+   # --- Test 2: [Short description] (FR-002, SC-003) ---
+   echo "[2/N] Testing [what]..."
+   TOTAL=$((TOTAL+1))
+   [Executable commands that verify the behavior]
+   echo "  ✅ [What was verified]"
+   PASSED=$((PASSED+1))
+
+   # Teardown
+   [Commands to clean up — e.g., stop server, remove temp data]
+
+   echo ""
+   echo "=== Demo complete: ${PASSED}/${TOTAL} passed, ${FAILED} failed ==="
    ```
-   The script must be executable (`chmod +x`) and self-contained — running it should demonstrate the Feature without manual steps.
-   **Use `curl`, `pnpm exec`, `node -e`, `electron --inspect`, etc. — NOT prose instructions.**
+
+   **Key requirements:**
+   - The script must be executable (`chmod +x`) and self-contained
+   - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to a demo test. Mark untestable items with ⬜ and reason
+   - **Each test step must state what it verifies** (FR/SC reference + expected behavior)
+   - **Summary line at the end**: Show passed/total count
+   - Aim for **maximum coverage** of the Feature's functional requirements — skip only what genuinely cannot be automated (e.g., manual UI interaction on a non-headless platform)
+   - **Use `curl`, `pnpm exec`, `node -e`, `electron --inspect`, etc. — NOT prose instructions**
 
 5. **Update `demos/README.md`** (Demo Hub — index of all Feature demos):
    - Create if it doesn't exist (first Feature with demo)

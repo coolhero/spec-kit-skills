@@ -333,7 +333,7 @@ If the user selects "Create a new branch", ask for the branch name via "Other" i
    - III. Simplicity First — Implement only what is in the spec. No speculative additions
    - IV. Surgical Changes — No "improving" adjacent code. Only clean up own changes
    - V. Goal-Driven Execution — Verifiable completion criteria required
-   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Implement a minimal demo surface and provide an **executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) that can be run to demonstrate the Feature
+   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Provide an **executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc.) that **maps to spec.md's FR-###/SC-###** and exercises as many functional requirements as possible. Each test step states what it verifies (FR/SC ref + expected behavior) and the script prints a passed/total summary
 
 2. **User selection**: All 6 are selected by default. The user can:
    - Deselect specific practices
@@ -1473,7 +1473,12 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - The demo script must be executable and self-contained: running it should demonstrate the Feature without manual steps
 - If a markdown demo file was generated instead, **delete it** and create a proper executable script
 
-**Step 2 — Check demo components are documented**:
+**Step 2 — Check coverage mapping and demo components**:
+- The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to specific demo tests
+  - Each FR/SC should be either ✅ (covered by a test) or ⬜ (skipped with reason)
+  - **Aim for maximum coverage** — every functional requirement should have a corresponding demo test unless genuinely untestable
+  - If coverage is below 50% of the Feature's FR count, **WARN** the user and suggest adding more tests
+- Each test step in the script must state what it verifies: `# --- Test N: [description] (FR-###, SC-###) ---`
 - The demo script must include a **Demo Components** header comment listing each component as Demo-only or Promotable
 - Demo-only components are marked with `// @demo-only` (removed after all Features complete)
 - Promotable components are marked with `// @demo-scaffold — will be extended by F00N-[feature]`

@@ -172,9 +172,11 @@ Quality-driven:
   ```
 - Each demo script (`demos/F00N-name.sh` or `.ts`/`.py`/etc. matching the project's language) must be:
   - **Executable**: `chmod +x` and self-contained — running it demonstrates the Feature without manual steps
-  - **Self-documenting**: Include a Demo Components header comment listing each component as Demo-only or Promotable
+  - **Coverage-mapped**: Include a Coverage header comment mapping each FR-###/SC-### from spec.md to a specific demo test (✅ covered / ⬜ skipped with reason). Aim for maximum coverage of the Feature's functional requirements
+  - **Self-documenting**: Each test step states what it verifies and why (FR/SC reference + expected behavior). Include a Demo Components header listing each component as Demo-only or Promotable
+  - **Summarized**: Print a final `passed/total` result line so the outcome is immediately clear
   - **Verifiable**: The script is executed during `verify` and must complete without errors
-- "Demo-ready" means: running `./demos/F00N-name.sh` exercises the Feature's core user flows and displays results — without requiring other incomplete Features or manual intervention
+- "Demo-ready" means: running `./demos/F00N-name.sh` exercises **as many of the Feature's functional requirements as possible** and reports pass/fail results — without requiring other incomplete Features or manual intervention
 - **Demo script by Feature type**:
   - Has UI → Script starts the server, verifies demo endpoints/pages respond, then shuts down
   - Backend/API only → Script invokes API endpoints and displays results
