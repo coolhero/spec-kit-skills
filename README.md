@@ -1,31 +1,35 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-04 09:46 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-04 10:18 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
 ---
 
-## Purpose
+## Overview
 
-[spec-kit](https://github.com/github/spec-kit) is a Git-based execution framework for implementing Spec-Driven Development (SDD) as a practical workflow. However, spec-kit has the following project-level limitations.
+Three Claude Code custom skills that add a **Global Evolution Layer** to [spec-kit](https://github.com/github/spec-kit) SDD workflows:
 
-### Limitations of spec-kit
+| Skill | Purpose | When to Use |
+|-------|---------|-------------|
+| `/reverse-spec` | Reverse-analyzes existing source code → generates cross-Feature context artifacts | Brownfield rebuild (full re-implementation) |
+| `/smart-sdd` | Wraps spec-kit commands with cross-Feature context injection + progress tracking | All modes: greenfield, incremental, rebuild |
+| `/speckit-diff` | *(Utility)* Checks spec-kit version compatibility, produces impact report | Anytime — after spec-kit updates |
 
-spec-kit is optimized for **Feature-local governance** (internal control within individual features), but lacks the following project-level management mechanisms out of the box:
+### Why This Exists
 
-| Limitation | Impact |
-|-----------|--------|
-| No cross-Feature references | `/speckit-plan` does not automatically reference preceding Features' data-model or API contracts, potentially leading to incompatible designs |
-| Limited cross-Feature analysis | `/speckit-analyze` only analyzes within a single Feature, unable to detect entity/interface conflicts between Features |
-| Insufficient agent context | The "Recent Changes" section only accumulates one-line summaries for the last 3 Features. Data model/API/business logic level context is not included |
-| No release-level management | No artifacts for managing Feature dependencies, priorities, and release grouping, leaving integration planning outside the framework |
+spec-kit excels at Feature-local governance but lacks cross-Feature context management:
 
-### This Project's Solution: Global Evolution Layer
+| Gap | Impact |
+|-----|--------|
+| No cross-Feature references | `/speckit-plan` doesn't reference preceding Features' data-model or API contracts |
+| Limited cross-Feature analysis | `/speckit-analyze` only checks within a single Feature |
+| Insufficient agent context | "Recent Changes" only accumulates one-line summaries for the last 3 Features |
+| No release-level management | No artifacts for Feature dependencies, priorities, or release grouping |
 
-Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
+This project fills these gaps with **entity/API registries** shared across Features, **pre-context injection** before every spec-kit command, **dependency-aware ordering**, and **automatic global artifact updates** after each Feature completes.
 
-Two custom skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting three distinct project modes:
+### Three Project Modes
 
 ```
 -- Greenfield -----------------------------------------------------------
@@ -41,6 +45,65 @@ code                   (reverse-analysis)  (roadmap, registries,
                                            pre-context, etc.)
 ```
 
+---
+
+## Quick Start
+
+### Prerequisites
+
+- [Claude Code](https://claude.ai/claude-code) CLI must be installed
+- [spec-kit](https://github.com/github/spec-kit) skill must be installed (for `/smart-sdd` usage)
+
+### Installation
+
+**Method 1: Global Installation (use across all projects)**
+
+```bash
+# Clone the repository
+git clone https://github.com/coolhero/spec-kit-skills.git
+
+# Create symbolic links
+ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
+ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
+```
+
+**Method 2: Project-Local Installation (use in a specific project only)**
+
+```bash
+# From the project root
+mkdir -p .claude/skills
+cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
+cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
+```
+
+### Verify Installation
+
+Confirm the skills are recognized in Claude Code with the following commands:
+
+```
+/reverse-spec --help
+/smart-sdd status
+```
+
+### First Commands
+
+| Mode | Command |
+|------|---------|
+| New project | `/smart-sdd init` |
+| Existing codebase rebuild | `/reverse-spec ./path/to/source` |
+| Add to existing project | `/smart-sdd add` |
+| Check spec-kit compatibility | `/speckit-diff` |
+
+---
+
+## How It Works
+
+### The Solution: Global Evolution Layer
+
+Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
+
+Two custom skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting three distinct project modes:
+
 ### When to Use `/reverse-spec`
 
 The `/reverse-spec` skill is designed for the **full rebuild scenario** -- when you have an existing codebase and want to re-implement it using spec-kit SDD. It is not needed for greenfield projects or for adding Features to an existing smart-sdd project.
@@ -49,9 +112,44 @@ In the rebuild workflow, `/reverse-spec` **generates the essential prerequisites
 
 Furthermore, **reproducing and testing the existing implementation** is at the core of the rebuild approach. The extracted draft requirements (FR-###) and acceptance criteria (SC-###) are derived from what the existing system actually does, providing test criteria to verify that the redeveloped system accurately reproduces the original functionality.
 
+### Common Protocol: Assemble → Checkpoint → Execute+Review → Update
+
+All spec-kit command executions follow this 4-step protocol:
+
+```
++--------------+     +---------------+     +------------------------+     +--------------+
+|  1. Assemble |---->| 2. Checkpoint |---->|  3. Execute + Review   |---->|  4. Update   |
+|  Context     |     |  Pre-Exec     |     | spec-kit Execution +   |     | Global       |
+|  Assembly    |     |  Confirmation |     | Artifact Review        |     | Refresh      |
++--------------+     +---------------+     +------------------------+     +--------------+
+```
+
+| Step | Description |
+|------|------------|
+| **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`). If a source file is missing or a section contains only placeholder text, that source is gracefully skipped |
+| **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify before execution. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
+| **Execute+Review** | Executes the corresponding spec-kit command and **immediately** — without stopping — presents the generated/modified artifacts for review. The user can approve, request modifications (re-execute), or edit artifacts directly. **HARD STOP** — same rules as Checkpoint. Execute and Review are ONE continuous action to prevent agent from stopping between them. **Review skipped only in `--auto` mode** |
+| **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
+
+### Per-Command Context Injection
+
+Summary of what information is automatically injected before each spec-kit command execution:
+
+| Command | Injection Source | Injected Content |
+|---------|-----------------|-----------------|
+| `constitution` | `constitution-seed.md` | Full content (source reference principles, architecture principles, Best Practices, Global Evolution operational principles) |
+| `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | Feature summary, FR-### drafts, SC-### drafts, business rules, edge cases, original source reference. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
+| `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions. **If registries empty (early greenfield), skip registry injection** |
+| `tasks` | `plan.md` (spec-kit artifact) | Automatic execution based on plan. No additional injection |
+| `analyze` | `spec.md` + `plan.md` + `tasks.md` (spec-kit artifacts) | Cross-artifact consistency analysis (gaps, duplications, ambiguities). Runs before implement |
+| `implement` | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks. No additional injection |
+| `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature entity/API consistency, impact scope analysis |
+
+**Preceding Feature results take priority**: If a dependent preceding Feature's plan is already complete, the **finalized data-model.md and contracts/** from `specs/{NNN-feature}/` are referenced instead of the drafts in entity-registry/api-registry.
+
 ---
 
-## Skill Overview
+## Skill Details
 
 ### 1. `/reverse-spec` -- Reverse-Analyze Existing Source Code for Full Rebuild
 
@@ -345,41 +443,6 @@ Key practical differences:
 
 During pipeline execution, Feature definitions can be modified using `/smart-sdd restructure`. This command supports splitting, merging, moving requirements, changing dependencies, and deleting Features. All changes are automatically propagated to every affected artifact (roadmap, registries, pre-context files, sdd-state) with user approval before execution.
 
-#### Common Protocol: Assemble → Checkpoint → Execute+Review → Update
-
-All spec-kit command executions follow this 4-step protocol:
-
-```
-+--------------+     +---------------+     +------------------------+     +--------------+
-|  1. Assemble |---->| 2. Checkpoint |---->|  3. Execute + Review   |---->|  4. Update   |
-|  Context     |     |  Pre-Exec     |     | spec-kit Execution +   |     | Global       |
-|  Assembly    |     |  Confirmation |     | Artifact Review        |     | Refresh      |
-+--------------+     +---------------+     +------------------------+     +--------------+
-```
-
-| Step | Description |
-|------|------------|
-| **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`). If a source file is missing or a section contains only placeholder text, that source is gracefully skipped |
-| **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify before execution. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
-| **Execute+Review** | Executes the corresponding spec-kit command and **immediately** — without stopping — presents the generated/modified artifacts for review. The user can approve, request modifications (re-execute), or edit artifacts directly. **HARD STOP** — same rules as Checkpoint. Execute and Review are ONE continuous action to prevent agent from stopping between them. **Review skipped only in `--auto` mode** |
-| **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
-
-#### Per-Command Context Injection
-
-Summary of what information is automatically injected before each spec-kit command execution:
-
-| Command | Injection Source | Injected Content |
-|---------|-----------------|-----------------|
-| `constitution` | `constitution-seed.md` | Full content (source reference principles, architecture principles, Best Practices, Global Evolution operational principles) |
-| `specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` | Feature summary, FR-### drafts, SC-### drafts, business rules, edge cases, original source reference. **If business-logic-map.md missing (greenfield/add), skip business logic injection** |
-| `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions. **If registries empty (early greenfield), skip registry injection** |
-| `tasks` | `plan.md` (spec-kit artifact) | Automatic execution based on plan. No additional injection |
-| `analyze` | `spec.md` + `plan.md` + `tasks.md` (spec-kit artifacts) | Cross-artifact consistency analysis (gaps, duplications, ambiguities). Runs before implement |
-| `implement` | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks. No additional injection |
-| `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature entity/API consistency, impact scope analysis |
-
-**Preceding Feature results take priority**: If a dependent preceding Feature's plan is already complete, the **finalized data-model.md and contracts/** from `specs/{NNN-feature}/` are referenced instead of the drafts in entity-registry/api-registry.
-
 #### Pipeline Mode Details
 
 Running `/smart-sdd pipeline` progresses through the entire workflow sequentially:
@@ -424,18 +487,19 @@ After tasks are generated, `speckit-analyze` runs a READ-ONLY consistency check 
 #### 4-Phase Verification (verify step)
 
 ```
-Phase 1: Execution Verification (Code Level)
+Phase 1: Execution Verification (Code Level) — BLOCKS on failure
     +-- Run tests, Build check, Lint check
+    +-- If ANY check fails → verification BLOCKED, merge not allowed
 
 Phase 2: Cross-Feature Consistency Verification
     +-- Check cross-verification points in pre-context.md
     +-- Analyze whether shared entities/APIs changed by this Feature affect other Features
 
-Phase 3: Demo-Ready Verification (only if Demo-Ready Delivery is in the constitution)
-    +-- Check demos/F00N-name.md exists and is complete
-    +-- Verify demo surface (CLI command, demo script, or demo page) is functional
-    +-- Verify Demo Components table documents all demo-specific code
-    +-- Check component markers (@demo-only / @demo-scaffold) are present
+Phase 3: Demo-Ready Verification (only if Demo-Ready Delivery is in the constitution) — BLOCKS on failure
+    +-- Check executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
+    +-- Execute the demo script and verify it completes without errors
+    +-- Check Demo Components header and component markers (@demo-only / @demo-scaffold)
+    +-- If ANY check fails → verification BLOCKED
 
 Phase 4: Global Evolution Update
     +-- Verify consistency between entity-registry/api-registry and actual implementation; update if discrepancies found
@@ -497,64 +561,6 @@ A utility skill that checks whether the current spec-kit-skills are compatible w
 **5 analysis dimensions**: Skill changes, Template format changes, Script interface changes, Workflow sequence changes, Directory structure changes
 
 **Priority levels**: P1 (Breaking — must fix), P2 (Compatibility — should fix), P3 (Enhancement — optional)
-
----
-
-## Path Conventions
-
-| Target | Path | Notes |
-|--------|------|-------|
-| reverse-spec artifacts | `specs/reverse-spec/` | Flat structure. Can be changed via `/smart-sdd --from` |
-| spec-kit feature artifacts | `specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
-| spec-kit constitution | `.specify/memory/constitution.md` | spec-kit native working path |
-| smart-sdd state file | `specs/reverse-spec/sdd-state.md` | Automatically created/managed by smart-sdd |
-
-### Feature Naming Convention
-
-smart-sdd and spec-kit use slightly different naming formats, but the **short-name** is always identical:
-
-| System | Format | Example |
-|--------|--------|---------|
-| smart-sdd (pre-context, roadmap, state) | `F{NNN}-{short-name}` | `F001-auth` |
-| spec-kit (specs/ directory, git branch) | `{NNN}-{short-name}` | `001-auth` |
-
-Conversion: strip or prepend `F` prefix. The mapping is tracked in `sdd-state.md` → Feature Mapping table.
-
-### Global Evolution Layer Artifact Structure
-
-```
-specs/reverse-spec/
-├── roadmap.md
-├── constitution-seed.md
-├── entity-registry.md
-├── api-registry.md
-├── business-logic-map.md           # (rebuild mode only)
-├── stack-migration.md              # (rebuild + new stack only)
-├── coverage-baseline.md            # (rebuild mode only — generated by /reverse-spec Phase 4-3)
-├── parity-report.md                # (rebuild mode only — generated by /smart-sdd parity)
-├── sdd-state.md                    # Automatically created/managed by smart-sdd
-└── features/
-    ├── F001-auth/pre-context.md
-    ├── F002-product/pre-context.md
-    └── ...
-```
-
-> Also generates `.env.example` at the project root if environment variables were detected.
-
----
-
-## Constitution Best Practices
-
-The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` includes the following 6 recommended development principles:
-
-| Principle | Core | Verification Criteria |
-|-----------|------|----------------------|
-| **I. Test-First (NON-NEGOTIABLE)** | Write tests first. Code without tests is not considered complete. spec.md's Acceptance Scenarios are the source of test cases | All tests pass |
-| **II. Think Before Coding** | No assumptions. If unclear, mark as `[NEEDS CLARIFICATION]`. Explicitly record trade-offs | Every decision has an answer to "why?" |
-| **III. Simplicity First** | Implement only what is in the spec. No speculative feature additions/premature abstractions | All code is traceable to requirements |
-| **IV. Surgical Changes** | No "improving" adjacent code. Only clean up orphaned code caused by your own changes | Changed lines are traceable to tasks |
-| **V. Goal-Driven Execution** | Verifiable completion criteria required. "implement" leads to "tests pass" | Automated verification passes |
-| **VI. Demo-Ready Delivery** | Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient — implement a minimal demo surface (CLI command, demo script, demo page) and document it in `demos/F00N-name.md`. Demo code is categorized as **Demo-only** (`// @demo-only`, removed later) or **Promotable** (`// @demo-scaffold`, extended later) | A non-developer can follow `demos/F00N-name.md` and verify the Feature works |
 
 ---
 
@@ -675,7 +681,63 @@ The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` inc
 
 ---
 
-## Relationship with spec-kit
+## Reference
+
+### Path Conventions
+
+| Target | Path | Notes |
+|--------|------|-------|
+| reverse-spec artifacts | `specs/reverse-spec/` | Flat structure. Can be changed via `/smart-sdd --from` |
+| spec-kit feature artifacts | `specs/{NNN-feature}/` | Native spec-kit path. Not modified by smart-sdd |
+| spec-kit constitution | `.specify/memory/constitution.md` | spec-kit native working path |
+| smart-sdd state file | `specs/reverse-spec/sdd-state.md` | Automatically created/managed by smart-sdd |
+
+#### Feature Naming Convention
+
+smart-sdd and spec-kit use slightly different naming formats, but the **short-name** is always identical:
+
+| System | Format | Example |
+|--------|--------|---------|
+| smart-sdd (pre-context, roadmap, state) | `F{NNN}-{short-name}` | `F001-auth` |
+| spec-kit (specs/ directory, git branch) | `{NNN}-{short-name}` | `001-auth` |
+
+Conversion: strip or prepend `F` prefix. The mapping is tracked in `sdd-state.md` → Feature Mapping table.
+
+#### Global Evolution Layer Artifact Structure
+
+```
+specs/reverse-spec/
+├── roadmap.md
+├── constitution-seed.md
+├── entity-registry.md
+├── api-registry.md
+├── business-logic-map.md           # (rebuild mode only)
+├── stack-migration.md              # (rebuild + new stack only)
+├── coverage-baseline.md            # (rebuild mode only — generated by /reverse-spec Phase 4-3)
+├── parity-report.md                # (rebuild mode only — generated by /smart-sdd parity)
+├── sdd-state.md                    # Automatically created/managed by smart-sdd
+└── features/
+    ├── F001-auth/pre-context.md
+    ├── F002-product/pre-context.md
+    └── ...
+```
+
+> Also generates `.env.example` at the project root if environment variables were detected.
+
+### Constitution Best Practices
+
+The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` includes the following 6 recommended development principles:
+
+| Principle | Core | Verification Criteria |
+|-----------|------|----------------------|
+| **I. Test-First (NON-NEGOTIABLE)** | Write tests first. Code without tests is not considered complete. spec.md's Acceptance Scenarios are the source of test cases | All tests pass |
+| **II. Think Before Coding** | No assumptions. If unclear, mark as `[NEEDS CLARIFICATION]`. Explicitly record trade-offs | Every decision has an answer to "why?" |
+| **III. Simplicity First** | Implement only what is in the spec. No speculative feature additions/premature abstractions | All code is traceable to requirements |
+| **IV. Surgical Changes** | No "improving" adjacent code. Only clean up orphaned code caused by your own changes | Changed lines are traceable to tasks |
+| **V. Goal-Driven Execution** | Verifiable completion criteria required. "implement" leads to "tests pass" | Automated verification passes |
+| **VI. Demo-Ready Delivery** | Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient — implement a minimal demo surface and provide an **executable demo script** (`demos/F00N-name.sh` or `.ts`/`.py`/etc.). The demo script is executed during verify and must complete without errors. Demo code is categorized as **Demo-only** (`// @demo-only`, removed later) or **Promotable** (`// @demo-scaffold`, extended later) | Running `demos/F00N-name.sh` demonstrates the Feature without manual steps |
+
+### Relationship with spec-kit
 
 | Aspect | spec-kit | spec-kit-skills |
 |--------|----------|-----------------|
@@ -685,7 +747,7 @@ The `constitution-seed.md` generated by `/reverse-spec` or `/smart-sdd init` inc
 | **Coupling** | Fully functional without spec-kit-skills | Requires spec-kit |
 | **Compatibility** | Unaffected by spec-kit updates | Supplements via Constitution principles + artifacts, independent of spec-kit version |
 
-### Using reverse-spec Artifacts with Plain spec-kit (without smart-sdd)
+#### Using reverse-spec Artifacts with Plain spec-kit (without smart-sdd)
 
 If you want to use reverse-spec artifacts directly with spec-kit commands — without the smart-sdd orchestrator — you can manually provide the relevant context in your conversation before invoking each command. Smart-sdd automates this assembly, but the same result can be achieved manually.
 
@@ -768,49 +830,7 @@ Analyze cross-artifact consistency for Feature F002-product:
 | Per-Feature env var verification | Checked at each Feature's implement step with HARD STOP | You check `.env` yourself |
 | Feature branch management | Automated create/merge | You manage git branches yourself |
 
----
-
-## Installation & Setup
-
-### Prerequisites
-
-- [Claude Code](https://claude.ai/claude-code) CLI must be installed
-- [spec-kit](https://github.com/github/spec-kit) skill must be installed (for `/smart-sdd` usage)
-
-### Installation
-
-**Method 1: Global Installation (use across all projects)**
-
-```bash
-# Clone the repository
-git clone https://github.com/coolhero/spec-kit-skills.git
-
-# Create symbolic links
-ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
-ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
-```
-
-**Method 2: Project-Local Installation (use in a specific project only)**
-
-```bash
-# From the project root
-mkdir -p .claude/skills
-cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
-cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
-```
-
-### Verify Installation
-
-Confirm the skills are recognized in Claude Code with the following commands:
-
-```
-/reverse-spec --help
-/smart-sdd status
-```
-
----
-
-## Project Structure
+### Project Structure
 
 ```
 spec-kit-skills/
@@ -840,11 +860,9 @@ spec-kit-skills/
                 └── integration-surface.md               # Spec-kit baseline (structural signatures)
 ```
 
----
+### Maintenance
 
-## Maintenance
-
-### Spec-Kit Compatibility Baseline
+#### Spec-Kit Compatibility Baseline
 
 When modifying spec-kit-skills (smart-sdd, reverse-spec, or their reference files), always check whether the changes affect spec-kit integration points. If spec-kit itself has been updated, run `/speckit-diff` to identify required changes.
 

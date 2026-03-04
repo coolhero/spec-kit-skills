@@ -315,7 +315,7 @@ If the user selects "Create a new branch", ask for the branch name via "Other" i
    - III. Simplicity First — Implement only what is in the spec. No speculative additions
    - IV. Surgical Changes — No "improving" adjacent code. Only clean up own changes
    - V. Goal-Driven Execution — Verifiable completion criteria required
-   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Implement a minimal demo surface (CLI command, simple demo page, API playground, or demo script) and provide step-by-step instructions in `demos/F00N-name.md`
+   - VI. Demo-Ready Delivery — Each Feature must be demonstrable upon completion. "Tests pass" alone is NOT sufficient. Implement a minimal demo surface and provide an **executable demo script** at `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) that can be run to demonstrate the Feature
 
 2. **User selection**: All 6 are selected by default. The user can:
    - Deselect specific practices
@@ -793,8 +793,8 @@ Executes the following steps **strictly in order** for each Feature.
 4. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
 5. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
 6. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
-7. verify     → Checkpoint(STOP) → Test/Build/Lint → Cross-Feature → Demo-Ready → Review(STOP) → Update
-8. merge      → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
+7. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → Review(STOP) → Update
+8. merge      → Verify-gate(BLOCK if not success) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
@@ -1371,38 +1371,78 @@ Running `/smart-sdd analyze [FID]` executes `speckit-analyze` to verify cross-ar
 
 Running `/smart-sdd verify [FID]` performs post-implementation verification. This step runs **after implement** to validate that the actual code works correctly and is consistent with the broader project.
 
-### Phase 1: Execution Verification
-- Run tests: Detect and execute the project's test command (from `package.json` scripts, `pyproject.toml`, `Makefile`, etc.)
-- Build check: Run the build command and confirm no errors
-- Lint check: Run the lint tool if configured
+### Phase 1: Execution Verification (BLOCKING)
+
+Run each check and record results. **If any check fails, verification is BLOCKED — do not proceed to Phase 2/3/4.**
+
+1. **Test check**: Detect and execute the project's test command (from `package.json` scripts, `pyproject.toml`, `Makefile`, etc.)
+2. **Build check**: Run the build command and confirm no errors
+3. **Lint check**: Run the lint tool if configured
+
+**If ANY check fails**, display and STOP:
+```
+❌ Execution Verification failed for [FID] - [Feature Name]:
+  Tests: [PASS/FAIL — pass count/total, failure details]
+  Build: [PASS/FAIL — error summary]
+  Lint:  [PASS/FAIL — critical issue count]
+
+Fix the failing checks before verification can continue.
+Verification is BLOCKED — merge will not be allowed until all checks pass.
+```
+
+**Use AskUserQuestion** with options:
+- "Fix and re-verify" — user will fix, then re-run `/smart-sdd verify`
+- "Show failure details" — display full test/build/lint output
+
+**Do NOT proceed to Phase 2** until all three checks pass. Do NOT allow the user to "skip" failed checks — there is no skip option.
+
+> **Build prerequisites**: If the build fails due to missing setup steps (e.g., `pnpm approve-builds`, native module compilation), include the specific prerequisite command in the error message so the user knows what to run.
 
 ### Phase 2: Cross-Feature Consistency Verification
 - Check the cross-verification points in the "For /speckit.analyze" section of `pre-context.md`
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
 - Verify that entity-registry.md and api-registry.md match the actual implementation
 
-### Phase 3: Demo-Ready Verification (only if VI. Demo-Ready Delivery is in the constitution)
-- Check that `demos/F00N-name.md` exists for the Feature
-- Check that a demo surface exists (not just tests): CLI command, demo script, demo page, or API playground
-- Check that `demos/F00N-name.md` includes a **Demo Components** table categorizing each component as Demo-only or Promotable with a clear Fate
-- Check that demo-only components are marked with `// @demo-only` and promotable components with `// @demo-scaffold — will be extended by F00N-[feature]`
-- If any check fails, **block verification** and instruct the user:
-  ```
-  ❌ Demo-Ready verification failed for [FID] - [Feature Name]:
-    - [Missing: demos/F00N-name.md | Missing: demo surface implementation | Missing: Demo Components table | Missing: component markers]
-
-  "Tests pass" alone does not satisfy Demo-Ready Delivery.
-  Please implement a minimal demo surface, create demos/F00N-name.md with Demo Components table,
-  and mark all demo code with appropriate category markers.
-  ```
-- Update `demos/README.md` (Demo Hub) with the Feature's demo status
+### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
+
+**Step 1 — Check demo script exists**:
+- Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
+- The demo script must be executable and self-contained: running it should demonstrate the Feature without manual steps
+
+**Step 2 — Check demo components are documented**:
+- The demo script must include a **Demo Components** header comment listing each component as Demo-only or Promotable
+- Demo-only components are marked with `// @demo-only` (removed after all Features complete)
+- Promotable components are marked with `// @demo-scaffold — will be extended by F00N-[feature]`
+
+**Step 3 — Execute the demo script**:
+- Run the demo script and verify it completes without errors
+- If the demo requires a running server (e.g., web app), start the server, verify the demo endpoints/pages respond correctly, then stop the server
+- Capture the demo output (stdout/stderr) for the Review display
+
+**If any check fails**, display and BLOCK:
+```
+❌ Demo-Ready verification failed for [FID] - [Feature Name]:
+  - [Missing: demos/F00N-name.sh | Script execution failed: <error> | Missing: Demo Components header | Missing: component markers]
+
+"Tests pass" alone does not satisfy Demo-Ready Delivery.
+Please create an executable demo script at demos/F00N-name.sh that demonstrates the Feature,
+and mark all demo code with appropriate category markers.
+```
+
+**Use AskUserQuestion** with options:
+- "Fix and re-verify" — user will fix, then re-run `/smart-sdd verify`
+- "Show failure details" — display full demo script output
+
+**Do NOT proceed to Phase 4** until the demo script exists and executes successfully.
+
+- Update `demos/README.md` (Demo Hub) with the Feature's demo status and the command to run the demo
 
 ### Phase 4: Global Evolution Update
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found
 - api-registry.md: Verify that the actually implemented API contracts match the registry; update if discrepancies are found
-- sdd-state.md: Record verification results (success/failure, test results, verification time)
+- sdd-state.md: Record verification results — **status MUST be one of `success` or `failure`**, plus test pass/fail counts, build result, and verification timestamp. The merge step checks this status as a gate condition.
 
 ---
 
@@ -1667,6 +1707,17 @@ spec-kit handles the branch creation automatically during `speckit-specify`:
 ### Post-Feature Merge: After verify Completes
 
 After verify completes and Global Evolution Layer updates are applied:
+
+**Step 0 — Verify-Success Gate (BLOCKING)**:
+Before ANY merge activity, check the Feature's verification status in `sdd-state.md`:
+- If the Feature's last verification result is **not `success`** (or if no verification was recorded): **BLOCK the merge**.
+  ```
+  ❌ Cannot merge [FID] - [Feature Name]: Verification has not passed.
+  Last verify result: [failure/not recorded]
+
+  Run `/smart-sdd verify [FID]` and ensure all checks pass before merging.
+  ```
+- Only proceed to Step 1 if verify status is `success`.
 
 **Step 1 — Commit Global Evolution updates on the Feature branch**:
 All Post-Feature Completion updates (entity-registry.md, api-registry.md, roadmap.md, pre-context.md updates, sdd-state.md) are committed on the Feature branch before merging.
