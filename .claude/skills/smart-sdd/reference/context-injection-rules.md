@@ -690,25 +690,33 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    > 2. Click "Login"          ← WRONG: Requires human interaction
    > ```
    > A markdown file with instructions is **documentation, NOT a demo script**.
-   > The demo MUST be a script that runs with `./demos/F00N-name.sh` — no human reading required.
+   >
+   > ```bash
+   > #!/usr/bin/env bash
+   > TOTAL=0; PASSED=0
+   > TOTAL=$((TOTAL+1)); curl -s ... | grep -q "OK" && PASSED=$((PASSED+1))
+   > echo "${PASSED}/${TOTAL} passed"    ← WRONG: This is a test suite, not a demo
+   > ```
+   > A script that only runs assertions and exits is a **test suite**, not a demo.
+   > Tests are for `verify` Phase 1. Demos are for showing the **real, working Feature**.
 
-   **CORRECT — executable script with coverage mapping and interactive mode:**
+   **CORRECT — executable demo that launches the Feature for the user to experience:**
    ```bash
    #!/usr/bin/env bash
    # Demo: [Feature Name]
    #
-   # Purpose: Demonstrates [Feature Name] by exercising core scenarios
-   #          derived from spec.md acceptance criteria.
+   # Purpose: Launches [Feature Name] so the user can experience it firsthand.
+   #          Sets up the environment, starts the service, and provides
+   #          concrete examples of what to try.
    #
    # Usage:
-   #   ./demos/F00N-name.sh              # Test mode (default) — automated assertions, exit
-   #   ./demos/F00N-name.sh --interactive # Interactive mode — try the Feature yourself
+   #   ./demos/F00N-name.sh        # Launch the demo (interactive, default)
+   #   ./demos/F00N-name.sh --ci   # CI mode — quick health-check and exit
    #
    # Coverage (maps to spec.md):
-   #   ✅ FR-001 [Requirement name]   → Test 1: [what this test does]
-   #   ✅ FR-002 [Requirement name]   → Test 2: [what this test does]
-   #   ✅ FR-003 [Requirement name]   → Test 3: [what this test does]
-   #   ⬜ FR-004 [Requirement name]   → Skipped: [reason, e.g., requires external service]
+   #   ✅ FR-001 [Requirement name]   → Demonstrated: [how the user can see this]
+   #   ✅ FR-002 [Requirement name]   → Demonstrated: [how the user can see this]
+   #   ⬜ FR-003 [Requirement name]   → Not demoed: [reason, e.g., requires external service]
    #
    # Demo Components:
    #   [component name] | [file path] | Demo-only | Remove after F0XX-[feature]
@@ -717,92 +725,88 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    # Prerequisites: [What must be running/installed]
    set -euo pipefail
 
-   MODE="${1:---test}"
-   TOTAL=0; PASSED=0; FAILED=0
+   CI_MODE=false
+   [ "${1:-}" = "--ci" ] && CI_MODE=true
 
    # --- Cleanup handler ---
    cleanup() {
      echo ""
-     echo "Cleaning up..."
+     echo "Shutting down demo..."
      [Commands to clean up — e.g., stop server, remove temp data]
-     if [ "$MODE" = "--test" ]; then
-       echo "=== Demo complete: ${PASSED}/${TOTAL} passed, ${FAILED} failed ==="
-     fi
    }
    trap cleanup EXIT
 
-   echo "=== Demo: [Feature Name] ==="
+   echo "══════════════════════════════════════════════════"
+   echo "  Demo: [Feature Name]"
+   echo "══════════════════════════════════════════════════"
    echo ""
 
-   # Setup
-   [Commands to prepare the demo environment — e.g., start server, seed DB]
+   # ─── Setup ──────────────────────────────────────────────────
+   echo "Setting up..."
+   [Commands to prepare: seed DB, build assets, etc.]
 
-   # ─── Automated Tests ────────────────────────────────────────
+   # ─── Start the Feature ──────────────────────────────────────
+   echo "Starting [Feature Name]..."
+   [Commands to start the service — e.g., start server in background]
 
-   # --- Test 1: [Short description] (FR-001, SC-001) ---
-   echo "[1/N] Testing [what]..."
-   TOTAL=$((TOTAL+1))
-   [Executable commands that verify the behavior]
-   # Assert: [expected outcome]
-   echo "  ✅ [What was verified]"
-   PASSED=$((PASSED+1))
-
-   # --- Test 2: [Short description] (FR-002, SC-003) ---
-   echo "[2/N] Testing [what]..."
-   TOTAL=$((TOTAL+1))
-   [Executable commands that verify the behavior]
-   echo "  ✅ [What was verified]"
-   PASSED=$((PASSED+1))
-
+   # ─── Health Check ───────────────────────────────────────────
    echo ""
-   echo "=== Tests: ${PASSED}/${TOTAL} passed, ${FAILED} failed ==="
+   echo "Running health check..."
+   [Quick checks to verify the demo environment is alive]
+   # e.g., curl -sf http://localhost:3000/health || { echo "❌ Health check failed"; exit 1; }
+   echo "  ✅ [Service] is running on [port/URL]"
 
-   # ─── Interactive Mode ───────────────────────────────────────
-
-   if [ "$MODE" = "--interactive" ] || [ "$MODE" = "-i" ]; then
+   # ─── CI Mode: exit after health check ───────────────────────
+   if [ "$CI_MODE" = true ]; then
      echo ""
-     echo "══════════════════════════════════════════════════"
-     echo "  🎮 Interactive Mode — Try it yourself!"
-     echo "══════════════════════════════════════════════════"
-     echo ""
-     echo "The Feature is running. Here's what you can try:"
-     echo ""
-     [Print concrete examples the user can copy-paste and run:]
-     echo "  # Example 1: [What to try]"
-     echo "  [Actual command the user can run — e.g., curl http://localhost:3000/api/users]"
-     echo ""
-     echo "  # Example 2: [What to try]"
-     echo "  [Actual command — e.g., open http://localhost:3000/dashboard in a browser]"
-     echo ""
-     echo "Press Ctrl+C to stop."
-     echo ""
-     # Keep the service running until user interrupts
-     wait || true
+     echo "=== CI health check passed ==="
+     exit 0
    fi
+
+   # ─── Interactive: Show the user what to try ─────────────────
+   echo ""
+   echo "══════════════════════════════════════════════════"
+   echo "  🎯 [Feature Name] is live! Try it:"
+   echo "══════════════════════════════════════════════════"
+   echo ""
+   [Print concrete things the user can DO right now:]
+   echo "  👉 Open in browser: http://localhost:3000/[page]"
+   echo ""
+   echo "  👉 Try the API:"
+   echo "     curl http://localhost:3000/api/[endpoint]"
+   echo ""
+   echo "  👉 [Another thing to try]:"
+   echo "     [Concrete command or URL]"
+   echo ""
+   echo "──────────────────────────────────────────────────"
+   echo "  Press Ctrl+C to stop the demo."
+   echo "──────────────────────────────────────────────────"
+   echo ""
+
+   # Keep the service running until the user stops it
+   wait || true
    ```
 
    **Key requirements:**
+   - **The demo shows the real, working Feature** — not just assertions. Running the script launches the Feature so the user can experience it firsthand
    - The script must be executable (`chmod +x`) and self-contained
-   - **Two modes REQUIRED**:
-     - `--test` (default): Automated assertions → passed/total summary → exit. Used by `verify` phase
-     - `--interactive` / `-i`: After automated tests pass, keep the Feature running and print "Try it yourself" examples with concrete commands the user can copy-paste. Exit on Ctrl+C
-   - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to a demo test. Mark untestable items with ⬜ and reason
-   - **Each test step must state what it verifies** (FR/SC reference + expected behavior)
-   - **Summary line**: Show passed/total count (in both modes)
-   - **Interactive examples REQUIRED**: At least 2-3 concrete commands/URLs the user can try (e.g., `curl` commands, browser URLs, CLI invocations)
-   - Aim for **maximum coverage** of the Feature's functional requirements — skip only what genuinely cannot be automated (e.g., manual UI interaction on a non-headless platform)
-   - **Use `curl`, `pnpm exec`, `node -e`, `electron --inspect`, etc. — NOT prose instructions**
-   - **Interactive mode by Feature type**:
-     - Has UI → Keep server running, print URLs to open in browser
-     - Backend/API → Keep server running, print curl/httpie examples
-     - CLI/Library → Print sample commands to run in another terminal
-     - Data layer → Keep sandbox running, print CRUD command examples
+   - **Default = interactive**: The script launches the Feature and keeps it running. The user interacts with it via browser, curl, CLI, etc.
+   - **`--ci` flag**: For `verify` Phase 3 automation — runs setup + health check, then exits. No user interaction needed
+   - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Use ⬜ for items that can't be demoed
+   - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
+   - **What the demo IMPLEMENTS** (by Feature type):
+     - Has UI → Demo starts the server with demo data, opens the real UI. User sees and interacts with actual pages
+     - Backend/API → Demo starts the server with demo data, prints curl commands for real endpoints
+     - CLI/Library → Demo provides a pre-configured sandbox and sample commands to run
+     - Data layer / Store → Demo provides a seeded database with CRUD command examples
+     - Pipeline / Engine → Demo runs the pipeline with sample input and shows real output, then lets the user try with their own input
+   - **Demo artifacts**: During `implement`, create the surfaces users will interact with (demo routes, demo pages, demo data fixtures, demo CLI wrappers, etc.) — these are what make the demo real, not just test stubs
+   - **Demo code separation**: Same as before — `// @demo-only` and `// @demo-scaffold` markers
 
 5. **Update `demos/README.md`** (Demo Hub — index of all Feature demos):
    - Create if it doesn't exist (first Feature with demo)
-   - Add the Feature with both demo commands:
-     - `./demos/F00N-name.sh` — run automated tests
-     - `./demos/F00N-name.sh --interactive` — try it yourself
+   - Add the Feature with its demo command and a brief description of what the user will experience:
+     - `./demos/F00N-name.sh` — launches [brief description of what the user can try]
 
 ### Injected Content
 
@@ -904,12 +908,12 @@ Show the **actual verification checklist** so the user can see what will be chec
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
   - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
-  - [ ] Demo script is NOT markdown (reject if file contains "## Demo Steps" or manual instructions)
-  - [ ] Demo script supports --test (default) and --interactive modes
-  - [ ] Demo script executes without errors (--test mode)
-  - [ ] FR/SC Coverage header maps spec.md FR-###/SC-### to test steps
+  - [ ] Demo script is NOT markdown and NOT a test-only script
+  - [ ] Demo launches a real, working Feature environment (not just assertions)
+  - [ ] Demo prints concrete "Try it" instructions (URLs, commands) for the user (≥ 2)
+  - [ ] --ci flag works: health check passes and exits cleanly
+  - [ ] FR/SC Coverage header maps spec.md FR-###/SC-### to what the user can try
   - [ ] Coverage ≥ 50% of FR/SC items (warn if below)
-  - [ ] Interactive mode prints concrete "Try it yourself" examples (≥ 2)
   - [ ] Demo Components header comment with Category and Fate
   - [ ] Component markers (@demo-only / @demo-scaffold)
 
@@ -949,11 +953,10 @@ After verification execution completes:
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]
   - ✅/❌ Executable demo script exists (demos/F00N-name.sh)
-  - ✅/❌ Demo script is executable (not markdown)
-  - ✅/❌ Demo script supports --test and --interactive modes
-  - ✅/❌ Demo script executed successfully (--test mode)
+  - ✅/❌ Demo script launches a real Feature environment (not test-only)
+  - ✅/❌ Demo prints concrete "Try it" instructions for the user (≥ 2)
+  - ✅/❌ --ci health check passed
   - ✅/❌ FR/SC Coverage mapping present (≥ 50% of spec FR/SC items)
-  - ✅/❌ Interactive mode has "Try it yourself" examples (≥ 2)
   - ✅/❌ Demo Components header comment present
   - ✅/❌ Component markers present
 

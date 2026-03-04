@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 00:30 KST
+[English README](README.md) | Last updated: 2026-03-05 01:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -494,9 +494,9 @@ tasks 생성 후, `speckit-analyze`가 spec.md, plan.md, tasks.md 간의 READ-ON
     └─ 변경된 공유 엔티티/API가 다른 Feature에 영향을 주는지 분석
 
 3단계: Demo-Ready 검증 (constitution에 VI. Demo-Ready Delivery가 있는 경우만) — 실패 시 BLOCK
-    └─ 실행 가능한 데모 스크립트 존재 확인 (demos/F00N-name.sh 또는 .ts/.py 등)
-    └─ 두 가지 모드 지원 확인: --test (기본값) 및 --interactive (직접 체험)
-    └─ 데모 스크립트 실행 (--test 모드) 및 정상 완료 확인
+    └─ 데모 스크립트가 실제 Feature를 실행하는지 확인 (테스트만 돌리는 스크립트 거부)
+    └─ 사용자를 위한 구체적 "이렇게 써보세요" 안내 존재 확인 (URL, 명령어 ≥ 2개)
+    └─ --ci 헬스체크 실행 및 통과 확인
     └─ Demo Components 헤더 및 컴포넌트 마커 (@demo-only, @demo-scaffold) 확인
     └─ 하나라도 실패 → 검증 차단
 
@@ -733,7 +733,7 @@ specs/reverse-spec/
 | **III. Simplicity First** | spec 범위만 구현. 추측적 기능 추가/조기 추상화 금지 | 모든 코드가 요구사항으로 추적 가능 |
 | **IV. Surgical Changes** | 인접 코드 개선 금지. 자기 변경으로 발생한 고아 코드만 정리 | 변경 줄이 task로 추적 가능 |
 | **V. Goal-Driven Execution** | 검증 가능한 완료 기준 필수. "구현한다" → "테스트가 통과한다" | 자동화 검증 통과 |
-| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)를 **두 가지 모드**로 제공: `--test` (기본값: 자동화 검증 → passed/total → 종료)와 `--interactive` (Feature를 실행 상태로 유지하여 사용자가 **직접 써볼 수 있는** 복사-붙여넣기 예제 제공). **spec.md의 FR-###/SC-###에 매핑**하여 가능한 한 모든 기능 요구사항을 검증. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류 | `./demos/F00N-name.sh`로 검증 (test 모드); `--interactive`로 사용자가 직접 체험 |
+| **VI. Demo-Ready Delivery** | 각 Feature 완료 시 데모 가능한 형태로 제공. "테스트 통과"만으로는 불충분 — **실행 가능한 데모 스크립트** (`demos/F00N-name.sh` 또는 `.ts`/`.py` 등)가 **실제 동작하는 Feature를 실행**하여 사용자가 직접 체험할 수 있어야 함. 스크립트가 서비스를 시작하고, 구체적인 "이렇게 써보세요" 안내(URL, curl 명령어)를 출력하며, Ctrl+C까지 실행 유지. `--ci` 플래그로 자동화 헬스체크(`verify`에서 사용). Coverage 헤더는 **spec.md의 FR-###/SC-###에 매핑**하여 사용자가 뭘 체험할 수 있는지 표시. 데모 코드는 **Demo-only** (`// @demo-only`, 추후 삭제)와 **Promotable** (`// @demo-scaffold`, 추후 확장)로 분류 | `./demos/F00N-name.sh` 실행으로 Feature 실물을 체험 — 보고, 쓰고, 상호작용 |
 
 ### spec-kit과의 관계
 

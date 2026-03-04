@@ -161,40 +161,37 @@ Quality-driven:
 - **Verification criterion**: `Automated verification (tests, build, lint) must pass upon each task completion`
 
 ### VI. Demo-Ready Delivery
-- Each Feature must be demonstrable upon completion — not just passing tests, but runnable and visually/functionally verifiable **by the user**
+- Each Feature must be demonstrable upon completion — not just passing tests, but **the user must be able to see and use the real, working Feature**
+- A demo is NOT a test suite. Tests belong in `verify` Phase 1. A demo **launches the Feature** so the user can experience it firsthand
 - Maintain a centralized `demos/` directory at the project root with **executable demo scripts** per Feature:
   ```
   demos/
-  ├── README.md              # Demo Hub — index of all Feature demos with run commands
-  ├── F001-auth.sh           # Executable demo script for Feature F001
+  ├── README.md              # Demo Hub — index of all Feature demos
+  ├── F001-auth.sh           # Launches auth Feature for the user to try
   ├── F002-product.sh
   └── ...
   ```
 - Each demo script (`demos/F00N-name.sh` or `.ts`/`.py`/etc. matching the project's language) must be:
-  - **Two-mode**: Support `--test` (default) and `--interactive` / `-i` execution modes:
-    - `--test`: Automated assertions → passed/total summary → exit. Used by `verify` phase
-    - `--interactive`: After tests pass, keep the Feature running and print "Try it yourself" examples with concrete commands/URLs the user can copy-paste. Exit on Ctrl+C
-  - **Executable**: `chmod +x` and self-contained — running it demonstrates the Feature without manual steps
-  - **Coverage-mapped**: Include a Coverage header comment mapping each FR-###/SC-### from spec.md to a specific demo test (✅ covered / ⬜ skipped with reason). Aim for maximum coverage of the Feature's functional requirements:
+  - **Interactive by default**: Running the script starts the Feature, prints "Try it" instructions (real URLs, commands), and keeps running until Ctrl+C
+  - **`--ci` flag for automation**: `./demos/F00N-name.sh --ci` runs setup + health check and exits cleanly. Used by `verify` Phase 3
+  - **Executable**: `chmod +x` and self-contained — sets up everything needed (demo data, server start, etc.)
+  - **Coverage-mapped**: Include a Coverage header comment mapping each FR-###/SC-### from spec.md to what the user can see/try in the demo (✅ demonstrated / ⬜ not demoed with reason):
     ```bash
     # Coverage (maps to spec.md):
-    #   ✅ FR-001 [Requirement name]   → Test 1: [what this test does]
-    #   ✅ FR-002 [Requirement name]   → Test 2: [what this test does]
-    #   ⬜ FR-003 [Requirement name]   → Skipped: [reason]
+    #   ✅ FR-001 [Requirement name]   → Demonstrated: [how the user sees this]
+    #   ✅ FR-002 [Requirement name]   → Demonstrated: [how the user sees this]
+    #   ⬜ FR-003 [Requirement name]   → Not demoed: [reason]
     ```
-  - **Self-documenting**: Each test step states what it verifies and why (FR/SC reference + expected behavior). Include a Demo Components header listing each component as Demo-only or Promotable
-  - **Summarized**: Print a final `passed/total` result line so the outcome is immediately clear
-  - **Interactive**: In `--interactive` mode, print at least 2 concrete, copy-pasteable examples so users can actually try the Feature
-  - **Verifiable**: The script is executed during `verify` (test mode) and must complete without errors
-- "Demo-ready" means:
-  - `./demos/F00N-name.sh` exercises **as many of the Feature's functional requirements as possible** and reports pass/fail results — without requiring other incomplete Features or manual intervention
-  - `./demos/F00N-name.sh --interactive` lets the **user actually try the Feature** with concrete examples
-- **Demo interactive mode by Feature type**:
-  - Has UI → Keep server running, print URLs to open in browser
-  - Backend/API only → Keep server running, print curl/httpie examples to try
-  - CLI/Library → Print sample commands to run in another terminal
-  - Data layer / Store → Keep sandbox running, print CRUD command examples
-  - Pipeline / Engine → Print commands to run the pipeline with custom data
+  - **Concrete instructions**: Print at least 2 things the user can actually DO — real URLs to open, real commands to run, real interactions to try
+  - Include a **Demo Components** header listing each component as Demo-only or Promotable
+- "Demo-ready" means: `./demos/F00N-name.sh` starts the Feature and the user can **see it, use it, interact with it** — not just read a "3/3 passed" message
+- **What the demo implements** (by Feature type):
+  - Has UI → Start server with demo data, user opens real pages in browser and interacts
+  - Backend/API → Start server with demo data, user calls real API endpoints with curl/httpie
+  - CLI/Library → Provide pre-configured sandbox, user runs real commands
+  - Data layer / Store → Provide seeded database, user performs real CRUD operations
+  - Pipeline / Engine → Provide sample input, user runs the pipeline and sees real output
+- **Demo artifacts**: During `implement`, create the surfaces users will interact with — demo routes, demo pages, demo data fixtures, demo CLI wrappers. These are what make the demo real, not assertions
 - **Demo code separation strategy**: Clearly distinguish demo-only code from production code
   - **Demo-only code** (mock data, temporary UI scaffolding): Place under `demos/` directory. Mark with `// @demo-only` comment. Will be removed or replaced when the real Feature is implemented
   - **Promotable code** (minimal but real implementation that future Features will extend): Place in the regular source tree. Mark with `// @demo-scaffold — will be extended by F00N-[feature]` comment. Not deleted, but evolved
@@ -206,7 +203,7 @@ Quality-driven:
     #   Settings page shell | src/pages/settings.tsx | Promotable | Extended by F005-settings
     ```
   - During subsequent Feature implementation, check `demos/` for demo-only components marked for removal and clean them up
-- **Verification criterion**: `Running ./demos/F00N-name.sh verifies the Feature works (test mode), and ./demos/F00N-name.sh --interactive lets the user try it — "npm test passes" alone does NOT satisfy this criterion`
+- **Verification criterion**: `Running ./demos/F00N-name.sh launches the Feature and the user can experience it — "npm test passes" alone does NOT satisfy this criterion`
 
 ---
 
