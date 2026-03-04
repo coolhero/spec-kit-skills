@@ -557,7 +557,20 @@ If the spec-kit command fails (error, crash, partial output):
 
 **⚠️ CRITICAL — SUPPRESS spec-kit output**: spec-kit commands print "Next phase:", "Suggested commit:", and other messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
 
-**Execute and Review are ONE continuous action.** After the spec-kit command completes, you MUST — without stopping, without summarizing, without waiting — immediately continue to display the Review content below. There is no pause between Execute and Review.
+**⚠️⚠️⚠️ EXECUTE + REVIEW CONTINUITY RULE ⚠️⚠️⚠️**
+
+**Execute and Review are ONE continuous action — they MUST happen in the SAME response.** After the spec-kit command (skill invocation) returns, you MUST NOT:
+- Generate a response to show the user the command output
+- Stop to present results or a summary
+- Wait for the user to click "continue" or send any message
+- Show "Done" or "Completed" or "Constitution finalized" messages
+
+Instead, in the SAME response where the spec-kit command completed, IMMEDIATELY:
+1. Read the generated artifact file(s)
+2. Display the Review content (Step 3b below)
+3. Call AskUserQuestion for approval (Step 3c below)
+
+**If you find yourself about to generate a response after Execute without showing the Review — STOP. You are violating this rule. Continue to Step 3b.**
 
 #### Step 3b. Display the Review Content
 
@@ -750,11 +763,11 @@ Display the constitution-seed content per [context-injection-rules.md §1 Checkp
 
 #### Phase 0-3. Execute + Review (HARD STOP)
 
-This is ONE continuous step — do NOT stop between execution and review.
+**This is ONE continuous step — ALL of the following (1-7) MUST happen in the SAME response. Do NOT generate a separate response after step 1.**
 
 1. Provide the constitution-seed content as context and execute `speckit-constitution`
-2. **Ignore any "Suggested commit" or "Next step" output from speckit-constitution**
-3. Read `.specify/memory/constitution.md` — the **entire file**
+2. **In the SAME response** — ignore any "Suggested commit" or "Next step" output from speckit-constitution
+3. **In the SAME response** — read `.specify/memory/constitution.md` — the **entire file**
 4. Display the Review content per [context-injection-rules.md §1 Review Display Content](reference/context-injection-rules.md#review-display-content)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
 6. Call AskUserQuestion with options: "Approve", "Request modifications", "I've finished editing"
@@ -769,6 +782,8 @@ Record the constitution completion in `sdd-state.md`:
 - Set Constitution Version to the version from the generated file
 - Set Constitution Completed At to current ISO 8601 timestamp
 - Add entry to Constitution Update Log
+
+**After Phase 0-4 completes, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
 
 ### Phase 1~N: Progress Features in Release Group Order
 
@@ -871,20 +886,16 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 #### Next Step Guidance (after each Feature completion)
 
-After completing a Feature (or when the pipeline is interrupted/paused), ALWAYS display guidance on what to do next:
-
 **If more Features remain in the pipeline**:
+
+Display progress and **IMMEDIATELY proceed to the next Feature** — do NOT stop, do NOT wait for user input, do NOT suggest running a separate command. The pipeline is a continuous flow:
 ```
 ✅ [FID]-[name] completed!
 
 📊 Progress: [completed]/[total] Features done
-  Next Feature: [next-FID]-[next-name]
-
-Next steps:
-  /smart-sdd pipeline       — Continue pipeline (resumes from [next-FID])
-  /smart-sdd specify [next-FID] — Start the next Feature manually
-  /smart-sdd status         — View overall progress
+  Proceeding to: [next-FID]-[next-name]
 ```
+Then immediately start the next Feature's pre-flight (Step 0).
 
 **If all Features are completed**:
 ```
@@ -900,7 +911,9 @@ Next steps:
   /smart-sdd add            — Add new Features to the project
 ```
 
-**If the pipeline is interrupted mid-Feature** (e.g., context limit, user pauses):
+**If the pipeline is interrupted mid-Feature** (e.g., context limit, user pauses, error):
+
+This is the ONLY case where "Next steps" with commands should be displayed:
 ```
 ⏸️ Pipeline paused at [FID]-[name] → [current-step]
 
@@ -910,7 +923,7 @@ To resume:
   /smart-sdd status         — Check current state
 ```
 
-> **This guidance is MANDATORY.** Never end a pipeline session without displaying next steps. The user must always know how to continue.
+> **Pipeline continuity rule**: The pipeline is a CONTINUOUS flow. The only reasons to stop are: (1) HARD STOP checkpoints requiring user approval, (2) BLOCK conditions (verify/merge gates), (3) All Features completed, or (4) Unrecoverable error. Between Features, between Phases — the pipeline keeps running. Never display "Next steps" with commands unless the pipeline is actually stopping.
 
 ---
 

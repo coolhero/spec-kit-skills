@@ -596,9 +596,11 @@ Contents to include in each pre-context.md:
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts (owned + referenced entities, provided + consumed APIs), technical decisions
 - **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
 
-### 4-3. Source Coverage Baseline
+### 4-3. Source Coverage Baseline (BLOCKING)
 
-After generating all deliverables, perform an automated source surface measurement to quantify how much of the original source code is covered by the extracted Features. This establishes a baseline for later parity checking via `/smart-sdd parity`.
+> ⚠️ **This sub-phase is MANDATORY and BLOCKING.** Do NOT skip Steps 2-3 even if the deliverables are already generated. Low source coverage means Features are incomplete — the unmapped source files likely represent functionality that needs to be assigned to existing Features or defined as new Features. **Proceeding to Phase 4-4 without completing Step 3 classification is NOT allowed.**
+
+After generating all deliverables, perform an automated source surface measurement to quantify how much of the original source code is covered by the extracted Features.
 
 #### Step 1 — Automated Surface Measurement
 
@@ -664,10 +666,34 @@ If user selects "Create new Feature" for any items:
 - Generate pre-context.md for the new Feature using the [pre-context-template](templates/pre-context-template.md)
 - The new Feature will be picked up by smart-sdd when the pipeline runs
 
+#### Step 3b — Post-Classification Coverage Update
+
+After classifying ALL unmapped groups:
+
+1. **Recalculate coverage metrics**: Include newly assigned items and new Features from Step 3
+2. **Display updated metrics**:
+   ```
+   📊 Updated Source Coverage (after classification):
+
+   | Metric       | Before | After | Change |
+   |--------------|--------|-------|--------|
+   | Source files | 45.5%  | 89.2% | +43.7% |
+   | ...          | ...    | ...   | ...    |
+
+   New Features created: [count]
+   Items assigned to existing Features: [count]
+   Intentional exclusions: [count]
+   ```
+3. **If source file coverage is still below 70%** after classification: Display a warning and ask the user whether to continue or re-examine:
+   ```
+   ⚠️ Source file coverage is still [X]% after classification.
+   This means [N] source files are not accounted for in any Feature.
+   ```
+
 #### Step 4 — Generate coverage-baseline.md
 
 Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-template](templates/coverage-baseline-template.md):
-- Populate Surface Metrics table with the measured values from Step 1
+- Populate Surface Metrics table with the **final** measured values (after Step 3b update)
 - Record all unmapped items with their user-assigned classifications from Step 3
 - Record all intentional exclusions with their reasons and descriptions
 - Add coverage notes from the classification process
