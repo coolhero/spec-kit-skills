@@ -404,7 +404,7 @@ Next steps:
 
 #### Init and --auto Mode
 
-When `--auto` is specified, Phase 2 and Phase 3 Checkpoints are skipped (content is displayed but proceeds immediately). However, interactive Q&A in Phases 1-3 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 6 Best Practices, AI-suggested Tier assignments and Release Groups).
+When `--auto` is specified, Phase 2 and Phase 3 Checkpoints are skipped (content is displayed but proceeds immediately). However, interactive Q&A in Phases 1-3 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 6 Best Practices, AI-suggested Feature granularity and Release Groups).
 
 #### Init and --dangerously-skip-permissions
 

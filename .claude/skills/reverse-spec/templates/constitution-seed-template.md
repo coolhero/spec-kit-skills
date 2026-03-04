@@ -172,7 +172,13 @@ Quality-driven:
   ```
 - Each demo script (`demos/F00N-name.sh` or `.ts`/`.py`/etc. matching the project's language) must be:
   - **Executable**: `chmod +x` and self-contained — running it demonstrates the Feature without manual steps
-  - **Coverage-mapped**: Include a Coverage header comment mapping each FR-###/SC-### from spec.md to a specific demo test (✅ covered / ⬜ skipped with reason). Aim for maximum coverage of the Feature's functional requirements
+  - **Coverage-mapped**: Include a Coverage header comment mapping each FR-###/SC-### from spec.md to a specific demo test (✅ covered / ⬜ skipped with reason). Aim for maximum coverage of the Feature's functional requirements:
+    ```bash
+    # Coverage (maps to spec.md):
+    #   ✅ FR-001 [Requirement name]   → Test 1: [what this test does]
+    #   ✅ FR-002 [Requirement name]   → Test 2: [what this test does]
+    #   ⬜ FR-003 [Requirement name]   → Skipped: [reason]
+    ```
   - **Self-documenting**: Each test step states what it verifies and why (FR/SC reference + expected behavior). Include a Demo Components header listing each component as Demo-only or Promotable
   - **Summarized**: Print a final `passed/total` result line so the outcome is immediately clear
   - **Verifiable**: The script is executed during `verify` and must complete without errors

@@ -53,7 +53,7 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 - "Stay on current branch (Recommended)" — Continue on the current branch (usually `main`)
 - "Create a new branch" — Create and checkout a new branch for the SDD work
 
-If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
+**If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 
 > **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
@@ -201,7 +201,7 @@ For each category (one at a time, in dependency order):
    - "[Alternative Tech]"
    - "[Keep/Change option]" — whichever wasn't already listed as Recommended
    - "Accept all remaining recommendations" — skip subsequent categories and auto-apply recommended for each
-3. **STOP and WAIT** for the user's response before moving to the next category.
+3. **STOP and WAIT** for the user's response before moving to the next category. **If response is empty → re-ask.**
 4. If the user selects "Other", accept their custom input and record it.
 5. If the user selects "Accept all remaining recommendations", stop the per-category loop. Apply the recommended option for every remaining category and proceed directly to Step 3 (Final Summary and Confirmation), where the user can still review and revise if needed.
 
@@ -269,7 +269,7 @@ Ask via AskUserQuestion: "Confirm the final stack decisions?"
 - "Confirm and proceed"
 - "Revise some choices"
 
-If "Revise some choices", ask which categories to revisit and re-run Step 2 for those categories only.
+**If response is empty → re-ask.** If "Revise some choices", ask which categories to revisit and re-run Step 2 for those categories only.
 
 **Step 4 — Finalize**:
 Record the finalized stack decisions. These will be used in:
@@ -442,7 +442,7 @@ Use AskUserQuestion to ask the user:
 - "Option A: Coarse (Domain-level)"
 - "Option C: Fine (Capability-level)"
 
-**You MUST STOP and WAIT for the user's response. Do NOT proceed until the user selects a granularity level.**
+**You MUST STOP and WAIT for the user's response. Do NOT proceed until the user selects a granularity level. If response is empty → re-ask.**
 
 If the user selects "Other", they can describe a custom granularity or request specific merges/splits of the proposed Features.
 
@@ -526,7 +526,7 @@ Examples:
 - "Auth recommended as Tier 1: 7 Features directly depend on it, owns the User entity, used as middleware for all APIs"
 - "Notification recommended as Tier 3: Independent module with no reverse dependencies, loosely coupled via event subscription"
 
-Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
+Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. **If response is empty → re-ask.** If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
 
 ---
 
