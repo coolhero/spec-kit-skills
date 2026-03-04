@@ -7,6 +7,15 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 
 # Smart-SDD: spec-kit Workflow Orchestrator
 
+> **🚨 MANDATORY RULE — READ FIRST 🚨**
+>
+> Every HARD STOP in this skill uses AskUserQuestion. After EVERY AskUserQuestion call:
+> 1. **CHECK the response** — is it empty, blank, or missing a selection?
+> 2. **If empty → call AskUserQuestion AGAIN.** Do NOT proceed. Do NOT treat empty as approval.
+> 3. **Only proceed when the user has explicitly selected an option** ("Approve", "Request modifications", etc.)
+>
+> This rule applies to ALL Checkpoints and ALL Reviews. Violating this rule means the user loses control of the workflow. There are no exceptions.
+
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with three project modes:
 
 - **Greenfield**: New project from scratch via `/smart-sdd init`
