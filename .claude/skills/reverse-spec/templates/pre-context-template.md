@@ -39,6 +39,22 @@
 - **Extract**: What (what it does), Why (why it does it)
 - **Ignore**: How (how it was implemented)
 
+### Naming Remapping
+
+> **Only present when the project identity changed** (Phase 0 Question 3). Omit this section entirely if the project name is unchanged.
+> Lists code-level identifiers in this Feature's source files that contain the original project name and must be renamed in the new implementation.
+
+| Original Identifier | Location | New Identifier | Type |
+|---------------------|----------|----------------|------|
+| `createCherryIn` | `src/providers/index.ts:42` | `createAngdu` | function |
+| `CherryProvider` | `src/providers/cherry.ts:8` | `AngduProvider` | class |
+| `cherryConfig` | `src/config/app.ts:15` | `angduConfig` | variable |
+| `CHERRY_API_KEY` | `src/env.ts:3` | `ANGDU_API_KEY` | env var |
+| `@cherry-in/core` | `package.json` | `@angdu/core` | package |
+
+> **How to use**: During `/speckit.specify`, `/speckit.plan`, and `/speckit.implement`, always use the **New Identifier** column. The Original Identifier is for reference when reading the existing source code.
+> If no identifiers containing the original project name were found in this Feature's source files, write "None — no original project name references in this Feature".
+
 ### Static Resources
 
 > Non-code files used by this Feature that must be **copied from the original source** during implementation.

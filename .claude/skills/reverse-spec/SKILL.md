@@ -380,6 +380,15 @@ Define the following for each Feature:
 - Owned entities
 - Provided APIs
 
+**Naming Remapping scan** (only if Phase 0 Question 3 established a new project name):
+For each Feature's associated files, scan for code-level identifiers (function names, class names, variable names, constants, package names) that contain the original project name or its prefix mappings. Record each occurrence with:
+- Original identifier (e.g., `createCherryIn`, `CherryProvider`)
+- File and line number
+- Suggested new identifier (apply the prefix mapping, e.g., `Cherry` → `Angdu`)
+- Type (function, class, variable, constant, env var, package, etc.)
+
+This per-Feature catalog will be populated into each Feature's `pre-context.md` → "Naming Remapping" section during Phase 4-2.
+
 > Do not assign Feature IDs at this point. IDs will be assigned based on topological sort after constructing the dependency graph in 3-2.
 
 ### 3-1b. Feature Granularity Selection (HARD STOP)
@@ -590,6 +599,7 @@ For example, if the target directory is `/Users/dev/legacy-app`:
 
 Contents to include in each pre-context.md:
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
+- **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
 - **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features
 - **For /speckit.specify**: Existing feature summary, existing user scenarios, draft requirements (FR-###), draft success criteria (SC-###), edge cases

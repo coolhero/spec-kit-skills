@@ -134,6 +134,7 @@ You can open and edit this file directly, then select
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in requirements |
 
 ### Source Reference Path Resolution
 
@@ -165,6 +166,7 @@ To resolve file paths at runtime:
 - **Business rules**: List of rules for the Feature from business-logic-map (skipped if business-logic-map.md does not exist)
 - **Edge cases**: Edge cases found in pre-context and business-logic-map
 - **Original source reference**: File list from Source Reference (skipped if Source Reference is N/A)
+- **Naming remapping**: If Naming Remapping section exists in pre-context, remind that requirements and descriptions should use the new identifiers (e.g., "AngduProvider" not "CherryProvider")
 
 ### Preceding Feature Result Reference
 
@@ -341,6 +343,7 @@ You can open and edit this file directly, then select
 | File | Section | Filtering |
 |------|---------|-----------|
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in data models and API contracts |
 | `BASE_PATH/entity-registry.md` | Related entity sections | See rules below |
 | `BASE_PATH/api-registry.md` | Related API sections | See rules below |
 | `BASE_PATH/stack-migration.md` | Category Details + Per-Feature row | **Only if New Stack strategy**. See rules below |
@@ -392,6 +395,7 @@ Reference the actual implementation results of dependent preceding Features:
 - **Stack migration context** (New Stack only): Technology mapping, per-Feature migration notes, and patterns requiring rethinking from stack-migration.md. Skipped if Same Stack or file missing
 - **Technical decisions**: Draft technical decisions from pre-context
 - **Preceding Feature actual results**: Reference data-model and contracts from Features that have already completed plan
+- **Naming remapping**: If Naming Remapping section exists in pre-context, remind that entity names, API names, and technical terms should use the new identifiers
 
 ### Checkpoint Display Content
 
@@ -650,6 +654,7 @@ directly, then select "I've finished editing" to re-analyze.
 | `SPEC_PATH/[NNN-feature]/tasks.md` | Entire file | Current Feature |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Static Resources" section | **If present and non-empty** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
 
 ### Static Resource Handling
 
@@ -681,6 +686,24 @@ Before implementation, if the Feature's `pre-context.md` has a non-empty Environ
 
 **Greenfield projects**: Environment Variables section may be empty or contain "TBD" entries. Display TBD entries as reminders during implementation.
 **Incremental (add) projects**: `.env` should already exist. Verify required variables are present.
+
+### Naming Remapping (only if pre-context has a Naming Remapping section)
+
+When the Feature's `pre-context.md` contains a "Naming Remapping" section (indicating the project identity changed):
+
+1. Read the Naming Remapping table — it lists original identifiers found in this Feature's source files and their new names
+2. **Inject as context for `speckit-implement`**: Before execution, provide the remapping table as implementation guidance:
+   ```
+   ⚠️ Project Identity Remapping for [FID]:
+   The following identifiers from the original source must use new names:
+     createCherryIn → createAngdu (function)
+     CherryProvider → AngduProvider (class)
+     CHERRY_API_KEY → ANGDU_API_KEY (env var)
+   Ensure all new code uses the "New Identifier" column. Do NOT carry over original project naming.
+   ```
+3. This is a **soft reminder** — not a HARD STOP. The constitution's "Naming Conventions" section provides the authoritative old → new prefix mapping; the pre-context table provides the Feature-specific occurrences
+
+**Greenfield/incremental projects**: No Naming Remapping section exists. Skip entirely.
 
 ### Demo-Ready Delivery (only if VI. Demo-Ready Delivery is in the constitution)
 
@@ -834,6 +857,7 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
 
 - Automatically executes `speckit-implement` based on tasks.md
 - Static resource copy instructions from pre-context.md (if applicable)
+- Naming remapping context from pre-context.md (if applicable) — displays old → new identifier mapping before execution
 - If Demo-Ready Delivery is active: demo surface implementation + executable demo script creation (`demos/F00N-name.sh`)
 
 ### Checkpoint
