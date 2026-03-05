@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-06 06:00 KST
+[English README](README.md) | Last updated: 2026-03-05 14:09 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -8,27 +8,40 @@
 
 ## 개요
 
-[spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 **Global Evolution Layer**를 추가하는 Claude Code 커스텀 스킬 4종:
+[spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 **Global Evolution Layer**를 추가하는 Claude Code 커스텀 스킬 모음.
 
-| 스킬 | 목적 | 사용 시점 |
-|------|------|-----------|
-| `/reverse-spec` | 기존 소스코드 역분석 → 교차 Feature 컨텍스트 아티펙트 생성 | Brownfield rebuild 또는 SDD 도입 |
-| `/smart-sdd` | spec-kit 커맨드를 교차 Feature 컨텍스트 주입 + 진행 추적으로 래핑 | 모든 모드: greenfield, incremental, rebuild, adoption |
-| `/speckit-diff` | *(유틸리티)* spec-kit 버전 호환성 검사, 영향 리포트 생성 | 언제든 — spec-kit 업데이트 후 |
-| `/case-study` | *(유틸리티)* 실행 아티펙트에서 Case Study 보고서 생성 | reverse-spec + smart-sdd 완료 후 |
+### `/reverse-spec` — 기존 소스 → SDD-Ready 아티펙트
 
-### 이 프로젝트가 필요한 이유
+이미 동작하는 코드가 있는 상태에서 SDD를 적용하려 할 때, 첫 번째 난관은 **하나의 코드베이스를 어떻게 명확한 경계를 가진 Feature 단위로 쪼개는가**입니다.
 
-spec-kit은 Feature 단위 거버넌스에 특화되어 있지만, 교차 Feature 컨텍스트 관리가 부족합니다:
+`/reverse-spec`이 이 문제를 해결합니다. 기존 소스코드를 읽고 SDD에 필요한 기반을 만들어냅니다:
 
-| 한계 | 영향 |
+- **Feature 분해** — 소스 구조에서 논리적 Feature 경계를 식별하고, Feature 간 관계를 보여주는 의존성 그래프를 구성합니다
+- **교차 Feature 레지스트리** — 여러 Feature에서 공유하는 엔티티(데이터 모델), API 계약(Feature 간 통신 방식), 비즈니스 로직 규칙을 프로젝트 수준의 레지스트리로 추출합니다
+- **Feature별 pre-context** — 각 Feature가 소유하는 엔티티, 노출/소비하는 API, 의존하는 다른 Feature를 정리한 컨텍스트 문서를 생성합니다
+- **소스 커버리지 베이스라인** — 추출된 Feature들이 원본 소스의 얼마나 많은 부분을 커버하는지 측정하여, 빠뜨린 기능이 없도록 합니다
+
+결과물은 `/smart-sdd`가 교차 Feature 컨텍스트를 완벽하게 인식하며 spec-kit 파이프라인을 실행할 수 있게 하는 SDD-ready 아티펙트 세트입니다.
+
+### `/smart-sdd` — 교차 Feature 컨텍스트를 갖춘 spec-kit
+
+spec-kit은 한 번에 하나의 Feature만 처리합니다. 단일 Feature라면 문제없지만, 실제 프로젝트에서는 Feature들이 데이터 모델을 공유하고, 서로의 API를 호출하며, 순서 의존성을 갖습니다. Feature 3에 대해 `/speckit-plan`을 실행할 때, Feature 1이 정의한 데이터 모델이나 Feature 2가 기대하는 API 계약을 알 방법이 없습니다.
+
+`/smart-sdd`는 모든 spec-kit 커맨드를 **4단계 프로토콜**로 래핑합니다:
+
+1. **Assemble** — spec-kit 커맨드 실행 전, 관련 컨텍스트를 수집: 엔티티/API 레지스트리, 선행 Feature의 결정 사항, 의존성 제약
+2. **Checkpoint** — 수집된 컨텍스트를 사용자에게 보여주고 실행 전 확인
+3. **Execute + Review** — 주입된 컨텍스트와 함께 spec-kit 커맨드를 실행하고, 출력물의 교차 Feature 정합성을 검토
+4. **Update** — 실행 후 새로 생성된 엔티티, API, 결정 사항으로 글로벌 레지스트리와 상태를 갱신
+
+이로써 Feature 3의 `/speckit-plan`은 Feature 1의 `User` 엔티티에 `email`과 `role` 필드가 있다는 것과, Feature 2의 `/api/orders` 엔드포인트가 `userId` 파라미터를 기대한다는 것을 자동으로 알게 됩니다. 수동으로 교차 참조할 필요가 없습니다.
+
+### 유틸리티
+
+| 스킬 | 목적 |
 |------|------|
-| 교차 Feature 참조 없음 | `/speckit-plan` 실행 시 선행 Feature의 data-model이나 API contracts를 자동 참조하지 않음 |
-| 제한적 교차 Feature 분석 | `/speckit-analyze`는 단일 Feature 내에서만 분석 |
-| 불충분한 에이전트 컨텍스트 | "Recent Changes" 섹션은 최근 3개 Feature의 한 줄 요약만 축적 |
-| 릴리스 단위 관리 없음 | Feature 의존성, 우선순위, 릴리스 그룹 관리를 위한 아티펙트 부재 |
-
-이 프로젝트는 전 Feature에 걸쳐 공유되는 **엔티티/API 레지스트리**, 모든 spec-kit 커맨드 실행 전 **pre-context 주입**, **의존성 기반 순서 지정**, 각 Feature 완료 후 **글로벌 아티펙트 자동 갱신**으로 이 공백을 채웁니다.
+| `/speckit-diff` | spec-kit 버전을 저장된 베이스라인과 비교하고 호환성 판정 + 영향 리포트를 생성합니다. spec-kit 업데이트 후 실행. |
+| `/case-study` | 실행 아티펙트에서 Case Study 보고서(메트릭 + 정성적 관찰)를 생성합니다. 워크플로우 완료 후 실행. |
 
 ### 네 가지 사용자 여정
 
@@ -119,17 +132,9 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 
 ## 작동 방식
 
-### 해결 방안: Global Evolution Layer
+### Global Evolution Layer
 
 spec-kit의 커맨드 템플릿 자체를 수정하지 않고, **Constitution 원칙 + 프로젝트 수준 산출물 + 운영 스킬**로 한계를 보완합니다.
-
-#### `/reverse-spec`은 언제 사용하는가
-
-`/reverse-spec`은 **기존 시스템의 전체 재개발(Brownfield rebuild)** 시나리오를 위한 도구입니다. 기존 소스코드를 역분석하여 엔티티, API 계약, 비즈니스 로직, Feature 간 의존성을 추출하고, 이 정보를 기반으로 smart-sdd가 각 Feature의 spec-kit 커맨드 실행 시 **교차 Feature 컨텍스트를 정확하게 주입**할 수 있게 합니다.
-
-기존 구현을 재현하고 테스트하는 것이 재구축 접근의 핵심입니다. 추출된 드래프트 요구사항(FR-###)과 성공 기준(SC-###)은 기존 시스템이 실제로 하는 것에서 파생되어, 재개발된 시스템이 원래 기능을 정확히 재현하는지 검증하기 위한 테스트 기준을 제공합니다.
-
-신규 프로젝트(Greenfield)나 기존 smart-sdd 프로젝트에 기능을 추가하는 경우(Brownfield incremental)에는 `/reverse-spec` 대신 `/smart-sdd init` 또는 `/smart-sdd add`를 사용합니다.
 
 ### 공통 프로토콜: Assemble → Checkpoint → Execute+Review → Update
 
@@ -426,6 +431,9 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 # 상태 확인
 /smart-sdd status                        # 전체 진행 상태 조회
 
+# SBI 커버리지 확인 (rebuild/adoption 전용)
+/smart-sdd coverage                      # SBI 커버리지 확인 및 갭 대화형 해소
+
 # 패리티 검사 (brownfield rebuild 전용 — 파이프라인 완료 후)
 /smart-sdd parity                        # 원본 소스 대비 패리티 검사
 /smart-sdd parity --source ./old-project # 소스 경로 명시적 지정
@@ -485,6 +493,12 @@ reverse-spec SBI (B###) → specify FR (FR-###) → implement → verify → 커
 ```
 
 `spec.md`의 각 FR에는 소스 태그가 포함됩니다 (예: `FR-001: 이메일 로그인 [source: B001]`). verify 후 `sdd-state.md`에서 커버리지를 추적합니다: P1 행위는 scope 모드와 관계없이 100% 매핑이 필수입니다.
+
+**무엇이 추출되나?** 도메인 프로필(`domains/app.md` § Source Behavior Inventory)이 추출 대상, 우선순위 분류 규칙(P1/P2/P3), 기술 스택별 스캔 패턴을 정의합니다. 기본 `app` 프로필은 exported functions, public methods, request handlers, event listeners, middleware, CLI commands를 추출합니다.
+
+**SBI 추출 확장**: 도메인 프로필을 편집하여 프로젝트 패턴에 맞는 추출 대상을 추가하세요. 예를 들어, `GraphQL resolvers`, `WebSocket handlers`, `cron jobs`, `database triggers`, `state machine transitions`, `authorization policies` 등을 추가하면 `/reverse-spec`가 소스 분석 시 해당 패턴도 스캔합니다. 새 도메인용 프로필을 만들려면 `domains/_schema.md`의 스키마를 따르세요.
+
+`/smart-sdd coverage`로 언제든 현재 SBI 커버리지를 확인하고 갭을 대화형으로 해결할 수 있습니다.
 
 #### 데모 계층화
 
@@ -886,6 +900,7 @@ spec-kit-skills/
         │   │   ├── init.md                              # Greenfield 설정 워크플로우
         │   │   ├── add.md                               # Brownfield incremental 워크플로우
         │   │   ├── adopt.md                             # SDD 도입 워크플로우
+        │   │   ├── coverage.md                          # SBI 커버리지 확인 및 갭 해소
         │   │   ├── pipeline.md                          # 파이프라인 + step 모드 워크플로우
         │   │   ├── restructure.md                       # Feature 구조 변경 워크플로우
         │   │   ├── expand.md                            # Tier 확장 워크플로우

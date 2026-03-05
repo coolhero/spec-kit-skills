@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-06 06:00 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 14:09 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -8,27 +8,40 @@
 
 ## Overview
 
-Four Claude Code custom skills that add a **Global Evolution Layer** to [spec-kit](https://github.com/github/spec-kit) SDD workflows:
+Claude Code custom skills that add a **Global Evolution Layer** to [spec-kit](https://github.com/github/spec-kit) SDD workflows.
 
-| Skill | Purpose | When to Use |
-|-------|---------|-------------|
-| `/reverse-spec` | Reverse-analyzes existing source code → generates cross-Feature context artifacts | Brownfield rebuild or SDD adoption |
-| `/smart-sdd` | Wraps spec-kit commands with cross-Feature context injection + progress tracking | All modes: greenfield, incremental, rebuild, adoption |
-| `/speckit-diff` | *(Utility)* Checks spec-kit version compatibility, produces impact report | Anytime — after spec-kit updates |
-| `/case-study` | *(Utility)* Generates Case Study reports from execution artifacts | After completing reverse-spec + smart-sdd |
+### `/reverse-spec` — Existing Source → SDD-Ready Artifacts
 
-### Why This Exists
+When you already have working code and want to apply SDD, the first challenge is: **how do you break a monolithic codebase into well-defined Features with clear boundaries?**
 
-spec-kit excels at Feature-local governance but lacks cross-Feature context management:
+`/reverse-spec` solves this. It reads your existing source code and produces the foundation that SDD needs:
 
-| Gap | Impact |
-|-----|--------|
-| No cross-Feature references | `/speckit-plan` doesn't reference preceding Features' data-model or API contracts |
-| Limited cross-Feature analysis | `/speckit-analyze` only checks within a single Feature |
-| Insufficient agent context | "Recent Changes" only accumulates one-line summaries for the last 3 Features |
-| No release-level management | No artifacts for Feature dependencies, priorities, or release grouping |
+- **Feature decomposition** — Identifies logical Feature boundaries from the source structure, then builds a dependency graph showing how Features relate to each other
+- **Cross-Feature registries** — Extracts shared entities (data models used across Features), API contracts (how Features communicate), and business logic rules into project-wide registries
+- **Per-Feature pre-contexts** — For each Feature, generates a context document listing which entities it owns, which APIs it exposes/consumes, and which other Features it depends on
+- **Source coverage baseline** — Measures how much of the original source is accounted for by the extracted Features, so nothing falls through the cracks
 
-This project fills these gaps with **entity/API registries** shared across Features, **pre-context injection** before every spec-kit command, **dependency-aware ordering**, and **automatic global artifact updates** after each Feature completes.
+The output is a complete set of SDD-ready artifacts that `/smart-sdd` can then consume to run the spec-kit pipeline with full cross-Feature awareness.
+
+### `/smart-sdd` — spec-kit with Cross-Feature Context
+
+spec-kit processes one Feature at a time. That works well in isolation, but real projects have Features that share data models, call each other's APIs, and have ordering constraints. When you run `/speckit-plan` for Feature 3, it has no idea what data models Feature 1 already defined or what API contracts Feature 2 expects.
+
+`/smart-sdd` wraps every spec-kit command with a **4-step protocol**:
+
+1. **Assemble** — Before running a spec-kit command, gathers relevant context: entity/API registries, preceding Features' decisions, dependency constraints
+2. **Checkpoint** — Shows the assembled context to the user for review before execution
+3. **Execute + Review** — Runs the spec-kit command with injected context, then reviews the output for cross-Feature consistency
+4. **Update** — After execution, updates the global registries and state tracking with any new entities, APIs, or decisions
+
+This means `/speckit-plan` for Feature 3 now automatically knows Feature 1's `User` entity has `email` and `role` fields, and Feature 2's `/api/orders` endpoint expects a `userId` parameter. No manual cross-referencing needed.
+
+### Utilities
+
+| Skill | Purpose |
+|-------|---------|
+| `/speckit-diff` | Compares spec-kit versions against a stored baseline, produces a compatibility verdict + impact report. Run after spec-kit updates. |
+| `/case-study` | Generates a Case Study report (metrics + qualitative observations) from execution artifacts. Run after completing a workflow. |
 
 ### Four User Journeys
 
@@ -119,21 +132,9 @@ Confirm the skills are recognized in Claude Code with the following commands:
 
 ## How It Works
 
-### The Solution: Global Evolution Layer
+### The Global Evolution Layer
 
 Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
-
-These skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting four distinct project modes:
-
-### When to Use `/reverse-spec`
-
-The `/reverse-spec` skill is designed for the **full rebuild scenario** -- when you have an existing codebase and want to re-implement it using spec-kit SDD. It is not needed for greenfield projects or for adding Features to an existing smart-sdd project.
-
-In the rebuild workflow, `/reverse-spec` **generates the essential prerequisites for smart-sdd to function correctly**. It reverse-analyzes existing source code to extract entities, API contracts, business logic, and inter-Feature dependencies. smart-sdd needs this information to **accurately inject cross-Feature context** when executing spec-kit commands for each Feature. Without reverse analysis, smart-sdd cannot know which entities to reference, which API contracts to comply with, or how each Feature depends on its predecessors.
-
-Furthermore, **reproducing and testing the existing implementation** is at the core of the rebuild approach. The extracted draft requirements (FR-###) and acceptance criteria (SC-###) are derived from what the existing system actually does, providing test criteria to verify that the redeveloped system accurately reproduces the original functionality.
-
-For the **adoption scenario**, run `/reverse-spec --adopt` instead. This generates the same cross-Feature artifacts but with `--scope full` and `--stack same` forced — since adoption documents the existing code as-is without reimplementing it. The output feeds into `/smart-sdd adopt` (not the standard pipeline).
 
 ### Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
@@ -427,6 +428,9 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 # Status check
 /smart-sdd status                        # Check overall progress status
 
+# SBI coverage check (rebuild/adoption only)
+/smart-sdd coverage                      # Check SBI coverage and resolve gaps interactively
+
 # Parity check (brownfield rebuild only — after pipeline completes)
 /smart-sdd parity                        # Check parity against original source
 /smart-sdd parity --source ./old-project # Specify source path explicitly
@@ -491,6 +495,12 @@ reverse-spec SBI (B###) → specify FR (FR-###) → implement → verify → cov
 ```
 
 Each FR in `spec.md` includes a source tag (e.g., `FR-001: Email login [source: B001]`). After verify, `sdd-state.md` tracks coverage: P1 behaviors require 100% mapping regardless of scope mode.
+
+**What gets extracted?** The domain profile (`domains/app.md` § Source Behavior Inventory) defines extraction targets, priority classification rules (P1/P2/P3), and scan patterns per tech stack. The default `app` profile extracts: exported functions, public methods, request handlers, event listeners, middleware, CLI commands.
+
+**Extending SBI extraction**: Edit the domain profile to add extraction targets for your project's patterns. For example, add `GraphQL resolvers`, `WebSocket handlers`, `cron jobs`, `database triggers`, `state machine transitions`, or `authorization policies`. `/reverse-spec` will then scan for those patterns during source analysis. To create a profile for a new domain, follow the schema in `domains/_schema.md`.
+
+Use `/smart-sdd coverage` anytime to check current SBI coverage and resolve gaps interactively.
 
 #### Demo Layering
 
@@ -892,6 +902,7 @@ spec-kit-skills/
         │   │   ├── add.md                               # Brownfield incremental workflow
         │   │   ├── pipeline.md                          # Pipeline + step mode workflows
         │   │   ├── adopt.md                              # SDD adoption pipeline workflow
+        │   │   ├── coverage.md                          # SBI coverage check & gap resolution
         │   │   ├── restructure.md                       # Feature restructuring workflow
         │   │   ├── expand.md                            # Tier expansion workflow
         │   │   └── parity.md                            # Source parity verification

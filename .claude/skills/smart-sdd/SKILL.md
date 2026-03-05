@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|restructure|expand|parity|status"
+argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
@@ -131,7 +131,7 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | status | parity)
+  First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
   --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>    → Path to PRD document (only for init command)
