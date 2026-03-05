@@ -457,8 +457,9 @@ Features: F001-xxx, F002-yyy, F003-zzz
 Related SBI: [Summary of behaviors this scenario covers]
 ```
 
-**Step 2 — User approval**:
-Present the proposed Demo Groups via AskUserQuestion:
+**Step 2 — Display and approve**:
+**FIRST**, display ALL proposed Demo Groups using the format above (DG-01, DG-02, ...) so the user can see the full details.
+**THEN**, ask via AskUserQuestion:
 - "Accept proposed Demo Groups"
 - "Modify grouping" (user can reassign Features between groups)
 - "Add more groups"
@@ -523,7 +524,22 @@ First, identify the project domain: understand what kind of system the project i
 
 Evaluate each Feature comprehensively across the analysis axes and assign to Tier 1 (Essential) / Tier 2 (Recommended) / Tier 3 (Optional). See `domains/{domain}.md` § Tier Classification Axes for the evaluation criteria and Tier definitions. For each Feature, a **specific rationale** for the assigned Tier must be provided.
 
-Present the classification results to the user via AskUserQuestion and obtain approval/adjustments. **If response is empty → re-ask.** If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
+**FIRST**, display the full Tier classification table showing each Feature's assigned Tier and rationale:
+```
+── Tier Classification Results ──────────────────
+
+Tier 1 (Essential):
+  F001-auth       — [rationale]
+  F002-product    — [rationale]
+
+Tier 2 (Recommended):
+  F003-order      — [rationale]
+
+Tier 3 (Optional):
+  F004-analytics  — [rationale]
+```
+
+**THEN**, ask via AskUserQuestion for approval/adjustments. **If response is empty → re-ask.** If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
 
 ### Decision History Recording — Architecture
 
