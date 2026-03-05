@@ -363,7 +363,7 @@ Check if `case-study-log.md` exists at project root:
 - **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
 - **If already exists**: Skip silently (created by `/reverse-spec` or manually)
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../../case-study/reference/recording-protocol.md) § M5.
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M5.
 
 **After recording, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
 
@@ -467,7 +467,7 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 > **Git branching**: spec-kit automatically creates a Feature branch during `speckit-specify`. All subsequent steps (plan through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [Git Branch Management](#git-branch-management) for details.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../../case-study/reference/recording-protocol.md) § M6.
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.
 
 #### Next Step Guidance (after each Feature completion)
 
@@ -484,7 +484,7 @@ Then immediately start the next Feature's pre-flight (Step 0).
 
 **If all Features are completed**:
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../../case-study/reference/recording-protocol.md) § M8.
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M8.
 
 ```
 🎉 All Features completed!
