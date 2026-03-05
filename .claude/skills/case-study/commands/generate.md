@@ -8,7 +8,6 @@ Generates a structured Case Study report by aggregating quantitative metrics fro
 
 - `target-directory`: Path to the project root (default: CWD)
 - `--lang en|ko`: Output language (default: `en`)
-- `--output <path>`: Write report to file (default: display in conversation)
 
 Set `BASE_PATH` = `{target-directory}/specs/reverse-spec/`
 Set `SPEC_PATH` = `{target-directory}/specs/`
@@ -223,12 +222,13 @@ Auto-generated from aggregated metrics:
 
 ## Step 5 — Output
 
-### Display mode (default)
-Display the complete report in the conversation.
+Always write the report to a timestamped file in the target directory.
 
-### File mode (`--output <path>`)
-1. Write the report to the specified file path using the Write tool
-2. Display a summary in the conversation:
+1. Generate output filename: `case-study-YYYYMMDD-HHMM.md` using the current local date/time
+   - Example: `case-study-20260305-1430.md`
+2. Output path: `{target-directory}/case-study-YYYYMMDD-HHMM.md`
+3. Write the report using the Write tool
+4. Display a summary in the conversation:
    ```
    ✅ Case Study report generated: {output path}
 

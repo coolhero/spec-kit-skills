@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-06 03:00 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-06 06:00 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -30,7 +30,7 @@ spec-kit excels at Feature-local governance but lacks cross-Feature context mana
 
 This project fills these gaps with **entity/API registries** shared across Features, **pre-context injection** before every spec-kit command, **dependency-aware ordering**, and **automatic global artifact updates** after each Feature completes.
 
-### Five User Journeys
+### Four User Journeys
 
 ```
 -- New Project ----------------------------------------------------------------
@@ -113,7 +113,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 | SDD adoption | `/reverse-spec --adopt` → `/smart-sdd adopt` (run from source directory) |
 | Add to existing project | `/smart-sdd add` |
 | Check spec-kit compatibility | `/speckit-diff` |
-| Generate Case Study report | `/case-study init` → record observations → `/case-study generate` |
+| Generate Case Study report | `/case-study` (observations are auto-recorded during workflow) |
 
 ---
 
@@ -123,7 +123,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 
 Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
 
-Three custom skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting three distinct project modes:
+These skills implement a Global Evolution Layer that wraps the spec-kit workflow, supporting four distinct project modes:
 
 ### When to Use `/reverse-spec`
 
@@ -132,6 +132,8 @@ The `/reverse-spec` skill is designed for the **full rebuild scenario** -- when 
 In the rebuild workflow, `/reverse-spec` **generates the essential prerequisites for smart-sdd to function correctly**. It reverse-analyzes existing source code to extract entities, API contracts, business logic, and inter-Feature dependencies. smart-sdd needs this information to **accurately inject cross-Feature context** when executing spec-kit commands for each Feature. Without reverse analysis, smart-sdd cannot know which entities to reference, which API contracts to comply with, or how each Feature depends on its predecessors.
 
 Furthermore, **reproducing and testing the existing implementation** is at the core of the rebuild approach. The extracted draft requirements (FR-###) and acceptance criteria (SC-###) are derived from what the existing system actually does, providing test criteria to verify that the redeveloped system accurately reproduces the original functionality.
+
+For the **adoption scenario**, run `/reverse-spec --adopt` instead. This generates the same cross-Feature artifacts but with `--scope full` and `--stack same` forced — since adoption documents the existing code as-is without reimplementing it. The output feeds into `/smart-sdd adopt` (not the standard pipeline).
 
 ### Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
@@ -439,7 +441,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 /smart-sdd pipeline --from ./path --auto
 ```
 
-#### Five Project Modes
+#### Four Project Modes
 
 | Aspect | Greenfield | Brownfield (incremental) | Brownfield (rebuild) |
 |--------|-----------|-------------------------|---------------------|
@@ -455,7 +457,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 **Adoption Mode** (new in v2):
 - **Use case**: Keep existing code, wrap it with SDD governance documents
 - **Entry point**: `/reverse-spec --adopt` → `/smart-sdd adopt` (run from source directory)
-- **`--adopt` flag**: Forces stack=same, skips project renaming — existing code stays as-is
+- **`--adopt` flag**: Forces scope=full, stack=same, skips project renaming — existing code stays as-is
 - **Pipeline**: specify → plan → analyze → verify (no tasks/implement — no code to write)
 - **Feature status**: `adopted` (distinct from `completed` — signals legacy code)
 - **Verify behavior**: Test failures are recorded as pre-existing issues (non-blocking)
@@ -594,9 +596,9 @@ When new architecture principles are discovered during Feature progression:
 ```
 📊 Smart-SDD Progress Status
 
-Origin: [greenfield | reverse-spec]
+Origin: [greenfield | rebuild | adoption]
 Scope: core | Active Tiers: T1
-Constitution: ✅ v1.0.0 (2024-01-15)
+Constitution: ✅ v1.0.0 (2026-01-15)
 
 Feature         | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status
 ----------------|------|---------|------|-------|---------|-----------|--------|-------|----------
@@ -889,9 +891,16 @@ spec-kit-skills/
         │   │   ├── init.md                              # Greenfield setup workflow
         │   │   ├── add.md                               # Brownfield incremental workflow
         │   │   ├── pipeline.md                          # Pipeline + step mode workflows
+        │   │   ├── adopt.md                              # SDD adoption pipeline workflow
         │   │   ├── restructure.md                       # Feature restructuring workflow
         │   │   ├── expand.md                            # Tier expansion workflow
         │   │   └── parity.md                            # Source parity verification
+        │   ├── scripts/                                    # Read-only aggregation scripts
+        │   │   ├── context-summary.sh
+        │   │   ├── demo-status.sh
+        │   │   ├── pipeline-status.sh
+        │   │   ├── sbi-coverage.sh
+        │   │   └── validate.sh
         │   ├── domains/                                 # Domain-specific behavior profiles
         │   │   ├── _schema.md                           # Domain profile schema
         │   │   ├── app.md                               # Application domain (default)
@@ -906,6 +915,9 @@ spec-kit-skills/
         │       │   ├── analyze.md
         │       │   ├── implement.md
         │       │   ├── verify.md
+        │       │   ├── adopt-specify.md                   # Adoption-mode specify injection
+        │       │   ├── adopt-plan.md                      # Adoption-mode plan injection
+        │       │   ├── adopt-verify.md                    # Adoption-mode verify injection
         │       │   └── parity.md
         │       ├── state-schema.md                      # sdd-state.md schema definition
         │       └── branch-management.md                 # Git branch management reference
@@ -918,7 +930,7 @@ spec-kit-skills/
         └── case-study/
             ├── SKILL.md                                 # Case Study generator skill (overview + routing)
             ├── commands/
-            │   ├── init.md                              # Initialize observation logging
+            │   ├── init.md                              # Auto-init logic (used internally by other skills)
             │   └── generate.md                          # Generate Case Study report
             ├── reference/
             │   └── recording-protocol.md                # Milestone-based recording guide
@@ -967,7 +979,9 @@ Key topics covered:
 
 ### Case Study Workflow
 
-The `/case-study` skill generates structured reports from SDD workflow execution. The observation log (`case-study-log.md`) is **automatically initialized** when you run `/reverse-spec`, `/smart-sdd init`, or `/smart-sdd pipeline` — no separate setup step required.
+The `/case-study` skill generates structured reports from SDD workflow execution.
+
+> `case-study-log.md` (qualitative observations) is auto-created by `/reverse-spec`, `/smart-sdd init`, and `/smart-sdd pipeline`. If it doesn't exist, the report is generated without qualitative sections.
 
 ```
 Step 1: Run the SDD workflow (case-study-log.md is auto-created)
@@ -975,11 +989,8 @@ Step 1: Run the SDD workflow (case-study-log.md is auto-created)
   /smart-sdd pipeline                 → Record M5-M6 observations per Feature
 
 Step 2: Generate the report
-  /case-study generate ./my-project              → English report
-  /case-study generate ./my-project --lang ko    → Korean report
-  /case-study generate ./my-project --output case-study.md  → Save to file
+  /case-study                                      → English → case-study-YYYYMMDD-HHMM.md
+  /case-study --lang ko                            → Korean → case-study-YYYYMMDD-HHMM.md
 ```
-
-> **Manual override**: Run `/case-study init ./my-project` to reset the log or view the recording protocol.
 
 The report combines **quantitative data** (automatically extracted from sdd-state.md, registries, and spec-kit artifacts) with **qualitative observations** (manually recorded at 8 milestones during execution). Even without observations, a metrics-only report is generated from the available artifacts.

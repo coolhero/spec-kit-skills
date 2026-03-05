@@ -23,12 +23,31 @@ All content from constitution-seed.md is provided as context when executing `spe
 - Recommended development principles (Best Practices)
 - Global Evolution Layer operational principles
 
+### Adoption Mode Preamble
+
+When Origin is `adoption` (from `/smart-sdd adopt`), **prepend** the following preamble before the constitution-seed content:
+
+```
+📌 Adoption Mode — This constitution documents the existing codebase's philosophy.
+
+The principles below were extracted from working source code. The constitution should:
+- Preserve the existing code's architectural philosophy and conventions
+- Describe current practices (descriptive), not impose new standards (prescriptive)
+- Only add new rules if the user explicitly requests them during review
+```
+
+This framing ensures `speckit-constitution` produces a constitution that **reflects the existing codebase** rather than defining aspirational standards.
+
 ## Checkpoint Display Content
 
-Show the **actual content** of constitution-seed.md so the user can review and modify before finalizing:
+Show the **actual content** of constitution-seed.md so the user can review and modify before finalizing.
+
+**Adoption mode**: Include the adoption preamble before the content, and add a note asking the user to validate that the extracted principles match their understanding of the codebase.
 
 ```
 📋 Context for Constitution finalization:
+
+[If adoption mode: show adoption preamble here]
 
 ── Source Reference Strategy ─────────────────────
 [Actual strategy content: Same/New stack details and reference approach]
@@ -53,6 +72,9 @@ Review the above content. You can:
   - Approve as-is to proceed with speckit-constitution
   - Request modifications (add/remove/change principles)
   - Edit constitution-seed.md directly before proceeding
+
+[If adoption mode: "⚠️ These principles were extracted from existing source code.
+Please verify they accurately reflect the codebase's philosophy."]
 ```
 
 ## Review Display Content

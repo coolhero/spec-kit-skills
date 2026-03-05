@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-06 03:00 KST
+[English README](README.md) | Last updated: 2026-03-06 06:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -30,7 +30,7 @@ spec-kit은 Feature 단위 거버넌스에 특화되어 있지만, 교차 Featur
 
 이 프로젝트는 전 Feature에 걸쳐 공유되는 **엔티티/API 레지스트리**, 모든 spec-kit 커맨드 실행 전 **pre-context 주입**, **의존성 기반 순서 지정**, 각 Feature 완료 후 **글로벌 아티펙트 자동 갱신**으로 이 공백을 채웁니다.
 
-### 다섯 가지 사용자 여정
+### 네 가지 사용자 여정
 
 ```
 -- 신규 프로젝트 ---------------------------------------------------------------
@@ -113,7 +113,7 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 | SDD 도입 | `/reverse-spec --adopt` → `/smart-sdd adopt` (소스 디렉토리에서 실행) |
 | 기존 프로젝트에 추가 | `/smart-sdd add` |
 | spec-kit 호환성 검사 | `/speckit-diff` |
-| Case Study 보고서 생성 | `/case-study init` → 관찰 기록 → `/case-study generate` |
+| Case Study 보고서 생성 | `/case-study` (관찰 기록은 워크플로우 중 자동 기록) |
 
 ---
 
@@ -371,7 +371,7 @@ Core scope에서는 각 Feature를 **5가지 분석 축**으로 종합 평가합
 
 ### 2. `/smart-sdd` --- spec-kit SDD 워크플로우 오케스트레이터
 
-spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차 Feature 컨텍스트를 자동 주입하고 Global Evolution Layer를 유지보수하는 스킬입니다. 세 가지 프로젝트 모드를 지원합니다:
+spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차 Feature 컨텍스트를 자동 주입하고 Global Evolution Layer를 유지보수하는 스킬입니다. 네 가지 프로젝트 모드를 지원합니다:
 
 - **Greenfield**: `/smart-sdd init`으로 신규 프로젝트를 처음부터 구성
 - **Brownfield (incremental)**: `/smart-sdd add`로 기존 smart-sdd 프로젝트에 Feature 추가
@@ -380,7 +380,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 #### 핵심 가치
 
 - spec-kit 커맨드를 **대체하지 않고 감싸는** 방식으로, spec-kit의 업데이트에 영향받지 않음
-- **다섯 가지 사용자 여정**: 신규(`init`), SDD 도입(`adopt`), 점진적 추가(`add`), 재구축(`pipeline`)
+- **네 가지 사용자 여정**: 신규(`init`), SDD 도입(`adopt`), 점진적 추가(`add`), 재구축(`pipeline`)
 - 각 커맨드 실행 전에 필요한 교차 Feature 정보를 **자동 조립하여 주입**
 - Feature 완료 시 Global Evolution Layer (entity-registry, api-registry, roadmap, 후속 pre-context)를 **자동 갱신**
 - 전체 진행 상태를 `sdd-state.md`로 **체계적 추적**
@@ -440,7 +440,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 /smart-sdd pipeline --from ./path --auto
 ```
 
-#### 다섯 가지 프로젝트 모드
+#### 네 가지 프로젝트 모드
 
 | 모드 | 커맨드 | 사용 시점 | Global Evolution Layer 생성 방식 | Feature 세분화 | Scope | 다음 단계 |
 |------|--------|----------|--------------------------------|--------------|-------|----------|
@@ -451,14 +451,14 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 **도입 모드** (v2 신규):
 - **사용 사례**: 기존 코드를 유지하면서 SDD 거버넌스 문서로 래핑
 - **진입점**: `/reverse-spec --adopt` → `/smart-sdd adopt` (소스 디렉토리에서 실행)
-- **`--adopt` 플래그**: stack=same 강제, 프로젝트 이름 변경 건너뜀 — 기존 코드 그대로 유지
+- **`--adopt` 플래그**: scope=full, stack=same 강제, 프로젝트 이름 변경 건너뜀 — 기존 코드 그대로 유지
 - **파이프라인**: specify → plan → analyze → verify (tasks/implement 없음 — 코드 작성 불필요)
 - **Feature 상태**: `adopted` (`completed`와 구분 — 레거시 코드임을 표시)
 - **Verify 동작**: 테스트 실패는 기존 이슈로 기록 (비차단)
 
 #### 모드별 실제 차이점
 
-세 가지 모드의 핵심적인 차이는 **시작 시점에 얼마나 많은 컨텍스트가 준비되어 있는가**입니다:
+네 가지 모드의 핵심적인 차이는 **시작 시점에 얼마나 많은 컨텍스트가 준비되어 있는가**입니다:
 
 - **Brownfield (rebuild)**는 가장 풍부한 초기 컨텍스트를 가집니다. `/reverse-spec`가 기존 코드베이스 전체를 분석하여 엔티티, API, 비즈니스 규칙, Feature 간 의존성을 Global Evolution Layer에 추출합니다. 파이프라인 실행 시 각 단계에 처음부터 초안 요구사항, 스키마 참조, 교차 Feature 컨텍스트가 주입됩니다. 이것은 **정제 기반(refinement-based)** 워크플로우입니다 --- spec-kit이 미리 채워진 초안을 정제합니다.
 
@@ -592,9 +592,9 @@ Feature 진행 중 새로운 아키텍처 원칙이 발견되면:
 ```
 📊 Smart-SDD 진행 상태
 
-Origin: [greenfield | reverse-spec]
+Origin: [greenfield | rebuild | adoption]
 Scope: core | Active Tiers: T1
-Constitution: ✅ v1.0.0 (2024-01-15)
+Constitution: ✅ v1.0.0 (2026-01-15)
 
 Feature         | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status
 ----------------|------|---------|------|-------|---------|------|--------|-------|----------
@@ -885,10 +885,17 @@ spec-kit-skills/
         │   ├── commands/                                # 커맨드별 워크플로우 상세
         │   │   ├── init.md                              # Greenfield 설정 워크플로우
         │   │   ├── add.md                               # Brownfield incremental 워크플로우
+        │   │   ├── adopt.md                             # SDD 도입 워크플로우
         │   │   ├── pipeline.md                          # 파이프라인 + step 모드 워크플로우
         │   │   ├── restructure.md                       # Feature 구조 변경 워크플로우
         │   │   ├── expand.md                            # Tier 확장 워크플로우
         │   │   └── parity.md                            # 소스 패리티 검증
+        │   ├── scripts/                                 # 아티펙트 집계 스크립트
+        │   │   ├── context-summary.sh                   # Feature/Entity/API/DemoGroup 요약
+        │   │   ├── sbi-coverage.sh                      # SBI 커버리지 대시보드
+        │   │   ├── demo-status.sh                       # Demo Group 진행 현황
+        │   │   ├── pipeline-status.sh                   # 파이프라인 진행 개요
+        │   │   └── validate.sh                          # 교차 파일 일관성 검사
         │   ├── domains/                                 # 도메인별 행동 프로필
         │   │   ├── _schema.md                           # 도메인 프로필 스키마
         │   │   ├── app.md                               # 애플리케이션 도메인 (기본값)
@@ -903,7 +910,10 @@ spec-kit-skills/
         │       │   ├── analyze.md
         │       │   ├── implement.md
         │       │   ├── verify.md
-        │       │   └── parity.md
+        │       │   ├── parity.md
+        │       │   ├── adopt-specify.md                # 도입 모드 specify 주입 규칙
+        │       │   ├── adopt-plan.md                    # 도입 모드 plan 주입 규칙
+        │       │   └── adopt-verify.md                  # 도입 모드 verify 주입 규칙
         │       ├── state-schema.md                      # sdd-state.md 스키마 정의
         │       └── branch-management.md                 # Git 브랜치 관리 참조
         ├── speckit-diff/
@@ -915,7 +925,7 @@ spec-kit-skills/
         └── case-study/
             ├── SKILL.md                                 # Case Study 생성 스킬 (개요 + 라우팅)
             ├── commands/
-            │   ├── init.md                              # 관찰 로깅 초기화
+            │   ├── init.md                              # 자동 초기화 로직 (다른 스킬에서 내부적으로 사용)
             │   └── generate.md                          # Case Study 보고서 생성
             ├── reference/
             │   └── recording-protocol.md                # 마일스톤별 기록 가이드
@@ -950,7 +960,7 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 
 | 날짜 | 주제 |
 |------|------|
-| 2026-02-28 | 초기 아키텍처, HARD STOP 철학, 세 가지 프로젝트 모드 |
+| 2026-02-28 | 초기 아키텍처, HARD STOP 철학, 네 가지 프로젝트 모드 |
 | 2026-03-01 | 데모 기반 전달, 스코프 시스템 (core/full), Feature 세분화 |
 | 2026-03-02 | 파이프라인 강화, Feature 재구성 프로토콜 |
 | 2026-03-03 | 리뷰 시스템 개편, 패리티 검증 시스템 |
@@ -964,19 +974,18 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 
 ### Case Study 워크플로우
 
-`/case-study` 스킬은 SDD 워크플로우 실행 결과에서 구조화된 보고서를 생성합니다. 관찰 로그(`case-study-log.md`)는 `/reverse-spec`, `/smart-sdd init`, `/smart-sdd pipeline` 실행 시 **자동으로 초기화**됩니다 — 별도의 설정 단계가 필요 없습니다.
+`/case-study` 스킬은 SDD 워크플로우 실행 결과에서 구조화된 보고서를 생성합니다.
+
+> `case-study-log.md` (정성적 관찰 기록)는 `/reverse-spec`, `/smart-sdd init`, `/smart-sdd pipeline` 실행 시 **자동 생성**됩니다. 로그가 없으면 정성적 섹션 없이 정량 데이터만으로 보고서를 생성합니다.
 
 ```
 Step 1: SDD 워크플로우 실행 (case-study-log.md 자동 생성)
   /reverse-spec ./source-code         → M1-M4 관찰 사항을 case-study-log.md에 기록
   /smart-sdd pipeline                 → Feature별 M5-M6 관찰 사항 기록
 
-Step 2: 보고서 생성
-  /case-study generate ./my-project              → 영어 보고서
-  /case-study generate ./my-project --lang ko    → 한국어 보고서
-  /case-study generate ./my-project --output case-study.md  → 파일로 저장
+Step 2: 보고서 생성 (타임스탬프 파일명으로 자동 저장)
+  /case-study                                      → 영어 → case-study-YYYYMMDD-HHMM.md
+  /case-study --lang ko                            → 한국어 → case-study-YYYYMMDD-HHMM.md
 ```
-
-> **수동 초기화**: `/case-study init ./my-project`로 로그를 재설정하거나 기록 프로토콜을 확인할 수 있습니다.
 
 보고서는 **정량 데이터** (sdd-state.md, 레지스트리, spec-kit 아티펙트에서 자동 추출)와 **정성적 관찰** (실행 중 8개 마일스톤에서 수동 기록)을 결합합니다. 관찰 기록이 없어도 아티펙트에서 메트릭만으로 보고서를 생성할 수 있습니다.

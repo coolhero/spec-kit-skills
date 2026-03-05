@@ -247,7 +247,7 @@ Before Phase 0, initialize the state and validate the source path.
 If `BASE_PATH/sdd-state.md` does not exist, create it:
 1. Read `BASE_PATH/roadmap.md` to extract the Feature list and Tiers
 2. Generate `sdd-state.md` following the [state-schema.md](reference/state-schema.md) format
-3. Set Origin based on the project type (`greenfield` or `rebuild`)
+3. Set Origin based on the project type (`greenfield`, `rebuild`, or `adoption`)
 4. Set Source Path (see state-schema.md for rules per mode)
 
 **Step 2 — Source Path verification (HARD STOP)**:
@@ -256,10 +256,11 @@ Read the `Source Path` from `sdd-state.md` and verify based on the project mode:
 | Mode | Source Path | Verification |
 |------|------------|-------------|
 | **greenfield** | `N/A` | Skip — no source to reference. Display: "Greenfield project — no existing source reference." |
-| **reverse-spec (rebuild)** | Absolute path from reverse-spec | Verify the path exists and is accessible. Display the path and ask the user to confirm or update it (the source may have moved since `/reverse-spec` was run). |
+| **rebuild** | Absolute path from reverse-spec | Verify the path exists and is accessible. Display the path and ask the user to confirm or update it (the source may have moved since `/reverse-spec` was run). |
+| **adoption** | `.` (CWD) | Same as incremental — the existing code is in the current directory. Display: "Adoption mode — current directory is the source reference." |
 | **add (incremental)** | `.` (CWD) | Verify that the current directory contains source code (check for common markers: `package.json`, `pyproject.toml`, `go.mod`, `src/`, etc.). Display: "Incremental mode — current directory is the source reference." |
 
-For **reverse-spec** mode, present to the user via AskUserQuestion:
+For **rebuild** mode, present to the user via AskUserQuestion:
 ```
 📂 Source Reference Path: [path from sdd-state.md]
 ```

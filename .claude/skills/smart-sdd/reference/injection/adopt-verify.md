@@ -62,9 +62,8 @@ Mode: ADOPTION — Non-blocking verification
   - [ ] SBI coverage: [P1: N entries, P2: N entries]
 
 ── Phase 3: Demo-Ready Verification ──────────────
-[Only if Demo-Ready Delivery is in the constitution]
-  - If constitution exists: apply demo checks
-  - If not yet finalized: skip Phase 3
+⏭️ SKIP — Adoption mode does not create per-Feature demos.
+  (Project-level demo is created in Post-Pipeline: Final Demo instead)
 
 ── Phase 4: Global Evolution Consistency ─────────
 [Same as standard — entity/API registry consistency]

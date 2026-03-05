@@ -33,7 +33,7 @@ $ARGUMENTS parsing rules:
   --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
   --name <val>  → New project name (skips Phase 0 Question 3 if provided; implies rename from detected project name)
   --domain <val> → Project domain profile: "app" (default). Determines analysis axes, registries, and Feature boundary heuristics
-  --adopt       → SDD Adoption mode: forces --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
+  --adopt       → SDD Adoption mode: forces --scope full --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
 ```
 
 ---

@@ -243,11 +243,35 @@ Based on the new Feature's entity/API dependencies and user scenario:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** (CheckpointApproval): "Accept recommendation", "Join [other group]", "Create new group", "No demo group"
+**HARD STOP** (CheckpointApproval):
+- **"Accept recommendation"** — Use the suggested group assignment
+- **"Join [other group]"** — Join a different existing group (specify which)
+- **"Create new Demo Group"** — Define a brand new demo group for this Feature
+- **"No demo group"** — Infrastructure/cross-cutting Feature, no user-facing demo
 
-If creating a new group:
-- Ask for scenario name and description
-- The new group will be added to roadmap.md Demo Groups section
+### 5c. New Demo Group Creation (if selected)
+
+If the user selects "Create new Demo Group":
+
+1. Ask for group details via AskUserQuestion:
+   - **Scenario name**: Short name (e.g., "Notification Management")
+   - **Description**: One-line user journey description
+
+2. Assign the next available Demo Group ID (DG-NN)
+
+3. Add the new group to `roadmap.md` Demo Groups section:
+   ```
+   ### DG-{NN}: {Scenario Name}
+   **Scenario**: {Description}
+   **Features**: F{NNN}-{new-feature}
+   **SBI Coverage**: (populated during specify)
+   ```
+
+4. Display confirmation:
+   ```
+   ✅ Created Demo Group DG-{NN}: {Scenario Name}
+      Feature: F{NNN}-{new-feature}
+   ```
 
 ---
 

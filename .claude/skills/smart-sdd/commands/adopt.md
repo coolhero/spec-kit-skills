@@ -21,16 +21,24 @@ The `adopt` command wraps **existing, working code** with SDD documentation. Unl
 ## Pipeline Overview
 
 ```
-Phase 0: Constitution Finalization (same as pipeline)
+Environment Bootstrap   → Install deps, env check, smoke test (skippable)
+  ↓
+Phase 0: Constitution Finalization (same flow, adoption-specific framing)
   ↓
 Phase 1~N: Feature-by-Feature Adoption (Release Group order)
   Each Feature:
     0. Pre-flight        → main branch check
     1. Specify (adopt)   → Extract existing behavior as FR/SC
     2. Plan (adopt)      → Document existing architecture
-    3. Analyze           → Cross-artifact consistency check
+    3. Analyze           → Cross-artifact consistency (spec.md + plan.md only)
     4. Verify (adopt)    → Non-blocking verification + SBI coverage
     5. Merge             → Checkpoint + Feature branch merge
+  ↓
+Post-Pipeline: Coverage Verification (BLOCKING) → Resolve gaps to 100% P1+P2
+  ↓
+Post-Pipeline: Final Demo (HARD STOP) → project-level demo script
+  ↓
+Post-Pipeline Summary
 ```
 
 ---
@@ -78,11 +86,144 @@ Processing order: Release Group sequence
 
 ---
 
+## Environment Bootstrap (Skippable)
+
+Before documenting the codebase, verify that the existing project actually builds, runs, and passes tests. This establishes a **baseline** that the verify step later uses to distinguish pre-existing issues from adoption-introduced problems.
+
+### HARD STOP — Skip Check
+
+```
+📋 Environment Bootstrap
+
+Before starting adoption, we should verify the existing project works:
+  1. Install dependencies
+  2. Check environment configuration (.env, etc.)
+  3. Build → verify compilation
+  4. Test → establish pass/fail baseline
+  5. Run → verify the application starts and responds
+
+This establishes a baseline to distinguish pre-existing issues from adoption-introduced problems.
+```
+
+Use AskUserQuestion:
+- **"Run bootstrap"** — Proceed with the full environment bootstrap below
+- **"Skip — environment is ready"** — Skip to Phase 0. Record in sdd-state.md: `Environment Bootstrap: skipped (user confirmed ready)`
+
+### Step 1 — Dependency Installation
+
+Detect the project's package manager and install dependencies:
+
+| Marker | Command |
+|--------|---------|
+| `package-lock.json` | `npm ci` |
+| `yarn.lock` | `yarn install --frozen-lockfile` |
+| `pnpm-lock.yaml` | `pnpm install --frozen-lockfile` |
+| `requirements.txt` / `pyproject.toml` | `pip install -r requirements.txt` / `pip install .` |
+| `go.mod` | `go mod download` |
+| `Cargo.toml` | `cargo fetch` |
+| `pom.xml` | `mvn dependency:resolve` |
+
+If the install command fails, display the error and ask the user to resolve it before continuing.
+
+### Step 2 — Environment Configuration
+
+1. Check if `.env.example` (or equivalent: `.env.sample`, `.env.template`) exists
+2. If it does, check if `.env` (or equivalent runtime config) exists
+3. **If `.env` is missing**: Display HARD STOP:
+   ```
+   ⚠️ Environment configuration required.
+
+   Found: .env.example ([N] variables defined)
+   Missing: .env (runtime values)
+
+   Please create .env with the required values, then confirm to continue.
+   ```
+4. **If `.env` exists**: Continue silently
+
+### Step 3 — Smoke Test (Build + Test + Run Baseline)
+
+Run the project's existing build, test, and run commands to establish a baseline:
+
+**Build baseline**:
+- Detect build command: `npm run build`, `go build ./...`, `cargo build`, `mvn compile`, etc.
+- Run build and record result: success/failure
+- If no build command is found, record: `No build command detected`
+
+**Test baseline**:
+- Detect test command: `npm test`, `pytest`, `go test ./...`, `cargo test`, `mvn test`, etc.
+- Run tests and record results:
+  - Total tests, passed, failed, skipped
+- If no test command is found, record: `No test command detected`
+
+**Run baseline**:
+- Detect run/start command: `npm run dev`, `npm start`, `python manage.py runserver`, `go run .`, `docker compose up`, etc.
+- Start the application in background, wait for it to be ready (up to 30 seconds)
+- Verify the application responds:
+  - HTTP server → health check request (e.g., `curl http://localhost:[port]`)
+  - CLI tool → run with `--help` or `--version`
+  - Library → skip run check (no standalone execution)
+- Stop the application after verification
+- If no run command is found or the project is a library/package, record: `No run command detected (library/package)` and skip
+
+### Step 4 — Record Baseline
+
+Record results in `sdd-state.md` under a new `Environment Bootstrap` section:
+
+```
+### Environment Bootstrap
+
+| Item | Status | Details |
+|------|--------|---------|
+| Dependencies | ✅ installed | [package manager] |
+| Environment  | ✅ configured | .env ([N] vars) |
+| Build        | ✅ success | [build command] |
+| Tests        | ⚠️ [M]/[N] passed | [M] passed, [F] failed, [S] skipped |
+| Run          | ✅ responds | [run command] → http://localhost:[port] |
+```
+
+Display summary:
+```
+✅ Environment Bootstrap Complete
+
+  Dependencies: installed ([package manager])
+  Environment:  configured
+  Build:        [success/failure]
+  Tests:        [M]/[N] passed ([F] failures = pre-existing)
+  Run:          [responds/failed/skipped] ([run command])
+
+  ℹ️ [F] test failures and build/run issues are recorded as pre-existing.
+     These will be non-blocking during per-Feature verify.
+```
+
+> The test/build baseline recorded here is used by the verify step (Step 4) to classify failures as "pre-existing" vs "newly introduced during adoption."
+
+---
+
 ## Phase 0: Constitution Finalization
 
-**Same as standard pipeline Phase 0.** See [pipeline.md](pipeline.md) § Phase 0.
+Follows the standard pipeline Phase 0 flow (see [pipeline.md](pipeline.md) § Phase 0) with **adoption-specific framing**.
 
-Skip check: If `.specify/memory/constitution.md` already exists and is finalized, skip Phase 0.
+**Skip check**: If `.specify/memory/constitution.md` already exists and is finalized, skip Phase 0.
+
+**Adoption-specific constitution framing**:
+
+The constitution-seed generated by `/reverse-spec --adopt` contains principles **extracted from the existing source code**. In adoption mode, the constitution documents "how the code IS built" — not "how we WILL build":
+
+- **Greenfield/Rebuild**: Constitution defines new standards and principles to follow
+- **Adoption**: Constitution documents the existing codebase's philosophy and conventions
+
+When assembling context (Phase 0-1), prepend the following framing to the constitution-seed content:
+
+```
+📌 Adoption Mode — This constitution documents the existing codebase's philosophy.
+
+The principles below were extracted from working source code. The constitution should:
+- Preserve the existing code's architectural philosophy and conventions
+- Describe current practices (descriptive), not impose new standards (prescriptive)
+- Only add new rules if the user explicitly requests them during review
+```
+
+**Both HARD STOPs (Checkpoint + Review) MUST fire** — the user should validate that the extracted principles accurately reflect their understanding of the codebase. Do NOT skip these stops in adoption mode.
 
 ---
 
@@ -143,15 +284,15 @@ Key behaviors:
 
 #### Step 3 — Analyze
 
-Execute the **standard analyze step** — same as pipeline. No adoption-specific variant needed.
+Execute the analyze step with a key difference: **`tasks.md` does not exist** in adoption mode (tasks are skipped). Analyze operates on `spec.md` + `plan.md` only.
 
 ```
 analyze → Assemble → Checkpoint(STOP) → speckit-analyze + Review(STOP) → Update
 ```
 
-**Injection rules**: Read `reference/injection/analyze.md` (standard)
+**Injection rules**: Read `reference/injection/analyze.md` (standard). Per `context-injection-rules.md` Missing/Sparse Content Handling rules, `tasks.md` absence is expected — analyze gracefully degrades to two-artifact mode.
 
-Cross-artifact consistency is checked the same way regardless of adoption mode.
+**CRITICAL analyze issues**: If analyze produces CRITICAL-severity findings, they are **informational in adoption mode** (not blocking). Record them as pre-existing architectural issues in `sdd-state.md`. The code already exists and works — CRITICAL issues become technical debt items, not blockers.
 
 #### ⏭️ Steps Skipped — Tasks + Implement
 
@@ -160,25 +301,6 @@ Cross-artifact consistency is checked the same way regardless of adoption mode.
 Record in `sdd-state.md`:
 - `tasks` step: `⏭️` with note "Skipped — adoption mode (code exists)"
 - `implement` step: `⏭️` with note "Skipped — adoption mode (code exists)"
-
-#### Environment Readiness Check (before first Feature's verify)
-
-Before running verify on the **first Feature**, check if the project requires environment setup:
-
-1. Check if `.env.example` (or equivalent) exists in the project root
-2. If it does, check if a corresponding `.env` (or equivalent runtime config) exists
-3. **If `.env` is missing**: Display a HARD STOP:
-   ```
-   ⚠️ Environment setup required before verify can run tests/build.
-
-   Found: .env.example ([N] variables defined)
-   Missing: .env (runtime values)
-
-   Please create .env with the required values, then confirm to continue.
-   ```
-4. **If `.env` exists**: Skip silently — environment is ready
-
-> This check runs **once** before the first Feature's verify, not per-Feature.
 
 #### Step 4 — Verify (Adoption Mode)
 
@@ -193,7 +315,7 @@ adopt-verify → Assemble → Checkpoint(STOP) → verify execution + Review(STO
 Key behaviors:
 - **Phase 1 (Execution Verification)**: Test/build failures are **non-blocking** — recorded as "pre-existing issues"
 - **Phase 2 (Cross-Feature Consistency)**: Same as standard
-- **Phase 3 (Demo-Ready)**: If constitution is finalized and includes Demo-Ready Delivery, apply demo checks. Otherwise skip
+- **Phase 3 (Demo-Ready)**: **SKIP in adoption mode** — per-Feature demo scripts are not created during adoption. The final project demo is created in the Post-Pipeline Demo step instead.
 - **Phase 4 (Global Evolution)**: Same as standard
 - **SBI Coverage**: Check B### → FR-### mapping completeness
 - **Overall status**: `adopted` (not `completed`)
@@ -227,25 +349,195 @@ Key behaviors:
 
 ---
 
+## Post-Pipeline: Coverage Verification (BLOCKING)
+
+> ⚠️ **This step is MANDATORY and BLOCKING.** All unmapped P1/P2 behaviors must be resolved before proceeding. Adoption is not complete until every source behavior is accounted for.
+
+After all Features are adopted, verify that the adoption captured the full source codebase and **resolve all gaps to reach 100% coverage**.
+
+### Step 1 — SBI Coverage Check
+
+Read `sdd-state.md` → Source Behavior Coverage section. Calculate P1/P2/P3 totals:
+
+```
+📊 Source Behavior Coverage:
+
+| Priority | Total | Mapped | Coverage |
+|----------|-------|--------|----------|
+| P1 (core)       | [N] | [M] | [%] |
+| P2 (important)  | [N] | [M] | [%] |
+| P3 (nice-to-have)| [N] | [M] | [%] |
+
+Unmapped P1 behaviors: [list if any]
+Unmapped P2 behaviors: [list if any]
+```
+
+**If P1 + P2 = 100%**: Skip to Step 3 (Coverage Baseline Cross-Check).
+
+### Step 2 — Gap Resolution (HARD STOP per group)
+
+> Mirrors `/reverse-spec` Phase 4-3 Step 3 classification flow. Every unmapped behavior must be explicitly resolved.
+
+Group unmapped P1/P2 behaviors by their owning Feature (from the SBI's Feature column). For each group, use AskUserQuestion and WAIT for the user's response:
+
+```
+📋 Unmapped Behaviors: [Feature Name] ([N] items)
+
+  B003 | registerUser()     | P1 — No matching FR in spec.md
+  B007 | sendVerifyEmail()  | P2 — No matching FR in spec.md
+
+Options:
+```
+
+Use AskUserQuestion per group:
+- **"Add to existing Feature [FID]"** — Go back to the affected Feature's specify step and add missing FR-### mappings for these behaviors. Mark the Feature's pipeline steps with 🔀 from specify onward in sdd-state.md. The Feature will re-run: specify → plan → analyze → verify → merge.
+- **"Create new Feature"** — Invoke the `add` workflow with pre-populated definition: Feature name derived from the behavior group, description includes the unmapped B### items as draft requirements, pre-context.md populated with the SBI entries. The new Feature goes through the full adopt pipeline (specify → plan → analyze → verify → merge).
+- **"Intentional exclusion"** — Record with one of 6 exclusion reasons: `deprecated`, `replaced`, `third-party`, `deferred`, `out-of-scope`, `covered-differently`. Update `coverage-baseline.md` if it exists.
+
+**Empty/blank response = NOT classified — re-ask.** You MUST obtain an explicit resolution for every group.
+
+**P3 behaviors**: Display unmapped P3 list for reference but do NOT require resolution. Record as `deferred` in coverage-baseline.md if not mapped.
+
+#### Step 2b — Post-Resolution Coverage Update
+
+After resolving ALL unmapped P1/P2 groups:
+
+1. **Re-run affected Features**: If any Features were marked 🔀 (re-specify) or new Features were created, execute their adopt pipeline steps before continuing.
+2. **Recalculate coverage metrics**: Include newly assigned items and new Features.
+3. **Display updated metrics**:
+
+```
+📊 Updated Source Behavior Coverage:
+
+| Priority | Total | Mapped | Excluded | Coverage |
+|----------|-------|--------|----------|----------|
+| P1 (core)       | [N] | [M] | [E] | [%] |
+| P2 (important)  | [N] | [M] | [E] | [%] |
+| P3 (nice-to-have)| [N] | [M] | [E] | [%] |
+```
+
+4. **Verify P1 + P2 = 100%** (mapped + excluded = total). If still below 100%, repeat Step 2 for remaining unmapped items.
+
+### Step 3 — Coverage Baseline Cross-Check
+
+If `BASE_PATH/coverage-baseline.md` exists (generated by `/reverse-spec`):
+
+1. Read the Surface Metrics table
+2. Compare against current Feature coverage in `sdd-state.md`
+3. Display summary:
+
+```
+📊 Source Coverage Cross-Check (vs coverage-baseline.md):
+
+| Metric           | Baseline | Adopted | Delta |
+|------------------|----------|---------|-------|
+| Source files      | [N]     | [M]     | [±]   |
+| API endpoints     | [N]     | [M]     | [±]   |
+| DB entities       | [N]     | [M]     | [±]   |
+| Source behaviors   | [N]     | [M]     | [±]   |
+```
+
+If any category shows a significant drop from baseline, display a note.
+
+---
+
+## Post-Pipeline: Final Demo (HARD STOP)
+
+After coverage verification, create a **project-level demo** based on the existing project's execution methods. This is not a per-Feature demo — it's a single demo that proves the adopted codebase runs correctly.
+
+### Step 1 — Detect Existing Run Methods
+
+Scan the project for existing execution methods:
+- `package.json` → `scripts.start`, `scripts.dev`, `scripts.serve`
+- `Makefile` → common targets (`run`, `dev`, `serve`, `start`)
+- `docker-compose.yml` → service definitions
+- `Procfile` → process definitions
+- `manage.py` → Django management commands
+- `main.go`, `cmd/` → Go entry points
+- README/CONTRIBUTING → documented run instructions
+
+### Step 2 — Present and Confirm
+
+Display the detected run methods:
+```
+📋 Final Demo — Existing Run Methods:
+
+  Detected:
+    npm run dev        — Development server (from package.json)
+    docker compose up  — Full stack (from docker-compose.yml)
+
+  Recommended demo command: [most appropriate option]
+```
+
+Use AskUserQuestion:
+- "Accept recommended" — Use the suggested run method
+- "Use different command" — User specifies custom command
+- "Skip final demo" — No demo creation (not recommended)
+
+### Step 3 — Create Demo Script
+
+If the user doesn't skip, create `demos/project-demo.sh`:
+
+```bash
+#!/usr/bin/env bash
+# Project Demo — Adopted SDD Codebase
+# Launches the existing application to demonstrate adopted Features
+#
+# Usage:
+#   ./demos/project-demo.sh         # Interactive (keeps running)
+#   ./demos/project-demo.sh --ci    # Health check only
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+echo "🚀 Launching [project-name]..."
+echo ""
+echo "── Try it ──────────────────────────────────"
+echo "  [instructions based on detected run method]"
+echo "─────────────────────────────────────────────"
+
+if [[ "${1:-}" == "--ci" ]]; then
+    # CI mode: start, health check, stop
+    [run command] &
+    PID=$!
+    sleep 5
+    [health check command]
+    kill $PID
+    echo "✅ Health check passed"
+else
+    # Interactive mode
+    [run command]
+fi
+```
+
+Make executable: `chmod +x demos/project-demo.sh`
+
+Display: `✅ Created: demos/project-demo.sh`
+
+---
+
 ## Post-Pipeline Summary
 
-After all Features are adopted:
+After coverage verification and final demo:
 
 ```
 ✅ Adoption Pipeline Complete
 
 ── Summary ──────────────────────────────────────
   Features adopted: [N]/[total]
-  SBI Coverage:
-    P1: [N]/[total] ([%])
-    P2: [N]/[total] ([%])
-    P3: [N]/[total] ([%])
+  SBI Coverage (after gap resolution):
+    P1: [N]/[total] (100%) — [E] excluded
+    P2: [N]/[total] (100%) — [E] excluded
+    P3: [N]/[total] ([%]) — not required
   Pre-existing issues:
     Test failures: [N] across [M] Features
     Build issues: [N]
     No tests: [K] Features
   Demo Groups:
     [List group status]
+  Final Demo:
+    demos/project-demo.sh — [run method used]
 
 ── What's Next ──────────────────────────────────
   The existing codebase is now wrapped with SDD documentation.

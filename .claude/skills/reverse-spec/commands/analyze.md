@@ -47,9 +47,10 @@ Check if `specs/reverse-spec/case-study-log.md` exists at the target directory:
 
 Determine the direction of the deliverables. Each question can be answered via CLI arguments OR interactive prompt.
 
-> **`--adopt` mode**: When `--adopt` is specified, this is SDD Adoption — documenting existing code in-place. Stack is forced to `same`, Question 3 (renaming) is skipped entirely. Only Question 1 (Scope) is asked.
+> **`--adopt` mode**: When `--adopt` is specified, this is SDD Adoption — documenting existing code in-place. Scope is forced to `full`, Stack is forced to `same`, and Question 3 (renaming) is skipped entirely. All three questions are auto-resolved.
 
 ### Question 1: Implementation Scope
+- **If `--adopt` is specified**: Force `full`. Skip this question — adoption documents the entire codebase.
 - If `--scope` argument is provided: use the specified value (`core` or `full`).
 - Otherwise: Ask the user via AskUserQuestion:
   - **Core Only (Core)**: Redevelop only the core features that form the foundation of the project. For learning/prototyping purposes

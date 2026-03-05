@@ -23,6 +23,26 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 ---
 
+## Environment Bootstrap (adoption only)
+
+> Only present when Origin is `adoption`. Omit this section for greenfield/rebuild.
+
+| Item | Status | Details |
+|------|--------|---------|
+| Dependencies | [✅ installed / ❌ failed / ⏭️ skipped] | [package manager] |
+| Environment  | [✅ configured / ⚠️ missing / ⏭️ skipped] | [.env details] |
+| Build        | [✅ success / ❌ failed / ⏭️ skipped] | [build command] |
+| Tests        | [✅ N/N passed / ⚠️ M/N passed / ⏭️ skipped] | [F] failed, [S] skipped |
+| Run          | [✅ responds / ❌ failed / ⏭️ skipped] | [run command] |
+
+If the user skips Environment Bootstrap, record a single row:
+
+| Item | Status | Details |
+|------|--------|---------|
+| Bootstrap | ⏭️ skipped | User confirmed environment is ready |
+
+---
+
 ## Constitution
 
 | Item | Value |

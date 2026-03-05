@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|specify|plan|tasks|analyze|implement|verify|restructure|expand|parity|status"
+argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|restructure|expand|parity|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
@@ -180,7 +180,7 @@ $ARGUMENTS parsing rules:
    - `--force`: Overwrites any partial/broken previous initialization
 3. Verify that `.claude/skills/speckit-specify/SKILL.md` now exists
 4. If initialization fails, display the error and instruct the user to run `specify init` manually
-5. **IMPORTANT**: After `specify init` installs new skills, they may not be available in the current Claude Code session. If a skill invocation fails with "Unknown skill", fall back to reading the skill's SKILL.md directly and executing the instructions inline (see [Skill Invocation Fallback](#skill-invocation-fallback))
+5. **IMPORTANT**: After `specify init` installs new skills, they may not be available in the current Claude Code session. If a skill invocation fails with "Unknown skill", fall back to reading the skill's SKILL.md directly and executing the instructions inline (see Skill Invocation Fallback in [pipeline.md](commands/pipeline.md))
 
 > **Note**: The spec-kit CLI binary is named `specify` (not `speckit`). The Claude Code skills installed by spec-kit use **hyphen-separated** names (e.g., `speckit-specify`, `speckit-plan`), not dot-separated.
 
