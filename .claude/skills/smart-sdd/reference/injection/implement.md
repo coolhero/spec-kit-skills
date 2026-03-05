@@ -87,7 +87,7 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
    > Anti-patterns, full bash template, key requirements, and Feature-type-specific demo approaches are defined in [demo-standard.md](../demo-standard.md).
    > **Demo artifacts**: During `implement`, create the surfaces users will interact with (demo routes, demo pages, demo data fixtures, demo CLI wrappers, etc.) — these are what make the demo real, not just test stubs.
 
-5. **Update `demos/README.md`** — see [demo-standard.md § 7](../demo-standard.md) for format.
+5. **Update `demos/README.md`** — see [demo-standard.md § 8](../demo-standard.md) for format.
 
 ## Injected Content
 
