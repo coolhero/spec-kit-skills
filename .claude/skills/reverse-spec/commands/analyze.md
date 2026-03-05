@@ -47,6 +47,8 @@ Check if `specs/reverse-spec/case-study-log.md` exists at the target directory:
 
 Determine the direction of the deliverables. Each question can be answered via CLI arguments OR interactive prompt.
 
+> **`--adopt` mode**: When `--adopt` is specified, this is SDD Adoption — documenting existing code in-place. Stack is forced to `same`, Question 3 (renaming) is skipped entirely. Only Question 1 (Scope) is asked.
+
 ### Question 1: Implementation Scope
 - If `--scope` argument is provided: use the specified value (`core` or `full`).
 - Otherwise: Ask the user via AskUserQuestion:
@@ -56,6 +58,7 @@ Determine the direction of the deliverables. Each question can be answered via C
 **If response is empty → re-ask.** Do NOT proceed without an explicit selection.
 
 ### Question 2: Tech Stack Strategy
+- **If `--adopt` is specified**: Force `same`. Skip this question — adoption keeps existing code as-is.
 - If `--stack` argument is provided: use the specified value (`same` or `new`).
 - Otherwise: Ask the user via AskUserQuestion:
   - **Same Stack (Same)**: Use the same language, framework, and libraries as the existing project
@@ -66,6 +69,8 @@ Determine the direction of the deliverables. Each question can be answered via C
 Record both responses and reference them throughout all subsequent Phases.
 
 ### Question 3: Project Identity (rebuild only)
+
+> **Skip entirely** when `--adopt` is specified. Adoption documents the existing project as-is — no renaming.
 
 When analyzing existing source code for rebuild, the original project's naming (class names, service names, branding) will appear throughout the codebase. If the new project has a different identity, this must be captured early so artifacts use the correct naming.
 

@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. A Reverse Specification skill that extracts specs from existing implementations.
-argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app]"
+argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app] [--adopt]"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
 
@@ -33,6 +33,7 @@ $ARGUMENTS parsing rules:
   --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
   --name <val>  → New project name (skips Phase 0 Question 3 if provided; implies rename from detected project name)
   --domain <val> → Project domain profile: "app" (default). Determines analysis axes, registries, and Feature boundary heuristics
+  --adopt       → SDD Adoption mode: forces --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
 ```
 
 ---

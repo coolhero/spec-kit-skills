@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-06 02:30 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-06 03:00 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -38,7 +38,7 @@ New project         --> /smart-sdd init --> Global Evolution Layer --> /smart-sd
 
 -- SDD Adoption ---------------------------------------------------------------
 Existing source     --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd adopt
-code                   (reverse-analysis)  (roadmap, registries,        (document existing)
+code (in CWD)          --adopt             (roadmap, registries,        (document existing)
                                            pre-context, etc.)
 
 -- Rebuild (Core/Full) --------------------------------------------------------
@@ -110,7 +110,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 |------|---------|
 | New project | `/smart-sdd init` |
 | Existing codebase rebuild | `/reverse-spec ./path/to/source` |
-| SDD adoption | `/reverse-spec ./path/to/source` → `/smart-sdd adopt` |
+| SDD adoption | `/reverse-spec --adopt` → `/smart-sdd adopt` (run from source directory) |
 | Add to existing project | `/smart-sdd add` |
 | Check spec-kit compatibility | `/speckit-diff` |
 | Generate Case Study report | `/case-study init` → record observations → `/case-study generate` |
@@ -454,7 +454,8 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 **Adoption Mode** (new in v2):
 - **Use case**: Keep existing code, wrap it with SDD governance documents
-- **Entry point**: `/reverse-spec` → `/smart-sdd adopt`
+- **Entry point**: `/reverse-spec --adopt` → `/smart-sdd adopt` (run from source directory)
+- **`--adopt` flag**: Forces stack=same, skips project renaming — existing code stays as-is
 - **Pipeline**: specify → plan → analyze → verify (no tasks/implement — no code to write)
 - **Feature status**: `adopted` (distinct from `completed` — signals legacy code)
 - **Verify behavior**: Test failures are recorded as pre-existing issues (non-blocking)

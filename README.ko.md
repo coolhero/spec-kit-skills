@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-06 02:30 KST
+[English README](README.md) | Last updated: 2026-03-06 03:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -38,7 +38,7 @@ spec-kit은 Feature 단위 거버넌스에 특화되어 있지만, 교차 Featur
 
 -- SDD 도입 -------------------------------------------------------------------
 기존 소스코드        --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd adopt
-                       (역분석)           (roadmap, registries,        (기존 코드 문서화)
+(CWD에서 실행)         --adopt             (roadmap, registries,        (기존 코드 문서화)
                                           pre-context 등)
 
 -- 재구축 (Core/Full) ----------------------------------------------------------
@@ -110,7 +110,7 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 |------|--------|
 | 새 프로젝트 | `/smart-sdd init` |
 | 기존 코드베이스 재구축 | `/reverse-spec ./path/to/source` |
-| SDD 도입 | `/reverse-spec ./path/to/source` → `/smart-sdd adopt` |
+| SDD 도입 | `/reverse-spec --adopt` → `/smart-sdd adopt` (소스 디렉토리에서 실행) |
 | 기존 프로젝트에 추가 | `/smart-sdd add` |
 | spec-kit 호환성 검사 | `/speckit-diff` |
 | Case Study 보고서 생성 | `/case-study init` → 관찰 기록 → `/case-study generate` |
@@ -450,7 +450,8 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 
 **도입 모드** (v2 신규):
 - **사용 사례**: 기존 코드를 유지하면서 SDD 거버넌스 문서로 래핑
-- **진입점**: `/reverse-spec` → `/smart-sdd adopt`
+- **진입점**: `/reverse-spec --adopt` → `/smart-sdd adopt` (소스 디렉토리에서 실행)
+- **`--adopt` 플래그**: stack=same 강제, 프로젝트 이름 변경 건너뜀 — 기존 코드 그대로 유지
 - **파이프라인**: specify → plan → analyze → verify (tasks/implement 없음 — 코드 작성 불필요)
 - **Feature 상태**: `adopted` (`completed`와 구분 — 레거시 코드임을 표시)
 - **Verify 동작**: 테스트 실패는 기존 이슈로 기록 (비차단)
