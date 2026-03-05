@@ -4,9 +4,6 @@
 > This is a variant of the standard `specify` injection — optimized for wrapping existing code with SDD documentation rather than defining new features.
 > For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 
-**BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
-**SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
-
 ---
 
 ## Key Difference from Standard Specify

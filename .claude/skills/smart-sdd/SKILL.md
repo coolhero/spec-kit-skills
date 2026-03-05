@@ -220,40 +220,9 @@ For reverse-spec domain profiles (analysis axes, registries, etc.), see `../reve
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
-**All spec-kit command executions follow this 4-step protocol. Each step MUST be executed in order. No step may be skipped (unless `--auto` mode is active).**
+All spec-kit command executions follow a mandatory 4-step protocol: **(1) Assemble** context per [`reference/injection/{command}.md`](reference/injection/) → **(2) Checkpoint** HARD STOP for user approval → **(3) Execute** spec-kit + **Review** artifacts (HARD STOP) → **(4) Update** global artifacts.
 
-```
-┌───────────┐    ┌────────────┐    ┌─────────────────────┐    ┌────────┐
-│ 1.Assemble│───→│2.Checkpoint│───→│3.Execute + Review   │───→│4.Update│
-│  (context)│    │ (HARD STOP)│    │  (spec-kit + STOP)  │    │ (state)│
-└───────────┘    └────────────┘    └─────────────────────┘    └────────┘
-```
-
-### 1. Assemble — Context Assembly
-Reads files/sections required for the given command from BASE_PATH. Filters and assembles information per command according to the per-command injection rules in [`reference/injection/{command}.md`](reference/injection/). Graceful degradation per [context-injection-rules.md](reference/context-injection-rules.md) § Missing/Sparse Content Handling.
-
-### 2. Checkpoint — User Confirmation (HARD STOP)
-Presents the assembled context with **actual content** (not just counts). The user reviews what will be injected and approves or requests modifications. Uses **PROCEDURE CheckpointApproval** (Approve as-is / Request modifications loop).
-
-### 3. Execute + Review (HARD STOP)
-Invokes the corresponding `speckit-[command]` via the Skill tool with the approved context. **Execute and Review are ONE continuous action** — after the spec-kit command returns, IMMEDIATELY read the generated artifacts, display the Review content, and call AskUserQuestion for approval. Do NOT generate a separate response between Execute and Review.
-
-**Skill Invocation Fallback**: If "Unknown skill" is returned, read `.claude/skills/speckit-[command]/SKILL.md` and execute inline.
-
-**SUPPRESS spec-kit output**: Ignore all "Next phase:", "Suggested commit:" messages from spec-kit. smart-sdd controls the workflow.
-
-Review uses **PROCEDURE ReviewApproval** (Approve / Request modifications / I've finished editing loop).
-
-### 4. Update — Global Evolution Layer Refresh
-Updates global artifacts (registries, state, roadmap) to reflect command results. See per-command injection rules in [`reference/injection/{command}.md`](reference/injection/) for update rules.
-
-**HARD STOP rules**: Both Checkpoint (Step 2) and Review (Step 3) require explicit user approval via AskUserQuestion. After AskUserQuestion returns, ALWAYS check the response — if empty, re-ask. Never proceed on empty.
-
-**`--auto` mode**: BOTH Checkpoint and Review are skipped — content is still displayed for transparency, but execution proceeds immediately.
-
-**`--dangerously-skip-permissions` mode**: AskUserQuestion is replaced with text messages. Checkpoints are NOT auto-skipped — only `--auto` does that.
-
-For full protocol details (Checkpoint procedure, Review procedure, Update rules), read `commands/pipeline.md`.
+Full procedures (CheckpointApproval, ReviewApproval, `--auto`/`--dangerously-skip-permissions` handling, Skill Invocation Fallback) are defined in `commands/pipeline.md`.
 
 ---
 

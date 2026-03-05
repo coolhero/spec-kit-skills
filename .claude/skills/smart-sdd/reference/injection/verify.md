@@ -4,9 +4,6 @@
 > For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 > For the full verification workflow (Phase 1-4 execution details), see [pipeline.md](../../commands/pipeline.md) § Verify Command.
 
-**BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
-**SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
-
 ---
 
 > **Note**: `speckit-analyze` is NOT used in this step. Cross-artifact consistency (spec ↔ plan ↔ tasks) was already verified in step 5 (Analyze) before implementation. This step focuses on post-implementation validation.

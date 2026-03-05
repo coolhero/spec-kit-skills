@@ -3,8 +3,6 @@
 > Per-command injection rules for `/smart-sdd tasks [FID]`.
 > For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 
-**SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
-
 ---
 
 ## Read Targets

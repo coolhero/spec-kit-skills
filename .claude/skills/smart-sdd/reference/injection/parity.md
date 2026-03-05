@@ -4,9 +4,6 @@
 > The parity command has its own multi-phase workflow — see [parity.md](../../commands/parity.md).
 > It does NOT follow the Common Protocol (Assemble → Checkpoint → Execute+Review → Update) and does NOT wrap a spec-kit command.
 
-**BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
-**SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
-
 ---
 
 ## Read Targets

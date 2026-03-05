@@ -852,7 +852,4 @@ When using Step Mode (e.g., `/smart-sdd verify F001`):
 
 ### Non-Git Projects
 
-If the project directory is not a git repository:
-- Skip all branch management (pre-flight, validation, merge)
-- Display a one-time notice: "No git repository detected. Branch management is disabled."
-- All other smart-sdd functionality works normally
+See SKILL.md § Non-Git Projects.
