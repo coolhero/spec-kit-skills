@@ -330,6 +330,46 @@
 
 ---
 
+## [2026-03-06] Context Efficiency Refactoring — Structural File Splitting
+
+### Pipeline.md Split (#10a)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Extract verify-phases.md | 134 lines → `commands/verify-phases.md` | Verify Phase 1-4 details loaded only during verify command, not every pipeline step |
+| Replace branch-management.md stub | 3-line stub → 120 lines of full Git Branch Management | Merge workflow loaded only during merge step, not every pipeline step |
+| Pipeline.md reduction | 855 → 608 lines (-29%) | ~3,000 tokens saved per non-verify pipeline step |
+
+### Demo Standard Consolidation (#8)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Create `reference/demo-standard.md` | Single source of truth for demo template, anti-patterns, requirements | Demo content was duplicated across 5+ files (implement.md, domains/app.md, verify.md, tasks.md, SKILL.md) |
+| Trim implement.md | ~130 lines removed → 3-line reference | Full bash template + anti-patterns + Feature-type requirements moved to demo-standard.md |
+| Keep SKILL.md Rule 2 intact | MANDATORY RULE stays in system prompt | Agents ignore rules they have to "read later" — same reasoning as original MANDATORY RULE banner decision |
+| Integration Demo execution procedure | Added to demo-standard.md § 7 | Trigger HARD STOP existed in 6 files but execution procedure was never defined; agents wouldn't know what to do when user selects "Run Integration Demo" |
+
+### Adoption Behavior Consolidation (#9)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Reduce domains/app.md § 4 | 34 lines → 2-line reference to adopt.md + adopt-verify.md | Adoption behavior differences were fully duplicated; reference is sufficient since adoption files are loaded during adoption flow |
+| Keep adopt-*.md self-contained | No extraction to shared file | Adopt injection files are loaded at different times; extracting to shared file would cause MORE loading |
+
+### Display Format Compression — Not Pursued (#11)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Do NOT compress display blocks | Confirmed not to proceed | Display format blocks serve dual purpose: formatting template + behavioral specification. Compressing them risks agents not knowing what to display, causing behavioral regressions |
+
+### 4-Journey Audit
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| branch-management.md adoption note | Added `(or adopted — see adopt.md)` to merge display | Generic template showed `completed` for all modes; adoption mode uses `adopted` status |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge
