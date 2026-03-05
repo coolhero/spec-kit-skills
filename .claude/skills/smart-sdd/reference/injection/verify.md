@@ -166,13 +166,30 @@ If issues were found, you can fix them directly, then select
    - Cross-Feature verification results
    - Overall verification status (`success` / `limited` / `failure`)
    - If limited: record `⚠️ LIMITED — [reason]` and/or `⚠️ DEMO-LIMITED — [reason]` in Notes
+3. **SBI Coverage Update** (rebuild/adoption only):
+   - Run `scripts/sbi-coverage.sh <project-root>` to get current coverage
+   - Update `sdd-state.md` Source Behavior Coverage: matched SBI entries → `✅ verified`
+   - If P1 coverage < 100% after this Feature: display warning:
+     ```
+     ⚠️ P1 SBI coverage is [X]% — some core behaviors are still unmapped.
+     ```
+4. **Demo Group Progress Update**:
+   - Check if this Feature belongs to any Demo Group in `sdd-state.md`
+   - Update the Completed count for that group
+   - Run `scripts/demo-status.sh <project-root>` to display current group status
+   - **Integration Demo Trigger**: If this Feature was the last pending Feature in a group → display HARD STOP:
+     ```
+     🎯 All Features in [DG-0N: Scenario] are now verified!
+     Run Integration Demo to verify the end-to-end scenario?
+     ```
+     Options: "Run Integration Demo", "Defer Integration Demo"
 
 ### After Merge Completion
 
 1. Update `BASE_PATH/sdd-state.md`:
    - Record the merge step as completed in Feature Progress and Feature Detail Log
    - Update Feature Mapping: record the Branch name and mark Merged as ✅
-   - Change the Feature Status to `completed`
+   - Change the Feature Status to `completed` (or `adopted` if adoption mode — see adopt-verify.md)
    - Record in Global Evolution Log: "Branch {NNN}-{short-name} merged to main"
 2. Verify that main branch is clean after merge (`git status`)
 3. The next Feature's `specify` step can now be started from the main branch

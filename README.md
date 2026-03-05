@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 08:48 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 23:30 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 

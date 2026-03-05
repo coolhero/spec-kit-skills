@@ -84,11 +84,12 @@ Feature: [FID] - [Feature Name]
   SC-001: ...
   SC-002: ...
 
-── Source Behavior Inventory (rebuild only) ──────
-[If present in pre-context — list P1/P2 behaviors]
-  P1: registerUser(), loginUser(), requireAuth() ...
-  P2: resetPassword(), updateProfile() ...
-  ⚠️ Ensure each P1/P2 behavior maps to at least one FR-###.
+── Source Behavior Inventory (rebuild/adoption) ──
+[If present in pre-context — list P1/P2 behaviors with B### IDs]
+  P1: B001 registerUser(), B002 loginUser(), B003 requireAuth() ...
+  P2: B004 resetPassword(), B005 updateProfile() ...
+  ⚠️ Ensure each P1/P2 behavior maps to at least one FR-### with [source: B###] tag.
+  Example: FR-001: User registration with email verification [source: B001]
 
 ── UI Component Features (frontend/fullstack rebuild) ─
 [If present in pre-context — list UI library capabilities]
@@ -238,4 +239,7 @@ You can open and edit this file directly, then select
 
 Update `sdd-state.md` per generic step-completion rules in [state-schema.md](../state-schema.md). Additionally:
 - Populate the Feature Mapping table: record spec-kit Name, spec-kit Path, and Branch (spec-kit creates the branch during specify)
-- No Global Evolution Layer artifact updates
+- **SBI Coverage Update** (rebuild/adoption only): After specify completes, scan the generated `spec.md` for `[source: B###]` tags. For each found tag:
+  - Update `sdd-state.md` → Source Behavior Coverage table: set FR column to the FR-### ID, Feature column to the Feature ID, Status to `🔄 in_progress`
+  - This establishes the SBI → FR mapping that will be confirmed during verify
+- No other Global Evolution Layer artifact updates
