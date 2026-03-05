@@ -7,6 +7,16 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 
 # Reverse-Spec: Existing Source Code → spec-kit Global Evolution Layer Extraction
 
+> **🚨 MANDATORY RULE — READ FIRST 🚨**
+>
+> **Empty Response Enforcement**
+> Every AskUserQuestion in this skill (Phase 0 questions, Phase 3 checkpoints, Phase 4 classification) MUST be checked after returning:
+> 1. **CHECK the response** — is it empty, blank, or missing a selection?
+> 2. **If empty → call AskUserQuestion AGAIN.** Do NOT proceed. Do NOT assume a default.
+> 3. **Only proceed when the user has explicitly selected an option.**
+>
+> This rule applies to ALL AskUserQuestion calls. Violating this rule means the user loses control of the workflow. There are no exceptions.
+
 Analyzes existing source code to extract project-level global context needed for spec-kit-based SDD (Spec-Driven Development) redevelopment.
 
 **Target Directory** (source to analyze): First positional argument from `$ARGUMENTS` (defaults to the current directory if not specified)

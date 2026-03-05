@@ -53,11 +53,15 @@ Determine the direction of the deliverables. Each question can be answered via C
   - **Core Only (Core)**: Redevelop only the core features that form the foundation of the project. For learning/prototyping purposes
   - **Full Implementation (Full)**: Redevelop the full set of features identical to the existing system
 
+**If response is empty → re-ask.** Do NOT proceed without an explicit selection.
+
 ### Question 2: Tech Stack Strategy
 - If `--stack` argument is provided: use the specified value (`same` or `new`).
 - Otherwise: Ask the user via AskUserQuestion:
   - **Same Stack (Same)**: Use the same language, framework, and libraries as the existing project
   - **New Stack (New)**: Migrate to an optimal modern tech stack
+
+**If response is empty → re-ask.** Do NOT proceed without an explicit selection.
 
 Record both responses and reference them throughout all subsequent Phases.
 
@@ -69,6 +73,8 @@ Ask via AskUserQuestion:
 - "Is the new project name different from the original?"
   - **Yes — new name**: User provides the new project name (e.g., "Cherry Studio" → "Angdu Studio")
   - **No — same name**: Keep the original project name as-is
+
+**If response is empty → re-ask.** Do NOT proceed without an explicit selection.
 
 If the user selects "Yes":
 1. Record the **original project name** and **new project name**
