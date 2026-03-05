@@ -86,7 +86,7 @@ Branch: {NNN}-{short-name} → main
 ── Global Evolution Updates ────────────────────
   entity-registry.md: [changes summary]
   api-registry.md: [changes summary]
-  roadmap.md: [Feature] → completed
+  roadmap.md: [Feature] → completed (or adopted — see adopt.md)
   sdd-state.md: updated
 
 ─────────────────────────────────────────────────

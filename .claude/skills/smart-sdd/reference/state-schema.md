@@ -211,6 +211,7 @@ Tracks demo groups defined in `roadmap.md`. Each group represents a user scenari
 ### Integration Demo Trigger
 When the last pending Feature in a group completes verify, display HARD STOP:
 "All Features in [Group] verified. Run Integration Demo for [Scenario]?"
+For the full execution procedure and result recording, see `reference/demo-standard.md` § 7.
 
 ### Integration Demo Invalidation
 When a Feature is added to an existing demo group (via incremental `add`):

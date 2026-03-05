@@ -1,7 +1,7 @@
 # Demo-Ready Delivery Standard
 
 > Single source of truth for demo script requirements, template, and anti-patterns.
-> Referenced by: `reference/injection/implement.md` (creation), `commands/verify-phases.md` Phase 3 (verification), `reference/injection/tasks.md` (task injection), `domains/app.md` § 1 (domain profile).
+> Referenced by: `reference/injection/implement.md` (creation), `commands/verify-phases.md` Phase 3 (verification), `reference/injection/tasks.md` (task injection), `domains/app.md` § 1 (domain profile), `reference/injection/verify.md` + `reference/state-schema.md` (Integration Demo trigger).
 > For the MANDATORY rule, see `SKILL.md` Rule 2.
 
 ---
@@ -155,7 +155,46 @@ wait || true
 | `// @demo-only` | Remove after demo — throwaway scaffolding |
 | `// @demo-scaffold — will be extended by F00N-[feature]` | Extend later — promotable to production code |
 
-## 7. Demo Hub (`demos/README.md`)
+## 7. Integration Demo (Demo Group completion)
+
+When all Features in a Demo Group complete verify, the trigger HARD STOP fires (see `reference/injection/verify.md` § Post-Step Update Rules). If the user selects **"Run Integration Demo"**:
+
+**Execution procedure**:
+1. Read the Demo Group's Feature list from `sdd-state.md` Demo Group Progress
+2. For each Feature in the group (in roadmap order), run its demo in CI mode:
+   ```
+   demos/F00N-name.sh --ci
+   ```
+   - If any Feature demo fails: report the failure and STOP. The group status stays `⏳`
+3. If all Feature demos pass individually, run a **cross-Feature smoke test**:
+   - Start all Features' services (using each demo's setup/start logic)
+   - Execute the Demo Group's scenario description as an end-to-end flow (e.g., "User registers → browses products → adds to cart → checks out")
+   - Verify each step succeeds
+4. Display results:
+   ```
+   🎯 Integration Demo: [DG-0N] — [Scenario Name]
+
+   ── Per-Feature Health ──────────────────────────
+     ✅/❌ F001-auth: [pass/fail]
+     ✅/❌ F002-product: [pass/fail]
+     ✅/❌ F003-cart: [pass/fail]
+
+   ── End-to-End Scenario ─────────────────────────
+     [Step-by-step results of the scenario flow]
+
+   Result: ✅ All passed / ❌ [failure details]
+   ```
+5. Update `sdd-state.md` Demo Group Progress:
+   - If passed: Status → `✅ All verified`, Last Demo → current date
+   - If failed: Status stays `⏳`, record failure reason in Status column
+
+**If the user selects "Defer Integration Demo"**: Status stays `⏳ all verified, demo pending`. The trigger re-fires on next `/smart-sdd pipeline` or `/smart-sdd verify` invocation.
+
+**Invalidation**: When a Feature is added to an existing group via `/smart-sdd add`, previous results are invalidated → `🔄 re-run needed (F00N added)`. See `reference/state-schema.md` § Integration Demo Invalidation.
+
+---
+
+## 8. Demo Hub (`demos/README.md`)
 
 After creating a demo script, update `demos/README.md`:
 - Create if it doesn't exist (first Feature with demo)

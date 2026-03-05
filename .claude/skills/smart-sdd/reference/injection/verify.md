@@ -180,6 +180,7 @@ If issues were found, you can fix them directly, then select
      Run Integration Demo to verify the end-to-end scenario?
      ```
      Options: "Run Integration Demo", "Defer Integration Demo"
+     For execution procedure, see [demo-standard.md § 7](../demo-standard.md).
 
 ### After Merge Completion
 
