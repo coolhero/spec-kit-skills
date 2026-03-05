@@ -343,7 +343,7 @@ Record the constitution completion in `sdd-state.md`:
 - Add entry to Constitution Update Log
 
 **Decision History Recording — Constitution**:
-After Phase 0-4 completes, **append** to `specs/history.md` (create with the standard header if it doesn't exist — see [History File Header](#history-file-header)):
+After Phase 0-4 completes, **append** to `specs/history.md` (create with the standard header if it doesn't exist — see SKILL.md § History File Header):
 
 ```markdown
 ---
@@ -374,7 +374,7 @@ Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed,
 - **Core scope**: Initially only Tier 1 Features are active (`Active Tiers: T1` in `sdd-state.md`). Tier 2/3 Features are `deferred` and skipped until activated via `/smart-sdd expand`.
 - **Full scope**: All Features are active — no deferred Features exist.
 - **Adopted Features**: Features with status `adopted` (from `/smart-sdd adopt`) are skipped. To transition them to `completed`, re-run the standard pipeline — it will re-execute tasks + implement + verify.
-- **Restructured Features**: Processed starting from their first 🔀 step (see [Restructure Command](#restructure-command--feature-structure-modification)).
+- **Restructured Features**: Processed starting from their first 🔀 step (see `commands/restructure.md`).
 
 **CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 

@@ -1,6 +1,6 @@
 ---
 name: smart-sdd
-description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, and full rebuild via reverse-spec.
+description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
 argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
@@ -28,7 +28,7 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 >
 > Tests belong in `verify` Phase 1. Demos show the **real thing running**. The user must be able to see, touch, and use the Feature.
 
-Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with three project modes:
+Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with four project modes:
 
 - **Greenfield**: New project from scratch via `/smart-sdd init`
 - **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
@@ -270,6 +270,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `constitution`, `specify`, `plan`, `tasks`, `analyze`, `implement`, `verify` | `commands/pipeline.md` | Step mode — execute a specific pipeline step |
 | `restructure` | `commands/restructure.md` | Modify Feature structure |
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
+| `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
 | `parity` | `commands/parity.md` | Check parity against original source |
 | `status` | *(inline below)* | Check progress |
 

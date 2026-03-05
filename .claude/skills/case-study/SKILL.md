@@ -29,11 +29,13 @@ Generates a structured Case Study report from the artifacts produced by `/revers
 
 ```
 $ARGUMENTS parsing rules:
+  "init"            → Sub-command: read `commands/init.md` and execute its workflow. Stop here.
   First token       → target-directory (optional, defaults to CWD). If it looks like a path.
   --lang <en|ko>    → Output language (default: "en")
 ```
 
-After parsing arguments, read `commands/generate.md` and execute its workflow.
+If the first argument is `init`, read `commands/init.md` and execute its workflow.
+Otherwise, after parsing arguments, read `commands/generate.md` and execute its workflow.
 
 ---
 

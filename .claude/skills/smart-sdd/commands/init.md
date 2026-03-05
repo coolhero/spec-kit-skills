@@ -142,7 +142,7 @@ Check if `case-study-log.md` exists at project root:
 7. **Checkpoint (HARD STOP)**: Display the complete Feature catalog, dependency graph (Mermaid), and Release Groups. Use AskUserQuestion to ask for approval. **If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT proceed to Phase 3 until the user explicitly approves.
 
 **Decision History Recording — Feature Definition**:
-After the user approves the Phase 2 Checkpoint, **append** to `specs/history.md` (create with the standard header if it doesn't exist — see [History File Header](#history-file-header)):
+After the user approves the Phase 2 Checkpoint, **append** to `specs/history.md` (create with the standard header if it doesn't exist — see SKILL.md § History File Header):
 
 ```markdown
 ---

@@ -1,6 +1,8 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 15:37 KST
+[![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
+
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 15:55 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -392,7 +394,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 #### Core Value
 
-- **Five user journeys**: `init` for greenfield, `adopt` for SDD adoption, `add` for incremental, `pipeline` for rebuild
+- **Four user journeys**: `init` for greenfield, `adopt` for SDD adoption, `add` for incremental, `pipeline` for rebuild
 - **Wraps rather than replaces** spec-kit commands, unaffected by spec-kit updates
 - **Automatically assembles and injects** required cross-Feature information before each command execution
 - **Automatically updates** the Global Evolution Layer (entity-registry, api-registry, roadmap, subsequent pre-context) upon Feature completion
@@ -479,13 +481,15 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 #### How the Modes Differ in Practice
 
-The three modes differ primarily in **how much context is available at the start**:
+The four modes differ primarily in **how much context is available at the start**:
 
 - **Brownfield (rebuild)** has the richest starting context. `/reverse-spec` pre-analyzes the entire codebase and extracts entities, APIs, business rules, and Feature dependencies into the Global Evolution Layer. When the pipeline runs, each step receives draft requirements, schema references, and cross-Feature context from day one. This is a **refinement-based** workflow -- spec-kit refines pre-populated drafts rather than creating from scratch.
 
 - **Greenfield** starts with minimal context. `/smart-sdd init` creates the project structure with empty entity/API registries and simplified pre-context files (no FR/SC drafts, no business logic map). The pipeline is **generative** -- spec-kit creates requirements, schemas, and contracts from scratch. As each Feature completes its `plan` step, the registries grow, providing context for subsequent Features. This means Feature ordering matters more in greenfield: a Feature's `plan` step populates the registries that the next Feature's `plan` step will reference.
 
 - **Brownfield (incremental)** inherits the existing project's context. `/smart-sdd add` creates new Features that can immediately reference the already-populated registries and completed Feature artifacts. It's the simplest mode -- just define new Features and resume the pipeline.
+
+- **Brownfield (adoption)** keeps existing code as-is and wraps it with SDD governance. `/reverse-spec --adopt` extracts the Global Evolution Layer, then `/smart-sdd adopt` runs a documentation-only pipeline (specify → plan → analyze → verify, no tasks/implement). Test failures are recorded as pre-existing issues rather than blocking. Features are marked `adopted` instead of `completed`.
 
 Key practical differences:
 
@@ -890,7 +894,7 @@ spec-kit-skills/
         ├── reverse-spec/
         │   ├── SKILL.md                                 # Main skill definition (overview + routing)
         │   ├── commands/
-        │   │   └── analyze.md                           # 5-Phase analysis workflow
+        │   │   └── analyze.md                           # Pre-Phase + 5-Phase analysis workflow
         │   ├── domains/                                 # Domain-specific analysis profiles
         │   │   ├── _schema.md                           # Domain profile schema
         │   │   ├── app.md                               # Application domain (default)

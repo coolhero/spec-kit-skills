@@ -1,6 +1,8 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 15:37 KST
+[![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
+
+[English README](README.md) | Last updated: 2026-03-05 15:55 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -392,6 +394,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 - **Greenfield**: `/smart-sdd init`으로 신규 프로젝트를 처음부터 구성
 - **Brownfield (incremental)**: `/smart-sdd add`로 기존 smart-sdd 프로젝트에 Feature 추가
 - **Brownfield (rebuild)**: `/reverse-spec` 산출물 기반으로 `/smart-sdd pipeline` 실행
+- **Brownfield (adoption)**: `/reverse-spec --adopt` → `/smart-sdd adopt`으로 기존 코드를 SDD 문서로 래핑
 
 #### 핵심 가치
 
@@ -466,14 +469,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 | **Greenfield** | `/smart-sdd init` | 신규 프로젝트를 처음부터 시작할 때 | 대화형 Q&A (또는 PRD 문서)로 Feature, 의존성, 원칙 정의 | Coarse/Standard/Fine 중 선택 | 항상 Full | `/smart-sdd pipeline` |
 | **Brownfield (incremental)** | `/smart-sdd add` | 기존 smart-sdd 프로젝트에 새 기능을 추가할 때 | 기존 산출물에 새 Feature 추가. roadmap, pre-context 갱신 | N/A (기존 Feature에 추가) | 기존 scope 유지 | `/smart-sdd pipeline` 또는 `/smart-sdd specify F00N` |
 | **Brownfield (rebuild)** | `/reverse-spec` | 기존 소스코드를 전체 재개발할 때 | 기존 코드 역분석으로 전체 산출물 자동 생성 | Coarse/Standard/Fine 중 선택 | Core 또는 Full. `/smart-sdd expand`로 확장 가능 | `/smart-sdd pipeline` |
-
-**도입 모드** (v2 신규):
-- **사용 사례**: 기존 코드를 유지하면서 SDD 거버넌스 문서로 래핑
-- **진입점**: `/reverse-spec --adopt` → `/smart-sdd adopt` (소스 디렉토리에서 실행)
-- **`--adopt` 플래그**: scope=full, stack=same 강제, 프로젝트 이름 변경 건너뜀 — 기존 코드 그대로 유지
-- **파이프라인**: specify → plan → analyze → verify (tasks/implement 없음 — 코드 작성 불필요)
-- **Feature 상태**: `adopted` (`completed`와 구분 — 레거시 코드임을 표시)
-- **Verify 동작**: 테스트 실패는 기존 이슈로 기록 (비차단)
+| **Brownfield (adoption)** | `/reverse-spec --adopt` → `/smart-sdd adopt` | 기존 코드를 유지하면서 SDD 거버넌스 문서로 래핑할 때 | `--adopt` 플래그로 역분석 후 문서 자동 생성 | N/A (기존 코드 그대로) | 항상 Full | `/smart-sdd adopt` (specify→plan→analyze→verify, tasks/implement 없음) |
 
 #### 모드별 실제 차이점
 
@@ -484,6 +480,8 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 - **Greenfield**는 최소한의 컨텍스트에서 시작합니다. `/smart-sdd init`이 빈 엔티티/API 레지스트리와 간소화된 pre-context 파일(FR/SC 초안 없음, business logic map 없음)로 프로젝트 구조를 생성합니다. 파이프라인은 **생성 기반(generative)**입니다 --- spec-kit이 요구사항, 스키마, 계약을 처음부터 만듭니다. 각 Feature의 `plan` 단계가 완료될 때마다 레지스트리가 확장되어 후속 Feature에 컨텍스트를 제공합니다. 따라서 greenfield에서는 Feature 순서가 더 중요합니다.
 
 - **Brownfield (incremental)**은 기존 프로젝트의 컨텍스트를 상속합니다. `/smart-sdd add`로 새 Feature를 생성하면 이미 채워진 레지스트리와 완료된 Feature 산출물을 즉시 참조할 수 있습니다. 가장 간단한 모드입니다.
+
+- **Brownfield (adoption)**은 기존 코드를 그대로 유지하면서 SDD 거버넌스 문서로 래핑합니다. `/reverse-spec --adopt`로 Global Evolution Layer를 추출한 뒤 `/smart-sdd adopt`이 문서 전용 파이프라인(specify → plan → analyze → verify, tasks/implement 없음)을 실행합니다. 테스트 실패는 기존 이슈로 기록되며 비차단입니다. Feature 상태는 `completed`가 아닌 `adopted`로 표시됩니다.
 
 실제 차이 요약:
 
@@ -889,7 +887,7 @@ spec-kit-skills/
         ├── reverse-spec/
         │   ├── SKILL.md                                 # 메인 스킬 정의 (개요 + 라우팅)
         │   ├── commands/
-        │   │   └── analyze.md                           # 5-Phase 분석 워크플로우
+        │   │   └── analyze.md                           # Pre-Phase + 5-Phase 분석 워크플로우
         │   ├── domains/                                 # 도메인별 분석 프로필
         │   │   ├── _schema.md                           # 도메인 프로필 스키마
         │   │   ├── app.md                               # 애플리케이션 도메인 (기본값)
