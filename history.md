@@ -322,6 +322,14 @@
 
 ---
 
+## [2026-03-06] Audit Fix — Case-Study Relative Path Correction
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Path depth fix | `adopt.md` (2곳) + `pipeline.md` (3곳): `../../../case-study/` → `../../case-study/` | `commands/` 하위 파일에서 `../../../`은 `.claude/` 레벨까지 올라가 잘못된 경로. `parity.md`는 이미 올바른 `../../`을 사용 중이었으므로 통일 |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge
