@@ -10,6 +10,19 @@
 
 Claude Code custom skills that add a **Global Evolution Layer** to [spec-kit](https://github.com/github/spec-kit) SDD workflows.
 
+spec-kit is a powerful SDD framework, but it processes one Feature at a time — it has no built-in mechanism for tracking shared entities across Features, managing API contracts between Features, or understanding the overall project roadmap. The **Global Evolution Layer** fills this gap: a set of project-wide artifacts that sit above spec-kit's per-Feature scope.
+
+| Artifact | What it tracks |
+|----------|---------------|
+| **Roadmap** | Feature dependency graph with execution ordering |
+| **Entity Registry** | Shared data models referenced across Features |
+| **API Registry** | Inter-Feature API contracts and endpoints |
+| **Per-Feature Pre-contexts** | What each Feature needs to know about the rest of the project |
+| **Source Behavior Inventory** | Function-level coverage tracking (for existing codebases) |
+| **Constitution** | Project-wide principles and architectural decisions |
+
+`/reverse-spec` **builds** these artifacts from existing source code. `/smart-sdd` **reads and updates** them during every spec-kit command execution.
+
 ### `/reverse-spec` — Existing Source → SDD-Ready Artifacts
 
 When you already have working code and want to apply SDD, the first challenge is: **how do you break a monolithic codebase into well-defined Features with clear boundaries?**
@@ -132,9 +145,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 
 ## How It Works
 
-### The Global Evolution Layer
-
-Without modifying spec-kit's command templates, this project compensates for these limitations through **Constitution principles + project-level artifacts + operational skills**.
+The Global Evolution Layer artifacts (described in [Overview](#overview)) are maintained through the following protocol:
 
 ### Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 

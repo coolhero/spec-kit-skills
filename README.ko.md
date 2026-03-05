@@ -10,6 +10,19 @@
 
 [spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 **Global Evolution Layer**를 추가하는 Claude Code 커스텀 스킬 모음.
 
+spec-kit은 강력한 SDD 프레임워크이지만, 한 번에 하나의 Feature만 처리합니다 — Feature 간 공유 엔티티 추적, API 계약 관리, 프로젝트 전체 로드맵을 이해하는 내장 메커니즘이 없습니다. **Global Evolution Layer**가 이 부재를 채웁니다: spec-kit의 Feature별 범위 위에 위치하는 프로젝트 수준의 아티펙트 세트입니다.
+
+| 아티펙트 | 추적하는 것 |
+|----------|------------|
+| **Roadmap** | Feature 의존성 그래프 + 실행 순서 |
+| **Entity Registry** | Feature 간 공유 데이터 모델 |
+| **API Registry** | Feature 간 API 계약 및 엔드포인트 |
+| **Feature별 Pre-context** | 각 Feature가 프로젝트의 나머지에 대해 알아야 할 것 |
+| **Source Behavior Inventory** | 함수 수준 커버리지 추적 (기존 코드베이스용) |
+| **Constitution** | 프로젝트 전역 원칙 및 아키텍처 결정 |
+
+`/reverse-spec`이 기존 소스코드에서 이 아티펙트들을 **생성**하고, `/smart-sdd`가 매 spec-kit 커맨드 실행 시 이들을 **읽고 갱신**합니다.
+
 ### `/reverse-spec` — 기존 소스 → SDD-Ready 아티펙트
 
 이미 동작하는 코드가 있는 상태에서 SDD를 적용하려 할 때, 첫 번째 난관은 **하나의 코드베이스를 어떻게 명확한 경계를 가진 Feature 단위로 쪼개는가**입니다.
@@ -132,9 +145,7 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 
 ## 작동 방식
 
-### Global Evolution Layer
-
-spec-kit의 커맨드 템플릿 자체를 수정하지 않고, **Constitution 원칙 + 프로젝트 수준 산출물 + 운영 스킬**로 한계를 보완합니다.
+Global Evolution Layer 아티펙트([개요](#개요)에서 설명)는 아래 프로토콜을 통해 유지됩니다:
 
 ### 공통 프로토콜: Assemble → Checkpoint → Execute+Review → Update
 
