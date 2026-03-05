@@ -143,7 +143,7 @@ Classify the project type based on the collected information. Use the project ty
 - Estimate the role of each module
 
 ### 1-5. Static Resource Inventory
-Identify non-code resource files that must be **copied as-is** to the new project (these cannot be regenerated through code):
+Identify non-code resource files used by the project. In **rebuild mode**, these must be **copied as-is** to the new project. In **adoption mode** (`--adopt`), these already exist in-place and are documented for reference only.
 
 | Resource Type | Search Patterns |
 |---------------|-----------------|
@@ -576,8 +576,9 @@ Generate the following files in order. Each file follows the template structure 
 6. **`specs/reverse-spec/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations
 
-7. **`.env.example`** (project root, only if env vars were detected in Phase 2-5):
-   - Generated at CWD root (NOT inside `specs/reverse-spec/`)
+7. **`.env.example`** (project root, **rebuild mode only** — skip when `--adopt` is specified):
+   - **Adoption mode**: `.env.example` already exists in the source project. Do NOT regenerate. Environment variables are documented in each Feature's pre-context.md → "Environment Variables" section only.
+   - **Rebuild mode**: Generated at CWD root (NOT inside `specs/reverse-spec/`)
    - Lists all detected env vars with category comments and placeholder values
    - Groups by Feature association (shared vars first, then per-Feature)
    - Format:
@@ -757,7 +758,7 @@ Generation complete:
 - specs/reverse-spec/features/F002-xxx/pre-context.md
 - ...
 - specs/reverse-spec/case-study-log.md              (observation log for milestone tracking)
-- .env.example                                    (if environment variables were detected)
+- .env.example                                    (rebuild only — if env vars detected)
 
 SBI: [N] source behaviors tracked (B001–B[N]) across [M] Features
 Demo Groups: [K] groups defined — Integration Demos trigger when all Features in a group are verified

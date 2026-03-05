@@ -91,15 +91,21 @@
 
 ### Static Resources
 
-> Non-code files used by this Feature that must be **copied from the original source** during implementation.
-> These files cannot be regenerated — they must be copied as-is and placed in the appropriate location in the new project.
+> **Rebuild mode**: Non-code files used by this Feature that must be **copied from the original source** during implementation. These files cannot be regenerated — they must be copied as-is.
+> **Adoption mode**: Non-code files used by this Feature that **already exist in the project** and will continue to be used as-is. Documented for reference only — no Target Path needed.
 > Source Path is **relative to Source Root** (same as file paths above). Resolve as `[Source Root]/[Source Path]` at runtime.
+
+**Rebuild mode** (include Target Path):
 
 | Source Path | Type | Target Path | Usage |
 |-------------|------|-------------|-------|
 | `[relative/path/logo.svg]` | Image | `[new/path/logo.svg]` | [e.g., App logo displayed in header] |
-| `[relative/path/locales/en.json]` | i18n | `[new/path/locales/en.json]` | [e.g., English translation strings] |
-| `[relative/path/fonts/custom.woff2]` | Font | `[new/path/fonts/custom.woff2]` | [e.g., Custom brand font] |
+
+**Adoption mode** (omit Target Path — files stay in place):
+
+| Path | Type | Usage |
+|------|------|-------|
+| `[relative/path/logo.svg]` | Image | [e.g., App logo displayed in header] |
 
 > If no static resources are associated with this Feature, write "None".
 > If resources need modification (e.g., resizing images, updating translation keys), note it in the Usage column.
