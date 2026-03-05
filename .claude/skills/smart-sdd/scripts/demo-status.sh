@@ -70,7 +70,7 @@ echo "$dg_lines" | while IFS='|' read -r _ group scenario features completed sta
     icon="🔄"
   fi
 
-  printf "  %s %-30s | %s %s | Last: %s\n" "$icon" "$group $scenario" "$completed" "" "${last_demo:-—}"
+  printf "  %s %-30s | %s | Last: %s\n" "$icon" "$group $scenario" "$completed" "${last_demo:-—}"
 
   # Show waiting features
   waiting=$(echo "$status" | grep -oE 'F[0-9]+-[a-zA-Z0-9_-]+' || true)

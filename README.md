@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 23:30 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-06 01:00 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -12,8 +12,8 @@ Four Claude Code custom skills that add a **Global Evolution Layer** to [spec-ki
 
 | Skill | Purpose | When to Use |
 |-------|---------|-------------|
-| `/reverse-spec` | Reverse-analyzes existing source code → generates cross-Feature context artifacts | Brownfield rebuild (full re-implementation) |
-| `/smart-sdd` | Wraps spec-kit commands with cross-Feature context injection + progress tracking | All modes: greenfield, incremental, rebuild |
+| `/reverse-spec` | Reverse-analyzes existing source code → generates cross-Feature context artifacts | Brownfield rebuild or SDD adoption |
+| `/smart-sdd` | Wraps spec-kit commands with cross-Feature context injection + progress tracking | All modes: greenfield, incremental, rebuild, adoption |
 | `/speckit-diff` | *(Utility)* Checks spec-kit version compatibility, produces impact report | Anytime — after spec-kit updates |
 | `/case-study` | *(Utility)* Generates Case Study reports from execution artifacts | After completing reverse-spec + smart-sdd |
 
@@ -30,21 +30,28 @@ spec-kit excels at Feature-local governance but lacks cross-Feature context mana
 
 This project fills these gaps with **entity/API registries** shared across Features, **pre-context injection** before every spec-kit command, **dependency-aware ordering**, and **automatic global artifact updates** after each Feature completes.
 
-### Three Project Modes
+### Five User Journeys
 
 ```
--- Greenfield -----------------------------------------------------------
+-- New Project ----------------------------------------------------------------
 New project         --> /smart-sdd init --> Global Evolution Layer --> /smart-sdd pipeline
 
--- Brownfield (incremental) ---------------------------------------------
+-- SDD Adoption ---------------------------------------------------------------
+Existing source     --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd adopt
+code                   (reverse-analysis)  (roadmap, registries,        (document existing)
+                                           pre-context, etc.)
+
+-- Rebuild (Core/Full) --------------------------------------------------------
+Existing source     --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd pipeline
+code                   (reverse-analysis)  (roadmap, registries,        (rebuild code)
+                                           pre-context, etc.)
+
+-- Incremental (Steady State) -------------------------------------------------
 Existing smart-sdd  --> /smart-sdd add  --> updated Global Evolution --> /smart-sdd pipeline
 project                                    Layer
-
--- Brownfield (rebuild) -------------------------------------------------
-Existing source     --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd pipeline
-code                   (reverse-analysis)  (roadmap, registries,
-                                           pre-context, etc.)
 ```
+
+All journeys converge to **incremental mode** as the steady state.
 
 ---
 
@@ -103,6 +110,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 |------|---------|
 | New project | `/smart-sdd init` |
 | Existing codebase rebuild | `/reverse-spec ./path/to/source` |
+| SDD adoption | `/reverse-spec ./path/to/source` → `/smart-sdd adopt` |
 | Add to existing project | `/smart-sdd add` |
 | Check spec-kit compatibility | `/speckit-diff` |
 | Generate Case Study report | `/case-study init` → record observations → `/case-study generate` |
@@ -370,7 +378,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 #### Core Value
 
-- **Three project entry points**: `init` for greenfield, `add` for incremental, `pipeline` for all modes
+- **Five user journeys**: `init` for greenfield, `adopt` for SDD adoption, `add` for incremental, `pipeline` for rebuild
 - **Wraps rather than replaces** spec-kit commands, unaffected by spec-kit updates
 - **Automatically assembles and injects** required cross-Feature information before each command execution
 - **Automatically updates** the Global Evolution Layer (entity-registry, api-registry, roadmap, subsequent pre-context) upon Feature completion
@@ -385,6 +393,11 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 # Brownfield (incremental) -- Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
+
+# SDD Adoption -- Document existing code with SDD artifacts
+/smart-sdd adopt                        # Adopt pipeline: specify → plan → analyze → verify
+/smart-sdd adopt --auto                 # Without stopping for confirmation
+/smart-sdd adopt --from ./path          # Read artifacts from specified path
 
 # Pipeline -- Run the full SDD pipeline (after init, add, or reverse-spec)
 /smart-sdd pipeline                      # With per-step confirmation
@@ -426,7 +439,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 /smart-sdd pipeline --from ./path --auto
 ```
 
-#### Three Project Modes
+#### Five Project Modes
 
 | Aspect | Greenfield | Brownfield (incremental) | Brownfield (rebuild) |
 |--------|-----------|-------------------------|---------------------|
@@ -438,6 +451,13 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 | Entity/API registries | Empty, populated during plan | Already exist, updated | Generated by reverse-spec |
 | Constitution | Created during init | Already exists | Created from constitution-seed |
 | business-logic-map | Not generated | Already exists | Generated by reverse-spec |
+
+**Adoption Mode** (new in v2):
+- **Use case**: Keep existing code, wrap it with SDD governance documents
+- **Entry point**: `/reverse-spec` → `/smart-sdd adopt`
+- **Pipeline**: specify → plan → analyze → verify (no tasks/implement — no code to write)
+- **Feature status**: `adopted` (distinct from `completed` — signals legacy code)
+- **Verify behavior**: Test failures are recorded as pre-existing issues (non-blocking)
 
 #### How the Modes Differ in Practice
 
@@ -458,6 +478,39 @@ Key practical differences:
 | Business logic map | Not available | Available -- injected during specify |
 | Cross-Feature context for early Features | Limited -- only dependency info | Rich -- full entity/API schemas from registries |
 | Pipeline ordering sensitivity | High -- dependent Features need predecessors to complete plan first | Low -- all registries pre-exist |
+
+#### Source Behavior Coverage (SBI Tracking)
+
+For rebuild and adoption projects, `/reverse-spec` assigns unique IDs (B001, B002, ...) to each behavior in the Source Behavior Inventory. These IDs enable end-to-end tracing through the pipeline:
+
+```
+reverse-spec SBI (B###) → specify FR (FR-###) → implement → verify → coverage update
+```
+
+Each FR in `spec.md` includes a source tag (e.g., `FR-001: Email login [source: B001]`). After verify, `sdd-state.md` tracks coverage: P1 behaviors require 100% mapping regardless of scope mode.
+
+#### Demo Layering
+
+Features are grouped into Demo Groups for multi-Feature integration testing:
+
+| Layer | Trigger | Scope |
+|-------|---------|-------|
+| **Feature Demo** | Each Feature verify | Single Feature functionality |
+| **Integration Demo** | All Features in demo group verified | User scenario — multi-Feature journey |
+
+Demo Groups are defined during `/reverse-spec` Phase 3 and stored in `roadmap.md`. When the last Feature in a group completes verify, an Integration Demo is triggered.
+
+#### Aggregation Scripts
+
+Five read-only bash scripts reduce agent context consumption by pre-aggregating artifact data:
+
+| Script | Purpose | Used By |
+|--------|---------|---------|
+| `context-summary.sh` | Feature/Entity/API/DemoGroup summary | `add` Step 2 |
+| `sbi-coverage.sh` | SBI coverage dashboard with `--filter` | `add` Step 4, verify post-check |
+| `demo-status.sh` | Demo Group progress | `add` Step 5, verify post-check |
+| `pipeline-status.sh` | Pipeline progress overview | Session orientation |
+| `validate.sh` | Cross-file consistency check | After artifact updates |
 
 #### Feature Restructuring
 

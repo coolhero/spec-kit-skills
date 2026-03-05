@@ -8,14 +8,14 @@ This document defines what observations to record at each milestone during `/rev
 
 | ID | When | What to Record |
 |----|------|---------------|
-| **M1** | Before `/reverse-spec` | Project background, why SDD redevelopment, expected goals, anticipated challenges |
+| **M1** | Before `/reverse-spec` (rebuild/adoption) | Project background, why SDD redevelopment/adoption, expected goals, anticipated challenges |
 | **M2** | After `/reverse-spec` Phase 1 | First impressions of codebase, scale/complexity assessment, unexpected findings |
-| **M3** | After `/reverse-spec` Phase 2-3 | Entity/API complexity observations, Feature decomposition rationale, Tier adjustment reasons |
-| **M4** | After `/reverse-spec` Phase 4-5 | Artifact completeness assessment, coverage gap observations, manual corrections made |
+| **M3** | After `/reverse-spec` Phase 2-3 | Entity/API complexity observations, Feature decomposition rationale, Tier adjustment reasons, Demo Group selection rationale |
+| **M4** | After `/reverse-spec` Phase 4-5 | Artifact completeness assessment, SBI coverage baseline, coverage gap observations, manual corrections made |
 | **M5** | After `/smart-sdd` constitution | Key constitution principles chosen, modifications made, reasoning |
-| **M6** | After each Feature completion | Per-Feature challenges, key decisions, perceived time investment, improvement ideas |
-| **M7** | After Parity Check (if applicable) | Parity results assessment, gap resolution strategy |
-| **M8** | After full completion | Overall assessment, key learnings, workflow improvement suggestions |
+| **M6** | After each Feature completion | Per-Feature challenges, key decisions, perceived time investment, improvement ideas. **Adoption mode**: Record adopt results (pre-existing issues, test baseline, documentation coverage) |
+| **M7** | After Parity Check (if applicable) | Parity results assessment, SBI coverage status (P1/P2/P3 percentages), gap resolution strategy |
+| **M8** | After full completion | Overall assessment, key learnings, workflow improvement suggestions, Demo Group Integration Demo results |
 
 ---
 

@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 23:30 KST
+[English README](README.md) | Last updated: 2026-03-06 01:00 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -12,8 +12,8 @@
 
 | 스킬 | 목적 | 사용 시점 |
 |------|------|-----------|
-| `/reverse-spec` | 기존 소스코드 역분석 → 교차 Feature 컨텍스트 아티펙트 생성 | Brownfield rebuild (전체 재구현) |
-| `/smart-sdd` | spec-kit 커맨드를 교차 Feature 컨텍스트 주입 + 진행 추적으로 래핑 | 모든 모드: greenfield, incremental, rebuild |
+| `/reverse-spec` | 기존 소스코드 역분석 → 교차 Feature 컨텍스트 아티펙트 생성 | Brownfield rebuild 또는 SDD 도입 |
+| `/smart-sdd` | spec-kit 커맨드를 교차 Feature 컨텍스트 주입 + 진행 추적으로 래핑 | 모든 모드: greenfield, incremental, rebuild, adoption |
 | `/speckit-diff` | *(유틸리티)* spec-kit 버전 호환성 검사, 영향 리포트 생성 | 언제든 — spec-kit 업데이트 후 |
 | `/case-study` | *(유틸리티)* 실행 아티펙트에서 Case Study 보고서 생성 | reverse-spec + smart-sdd 완료 후 |
 
@@ -30,18 +30,28 @@ spec-kit은 Feature 단위 거버넌스에 특화되어 있지만, 교차 Featur
 
 이 프로젝트는 전 Feature에 걸쳐 공유되는 **엔티티/API 레지스트리**, 모든 spec-kit 커맨드 실행 전 **pre-context 주입**, **의존성 기반 순서 지정**, 각 Feature 완료 후 **글로벌 아티펙트 자동 갱신**으로 이 공백을 채웁니다.
 
-### 세 가지 프로젝트 모드
+### 다섯 가지 사용자 여정
 
 ```
-── Greenfield ───────────────────────────────────────────────────
-신규 프로젝트 → /smart-sdd init → Global Evolution Layer → /smart-sdd pipeline
+-- 신규 프로젝트 ---------------------------------------------------------------
+신규 프로젝트        --> /smart-sdd init --> Global Evolution Layer --> /smart-sdd pipeline
 
-── Brownfield (incremental) ─────────────────────────────────────
-기존 smart-sdd 프로젝트 → /smart-sdd add → 새 Feature pipeline 진행
+-- SDD 도입 -------------------------------------------------------------------
+기존 소스코드        --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd adopt
+                       (역분석)           (roadmap, registries,        (기존 코드 문서화)
+                                          pre-context 등)
 
-── Brownfield (rebuild) ─────────────────────────────────────────
-기존 소스 코드 → /reverse-spec → Global Evolution Layer → /smart-sdd pipeline
+-- 재구축 (Core/Full) ----------------------------------------------------------
+기존 소스코드        --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd pipeline
+                       (역분석)           (roadmap, registries,        (코드 재구축)
+                                          pre-context 등)
+
+-- 점진적 추가 (정상 상태) ------------------------------------------------------
+기존 smart-sdd      --> /smart-sdd add  --> 갱신된 Global Evolution --> /smart-sdd pipeline
+프로젝트                                    Layer
 ```
+
+모든 여정은 **점진적 추가 모드**로 수렴합니다.
 
 ---
 
@@ -100,6 +110,7 @@ Claude Code에서 아래 명령으로 스킬이 인식되는지 확인합니다:
 |------|--------|
 | 새 프로젝트 | `/smart-sdd init` |
 | 기존 코드베이스 재구축 | `/reverse-spec ./path/to/source` |
+| SDD 도입 | `/reverse-spec ./path/to/source` → `/smart-sdd adopt` |
 | 기존 프로젝트에 추가 | `/smart-sdd add` |
 | spec-kit 호환성 검사 | `/speckit-diff` |
 | Case Study 보고서 생성 | `/case-study init` → 관찰 기록 → `/case-study generate` |
@@ -369,7 +380,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 #### 핵심 가치
 
 - spec-kit 커맨드를 **대체하지 않고 감싸는** 방식으로, spec-kit의 업데이트에 영향받지 않음
-- 세 가지 프로젝트 진입점 지원 (greenfield, brownfield incremental, brownfield rebuild)
+- **다섯 가지 사용자 여정**: 신규(`init`), SDD 도입(`adopt`), 점진적 추가(`add`), 재구축(`pipeline`)
 - 각 커맨드 실행 전에 필요한 교차 Feature 정보를 **자동 조립하여 주입**
 - Feature 완료 시 Global Evolution Layer (entity-registry, api-registry, roadmap, 후속 pre-context)를 **자동 갱신**
 - 전체 진행 상태를 `sdd-state.md`로 **체계적 추적**
@@ -383,6 +394,11 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 
 # Brownfield (incremental) --- 기존 smart-sdd 프로젝트에 새 Feature 추가
 /smart-sdd add                           # 대화형으로 새 Feature 정의 및 추가
+
+# SDD 도입 -- 기존 코드를 SDD 아티펙트로 문서화
+/smart-sdd adopt                        # 도입 파이프라인: specify → plan → analyze → verify
+/smart-sdd adopt --auto                 # 확인 없이 진행
+/smart-sdd adopt --from ./path          # 지정된 경로에서 아티펙트 읽기
 
 # Pipeline 모드 --- 전체 순차 진행 (init, add, reverse-spec 이후 실행)
 /smart-sdd pipeline                      # 매 단계 확인
@@ -424,13 +440,20 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 /smart-sdd pipeline --from ./path --auto
 ```
 
-#### 세 가지 프로젝트 모드
+#### 다섯 가지 프로젝트 모드
 
 | 모드 | 커맨드 | 사용 시점 | Global Evolution Layer 생성 방식 | Feature 세분화 | Scope | 다음 단계 |
 |------|--------|----------|--------------------------------|--------------|-------|----------|
 | **Greenfield** | `/smart-sdd init` | 신규 프로젝트를 처음부터 시작할 때 | 대화형 Q&A (또는 PRD 문서)로 Feature, 의존성, 원칙 정의 | Coarse/Standard/Fine 중 선택 | 항상 Full | `/smart-sdd pipeline` |
 | **Brownfield (incremental)** | `/smart-sdd add` | 기존 smart-sdd 프로젝트에 새 기능을 추가할 때 | 기존 산출물에 새 Feature 추가. roadmap, pre-context 갱신 | N/A (기존 Feature에 추가) | 기존 scope 유지 | `/smart-sdd pipeline` 또는 `/smart-sdd specify F00N` |
 | **Brownfield (rebuild)** | `/reverse-spec` | 기존 소스코드를 전체 재개발할 때 | 기존 코드 역분석으로 전체 산출물 자동 생성 | Coarse/Standard/Fine 중 선택 | Core 또는 Full. `/smart-sdd expand`로 확장 가능 | `/smart-sdd pipeline` |
+
+**도입 모드** (v2 신규):
+- **사용 사례**: 기존 코드를 유지하면서 SDD 거버넌스 문서로 래핑
+- **진입점**: `/reverse-spec` → `/smart-sdd adopt`
+- **파이프라인**: specify → plan → analyze → verify (tasks/implement 없음 — 코드 작성 불필요)
+- **Feature 상태**: `adopted` (`completed`와 구분 — 레거시 코드임을 표시)
+- **Verify 동작**: 테스트 실패는 기존 이슈로 기록 (비차단)
 
 #### 모드별 실제 차이점
 
@@ -451,6 +474,39 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 | Business logic map | 사용 불가 | 사용 가능 --- specify 시 주입 |
 | 초기 Feature의 교차 Feature 컨텍스트 | 제한적 --- 의존성 정보만 | 풍부 --- 레지스트리의 전체 엔티티/API 스키마 |
 | 파이프라인 순서 민감도 | 높음 --- 후속 Feature는 선행 Feature의 plan 완료 필요 | 낮음 --- 레지스트리가 이미 존재 |
+
+#### 소스 행위 커버리지 (SBI 추적)
+
+재구축 및 도입 프로젝트에서 `/reverse-spec`는 Source Behavior Inventory의 각 행위에 고유 ID(B001, B002, ...)를 할당합니다. 이 ID를 통해 파이프라인 전체에서 추적이 가능합니다:
+
+```
+reverse-spec SBI (B###) → specify FR (FR-###) → implement → verify → 커버리지 갱신
+```
+
+`spec.md`의 각 FR에는 소스 태그가 포함됩니다 (예: `FR-001: 이메일 로그인 [source: B001]`). verify 후 `sdd-state.md`에서 커버리지를 추적합니다: P1 행위는 scope 모드와 관계없이 100% 매핑이 필수입니다.
+
+#### 데모 계층화
+
+Feature들은 다중 Feature 통합 테스트를 위해 Demo Group으로 그룹화됩니다:
+
+| 계층 | 트리거 | 범위 |
+|------|--------|------|
+| **Feature 데모** | 각 Feature verify 완료 시 | 단일 Feature 기능 |
+| **Integration 데모** | Demo Group 내 모든 Feature verify 완료 시 | 사용자 시나리오 — 다중 Feature 여정 |
+
+Demo Group은 `/reverse-spec` Phase 3에서 정의되며 `roadmap.md`에 저장됩니다. 그룹 내 마지막 Feature가 verify를 완료하면 Integration Demo가 트리거됩니다.
+
+#### 집계 스크립트
+
+5개의 읽기 전용 bash 스크립트가 아티펙트 데이터를 사전 집계하여 에이전트 컨텍스트 소모를 줄입니다:
+
+| 스크립트 | 목적 | 사용처 |
+|----------|------|--------|
+| `context-summary.sh` | Feature/Entity/API/DemoGroup 요약 | `add` Step 2 |
+| `sbi-coverage.sh` | SBI 커버리지 대시보드 + `--filter` | `add` Step 4, verify 후처리 |
+| `demo-status.sh` | Demo Group 진행 현황 | `add` Step 5, verify 후처리 |
+| `pipeline-status.sh` | 파이프라인 진행 개요 | 세션 시작 시 |
+| `validate.sh` | 교차 파일 일관성 검사 | 아티펙트 갱신 후 |
 
 #### Feature 구조 변경
 

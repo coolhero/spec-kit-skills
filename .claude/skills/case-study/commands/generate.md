@@ -65,11 +65,13 @@ Glob for `{SPEC_PATH}/[0-9]*/spec.md`, `{SPEC_PATH}/[0-9]*/tasks.md` to extract 
 - Dependency count per Feature
 
 ### 3-2. From sdd-state.md
-- Origin (`greenfield`/`reverse-spec`)
+- Origin (`greenfield`/`rebuild`/`adoption`)
 - Domain profile used
 - Constitution: status, version, update count
-- Feature Progress table: per-step status icons and dates
+- Feature Progress table: per-step status icons and dates (include `adopted` status alongside `completed`)
 - Feature Detail Log: per-step timestamps, notes (FR/SC counts, test results)
+- Source Behavior Coverage (if exists): P1/P2/P3 counts and verified percentages
+- Demo Group Progress (if exists): per-group completion status
 - Parity Check Log: structural/logic parity %, gaps, new Features created
 - Global Evolution Log: registry update history
 - Restructure Log: merge/split operations
@@ -100,6 +102,12 @@ Parse milestone entries (M1-M8):
 - Extract Per-Category Stack Choices table (if new stack)
 - Extract Architecture Decisions table
 
+### 3-8. From SBI Coverage (if exists in sdd-state.md)
+- Parse Source Behavior Coverage table
+- Count per priority: P1 total/verified, P2 total/verified, P3 total/verified
+- Overall coverage percentage
+- List of unmapped (❌) and deferred (🔒) entries
+
 ---
 
 ## Step 4 — Report Generation
@@ -128,21 +136,23 @@ Auto-generated from aggregated metrics:
 
 ## {Section 1 Header}
 
-**Project**: {name} | **Domain**: {domain} | **Origin**: {greenfield/reverse-spec}
-**Scope**: {core/full} | **Stack**: {same/new} | **Features**: {total count} ({completed}/{total})
+**Project**: {name} | **Domain**: {domain} | **Origin**: {greenfield/rebuild/adoption}
+**Scope**: {core/full} | **Stack**: {same/new} | **Features**: {total count} ({completed+adopted}/{total})
 
 {1-3 sentence summary of the project and key outcomes}
 
 ### Key Metrics
 | Metric | Value |
 |--------|-------|
-| Features completed | {N}/{total} |
+| Features completed | {N}/{total} ({adopted} adopted) |
 | Total requirements (FR) | {sum of FR counts} |
 | Total success criteria (SC) | {sum of SC counts} |
 | Total tasks | {sum of task counts} |
 | Entities defined | {count from registry} |
 | API endpoints | {count from registry} |
 | Source coverage | {% from baseline} |
+| SBI coverage | {P1: X/Y (Z%), P2: X/Y (Z%), or "N/A"} |
+| Demo Groups | {completed}/{total} groups ({ready} ready for demo) |
 | Parity (structural/logic) | {%/% from parity log, or "N/A"} |
 ```
 
@@ -177,16 +187,18 @@ Auto-generated from aggregated metrics:
 | Feature | FR | SC | Tasks | Tests | Build | Status |
 |---------|----|----|-------|-------|-------|--------|
 | F001-auth | 5 | 8 | 12 | 24/24 ✅ | ✅ | completed |
-| F002-product | 8 | 12 | 18 | 30/30 ✅ | ✅ | completed |
+| F002-product | 8 | 12 | 18 | 30/30 ✅ | ✅ | adopted |
 ```
 
 - Constitution evolution: version history from Constitution Update Log
 - Global Evolution Log summary: which registries were updated, by which Features
+- Demo Group Progress (if exists): per-group completion status, Integration Demo results
 - From case-study-log.md M6 entries (if exist): per-Feature observations
 
 ### Section 6 — Quality & Parity
 
 - From sdd-state.md Feature Detail Log: verify step results (tests, build, lint, cross-Feature)
+- SBI Coverage (if exists): P1/P2/P3 mapping percentages, unmapped behavior list, deferred behaviors
 - From sdd-state.md Parity Check Log (if exists): structural/logic parity %
 - Exclusion audit from coverage-baseline.md (if exists)
 - From case-study-log.md M7 entry (if exists): parity observations

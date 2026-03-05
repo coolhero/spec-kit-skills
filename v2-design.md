@@ -1,7 +1,7 @@
 # spec-kit-skills v2 Redesign
 
 > Design document consolidating all v2 redesign decisions.
-> Status: **Design** (not yet implemented)
+> Status: **Implemented** (Phase 1-6 complete, 2026-03-05)
 > Date: 2026-03-06
 
 ---
@@ -362,14 +362,14 @@ No new artifact files. Changes are additions to existing artifact schemas.
 
 ---
 
-## 10. Not Yet Designed
+## 10. Design Resolution Log
 
-| Item | Description |
-|------|-------------|
-| Application Demo structure | What form does the Tier-completion / full-completion demo take? |
-| Deferred → incremental candidate presentation | How are unmapped P2/P3 SBI entries surfaced as Feature suggestions after Core completion? |
-| Adopt injection prompt full text | Detailed prompt wording for each adoption step |
-| Script implementations | Actual bash scripts (patterns defined, not yet coded) |
-| README/SKILL.md updates | Documentation reflecting v2 changes |
-| case-study skill updates | Origin field (`adoption \| rebuild`), `adopted` status handling, SBI coverage metrics, Demo Group progress, recording protocol (M1-M8) branching for adoption vs rebuild |
-| greenfield `init` alignment | Does init need demo group / SBI concepts? (No SBI, but demo groups could be manually defined) |
+| Item | Status | Resolution |
+|------|--------|------------|
+| Application Demo structure | **Deferred** | Integration Demo covers user scenarios sufficiently. Application Demo left to user discretion at project completion — no automated structure needed |
+| Deferred → incremental candidate presentation | **Resolved** | `sbi-coverage.sh --filter` already surfaces unmapped SBI entries. Core completion → `expand` command or `add` Step 4 (SBI Match) naturally presents deferred behaviors as Feature candidates |
+| Adopt injection prompt full text | **Implemented** | `injection/adopt-specify.md`, `adopt-plan.md`, `adopt-verify.md` (Phase 3) |
+| Script implementations | **Implemented** | 5 scripts in `scripts/` directory (Phase 4) |
+| README/SKILL.md updates | **Implemented** | README.md and README.ko.md updated with Five User Journeys, adopt command, SBI tracking, Demo Layering, Aggregation Scripts |
+| case-study skill updates | **Implemented** | generate.md updated: Origin values, SBI coverage metrics, Demo Group progress, adopted status. Recording protocol updated with adoption branching |
+| greenfield `init` alignment | **Resolved** | Greenfield has no SBI (no source code). Demo Groups are optional at init — users naturally create them via `add` Step 5 when adding Features incrementally |

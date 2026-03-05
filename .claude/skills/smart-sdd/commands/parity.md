@@ -9,7 +9,7 @@ Running `/smart-sdd parity` compares the original source code against implemente
 
 ### Prerequisites
 
-- **Origin must be `reverse-spec`**: Parity checking is only available for brownfield rebuild projects. If Origin in sdd-state.md is not `reverse-spec` (e.g., `greenfield`), display: "⚠️ Parity check is only available for brownfield rebuild projects (Origin: reverse-spec)." and exit.
+- **Origin must be `rebuild`**: Parity checking is only available for brownfield rebuild projects. If Origin in sdd-state.md is not `rebuild` (e.g., `greenfield` or `adoption`), display: "⚠️ Parity check is only available for brownfield rebuild projects (Origin: rebuild)." and exit.
 - **At least one Feature must be `completed`** in sdd-state.md.
 - **`coverage-baseline.md` is optional but recommended**: If present at `BASE_PATH/coverage-baseline.md`, intentional exclusions will be filtered from the gap list. If missing, parity still runs but without exclusion filtering — display a note: "ℹ️ coverage-baseline.md not found. Run `/reverse-spec` with Phase 4-3 to generate it, or all source items will be treated as expected."
 

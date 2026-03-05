@@ -26,7 +26,7 @@
 
 1. If `--source <path>` argument is provided → use that path
 2. If not → read `Source Path` from `sdd-state.md`
-3. If Source Path is `N/A` (greenfield) → display error: "⚠️ Parity check is only available for brownfield rebuild projects (Origin: reverse-spec)." and exit
+3. If Source Path is `N/A` (greenfield) → display error: "⚠️ Parity check is only available for brownfield rebuild projects (Origin: rebuild)." and exit
 4. Verify the resolved path exists and is accessible. If not found → display error and prompt user for a valid path
 
 ## Display Content

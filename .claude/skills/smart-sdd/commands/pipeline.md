@@ -635,7 +635,7 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
 - Verify that entity-registry.md and api-registry.md match the actual implementation
 
-**Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `reverse-spec`):
+**Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `rebuild`):
 If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:
 
 1. Read the Source Behavior Inventory table (function/method list with P1/P2/P3 priorities)
