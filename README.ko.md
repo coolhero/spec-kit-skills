@@ -19,7 +19,7 @@ spec-kit은 강력한 SDD 프레임워크이지만, 한 번에 하나의 Feature
 | **API Registry** | Feature 간 API 계약 및 엔드포인트 |
 | **Feature별 Pre-context** | 각 Feature가 프로젝트의 나머지에 대해 알아야 할 것 |
 | **Source Behavior Inventory** | 함수 수준 커버리지 추적 (기존 코드베이스용) |
-| **Constitution** | 프로젝트 전역 원칙 및 아키텍처 결정 |
+| **Constitution** | 프로젝트 전역 원칙 및 아키텍처 결정 *(spec-kit 내장 — 교차 Feature 규칙으로 확장)* |
 
 `/reverse-spec`이 기존 소스코드에서 이 아티펙트들을 **생성**하고, `/smart-sdd`가 매 spec-kit 커맨드 실행 시 이들을 **읽고 갱신**합니다.
 

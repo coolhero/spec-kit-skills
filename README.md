@@ -19,7 +19,7 @@ spec-kit is a powerful SDD framework, but it processes one Feature at a time —
 | **API Registry** | Inter-Feature API contracts and endpoints |
 | **Per-Feature Pre-contexts** | What each Feature needs to know about the rest of the project |
 | **Source Behavior Inventory** | Function-level coverage tracking (for existing codebases) |
-| **Constitution** | Project-wide principles and architectural decisions |
+| **Constitution** | Project-wide principles and architectural decisions *(spec-kit built-in — extended with cross-Feature rules)* |
 
 `/reverse-spec` **builds** these artifacts from existing source code. `/smart-sdd` **reads and updates** them during every spec-kit command execution.
 
