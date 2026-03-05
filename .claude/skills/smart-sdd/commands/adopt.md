@@ -161,6 +161,25 @@ Record in `sdd-state.md`:
 - `tasks` step: `⏭️` with note "Skipped — adoption mode (code exists)"
 - `implement` step: `⏭️` with note "Skipped — adoption mode (code exists)"
 
+#### Environment Readiness Check (before first Feature's verify)
+
+Before running verify on the **first Feature**, check if the project requires environment setup:
+
+1. Check if `.env.example` (or equivalent) exists in the project root
+2. If it does, check if a corresponding `.env` (or equivalent runtime config) exists
+3. **If `.env` is missing**: Display a HARD STOP:
+   ```
+   ⚠️ Environment setup required before verify can run tests/build.
+
+   Found: .env.example ([N] variables defined)
+   Missing: .env (runtime values)
+
+   Please create .env with the required values, then confirm to continue.
+   ```
+4. **If `.env` exists**: Skip silently — environment is ready
+
+> This check runs **once** before the first Feature's verify, not per-Feature.
+
 #### Step 4 — Verify (Adoption Mode)
 
 Execute the **full Common Protocol** with adoption-specific injection:
