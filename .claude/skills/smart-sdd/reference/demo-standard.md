@@ -1,0 +1,163 @@
+# Demo-Ready Delivery Standard
+
+> Single source of truth for demo script requirements, template, and anti-patterns.
+> Referenced by: `reference/injection/implement.md` (creation), `commands/verify-phases.md` Phase 3 (verification), `reference/injection/tasks.md` (task injection), `domains/app.md` § 1 (domain profile).
+> For the MANDATORY rule, see `SKILL.md` Rule 2.
+
+---
+
+## 1. Demo Philosophy
+
+A demo is an **executable script** that launches the real, working Feature so the user can experience it firsthand. It is NOT documentation, NOT a test suite, and NOT manual instructions.
+
+- **Default = interactive**: Start the Feature → print "Try it" instructions → keep running until Ctrl+C
+- **`--ci` flag**: Quick health check → exit (for `verify` Phase 3 automation)
+- **Script location**: `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language)
+
+## 2. Anti-Patterns (REJECT these)
+
+> **⚠️ DO NOT DO THIS:**
+
+```markdown
+# F001 Auth Demo          ← WRONG: This is a markdown document
+## Demo Steps              ← WRONG: Manual instructions for a human to follow
+1. Open the browser       ← WRONG: Not executable by a machine
+2. Click "Login"          ← WRONG: Requires human interaction
+```
+A markdown file with instructions is **documentation, NOT a demo script**.
+
+```bash
+#!/usr/bin/env bash
+TOTAL=0; PASSED=0
+TOTAL=$((TOTAL+1)); curl -s ... | grep -q "OK" && PASSED=$((PASSED+1))
+echo "${PASSED}/${TOTAL} passed"    ← WRONG: This is a test suite, not a demo
+```
+A script that only runs assertions and exits is a **test suite**, not a demo.
+Tests are for `verify` Phase 1. Demos are for showing the **real, working Feature**.
+
+Additional anti-patterns:
+- Showing demo steps as text in the chat instead of writing a script file
+- A script that only runs tests without starting the actual Feature
+
+## 3. Demo Script Template
+
+**CORRECT — executable demo that launches the Feature for the user to experience:**
+```bash
+#!/usr/bin/env bash
+# Demo: [Feature Name]
+#
+# Purpose: Launches [Feature Name] so the user can experience it firsthand.
+#          Sets up the environment, starts the service, and provides
+#          concrete examples of what to try.
+#
+# Usage:
+#   ./demos/F00N-name.sh        # Launch the demo (interactive, default)
+#   ./demos/F00N-name.sh --ci   # CI mode — quick health-check and exit
+#
+# Coverage (maps to spec.md):
+#   ✅ FR-001 [Requirement name]   → Demonstrated: [how the user can see this]
+#   ✅ FR-002 [Requirement name]   → Demonstrated: [how the user can see this]
+#   ⬜ FR-003 [Requirement name]   → Not demoed: [reason, e.g., requires external service]
+#
+# Demo Components:
+#   [component name] | [file path] | Demo-only | Remove after F0XX-[feature]
+#   [component name] | [file path] | Promotable | Extended by F0XX-[feature]
+#
+# Prerequisites: [What must be running/installed]
+set -euo pipefail
+
+CI_MODE=false
+[ "${1:-}" = "--ci" ] && CI_MODE=true
+
+# --- Cleanup handler ---
+cleanup() {
+  echo ""
+  echo "Shutting down demo..."
+  [Commands to clean up — e.g., stop server, remove temp data]
+}
+trap cleanup EXIT
+
+echo "══════════════════════════════════════════════════"
+echo "  Demo: [Feature Name]"
+echo "══════════════════════════════════════════════════"
+echo ""
+
+# ─── Setup ──────────────────────────────────────────────────
+echo "Setting up..."
+[Commands to prepare: seed DB, build assets, etc.]
+
+# ─── Start the Feature ──────────────────────────────────────
+echo "Starting [Feature Name]..."
+[Commands to start the service — e.g., start server in background]
+
+# ─── Health Check ───────────────────────────────────────────
+echo ""
+echo "Running health check..."
+[Quick checks to verify the demo environment is alive]
+# e.g., curl -sf http://localhost:3000/health || { echo "❌ Health check failed"; exit 1; }
+echo "  ✅ [Service] is running on [port/URL]"
+
+# ─── CI Mode: exit after health check ───────────────────────
+if [ "$CI_MODE" = true ]; then
+  echo ""
+  echo "=== CI health check passed ==="
+  exit 0
+fi
+
+# ─── Interactive: Show the user what to try ─────────────────
+echo ""
+echo "══════════════════════════════════════════════════"
+echo "  🎯 [Feature Name] is live! Try it:"
+echo "══════════════════════════════════════════════════"
+echo ""
+[Print concrete things the user can DO right now:]
+echo "  👉 Open in browser: http://localhost:3000/[page]"
+echo ""
+echo "  👉 Try the API:"
+echo "     curl http://localhost:3000/api/[endpoint]"
+echo ""
+echo "  👉 [Another thing to try]:"
+echo "     [Concrete command or URL]"
+echo ""
+echo "──────────────────────────────────────────────────"
+echo "  Press Ctrl+C to stop the demo."
+echo "──────────────────────────────────────────────────"
+echo ""
+
+# Keep the service running until the user stops it
+wait || true
+```
+
+## 4. Key Requirements
+
+- **The demo shows the real, working Feature** — not just assertions. Running the script launches the Feature so the user can experience it firsthand
+- The script must be executable (`chmod +x`) and self-contained
+- **Default = interactive**: The script launches the Feature and keeps it running. The user interacts with it via browser, curl, CLI, etc.
+- **`--ci` flag**: For `verify` Phase 3 automation — runs setup + health check, then exits. No user interaction needed
+- **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Use ⬜ for items that can't be demoed
+- **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
+- **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
+
+## 5. Requirements by Feature Type
+
+| Feature Type | Demo Approach |
+|-------------|---------------|
+| Has UI | Start the server with demo data, open the real UI. User sees and interacts with actual pages |
+| Backend/API | Start the server with demo data, print curl commands for real endpoints |
+| CLI/Library | Provide a pre-configured sandbox and sample commands to run |
+| Data layer / Store | Provide a seeded database with CRUD command examples |
+| Pipeline / Engine | Run the pipeline with sample input and show real output, then let the user try with their own input |
+
+## 6. Demo Code Markers
+
+| Marker | Meaning |
+|--------|---------|
+| `// @demo-only` | Remove after demo — throwaway scaffolding |
+| `// @demo-scaffold — will be extended by F00N-[feature]` | Extend later — promotable to production code |
+
+## 7. Demo Hub (`demos/README.md`)
+
+After creating a demo script, update `demos/README.md`:
+- Create if it doesn't exist (first Feature with demo)
+- Add the Feature with its demo command and a brief description:
+  - `./demos/F00N-name.sh` — launches [brief description of what the user can try]

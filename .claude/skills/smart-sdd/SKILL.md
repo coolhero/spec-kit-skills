@@ -236,7 +236,8 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `add` | `commands/add.md` | Add Features to existing project |
 | `adopt` | `commands/adopt.md` | SDD adoption pipeline — wrap existing code with SDD docs |
 | `pipeline` | `commands/pipeline.md` | Full SDD pipeline execution |
-| `constitution`, `specify`, `plan`, `tasks`, `analyze`, `implement`, `verify` | `commands/pipeline.md` | Step mode — execute a specific pipeline step |
+| `constitution`, `specify`, `plan`, `tasks`, `analyze`, `implement` | `commands/pipeline.md` | Step mode — execute a specific pipeline step |
+| `verify` | `commands/pipeline.md` + `commands/verify-phases.md` | Step mode — verify with Phase 1-4 details |
 | `restructure` | `commands/restructure.md` | Modify Feature structure |
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
 | `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
