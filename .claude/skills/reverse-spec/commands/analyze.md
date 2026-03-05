@@ -36,6 +36,11 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 
 > **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
+**Step 4 — Auto-initialize case study logging**:
+Check if `specs/reverse-spec/case-study-log.md` exists at the target directory:
+- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `{target-directory}/specs/reverse-spec/case-study-log.md` (create the directory if needed). Display: `📝 Case study log initialized: specs/reverse-spec/case-study-log.md`
+- **If already exists**: Skip silently (user may have manually initialized earlier)
+
 ---
 
 ## Phase 0 — Strategy Questions
@@ -740,6 +745,7 @@ Generation complete:
 - specs/reverse-spec/features/F001-xxx/pre-context.md
 - specs/reverse-spec/features/F002-xxx/pre-context.md
 - ...
+- specs/reverse-spec/case-study-log.md              (observation log for milestone tracking)
 - .env.example                                    (if environment variables were detected)
 
 SBI: [N] source behaviors tracked (B001–B[N]) across [M] Features

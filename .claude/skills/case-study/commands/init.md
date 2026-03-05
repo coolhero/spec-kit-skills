@@ -2,6 +2,8 @@
 
 Initializes case study observation logging for a project. Creates the `case-study-log.md` file from the template and displays the recording protocol.
 
+> **Note**: `case-study-log.md` is automatically created when running `/reverse-spec`, `/smart-sdd init`, or `/smart-sdd pipeline`. Use this command to **reset** an existing log or **view the recording protocol**.
+
 ---
 
 ## Step 1 — Resolve Target Directory

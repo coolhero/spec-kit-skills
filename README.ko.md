@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-06 01:00 KST
+[English README](README.md) | Last updated: 2026-03-06 02:30 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -963,20 +963,19 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 
 ### Case Study 워크플로우
 
-`/case-study` 스킬은 SDD 워크플로우 실행 결과에서 구조화된 보고서를 생성합니다. 일반적인 워크플로우:
+`/case-study` 스킬은 SDD 워크플로우 실행 결과에서 구조화된 보고서를 생성합니다. 관찰 로그(`case-study-log.md`)는 `/reverse-spec`, `/smart-sdd init`, `/smart-sdd pipeline` 실행 시 **자동으로 초기화**됩니다 — 별도의 설정 단계가 필요 없습니다.
 
 ```
-Step 1: 로깅 초기화
-  /case-study init ./my-project       → case-study-log.md 생성 + 기록 프로토콜 표시
-
-Step 2: SDD 워크플로우 실행
+Step 1: SDD 워크플로우 실행 (case-study-log.md 자동 생성)
   /reverse-spec ./source-code         → M1-M4 관찰 사항을 case-study-log.md에 기록
   /smart-sdd pipeline                 → Feature별 M5-M6 관찰 사항 기록
 
-Step 3: 보고서 생성
+Step 2: 보고서 생성
   /case-study generate ./my-project              → 영어 보고서
   /case-study generate ./my-project --lang ko    → 한국어 보고서
   /case-study generate ./my-project --output case-study.md  → 파일로 저장
 ```
+
+> **수동 초기화**: `/case-study init ./my-project`로 로그를 재설정하거나 기록 프로토콜을 확인할 수 있습니다.
 
 보고서는 **정량 데이터** (sdd-state.md, 레지스트리, spec-kit 아티펙트에서 자동 추출)와 **정성적 관찰** (실행 중 8개 마일스톤에서 수동 기록)을 결합합니다. 관찰 기록이 없어도 아티펙트에서 메트릭만으로 보고서를 생성할 수 있습니다.

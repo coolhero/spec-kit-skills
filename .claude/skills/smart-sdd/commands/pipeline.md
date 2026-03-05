@@ -357,6 +357,11 @@ After Phase 0-4 completes, **append** to `specs/history.md` (create with the sta
 | Key Modifications | [changes made during review, or "Accepted as-is"] |
 ```
 
+**Auto-initialize case study logging** (if not already present):
+Check if `{BASE_PATH}/case-study-log.md` exists:
+- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `{BASE_PATH}/case-study-log.md`. Display: `📝 Case study log initialized: {BASE_PATH}/case-study-log.md`
+- **If already exists**: Skip silently (created by `/reverse-spec` or manually)
+
 **After recording, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
 
 ### Phase 1~N: Progress Features in Release Group Order

@@ -39,6 +39,11 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 
 > **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
+**Step 4 — Auto-initialize case study logging**:
+Check if `specs/reverse-spec/case-study-log.md` exists:
+- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `specs/reverse-spec/case-study-log.md` (create the directory if needed). Display: `📝 Case study log initialized: specs/reverse-spec/case-study-log.md`
+- **If already exists**: Skip silently
+
 #### Phase 1: Project Definition
 
 1. **If `--prd` is provided**: Read the PRD document and extract:
@@ -231,6 +236,7 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
   specs/reverse-spec/entity-registry.md (empty — populated during plan)
   specs/reverse-spec/api-registry.md (empty — populated during plan)
   specs/reverse-spec/sdd-state.md
+  specs/reverse-spec/case-study-log.md
   specs/reverse-spec/features/F001-xxx/pre-context.md
   specs/reverse-spec/features/F002-xxx/pre-context.md
   ...
