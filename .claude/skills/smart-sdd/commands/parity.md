@@ -178,7 +178,7 @@ Use AskUserQuestion per group with options:
 
 - **"Intentional exclusion"** → Record in parity-report.md with one of 6 exclusion reasons (`deprecated`, `replaced`, `third-party`, `deferred`, `out-of-scope`, `covered-differently`). Also update coverage-baseline.md if it exists.
 
-- **"Defer"** → Add to roadmap.md Deferred Features section. Record in parity-report.md as deferred with a link to the deferred entry.
+- **"Defer"** → Create a new Feature via the `add` workflow with Tier 3 (or user-specified Tier). The Feature status is set to `deferred` (🔒) if outside Active Tiers. Record in parity-report.md as deferred with a link to the new Feature.
 
 **You MUST STOP and WAIT for the user's response for each group. Empty/blank response = NOT decided — re-ask.**
 

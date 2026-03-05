@@ -185,6 +185,7 @@ Tracks demo groups defined in `roadmap.md`. Each group represents a user scenari
 ### Demo Group Status Values
 - `✅ All verified` : All Features in group verified; Integration Demo completed
 - `⏳ [Feature list] pending` : Waiting for listed Features to complete verify
+- `⏳ [Feature list] deferred` : Features are outside Active Tiers (core scope); activate via `/smart-sdd expand`
 - `🔄 re-run needed ([reason])` : Integration Demo invalidated (e.g., new Feature added to group)
 
 ### Integration Demo Trigger

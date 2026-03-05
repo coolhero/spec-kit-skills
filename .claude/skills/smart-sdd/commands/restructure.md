@@ -84,11 +84,13 @@ Automatically analyze all affected artifacts for each operation:
 - Determine which entities/APIs belong to which child Feature
 - Identify downstream Features that depend on the original → determine which child each should now depend on
 - Evaluate completed steps: which child Feature do existing artifacts (spec.md, plan.md) belong to?
+- **Tier inheritance** (core scope): Child Features inherit the parent's Tier by default. The user may reassign Tiers during the Impact Summary review. If a child Feature's Tier is outside Active Tiers, mark it as `deferred` (🔒).
 
 ##### Merge
 - Combine entities/APIs from all merged Features under the surviving Feature
 - Compare completion states → determine which steps need re-execution on the surviving Feature
 - Redirect all downstream dependencies to the surviving Feature ID
+- **Tier inheritance** (core scope): The surviving Feature keeps its original Tier. If merged Features had different Tiers, use the highest-priority Tier (T1 > T2 > T3) for the surviving Feature.
 
 ##### Move
 - Identify the specific requirements/entities/APIs being moved

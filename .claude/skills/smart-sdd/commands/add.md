@@ -272,7 +272,9 @@ If creating a new group:
    - Update Demo Groups section (if group was joined or created in Step 5)
 
 3. **Update `sdd-state.md`**:
-   - Add new Feature rows to Feature Progress table (`pending`)
+   - Add new Feature rows to Feature Progress table:
+     - If core scope AND new Feature's Tier is outside Active Tiers → Status = `deferred` (🔒)
+     - Otherwise → Status = `pending`
    - Add to Feature Mapping (spec-kit Name/Path/Branch blank until specify)
    - Record "Feature F{NNN}-{name} added" in Global Evolution Log
    - If SBI entries selected in Step 4: update Source Behavior Coverage (link to new Feature, status remains `❌ unmapped` until specify)
