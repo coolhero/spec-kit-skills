@@ -21,7 +21,7 @@ Generates a structured Case Study report from the artifacts produced by `/revers
 /case-study ./my-project --lang ko         # Specific project directory
 ```
 
-> `case-study-log.md` (qualitative observations) is automatically created by `/reverse-spec`, `/smart-sdd init`, and `/smart-sdd pipeline`. If it doesn't exist, the report is generated without qualitative sections.
+> `case-study-log.md` (qualitative observations) is automatically created at the project root by `/reverse-spec`, `/smart-sdd init`, and `/smart-sdd pipeline`. Milestone entries are appended automatically during workflow execution. If it doesn't exist, the report is generated without qualitative sections.
 
 ---
 

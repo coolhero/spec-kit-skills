@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[English README](README.md) | Last updated: 2026-03-05 14:09 KST
+[English README](README.md) | Last updated: 2026-03-05 15:37 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -1002,12 +1002,12 @@ spec-kit-skills(smart-sdd, reverse-spec 또는 참조 파일)를 수정할 때, 
 
 `/case-study` 스킬은 SDD 워크플로우 실행 결과에서 구조화된 보고서를 생성합니다.
 
-> `case-study-log.md` (정성적 관찰 기록)는 `/reverse-spec`, `/smart-sdd init`, `/smart-sdd pipeline` 실행 시 **자동 생성**됩니다. 로그가 없으면 정성적 섹션 없이 정량 데이터만으로 보고서를 생성합니다.
+> `case-study-log.md` (정성적 관찰 기록)는 프로젝트 루트에 자동 생성됩니다. 마일스톤 항목(M1-M8)은 워크플로우 실행 중 자동 기록됩니다. 로그가 없으면 정량 데이터만으로 보고서를 생성합니다.
 
 ```
-Step 1: SDD 워크플로우 실행 (case-study-log.md 자동 생성)
-  /reverse-spec ./source-code         → M1-M4 관찰 사항을 case-study-log.md에 기록
-  /smart-sdd pipeline                 → Feature별 M5-M6 관찰 사항 기록
+Step 1: SDD 워크플로우 실행 (case-study-log.md가 프로젝트 루트에 자동 생성)
+  /reverse-spec ./source-code         → M1-M4 마일스톤 자동 기록
+  /smart-sdd pipeline                 → M5-M8 마일스톤 Feature별 자동 기록
 
 Step 2: 보고서 생성 (타임스탬프 파일명으로 자동 저장)
   /case-study                                      → 영어 → case-study-YYYYMMDD-HHMM.md

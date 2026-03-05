@@ -42,7 +42,7 @@ Run /reverse-spec and /smart-sdd pipeline first, then retry.
 | `business-logic-map.md` | `{BASE_PATH}/business-logic-map.md` | Business rule count per Feature |
 | `coverage-baseline.md` | `{BASE_PATH}/coverage-baseline.md` | Source coverage metrics, exclusions |
 | `constitution-seed.md` | `{BASE_PATH}/constitution-seed.md` | Key governance principles |
-| `case-study-log.md` | `{BASE_PATH}/case-study-log.md` | Qualitative observations (M1-M8) |
+| `case-study-log.md` | `{target-directory}/case-study-log.md` | Qualitative observations (M1-M8) |
 | `history.md` | `{SPEC_PATH}/history.md` | Strategic and architecture decisions |
 | `stack-migration.md` | `{BASE_PATH}/stack-migration.md` | Stack migration decisions |
 

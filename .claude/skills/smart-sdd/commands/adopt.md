@@ -347,6 +347,8 @@ Key behaviors:
    - Update Demo Group Progress
    - Check Integration Demo trigger
 
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../../case-study/reference/recording-protocol.md) § M6.
+
 ---
 
 ## Post-Pipeline: Coverage Verification (BLOCKING)
@@ -437,6 +439,8 @@ Display: `✅ Created: demos/project-demo.sh`
 ---
 
 ## Post-Pipeline Summary
+
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../../case-study/reference/recording-protocol.md) § M8.
 
 After coverage verification and final demo:
 

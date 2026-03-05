@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-05 14:09 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-05 15:37 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -1003,12 +1003,12 @@ Key topics covered:
 
 The `/case-study` skill generates structured reports from SDD workflow execution.
 
-> `case-study-log.md` (qualitative observations) is auto-created by `/reverse-spec`, `/smart-sdd init`, and `/smart-sdd pipeline`. If it doesn't exist, the report is generated without qualitative sections.
+> `case-study-log.md` (qualitative observations) is auto-created at the project root. Milestone entries (M1-M8) are appended automatically during workflow execution. If the log doesn't exist, the report is generated without qualitative sections.
 
 ```
-Step 1: Run the SDD workflow (case-study-log.md is auto-created)
-  /reverse-spec ./source-code         → Record M1-M4 observations in case-study-log.md
-  /smart-sdd pipeline                 → Record M5-M6 observations per Feature
+Step 1: Run the SDD workflow (case-study-log.md is auto-created at project root)
+  /reverse-spec ./source-code         → Auto-records M1-M4 milestones
+  /smart-sdd pipeline                 → Auto-records M5-M8 milestones per Feature
 
 Step 2: Generate the report
   /case-study                                      → English → case-study-YYYYMMDD-HHMM.md

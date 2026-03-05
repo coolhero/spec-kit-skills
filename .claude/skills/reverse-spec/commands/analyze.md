@@ -37,9 +37,11 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 > **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
 **Step 4 — Auto-initialize case study logging**:
-Check if `specs/reverse-spec/case-study-log.md` exists at the target directory:
-- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `{target-directory}/specs/reverse-spec/case-study-log.md` (create the directory if needed). Display: `📝 Case study log initialized: specs/reverse-spec/case-study-log.md`
+Check if `case-study-log.md` exists at the target directory root:
+- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `{target-directory}/case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
 - **If already exists**: Skip silently (user may have manually initialized earlier)
+
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.
 
 ---
 
@@ -164,6 +166,8 @@ For each discovered resource directory/group, record:
 Exclude: `node_modules/`, build output (`dist/`, `build/`), generated files, test fixtures.
 
 Upon completing Phase 1, report a summary of the detected tech stack, project structure, and static resource inventory to the user.
+
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M2.
 
 ### 1-6. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
 
@@ -557,6 +561,8 @@ After Phase 3 is complete (granularity selected, dependencies mapped, Tier class
 
 Record each user modification to the AI's Tier proposals (e.g., "Moved Search from T2 → T1"). If scope is `full`, omit the Tier Adjustments row.
 
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M3.
+
 ---
 
 ## Phase 4 — Deliverable Generation
@@ -758,6 +764,8 @@ Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-
 
 When AskUserQuestion is unavailable, display unmapped items via regular text and ask for classification via text message. Items without explicit classification are marked as `unclassified` in coverage-baseline.md for later review via `/smart-sdd parity`.
 
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M4.
+
 ### 4-4. Completion Report
 
 Report the complete list of generated deliverables and next-step guidance to the user:
@@ -774,7 +782,7 @@ Generation complete:
 - specs/reverse-spec/features/F001-xxx/pre-context.md
 - specs/reverse-spec/features/F002-xxx/pre-context.md
 - ...
-- specs/reverse-spec/case-study-log.md              (observation log for milestone tracking)
+- case-study-log.md                                 (observation log for milestone tracking — project root)
 - .env.example                                    (rebuild only — if env vars detected)
 
 SBI: [N] source behaviors tracked (B001–B[N]) across [M] Features
