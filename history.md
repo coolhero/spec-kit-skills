@@ -370,6 +370,15 @@
 
 ---
 
+## [2026-03-07] Audit — Status Command Extraction + MEMORY.md Update
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Extract status command | SKILL.md (355→313줄) → `commands/status.md` (42줄) | 다른 모든 명령은 `commands/*.md`로 분리되어 있었으나 status만 SKILL.md에 인라인. 분리 후 매 호출 시 시스템 프롬프트 12% 절감 |
+| MEMORY.md 전면 갱신 | 2-skill → 4-skill 반영, 경로/아키텍처/v2 기능 업데이트 | speckit-diff, case-study 누락, sdd-state 경로 오류, 공통 프로토콜 단계 수 불일치 등 다수 부정확 수정 |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge
