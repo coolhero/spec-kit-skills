@@ -1015,3 +1015,273 @@ Part 9: 내용적 개선 — "이런 버그를 막자"
 - [ ] State Management Anti-pattern을 라이브러리별로 관리할지, 공통 원칙만 유지할지
 - [ ] IPC Safety Rules가 Tauri 외 다른 프레임워크(Electron IPC, React Native Bridge)에도 적용 가능한지
 - [ ] Race Condition Analysis의 실효성 — plan 단계에서 미리 식별 가능한 범위의 한계
+
+---
+
+## Part 10: 추가 파이프라인 개선 (실전 운영 피드백)
+
+> 실제 Tauri 프로젝트 개발 운영에서 발견된 6가지 추가 개선점.
+> Part 8(구조적 개선), Part 9(버그 예방)와 보완 관계. 일부는 기존 Part를 구체화하고, 일부는 새로운 검증 영역.
+
+---
+
+### 10-A. Module Import Graph Validation (implement 단계) — NEW
+
+**문제**:
+`providers/index.ts`처럼 side-effect import가 필요한 모듈이 실제로 import chain에 포함되지 않아 런타임에서 등록이 누락됨. 빌드/테스트는 통과하지만 해당 모듈이 로드되지 않음.
+
+**근본 원인**: registry 패턴(자기 등록형 모듈)은 명시적 import가 없으면 tree-shaking이나 번들러가 제거하거나, 단순히 import 자체를 빠뜨림. 정적 분석(tsc, ESLint)으로는 감지 불가.
+
+**제안**:
+
+implement 단계에서 "dead module detection" 체크 추가:
+
+```
+Module Import Graph Validation:
+  registry 패턴 감지:
+    - index.ts에서 여러 모듈을 re-export 또는 side-effect import하는 파일
+    - decorator/annotation 기반 자기 등록 패턴
+    - plugin/provider 등록 패턴
+
+  검증:
+    - [ ] registry index 파일이 앱 진입점(main.ts, App.tsx)에서 import되는가?
+    - [ ] side-effect import가 필요한 모듈에 `// @side-effect` 주석 또는 마킹이 있는가?
+    - [ ] 번들러 설정에서 해당 모듈이 tree-shaking 제외 대상인가?
+
+  예시:
+    ❌ providers/index.ts가 어디에서도 import되지 않음
+       → 모든 provider 등록이 누락
+    ✅ App.tsx에서 `import './providers'` (side-effect import)
+       → 모든 provider가 앱 시작 시 등록됨
+```
+
+**기존 Part와의 관계**: Part 9-C-7 (Cross-Feature Integration Checklist)에서 "실제 스토어에서 읽는가?" 체크와 관련되나, import chain 자체의 유효성은 별도 문제.
+
+#### 수정 대상 (예상)
+
+- `reference/injection/implement.md` — Module Import Graph Validation 체크 추가
+- `domains/app.md` — 프레임워크별 registry 패턴 목록 (Tauri plugin, React context provider 등)
+
+---
+
+### 10-B. Smoke Launch 구체화 (verify 단계) — Part 8-B, 9-D-9 확장
+
+**문제**:
+verify가 `tsc --noEmit` + unit test 수준에서 멈춤. Tauri/Electron의 WebView 런타임에서만 발생하는 문제(Unicode regex `\p{...}`, CSS `h-full` 등)를 못 잡음.
+
+**기존 커버**: Part 8-B(데모 사전 실행), Part 9-D-9(Runtime Launch Verification)에서 방향은 제시됨. 이 항목은 **구체적 실행 기준**을 추가.
+
+**제안**: verify에 "smoke launch" 단계를 다음 기준으로 명확화:
+
+```
+Smoke Launch Criteria:
+  시간 제한: 5초
+  성공 조건:
+    - [ ] 프로세스 시작 (exit code ≠ crash)
+    - [ ] 메인 윈도우 렌더링 (빈 화면 아님)
+    - [ ] Error Boundary 미트리거 (React ErrorBoundary 등)
+    - [ ] JS 콘솔에 TypeError/ReferenceError/SyntaxError 없음
+    - [ ] 네트워크 요청 실패 없음 (CORS, 404 등)
+
+  실패 시:
+    → Part 8-C (자동 Fix 루프) 진입
+    → 동일 에러 패턴 반복 시 사용자에게 에러 리포트
+
+  Tauri MCP 있는 경우:
+    - webview_dom_snapshot → 렌더링 확인
+    - read_logs → 에러 로그 수집
+    - webview_execute_js → Error Boundary 상태 확인
+
+  Playwright MCP 있는 경우:
+    - browser_navigate → 페이지 로드 확인
+    - browser_console → JS 에러 수집
+
+  MCP 없는 경우:
+    - 프로세스 exit code + stdout/stderr 분석만 수행
+    - 나머지는 수동 체크리스트
+```
+
+#### 수정 대상 (예상)
+
+- `commands/verify-phases.md` — Phase 3에 smoke launch 기준 추가 (Part 8-B, 9-D-9와 통합)
+
+---
+
+### 10-C. Cross-Feature Nullable Field Tracking (analyze 단계) — Part 9-B 확장
+
+**문제**:
+F003(provider)에서 구현한 `ProviderList.tsx`의 `healthStatus` optional chaining 누락이 F006(chat) verify에서야 발견됨. Feature 간 공유 타입의 nullable 필드가 다른 Feature에서 안전하게 사용되는지 검증 시점이 늦음.
+
+**기존 커버**: Part 9-B (Cross-Feature Data Flow Analysis)에서 방향 제시. 이 항목은 **nullable field 패턴에 특화**된 자동 검증을 추가.
+
+**제안**:
+
+```
+Cross-Feature Nullable Field Analysis (analyze 단계):
+
+  공유 인터페이스 스캔:
+    - Feature 간 공유되는 TypeScript interface/type 식별
+    - 각 필드의 optional(?) 여부 추출
+
+  사용처 검증:
+    - 해당 타입을 참조하는 다른 Feature의 코드 스캔
+    - optional 필드에 대해:
+      - [ ] optional chaining (?.) 사용 여부
+      - [ ] nullish coalescing (?? default) 사용 여부
+      - [ ] 또는 타입 가드 (if 체크) 사용 여부
+    - 미사용 시 → ⚠️ warning (implement 단계에서 수정 요구)
+
+  예시:
+    interface Provider {
+      id: string;
+      healthStatus?: { status: string };  // ← optional
+    }
+
+    ❌ provider.healthStatus.status       // 크래시 위험
+    ✅ provider.healthStatus?.status      // safe
+```
+
+#### 수정 대상 (예상)
+
+- `reference/injection/analyze.md` — Cross-Feature Nullable Field Analysis 추가 (Part 9-B 통합)
+
+---
+
+### 10-D. Store Dependency Graph (plan/tasks 단계) — Part 9-A, 9-B 확장
+
+**문제**:
+Provider store가 `App.tsx`에서 로드되지 않아 chat Feature가 동작하지 않은 문제. 스토어 간 의존 관계와 초기화 순서가 명시되지 않아, 필수 스토어가 앱 진입점에서 누락됨.
+
+**기존 커버**: Part 9-A (Cross-Feature Data Flow Analysis)에서 "초기화 순서 검증" 체크리스트 제시. 이 항목은 **plan/tasks 단계에서 store dependency graph를 명시적으로 생성**하는 것을 추가.
+
+**제안**:
+
+```
+Store Dependency Graph (plan 단계):
+
+  plan.md에 "Store Initialization Order" 섹션 추가:
+
+  Store Dependency Graph:
+    AppStore (root)
+    ├── SettingsStore     ← App.tsx useEffect에서 loadSettings()
+    ├── ProviderStore     ← App.tsx useEffect에서 loadProviders()
+    │   └── HealthStore   ← ProviderStore 로드 후 자동 fetch
+    └── ChatStore         ← depends on ProviderStore (provider 선택)
+        └── MessageStore  ← depends on ChatStore (topic 선택)
+
+  tasks.md에 검증 태스크 추가:
+    - [ ] TASK-INIT-01: App.tsx에서 모든 루트 스토어 초기화 호출 확인
+    - [ ] TASK-INIT-02: 의존 스토어 미로드 시 graceful fallback UI 확인
+
+  implement 검증:
+    - 앱 진입점(App.tsx, main.ts)에서 graph의 루트 노드들이 초기화되는지 확인
+    - 의존 관계의 리프 노드가 부모 없이 사용되는 경우 → ⚠️ warning
+```
+
+#### 수정 대상 (예상)
+
+- `reference/injection/plan.md` — Store Dependency Graph 섹션 추가 규칙
+- `reference/injection/implement.md` — 앱 진입점 초기화 검증 체크
+
+---
+
+### 10-E. Persistence Layer Write-Through 검증 (implement 단계) — NEW
+
+**문제**:
+`tauri-plugin-store`의 `set()`이 in-memory only이고 `save()` 호출이 빠져서 데이터가 영구 저장되지 않음. 빌드/테스트에서는 in-memory 상태로 동작하므로 문제가 드러나지 않음.
+
+**근본 원인**: Persistence 라이브러리의 write-through(즉시 저장) vs write-back(명시적 flush 필요) 동작 차이를 인지하지 못한 채 구현.
+
+**제안**:
+
+```
+Persistence Layer Checklist (implement 단계):
+
+  사용 중인 persistence 라이브러리 식별:
+    - tauri-plugin-store → write-back (set은 메모리, save 필요)
+    - localStorage → write-through (즉시 저장)
+    - IndexedDB → write-through (트랜잭션 커밋 시)
+    - SQLite → write-through (트랜잭션 커밋 시)
+
+  write-back 라이브러리 사용 시 필수 확인:
+    - [ ] 모든 set/update 후 save/flush 호출이 있는가?
+    - [ ] 또는 auto-save 설정이 활성화되어 있는가?
+    - [ ] 앱 종료 시(beforeunload, cleanup) save가 호출되는가?
+
+  예시 (tauri-plugin-store):
+    ❌ await store.set('key', value);
+       // → 메모리에만 저장, 앱 재시작 시 유실
+    ✅ await store.set('key', value);
+       await store.save();
+       // → 디스크에 영구 저장
+```
+
+#### 수정 대상 (예상)
+
+- `reference/injection/implement.md` — Persistence Layer Checklist 추가
+- `domains/app.md` — 프레임워크별 persistence 라이브러리의 write 모드 목록
+
+---
+
+### 10-F. Downgrade Compatibility Matrix (specify/plan 단계) — Part 9-A 확장
+
+**문제**:
+`remark-gfm` v4 → v3 다운그레이드 시 TypeScript 타입 호환성 문제(`as never[]` 필요)를 사전에 알 수 없었음. 타겟 런타임 제약으로 패키지를 다운그레이드해야 할 때의 호환성 검증이 누락.
+
+**기존 커버**: Part 9-A-1 (Target Runtime Compatibility Matrix)에서 패키지 선택 시 호환성 확인을 제시. 이 항목은 **다운그레이드 시나리오**를 명시적으로 추가.
+
+**제안**:
+
+```
+Downgrade Compatibility Matrix (plan 단계):
+
+  패키지 다운그레이드 필요 시 (타겟 런타임 제약):
+
+  사전 검증:
+    - [ ] 다운그레이드 버전의 TypeScript 타입 정의가 현재 tsconfig과 호환되는가?
+    - [ ] API 차이 목록 (breaking changes between versions)
+    - [ ] peer dependency 충돌 여부
+    - [ ] 다운그레이드 버전이 ESM/CJS 어느 모듈 시스템을 지원하는가?
+
+  타입 호환성 해결 패턴:
+    - `as never[]` — 배열 타입 불일치 시 강제 캐스팅
+    - `@ts-expect-error` — 일시적 타입 무시 (주석으로 이유 기재)
+    - `declare module` — 타입 확장/오버라이드
+    - wrapper 함수 — 타입 차이를 내부적으로 흡수
+
+  plan.md Research Decisions에 기록:
+    Package Downgrade:
+      remark-gfm v4 → v3:
+        Reason: v4 uses Unicode property escapes (\p{...}), unsupported in WKWebView < macOS 13
+        Type Impact: unified Plugin type changed, requires `as never[]` cast
+        API Diff: none (functionality identical)
+        Risk: low (stable v3, widely used)
+```
+
+#### 수정 대상 (예상)
+
+- `reference/injection/plan.md` — Downgrade Compatibility Matrix 체크 추가 (Part 9-A-1 통합)
+
+---
+
+### Part 10 종합 수정 대상
+
+| 항목 | 단계 | 수정 파일 | 기존 Part 관계 |
+|------|------|-----------|----------------|
+| 10-A Module Import Graph | implement | injection/implement.md, domains/app.md | NEW |
+| 10-B Smoke Launch 구체화 | verify | verify-phases.md | Part 8-B, 9-D-9 확장 |
+| 10-C Nullable Field Tracking | analyze | injection/analyze.md | Part 9-B 확장 |
+| 10-D Store Dependency Graph | plan/tasks | injection/plan.md, injection/implement.md | Part 9-A, 9-B 확장 |
+| 10-E Persistence Write-Through | implement | injection/implement.md, domains/app.md | NEW |
+| 10-F Downgrade Compatibility | specify/plan | injection/plan.md | Part 9-A 확장 |
+
+### 구현 우선순위: 중 (Part 8/9 구현 시 함께 통합)
+
+### 미결정 사항
+
+- [ ] 10-A: side-effect import 감지를 정적 분석으로 할 수 있는지 (ESLint 플러그인? 커스텀 스크립트?)
+- [ ] 10-B: smoke launch 5초 기준이 복잡한 앱(Tauri 빌드 시간 등)에 적합한지
+- [ ] 10-C: nullable field 패턴을 tsc strict 모드로 대체 가능한지 (strictNullChecks가 이미 활성화된 경우)
+- [ ] 10-D: store dependency graph를 plan에서 자동 생성할 수 있는지 (코드 분석 기반)
+- [ ] 10-E: persistence 라이브러리별 write 모드 목록의 관리 범위 (Tauri 외 다른 프레임워크도?)
+- [ ] 10-F: 다운그레이드 호환성 정보 소스 (npm changelog? GitHub releases? 자동 수집 가능한지)

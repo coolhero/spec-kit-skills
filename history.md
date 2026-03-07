@@ -682,3 +682,17 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | F006 버그 커버리지 | 버그 #1(JS엔진), #3(CSS), #4(초기화), #5(IPC) → Tauri MCP로 런타임 자동 검증 가능 | Part 9의 "사전 방지" 규칙 + Tauri MCP의 "런타임 검증" 조합으로 이중 방어 |
 | 에이전트 자기 검증 | Tauri MCP 있으면 에이전트가 앱을 직접 조작/검증 가능 | "사용자가 직접 테스트해야 하는" 메타 문제를 Tauri 프로젝트에 한해 해결 |
 | Part 0 확장 | UI Verify Mode에 `tauri-mcp` 옵션 추가 | auto 모드에서 스택 기반 MCP 자동 감지 (Playwright/Tauri/수동 3분기) |
+
+---
+
+## [2026-03-07] TODO Part 10 — 추가 파이프라인 개선 (실전 운영 피드백)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 6개 개선 항목 추가 | Tauri 프로젝트 실전 운영에서 발견된 구체적 문제점 | Part 8/9가 방향 제시라면, Part 10은 실전에서 확인된 구체적 검증 패턴 |
+| 10-A Module Import Graph | implement에서 side-effect import chain 검증 (NEW) | registry 패턴 모듈이 import chain에서 누락되면 빌드는 되지만 런타임에서 등록 실패 |
+| 10-B Smoke Launch 구체화 | 5초 내 crash/error boundary 트리거 여부 (Part 8-B, 9-D-9 확장) | "빌드 통과 ≠ 런타임 통과"의 구체적 실행 기준 제시 |
+| 10-C Nullable Field Tracking | analyze에서 공유 타입 nullable 필드 사용 패턴 검증 (Part 9-B 확장) | F003의 healthStatus optional chaining 누락이 F006에서야 발견된 사례 |
+| 10-D Store Dependency Graph | plan/tasks에서 스토어 의존 그래프 명시적 생성 (Part 9-A/B 확장) | Provider store가 App.tsx에서 미로드 → chat Feature 전체 동작 실패 사례 |
+| 10-E Persistence Write-Through | implement에서 write-back 라이브러리 save() 호출 검증 (NEW) | tauri-plugin-store set()이 in-memory only인데 save() 누락 사례 |
+| 10-F Downgrade Compatibility | plan에서 패키지 다운그레이드 시 타입/API 호환성 매트릭스 (Part 9-A 확장) | remark-gfm v4→v3 다운그레이드 시 TypeScript 타입 불일치 사례 |
