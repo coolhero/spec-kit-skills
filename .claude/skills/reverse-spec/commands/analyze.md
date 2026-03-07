@@ -114,6 +114,7 @@ After all Phase 0 questions are answered, **append** to `specs/history.md` (crea
 | **Target** | [new-project-name] (`[absolute-path-to-target]`) |
 | **Stack** | [Same Stack / New Stack: old-stack → new-stack] |
 | **Identity** | [original-name] → [new-name] (or "Same") |
+| **What it does** | [1-2 sentence description of what the system does from a user's perspective — e.g., "AI-powered desktop chat application supporting multiple LLM providers with conversation management, knowledge base, and plugin system"] |
 ```
 
 This block is written ONCE at creation time and never modified. It serves as a permanent record of what is being rebuilt from what.
@@ -128,6 +129,7 @@ This block is written ONCE at creation time and never modified. It serves as a p
 | **Mode** | Adoption |
 | **Project** | [project-name] (`[absolute-path]`) |
 | **Purpose** | Wrapping existing code with SDD documentation |
+| **What it does** | [1-2 sentence description of what the system does from a user's perspective] |
 ```
 
 Add a dated section after the Project Context:

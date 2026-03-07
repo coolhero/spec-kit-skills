@@ -97,9 +97,19 @@ Parse milestone entries (M1-M8):
 - Map to corresponding report sections
 
 ### 3-7. From history.md (if exists)
-- Extract Strategy Decisions table
+- **Project Context block** (if exists — rebuild/adoption mode):
+  - Mode (Rebuild/Adoption), Original project name + path, Target project name + path
+  - Stack strategy (Same Stack / New Stack), Identity mapping (original-name → new-name)
+  - **What it does** (user-perspective description of the system)
+- Extract Strategy Decisions table (Scope, Stack, Name)
 - Extract Per-Category Stack Choices table (if new stack)
-- Extract Architecture Decisions table
+- Extract Architecture Decisions table (Granularity, Tier adjustments, Demo Groups)
+- Extract Constitution decisions (version, modifications)
+- **Extract per-Feature Implementation Decisions** (if recorded): spec deviations, architecture choices, trade-offs, limited verifications
+- Extract restructure/expand/parity decisions (if any)
+- Extract dated session entries — each `/reverse-spec` and `/smart-sdd` session records specific decisions with rationale
+
+> **history.md is the richest source of decision context**. The case-study report should reflect all significant decisions recorded here. Section 2 uses strategy/Project Context, Section 4 uses architecture/stack/constitution, Section 5 uses per-Feature decisions, Section 7 uses decisions that resolved challenges, Section 8 uses pivotal decisions that shaped outcomes.
 
 ### 3-8. From SBI Coverage (if exists in sdd-state.md)
 - Parse Source Behavior Coverage table
@@ -133,7 +143,7 @@ Assemble the report following the Case Study Agenda. Use `--lang` to determine s
 
 ### Section 1 — Executive Summary
 
-Auto-generated from aggregated metrics:
+Auto-generated from aggregated metrics + qualitative context:
 
 ```markdown
 # Case Study: {Project Name}
@@ -142,8 +152,17 @@ Auto-generated from aggregated metrics:
 
 **Project**: {name} | **Domain**: {domain} | **Origin**: {greenfield/rebuild/adoption}
 **Scope**: {core/full} | **Stack**: {same/new} | **Features**: {total count} ({completed+adopted}/{total})
+```
 
-{1-3 sentence summary of the project and key outcomes}
+**System Overview** (from M1 "What it does" + roadmap.md Project Overview):
+- What the system does from a user's perspective (1-3 sentences)
+- If rebuild/adoption: what was the original system, and what is the target
+
+> **Source priority**: history.md "What it does" (in Project Context) > M1 "What it does" > roadmap.md "Project Overview". If none provides a user-perspective description, synthesize from Feature names and descriptions.
+
+```markdown
+### System Overview
+{What the system does — user perspective, not tech stack}
 
 ### Key Metrics
 | Metric | Value |
@@ -162,10 +181,35 @@ Auto-generated from aggregated metrics:
 
 ### Section 2 — Project Background
 
-- From case-study-log.md M1 entry (if exists): project description, why SDD, goals, anticipated challenges
-- From roadmap.md: project overview section
-- From history.md: strategy decisions table
-- If no qualitative data: show project overview from roadmap.md only
+**Primary sources** (in priority order):
+1. **history.md Project Context block** (if exists): Mode (rebuild/adoption/greenfield), Original → Target mapping, Stack strategy, Identity
+2. **history.md Strategy Decisions table**: Scope/Stack/Name decisions with rationale
+3. **case-study-log.md M1 entry** (if exists): "What it does" (business purpose), anticipated challenges, first impressions
+4. **roadmap.md Project Overview section**: project description, source path
+
+**Content structure**:
+```markdown
+### Why This Project
+{From M1 observations + roadmap.md — what the project is and why SDD was applied}
+
+### Project Context (rebuild/adoption only)
+| | Details |
+|---|---------|
+| Mode | {from history.md Project Context} |
+| Original | {name} (`{path}`) |
+| Target | {name} (`{path}`) |
+| Stack | {Same Stack / New Stack: old → new} |
+| Identity | {original-name → new-name, or "Same"} |
+
+### Strategic Decisions
+{From history.md Strategy Decisions table — Scope, Stack, Name choices with rationale}
+
+### Anticipated Challenges
+{From M1 Anticipated Challenges + initial structure observations}
+```
+
+- If no history.md Project Context: omit the Project Context subsection
+- If no M1 entry: synthesize from roadmap.md + history.md only
 
 ### Section 3 — Source Analysis
 
@@ -176,9 +220,10 @@ Auto-generated from aggregated metrics:
 
 ### Section 4 — Architecture & Strategy
 
-- From history.md: strategy decisions (scope, stack, identity)
-- From history.md: stack migration choices (if new stack)
-- From history.md: architecture decisions (granularity, tier adjustments)
+- From history.md: strategy decisions (scope, stack, identity) — with rationale from the Rationale column
+- From history.md: stack migration choices — per-category Original → Chosen with reasons (if new stack)
+- From history.md: architecture decisions — granularity, tier adjustments, Demo Group definitions with rationale
+- From history.md: constitution decisions — version, key modifications
 - From constitution-seed.md: key principles (list top 5-7 principles)
 - From stack-migration.md (if present): migration strategy, per-category decisions, dependency chain analysis
 - From case-study-log.md M3/M5 entries (if exist): qualitative observations
@@ -198,7 +243,8 @@ Auto-generated from aggregated metrics:
 - Constitution evolution: version history from Constitution Update Log
 - Global Evolution Log summary: which registries were updated, by which Features
 - Demo Group Progress (if exists): per-group completion status, Integration Demo results
-- From case-study-log.md M6 entries (if exist): per-Feature observations
+- From case-study-log.md M6 entries (if exist): per-Feature observations — especially "Delivers" (what user can now do)
+- From history.md: per-Feature architecture decisions recorded during pipeline execution (e.g., granularity changes, dependency adjustments, restructuring rationale)
 
 ### Section 6 — Quality & Parity
 
@@ -213,16 +259,39 @@ Auto-generated from aggregated metrics:
 - Aggregated from case-study-log.md: all "Challenges" subsections across M2-M8
 - From sdd-state.md: any ❌ (failed) or ⚠️ (limited) steps with their notes
 - From sdd-state.md: Restructure Log entries (if any Feature restructuring occurred)
+- From history.md: per-Feature Implementation Decisions that resolved challenges (spec deviations, architecture trade-offs, limited verification decisions with rationale)
+- From history.md: restructure/parity decisions that addressed structural issues
 - If no qualitative data: show only structural issues (failed/limited steps, restructures)
 
 ### Section 8 — Outcomes & Lessons Learned
 
-- Summary metrics comparison (planned vs actual)
-- From case-study-log.md M8 entry (if exists): overall assessment, key learnings, recommendations
-- Auto-generated insights:
-  - Features with most restructuring or re-execution
-  - Registry growth pattern (entities/APIs added over time from Global Evolution Log)
-  - Average FR/SC per Feature
+**What was delivered** (from M6 "Delivers" entries + Feature descriptions):
+- Aggregate all M6 "Delivers" lines to build a user-facing narrative of what the completed system can do
+- Group by Demo Group (if exists) to show end-to-end scenarios
+
+**Impact Assessment** (auto-generated):
+- Before vs After comparison table:
+  ```markdown
+  | Aspect | Before | After |
+  |--------|--------|-------|
+  | Documentation | {none/partial/existing} | {FR/SC/entity/API counts} |
+  | Test coverage | {from M1 anticipated or sdd-state pre-existing} | {from verify results} |
+  | Architecture visibility | {unknown/undocumented} | {entity-registry + api-registry + constitution} |
+  | Behavior traceability | {none} | {SBI coverage P1/P2/P3 %} |
+  ```
+
+**Summary metrics comparison** (planned vs actual):
+- Planned Features vs completed/adopted Features
+- Planned scope (core/full) vs actual delivery
+- From history.md: key decisions that shaped the outcome (strategy pivots, scope changes, restructuring)
+
+**From case-study-log.md M8 entry** (if exists): overall assessment, key learnings, recommendations
+
+**Auto-generated insights**:
+- Features with most restructuring or re-execution
+- Registry growth pattern (entities/APIs added over time from Global Evolution Log)
+- Average FR/SC per Feature
+- Key decisions from history.md that had the most impact on the final architecture
 
 ---
 

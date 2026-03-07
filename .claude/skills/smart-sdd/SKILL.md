@@ -224,8 +224,8 @@ When creating `specs/history.md` for the first time, use this header:
 ```
 
 **Project Context block** (required for rebuild/adoption — written ONCE after the header):
-- **Rebuild**: Include Mode, Original (name + path), Target (name + path), Stack, Identity mapping
-- **Adoption**: Include Mode, Project (name + path), Purpose
+- **Rebuild**: Include Mode, Original (name + path), Target (name + path), Stack, Identity mapping, **What it does** (user-perspective description)
+- **Adoption**: Include Mode, Project (name + path), Purpose, **What it does** (user-perspective description)
 - **Greenfield**: No Project Context block needed (no original source)
 - See `reverse-spec/commands/analyze.md` § Decision History Recording for the full format
 

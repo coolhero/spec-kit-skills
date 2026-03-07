@@ -33,13 +33,17 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 
 **Trigger**: After case-study-log initialization, before `/reverse-spec` Phase 0.
 
-**What to record**: Project name/stack (first impression), approximate scale, structure type, anticipated challenges.
+**What to record**: Project name/stack (first impression), approximate scale, structure type, **what the system does** (business purpose), anticipated challenges.
+
+> **IMPORTANT**: Always record what the system does from a user's perspective — not just the tech stack. This feeds directly into the Case Study's Executive Summary and Project Background sections. Without this, the report is metric-heavy but lacks the "what was built" narrative.
 
 ```markdown
 ## [YYYY-MM-DD] M1 — Project Background
 **Context**: Before starting /reverse-spec analysis on {target-directory}
 ### Observations
 - Project: {name}, Tech stack: {first impression}, Scale: {N} files, Structure: {type}
+- What it does: {1-2 sentence description of what the system does from a user's perspective — e.g., "AI-powered desktop chat application supporting multiple LLM providers with conversation management, knowledge base, and plugin system"}
+- Mode: {rebuild/adoption} {original-name} → {new-name} (or "greenfield")
 ### Anticipated Challenges
 - {e.g., "tightly coupled modules", "no tests"}
 ```
@@ -119,12 +123,13 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 
 **Trigger**: After each Feature's merge step (repeatable per Feature).
 
-**What to record**: FR/SC/task counts, verify results, implementation difficulties, architecture decisions. Use `M6 — Feature [FID]-[name]` (or `(adopted)` for adoption).
+**What to record**: **What the Feature delivers** (user-facing capability), FR/SC/task counts, verify results, implementation difficulties, architecture decisions. Use `M6 — Feature [FID]-[name]` (or `(adopted)` for adoption).
 
 ```markdown
 ## [YYYY-MM-DD] M6 — Feature {FID}-{name}
 **Context**: After {FID}-{name} completed and merged
 ### Observations
+- Delivers: {what the user can now do — e.g., "Users can now register, login, and manage their accounts via OAuth or email/password"}
 - FR: {N}, SC: {N}, Tasks: {N}, Test/Build: {results}
 ### Challenges
 - {Spec ambiguities, implementation difficulties, or "None"}

@@ -421,6 +421,21 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.
 
+📝 **Decision History Recording — Feature Implementation** (after merge):
+If there were notable decisions during this Feature's pipeline (specify → verify), **append** to `specs/history.md`:
+
+```markdown
+### [FID]-[name] — Implementation Decisions
+
+| Decision | Choice | Details |
+|----------|--------|---------|
+| [e.g., Spec deviation] | [what changed] | [why — from specify/plan review discussions] |
+| [e.g., Architecture choice] | [pattern/approach chosen] | [rationale] |
+| [e.g., Limited verification] | [what was limited] | [reason and planned resolution] |
+```
+
+> **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
+
 #### Next Step Guidance (after each Feature completion)
 
 **If more Features remain in the pipeline**:
