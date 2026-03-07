@@ -153,7 +153,11 @@ $ARGUMENTS parsing rules:
 
 **Step 0a. Git check**: Run `git rev-parse --is-inside-work-tree`. If not a repo → `git init` + initial commit. If git not installed → warn and continue without git.
 
-**Step 0b. spec-kit CLI check**: Run `which specify`. If not found → `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git`. Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skill names use hyphens (`speckit-specify`).
+**Step 0b. spec-kit CLI check**: Run `which specify`. If not found → try installation in order:
+1. `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git` (if `uv` available)
+2. `pipx install specify-cli --pip-args="--extra-index-url https://github.com/github/spec-kit.git"` (if `pipx` available)
+3. `pip install git+https://github.com/github/spec-kit.git` (fallback)
+Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skill names use hyphens (`speckit-specify`).
 
 **Step 0c. spec-kit project init check**: Look for `.claude/skills/speckit-specify/SKILL.md`. If not found → `specify init --here --ai claude --force --no-git --ai-skills`. If skills aren't registered in current session, use Skill Invocation Fallback (see [pipeline.md](commands/pipeline.md)).
 

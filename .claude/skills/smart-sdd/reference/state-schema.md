@@ -128,7 +128,7 @@ Update history of Global Evolution Layer files.
 | Date/Time | Trigger Feature | Target File | Change Description |
 |-----------|----------------|-------------|-------------------|
 | 2024-01-16 | F001-auth (plan) | entity-registry.md | Finalized User, Session entities applied |
-| 2024-01-17 | F001-auth (implement) | roadmap.md | F001 status → completed |
+| 2024-01-17 | F001-auth (implement) | pre-context.md (F002) | Updated entity/API drafts to match actual implementation |
 
 ---
 

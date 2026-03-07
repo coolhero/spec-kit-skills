@@ -151,6 +151,21 @@ SKILL CHANGES:
   speckit-constitution modified →
     + .claude/skills/reverse-spec/templates/constitution-seed-template.md (format alignment)
 
+  speckit-implement modified →
+    + .claude/skills/smart-sdd/reference/injection/implement.md (Implement injection/review rules)
+
+  speckit-analyze modified →
+    + .claude/skills/smart-sdd/reference/injection/analyze.md (Analyze injection/review rules)
+
+  speckit-tasks modified →
+    + .claude/skills/smart-sdd/reference/injection/tasks.md (Tasks injection/review rules)
+
+  speckit-clarify modified →
+    + .claude/skills/smart-sdd/reference/injection/specify.md (Clarify feeds back into specify)
+
+  speckit-checklist modified →
+    + .claude/skills/smart-sdd/reference/injection/verify.md (Checklist used in verify Phase 1)
+
 TEMPLATE CHANGES:
   spec-template.md changed →
     .claude/skills/smart-sdd/reference/injection/specify.md (Specify Review)

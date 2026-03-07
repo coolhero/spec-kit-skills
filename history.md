@@ -710,3 +710,23 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 공백 4: Behavioral Contract | 프레임워크 이름만 기록, 암묵적 동작 규칙 누락 | Zustand referential stability, React StrictMode 멱등성, tauri-plugin-store write-back 등 타입 시스템이 잡을 수 없는 함정 |
 | 공백 5: Module Dependency Graph | 파일 목록만 존재, import chain 미추적 | side-effect import 누락으로 registry 패턴 전체 실패 |
 | Part 8-10과의 관계 | Part 11은 상위 프레임, Part 8-10은 구체적 해법 | 5가지 공백이 해결되지 않으면 모든 Feature에서 동일 패턴 실패 반복 |
+
+---
+
+## [2026-03-08] 전체 소스 점검 기반 버그 수정 (H1-H3, M1-M5, M9, L1-L6)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| H1: implement 조기 completed | implement.md Post-Step에서 roadmap `completed` 설정 제거 + 명시적 주석 추가 | state-schema.md에 따르면 completed는 merge 후에만 설정. state-schema.md의 Global Evolution Log 예시도 수정 |
+| H2: adopt-verify Phase 3 skip | skip 사유를 "Adoption mode does not create per-Feature demos (existing code verified as-is)"로 수정 | 기존 "constitution not yet finalized"은 adoption과 무관 |
+| H3: adopt-verify 상태값 혼동 | verify 결과(success/limited/failure)와 Feature Progress Status(adopted)를 분리 표기 | 두 개념이 혼동되어 에이전트가 잘못된 상태를 기록할 수 있었음 |
+| M1: 미사용 스크립트 연결 | validate.sh를 status.md에 연결 (pipeline-status.sh는 이미 연결됨) | CLAUDE.md 규칙: dead code로 판단하지 말고 연결 |
+| M2: domain schema 확장 | _schema.md에 section 5 (Feature Elaboration Probes), 6 (UI Testing Integration) 추가 | app.md에 이미 존재하는 섹션이 schema에 정의되지 않았음 |
+| M3: adopt restructured | adopt.md pre-flight에 restructured 상태 처리 분기 추가 | restructured Feature가 adopt pipeline에 들어오면 처리 방법이 없었음 |
+| M4: uv fallback | spec-kit CLI 설치를 uv → pipx → pip 3단계 fallback으로 변경 | uv 미설치 환경에서 설치 실패 |
+| M5: speckit-diff sub-rule | Impact Mapping에 implement/analyze/tasks/clarify/checklist 5개 sub-rule 추가 | 해당 spec-kit 스킬 변경 시 전용 injection 파일 업데이트 누락 방지 |
+| M9: uninstall.sh | install.sh와 대응하는 제거 스크립트 생성 | 설치만 있고 제거 수단이 없었음 |
+| L1: adopt .env re-ask | .env HARD STOP에 re-ask 텍스트 추가 | MANDATORY RULE 1 패턴과 일관성 |
+| L2: restructured 예시 | status.md 출력 예시에 restructured 상태 + 🔀 표기 추가 | restructured가 가능한 상태이나 예시에 미포함 |
+| L5: speckit-diff AskUserQuestion | allowed-tools에서 미사용 AskUserQuestion 제거 | read-only 분석 스킬에 불필요 |
+| L6: speckit-diff read-only | "Read-only analysis" → "Non-destructive analysis"로 수정, --output 쓰기 설명 추가 | --output 파일 쓰기와 "read-only" 주장이 모순 |

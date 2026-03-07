@@ -153,9 +153,10 @@ You can open and edit any of these files directly, then select
 
 ## Post-Step Update Rules
 
-1. Change the Status of the Feature in `BASE_PATH/roadmap.md` to `completed`
-2. Subsequent Feature impact analysis:
+1. Subsequent Feature impact analysis:
    - Find the list of Features that depend on the current Feature from the Dependency Graph in `roadmap.md`
    - Inspect the `pre-context.md` of each subsequent Feature
    - If the entity/API drafts in the "For /speckit.plan" section differ from the actual implementation, update them
    - Report the changes to the user
+
+> **Note**: Feature Progress Status remains `in_progress` after implement. Status transitions to `completed` only after all steps including merge are ✅ (per state-schema.md).

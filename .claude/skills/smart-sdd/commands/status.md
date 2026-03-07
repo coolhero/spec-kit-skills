@@ -12,6 +12,8 @@ Follows the schema defined in [state-schema.md](../reference/state-schema.md).
 
 Run `scripts/pipeline-status.sh <target-path>` first to produce a quick progress summary (project info, constitution status, feature completion %, current feature, blocked/deferred counts). Display the script output as a preamble before rendering the detailed table below.
 
+Optionally, append `scripts/validate.sh <target-path>` output if the user requests a consistency check — this validates cross-file consistency (Feature ID matching between roadmap/state, SBI mappings, Demo Group references).
+
 Output format varies by scope:
 
 **Full scope** (no Tier concept):
@@ -26,8 +28,9 @@ Feature         | specify | plan | tasks | analyze | implement | verify | merge 
 F001-auth       |   ✅    |  ✅  |  ✅   |   ✅    |    ✅     |   ✅   |  ✅  | completed
 F002-product    |   ✅    |  🔄  |       |         |           |        |      | in_progress
 F003-cart       |         |      |       |         |           |        |      | pending
+F004-search     |   ✅    |  🔀  |  🔀   |         |           |        |      | restructured
 
-Active: 1/3 completed, 1/3 in progress
+Active: 1/4 completed, 1/4 in progress | Restructured: 1 (🔀 = needs re-execution)
 ```
 
 **Core scope** (with Tier column):

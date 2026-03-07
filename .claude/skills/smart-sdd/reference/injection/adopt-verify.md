@@ -113,7 +113,7 @@ After verification execution completes:
     [⚠️ Unmapped P1: B### — funcName (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
-Skipped — Adoption mode does not create per-Feature demos.
+Skipped — Adoption mode does not create per-Feature demos (existing code verified as-is).
 
 ── Phase 4: Global Evolution Consistency ───────────
   - entity-registry: [match/discrepancies]
@@ -144,7 +144,8 @@ Skipped — Adoption mode does not create per-Feature demos.
    - Test results with pre-existing issue annotations
    - Build results
    - Cross-Feature verification results
-   - Overall status: `adopted` (NOT `completed` or `success`)
+   - Verify step result: `success` / `limited` / `failure` (same as standard verify)
+   - Feature Progress Status: `adopted` (NOT `completed` — set after merge, per state-schema.md)
    - Notes: `⚠️ PRE-EXISTING: [details]` or `📝 NO TESTS`
 3. Update Source Behavior Coverage in `sdd-state.md`:
    - For each FR-### with `[source: B###]` tag that passed cross-reference:

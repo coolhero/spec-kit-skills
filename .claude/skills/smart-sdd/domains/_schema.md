@@ -49,3 +49,23 @@ Behavior differences when wrapping existing code with SDD docs (adoption mode).
 | **Demo pattern** | How to demo existing code vs newly built code |
 | **Injection framing** | How spec-kit command prompts differ: "extract what exists" vs "define what to build" |
 | **Feature status** | Post-adoption status value and its implications for incremental mode |
+
+### 5. Feature Elaboration Probes (optional)
+
+Domain-specific questions asked during the `add` command's consultation phase to elicit Feature-specific technical details.
+
+| Field | Description |
+|-------|-------------|
+| **Probe category** | What aspect is being probed (e.g., UI patterns, data flow, state management) |
+| **Questions** | Domain-specific elaboration questions for the `add` Step 2 consultation |
+| **When to ask** | Conditions or triggers for each probe (e.g., "if Feature has UI components") |
+
+### 6. UI Testing Integration (optional)
+
+Guidance for automated UI verification during verify Phase 3.
+
+| Field | Description |
+|-------|-------------|
+| **MCP tools mapping** | Which MCP tools map to which verification actions (e.g., `browser_click` → SC interaction) |
+| **SC verification flow** | How to translate Scenario Coverage items into automated test steps |
+| **Platform constraints** | Platform-specific limitations or considerations (e.g., WebView CSS differences) |

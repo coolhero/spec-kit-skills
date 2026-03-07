@@ -2,7 +2,7 @@
 name: speckit-diff
 description: Analyzes spec-kit version differences and identifies required updates to spec-kit-skills (smart-sdd + reverse-spec). Auto-clones latest spec-kit from GitHub and compares against baseline. Read-only analysis producing a compatibility verdict and impact report.
 argument-hint: "[--output path] [--local path]"
-allowed-tools: [Read, Grep, Glob, Bash, Write, AskUserQuestion]
+allowed-tools: [Read, Grep, Glob, Bash, Write]
 ---
 
 # speckit-diff: Spec-Kit Version Compatibility Analyzer
@@ -45,7 +45,7 @@ After parsing arguments, read `commands/diff.md` for the complete workflow (5 ph
 
 ## CRITICAL Rules
 
-1. **Read-only analysis**: This skill NEVER modifies spec-kit-skills files. It only reads and reports.
+1. **Non-destructive analysis**: This skill NEVER modifies existing spec-kit-skills files. It only reads and reports (optionally writing a new report file via `--output`).
 2. **No project dependency**: This skill does NOT require reverse-spec, smart-sdd, or any project to be active. It only needs:
    - Access to the spec-kit source (cloned or local)
    - The baseline file (bundled with this skill)
