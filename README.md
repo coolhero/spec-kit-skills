@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-07 22:30 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-07 18:04 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
