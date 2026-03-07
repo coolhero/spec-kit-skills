@@ -313,6 +313,12 @@ Check if `case-study-log.md` exists at project root:
 
 **After recording, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
 
+> **Fallback**: If you cannot immediately proceed (e.g., context limit reached), display:
+> ```
+> ⏸️ Pipeline paused after Constitution finalization.
+> To resume: /smart-sdd pipeline (or type "continue")
+> ```
+
 ### Phase 1~N: Progress Features in Release Group Order
 
 Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed, adopted, and deferred Features** — only processes Features with `pending`, `in_progress`, or `restructured` status in `sdd-state.md`.
@@ -424,6 +430,12 @@ Display progress and **IMMEDIATELY proceed to the next Feature** — do NOT stop
   Proceeding to: [next-FID]-[next-name]
 ```
 Then immediately start the next Feature's pre-flight (Step 0).
+
+> **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display:
+> ```
+> ⏸️ Pipeline paused after [FID]-[name]. Next: [next-FID]-[next-name]
+> To resume: /smart-sdd pipeline (or type "continue")
+> ```
 
 **If all Features are completed**:
 
