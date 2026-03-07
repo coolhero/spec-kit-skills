@@ -411,6 +411,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 # Add Features (universal -- works for all modes)
 /smart-sdd add                           # Interactive: define and add new Feature(s)
 /smart-sdd add --prd path/to/req.md      # Define Feature(s) from a requirements document
+/smart-sdd add --gap                     # Gap-driven: cover unmapped SBI/parity gaps
 
 # SDD Adoption -- Document existing code with SDD artifacts
 /smart-sdd adopt                        # Adopt pipeline: specify → plan → analyze → verify
@@ -705,27 +706,31 @@ A utility skill that checks whether the current spec-kit-skills are compatible w
 
 ```
 1. /smart-sdd init
+   +-- Pre-Phase: Git repository setup (init or check existing)
    +-- Phase 1: Define project
    |   +-- Name: "TaskFlow", Domain: SaaS productivity
    |   +-- Stack: TypeScript + Next.js + Prisma + PostgreSQL
-   +-- Phase 2: Define Features interactively
+   +-- Phase 2: Constitution seed with 6 Best Practices (all selected)
+   +-- Phase 3: Generate artifacts under specs/reverse-spec/
+   |   +-- roadmap.md (empty Feature catalog), constitution-seed.md
+   |   +-- entity-registry.md (empty), api-registry.md (empty)
+   |   +-- sdd-state.md (empty Feature Progress)
+   +-- Phase 4: "Define Features now?" → Yes, chaining into add...
+
+   /smart-sdd add (chained from init)
+   +-- Phase 1: Feature Definition (Type 2 — Conversational)
    |   +-- Brainstorm initial features
-   |   +-- Granularity selection:
-   |   |   A. Coarse (3 Features): auth, core-app, admin
-   |   |   B. Standard (5 Features) — Recommended ← selected
-   |   |   C. Fine (9 Features): register, login, workspace, task-crud, ...
+   |   +-- Elaboration: evaluate against 6 perspectives
+   +-- Phase 2: Overlap & Impact (skipped — first greenfield Features)
+   +-- Phase 3: Scope Negotiation
    |   +-- F001-auth: User registration, login, sessions
    |   +-- F002-workspace: Team workspaces, member management
    |   +-- F003-task: Task CRUD, assignment, status tracking
    |   +-- F004-board: Kanban board views, drag-and-drop
    |   +-- F005-notification: Email/in-app notifications
-   |   +-- Dependency graph validated, Release Groups proposed
-   +-- Phase 3: Constitution seed with 6 Best Practices (all selected)
-   +-- Phase 4: Generate artifacts under specs/reverse-spec/
-   |   +-- roadmap.md, constitution-seed.md
-   |   +-- entity-registry.md (empty), api-registry.md (empty)
-   |   +-- features/F001-auth/pre-context.md, ...
-   +-- Phase 5: Completion report
+   +-- Phase 4: SBI Match (skipped — greenfield, no source behaviors)
+   +-- Phase 5: Demo Group assignment
+   +-- Phase 6: Create pre-context.md per Feature, update roadmap + sdd-state
 
 2. /smart-sdd pipeline
    +-- Phase 0: Finalize /speckit-constitution based on constitution-seed
@@ -749,22 +754,24 @@ A utility skill that checks whether the current spec-kit-skills are compatible w
 
 ```
 1. /smart-sdd add
-   +-- Phase 1: Current project state
-   |   +-- Features: 4 total (3 completed, 1 pending)
-   |   +-- Entities: 8 defined, APIs: 23 defined
-   +-- Phase 2: Define new Feature(s) interactively
-   |   +-- F005-notification (Tier 2): Real-time notifications for task updates
+   +-- Phase 1: Feature Definition (Type 2 — Conversational)
+   |   +-- "I need real-time notifications for task updates"
+   |   +-- Elaboration: 6 perspectives → actors, capabilities, data, interfaces...
+   +-- Phase 2: Overlap & Impact Analysis
+   |   +-- Context: 4 Features (3 completed, 1 pending), 8 entities, 23 APIs
+   |   +-- No overlap with existing Features
+   |   +-- ⚠️ Constitution Impact: WebSocket (new technology)
+   +-- Phase 3: Scope Negotiation
+   |   +-- F005-notification: Real-time notifications for task updates
    |   |   +-- Depends on: F001-auth (User entity), F003-task (Task events)
-   |   +-- F006-analytics (Tier 3): Dashboard with task completion metrics
-   |       +-- Depends on: F002-workspace, F003-task
-   +-- Phase 3: Checkpoint with updated dependency graph
-   +-- Phase 4: Update roadmap.md, create pre-context.md for new Features
-   +-- Phase 5: Completion report
+   +-- Phase 4: SBI Match (skipped — incremental, no source behaviors)
+   +-- Phase 5: Demo Group → joins DG-01 (Task Management Flow)
+   +-- Phase 6: Create pre-context.md, update roadmap + sdd-state
 
 2. /smart-sdd pipeline
    +-- Phase 0: Skipped (constitution already exists)
    +-- Skips F001-F003 (completed), F004 (pending but already defined)
-   +-- Processes F004 (if pending), then F005-notification, F006-analytics
+   +-- Processes F004 (if pending), then F005-notification
        +-- F005-notification:
            +-- Assemble: pre-context + entity-registry(User, Task) + api-registry
            +-- (References finalized schemas from completed Features)

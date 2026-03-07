@@ -700,28 +700,33 @@ parity 명령어는 5개 페이즈로 실행됩니다:
 
 ```
 1. /smart-sdd init
+   ├─ Pre-Phase: Git 저장소 설정 (init 또는 기존 확인)
    ├─ Phase 1: 프로젝트 정의
    │   ├─ 프로젝트명: TaskFlow
    │   ├─ 설명: 팀 협업 태스크 관리 앱
    │   ├─ 도메인: SaaS / Project Management
    │   └─ 기술 스택: TypeScript, Next.js, Prisma, PostgreSQL
-   ├─ Phase 2: Feature 정의 (대화형 Q&A)
+   ├─ Phase 2: Constitution Seed 정의
+   │   └─ 6개 Best Practices 전체 채택 + 프로젝트 컨벤션 추가
+   ├─ Phase 3: 산출물 생성
+   │   └─ specs/reverse-spec/ 하위에 roadmap(빈 Feature Catalog),
+   │      constitution-seed, entity-registry(빈), api-registry(빈), sdd-state 생성
+   └─ Phase 4: "Feature를 지금 정의하시겠습니까?" → Yes, add로 체이닝...
+
+   /smart-sdd add (init에서 체이닝)
+   ├─ Phase 1: Feature 정의 (Type 2 — 대화형)
    │   ├─ 초기 Feature 브레인스토밍
-   │   ├─ 세분화 수준 선택:
-   │   │   A. Coarse (3 Features): auth, core-app, admin
-   │   │   B. Standard (5 Features) — 권장 ← 선택됨
-   │   │   C. Fine (9 Features): register, login, workspace, task-crud, ...
+   │   └─ Elaboration: 6가지 관점으로 정의 품질 평가
+   ├─ Phase 2: 중첩 & 영향 분석 (생략 — 첫 greenfield Feature)
+   ├─ Phase 3: 범위 협의
    │   ├─ F001-auth: 사용자 인증 및 팀 관리
    │   ├─ F002-workspace: 팀 워크스페이스, 멤버 관리
    │   ├─ F003-task: 태스크 CRUD, 담당자 배정, 상태 추적
    │   ├─ F004-board: 칸반 보드 뷰, 드래그 앤 드롭
    │   └─ F005-notification: 태스크 변경 알림
-   ├─ Phase 3: Constitution Seed 정의
-   │   └─ 6개 Best Practices 전체 채택 + 프로젝트 컨벤션 추가
-   ├─ Phase 4: 산출물 생성
-   │   └─ specs/reverse-spec/ 하위에 roadmap, constitution-seed,
-   │      entity-registry(빈), api-registry(빈), pre-context 생성
-   └─ 완료 보고: "다음: /smart-sdd pipeline"
+   ├─ Phase 4: SBI 매칭 (생략 — greenfield, 소스 행위 없음)
+   ├─ Phase 5: Demo Group 배정
+   └─ Phase 6: Feature별 pre-context.md 생성, roadmap + sdd-state 갱신
 
 2. /smart-sdd pipeline
    ├─ Phase 0: constitution-seed 기반으로 /speckit-constitution 확정
@@ -741,22 +746,19 @@ parity 명령어는 5개 페이즈로 실행됩니다:
 
 ```
 1. /smart-sdd add
-   ├─ Phase 1: 현재 프로젝트 상태 확인
-   │   ├─ Features: 4개 (F001-auth ✅, F002-product ✅, F003-order ✅, F004-payment ✅)
-   │   ├─ Entities: 8개 정의, APIs: 23개 정의
-   │   └─ 현재 상태 요약 표시
-   ├─ Phase 2: 새 Feature 정의 (대화형 Q&A)
-   │   ├─ F005-notification (Tier 2): 주문 상태 변경 시 이메일/푸시 알림
+   ├─ Phase 1: Feature 정의 (Type 2 — 대화형)
+   │   ├─ "주문 상태 변경 시 알림이 필요합니다"
+   │   └─ Elaboration: 6가지 관점 → 사용자, 기능, 데이터, 인터페이스...
+   ├─ Phase 2: 중첩 & 영향 분석
+   │   ├─ 현재 상태: 4 Features (모두 완료), 8 entities, 23 APIs
+   │   ├─ 기존 Feature와 중첩 없음
+   │   └─ ⚠️ Constitution 영향: WebSocket (새 기술)
+   ├─ Phase 3: 범위 협의
+   │   ├─ F005-notification: 주문 상태 변경 시 이메일/푸시 알림
    │   │   └─ 의존: F001-auth (User), F003-order (Order 이벤트)
-   │   └─ F006-analytics (Tier 3): 주문/매출 통계 대시보드
-   │       └─ 의존: F002-product, F003-order
-   ├─ Phase 3: Checkpoint — 새 Feature + 의존성 그래프 + Release Group 확인
-   ├─ Phase 4: 산출물 갱신
-   │   ├─ roadmap.md에 F005, F006 추가
-   │   ├─ features/F005-notification/pre-context.md 생성
-   │   ├─ features/F006-analytics/pre-context.md 생성
-   │   └─ sdd-state.md에 새 Feature 추가 (pending)
-   └─ 완료 보고: "다음: /smart-sdd specify F005"
+   ├─ Phase 4: SBI 매칭 (생략 — incremental, 소스 행위 없음)
+   ├─ Phase 5: Demo Group → DG-01 (주문 처리 흐름)에 합류
+   └─ Phase 6: pre-context.md 생성, roadmap + sdd-state 갱신
 
 2. /smart-sdd pipeline
    ├─ (Constitution 이미 존재 → Phase 0 생략)
@@ -764,7 +766,7 @@ parity 명령어는 5개 페이즈로 실행됩니다:
    ├─ F005-notification:
    │   ├─ Assemble: pre-context + entity-registry(User, Order 참조) + api-registry 조립
    │   └─ specify → plan → tasks → implement → verify
-   └─ F006-analytics: ...
+   └─ 완료
 ```
 
 ### 시나리오 3 (Brownfield rebuild): 레거시 e-commerce 시스템을 React + FastAPI로 재개발

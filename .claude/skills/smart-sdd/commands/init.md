@@ -151,8 +151,8 @@ Then ask the user via AskUserQuestion whether to define Features now:
 **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 **If "Define Features now"**:
-- If `--prd` was provided to init: pass the same PRD path to the add flow (triggers Phase 1 Type C — PRD-based Feature extraction)
-- If no `--prd`: enter add flow in conversational mode (Phase 1 Type A/B)
+- If `--prd` was provided to init: pass the same PRD path to the add flow (triggers Phase 1 Type 1 — Document-based Feature extraction)
+- If no `--prd`: enter add flow in conversational mode (Phase 1 Type 2 — Conversational)
 - Transition directly into the add command's Phase 1. The agent reads `commands/add.md` and continues execution without requiring the user to type `/smart-sdd add`
 
 **If "Later"**:
