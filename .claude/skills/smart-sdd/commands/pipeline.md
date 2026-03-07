@@ -425,23 +425,32 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 **If more Features remain in the pipeline**:
 
-Display progress and **IMMEDIATELY proceed to the next Feature** — do NOT stop, do NOT wait for user input, do NOT suggest running a separate command. The pipeline is a continuous flow:
+Display progress and ask whether the user wants to test before proceeding:
 ```
-✅ [FID]-[name] completed!
+✅ [FID]-[name] completed and merged to main!
 
 📊 Progress: [completed]/[total] Features done
-  Proceeding to: [next-FID]-[next-name]
+→ Next: [next-FID]-[next-name]
+  Steps: specify → plan → tasks → analyze → implement → verify → merge
 ```
-Then immediately start the next Feature's pre-flight (Step 0).
 
-> **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display:
-> ```
-> ⏸️ Pipeline paused after [FID]-[name].
-> To resume: /smart-sdd pipeline (or type "continue")
->
-> → Next: [next-FID]-[next-name]
->   Steps: specify → plan → tasks → analyze → implement → verify → merge
-> ```
+**HARD STOP**: Use AskUserQuestion:
+- "Proceed to next Feature" — continue pipeline immediately
+- "Test first — I'll type 'continue' when ready" — pause pipeline for user testing
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+If "Proceed": immediately start the next Feature's pre-flight (Step 0).
+If "Test first": display the pause message and wait:
+```
+⏸️ Pipeline paused for testing. Take your time!
+To resume: /smart-sdd pipeline (or type "continue")
+
+→ Next: [next-FID]-[next-name]
+  Steps: specify → plan → tasks → analyze → implement → verify → merge
+```
+
+> **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display the pause message above.
 
 **If all Features are completed**:
 

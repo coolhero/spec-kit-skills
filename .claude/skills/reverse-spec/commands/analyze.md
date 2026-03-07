@@ -434,7 +434,7 @@ The Demo Groups will be written to `roadmap.md` in Phase 4-1 and tracked in `sdd
 
 Then proceed to 3-2.
 
-### 3-2. Dependency Graph Construction and Feature ID Assignment
+### 3-2. Dependency Graph Construction and Release Group Determination
 Derive inter-Feature dependencies:
 - **Direct Dependency**: Uses another Feature's modules via import/require
 - **API Dependency**: Calls APIs provided by another Feature
@@ -443,34 +443,44 @@ Derive inter-Feature dependencies:
 
 Record dependency directions and types, and visualize them as a Mermaid diagram.
 
-**Feature ID Assignment Rules**:
+**Release Group Determination**:
+Group Features into Release Groups based on dependency layers:
+1. **Release 1 (Foundation)**: Features with no dependencies (or only external dependencies)
+2. **Release 2+**: Features whose dependencies are all satisfied by preceding Release Groups
+3. Within each Release Group, order Features by topological sort (most independent first)
+
+> **Do NOT assign Feature IDs yet.** Use temporary labels (feature names only) until Phase 3-3 (Tier classification) is complete. IDs will be assigned after Release Groups and Tiers are both determined.
+
+### 3-2b. Feature ID Assignment (after Phase 3-3)
+
+> **This step runs AFTER Phase 3-3 (Tier Classification).** If Scope = Full, run immediately after 3-2 (no Tier classification needed).
+
+**Feature ID Assignment Rules — IDs MUST follow the actual implementation (Release Group) order**:
 
 **If Scope = Core**:
-Assign Feature IDs by **Tier first, then topological sort within each Tier**:
-1. Group all Features by Tier (Tier 1 → Tier 2 → Tier 3)
-2. Within each Tier group, sort by topological order (dependency-based)
-3. Assign F001, F002, ... sequentially across the groups: all Tier 1 Features first, then all Tier 2, then all Tier 3
+1. Start with Release Group 1, then Release Group 2, etc.
+2. Within each Release Group, Tier 1 Features come first, then Tier 2, then Tier 3
+3. Within the same Tier in the same Release Group, maintain topological order
+4. Assign F001, F002, ... sequentially across all Release Groups
 
 This ensures:
-- All Tier 1 Features always have lower numbers than Tier 2/3
-- Within the same Tier, dependency order is respected
-- The F001, F002, ... sequence represents the **feasible implementation order** while keeping Tier grouping intact
+- Feature IDs directly correspond to the pipeline execution order
+- `F001 → F002 → F003 → ...` is the order Features will actually be built
+- No ID gaps or out-of-order processing in the pipeline
 
 **If Scope = Full**:
-Assign Feature IDs by **pure topological sort** (dependency-based):
-1. Sort all Features by topological order — Features with no dependencies first, then Features that depend only on already-ordered Features
-2. Assign F001, F002, ... sequentially
-3. No Tier classification is performed — all Features are treated equally
+1. Start with Release Group 1, then Release Group 2, etc.
+2. Within each Release Group, maintain topological order
+3. Assign F001, F002, ... sequentially
 
 This ensures:
-- The F001, F002, ... sequence represents the optimal implementation order based solely on dependencies
-- No unnecessary classification overhead for full rebuilds
+- Feature IDs match the implementation order based on dependency-resolved Release Groups
 
 **Common**: These numbers also correspond to spec-kit's `specs/{NNN-feature}/` directory names (e.g., F001-auth → `specs/001-auth/`)
 
 ### 3-3. Importance Analysis and Tier Classification (Core Scope Only, HARD STOP)
 
-> **This phase is SKIPPED when Scope = Full.** In full mode, all Features are implemented without prioritization — Feature ordering is determined solely by dependency-based topological sort (Phase 3-2). Skip directly to Phase 4.
+> **This phase is SKIPPED when Scope = Full.** In full mode, all Features are implemented without prioritization — Feature ordering is determined by Release Group order (Phase 3-2). Proceed to Phase 3-2b (Feature ID Assignment) then Phase 4.
 
 **If Scope = Core**:
 
@@ -478,22 +488,24 @@ First, identify the project domain: understand what kind of system the project i
 
 Evaluate each Feature comprehensively across the analysis axes and assign to Tier 1 (Essential) / Tier 2 (Recommended) / Tier 3 (Optional). See `domains/{domain}.md` § Tier Classification Axes for the evaluation criteria and Tier definitions. For each Feature, a **specific rationale** for the assigned Tier must be provided.
 
-**FIRST**, display the full Tier classification table showing each Feature's assigned Tier and rationale:
+**FIRST**, display the full Tier classification table showing each Feature's assigned Tier and rationale (using temporary names — final Feature IDs will be assigned in Phase 3-2b after Tier approval):
 ```
 ── Tier Classification Results ──────────────────
 
 Tier 1 (Essential):
-  F001-auth       — [rationale]
-  F002-product    — [rationale]
+  auth            — [rationale]
+  product         — [rationale]
 
 Tier 2 (Recommended):
-  F003-order      — [rationale]
+  order           — [rationale]
 
 Tier 3 (Optional):
-  F004-analytics  — [rationale]
+  analytics       — [rationale]
 ```
 
 **THEN**, ask via AskUserQuestion for approval/adjustments. **If response is empty → re-ask.**
+
+**After Tier approval**: Proceed to Phase 3-2b to assign final Feature IDs in Release Group order (Tier 1 first within each group).
 
 ### Decision History Recording — Architecture
 
