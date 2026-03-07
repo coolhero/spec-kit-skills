@@ -39,7 +39,7 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 
 **Step 4 — Auto-initialize case study logging**:
 Check if `case-study-log.md` exists at project root:
-- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `case-study-log.md`. Display: `Case study log initialized: case-study-log.md`
+- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `case-study-log.md`. Display: `Case study log initialized: case-study-log.md`
 - **If already exists**: Skip silently
 
 #### Phase 1: Project Definition

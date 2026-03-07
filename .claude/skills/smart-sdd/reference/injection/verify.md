@@ -6,7 +6,7 @@
 
 ---
 
-> **Note**: `speckit-analyze` is NOT used in this step. Cross-artifact consistency (spec ↔ plan ↔ tasks) was already verified in step 5 (Analyze) before implementation. This step focuses on post-implementation validation.
+> **Note**: `speckit-analyze` is NOT used in this step. Cross-artifact consistency (spec ↔ plan ↔ tasks) was already verified in step 4 (Analyze) before implementation. This step focuses on post-implementation validation.
 
 > **Greenfield/add note**: For greenfield or add-origin projects, cross-Feature verification points in pre-context.md may be limited to dependency-based checks only (no source-code-derived verification points). The verify command works the same way — it just has fewer pre-defined verification items.
 

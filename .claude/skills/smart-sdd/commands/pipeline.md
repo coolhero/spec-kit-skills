@@ -382,12 +382,14 @@ After Phase 0-4 completes, **append** to `specs/history.md` (create with the sta
 
 **Auto-initialize case study logging** (if not already present):
 Check if `case-study-log.md` exists at project root:
-- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
+- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
 - **If already exists**: Skip silently (created by `/reverse-spec` or manually)
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M5.
 
-**After recording, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
+**Post-Phase 0 validation**: Run `scripts/validate.sh <project-root>` to check cross-file consistency (Feature IDs, SBI mappings, Demo Group references). If ❌ errors are found, display them and resolve before proceeding. ⚠️ warnings are informational — note but continue.
+
+**After recording and validation, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
 
 > **Fallback**: If you cannot immediately proceed (e.g., context limit reached), display:
 > ```
@@ -419,8 +421,8 @@ Executes the following steps **strictly in order** for each Feature.
 1. specify    → Assemble → Checkpoint(STOP) → speckit-specify → Review(STOP) → Update
    1b. clarify → Auto-scan spec.md for ambiguities → speckit-clarify (conditional sub-step of specify)
 2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
-3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
-4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
+3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP) → Update
+4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
 5. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
 6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → Review(STOP) → Update
 7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
@@ -559,6 +561,8 @@ Next steps:
   /smart-sdd status         — View final progress report
   /smart-sdd add            — Add new Features to the project
 ```
+
+**Final validation**: Run `scripts/validate.sh <project-root>` to verify cross-file consistency across all completed Features. Display any ❌ errors or ⚠️ warnings.
 
 **If the pipeline is interrupted mid-Feature** (e.g., context limit, user pauses, error):
 

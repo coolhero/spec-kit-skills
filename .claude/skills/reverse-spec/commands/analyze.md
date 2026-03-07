@@ -35,7 +35,7 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 **If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 **Step 4 — Auto-initialize case study logging**:
 Check if `case-study-log.md` exists at the target directory root:
-- **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `{target-directory}/case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
+- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `{target-directory}/case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
 - **If already exists**: Skip silently (user may have manually initialized earlier)
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.

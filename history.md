@@ -742,3 +742,19 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | allowed-tools 변경 | `AskUserQuestion` 제거, `Bash` 추가 | init이 유일한 AskUserQuestion 사용처(기존 로그 덮어쓰기 확인). Bash는 타임스탬프 생성(`date` 명령) 등에 필요 |
 | M7: stack-migration.md 추출 단계 | generate.md Step 3에 3-8 (From stack-migration.md) 추가 | Step 2 아티팩트 발견에 등록되어 있었으나 Step 3 추출 단계가 누락. history.md와의 데이터 관계도 명시 |
 | 템플릿/프로토콜 유지 | `templates/`, `reference/` 디렉토리는 그대로 유지 | reverse-spec, smart-sdd가 case-study-log.md 자동 생성 시 템플릿/프로토콜을 참조하므로 삭제 불가 |
+
+---
+
+## [2026-03-08] 전체 소스 2차 점검 — Flow 일관성 + 미활용 연결 수정 (F1-F6 + validate.sh)
+
+> Review Protocol(CLAUDE.md) 기준: Flow 불일치 → 미활용 부분 → Context 효율성 순서로 검토
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| F1: verify injection step 번호 | "step 5 (Analyze)" → "step 4 (Analyze)" | pipeline.md 흐름도 기준 analyze는 step 4. verify.md가 잘못된 번호를 참조하면 에이전트 혼동 유발 |
+| F2: adoption analyze fallback | context-injection-rules.md에 `tasks.md absent` 항목 추가 | adopt.md가 "tasks.md 부재 시 two-artifact mode" 를 주장하지만 규칙 테이블에 해당 항목 없어 에이전트가 누락된 파일을 읽으려 에러 발생 가능 |
+| F3: tasks 흐름도 Update 누락 | `→ Update` 추가 | injection/tasks.md에 Update 규칙이 존재하지만 pipeline.md 흐름도에서만 생략. specify/plan과 불일치 |
+| F4: analyze 흐름도 정확성 | `(simplified — Assemble/Update are no-ops)` 표기 추가 | "full Common Protocol" 주장과 흐름도 생략의 불일치 해소 |
+| F5: adoption verify 분기 | verify-phases.md 헤더에 adoption 모드 분기 안내 추가 | step-mode로 `/smart-sdd verify F001`을 adopted Feature에 실행 시, adoption 특화 동작을 알 수 있는 경로가 없었음 |
+| F6: 템플릿 경로 명시화 | 4곳의 산문형 참조 → 명시적 상대 경로 링크 `[...](../../case-study/templates/...)` | recording-protocol은 이미 명시적 상대 경로 사용. 템플릿도 동일 패턴으로 통일 |
+| validate.sh 연결 강화 | pipeline.md Phase 0 완료 + 전체 완료 시 자동 호출, 스크립트 헤더 갱신 | 헤더에 "Post-artifact update validation"이라 명시하면서 실제 자동 호출 지점 없었음. 핵심 2곳(Phase 0 후, 전체 완료 후)에 연결 |

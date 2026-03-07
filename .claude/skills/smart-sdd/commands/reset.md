@@ -138,7 +138,7 @@ If the tag does not exist: Display a warning that registries may contain pipelin
 
 **If "Full reset (include logs)" was selected**:
 
-1. **Reinitialize case-study-log.md**: Read the case-study skill's `templates/case-study-log-template.md` and overwrite `case-study-log.md` at project root
+1. **Reinitialize case-study-log.md**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and overwrite `case-study-log.md` at project root
 
 2. **Clean history.md pipeline entries**: Remove all `### [FID]-[name] — Implementation Decisions` sections and `## [YYYY-MM-DD] /smart-sdd pipeline — Constitution` sections from `specs/history.md`. Keep `/reverse-spec` entries, strategy/architecture decisions, and the Project Context block intact.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # validate.sh — Cross-file consistency validation for smart-sdd
 # Read-only: does NOT modify any artifacts.
-# Used by: Post-artifact update validation
+# Used by: pipeline.md (Phase 0 completion + all Features completed), status.md (on-demand)
 #
 # Usage: validate.sh <target-path>
 #   target-path: Project root containing specs/ directory
