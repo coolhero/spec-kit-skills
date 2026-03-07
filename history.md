@@ -443,10 +443,21 @@
 
 ---
 
+## [2026-03-07] Audit Fix — Phase 1 Redesign Cross-File Consistency
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| init.md Type refs | "Type C" → "Type 1", "Type A/B" → "Type 2" | Phase 1 redesign renamed types but init.md's chaining text was missed |
+| README --gap | Added `--gap` to README.md usage block | Was present in SKILL.md and README.ko.md but missing from README.md usage block |
+| README greenfield example | Updated to show init (Pre-Phase + 4 Phases) → add (6 Phases) chain | Example showed old init with inline Feature definition (Phase 2) which no longer exists |
+| README incremental example | Updated to match add's 6-Phase structure | Example used old Phase numbering that didn't match add.md's actual flow |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge
-At least 5 dedicated fix commits for cross-file inconsistencies. Root cause: multi-file skill architecture where changes in one file silently invalidate assumptions in others. Mitigated by comprehensive audit passes but remains an ongoing concern.
+At least 6 dedicated fix commits for cross-file inconsistencies. Root cause: multi-file skill architecture where changes in one file silently invalidate assumptions in others. Mitigated by comprehensive audit passes but remains an ongoing concern.
 
 ### spec-kit CLI Integration (Trial and Error)
 Binary name: `specify` (not `speckit`). Skill names: `speckit-specify` (hyphen, not dot). Discovered through 3 rapid fix-revert cycles on day 1. Constitution path: `.specify/memory/constitution.md` (not `specs/`).
