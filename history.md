@@ -627,3 +627,14 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | Per-Feature eligibility | Eligible (prerequisites met), Blocked (prerequisites missing), Already-past (resume from next uncompleted) | Three-way classification gives clear feedback; doesn't force re-execution of completed steps |
 | HARD STOP pre-check | Display eligible/blocked summary, user confirms before proceeding | User sees exactly which Features will run and which are blocked; prevents surprise failures |
 | Phase 0 always skipped | Constitution verified but never re-executed in --start mode | Constitution is a one-time setup; if it's not done, pipeline should be run normally first |
+
+---
+
+## [2026-03-07] TODO — Browser MCP → Playwright MCP 용어 통일
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Browser MCP umbrella 폐기 | "Browser MCP" 카테고리 대신 "Playwright MCP"로 단일화 | Browser MCP umbrella를 유지하면 감지 로직 3단계 (Playwright → 다른 MCP → 수동), MCP 종류별 tool name 표준화, 각 MCP마다 action 매핑 필요 등 불필요한 복잡도 발생 |
+| 감지 로직 간소화 | 3단계 → 2단계: `Playwright MCP 있음 → 자동` / `없음 → 수동 체크리스트` | Claude in Chrome 등 다른 browser MCP 대응 제거. Playwright MCP 하나로 통일하면 구현량도 줄어듦 |
+| 미결정 사항 정리 | "Browser MCP 종류별 tool name 표준화" 항목 삭제 | Playwright MCP 단일화로 문제 자체가 해소됨 |
+| constitution 질문 | "Browser MCP 자동 검증" → "Playwright MCP 자동 검증" | UI Verify Mode 값도 `browser-mcp` → `playwright-mcp`로 변경 |
