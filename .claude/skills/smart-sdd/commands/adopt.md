@@ -342,6 +342,17 @@ Key behaviors:
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.
 
+**After recording, IMMEDIATELY proceed to the next Feature. Do NOT stop or wait for user input.**
+
+> **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display:
+> ```
+> ⏸️ Adopt pipeline paused after [FID]-[name].
+> To resume: /smart-sdd adopt (or type "continue")
+>
+> → Next: [next-FID]-[next-name]
+>   Steps: specify(adopt) → plan(adopt) → analyze → verify(adopt) → merge
+> ```
+
 ---
 
 ## Post-Pipeline: Coverage Verification (BLOCKING)

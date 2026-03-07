@@ -317,6 +317,9 @@ Check if `case-study-log.md` exists at project root:
 > ```
 > ⏸️ Pipeline paused after Constitution finalization.
 > To resume: /smart-sdd pipeline (or type "continue")
+>
+> → Next: [first-FID]-[first-name]
+>   Steps: specify → plan → tasks → analyze → implement → verify → merge
 > ```
 
 ### Phase 1~N: Progress Features in Release Group Order
@@ -433,8 +436,11 @@ Then immediately start the next Feature's pre-flight (Step 0).
 
 > **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display:
 > ```
-> ⏸️ Pipeline paused after [FID]-[name]. Next: [next-FID]-[next-name]
+> ⏸️ Pipeline paused after [FID]-[name].
 > To resume: /smart-sdd pipeline (or type "continue")
+>
+> → Next: [next-FID]-[next-name]
+>   Steps: specify → plan → tasks → analyze → implement → verify → merge
 > ```
 
 **If all Features are completed**:
