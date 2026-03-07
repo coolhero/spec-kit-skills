@@ -242,9 +242,85 @@ If deferred Features exist (core scope only), list them:
 
 This step is informational only — no user confirmation required.
 
+### Pipeline --start Mode
+
+When `--start <step>` is specified, the pipeline skips all steps before the designated start step and begins execution from that step onward for every active Feature. This is useful when spec artifacts (specify through tasks/analyze) are already complete and you want to run implement for all Features, or when you need to re-run verify across the board.
+
+**Valid `--start` values**: `specify`, `plan`, `tasks`, `analyze`, `implement`, `verify`
+
+**Step 4 — --start Pre-check (only when --start is specified)**:
+
+1. **Validate start step**: Confirm the value is one of the valid steps above. If invalid, display error and list valid values.
+
+2. **Constitution check**: Verify `.specify/memory/constitution.md` exists and is finalized (not the initial template). If not finalized → BLOCK the pipeline:
+   ```
+   ❌ Constitution has not been finalized.
+   Run /smart-sdd pipeline (without --start) or /smart-sdd constitution first.
+   ```
+
+3. **Prerequisite scan**: For each active Feature (not `completed`, `adopted`, or `deferred`), check that all steps BEFORE the `--start` step have ✅ status in sdd-state.md Feature Progress.
+
+   **Prerequisite mapping**:
+
+   | --start | Required prerequisites (must be ✅) |
+   |---------|--------------------------------------|
+   | specify | (none — only constitution) |
+   | plan | specify |
+   | tasks | specify, plan |
+   | analyze | specify, plan, tasks |
+   | implement | specify, plan, tasks, analyze |
+   | verify | specify, plan, tasks, analyze, implement |
+
+   Classify each Feature:
+   - **Eligible**: All prerequisite steps are ✅ → Feature will be processed from `--start` onward
+   - **Blocked**: One or more prerequisite steps are not ✅ → Feature cannot be processed
+   - **Already past start**: If the Feature has already completed the `--start` step (✅), it picks up from its next uncompleted step (normal resume behavior). If ALL steps including merge are ✅ → skip (completed)
+
+4. **Display summary (HARD STOP)**:
+
+   ```
+   📋 Pipeline --start [step]
+
+   ── Eligible Features ─────────────────────────
+     ✅ [FID]-[name]: [prerequisite steps all ✅] → will run: [step] → ... → merge
+     ✅ [FID]-[name]: [step] already ✅ → will resume from: [next-uncompleted-step]
+     ⏭️ [FID]-[name]: completed → skip
+
+   ── Blocked Features (prerequisites not met) ──
+     ❌ [FID]-[name]: missing: [step1] ([status]), [step2] ([status])
+
+   ──────────────────────────────────────────────
+   [N] Features will be processed, [M] blocked, [K] skipped (completed/deferred).
+   ```
+
+   Use AskUserQuestion (HARD STOP):
+   - "Proceed with [N] eligible Features"
+   - "Abort — fix blocked Features first"
+
+   **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+   If no eligible Features exist (all are blocked or completed), display:
+   ```
+   ❌ No eligible Features for --start [step].
+   [Blocked reasons or "All Features already completed."]
+   ```
+   And stop the pipeline.
+
+5. **Pipeline flow with --start**:
+   - **Phase 0 (Constitution)**: Always skipped (constitution is a prerequisite, verified in step 2 above)
+   - **Phase 1~N (Features)**: For each eligible Feature in Release Group order, skip steps before `--start` and execute from `--start` (or from the next uncompleted step if `--start` step is already ✅) through merge
+   - All other pipeline rules apply: HARD STOPs, Common Protocol, branch validation, env var check, etc.
+
+> **Note**: `--start` does NOT reset or re-run already-completed steps. It only changes where the pipeline begins for each Feature. To force re-execution of completed steps, use `/smart-sdd reset` first, then re-run the pipeline.
+
 ### Phase 0: Constitution Finalization
 
-**Skip check**: Before executing, check if `.specify/memory/constitution.md` already exists AND its content is not just the initial template (i.e., it has been finalized by `speckit-constitution`). If it does, skip Phase 0 entirely and proceed to Phase 1. This covers:
+**Skip check**: Skip Phase 0 entirely if ANY of the following is true:
+- `--start` is specified (constitution is verified during --start Pre-check; Phase 0 is skipped)
+- `.specify/memory/constitution.md` already exists AND its content is not just the initial template (i.e., it has been finalized by `speckit-constitution`)
+
+This covers:
+- `--start` mode (constitution already verified as prerequisite)
 - `add` mode (constitution already created in previous pipeline runs)
 - Pipeline re-runs after interruption (constitution was already finalized)
 - Any scenario where `speckit-constitution` has already been executed
@@ -330,8 +406,9 @@ Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed,
 - **Full scope**: All Features are active — no deferred Features exist.
 - **Adopted Features**: Features with status `adopted` (from `/smart-sdd adopt`) are skipped. To transition them to `completed`, re-run the standard pipeline — it will re-execute tasks + implement + verify.
 - **Restructured Features**: Processed starting from their first 🔀 step (see `commands/restructure.md`).
+- **--start mode**: When `--start <step>` is specified, only eligible Features (verified during --start Pre-check) are processed. For each eligible Feature, steps before the `--start` step are skipped — execution begins from the `--start` step (or the next uncompleted step if `--start` step is already ✅). All other rules (HARD STOPs, Common Protocol, branch validation) apply normally.
 
-**CRITICAL: Each Feature must complete ALL steps (specify through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
+**CRITICAL: Each Feature must complete ALL steps (from its starting step through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
 Executes the following steps **strictly in order** for each Feature.
 

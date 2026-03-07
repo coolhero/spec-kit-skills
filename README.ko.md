@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | Last updated: 2026-03-07 18:04 KST
+[English README](README.md) | Last updated: 2026-03-07 20:49 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -422,6 +422,8 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 # Pipeline 모드 --- 전체 순차 진행 (init, add, reverse-spec 이후 실행)
 /smart-sdd pipeline                      # 매 단계 확인
 /smart-sdd pipeline --from ./path        # 지정 경로에서 산출물 읽기
+/smart-sdd pipeline --start implement    # implement 단계부터 시작 (전체 Feature)
+/smart-sdd pipeline --start verify       # verify 단계부터 시작 (전체 Feature)
 
 # Step 모드 --- 특정 Feature의 특정 단계만 실행
 /smart-sdd constitution                  # constitution 확정 (최초 1회)

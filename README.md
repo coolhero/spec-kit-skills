@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-07 18:04 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-07 20:49 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -418,6 +418,8 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 # Pipeline -- Run the full SDD pipeline (after init, add, or reverse-spec)
 /smart-sdd pipeline                      # With per-step confirmation
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
+/smart-sdd pipeline --start implement    # Start from implement step (all Features)
+/smart-sdd pipeline --start verify       # Start from verify step (all Features)
 
 # Step Mode -- Execute a specific step for a specific Feature
 /smart-sdd constitution                  # Finalize constitution (one-time)

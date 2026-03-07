@@ -614,3 +614,16 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | CI path convergence rule | CI exit must come AFTER Feature startup, never before | Real incident: CI checked frontend build → passed; actual demo ran `tauri dev` → `command not found`. CI gave false confidence |
 | Verify Step 4 added | Read demo script source, verify CI branch doesn't exit before Feature startup | Static analysis catches shortcut paths before execution; prevents CI-passes-but-demo-fails scenario |
 | Template comments | Added `⚠️` comments at correct CI exit placement in demo template | Makes the correct pattern visually obvious to the implementing agent |
+
+---
+
+## [2026-03-07] Pipeline --start Flag
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Flag name | `--start <step>` | `--from` already used for artifact path; `--start` is intuitive and avoids conflict |
+| Valid values | `specify`, `plan`, `tasks`, `analyze`, `implement`, `verify` | Matches the pipeline step names exactly; `constitution` excluded (use normal pipeline); `merge` excluded (not independently startable) |
+| Prerequisite validation | All steps before `--start` must be ✅ per Feature | Ensures spec artifacts exist before running later steps; prevents implement without plan/tasks |
+| Per-Feature eligibility | Eligible (prerequisites met), Blocked (prerequisites missing), Already-past (resume from next uncompleted) | Three-way classification gives clear feedback; doesn't force re-execution of completed steps |
+| HARD STOP pre-check | Display eligible/blocked summary, user confirms before proceeding | User sees exactly which Features will run and which are blocked; prevents surprise failures |
+| Phase 0 always skipped | Constitution verified but never re-executed in --start mode | Constitution is a one-time setup; if it's not done, pipeline should be run normally first |

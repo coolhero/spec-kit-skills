@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -59,6 +59,8 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 # Pipeline — Run the full SDD pipeline (after init, add, or reverse-spec)
 /smart-sdd pipeline                      # With per-step confirmation
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
+/smart-sdd pipeline --start implement    # Start from implement step (all Features)
+/smart-sdd pipeline --start verify       # Start from verify step (all Features)
 
 # Step Mode — Execute a specific step for a specific Feature
 /smart-sdd constitution                  # Finalize constitution (one-time)
@@ -139,6 +141,7 @@ $ARGUMENTS parsing rules:
   --prd <path>    → Path to PRD document (for init and add commands)
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
+  --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify
   --domain <val>  → Project domain profile: "app" (default). Determines demo pattern, parity dimensions, and verify steps
 ```
 
