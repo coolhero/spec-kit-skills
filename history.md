@@ -669,3 +669,16 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | Part 8과의 관계 | Part 8 = 구조(언제/어떻게 실행), Part 9 = 내용(무엇을 검사) | Part 8의 빌드 게이트에서 Part 9의 검증 항목 실행, Part 8의 Fix 루프에서 Part 9의 규칙 위반 수정 |
 | 4단계 개선 | plan(호환성+anti-pattern+경쟁조건), analyze(데이터흐름), implement(IPC안전+CSS제약+통합체크), verify(empty state+런타임) | 7건의 버그 각각에 대해 "어느 단계에서 막았어야 하는가" 역추적하여 배치 |
 | 주요 발견 | "빌드 성공 ≠ 런타임 성공" — verify가 빌드/테스트에만 의존 | 125/125 테스트 통과했지만 WKWebView 호환성, Zustand 무한 리렌더, IPC 필드 크래시 등 6건 미검출 |
+
+---
+
+## [2026-03-07] TODO Part 7 갱신 — Tauri MCP Server 활용으로 플랫폼 한계 해결
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Tauri UI 검증 | mcp-server-tauri (hypothesi/mcp-server-tauri) 활용 | Part 7 기존 결론 "Tauri → ❌ 불가"를 뒤집음. WebSocket + Rust Bridge Plugin으로 시스템 WebView 직접 연결 |
+| 도구 매핑 | Tauri MCP 20개 도구 → Playwright MCP 대응 매핑 | webview_interact≈browser_click, webview_screenshot≈screenshot, ipc_execute_command은 Tauri 전용 |
+| 전략 다이어그램 변경 | 2분기(Playwright/수동) → 3분기(웹앱+Playwright / Tauri+TauriMCP / 기타+수동) | 프로젝트 스택 감지 → 적합한 MCP 선택 → 자동 검증 or 수동 fallback |
+| F006 버그 커버리지 | 버그 #1(JS엔진), #3(CSS), #4(초기화), #5(IPC) → Tauri MCP로 런타임 자동 검증 가능 | Part 9의 "사전 방지" 규칙 + Tauri MCP의 "런타임 검증" 조합으로 이중 방어 |
+| 에이전트 자기 검증 | Tauri MCP 있으면 에이전트가 앱을 직접 조작/검증 가능 | "사용자가 직접 테스트해야 하는" 메타 문제를 Tauri 프로젝트에 한해 해결 |
+| Part 0 확장 | UI Verify Mode에 `tauri-mcp` 옵션 추가 | auto 모드에서 스택 기반 MCP 자동 감지 (Playwright/Tauri/수동 3분기) |
