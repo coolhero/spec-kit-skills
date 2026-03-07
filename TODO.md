@@ -411,3 +411,100 @@ implement 단계의 Review에서 "Request modifications" 시:
 - [ ] 역전파 시 spec의 기존 FR 번호 체계를 어떻게 유지할지
 - [ ] plan.md, tasks.md의 역갱신 범위 — 전체 재생성 vs 부분 추가
 - [ ] 파이프라인 외부 세션 수정은 감지 자체가 가능한가? (git diff 기반?)
+
+---
+
+## Part 6: Rebuild UI Fidelity (원본 소스 UI와 리빌드 UI의 시각적 괴리)
+
+### 문제
+
+Brownfield rebuild 시, 기능적으로는 동일하게 구현되더라도 **UI의 모양새(레이아웃, 스타일, 컴포넌트 배치)가 원본과 크게 달라지는** 경우가 빈번함.
+
+현재 파이프라인에서 UI 외형을 보존하는 메커니즘:
+- `pre-context.md` → Source Reference에 원본 파일 목록은 있지만 **시각적 정보 없음**
+- `spec.md` → FR/SC는 기능 요구사항이지 **UI 레이아웃 명세가 아님**
+- `plan.md` → 데이터 모델/API 설계이지 **컴포넌트 배치/스타일 설계가 아님**
+- `business-logic-map.md` → 비즈니스 로직이지 **UI 구조가 아님**
+
+**근본 원인**: SDD 파이프라인은 "무엇을 하는가(What)"에 집중하고, "어떻게 보이는가(How it looks)"를 체계적으로 전달하지 않음.
+
+### 시나리오별 영향
+
+| 상황 | stack=same | stack=new |
+|------|-----------|----------|
+| 같은 컴포넌트 라이브러리 사용 | 배치/스타일만 달라짐 | 완전히 다른 UI (프레임워크도 다름) |
+| 원본에 커스텀 CSS/테마 있음 | 테마 정보 유실 | 테마 정보 유실 + 프레임워크 전환 |
+| 원본에 반응형 레이아웃 있음 | 반응형 동작 누락 가능 | 반응형 패턴 자체가 다름 |
+
+### 잠재적 접근 방식
+
+**A. UI Reference Screenshot 캡처 (reverse-spec 확장)**
+
+`/reverse-spec` Phase 2에서 원본 소스의 주요 페이지 스크린샷을 캡처:
+1. 원본 앱을 로컬에서 실행 (사용자 지원 필요)
+2. Browser MCP로 주요 라우트 순회 → 스크린샷 캡처
+3. 각 Feature의 `pre-context.md`에 스크린샷 참조 추가
+4. implement 시 에이전트가 스크린샷을 참조하여 유사한 레이아웃 구현
+
+장점: 직관적, 시각 정보 직접 전달
+단점: 원본 앱 실행 필요, Browser MCP 의존, 스크린샷 저장/관리 비용
+
+**B. UI Structure Extraction (reverse-spec 확장)**
+
+`/reverse-spec` Phase 2 Deep Analysis에서 UI 구조 정보를 추가 추출:
+1. 컴포넌트 트리 구조 (페이지 → 섹션 → 컴포넌트 계층)
+2. 레이아웃 패턴 (sidebar + main, header + content + footer 등)
+3. 사용 중인 UI 라이브러리/테마 (Tailwind 클래스 패턴, MUI 테마 설정 등)
+4. 반응형 브레이크포인트
+5. 색상 팔레트 / 타이포그래피 시스템
+
+추출 결과를 `pre-context.md`의 새 섹션 "UI Structure" 또는 별도 `ui-reference.md`에 기록.
+`plan.md` 작성 시 이 정보를 참조하여 컴포넌트 설계에 반영.
+
+장점: 코드 분석만으로 가능 (원본 실행 불필요), 정형화된 정보
+단점: 정적 분석 한계 (실제 렌더링 결과와 다를 수 있음), 추출 복잡도
+
+**C. Visual Parity Check (verify/parity 확장)**
+
+구현 후 원본과의 시각적 비교:
+1. 원본 앱과 리빌드 앱을 동시에 실행
+2. Browser MCP로 동일 페이지를 순회하며 스크린샷 비교
+3. 차이점 리포트 생성 → 사용자에게 수용/수정 선택지 제공
+
+장점: 결과 기반 검증으로 정확
+단점: 양쪽 앱 동시 실행 필요, Browser MCP 의존, 리소스 비용 높음
+
+**D. UI Spec Section (specify 확장)**
+
+`spec.md`에 기능 요구사항과 별도로 **UI 요구사항 섹션** 추가:
+1. reverse-spec에서 추출한 UI 구조를 `pre-context.md` "For /speckit.specify"에 포함
+2. specify 시 FR/SC와 함께 UI 레이아웃 요구사항 생성 (예: "sidebar에 네비게이션, main 영역에 컨텐츠")
+3. plan.md에서 이를 참조하여 컴포넌트 설계
+
+장점: 기존 파이프라인 흐름에 자연스럽게 통합
+단점: 텍스트 기반 UI 명세의 한계 (시각 정보 전달력 부족)
+
+### 권장: B + D 조합 (+ 선택적 A)
+
+1. **B** (UI Structure Extraction): reverse-spec에서 UI 구조 정보 추출 → pre-context에 기록
+2. **D** (UI Spec Section): specify에서 UI 레이아웃 요구사항 생성 → plan에 반영
+3. **A** (선택적): Browser MCP 있으면 스크린샷도 캡처하여 참조 자료로 활용
+
+### 수정 대상 (예상)
+
+- `commands/analyze.md` (reverse-spec) — Phase 2에 UI 구조 추출 추가
+- `templates/pre-context-template.md` — "UI Structure" 섹션 추가
+- `reference/injection/specify.md` — UI 구조 정보 주입 규칙 추가
+- `reference/injection/plan.md` — 컴포넌트 설계 시 UI 참조 규칙 추가
+- `domains/app.md` — UI 추출 패턴 정의 (프레임워크별)
+
+### 구현 우선순위: 미정 (접근 방식 결정 필요)
+
+### 미결정 사항
+
+- [ ] stack=new인 경우 UI 보존이 의미 있는가? (프레임워크 자체가 다른데)
+- [ ] UI 구조 추출의 정확도를 어떻게 보장할지 (CSS-in-JS vs CSS Modules vs Tailwind 등)
+- [ ] 스크린샷 캡처 시 인증/데이터 문제 (로그인 필요한 페이지는?)
+- [ ] "모양새 보존" vs "현대적 리디자인" — 사용자 의도를 어느 시점에 물어볼지
+- [ ] UI Component Features (기존 추출 항목)와의 중복/통합 범위
+- [ ] 반응형 디자인 — 어느 뷰포트를 기준으로 삼을지
