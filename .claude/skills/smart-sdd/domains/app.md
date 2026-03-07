@@ -95,3 +95,20 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 | **Caching** | Cache strategy? Invalidation? TTL? |
 | **Observability** | Logging requirements? Metrics? Health check endpoint? |
 | **Data migration** | Schema changes needed? Migration strategy? Backward compatibility? |
+
+---
+
+## 6. UI Testing Integration
+
+> Browser automation hook points for Features with user-facing UI.
+> Full guide: [reference/ui-testing-integration.md](../reference/ui-testing-integration.md)
+
+| Feature Type | UI Verification | Condition |
+|-------------|----------------|-----------|
+| Has UI (frontend/fullstack) | Demo URL navigation + screenshot + element check | Playwright MCP available |
+| Backend/API only | Skip (API health check only) | — |
+| CLI/Library | Skip | — |
+
+When Playwright MCP is available during `verify` Phase 3:
+- Demo script starts the server → Playwright navigates to demo URL → verifies page loads and key elements exist
+- If not available: falls back to health endpoint check only (no degradation)

@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-07 12:56 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-07 15:30 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -688,6 +688,20 @@ The parity command runs in 5 phases:
 
 Cross-cutting gaps (e.g., rate limiting, CORS) receive dual treatment: constitution update (architectural principle) AND infrastructure Feature (actual implementation code).
 
+#### Catch-Up Workflow: Original Source Updates
+
+When the original source is updated after the rebuild starts (new features, bug fixes, etc.), use the **Complete + Catch-up** workflow:
+
+```
+1. /smart-sdd pipeline                      # Complete current pipeline first
+2. /smart-sdd parity --source /path/to/updated-original  # Detect new gaps
+3. /smart-sdd add --gap                     # Create Features from new gaps
+4. /smart-sdd pipeline                      # Implement the gap-covering Features
+5. /smart-sdd parity --source ...           # Re-verify → closer to 100%
+```
+
+Previous parity decisions (exclusions, deferrals) are preserved — only new gaps are presented. For large-scale original source changes (major refactoring, new modules), consider re-running `/reverse-spec` to refresh SBI entries before the catch-up.
+
 ### 3. `/speckit-diff` -- Spec-Kit Version Compatibility Analyzer
 
 A utility skill that checks whether the current spec-kit-skills are compatible with the latest spec-kit version. Works independently — no dependency on reverse-spec, smart-sdd, or any active project.
@@ -924,6 +938,18 @@ Changing the domain profile changes *what* gets analyzed and *how* artifacts are
 
 The `domains/` directory in each skill contains the profile schema (`_schema.md`) and existing profiles. Use `--domain` to select a profile (default: `app`).
 
+### UI Testing Integration (Playwright MCP)
+
+When [Playwright MCP](https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-playwright) (or similar browser automation) is available in the Claude Code environment, `/smart-sdd verify` can perform automated UI verification:
+
+- **Demo UI check**: After demo script starts the server, Playwright navigates to the demo URL, verifies the page loads, and checks for key UI elements
+- **Screenshot evidence**: Captures screenshots during verification for review
+- **Graceful degradation**: If Playwright MCP is not available, everything works as before (health endpoint check only)
+
+Demo scripts can include an optional `# Playwright` header comment with URLs and element assertions for automated verification.
+
+**Current (Phase A)**: Hook points in verify Phase 3 for demo UI validation. **Future**: Visual parity comparison (Phase B) and UI behavior extraction (Phase C). See `reference/ui-testing-integration.md` for the full guide and roadmap.
+
 ### Project Structure
 
 ```
@@ -985,7 +1011,9 @@ spec-kit-skills/
         │       │   ├── adopt-verify.md                    # Adoption-mode verify injection
         │       │   └── parity.md
         │       ├── state-schema.md                      # sdd-state.md schema definition
-        │       └── branch-management.md                 # Git branch management reference
+        │       ├── branch-management.md                 # Git branch management reference
+        │       ├── feature-elaboration-framework.md     # Feature definition quality evaluation
+        │       └── ui-testing-integration.md            # Playwright MCP integration guide
         ├── speckit-diff/
         │   ├── SKILL.md                                 # Compatibility analyzer skill (overview + routing)
         │   ├── commands/

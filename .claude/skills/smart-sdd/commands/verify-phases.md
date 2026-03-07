@@ -89,6 +89,18 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - The `--ci` flag must be supported for automated verification: runs setup + health check, then exits cleanly
 - **REJECT if**: the script has no interactive experience (i.e., only runs assertions and exits with no live Feature)
 
+**Step 2b — UI Verification Hook** (optional — only if Playwright MCP available):
+- After health check passes and before `--ci` exits, if Playwright MCP tools are available in the session:
+  1. Parse demo script stdout for URLs (pattern: `http://localhost:\d+/...`)
+  2. Navigate to each URL via Playwright
+  3. Verify page loads (no error state, page title present)
+  4. If demo script has a `# Playwright` header comment: run listed assertions (element existence, clickability)
+  5. Take screenshot for review evidence
+  6. Report: `UI verification: ✅ [N] pages verified, [N] elements checked`
+- **If Playwright MCP not available**: skip silently (no warning, no degradation)
+- **If UI verification fails**: report as warning (⚠️), not blocker — health check already passed
+- See [reference/ui-testing-integration.md](../reference/ui-testing-integration.md) for full guide
+
 **Step 3 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to what the user can try/see in the demo
   - Each FR/SC should be either ✅ (demonstrated) or ⬜ (not demoed with reason)

@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | Last updated: 2026-03-07 12:56 KST
+[English README](README.md) | Last updated: 2026-03-07 15:30 KST
 
 **spec-kit 기반 Spec-Driven Development(SDD) 워크플로우를 보강하는 Claude Code 커스텀 스킬 모음**
 
@@ -682,6 +682,20 @@ parity 명령어는 5개 페이즈로 실행됩니다:
 
 횡단 관심사 gap(예: rate limiting, CORS)은 이중 처리: constitution 업데이트(아키텍처 원칙) + 인프라 Feature(실제 구현 코드).
 
+#### Catch-Up 워크플로우: 원본 소스 업데이트 대응
+
+Rebuild 중 원본 소스가 업데이트된 경우 (새 기능, 버그 수정 등), **Complete + Catch-up** 워크플로우를 사용합니다:
+
+```
+1. /smart-sdd pipeline                      # 현재 파이프라인 먼저 완료
+2. /smart-sdd parity --source /path/to/updated-original  # 새로운 gap 감지
+3. /smart-sdd add --gap                     # gap에서 Feature 생성
+4. /smart-sdd pipeline                      # gap 커버 Feature 구현
+5. /smart-sdd parity --source ...           # 재검증 → 100%에 가까워짐
+```
+
+이전 parity 결정(제외, 유예)은 보존됩니다 — 새로운 gap만 표시됩니다. 원본 소스에 대규모 변경(대규모 리팩터링, 새 모듈)이 있었다면, catch-up 전에 `/reverse-spec`을 다시 실행하여 SBI 항목을 갱신하는 것을 권장합니다.
+
 ### 3. `/speckit-diff` -- Spec-Kit 버전 호환성 분석기
 
 현재 spec-kit-skills가 최신 spec-kit 버전과 호환되는지 확인하는 유틸리티 스킬입니다. reverse-spec, smart-sdd, 또는 활성 프로젝트에 대한 의존성 없이 **독립적으로 실행** 가능합니다.
@@ -913,6 +927,18 @@ Tech Stack (런타임 감지)            ← 프레임워크별 파일 패턴, O
 
 각 스킬의 `domains/` 디렉토리에 프로필 스키마(`_schema.md`)와 기존 프로필이 있습니다. `--domain`으로 프로필을 선택합니다 (기본값: `app`).
 
+### UI 테스트 통합 (Playwright MCP)
+
+Claude Code 환경에서 [Playwright MCP](https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-playwright) (또는 유사한 브라우저 자동화)를 사용할 수 있을 때, `/smart-sdd verify`가 자동화된 UI 검증을 수행할 수 있습니다:
+
+- **데모 UI 검사**: 데모 스크립트가 서버를 시작한 후, Playwright가 데모 URL로 이동하여 페이지 로딩과 주요 UI 요소를 확인
+- **스크린샷 증거**: 검증 중 스크린샷을 캡처하여 리뷰에 활용
+- **우아한 폴백**: Playwright MCP를 사용할 수 없으면 기존과 동일하게 동작 (health 엔드포인트 검사만)
+
+데모 스크립트에 선택적으로 `# Playwright` 헤더 코멘트를 포함하여 URL과 요소 어설션을 자동 검증에 활용할 수 있습니다.
+
+**현재 (Phase A)**: verify Phase 3에 데모 UI 검증 hook point. **향후**: 시각적 패리티 비교 (Phase B), UI 행동 추출 (Phase C). 자세한 가이드와 로드맵은 `reference/ui-testing-integration.md`를 참조하세요.
+
 ### 프로젝트 구조
 
 ```
@@ -974,7 +1000,9 @@ spec-kit-skills/
         │       │   ├── adopt-plan.md                    # 도입 모드 plan 주입 규칙
         │       │   └── adopt-verify.md                  # 도입 모드 verify 주입 규칙
         │       ├── state-schema.md                      # sdd-state.md 스키마 정의
-        │       └── branch-management.md                 # Git 브랜치 관리 참조
+        │       ├── branch-management.md                 # Git 브랜치 관리 참조
+        │       ├── feature-elaboration-framework.md     # Feature 정의 품질 평가
+        │       └── ui-testing-integration.md            # Playwright MCP 통합 가이드
         ├── speckit-diff/
         │   ├── SKILL.md                                 # 호환성 분석 스킬 (개요 + 라우팅)
         │   ├── commands/

@@ -454,10 +454,42 @@
 
 ---
 
+## [2026-03-07] Pending Feature Cleanup + Catch-Up Workflow + Playwright Phase A
+
+### Pending Feature Cleanup (add Pre-Check)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Pending Feature review | add Pre-Check offers cleanup when both completed AND pending Features exist | Partial implementation from reverse-spec may leave stale pending Features; user should be able to clean them up before adding new ones |
+| Cleanup scope | Only `pending` status — not `in_progress`, `completed`, or `adopted` | Active/done Features need `/smart-sdd restructure` for removal; add cleanup is for unstarted ones only |
+| SBI unlinking | Cleaned-up Features' SBI entries return to `unmapped` status | Ensures gap detection (Type 3) can re-propose these behaviors for new Features |
+| Type 3 unmapped filter | Explicitly filter to `unmapped` status only, exclude `in_progress` | `in_progress` behaviors are assigned to pending Features being worked on — they aren't truly "gaps" |
+
+### Complete + Catch-Up Workflow
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Catch-up via parity + add --gap | `pipeline → parity --source updated → add --gap → pipeline` | Handles original source updates during rebuild. parity detects new gaps, add --gap covers them, pipeline implements |
+| Incremental parity | Preserve previous decisions, only show new gaps | Avoids re-deciding already-handled gaps on each parity re-run |
+| Re-run reverse-spec for large changes | Recommended when original has major refactoring or new modules | parity is lightweight (structural/logic comparison); reverse-spec is heavier but captures new SBI entries and registries |
+
+### Playwright MCP Integration — Phase A
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Phase A scope | Hook points only — no core logic changes | LOW effort: verify Phase 3 gets UI check, demo scripts get Playwright header, domain profile gets hook table |
+| Graceful degradation | All hooks check for Playwright MCP availability at runtime; absent → silent skip | No dependency on Playwright; existing behavior preserved when not available |
+| verify Phase 3 Step 2b | After health check, navigate to demo URLs + screenshot + element check | Catches "server responds but UI doesn't render" issues that health checks miss |
+| Demo script Playwright header | Optional `# Playwright` comment with URLs and element assertions | Informational when Playwright absent; actionable when present. Extends existing Coverage header pattern |
+| Separate reference doc | `reference/ui-testing-integration.md` (~180 lines) | Too much content for domains/app.md; separate doc covers current usage, troubleshooting, and future roadmap (Phase B/C) |
+| Future Phase B/C prerequisites | Original source must be runnable; Source Runnability Check needed in reverse-spec Pre-Phase | Static analysis doesn't need running source; visual parity and UI SBI extraction do. Check should be non-blocking (continues with static-only if not runnable) |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge
-At least 6 dedicated fix commits for cross-file inconsistencies. Root cause: multi-file skill architecture where changes in one file silently invalidate assumptions in others. Mitigated by comprehensive audit passes but remains an ongoing concern.
+At least 7 dedicated fix commits for cross-file inconsistencies. Root cause: multi-file skill architecture where changes in one file silently invalidate assumptions in others. Mitigated by comprehensive audit passes but remains an ongoing concern.
 
 ### spec-kit CLI Integration (Trial and Error)
 Binary name: `specify` (not `speckit`). Skill names: `speckit-specify` (hyphen, not dot). Discovered through 3 rapid fix-revert cycles on day 1. Constitution path: `.specify/memory/constitution.md` (not `specs/`).

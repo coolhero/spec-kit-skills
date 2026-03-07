@@ -56,6 +56,72 @@ Phase 6 → Generate final artifacts → DELETE specs/add-draft.md
 
 ---
 
+## Pre-Check: Pending Feature Review (Conditional)
+
+> Runs ONCE before Phase 1, only when both completed AND pending Features exist.
+> Skipped when `--auto` is active.
+
+When a project has partially implemented Features from reverse-spec (some completed, some still pending), the user may want to clean up stale pending Features before defining new ones.
+
+### Trigger Conditions
+
+1. Read `sdd-state.md` Feature Progress table
+2. Count Features by status:
+   - At least 1 Feature with status `completed` or `adopted`
+   - At least 1 Feature with status `pending`
+3. If BOTH conditions met → show review prompt
+4. Otherwise → skip silently (no message)
+
+### Review Prompt (HARD STOP)
+
+```
+📋 Pending Feature Review
+
+You have [N] pending (unimplemented) Features from the original plan:
+
+  F003-cart         | pending | Tier 1
+  F005-reporting    | pending | Tier 2
+  F007-admin-panel  | pending | Tier 3
+
+Would you like to review these before adding new Features?
+```
+
+**HARD STOP** via AskUserQuestion:
+- **"Keep all — proceed to add"** → Skip cleanup, continue to Phase 1
+- **"Review and clean up"** → Enter cleanup flow (see below)
+
+### Cleanup Flow
+
+If the user selects "Review and clean up":
+
+1. Present each pending Feature with details (description, dependencies, SBI count)
+2. Ask via AskUserQuestion (multiSelect): "Which Features would you like to remove?"
+3. For each selected Feature, clean up:
+   - **`roadmap.md`**: Remove from Feature Catalog, Dependency Graph, Release Groups, Demo Groups
+   - **`sdd-state.md`**: Remove from Feature Progress, Feature Mapping, Demo Group Progress
+   - **`pre-context.md`**: Delete `specs/reverse-spec/features/F00N-name/pre-context.md`
+   - **`entity-registry.md`**: Remove entity ownership entries (keep entities if referenced by other Features)
+   - **`api-registry.md`**: Remove API entries owned by this Feature
+   - **SBI Coverage**: Unlink SBI entries (set status back to `unmapped`, clear Feature column)
+4. Record removed Features in `specs/history.md`:
+   ```
+   ## [YYYY-MM-DD] /smart-sdd add — Pending Feature Cleanup
+   | Removed | Reason |
+   |---------|--------|
+   | F005-reporting | User chose to remove before adding new Features |
+   ```
+5. Display summary:
+   ```
+   ✅ Removed [N] pending Feature(s): F005-reporting, F007-admin-panel
+      Updated: roadmap.md, sdd-state.md, entity-registry.md, api-registry.md
+      SBI entries unlinked: [N] behaviors returned to unmapped status
+   ```
+6. Proceed to Phase 1
+
+**Important**: Only Features with status `pending` can be removed via this flow. Features that are `in_progress`, `completed`, or `adopted` are NOT eligible. For those, use `/smart-sdd restructure`.
+
+---
+
 ## Phase 1: Feature Definition (Adaptive Consultation)
 
 > Conversational phase — no HARD STOP.
@@ -75,6 +141,7 @@ Determine entry type from the user's input and arguments:
 **Auto gap detection** (when no `--gap` but project might have gaps):
 - Read `sdd-state.md` for Origin (`rebuild` or `adoption`)
 - Run `scripts/sbi-coverage.sh <project-root>` to check unmapped behaviors
+- **Count only `unmapped` status** — exclude `in_progress` behaviors already assigned to pending Features
 - If unmapped P1/P2 behaviors exist AND no `--prd` provided:
   → Ask via AskUserQuestion: "Found N unmapped source behaviors. How would you like to proceed?"
   - "Show me the gaps (Recommended)" → Switch to Type 3
@@ -118,8 +185,9 @@ Determine entry type from the user's input and arguments:
 
 1. Run `scripts/sbi-coverage.sh <project-root>` for full coverage view
 2. If `parity-report.md` exists at BASE_PATH: read gap areas for additional context
-3. Cluster unmapped behaviors by domain/function (using behavior descriptions and source file proximity)
-4. Auto-propose Feature candidates from clusters:
+3. **Filter to `unmapped` status only**: Exclude `in_progress` behaviors (already assigned to pending Features). Only truly unmapped behaviors are gap candidates.
+4. Cluster unmapped behaviors by domain/function (using behavior descriptions and source file proximity)
+5. Auto-propose Feature candidates from clusters:
    ```
    📋 Gap Analysis — Unmapped Source Behaviors
 
@@ -140,8 +208,8 @@ Determine entry type from the user's input and arguments:
 
    Select, modify, or reject these proposals.
    ```
-5. User selects/modifies/rejects proposals
-6. Proceed to Elaboration (1c)
+6. User selects/modifies/rejects proposals
+7. Proceed to Elaboration (1c)
 
 **Type 3 → Phase 4 optimization**: Features built from SBI entries arrive at Phase 4 **pre-mapped**. Phase 4 confirms the mapping and allows expansion (NEW B### entries) only — no re-selection needed.
 

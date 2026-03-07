@@ -241,3 +241,61 @@ When `--auto` is specified:
 ### `--dangerously-skip-permissions` handling
 
 Same handling as other commands: AskUserQuestion replaced with text messages. Classification prompts display options as regular text and wait for text response.
+
+---
+
+## Catch-Up Workflow: Handling Original Source Updates
+
+When the original source has been updated after the rebuild pipeline started (new features added, bugs fixed, etc.), the parity command provides a systematic way to detect and close the gap.
+
+### When to Use
+
+- Original source received updates while you were rebuilding
+- You discover undocumented behaviors in the original that were missed by reverse-spec
+- Original source has grown since the initial analysis (new endpoints, pages, business rules)
+
+### Complete + Catch-Up Flow
+
+```
+1. Complete current pipeline
+   /smart-sdd pipeline              # Finish all in-progress Features first
+
+2. Re-run parity against updated source
+   /smart-sdd parity --source /path/to/updated-original
+
+3. Review new gaps
+   → parity-report.md updated with new gap entries (G-NNN)
+   → Existing exclusions/deferrals are preserved
+
+4. Cover gaps via add
+   /smart-sdd add --gap             # Type 3 auto-proposes Features from new gaps
+
+5. Implement new Features
+   /smart-sdd pipeline              # Pipeline picks up newly added Features
+```
+
+### Key Behaviors
+
+- **Incremental parity**: The parity command preserves previous decisions (exclusions, deferrals) from `parity-report.md`. Only NEW gaps (not previously seen) are presented for remediation.
+- **Source path**: Use `--source` to point to the updated original. If the original has moved or been reorganized, provide the new path — parity compares structure, not paths.
+- **SBI re-extraction**: If the original source has significant new code, consider running `/reverse-spec` on the updated source first to refresh the SBI entries. Then `add --gap` can reference the updated inventory.
+- **Partial catch-up**: You don't have to close all gaps at once. Use Phase 4 "Defer" option to prioritize which gaps to address now vs. later.
+
+### Artifact Update Flow
+
+```
+Updated original source
+  → /smart-sdd parity --source      (detect new gaps)
+  → parity-report.md                (new G-NNN entries)
+  → /smart-sdd add --gap            (Type 3: create Features from gaps)
+  → roadmap.md + sdd-state.md       (new Features registered)
+  → /smart-sdd pipeline             (implement new Features)
+  → /smart-sdd parity --source      (re-verify → closer to 100%)
+```
+
+### When to Re-Run reverse-spec Instead
+
+If the original source changes are **large** (major refactoring, new modules, significant architecture changes):
+- Re-running `/reverse-spec` on the updated source produces fresh SBI entries, entity/API registries
+- The catch-up flow then uses these refreshed artifacts for more accurate gap detection
+- This is heavier but more thorough than parity-only catch-up
