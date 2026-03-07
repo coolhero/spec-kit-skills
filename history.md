@@ -604,3 +604,13 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | Commit + tag approach | Auto-commit + `git tag -f reverse-spec-complete` after Phase 4-4 | Tag provides stable reference point for `smart-sdd reset`; commit ensures clean git state before pipeline starts |
 | Tag over branch | Tag instead of separate branch | Branch requires merge step and can cause state confusion; tag is a permanent, immutable reference point |
 | Force-tag (`-f`) | Overwrite tag on re-run | Users may run reverse-spec multiple times; latest run should always be the reset target |
+
+---
+
+## [2026-03-07] Demo CI/Interactive Path Convergence
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| CI path convergence rule | CI exit must come AFTER Feature startup, never before | Real incident: CI checked frontend build → passed; actual demo ran `tauri dev` → `command not found`. CI gave false confidence |
+| Verify Step 4 added | Read demo script source, verify CI branch doesn't exit before Feature startup | Static analysis catches shortcut paths before execution; prevents CI-passes-but-demo-fails scenario |
+| Template comments | Added `⚠️` comments at correct CI exit placement in demo template | Makes the correct pattern visually obvious to the implementing agent |
