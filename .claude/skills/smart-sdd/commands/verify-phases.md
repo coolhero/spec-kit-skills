@@ -113,6 +113,15 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 **Step 4 — Execute the demo in CI mode (`--ci`)**:
 - Run `demos/F00N-name.sh --ci` and verify it completes without errors (health check passes)
 - Capture the demo output (stdout/stderr) for the Review display
+- **Runtime error scan (BLOCKING)**: After demo execution, scan the captured stdout/stderr for runtime error patterns:
+  - `"level":"error"` or `"level":"fatal"` (structured log errors)
+  - `Error occurred`, `Unhandled rejection`, `Uncaught exception`
+  - `TypeError`, `ReferenceError`, `SyntaxError` (JS runtime errors)
+  - `No handler registered`, `ECONNREFUSED`, `ENOENT` (service initialization failures)
+  - `panic:`, `FATAL`, `segfault` (system-level crashes)
+  - Process exit with non-zero code
+- **If runtime errors are detected**: The demo is considered **FAILED** even if the health check (HTTP 200) passed — a healthy port does not mean the application is functioning correctly (e.g., Vite dev server may respond while Electron main process has fatal errors)
+- Display each detected error with its source line for user review
 
 **If any check fails**, display and BLOCK:
 ```
