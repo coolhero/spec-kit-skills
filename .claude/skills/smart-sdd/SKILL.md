@@ -49,6 +49,7 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 
 # Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
+/smart-sdd add --prd path/to/requirements.md  # Define from a PRD/requirements document
 
 # Adoption — Wrap existing code with SDD documentation (after reverse-spec)
 /smart-sdd adopt                         # Adopt existing code with SDD docs

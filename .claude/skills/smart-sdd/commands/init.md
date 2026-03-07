@@ -129,7 +129,9 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
 
 6. **Not generated**: `business-logic-map.md` (no existing logic to map), `stack-migration.md` (no existing stack), per-Feature `pre-context.md` (created by `/smart-sdd add`)
 
-#### Phase 4: Completion Report
+#### Phase 4: Completion + Feature Definition Prompt
+
+Display the completion report:
 
 ```
 ✅ Greenfield project initialized:
@@ -140,16 +142,34 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
   specs/reverse-spec/api-registry.md (empty — populated during plan)
   specs/reverse-spec/sdd-state.md
   case-study-log.md
+```
 
+Then ask the user via AskUserQuestion whether to define Features now:
+- "Define Features now (Recommended)" — Chain into `/smart-sdd add` flow immediately
+- "Later — I'll run /smart-sdd add separately" — Show completion message and stop
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**If "Define Features now"**:
+- If `--prd` was provided to init: pass the same PRD path to the add flow (triggers Phase 1 Type C — PRD-based Feature extraction)
+- If no `--prd`: enter add flow in conversational mode (Phase 1 Type A/B)
+- Transition directly into the add command's Phase 1. The agent reads `commands/add.md` and continues execution without requiring the user to type `/smart-sdd add`
+
+**If "Later"**:
+```
 Next steps:
   /smart-sdd add                — Define your first Feature(s)
   /smart-sdd constitution       — Finalize the constitution first (optional)
 ```
 
+> **`--auto` mode**: Automatically selects "Define Features now" and chains into add. If `--prd` was provided, add runs in PRD mode.
+
+> **`--dangerously-skip-permissions` mode**: Same as --auto behavior — chains into add automatically.
+
 #### Init and --auto Mode
 
-When `--auto` is specified, the Phase 2 Checkpoint is skipped (content is displayed but proceeds immediately). However, interactive Q&A in Phases 1-2 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 6 Best Practices, AI-suggested conventions).
+When `--auto` is specified, the Phase 2 Checkpoint is skipped (content is displayed but proceeds immediately) and Feature Definition chains into add automatically. Interactive Q&A in Phases 1-2 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 6 Best Practices, AI-suggested conventions, PRD-based Feature extraction).
 
 #### Init and --dangerously-skip-permissions
 
-Same handling as other commands: interactive prompts use regular text messages instead of AskUserQuestion. The `--prd` argument is recommended in this environment to minimize required interaction.
+Same handling as other commands: interactive prompts use regular text messages instead of AskUserQuestion. The `--prd` argument is recommended in this environment to minimize required interaction. Feature definition chains into add automatically.

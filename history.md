@@ -400,6 +400,15 @@
 | Conditional FR drafts | SBI-mapped behaviors → FR draft in pre-context; no SBI → description only | Optimizes pre-context information density. Greenfield Features without SBI get leaner pre-context |
 | Adaptive consultation (Phase 1) | 4 readiness types (A: vague, B: specific, C: PRD, D: extend existing) | Framework defined, detailed implementation deferred to follow-up iteration |
 
+### init → add Chaining + PRD Support
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| init → add chaining | init Phase 4 asks "Define Features now?" → Yes chains into add flow | Eliminates the extra step of running add separately after init. User experience matches the old init-then-pipeline flow |
+| add `--prd` argument | Per-invocation PRD path for Feature extraction (Phase 1 Type C) | Each add can reference a different requirements document. PRD is one-time input, not stored in sdd-state |
+| PRD auto-forwarding | init `--prd` passes the same path to chained add | PRD specified once at init, Feature extraction happens automatically in add without re-specifying |
+| init PRD vs add PRD | init extracts project meta (name, domain, stack); add extracts Feature candidates | Same document, different extraction targets — role separation is maintained |
+
 ### SBI Origin System
 
 | Decision | Choice | Rationale |

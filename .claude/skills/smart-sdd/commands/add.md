@@ -12,6 +12,12 @@ Running `/smart-sdd add` defines new Feature(s) through a **6-Phase collaborativ
 
 **Prerequisite**: `roadmap.md`, `entity-registry.md`, `api-registry.md`, and `sdd-state.md` must already exist at BASE_PATH.
 
+### Input Sources
+
+- **`--prd path/to/prd.md`**: Reads the PRD/requirements document and extracts Feature candidates (triggers Phase 1 Type C). Each `add` invocation can reference a different PRD.
+- **Conversational input** (default): Gathers Feature information through interactive Q&A (Phase 1 Type A/B/D)
+- **Chained from init**: When init chains into add, the same `--prd` path is automatically passed if it was provided to init
+
 ---
 
 ## 6-Phase Overview
@@ -56,14 +62,16 @@ Phase 6 → Generate final artifacts → DELETE specs/add-draft.md
 
 ### 1a. User Readiness Detection
 
-Observe the user's initial input to determine their readiness level:
+Determine the readiness level from the user's input and `--prd` argument:
 
 | Type | Signal | Approach |
 |------|--------|----------|
 | **A: Vague idea** | "I want something for notifications" | Guided brainstorming — ask clarifying questions to shape the Feature |
 | **B: Specific requirements** | "I need push + email notifications with user preferences" | Structured confirmation — organize into Feature structure |
-| **C: PRD/document** | User provides a document path or pastes structured requirements | Document parsing — extract Features from the document, confirm with user |
+| **C: PRD/document** | `--prd` argument provided, or user pastes structured requirements | Document parsing — extract Feature candidates from the document, confirm with user |
 | **D: Extend existing** | "I want to add search to the product Feature" | Reference existing Feature's spec.md/plan.md to understand current scope |
+
+**If `--prd` is provided**: Automatically enter Type C. Read the document, extract Feature candidates (name, description, capabilities, dependencies), and present for user confirmation/adjustment.
 
 ### 1b. Information Gathering
 
@@ -84,6 +92,8 @@ Create `specs/add-draft.md` with the gathered information:
 
 ```markdown
 # Add Draft — [Date]
+
+Source: [PRD path if --prd was used, or "conversational"]
 
 ## Phase 1: Feature Candidates
 
