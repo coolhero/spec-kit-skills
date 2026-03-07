@@ -648,3 +648,13 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 플랫폼 한계 명시 | Electron(❌ MCP 미지원), Tauri(❌ 불가), Flutter/RN Desktop(❌ 불가) 문서화 | Playwright MCP는 브라우저 자동화 전용. 데스크톱 앱에서 "demo 멈춤인데 verify 통과" 문제를 Playwright MCP로는 해결 불가 |
 | 데스크톱 앱 UI 검증 | Part 3 수동 체크리스트가 유일한 수단 | Playwright MCP 자동 검증 불가 → 수동 체크리스트 중요도 상승 |
 | 접근 방식 | A: 스택 기반 자동 모드 분기, B: 데스크톱 특화 체크리스트, C: Electron CDP 장기 대응 | A+B는 Part 0/3 구현 후 확장. C는 Playwright MCP 측 지원 필요로 우리 범위 밖 |
+
+---
+
+## [2026-03-07] TODO Part 8 — Implement-time Incremental Verification
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 근본 원인 진단 | implement 중 코드 미실행 + 자동 fix 루프 부재 | 코드 작성 → 최초 실행(verify Phase 3)까지 간격이 너무 크고, 실패 시 에이전트가 자동 수정하지 않음. 데모가 전혀 동작하지 않거나 런타임 에러 다수 발생 |
+| 4대 메커니즘 제안 | A: 태스크 레벨 빌드 검증, B: 데모 사전 실행, C: 자동 Fix 루프, D: 빌드 게이트 | A는 에러 조기 발견, B는 implement 완료 전 데모 1회 실행, C는 verify 실패 시 자동 수정(최대 3회), D는 implement → verify 전이 조건 |
+| 우선순위 | 높음 (현재 가장 큰 실사용 문제) | 실제 테스트에서 데모 동작 문제가 가장 빈번하게 보고됨 |
