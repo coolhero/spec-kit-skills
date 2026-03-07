@@ -415,6 +415,7 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 # Feature 추가 (범용 --- 모든 모드에서 사용)
 /smart-sdd add                           # 대화형으로 새 Feature 정의 및 추가
 /smart-sdd add --prd path/to/req.md      # 요구사항 문서에서 Feature 정의
+/smart-sdd add --gap                     # 갭 커버: 미매핑 SBI/패리티 갭에서 Feature 제안
 
 # SDD 도입 -- 기존 코드를 SDD 아티펙트로 문서화
 /smart-sdd adopt                        # 도입 파이프라인: specify → plan → analyze → verify
@@ -508,19 +509,20 @@ Phase 5: Demo Group          — Demo Group 배정
 Phase 6: 확정                — 아티펙트 생성, roadmap/sdd-state 갱신
 ```
 
-**적응형 컨설팅** (Phase 1): 사용자의 준비 수준을 감지하여 접근 방식을 조정합니다:
-- **막연한 아이디어** → 가이드 브레인스토밍
-- **구체적 요구사항** → 구조화 확인
-- **PRD/문서 제공** → 문서 파싱 + 검증
-- **기존 Feature 확장** → 현재 spec/plan 참조
+**3가지 진입 유형** (Phase 1): Feature 정의를 시작하는 방식에 맞춰 조정합니다:
+- **Type 1 — 문서 기반**: `--prd path/to/doc.md` → 문서 파싱, Feature 후보 추출
+- **Type 2 — 대화형**: 기본값 → 대화형 Q&A, 막연한 아이디어에서 구체적 정의까지 점진적 구체화
+- **Type 3 — 갭 커버**: `--gap` → 미매핑 SBI/패리티 갭 분석, 클러스터링으로 Feature 후보 자동 제안
 
-**중첩 보호** (Phase 2): Feature 기능 중복, 엔티티 소유권 충돌, API 경로 충돌을 방지합니다. 새 Feature가 constitution에 포함되지 않은 기술을 도입하는지도 체크합니다.
+세 가지 유형 모두 **공통 Elaboration 단계**로 수렴합니다. [Feature Elaboration Framework](/.claude/skills/smart-sdd/reference/feature-elaboration-framework.md)의 6가지 관점(사용자 & 목적, 기능, 데이터, 인터페이스, 품질, 경계)으로 정의를 평가합니다. 도메인별 추가 질문은 `domains/{domain}.md` § 5에서 로드됩니다.
 
-**SBI 확장** (Phase 4): rebuild/adoption 프로젝트에서 미매핑 소스 행위를 새 Feature에 매핑합니다. 사용자가 원본 소스에 없는 **NEW 행위**(Origin=`new`)를 정의할 수도 있습니다 — 이 항목은 원본 커버리지 메트릭을 오염시키지 않도록 별도 추적됩니다.
+**자동 갭 감지**: rebuild/adoption 프로젝트에서 `--prd`나 `--gap`이 지정되지 않았을 때 미매핑 소스 행위가 발견되면, 갭 커버 모드로 전환을 자동 제안합니다.
 
-**PRD 지원**: `--prd path/to/doc.md`로 요구사항 문서에서 Feature 후보를 추출할 수 있습니다. 매 `add` 호출마다 다른 PRD를 참조할 수 있습니다. `init --prd`에서 add로 체이닝 시 PRD 경로가 자동 전달됩니다.
+**중첩 보호** (Phase 2): Feature 기능 중복, 엔티티 소유권 충돌, API 경로 충돌을 방지합니다. 새 Feature가 constitution에 포함되지 않은 기술을 도입하는지도 체크합니다. "기존 Feature 확장" 감지도 여기서 흡수합니다 (이전에는 별도 유형이었음).
 
-**Init 체이닝**: `init`이 프로젝트 설정을 완료한 후 "Feature를 지금 정의하시겠습니까?"를 묻습니다. Yes면 add 흐름으로 직접 진입하여 `/smart-sdd add`를 별도로 실행할 필요가 없습니다. "나중에"를 선택하면 이후 독립적으로 add를 실행할 수 있습니다.
+**SBI 확장** (Phase 4): rebuild/adoption 프로젝트에서 미매핑 소스 행위를 새 Feature에 매핑합니다. 사용자가 원본 소스에 없는 **NEW 행위**(Origin=`new`)를 정의할 수도 있습니다 — 이 항목은 원본 커버리지 메트릭을 오염시키지 않도록 별도 추적됩니다. Type 3 Feature는 사전 매핑 상태로 도착합니다.
+
+**Init 체이닝**: `init`이 프로젝트 설정을 완료한 후 "Feature를 지금 정의하시겠습니까?"를 묻습니다. Yes면 add 흐름으로 직접 진입하여 `/smart-sdd add`를 별도로 실행할 필요가 없습니다.
 
 **세션 복원력**: 초안 파일(`specs/add-draft.md`)이 Phase 1-5 동안 유지됩니다. 세션이 중단되면 다음 `add` 호출 시 초안을 감지하여 이어가기 또는 새로 시작을 제안합니다.
 

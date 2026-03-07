@@ -516,19 +516,20 @@ Phase 5: Demo Group           — Assign to demo groups
 Phase 6: Finalization         — Create artifacts, update roadmap/sdd-state
 ```
 
-**Adaptive Consultation** (Phase 1): Detects how prepared the user is and adjusts accordingly:
-- **Vague idea** → guided brainstorming
-- **Specific requirements** → structured confirmation
-- **PRD/document provided** → document parsing + validation
-- **Extending existing Feature** → references current spec/plan
+**Three Entry Types** (Phase 1): Adapts to how you start Feature definition:
+- **Type 1 — Document-based**: `--prd path/to/doc.md` → parse document, extract Feature candidates
+- **Type 2 — Conversational**: Default → interactive Q&A, gradually elaborating from vague to specific
+- **Type 3 — Gap-driven**: `--gap` → analyze unmapped SBI/parity gaps, auto-propose Feature candidates from clusters
 
-**Overlap Protection** (Phase 2): Prevents Feature duplication, entity ownership conflicts, and API path collisions with existing Features. Also checks if the new Feature introduces technology not covered by the constitution.
+All three types converge on a **common Elaboration step** that evaluates the definition against six perspectives (User & Purpose, Capabilities, Data, Interfaces, Quality, Boundaries) using the [Feature Elaboration Framework](/.claude/skills/smart-sdd/reference/feature-elaboration-framework.md). Domain-specific probes are loaded from `domains/{domain}.md` § 5.
 
-**SBI Expansion** (Phase 4): For rebuild/adoption projects, maps unmapped source behaviors to the new Feature. Users can also define **NEW behaviors** (Origin=`new`) beyond the original source — these are tracked separately so they don't pollute original coverage metrics.
+**Auto Gap Detection**: For rebuild/adoption projects, if unmapped source behaviors are found when no `--prd` or `--gap` is specified, add automatically suggests switching to gap-driven mode.
 
-**PRD Support**: Use `--prd path/to/doc.md` to extract Feature candidates from a requirements document. Each `add` invocation can reference a different PRD. When `init --prd` chains into add, the PRD path is passed automatically.
+**Overlap Protection** (Phase 2): Prevents Feature duplication, entity ownership conflicts, and API path collisions with existing Features. Also checks if the new Feature introduces technology not covered by the constitution. Absorbs "extend existing Feature" detection (previously a separate type).
 
-**Init Chaining**: After `init` completes project setup, it prompts: "Define Features now?" If yes, it chains directly into the add flow — no need to run `/smart-sdd add` separately. The user can also choose "Later" and run add independently.
+**SBI Expansion** (Phase 4): For rebuild/adoption projects, maps unmapped source behaviors to the new Feature. Users can also define **NEW behaviors** (Origin=`new`) beyond the original source — these are tracked separately so they don't pollute original coverage metrics. Type 3 Features arrive pre-mapped.
+
+**Init Chaining**: After `init` completes project setup, it prompts: "Define Features now?" If yes, it chains directly into the add flow — no need to run `/smart-sdd add` separately.
 
 **Session Resilience**: A draft file (`specs/add-draft.md`) persists across Phases 1-5. If a session is interrupted, the next `add` invocation detects the draft and offers to resume or restart.
 

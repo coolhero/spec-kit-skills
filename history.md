@@ -419,6 +419,30 @@
 
 ---
 
+## [2026-03-07] Phase 1 Redesign — 3 Entry Types + Feature Elaboration Framework
+
+### Phase 1 Entry Type Redesign
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 3 entry types (was 4) | Type 1 (Document-based), Type 2 (Conversational), Type 3 (Gap-driven) | User-centric reframing: types differ only in HOW initial info is gathered. Old A+B merged into one spectrum (Type 2), old D absorbed by Phase 2 overlap check |
+| Type D → Phase 2 | "Extend existing Feature" detected by Phase 2 overlap check, not Phase 1 type | D was a modifier, not an independent entry type. Any type can result in extending an existing Feature — Phase 2 handles this uniformly |
+| Gap-driven type (Type 3) | New type for post-rebuild gap coverage (`--gap`) | Most important use case identified: rebuild completes but 13% functionality gap remains. Type 3 reverses the flow — starts from data (unmapped SBI/parity) instead of user intent |
+| Auto gap detection | If unmapped P1/P2 behaviors exist → suggest Type 3 | Explicit `--gap` for intentional use + auto-detection for discovery. Prevents users from accidentally ignoring significant gaps |
+| Type 3 → Phase 4 pre-mapping | Gap-driven Features arrive at Phase 4 pre-mapped | SBI selection already happened in Phase 1 (that's the entire basis of the Feature). Re-selecting in Phase 4 would be redundant |
+
+### Feature Elaboration Framework
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Common elaboration step | All 3 types converge on perspective-based evaluation after initial gathering | Types differ in entry, but quality evaluation should be uniform. Ensures every Feature definition meets the same minimum bar |
+| 6 perspectives | User & Purpose, Capabilities, Data, Interfaces, Quality, Boundaries | Covers all dimensions needed to scope a Feature. 1–4 required, 5–6 optional |
+| Separate reference document | `reference/feature-elaboration-framework.md` | Separates "what to evaluate" from "how to gather" (the add.md flow logic). Reusable and independently maintainable |
+| Domain extension via § 5 | `domains/{domain}.md` § 5 adds domain-specific probes | Base framework is domain-independent. Domain probes extend existing perspectives (not new ones). Follows established domain profile pattern (§ 1 Demo, § 2 Parity, § 3 Verify, § 4 Adoption, § 5 Elaboration) |
+| Bilingual example questions | Korean example questions in framework | Helps Korean-speaking users; maintains project's bilingual pattern |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge

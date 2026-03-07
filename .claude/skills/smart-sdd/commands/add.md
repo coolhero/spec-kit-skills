@@ -14,8 +14,9 @@ Running `/smart-sdd add` defines new Feature(s) through a **6-Phase collaborativ
 
 ### Input Sources
 
-- **`--prd path/to/prd.md`**: Reads the PRD/requirements document and extracts Feature candidates (triggers Phase 1 Type C). Each `add` invocation can reference a different PRD.
-- **Conversational input** (default): Gathers Feature information through interactive Q&A (Phase 1 Type A/B/D)
+- **`--prd path/to/prd.md`**: Reads the PRD/requirements document and extracts Feature candidates (triggers Phase 1 Type 1). Each `add` invocation can reference a different PRD.
+- **`--gap`**: Starts in gap-driven mode — analyzes unmapped SBI behaviors and parity gaps to auto-propose Feature candidates (triggers Phase 1 Type 3). Only meaningful for rebuild/adoption projects with SBI data.
+- **Conversational input** (default): Gathers Feature information through interactive Q&A (Phase 1 Type 2). Auto gap detection may suggest switching to Type 3 if unmapped behaviors are found.
 - **Chained from init**: When init chains into add, the same `--prd` path is automatically passed if it was provided to init
 
 ---
@@ -57,51 +58,138 @@ Phase 6 → Generate final artifacts → DELETE specs/add-draft.md
 
 ## Phase 1: Feature Definition (Adaptive Consultation)
 
-> Conversational phase — no scripts, no HARD STOP.
-> ※ Detailed adaptive consultation design is deferred to a follow-up iteration. Current implementation provides the framework.
+> Conversational phase — no HARD STOP.
+> Uses [feature-elaboration-framework.md](../reference/feature-elaboration-framework.md) for definition quality evaluation.
+> Uses `domains/{domain}.md` § 5 for domain-specific elaboration probes.
 
-### 1a. User Readiness Detection
+### 1a. Entry Detection + Auto Gap Suggestion
 
-Determine the readiness level from the user's input and `--prd` argument:
+Determine entry type from the user's input and arguments:
 
-| Type | Signal | Approach |
-|------|--------|----------|
-| **A: Vague idea** | "I want something for notifications" | Guided brainstorming — ask clarifying questions to shape the Feature |
-| **B: Specific requirements** | "I need push + email notifications with user preferences" | Structured confirmation — organize into Feature structure |
-| **C: PRD/document** | `--prd` argument provided, or user pastes structured requirements | Document parsing — extract Feature candidates from the document, confirm with user |
-| **D: Extend existing** | "I want to add search to the product Feature" | Reference existing Feature's spec.md/plan.md to understand current scope |
+| Type | Trigger | Approach |
+|------|---------|----------|
+| **Type 1: Document-based** | `--prd` provided, or user pastes structured document | Parse document → extract Feature candidates → confirm with user |
+| **Type 2: Conversational** | Default (no `--prd`, no `--gap`) | Gather Feature intent through interactive Q&A, gradually elaborating |
+| **Type 3: Gap-driven** | `--gap` flag, or auto-detected | Analyze SBI/parity gaps → auto-propose Feature candidates → user selects |
 
-**If `--prd` is provided**: Automatically enter Type C. Read the document, extract Feature candidates (name, description, capabilities, dependencies), and present for user confirmation/adjustment.
+**Auto gap detection** (when no `--gap` but project might have gaps):
+- Read `sdd-state.md` for Origin (`rebuild` or `adoption`)
+- Run `scripts/sbi-coverage.sh <project-root>` to check unmapped behaviors
+- If unmapped P1/P2 behaviors exist AND no `--prd` provided:
+  → Ask via AskUserQuestion: "Found N unmapped source behaviors. How would you like to proceed?"
+  - "Show me the gaps (Recommended)" → Switch to Type 3
+  - "I have a specific Feature in mind" → Continue as Type 2
+- **If response is empty → re-ask** (per MANDATORY RULE 1)
+- For greenfield projects (no SBI): skip detection, default to Type 2
 
-### 1b. Information Gathering
+### 1b. Initial Information Gathering (per type)
 
-Regardless of readiness type, collect:
+#### Type 1 — Document-based
 
-1. **Feature purpose**: What problem does this solve?
-2. **Key capabilities**: What should the user be able to do?
-3. **Entity hints**: What data does it manage? ("it needs user data", "it manages orders")
-4. **API hints**: What endpoints are needed? ("it calls the auth endpoint")
-5. **Dependency hints**: Which existing Features does it interact with?
-6. **UI hints** (if applicable): What pages or components are needed?
+1. Read the PRD/requirements document at the `--prd` path
+2. Extract Feature candidates: name, description, capabilities, expected entities, API hints, dependencies
+3. Present extracted candidates for user confirmation/adjustment:
+   ```
+   📋 Extracted from PRD: [filename]
 
-**Do NOT propose Feature structure yet** — just gather information.
+   Candidate 1: [Feature Name]
+     Description: [1-2 sentences]
+     Capabilities: [bullet list]
+     Entity hints: [entity names mentioned]
+     API hints: [endpoint hints]
 
-### 1c. Create Draft
+   Candidate 2: [if multiple]
+   ...
+
+   Please confirm, modify, or add to these candidates.
+   ```
+4. Apply user adjustments → proceed to Elaboration (1c)
+
+#### Type 2 — Conversational
+
+1. Ask the user to describe the Feature they want to add
+2. Listen for information across the six perspectives (see 1c) — purpose, capabilities, data, interfaces
+3. Iterate naturally: the user may provide a vague idea or specific requirements. Adapt:
+   - **Vague** ("I want notifications"): Ask clarifying questions to shape the Feature
+   - **Specific** ("push + email notifications with user preferences"): Organize into structured candidate
+4. When enough initial context is gathered → proceed to Elaboration (1c)
+
+#### Type 3 — Gap-driven
+
+1. Run `scripts/sbi-coverage.sh <project-root>` for full coverage view
+2. If `parity-report.md` exists at BASE_PATH: read gap areas for additional context
+3. Cluster unmapped behaviors by domain/function (using behavior descriptions and source file proximity)
+4. Auto-propose Feature candidates from clusters:
+   ```
+   📋 Gap Analysis — Unmapped Source Behaviors
+
+   ── Cluster 1: Notification System ──────────────
+     B023 | P2 | sendEmail() — Send email via SMTP
+     B024 | P2 | formatNotification() — Template rendering
+     B031 | P3 | scheduleDelivery() — Delayed notification
+     → Suggested Feature: F009-notifications (3 behaviors)
+
+   ── Cluster 2: Report Generation ────────────────
+     B040 | P2 | generateReport() — PDF report creation
+     B041 | P2 | exportCSV() — CSV data export
+     → Suggested Feature: F010-reports (2 behaviors)
+
+   ── Unclustered ─────────────────────────────────
+     B045 | P3 | cleanupTempFiles() — Temp file cleanup
+     → Could be: standalone Feature or part of existing Feature
+
+   Select, modify, or reject these proposals.
+   ```
+5. User selects/modifies/rejects proposals
+6. Proceed to Elaboration (1c)
+
+**Type 3 → Phase 4 optimization**: Features built from SBI entries arrive at Phase 4 **pre-mapped**. Phase 4 confirms the mapping and allows expansion (NEW B### entries) only — no re-selection needed.
+
+### 1c. Elaboration (COMMON — all types converge here)
+
+After initial gathering, evaluate the Feature definition against the **Feature Elaboration Framework**:
+
+1. **Load framework**: Read `reference/feature-elaboration-framework.md` for the six base perspectives
+2. **Load domain probes**: Read `domains/{domain}.md` § 5 for domain-specific probes (if present)
+3. **Assess coverage**: Score each perspective for the current definition:
+   - **Covered**: Sufficient information to proceed
+   - **Partial**: Some info, but key gaps remain
+   - **Missing**: No information provided
+4. **Elaborate gaps**: Ask targeted questions for REQUIRED perspectives (1–4) with partial/missing coverage. Merge domain-specific probes into the relevant base perspectives.
+5. **Acknowledge optional**: For perspectives 5–6, record "TBD" if not discussed
+
+**Strategy**:
+- Batch 2–3 related questions — don't overwhelm the user
+- Use what you already have — if a document was provided, extract maximum info before asking
+- **Type 1**: Document likely covers Perspectives 1–4 well; focus on confirming + filling 5–6
+- **Type 2**: Start with Perspective 1 (who/why), build incrementally
+- **Type 3**: SBI behaviors provide Perspectives 2–3 automatically; focus on 1 (user scenarios) and 4 (interfaces)
+
+**Completion criteria**: Perspectives 1–4 each have at least basic coverage (see framework's Completion Criteria table).
+
+**Do NOT propose Feature structure yet** — just ensure the definition is rich enough to scope in Phase 3.
+
+### 1d. Create Draft
 
 Create `specs/add-draft.md` with the gathered information:
 
 ```markdown
 # Add Draft — [Date]
 
-Source: [PRD path if --prd was used, or "conversational"]
+Source: [PRD path / conversational / gap-analysis]
+Entry type: [Type 1 / Type 2 / Type 3]
 
 ## Phase 1: Feature Candidates
 
 ### Candidate 1: [Feature Name]
 - **Description**: [1-2 sentence description]
-- **Key capabilities**: [bullet list]
-- **Estimated entities**: [entity names mentioned]
-- **Estimated APIs**: [endpoint hints]
+- **User & Purpose**: [actors, problem, key scenarios]
+- **Capabilities**: [bullet list of concrete capabilities]
+- **Data**: [owned entities, referenced entities, key attributes]
+- **Interfaces**: [APIs provided/consumed, UI touchpoints, integrations]
+- **Quality notes**: [performance, security concerns — or "TBD"]
+- **Boundaries**: [exclusions, assumptions, constraints — or "TBD"]
+- **SBI pre-mapping**: [B### IDs if Type 3, or "N/A"]
 - **Estimated dependencies**: [Feature IDs]
 
 ### Candidate 2: [if multiple]
@@ -110,7 +198,15 @@ Source: [PRD path if --prd was used, or "conversational"]
 ## Status: Phase 1 complete
 ```
 
-**Transition**: When the user has provided enough context and the draft is created, move to Phase 2. The user does not need to explicitly approve — this phase is exploratory.
+**Transition**: Move to Phase 2. The user does not need to explicitly approve — this phase is exploratory.
+
+### Existing Feature Extension
+
+When the user describes extending an existing Feature (e.g., "add 2FA to F001-auth"):
+- This is NOT a separate entry type — the user enters via Type 2 (Conversational) or Type 1 (if they have a document)
+- During Elaboration (1c), reference the existing Feature's `spec.md` and `plan.md` to understand current scope
+- Phase 2 (Overlap Check) will detect the overlap and propose: merge into existing Feature vs. create new Feature
+- The user decides in Phase 2, not Phase 1
 
 ---
 
@@ -520,6 +616,7 @@ If Phase 3 proposes multiple Features:
 
 ### Greenfield Projects (First Features)
 
+- Phase 1 auto gap detection is skipped (no SBI data). `--gap` flag is ignored with a notice.
 - Phase 2 overlap check is skipped (no existing Features to overlap with)
 - Phase 4 (SBI Match) is skipped entirely — no source behaviors to match
 - Phase 5 proposes creating the initial Demo Groups

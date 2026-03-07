@@ -60,3 +60,38 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 
 > Defined in `commands/adopt.md` (pipeline flow) and `reference/injection/adopt-verify.md` (non-blocking verify).
 > Key differences: test/build/lint failures are non-blocking (recorded as baseline), demo is optional, Feature status is `adopted` (not `completed`).
+
+---
+
+## 5. Feature Elaboration Probes
+
+> Domain-specific additions to the base [Feature Elaboration Framework](../reference/feature-elaboration-framework.md).
+> These probes extend the six base perspectives with app-domain concerns.
+
+### Perspective 2 (Capabilities) — Additional Probes
+
+| Sub-domain | Probe Questions |
+|------------|----------------|
+| **Authentication & Authorization** | Who can access this? Role-based? Token-based? Session management needed? |
+| **CRUD lifecycle** | What are the create/read/update/delete operations? Soft delete or hard delete? Audit trail? |
+| **Validation** | Input validation rules? Server-side vs client-side? Error message format? |
+| **Pagination & Search** | List views need pagination? Search/filter capabilities? Sort options? |
+| **File handling** | File upload/download? Size limits? Allowed formats? Storage location? |
+
+### Perspective 4 (Interfaces) — Additional Probes
+
+| Sub-domain | Probe Questions |
+|------------|----------------|
+| **REST conventions** | Resource naming? HTTP methods? Status codes? Versioning strategy? |
+| **Real-time** | WebSocket/SSE needed? What events? Reconnection handling? |
+| **Frontend routing** | New pages/routes? Navigation integration? Protected routes? |
+| **Middleware** | Request middleware needed? (auth, logging, rate limiting, CORS) |
+
+### Perspective 5 (Quality) — Additional Probes
+
+| Sub-domain | Probe Questions |
+|------------|----------------|
+| **Concurrency** | Race conditions possible? Optimistic locking? Idempotency keys? |
+| **Caching** | Cache strategy? Invalidation? TTL? |
+| **Observability** | Logging requirements? Metrics? Health check endpoint? |
+| **Data migration** | Schema changes needed? Migration strategy? Backward compatibility? |

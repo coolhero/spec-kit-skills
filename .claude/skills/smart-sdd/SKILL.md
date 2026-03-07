@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
+argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
@@ -50,6 +50,7 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 # Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
 /smart-sdd add --prd path/to/requirements.md  # Define from a PRD/requirements document
+/smart-sdd add --gap                     # Gap-driven: cover unmapped SBI/parity gaps
 
 # Adoption — Wrap existing code with SDD documentation (after reverse-spec)
 /smart-sdd adopt                         # Adopt existing code with SDD docs
@@ -136,7 +137,8 @@ $ARGUMENTS parsing rules:
   First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
   --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
-  --prd <path>    → Path to PRD document (only for init command)
+  --prd <path>    → Path to PRD document (for init and add commands)
+  --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
   --auto          → Skip Checkpoint confirmation and execute all steps automatically
   --domain <val>  → Project domain profile: "app" (default). Determines demo pattern, parity dimensions, and verify steps
