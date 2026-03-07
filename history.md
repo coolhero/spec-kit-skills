@@ -638,3 +638,13 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 감지 로직 간소화 | 3단계 → 2단계: `Playwright MCP 있음 → 자동` / `없음 → 수동 체크리스트` | Claude in Chrome 등 다른 browser MCP 대응 제거. Playwright MCP 하나로 통일하면 구현량도 줄어듦 |
 | 미결정 사항 정리 | "Browser MCP 종류별 tool name 표준화" 항목 삭제 | Playwright MCP 단일화로 문제 자체가 해소됨 |
 | constitution 질문 | "Browser MCP 자동 검증" → "Playwright MCP 자동 검증" | UI Verify Mode 값도 `browser-mcp` → `playwright-mcp`로 변경 |
+
+---
+
+## [2026-03-07] TODO Part 7 — Playwright MCP 데스크톱 앱 플랫폼 한계
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 플랫폼 한계 명시 | Electron(❌ MCP 미지원), Tauri(❌ 불가), Flutter/RN Desktop(❌ 불가) 문서화 | Playwright MCP는 브라우저 자동화 전용. 데스크톱 앱에서 "demo 멈춤인데 verify 통과" 문제를 Playwright MCP로는 해결 불가 |
+| 데스크톱 앱 UI 검증 | Part 3 수동 체크리스트가 유일한 수단 | Playwright MCP 자동 검증 불가 → 수동 체크리스트 중요도 상승 |
+| 접근 방식 | A: 스택 기반 자동 모드 분기, B: 데스크톱 특화 체크리스트, C: Electron CDP 장기 대응 | A+B는 Part 0/3 구현 후 확장. C는 Playwright MCP 측 지원 필요로 우리 범위 밖 |
