@@ -111,13 +111,21 @@ Parse milestone entries (M1-M8):
 
 > **history.md is the richest source of decision context**. The case-study report should reflect all significant decisions recorded here. Section 2 uses strategy/Project Context, Section 4 uses architecture/stack/constitution, Section 5 uses per-Feature decisions, Section 7 uses decisions that resolved challenges, Section 8 uses pivotal decisions that shaped outcomes.
 
-### 3-8. From SBI Coverage (if exists in sdd-state.md)
+### 3-8. From stack-migration.md (if exists)
+- Migration strategy (same stack vs new stack)
+- Per-category stack choices table: Category, Original, Chosen, Rationale
+- Dependency chain analysis (if documented)
+- Migration risks and mitigations
+
+> **Note**: Some stack migration data also appears in history.md (Strategy Decisions, Per-Category Stack Choices). If both sources exist, stack-migration.md provides the detailed per-category breakdown while history.md provides decision rationale. Use both for Section 4.
+
+### 3-9. From SBI Coverage (if exists in sdd-state.md)
 - Parse Source Behavior Coverage table
 - Count per priority: P1 total/verified, P2 total/verified, P3 total/verified
 - Overall coverage percentage
 - List of unmapped (❌) and deferred (🔒) entries
 
-### 3-9. From case-study-log.md header
+### 3-10. From case-study-log.md header
 - Extract `**Domain**:` field (e.g., `app`, `data-science`)
 - Fallback: read domain from sdd-state.md if not in log header
 - Use in Section 1 Executive Summary

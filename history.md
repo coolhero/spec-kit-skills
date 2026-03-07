@@ -730,3 +730,15 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | L2: restructured 예시 | status.md 출력 예시에 restructured 상태 + 🔀 표기 추가 | restructured가 가능한 상태이나 예시에 미포함 |
 | L5: speckit-diff AskUserQuestion | allowed-tools에서 미사용 AskUserQuestion 제거 | read-only 분석 스킬에 불필요 |
 | L6: speckit-diff read-only | "Read-only analysis" → "Non-destructive analysis"로 수정, --output 쓰기 설명 추가 | --output 파일 쓰기와 "read-only" 주장이 모순 |
+
+---
+
+## [2026-03-08] case-study 간소화 — init 제거 + generate 단일 명령
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| init 서브커맨드 제거 | `commands/init.md` 삭제, SKILL.md 라우팅 제거 | case-study-log.md는 `/reverse-spec`, `/smart-sdd init`, `/smart-sdd pipeline` 3곳에서 자동 생성. init은 중복이며, 사용자가 수동으로 init을 실행할 이유가 없음 |
+| argument-hint 간소화 | `"[init\|generate] [target-directory] [--lang en\|ko]"` → `"[target-directory] [--lang en\|ko]"` | 서브커맨드 없이 바로 generate 실행. 사용 편의성 향상 |
+| allowed-tools 변경 | `AskUserQuestion` 제거, `Bash` 추가 | init이 유일한 AskUserQuestion 사용처(기존 로그 덮어쓰기 확인). Bash는 타임스탬프 생성(`date` 명령) 등에 필요 |
+| M7: stack-migration.md 추출 단계 | generate.md Step 3에 3-8 (From stack-migration.md) 추가 | Step 2 아티팩트 발견에 등록되어 있었으나 Step 3 추출 단계가 누락. history.md와의 데이터 관계도 명시 |
+| 템플릿/프로토콜 유지 | `templates/`, `reference/` 디렉토리는 그대로 유지 | reverse-spec, smart-sdd가 case-study-log.md 자동 생성 시 템플릿/프로토콜을 참조하므로 삭제 불가 |

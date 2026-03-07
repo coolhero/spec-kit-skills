@@ -1,8 +1,8 @@
 ---
 name: case-study
 description: Generates a Case Study report from reverse-spec and smart-sdd execution artifacts. Aggregates quantitative metrics from project artifacts and qualitative observations from the case study log.
-argument-hint: "[init|generate] [target-directory] [--lang en|ko]"
-allowed-tools: [Read, Grep, Glob, Write, AskUserQuestion]
+argument-hint: "[target-directory] [--lang en|ko]"
+allowed-tools: [Read, Grep, Glob, Write, Bash]
 ---
 
 # Case Study: SDD Workflow Report Generator
@@ -29,15 +29,11 @@ Generates a structured Case Study report from the artifacts produced by `/revers
 
 ```
 $ARGUMENTS parsing rules:
-  "init"            → Sub-command: read `commands/init.md` and execute its workflow. Stop here.
-  "generate"        → Sub-command: read `commands/generate.md` and execute its workflow. Stop here.
   First token       → target-directory (optional, defaults to CWD). If it looks like a path.
   --lang <en|ko>    → Output language (default: "en")
 ```
 
-If the first argument is `init`, read `commands/init.md` and execute its workflow.
-If the first argument is `generate`, read `commands/generate.md` and execute its workflow.
-Otherwise, after parsing arguments, read `commands/generate.md` and execute its workflow (default).
+After parsing arguments, read `commands/generate.md` and execute its workflow.
 
 ---
 
