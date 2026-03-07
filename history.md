@@ -554,3 +554,32 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 |----------|--------|-----------|
 | 3 additional re-ask enforcement | Inline at each location | Same pattern as initial 13-location fix |
 | recording-protocol.md paths | Kept as-is | Relative paths verified correct via filesystem test |
+
+---
+
+## [2026-03-07] Real-World Usage Audit — Pipeline Behavior Fixes + Case Study Enhancement
+
+### Pipeline Behavior Fixes (from actual usage observations)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Fallback message enhancement | Added next-step preview to pipeline/adopt pause messages | User typing "continue" had no idea what would happen next |
+| FR→Task coverage severity split | FR with 0 tasks = CRITICAL (blocking), FR with partial = HIGH (non-blocking) | 100% enforcement was too strict for partial coverage; zero-coverage is genuinely dangerous |
+| Runtime error scan in Phase 3 | Scan stdout/stderr for TypeError, fatal, unhandled rejection etc. | Demo health check only checked HTTP 200 on Vite port while Electron main process had fatal errors — false pass |
+| Feature ID ordering | Defer ID assignment until after Release Groups + Tiers determined (Phase 3-2b) | IDs were assigned by topological sort before Release Groups, causing F001→F004 skip in pipeline execution |
+| User testing pause | HARD STOP after each Feature completion: "Proceed" or "Test first" | Pipeline immediately proceeded to next Feature without giving user time to test |
+| quickstart.md reference | Added to implement/verify Read Targets; demo scripts must follow quickstart.md run instructions | Demo creation and verification were disconnected from spec-kit's authoritative run instructions |
+| history.md Project Context | Rebuild/adoption records original→target conversion as permanent header | New sessions couldn't quickly understand what was being rebuilt from what |
+
+### Case Study Enhancement — Business Context + history.md Integration
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| M1 "What it does" | Added business purpose field to recording protocol + log template | Case study reports were metric-heavy but lacked the "what was built" narrative |
+| M6 "Delivers" | Added user-facing capability field to recording protocol | Per-Feature outcomes had FR/SC counts but no user-perspective description |
+| history.md "What it does" | Added to Project Context block (rebuild + adoption) | Permanent record of system purpose; available even without case-study-log |
+| Per-Feature Decision History recording | Pipeline records notable implementation decisions to history.md after merge | history.md only had strategic decisions; pipeline-level choices were lost |
+| generate.md Section 1 System Overview | Pulls from history.md > M1 > roadmap.md (priority order) | Executive Summary needs the "what" narrative, not just metrics |
+| generate.md Section 2 structured | Project Context table + Strategic Decisions + Anticipated Challenges | Background section was unstructured; now has clear subsections from history.md |
+| generate.md Section 8 Impact Assessment | Before vs After comparison table + "What was delivered" from M6 entries | Outcomes section lacked concrete before/after impact measurement |
+| history.md as primary case-study source | Added guidance note: "history.md is the richest source of decision context" | Multiple sections (2,4,5,7,8) should pull from history.md; previously underutilized |
