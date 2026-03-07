@@ -533,8 +533,9 @@ Running `/smart-sdd analyze [FID]` executes `speckit-analyze` to verify cross-ar
 **Workflow**:
 1. Execute `speckit-analyze` via the Common Protocol (Assemble → Checkpoint → Execute+Review → Update)
 2. Review the analysis report:
-   - If **CRITICAL** issues exist: Block implementation. The user must resolve them first (re-run specify, plan, or tasks as needed)
-   - If only **HIGH/MEDIUM/LOW** issues: Display findings, user may proceed or address them
+   - If **CRITICAL** issues exist (including FR with zero mapped tasks): Block implementation. The user must resolve them first (re-run specify, plan, or tasks as needed)
+   - If **HIGH** issues exist (including FR with partial task coverage): Strongly recommend addressing, but user may override and proceed
+   - If only **MEDIUM/LOW** issues: Display findings, user may proceed or address them
 3. Record analysis results in `sdd-state.md`
 
 **Prerequisite**: `tasks.md` must exist for the Feature (`speckit-analyze` requires all three artifacts: spec.md, plan.md, tasks.md)

@@ -26,6 +26,24 @@ speckit-analyze will check consistency across spec.md, plan.md, and tasks.md.
 Do you want to proceed?
 ```
 
+## Coverage Severity Rules
+
+FR→Task coverage gaps are classified by the following severity rules:
+
+| Situation | Severity | Blocking? |
+|-----------|----------|-----------|
+| FR has **zero** mapped tasks | **CRITICAL** | ✅ BLOCKS implement — requirement will be entirely missed |
+| FR has task(s) but **partial** coverage (sub-aspect not explicit) | **HIGH** | ❌ Non-blocking — strongly recommended to fix, user can override |
+| All FRs fully covered | — | — |
+
+**Zero-task CRITICAL rule**: If any FR-### has no task mapped to it at all, this is a CRITICAL issue. The analyze step MUST block implementation until the user either:
+- Adds a task covering the requirement, or
+- Removes/merges the FR into another requirement
+
+**Partial-coverage HIGH rule**: If an FR has task(s) but a specific sub-aspect isn't explicitly mentioned in any task description, this is HIGH severity. The user is strongly encouraged to update the task description or add a sub-task, but may proceed.
+
+---
+
 ## Review Display Content
 
 After `speckit-analyze` completes:
@@ -49,13 +67,19 @@ After `speckit-analyze` completes:
 
 ── CRITICAL Issues (if any) ─────────────────────
 [List each CRITICAL finding with location and recommendation.
- These MUST be resolved before proceeding to implement.]
+ These MUST be resolved before proceeding to implement.
+ Includes: FR with zero mapped tasks, constitution violations, etc.]
 
-── HIGH/MEDIUM Issues (if any) ──────────────────
-[List significant findings. User may proceed but should consider addressing.]
+── HIGH Issues (if any) ─────────────────────────
+[List HIGH findings. Strongly recommended to address before proceeding.
+ Includes: FR with partial task coverage.]
+
+── MEDIUM/LOW Issues (if any) ──────────────────
+[List remaining findings. User may proceed but should consider addressing.]
 
 ── Coverage Gaps ────────────────────────────────
-[Requirements with no tasks, tasks with no requirements]
+[Requirements with no tasks (CRITICAL), partial coverage (HIGH),
+ tasks with no requirements]
 
 ── Constitution Alignment ───────────────────────
 [Any violations of constitution principles]
@@ -63,7 +87,7 @@ After `speckit-analyze` completes:
 ──────────────────────────────────────────────────
 ```
 
-**If CRITICAL issues exist**:
+**If CRITICAL issues exist** (including FR with zero tasks):
 - Display: "❌ CRITICAL issues found. These must be resolved before implementation."
 - Do NOT allow proceeding to implement until CRITICAL issues are addressed
 
