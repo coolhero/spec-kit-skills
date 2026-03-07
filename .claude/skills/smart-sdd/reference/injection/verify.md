@@ -19,6 +19,7 @@
 | `BASE_PATH/entity-registry.md` | Entities modified by the Feature | Change tracking |
 | `BASE_PATH/api-registry.md` | APIs modified by the Feature | Change tracking |
 | `SPEC_PATH/[NNN-feature]/spec.md` | FR-### list | For behavior completeness cross-reference |
+| `SPEC_PATH/[NNN-feature]/quickstart.md` | Entire file | **If exists** — authoritative run instructions for demo verification |
 | `SPEC_PATH/[NNN-feature]/` | data-model.md, contracts/ | Actual implementation results |
 
 ## Injected Content

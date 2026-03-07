@@ -39,7 +39,7 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 1. Ask for the reason (e.g., "Tests require external service not available", "Build depends on Feature B not yet merged", "DB migration requires completed Feature C")
 2. Record in `sdd-state.md` Feature Detail Log → verify row Notes: `⚠️ LIMITED — [reason]`
 3. Set the verify step icon to `⚠️` (not ✅) in Feature Progress
-4. Proceed to Phase 2 — but the merge step will display a reminder that this Feature has limited verification
+4. **Proceed to Phase 2 AND Phase 3 sequentially** — Phase 1 limited-acknowledge does NOT skip subsequent phases. All phases (2, 3, 4) MUST still execute. The merge step will display a reminder that this Feature has limited verification.
 5. **This is NOT a skip** — the limitation is tracked and visible in status reports
 
 > **Build prerequisites**: If the build fails due to missing setup steps (e.g., `pnpm approve-builds`, native module compilation), include the specific prerequisite command in the error message so the user knows what to run.
@@ -74,6 +74,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).
+> **quickstart.md reference**: If `specs/{NNN-feature}/quickstart.md` exists, use it as the authoritative source for how the Feature should be launched and verified. The demo script must follow quickstart.md's run instructions.
 
 **Step 1 — Check demo script exists AND is a real demo (NOT markdown, NOT test-only)**:
 - Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
