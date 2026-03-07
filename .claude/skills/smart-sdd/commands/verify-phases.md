@@ -120,7 +120,9 @@ Before running the demo, **read the demo script source** and verify:
 > **Why this matters**: A demo that passes CI but fails for the user is worse than no CI check at all. Example: CI checks "frontend build" → passes. User runs the demo → `tauri: command not found`. The CI check gave false confidence.
 
 **Step 5 — Execute the demo in CI mode (`--ci`)**:
-- Run `demos/F00N-name.sh --ci` and verify it completes without errors (health check passes)
+- Run `demos/F00N-name.sh --ci` and verify it completes without errors
+- The demo script's CI mode MUST include a **stability window** (~10 seconds) between the initial health check and exit — verify the script includes this (see demo-standard.md template)
+- If the demo script lacks a stability window (exits immediately after first health check), **WARN** and recommend updating the script to include one
 - Capture the demo output (stdout/stderr) for the Review display
 - **Runtime error scan (BLOCKING)**: After demo execution, scan the captured stdout/stderr for runtime error patterns:
   - `"level":"error"` or `"level":"fatal"` (structured log errors)

@@ -71,8 +71,16 @@ echo "Starting [Feature Name]..."; # [start server in background]
 curl -sf http://localhost:3000/health || { echo "❌ Health check failed"; exit 1; }
 echo "✅ [Service] running"
 
-# ⚠️ CI exit MUST be AFTER startup + health check — never before.
-if [ "$CI_MODE" = true ]; then echo "=== CI health check passed ==="; exit 0; fi
+# ─── Stability Window (CI only) ───
+# Wait briefly after startup to catch crash-after-start, hangs, and delayed errors.
+if [ "$CI_MODE" = true ]; then
+  echo "Stability check (10s)..."
+  sleep 10
+  # Re-check: is the process still alive and responding?
+  curl -sf http://localhost:3000/health || { echo "❌ Stability check failed — app crashed after startup"; exit 1; }
+  echo "=== CI health + stability check passed ==="
+  exit 0
+fi
 
 # ─── Interactive: Try it ───
 echo "🎯 [Feature Name] is live!"
@@ -88,10 +96,12 @@ wait || true
 - **The demo shows the real, working Feature** — not just assertions. Running the script launches the Feature so the user can experience it firsthand
 - The script must be executable (`chmod +x`) and self-contained
 - **Default = interactive**: The script launches the Feature and keeps it running. The user interacts with it via browser, curl, CLI, etc.
-- **`--ci` flag**: For `verify` Phase 3 automation — runs setup + health check, then exits. No user interaction needed
-- **⚠️ CI/Interactive path convergence (CRITICAL)**: CI mode MUST execute the **same startup commands** as interactive mode. The `if [ "$CI_MODE" = true ]; then exit 0; fi` line must come **AFTER** the Feature is actually started and health-checked — never before. If CI mode takes a shortcut (e.g., only checks the build without running `npm run dev` / `tauri dev`), the CI check becomes meaningless: it can pass while the actual demo fails.
-  - ✅ CORRECT: Start Feature → health check → `if CI then exit` → interactive instructions → wait
+- **`--ci` flag**: For `verify` Phase 3 automation — runs setup + health check + stability window, then exits. No user interaction needed
+- **⚠️ CI/Interactive path convergence (CRITICAL)**: CI mode MUST execute the **same startup commands** as interactive mode. The CI exit point must come **AFTER** the Feature is actually started, health-checked, AND stability-verified — never before. If CI mode takes a shortcut (e.g., only checks the build without running `npm run dev` / `tauri dev`), the CI check becomes meaningless: it can pass while the actual demo fails.
+  - ✅ CORRECT: Start Feature → health check → **stability window (10s)** → re-check → `exit 0`
   - ❌ WRONG: Build check → `if CI then exit` → Start Feature → interactive instructions → wait
+  - ❌ WRONG: Start Feature → health check → `exit 0` immediately (no stability window — misses crash-after-startup)
+- **Stability window**: After initial health check, CI mode waits ~10 seconds then re-checks health. This catches applications that start successfully but crash or hang shortly after startup (e.g., event loop blocking, resource exhaustion, delayed initialization failure)
 - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Use ⬜ for items that can't be demoed
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
