@@ -379,6 +379,37 @@
 
 ---
 
+## [2026-03-07] add v3 Redesign — Universal Feature Definition + init Slimming
+
+### Universal Feature Definition via `add`
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Universal feature definition | `add` handles all modes (greenfield, incremental, rebuild) | init's Feature definition and add's Feature definition were redundant — unifying through add ensures consistent quality across all modes |
+| init slimming | init = project setup + constitution only (no Feature definition) | Feature definition delegated to add; init becomes lightweight. Phase count: 5 → 4 |
+| Greenfield flow change | `init` → `add` → `pipeline` (was: `init` → `pipeline`) | Users define Features via add after init sets up the project skeleton |
+
+### add v3 6-Phase Flow
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Draft file lifecycle | `specs/add-draft.md` created at Phase 1, deleted at Phase 6 | Enables session resume on interruption; provides inter-Phase data transfer. If file exists on next add invocation, offer resume or restart |
+| Overlap checking (Phase 2) | Analyze Feature duplication, entity ownership conflict, API path overlap | Prevents defining Features that duplicate or conflict with existing ones. Skipped for first greenfield Feature |
+| Constitution impact check | Embedded in Phase 2 as conditional lightweight check | Not worth a separate Phase — only fires when new technology/patterns detected. Displays warning + suggests `/smart-sdd constitution` update |
+| SBI expansion (Phase 4) | Users can define NEW B### entries beyond original source | Original SBI only covers extracted behaviors; add-mode Features may introduce entirely new capabilities. NEW entries tagged with Origin=`new` to prevent original coverage metric pollution |
+| Conditional FR drafts | SBI-mapped behaviors → FR draft in pre-context; no SBI → description only | Optimizes pre-context information density. Greenfield Features without SBI get leaner pre-context |
+| Adaptive consultation (Phase 1) | 4 readiness types (A: vague, B: specific, C: PRD, D: extend existing) | Framework defined, detailed implementation deferred to follow-up iteration |
+
+### SBI Origin System
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Origin column | Added `Origin` column (`extracted` / `new`) to SBI Coverage table | Distinguishes behaviors from original source vs. user-defined new behaviors |
+| Separate metrics | NEW entries excluded from P1/P2/P3 extracted coverage percentages | P1 100% mandate applies only to original source behaviors; NEW behaviors tracked separately |
+| sbi-coverage.sh backward compat | Auto-detect Origin column presence; legacy format = all extracted | Existing projects without Origin column continue to work unchanged |
+
+---
+
 ## Recurring Patterns
 
 ### Cross-File Consistency Challenge

@@ -164,21 +164,24 @@ Parity check execution history. Recorded when `/smart-sdd parity` is executed. O
 
 ## Source Behavior Coverage
 
-Tracks mapping from Source Behavior Inventory (SBI) entries to Functional Requirements. Only populated for projects with Origin `rebuild` or `adoption` (greenfield has no SBI).
+Tracks mapping from Source Behavior Inventory (SBI) entries to Functional Requirements. Populated for projects with Origin `rebuild` or `adoption`, and also when `/smart-sdd add` creates NEW behaviors.
 
-| SBI | Priority | FR | Feature | Status |
-|-----|----------|----|---------|--------|
-| B001 | P1 | FR-001 | F001-auth | ✅ verified |
-| B002 | P2 | FR-002 | F001-auth | ✅ verified |
-| B003 | P2 | — | — | ❌ unmapped |
-| B004 | P1 | FR-005 | F002-product | 🔄 in_progress |
-| B005 | P3 | — | — | 🔒 deferred |
+| SBI | Priority | Origin | FR | Feature | Status |
+|-----|----------|--------|----|---------|--------|
+| B001 | P1 | extracted | FR-001 | F001-auth | ✅ verified |
+| B002 | P2 | extracted | FR-002 | F001-auth | ✅ verified |
+| B003 | P2 | extracted | — | — | ❌ unmapped |
+| B004 | P1 | extracted | FR-005 | F002-product | 🔄 in_progress |
+| B005 | P3 | extracted | — | — | 🔒 deferred |
+| B050 | P2 | new | FR-003 | F009-notif | 🔄 in_progress |
 
-**Summary:**
+**Summary (extracted only — original source coverage):**
 P1: 15/15 (100%) ✅
 P2: 22/28 (79%) ⚠️
 P3: 5/12 (42%)
 Overall: 42/55 (76%)
+
+**NEW behaviors:** 1 total (0 verified, 1 in_progress)
 
 ### SBI Status Values
 - `✅ verified` : Mapped to FR-###, Feature verify passed
@@ -186,10 +189,15 @@ Overall: 42/55 (76%)
 - `❌ unmapped` : No FR-### mapping exists yet
 - `🔒 deferred` : Outside current Active Tiers (core scope only)
 
+### SBI Origin Values
+- `extracted` : Behavior extracted from original source code during `/reverse-spec` Phase 2/4
+- `new` : Behavior defined by user during `/smart-sdd add` Phase 4 (not present in original source)
+
 ### Coverage Policy
-- **P1 behaviors: 100% coverage mandatory** regardless of scope mode
+- **P1 behaviors: 100% coverage mandatory** regardless of scope mode (applies to Origin=`extracted` only)
 - P2/P3 not in Active Tiers → `deferred` status
 - After Core completion, deferred items become incremental candidates
+- **NEW entries** (Origin=`new`): Tracked separately from original source coverage metrics. They do NOT affect the extracted P1/P2/P3 percentages. NEW coverage is reported as a separate "NEW behaviors" line
 
 ---
 

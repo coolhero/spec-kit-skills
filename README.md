@@ -62,7 +62,8 @@ This means `/speckit-plan` for Feature 3 now automatically knows Feature 1's `Us
 
 ```
 -- New Project ----------------------------------------------------------------
-New project         --> /smart-sdd init --> Global Evolution Layer --> /smart-sdd pipeline
+New project         --> /smart-sdd init --> /smart-sdd add --> /smart-sdd pipeline
+                        (project setup)    (define Features)   (implement)
 
 -- SDD Adoption ---------------------------------------------------------------
 Existing source     --> /reverse-spec   --> Global Evolution Layer --> /smart-sdd adopt
@@ -136,7 +137,7 @@ Confirm the skills are recognized in Claude Code with the following commands:
 
 | Mode | Command |
 |------|---------|
-| New project | `/smart-sdd init` |
+| New project | `/smart-sdd init` → `/smart-sdd add` |
 | Existing codebase rebuild | `/reverse-spec ./path/to/source` |
 | SDD adoption | `/reverse-spec --adopt` → `/smart-sdd adopt` (run from source directory) |
 | Add to existing project | `/smart-sdd add` |

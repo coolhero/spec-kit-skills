@@ -30,7 +30,7 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with four project modes:
 
-- **Greenfield**: New project from scratch via `/smart-sdd init`
+- **Greenfield**: New project setup via `/smart-sdd init`, then Feature definition via `/smart-sdd add`
 - **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
 - **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`
 - **Brownfield (adoption)**: Wrap existing code with SDD documentation via `/smart-sdd adopt`
@@ -42,9 +42,10 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 ## Usage
 
 ```
-# Greenfield — New project setup
-/smart-sdd init                          # Interactive greenfield project setup
+# Greenfield — New project setup + Feature definition
+/smart-sdd init                          # Interactive project setup (constitution + artifacts)
 /smart-sdd init --prd path/to/prd.md     # Setup from a PRD document
+/smart-sdd add                           # Define Features (universal — used for all modes)
 
 # Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
@@ -258,7 +259,7 @@ When `--auto` is specified:
 - BOTH Checkpoint (Step 2) and Review (Step 3b-c) are skipped — content is still displayed for transparency, but execution proceeds immediately without waiting for user approval
 - This is the ONLY way to bypass HARD STOPs
 - Clarify scan still runs; if ambiguities found, `speckit-clarify` uses its own recommendation as default
-- For `init`: Phase 2 and Phase 3 Checkpoints are skipped; if `--prd` is provided, reasonable defaults are used throughout
+- For `init`: Phase 2 Checkpoint is skipped; if `--prd` is provided, reasonable defaults are used throughout
 - For `parity`: Phase 4 HARD STOPs are skipped; groups are auto-assigned per suggested grouping (conservative: no auto-exclusions)
 - For `expand`: Tier selection is skipped if argument was provided
 - Error handling AskUserQuestion calls are NOT skipped (errors always need user attention)

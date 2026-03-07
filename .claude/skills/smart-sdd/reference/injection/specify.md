@@ -12,7 +12,7 @@
 | File | Section | Filtering |
 |------|---------|-----------|
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild mode)** — ensure FR-### cover all P1/P2 behaviors |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild/adoption/add mode with SBI)** — ensure FR-### cover all P1/P2 behaviors |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
@@ -45,7 +45,7 @@ To resolve file paths at runtime:
 - **Feature summary**: Feature description and scope from pre-context
 - **Draft requirements (FR-###)**: Draft Functional Requirements extracted from pre-context
 - **Draft acceptance criteria (SC-###)**: Draft Success Criteria / Acceptance Scenario extracted from pre-context
-- **Source behavior inventory**: If present, the function-level behavior list with priorities — remind that each P1/P2 behavior should map to at least one FR-###. This prevents functionality loss during rebuild
+- **Source behavior inventory**: If present, the function-level behavior list with priorities — remind that each P1/P2 behavior should map to at least one FR-###. This prevents functionality loss during rebuild. **NEW entries** (Origin=`new`): Treat as new requirements to be specified, not as coverage of existing code. They should still map to FR-### but do not represent original source behaviors
 - **UI component features**: If present, the third-party UI library capabilities — remind that each UI feature should map to an FR-###. These features (toolbar items, editing modes, plugins) are invisible to function-level analysis
 - **Business rules**: List of rules for the Feature from business-logic-map (skipped if business-logic-map.md does not exist)
 - **Edge cases**: Edge cases found in pre-context and business-logic-map
@@ -236,7 +236,8 @@ You can open and edit this file directly, then select
 
 Update `sdd-state.md` per generic step-completion rules in [state-schema.md](../state-schema.md). Additionally:
 - Populate the Feature Mapping table: record spec-kit Name, spec-kit Path, and Branch (spec-kit creates the branch during specify)
-- **SBI Coverage Update** (rebuild/adoption only): After specify completes, scan the generated `spec.md` for `[source: B###]` tags. For each found tag:
+- **SBI Coverage Update** (rebuild/adoption/add with SBI): After specify completes, scan the generated `spec.md` for `[source: B###]` tags. For each found tag:
   - Update `sdd-state.md` → Source Behavior Coverage table: set FR column to the FR-### ID, Feature column to the Feature ID, Status to `🔄 in_progress`
   - This establishes the SBI → FR mapping that will be confirmed during verify
+  - For NEW entries (Origin=`new`): same process, but these entries are tracked separately in coverage metrics
 - No other Global Evolution Layer artifact updates
