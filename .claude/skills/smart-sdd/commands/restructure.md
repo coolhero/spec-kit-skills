@@ -126,43 +126,20 @@ Display the analysis results in a structured format and request user approval:
 🔀 Feature Restructure — Impact Summary
 
 **Operation**: [split / merge / move / reorder / delete]
-**Affected Features**: F003, F004, F005, F008 (new)
+**Affected Features**: [list with (new)/(removed) markers]
 
 ### Changes to Apply
-
-#### 1. Feature Catalog (roadmap.md)
-- REMOVE: F005-wishlist
-- MODIFY: F004-cart → F004-shopping (description updated)
-- ADD: (none)
-
-#### 2. Dependency Graph (roadmap.md)
-- REMOVE edge: F005 → F001
-- MODIFY edge: F004 → F001 (unchanged), F004 → F002 (new — inherited from F005)
-
-#### 3. Entity Ownership (entity-registry.md)
-- TRANSFER: WishlistItem (F005 → F004)
-
-#### 4. API Ownership (api-registry.md)
-- TRANSFER: GET /wishlist (F005 → F004)
-- TRANSFER: POST /wishlist (F005 → F004)
-
-#### 5. Pre-Context Updates
-- MODIFY: features/F004-shopping/pre-context.md (merged content from F005)
-- DELETE: features/F005-wishlist/pre-context.md
-- MODIFY: features/F006-order/pre-context.md (dependency F005 → F004)
-
-#### 6. Pipeline State (sdd-state.md)
-- REMOVE: F005 from Feature Progress
-- MODIFY: F004 status → needs re-execution from "specify" step (🔀)
-- NOTE: F005 had completed "specify" → content merged into F004
-
-#### 7. spec-kit Artifacts (manual cleanup — NOT auto-deleted)
-- PRESERVE: specs/005-wishlist/ (will NOT be auto-deleted)
-- FLAG: specs/004-cart/ → may need re-execution of specify, plan, tasks
+1. **Feature Catalog** (roadmap.md) — ADD/REMOVE/MODIFY: [entries]
+2. **Dependency Graph** (roadmap.md) — [edge changes]
+3. **Entity Ownership** (entity-registry.md) — TRANSFER: [entity (from → to)]
+4. **API Ownership** (api-registry.md) — TRANSFER: [endpoints (from → to)]
+5. **Pre-Context** — MODIFY/DELETE: [affected files]
+6. **Pipeline State** (sdd-state.md) — [row changes, 🔀 markers]
+7. **spec-kit Artifacts** — PRESERVE: [dirs NOT auto-deleted], FLAG: [dirs needing re-execution]
 
 ### ⚠️ Warnings
-- F004 (specify: completed) will be marked as 🔀 from specify step
-- specs/005-wishlist/ directory will NOT be deleted (cleanup command provided after completion)
+- [Features with completed steps that will be marked 🔀]
+- [Directories preserved for manual cleanup]
 ```
 
 **Use AskUserQuestion** to request approval (options: "Approve changes", "Request modifications"). **If response is empty → re-ask** (per MANDATORY RULE 1). If the user requests modifications, return to Phase 2 and re-analyze. Do NOT proceed to Phase 5 until the user explicitly approves.
@@ -200,27 +177,11 @@ After all changes are applied, verify consistency and display the completion rep
 ```
 ✅ Feature restructure completed:
 
-**Operation**: merge (F004-cart + F005-wishlist → F004-shopping)
-
-**Updated artifacts**:
-  - roadmap.md: Feature Catalog (1 removed), Dependency Graph (2 edges updated)
-  - entity-registry.md: 1 entity transferred (WishlistItem → F004)
-  - api-registry.md: 2 APIs transferred (GET/POST /wishlist → F004)
-  - features/F004-shopping/pre-context.md: merged content
-  - features/F005-wishlist/pre-context.md: DELETED
-  - sdd-state.md: F005 removed, F004 status → restructured
-
-**Pipeline impact**:
-  - F004-shopping: needs re-execution from specify step (🔀)
-  - Downstream Features unaffected
-
-**Manual cleanup suggested**:
-  - rm -rf specs/005-wishlist/       — Old spec-kit artifacts
-  - git branch -d 005-wishlist       — Old Feature branch (if exists)
-
-**Next steps**:
-  /smart-sdd specify F004    — Re-specify the restructured Feature
-  /smart-sdd pipeline        — Resume pipeline (processes restructured + pending Features)
+**Operation**: [operation] ([details])
+**Updated artifacts**: [list each file with change summary]
+**Pipeline impact**: [Features needing re-execution from which step (🔀)]
+**Manual cleanup**: [rm commands for old spec-kit dirs/branches]
+**Next steps**: /smart-sdd specify [FID] or /smart-sdd pipeline
 ```
 
 **Decision History Recording — Restructure**:

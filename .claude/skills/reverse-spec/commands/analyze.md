@@ -188,14 +188,7 @@ Adapt the categories to match the actual project. Add or remove rows as needed (
 
 You MUST iterate through **every single category** from Step 1's table, **one at a time**, and call AskUserQuestion for each. There is no exception to this rule.
 
-**PROHIBITED behaviors:**
-- ❌ Batching multiple categories into a single question
-- ❌ Deciding on behalf of the user that a category is "already optimal" or "already modern"
-- ❌ Showing a summary table with "Keep" pre-filled for categories the user never confirmed
-- ❌ Saying "All other categories: Keep current" — the user MUST confirm each one
-- ❌ Presenting only "migration candidates" while skipping stable categories
-
-**The ONLY way to skip remaining categories** is when the user explicitly selects the "Accept all remaining recommendations" option in AskUserQuestion. The agent NEVER decides to skip.
+**PROHIBITED**: Batching categories, pre-filling "Keep" for unconfirmed categories, skipping categories, or deciding on the user's behalf. The ONLY way to skip is when the user selects "Accept all remaining recommendations".
 
 For each category (one at a time, in dependency order):
 1. Show the current technology, 1~2 alternatives, AND "Keep Current" with rationale for each:
@@ -218,7 +211,7 @@ For each category (one at a time, in dependency order):
 4. If the user selects "Other", accept their custom input and record it.
 5. If the user selects "Accept all remaining recommendations", stop the per-category loop. Apply the recommended option for every remaining category and proceed directly to Step 3 (Final Summary and Confirmation), where the user can still review and revise if needed.
 
-**Category dependency chain**: Categories have cascading constraints — each choice narrows the viable options for subsequent categories. Process them in this dependency order:
+**Category dependency chain** — process in this order (each choice constrains subsequent options):
 
 ```
 Language ──→ Framework ──→ ORM/DB ──→ Testing
@@ -228,46 +221,7 @@ Language ──→ Framework ──→ ORM/DB ──→ Testing
                 └──→ Build/Deploy ──────┘
 ```
 
-1. **Language** — Constrains everything. Must be decided first.
-2. **Framework** — Constrained by Language. (e.g., TypeScript → Next.js/Nuxt/Fastify, not Django)
-3. **ORM/DB** — Constrained by Language + Framework. (e.g., TypeScript + Next.js → Prisma/Drizzle, not SQLAlchemy)
-4. **Remaining categories** — Constrained by the above. (e.g., Framework choice determines viable state management, UI library, and testing options)
-
-**Critical rule**: When presenting options for each category, **only propose technologies that are compatible with all previously confirmed choices**. Explicitly state why the recommendations fit the already-decided stack.
-
-```
-📋 [Category]: [Current] → ? (constrained by: [list confirmed choices])
-
-| Option | Technology | Rationale |
-|--------|-----------|-----------|
-| Recommended | [Tech A] | [Why this fits with confirmed Language + Framework + ...] |
-| Alternative | [Tech B] | [Why this also works, trade-offs vs recommended] |
-| Keep Current | [Current] | [Compatibility note — may or may not work with new stack] |
-```
-
-If "Keep Current" is **incompatible** with previously confirmed choices (e.g., keeping Django ORM after choosing TypeScript), mark it clearly:
-- "⚠️ Keep [Current] — **Incompatible** with [confirmed choice]. Would require a bridge/adapter."
-
-Example flow:
-```
-📋 Language: Python 3.10 → ?
-  → User selects "TypeScript 5.x"
-
-📋 Framework: Django 4.2 → ? (constrained by: TypeScript)
-  Options only include TypeScript-compatible frameworks
-  → User selects "Next.js 14"
-
-📋 ORM/DB: Django ORM + PostgreSQL → ? (constrained by: TypeScript + Next.js)
-  Options only include TypeScript ORMs that work with Next.js
-  ⚠️ "Keep Django ORM" marked as Incompatible with TypeScript
-  → User selects "Prisma + PostgreSQL"
-
-📋 State Management: Redux Toolkit → ? (constrained by: TypeScript + Next.js + React)
-  Options only include React-compatible state libraries
-  → User selects "Zustand"
-
-... (continue for remaining categories)
-```
+Only propose technologies compatible with all previously confirmed choices. If "Keep Current" is incompatible with confirmed choices, mark it: "⚠️ Keep [Current] — **Incompatible** with [confirmed choice]."
 
 **Step 3 — Final Summary and Confirmation**:
 After all categories are decided, present the complete migration table:
@@ -378,8 +332,6 @@ After identifying Feature boundaries, present **multiple granularity options** t
 
 **Step 1 — Prepare granularity proposals**:
 Analyze the identified Features and propose 2-3 granularity levels:
-
-> **Note**: This table is shared with `/smart-sdd init` § Phase 2. Keep both in sync when modifying.
 
 | Level | Name | Description | Typical Feature Count |
 |-------|------|-------------|----------------------|
@@ -640,7 +592,7 @@ F003-order (12 entries): B019–B030
 
 Contents to include in each pre-context.md:
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
-- **Source Behavior Inventory**: Function-level inventory from Phase 2-6, filtered to this Feature's associated files. Each entry: **B### ID**, source file, function/method name, behavior description, priority (P1/P2/P3). This ensures no source-level functionality is lost during the extraction pipeline
+- **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/app.md` § 3-7 for format)
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files

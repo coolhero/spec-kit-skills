@@ -2,7 +2,7 @@
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
 argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
-allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
+allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
 # Smart-SDD: spec-kit Workflow Orchestrator
@@ -142,64 +142,17 @@ $ARGUMENTS parsing rules:
 - If `--from` is specified: use that path
 - If not specified: `./specs/reverse-spec/`
 
-**Pre-validation** (for all commands):
+**Pre-validation** (all commands except `init`, which has its own Pre-Phase):
 
-**Step 0 — Git and spec-kit installation check** (all commands except `init`):
+**Step 0a. Git check**: Run `git rev-parse --is-inside-work-tree`. If not a repo → `git init` + initial commit. If git not installed → warn and continue without git.
 
-> **`init` command**: Skips Steps 0 and 1 entirely. The `init` command has its own Pre-Phase that handles git setup, branch selection, and roadmap creation.
+**Step 0b. spec-kit CLI check**: Run `which specify`. If not found → `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git`. Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skill names use hyphens (`speckit-specify`).
 
-**0a. Git repository check**:
-1. Check if the current directory is a git repository: `git rev-parse --is-inside-work-tree`
-2. If NOT a git repository:
-   - Run `git init` to initialize a new repository
-   - Run `git add .` and `git commit -m "Initial commit"` if there are files to commit
-   - Display: "📦 Initialized git repository in current directory."
-3. If git is not installed at all (`which git` fails):
-   - Display a warning: "⚠️ Git is not installed. Branch management will be disabled."
-   - Continue without git (see [Non-Git Projects](#non-git-projects))
+**Step 0c. spec-kit project init check**: Look for `.claude/skills/speckit-specify/SKILL.md`. If not found → `specify init --here --ai claude --force --no-git --ai-skills`. If skills aren't registered in current session, use Skill Invocation Fallback (see [pipeline.md](commands/pipeline.md)).
 
-**0b. spec-kit CLI installation check**:
-1. Check if spec-kit is available by running: `which specify`
-2. If not found, automatically install it:
-   ```
-   uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-   ```
-3. Verify installation succeeded by running `which specify` again
-4. If installation fails, display the error and instruct the user to install manually
+**Step 1. roadmap.md check** (skip for `init` and `status`): Verify `roadmap.md` exists at BASE_PATH. If not found → suggest `/smart-sdd init` or `/reverse-spec`.
 
-**0c. spec-kit project initialization check**:
-1. Check if spec-kit skills are installed: look for `.claude/skills/speckit-specify/SKILL.md` in the current project
-2. If NOT found, initialize spec-kit:
-   ```
-   specify init --here --ai claude --force --no-git --ai-skills
-   ```
-   - `--no-git`: Prevents spec-kit from running its own git init (we already handled git in Step 0a)
-   - `--ai-skills`: Installs Claude Code skills (`speckit-specify`, `speckit-plan`, etc.) into `.claude/skills/`
-   - `--force`: Overwrites any partial/broken previous initialization
-3. Verify that `.claude/skills/speckit-specify/SKILL.md` now exists
-4. If initialization fails, display the error and instruct the user to run `specify init` manually
-5. **IMPORTANT**: After `specify init` installs new skills, they may not be available in the current Claude Code session. If a skill invocation fails with "Unknown skill", fall back to reading the skill's SKILL.md directly and executing the instructions inline (see Skill Invocation Fallback in [pipeline.md](commands/pipeline.md))
-
-> **Note**: The spec-kit CLI binary is named `specify` (not `speckit`). The Claude Code skills installed by spec-kit use **hyphen-separated** names (e.g., `speckit-specify`, `speckit-plan`), not dot-separated.
-
-**Step 1 — roadmap.md check** (for all commands except `init` and `status`):
-1. Check whether `roadmap.md` exists at BASE_PATH
-2. If not found, display:
-   ```
-   No roadmap.md found at [BASE_PATH].
-   To set up your project, run one of the following:
-     - /smart-sdd init             — Start a new project (greenfield)
-     - /smart-sdd init --prd <path> — Start from a PRD document
-     - /reverse-spec [target-dir]  — Reverse-analyze existing code for full rebuild
-   ```
-
-**Additional rules**:
-- `init` command: Skip Steps 0 and 1 (init has its own Pre-Phase and creates roadmap.md).
-- `add` command: roadmap.md **must** exist (adding to an existing project)
-- `restructure` command: `roadmap.md`, `entity-registry.md`, `api-registry.md`, and `sdd-state.md` must all exist (same prerequisites as `add`)
-- `status` command: If `sdd-state.md` does not exist, display "No project initialized yet" and suggest `init` or `reverse-spec`
-
-> **Note**: BASE_PATH is relative to the CWD. All smart-sdd commands must be invoked from the same project directory.
+**Additional rules**: `add`/`restructure` require roadmap + registries + sdd-state.md. `status` without sdd-state.md → "No project initialized yet". BASE_PATH is relative to CWD.
 
 ---
 

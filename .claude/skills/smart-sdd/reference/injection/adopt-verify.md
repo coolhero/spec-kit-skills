@@ -113,7 +113,7 @@ After verification execution completes:
     [⚠️ Unmapped P1: B### — funcName (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
-[Results if applicable, or "Skipped — constitution not yet finalized"]
+Skipped — Adoption mode does not create per-Feature demos.
 
 ── Phase 4: Global Evolution Consistency ───────────
   - entity-registry: [match/discrepancies]

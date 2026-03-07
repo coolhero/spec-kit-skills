@@ -1,7 +1,7 @@
 ---
 name: case-study
 description: Generates a Case Study report from reverse-spec and smart-sdd execution artifacts. Aggregates quantitative metrics from project artifacts and qualitative observations from the case study log.
-argument-hint: "[target-directory] [--lang en|ko]"
+argument-hint: "[init|generate] [target-directory] [--lang en|ko]"
 allowed-tools: [Read, Grep, Glob, Write, AskUserQuestion]
 ---
 
@@ -30,31 +30,20 @@ Generates a structured Case Study report from the artifacts produced by `/revers
 ```
 $ARGUMENTS parsing rules:
   "init"            → Sub-command: read `commands/init.md` and execute its workflow. Stop here.
+  "generate"        → Sub-command: read `commands/generate.md` and execute its workflow. Stop here.
   First token       → target-directory (optional, defaults to CWD). If it looks like a path.
   --lang <en|ko>    → Output language (default: "en")
 ```
 
 If the first argument is `init`, read `commands/init.md` and execute its workflow.
-Otherwise, after parsing arguments, read `commands/generate.md` and execute its workflow.
+If the first argument is `generate`, read `commands/generate.md` and execute its workflow.
+Otherwise, after parsing arguments, read `commands/generate.md` and execute its workflow (default).
 
 ---
 
 ## Case Study Agenda
 
-The generated report follows this 8-section structure:
-
-| # | Section | Primary Data Source |
-|---|---------|-------------------|
-| 1 | **Executive Summary** | Aggregated metrics from all artifacts |
-| 2 | **Project Background** | case-study-log.md (M1) + roadmap.md |
-| 3 | **Source Analysis** | coverage-baseline.md + registries |
-| 4 | **Architecture & Strategy** | history.md + constitution-seed.md |
-| 5 | **Pipeline Execution** | sdd-state.md + spec-kit artifacts |
-| 6 | **Quality & Parity** | sdd-state.md (verify/parity logs) |
-| 7 | **Challenges & Solutions** | case-study-log.md (M2-M8 Challenges) |
-| 8 | **Outcomes & Lessons Learned** | case-study-log.md (M8) + metrics |
-
-Sections with no available data are omitted or show "Data not available".
+The report follows an 8-section structure (see `commands/generate.md` for details). Sections with no available data are omitted or show "Data not available".
 
 ---
 

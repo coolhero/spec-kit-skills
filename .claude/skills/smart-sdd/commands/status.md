@@ -8,6 +8,10 @@ Running `/smart-sdd status` reads `sdd-state.md` and displays the overall progre
 
 Follows the schema defined in [state-schema.md](../reference/state-schema.md).
 
+### Quick Summary via Script
+
+Run `scripts/pipeline-status.sh <target-path>` first to produce a quick progress summary (project info, constitution status, feature completion %, current feature, blocked/deferred counts). Display the script output as a preamble before rendering the detailed table below.
+
 Output format varies by scope:
 
 **Full scope** (no Tier concept):

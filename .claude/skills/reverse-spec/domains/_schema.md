@@ -1,6 +1,6 @@
 # Domain Profile Schema
 
-> Every domain profile MUST define all sections below. The agent reads the active profile during execution and adapts each Phase accordingly.
+> Every domain profile MUST define sections 1-6. Sections 7-9 are optional (defined in smart-sdd domain profiles). The agent reads the active profile during execution and adapts each Phase accordingly.
 
 ---
 
@@ -30,18 +30,11 @@ Criteria for identifying Feature boundaries in Phase 3-1. Domain-specific signal
 ### 6. Tier Classification Axes
 Importance analysis criteria for Phase 3-3 (core scope only). Each axis evaluates Features from a different perspective to determine Tier placement.
 
-### 7. Demo Pattern (used by smart-sdd)
-How a completed Feature should be demonstrated. Defines:
-- **Type**: Execution model (server-based, script-based, notebook-based, etc.)
-- **Default mode**: Interactive behavior
-- **CI mode**: Automated health check behavior
-- **Script location**: Demo script naming convention
+### 7. Demo Pattern — Optional (defined in smart-sdd domain profile if applicable)
+How a completed Feature should be demonstrated.
 
-### 8. Parity Dimensions (used by smart-sdd)
-Dimensions for source parity comparison. Each dimension defines what structural and logic elements to compare between original and rebuilt systems.
+### 8. Parity Dimensions — Optional (defined in smart-sdd domain profile if applicable)
+Dimensions for source parity comparison.
 
-### 9. Verify Steps (used by smart-sdd)
-Verification steps to execute after Feature implementation. Each step defines:
-- **Name**: Step identifier
-- **Required**: Whether failure blocks the pipeline
-- **Description**: What to check
+### 9. Verify Steps — Optional (defined in smart-sdd domain profile if applicable)
+Verification steps to execute after Feature implementation.

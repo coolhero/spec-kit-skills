@@ -62,7 +62,6 @@ If the user skips Environment Bootstrap, record a single row:
 |------------|-------------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | auth | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
 | F002 | product | ✅ 01-18 | 🔄 | | | | | | in_progress |
-| F003 | order | | | | | | | | pending |
 
 **Core scope** (with Tier column):
 
@@ -70,7 +69,6 @@ If the user skips Environment Bootstrap, record a single row:
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | auth | T1 | ✅ 01-15 | ✅ 01-16 | ✅ 01-16 | ✅ 01-16 | ✅ 01-17 | ✅ 01-17 | ✅ 01-17 | completed |
 | F002 | product | T1 | ✅ 01-18 | 🔄 | | | | | | in_progress |
-| F003 | order | T2 | | | | | | | | deferred |
 
 ### Step Status Icons
 - ✅ : Completed (followed by completion date MM-DD)
@@ -100,11 +98,6 @@ If the user skips Environment Bootstrap, record a single row:
 |------|--------|---------|-----------|-------|
 | specify | completed | 2024-01-15T10:00:00 | 2024-01-15T10:30:00 | 5 FRs, 8 SCs |
 | plan | completed | 2024-01-16T09:00:00 | 2024-01-16T11:00:00 | 3 entities, 5 APIs |
-| tasks | completed | 2024-01-16T11:30:00 | 2024-01-16T12:00:00 | 12 tasks |
-| analyze | completed | 2024-01-16T12:30:00 | 2024-01-16T12:45:00 | No CRITICAL issues |
-| implement | completed | 2024-01-17T09:00:00 | 2024-01-17T16:00:00 | |
-| verify | completed | 2024-01-17T16:30:00 | 2024-01-17T17:00:00 | Tests 24/24 passed |
-| merge | completed | 2024-01-17T17:05:00 | 2024-01-17T17:06:00 | Branch 001-auth → main |
 
 ### F002-product
 
@@ -135,9 +128,7 @@ Update history of Global Evolution Layer files.
 | Date/Time | Trigger Feature | Target File | Change Description |
 |-----------|----------------|-------------|-------------------|
 | 2024-01-16 | F001-auth (plan) | entity-registry.md | Finalized User, Session entities applied |
-| 2024-01-16 | F001-auth (plan) | api-registry.md | Finalized POST /auth/register, POST /auth/login applied |
 | 2024-01-17 | F001-auth (implement) | roadmap.md | F001 status → completed |
-| 2024-01-17 | F001-auth (implement) | F002 pre-context.md | User entity reference schema updated |
 
 ---
 
@@ -169,10 +160,6 @@ Tracks mapping from Source Behavior Inventory (SBI) entries to Functional Requir
 | SBI | Priority | Origin | FR | Feature | Status |
 |-----|----------|--------|----|---------|--------|
 | B001 | P1 | extracted | FR-001 | F001-auth | ✅ verified |
-| B002 | P2 | extracted | FR-002 | F001-auth | ✅ verified |
-| B003 | P2 | extracted | — | — | ❌ unmapped |
-| B004 | P1 | extracted | FR-005 | F002-product | 🔄 in_progress |
-| B005 | P3 | extracted | — | — | 🔒 deferred |
 | B050 | P2 | new | FR-003 | F009-notif | 🔄 in_progress |
 
 **Summary (extracted only — original source coverage):**

@@ -186,22 +186,23 @@ Determine entry type from the user's input and arguments:
 
 1. Run `scripts/sbi-coverage.sh <project-root>` for full coverage view
 2. If `parity-report.md` exists at BASE_PATH: read gap areas for additional context
-3. **Filter to `unmapped` status only**: Exclude `in_progress` behaviors (already assigned to pending Features). Only truly unmapped behaviors are gap candidates.
-4. Cluster unmapped behaviors by domain/function (using behavior descriptions and source file proximity)
-5. Auto-propose Feature candidates from clusters:
+3. If `coverage-baseline.md` exists at BASE_PATH: read Unmapped Items tables and collect all `cross-cutting` classified entries (files, endpoints, entities). These are **promotion candidates** — items previously deferred as shared infrastructure that may now warrant their own Feature.
+4. **Filter to `unmapped` status only**: Exclude `in_progress` behaviors (already assigned to pending Features). Only truly unmapped behaviors are gap candidates.
+5. Cluster unmapped behaviors + cross-cutting items by domain/function (using behavior descriptions and source file proximity)
+6. Auto-propose Feature candidates from clusters:
    ```
    📋 Gap Analysis — Unmapped Source Behaviors
 
    ── Cluster 1: Notification System ──────────────
      B023 | P2 | sendEmail() — Send email via SMTP
      B024 | P2 | formatNotification() — Template rendering
-     B031 | P3 | scheduleDelivery() — Delayed notification
-     → Suggested Feature: F009-notifications (3 behaviors)
+     → Suggested Feature: F009-notifications (2 behaviors)
 
-   ── Cluster 2: Report Generation ────────────────
-     B040 | P2 | generateReport() — PDF report creation
-     B041 | P2 | exportCSV() — CSV data export
-     → Suggested Feature: F010-reports (2 behaviors)
+   ── Cluster 2: Build Infrastructure (from cross-cutting) ──
+     [cross-cutting] scripts/build.sh — Build orchestration
+     [cross-cutting] scripts/i18n-extract.sh — i18n extraction
+     [cross-cutting] scripts/release.sh — Release automation
+     → Suggested Feature: F010-build-infra (3 cross-cutting items)
 
    ── Unclustered ─────────────────────────────────
      B045 | P3 | cleanupTempFiles() — Temp file cleanup
@@ -209,10 +210,12 @@ Determine entry type from the user's input and arguments:
 
    Select, modify, or reject these proposals.
    ```
-6. User selects/modifies/rejects proposals
-7. Proceed to Elaboration (1c)
+7. User selects/modifies/rejects proposals
+8. Proceed to Elaboration (1c)
 
 **Type 3 → Phase 4 optimization**: Features built from SBI entries arrive at Phase 4 **pre-mapped**. Phase 4 confirms the mapping and allows expansion (NEW B### entries) only — no re-selection needed.
+
+**Cross-cutting → Feature promotion**: When a cluster contains cross-cutting items and the user approves the Feature, Phase 6 (Finalization) updates `coverage-baseline.md` — changing the Classification of promoted items from `cross-cutting` to `assigned:F00N` with the new Feature ID. This ensures the coverage baseline stays in sync.
 
 ### 1c. Elaboration (COMMON — all types converge here)
 

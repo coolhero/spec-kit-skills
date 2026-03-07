@@ -13,16 +13,11 @@
 
 ## [YYYY-MM-DD] M1 — Project Background
 
-**Context**: Before starting `/reverse-spec`
+**Context**: Before starting `/reverse-spec` analysis on [target-directory]
 
-### Project Description
-- [What does this project do? Who are the users?]
-
-### Why SDD Redevelopment
-- [Why was spec-kit SDD chosen for this project?]
-
-### Expected Goals
-- [What outcomes are expected from the redevelopment?]
+### Observations
+- Project: [name], Tech stack: [first impression of languages/frameworks]
+- Scale: [N] source files, Structure: [monorepo/monolith/etc.]
 
 ### Anticipated Challenges
-- [What difficulties are anticipated?]
+- [Based on source structure — e.g., "tightly coupled modules", "no tests", "undocumented APIs"]

@@ -56,31 +56,20 @@ Review the above content. You can:
 **HARD STOP**: You MUST follow this exact procedure. No exceptions.
 
 ```
-PROCEDURE CheckpointApproval:
+PROCEDURE ApprovalGate(type):
+  # type = "checkpoint" → options: ["Approve as-is", "Request modifications"]
+  # type = "review"     → options: ["Approve", "Request modifications", "I've finished editing"]
   LOOP:
-    response = AskUserQuestion(
-      options: ["Approve as-is", "Request modifications"]
-    )
+    response = AskUserQuestion(options per type above)
 
-    IF response is empty, blank, or has no meaningful selection:
-      Display "⚠️ No approval received. Please review the context above and select one option."
-      CONTINUE LOOP  ← ask again, do NOT proceed
-
-    IF response == "Approve as-is" OR user typed "yes"/"approved"/"lgtm":
-      BREAK LOOP → proceed to Step 3 (Execute+Review)
-
-    IF response == "Request modifications":
-      Ask user what to change
-      Apply modifications to the context
-      Re-display the updated context summary
-      CONTINUE LOOP  ← ask for approval again
-
-    OTHERWISE (unrecognized response):
-      Display "Please select: Approve as-is / Request modifications"
-      CONTINUE LOOP
+    IF response is empty/blank → re-ask ("⚠️ No approval received. Please select one option.")
+    IF approved (yes/lgtm/approve) → BREAK LOOP → proceed to next step
+    IF "Request modifications" → ask what to change → apply → re-display → CONTINUE LOOP
+    IF "I've finished editing" (review only) → re-read artifacts → show diff → ask approve/edit-more
+    OTHERWISE → re-ask with valid options
 ```
 
-**⚠️ CRITICAL**: After AskUserQuestion returns, you MUST check the response BEFORE doing anything else. If the response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed to Execute.
+**⚠️ CRITICAL**: If response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed.
 
 ### 3. Execute — spec-kit Command Execution
 
@@ -168,41 +157,7 @@ For detailed per-command Review Display Content, see [context-injection-rules.md
 
 #### Step 3c. Ask for User Approval (HARD STOP)
 
-You MUST follow this exact procedure. No exceptions.
-
-```
-PROCEDURE ReviewApproval:
-  LOOP:
-    response = AskUserQuestion(
-      options: ["Approve", "Request modifications", "I've finished editing"]
-    )
-
-    IF response is empty, blank, or has no meaningful selection:
-      Display "⚠️ No approval received. Please review the artifact above and select one option."
-      CONTINUE LOOP  ← ask again, do NOT proceed
-
-    IF response == "Approve" OR user typed "yes"/"approved"/"looks good"/"lgtm":
-      BREAK LOOP → proceed to Step 4 (Update)
-
-    IF response == "Request modifications":
-      Ask user what to change
-      Re-execute spec-kit command with feedback
-      Go back to Step 3b (re-display Review with updated content)
-      CONTINUE LOOP
-
-    IF response == "I've finished editing":
-      Re-read the artifact file(s) to pick up user's changes
-      Display a brief summary of what changed
-      response2 = AskUserQuestion(options: ["Approve changes", "Edit more"])
-      IF response2 == "Approve changes": BREAK LOOP → proceed to Step 4
-      IF response2 == "Edit more": CONTINUE LOOP
-
-    OTHERWISE (unrecognized response):
-      Display "Please select: Approve / Request modifications / I've finished editing"
-      CONTINUE LOOP
-```
-
-**⚠️ CRITICAL**: After AskUserQuestion returns, you MUST check the response BEFORE doing anything else. If the response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed to Update.
+Use `ApprovalGate(type: review)` from Step 2 above. **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 **Per-command option overrides**: Some commands use context-specific options (e.g., Clarify: "Run clarify again", Analyze: outcome-dependent, Verify: pass/fail-specific). See [context-injection-rules.md](reference/context-injection-rules.md) for details.
 
@@ -377,13 +332,13 @@ Executes the following steps **strictly in order** for each Feature.
 0. pre-flight → Ensure on main branch (clean state)
 1. specify    → Assemble → Checkpoint(STOP) → speckit-specify → Review(STOP) → Update
                 (spec-kit creates Feature branch: {NNN}-{short-name})
-2. clarify    → Auto-scan spec.md for ambiguities → speckit-clarify (if needed)
-3. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
-4. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
-5. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
-6. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
-7. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → Review(STOP) → Update
-8. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
+   1b. clarify → Auto-scan spec.md for ambiguities → speckit-clarify (conditional sub-step of specify)
+2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
+3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
+4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement)
+5. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement → Review(STOP)
+6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → Review(STOP) → Update
+7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
@@ -532,29 +487,9 @@ Do NOT proceed with the step.
 
 ### Feature ID → spec-kit Feature Name Mapping
 
-spec-kit uses the naming format `{NNN}-{short-name}` (e.g., `001-auth`), while smart-sdd uses `F{NNN}-{short-name}` (e.g., `F001-auth`). The **short-name** portion MUST be identical across both systems.
+> Full naming convention and conversion rules: see `reference/state-schema.md` § Feature Mapping.
 
-**Naming Convention (MANDATORY)**:
-
-| System | Format | Example | Notes |
-|--------|--------|---------|-------|
-| smart-sdd Feature ID | `F{NNN}-{short-name}` | `F001-auth` | Used in roadmap.md, pre-context folders, sdd-state.md |
-| spec-kit Feature directory | `{NNN}-{short-name}` | `001-auth` | Under `specs/`. Created by `create-new-feature.sh` |
-| git branch | `{NNN}-{short-name}` | `001-auth` | Created by spec-kit during `speckit-specify` |
-| pre-context folder | `F{NNN}-{short-name}/` | `F001-auth/` | Under `specs/reverse-spec/features/` |
-
-**Conversion rules**:
-- `F001-auth` → spec-kit name: strip `F` prefix → `001-auth`
-- `001-auth` → smart-sdd ID: prepend `F` → `F001-auth`
-
-**When creating a Feature in spec-kit** (during `specify` step):
-1. Extract the `short-name` from the smart-sdd Feature ID (e.g., `F001-auth` → `auth`)
-2. Extract the numeric part (e.g., `F001` → `1`)
-3. Pass to spec-kit: `create-new-feature.sh --number {N} --short-name "{short-name}"`
-4. This produces the spec-kit directory `{NNN}-{short-name}` (e.g., `001-auth`)
-5. Record the mapping in `sdd-state.md` → Feature Mapping table
-
-**IMPORTANT**: The `short-name` MUST match between smart-sdd and spec-kit. If the user defined Feature name as `F001-platform` in the init/reverse-spec phase, the spec-kit Feature must be `001-platform` (NOT `001-app-shell` or any other name). This ensures consistent naming across all artifacts.
+**Quick reference**: `F001-auth` (smart-sdd) ↔ `001-auth` (spec-kit/git branch). Strip/prepend `F` prefix. The `short-name` MUST match between both systems.
 
 ---
 

@@ -94,30 +94,11 @@
 - **Rationale**: [...]
 
 <!--
-Recommendation categories to consider based on source analysis:
-
-Domain-driven:
-- Financial/Payment → Idempotency, Audit Trail, Decimal Precision
-- Multi-tenant SaaS → Tenant Isolation, Data Partitioning
-- Healthcare/PII → Data Encryption at Rest, Access Logging
-- Real-time → Optimistic Updates, Conflict Resolution, Graceful Degradation
-- E-commerce → Inventory Consistency, Cart Expiry, Price Integrity
-
-Architecture-driven:
-- Event-driven/Message queues → Event Idempotency, Dead Letter Handling, Eventual Consistency
-- Microservices → Circuit Breaker, Bulkhead, Distributed Tracing
-- Heavy async/background jobs → Job Idempotency, Retry Strategy, Timeout Policy
-- File/media handling → Streaming Upload, CDN Strategy, Cleanup Policy
-
-Scale/Performance-driven:
-- High-traffic APIs → Rate Limiting, Caching Strategy, Connection Pooling
-- Large datasets → Pagination Mandate, Query Optimization, Index Strategy
-- Search-heavy → Search Index Sync Strategy, Denormalization Policy
-
-Quality-driven:
-- No existing tests → Behavioral Characterization Tests (capture existing behavior before refactoring)
-- Complex state machines → State Transition Diagram Requirement
-- Heavy external integrations → Mock/Stub Strategy, Contract Testing
+Recommendation categories: Domain (Financial→Idempotency/Audit, SaaS→Tenant Isolation,
+Healthcare→Encryption/Logging, Real-time→Optimistic Updates, E-commerce→Inventory Consistency),
+Architecture (Event-driven→Idempotency/DLQ, Microservices→Circuit Breaker/Tracing, Async→Retry/Timeout),
+Scale (High-traffic→Rate Limiting/Caching, Large datasets→Pagination/Indexing),
+Quality (No tests→Characterization Tests, Complex state→State Diagrams, External APIs→Contract Testing)
 -->
 
 ---
@@ -154,13 +135,7 @@ Quality-driven:
 - Respect existing code style and maintain consistency
 - **Verification criterion**: `Every changed line must be directly traceable to the current task`
 
-### V. Goal-Driven Execution
-- Every task includes verifiable completion criteria
-- Set completion criteria as "tests pass" instead of "implemented"
-- For multi-step work, define verification methods for each step in advance
-- **Verification criterion**: `Automated verification (tests, build, lint) must pass upon each task completion`
-
-### VI. Demo-Ready Delivery
+### V. Demo-Ready Delivery
 - Each Feature must be demonstrable upon completion — not just passing tests, but **the user must be able to see and use the real, working Feature**
 - A demo is NOT a test suite. Tests belong in `verify` Phase 1. A demo **launches the Feature** so the user can experience it firsthand
 - Maintain a centralized `demos/` directory at the project root with **executable demo scripts** per Feature:

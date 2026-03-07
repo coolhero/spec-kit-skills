@@ -24,11 +24,11 @@ This document defines shared patterns that apply to ALL per-command context inje
 
 The following patterns apply to ALL commands:
 
-**HARD STOP pattern**: Every Review section ends with a HARD STOP. The canonical procedure is defined in SKILL.md Step 3c (ReviewApproval). Per-command sections only specify the **options** — the LOOP/re-ask/empty-response handling is always the same.
+**HARD STOP pattern**: Every Review section ends with a HARD STOP. The canonical procedure is defined in `commands/pipeline.md` Step 3 (PROCEDURE ReviewApproval). Per-command sections only specify the **options** — the LOOP/re-ask/empty-response handling is always the same.
 
 **"Files You Can Edit" block**: Every Review display includes a "Files You Can Edit" block listing the exact artifact paths. The user can edit these files externally, then select "I've finished editing" to continue.
 
-**Checkpoint pattern**: All Checkpoints are HARD STOPs per SKILL.md Step 2. Even simplified Checkpoints (single-line message) require AskUserQuestion and WAIT.
+**Checkpoint pattern**: All Checkpoints are HARD STOPs per `commands/pipeline.md` Step 2 (PROCEDURE CheckpointApproval). Even simplified Checkpoints (single-line message) require AskUserQuestion and WAIT.
 
 ---
 

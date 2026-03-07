@@ -39,15 +39,7 @@ Any other arguments → ERROR: "Unknown argument. Usage: /speckit-diff [--output
 
 ## Workflow
 
-After parsing arguments, read `commands/diff.md` for the complete workflow. The workflow consists of:
-
-| Phase | Name | Description |
-|-------|------|-------------|
-| **Phase 0** | Source Acquisition | Resolve spec-kit source (GitHub clone or local path) + locate baseline |
-| **Phase 1** | Scanning | Extract structural signatures and compare against baseline |
-| **Phase 2** | Impact Mapping | Map changes to specific spec-kit-skills files with priority |
-| **Phase 3** | Report Generation | Generate compatibility report with verdict |
-| **Phase 4** | Cleanup | Remove temp directory if created |
+After parsing arguments, read `commands/diff.md` for the complete workflow (5 phases: Source Acquisition → Scanning → Impact Mapping → Report Generation → Cleanup).
 
 ---
 

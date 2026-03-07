@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-07 14:05 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-07 22:30 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -58,7 +58,7 @@ This means `/speckit-plan` for Feature 3 now automatically knows Feature 1's `Us
 | `/speckit-diff` | Compares spec-kit versions against a stored baseline, produces a compatibility verdict + impact report. Run after spec-kit updates. |
 | `/case-study` | Generates a Case Study report (metrics + qualitative observations) from execution artifacts. Run after completing a workflow. |
 
-### Four User Journeys
+### Five User Journeys
 
 ```
 -- New Project ----------------------------------------------------------------
@@ -180,7 +180,7 @@ Summary of what information is automatically injected before each spec-kit comma
 | `plan` | `pre-context.md` "For /speckit.plan" + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized schemas from preceding Features), technical decisions. **If registries empty (early greenfield), skip registry injection** |
 | `tasks` | `plan.md` (spec-kit artifact) | Automatic execution based on plan. No additional injection |
 | `analyze` | `spec.md` + `plan.md` + `tasks.md` (spec-kit artifacts) | Cross-artifact consistency analysis (gaps, duplications, ambiguities). Runs before implement |
-| `implement` | `tasks.md` (spec-kit artifact) | Automatic execution based on tasks. No additional injection |
+| `implement` | `tasks.md` + `pre-context.md` (Static Resources, Environment Variables, Naming Remapping) | Automatic execution based on tasks. Pre-checks: static resource copy, env var presence verification (HARD STOP if missing), naming remapping context. Demo-Ready Delivery if active |
 | `verify` | `pre-context.md` "For /speckit.analyze" + registries | Cross-Feature entity/API consistency, impact scope analysis |
 
 **Preceding Feature results take priority**: If a dependent preceding Feature's plan is already complete, the **finalized data-model.md and contracts/** from `specs/{NNN-feature}/` are referenced instead of the drafts in entity-registry/api-registry.
@@ -393,7 +393,7 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 #### Core Value
 
-- **Four user journeys**: `init` for greenfield, `adopt` for SDD adoption, `add` for incremental, `pipeline` for rebuild
+- **Five user journeys**: `init` for greenfield, `adopt` for SDD adoption, `add` for incremental, `pipeline` for rebuild (core/full)
 - **Wraps rather than replaces** spec-kit commands, unaffected by spec-kit updates
 - **Automatically assembles and injects** required cross-Feature information before each command execution
 - **Automatically updates** the Global Evolution Layer (entity-registry, api-registry, roadmap, subsequent pre-context) upon Feature completion
@@ -933,7 +933,7 @@ The `domains/` directory in each skill contains the profile schema (`_schema.md`
 
 ### UI Testing Integration (Playwright MCP)
 
-When [Playwright MCP](https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-playwright) (or similar browser automation) is available in the Claude Code environment, `/smart-sdd verify` can perform automated UI verification:
+When Playwright MCP (or similar browser automation) is available in the Claude Code environment, `/smart-sdd verify` can perform automated UI verification:
 
 - **Demo UI check**: After demo script starts the server, Playwright navigates to the demo URL, verifies the page loads, and checks for key UI elements
 - **Screenshot evidence**: Captures screenshots during verification for review
@@ -978,7 +978,9 @@ spec-kit-skills/
         │   │   ├── coverage.md                          # SBI coverage check & gap resolution
         │   │   ├── restructure.md                       # Feature restructuring workflow
         │   │   ├── expand.md                            # Tier expansion workflow
-        │   │   └── parity.md                            # Source parity verification
+        │   │   ├── parity.md                            # Source parity verification
+        │   │   ├── verify-phases.md                     # Verify phase execution details
+        │   │   └── status.md                            # Progress status display
         │   ├── scripts/                                    # Read-only aggregation scripts
         │   │   ├── context-summary.sh
         │   │   ├── demo-status.sh
@@ -1006,6 +1008,7 @@ spec-kit-skills/
         │       ├── state-schema.md                      # sdd-state.md schema definition
         │       ├── branch-management.md                 # Git branch management reference
         │       ├── feature-elaboration-framework.md     # Feature definition quality evaluation
+        │       ├── demo-standard.md                    # Demo script standard and templates
         │       └── ui-testing-integration.md            # Playwright MCP integration guide
         ├── speckit-diff/
         │   ├── SKILL.md                                 # Compatibility analyzer skill (overview + routing)
@@ -1057,7 +1060,7 @@ Key topics covered:
 | 2026-03-03 | Review system overhaul, parity checking system |
 | 2026-03-04 | speckit-diff utility, domain profile system, context optimization |
 | 2026-03-05 | Unified commands/ structure, case-study skill |
-| 2026-03-06 | **v2 redesign**: user intent model, adopt command, demo layering, SBI coverage tracking, script architecture ([design doc](v2-design.md)) |
+| 2026-03-06 | **v2 redesign**: user intent model, adopt command, demo layering, SBI coverage tracking, script architecture |
 
 > When making significant design decisions, add an entry to `history.md` to preserve the rationale for future reference.
 

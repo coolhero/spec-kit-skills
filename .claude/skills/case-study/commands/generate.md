@@ -107,6 +107,11 @@ Parse milestone entries (M1-M8):
 - Overall coverage percentage
 - List of unmapped (❌) and deferred (🔒) entries
 
+### 3-9. From case-study-log.md header
+- Extract `**Domain**:` field (e.g., `app`, `data-science`)
+- Fallback: read domain from sdd-state.md if not in log header
+- Use in Section 1 Executive Summary
+
 ---
 
 ## Step 4 — Report Generation
@@ -175,6 +180,7 @@ Auto-generated from aggregated metrics:
 - From history.md: stack migration choices (if new stack)
 - From history.md: architecture decisions (granularity, tier adjustments)
 - From constitution-seed.md: key principles (list top 5-7 principles)
+- From stack-migration.md (if present): migration strategy, per-category decisions, dependency chain analysis
 - From case-study-log.md M3/M5 entries (if exist): qualitative observations
 
 ### Section 5 — Pipeline Execution

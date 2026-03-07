@@ -7,7 +7,20 @@
       "WebFetch(domain:api.github.com)",
       "Bash(curl:*)",
       "WebFetch(domain:ancuta.org)",
-      "WebFetch(domain:intuitionlabs.ai)"
+      "WebFetch(domain:intuitionlabs.ai)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git pull:*)",
+      "Bash(uv tool run:*)",
+      "Bash(specify:*)",
+      "Bash(/Users/coolhero/.local/share/uv/tools/specify-cli/bin/specify:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(find:*)",
+      "Bash(chmod +x:*)",
+      "Bash(TZ='Asia/Seoul' date:*)"
     ]
   }
 }

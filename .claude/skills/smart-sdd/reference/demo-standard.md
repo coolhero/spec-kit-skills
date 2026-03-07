@@ -45,86 +45,38 @@ Additional anti-patterns:
 ```bash
 #!/usr/bin/env bash
 # Demo: [Feature Name]
-#
-# Purpose: Launches [Feature Name] so the user can experience it firsthand.
-#          Sets up the environment, starts the service, and provides
-#          concrete examples of what to try.
-#
-# Usage:
-#   ./demos/F00N-name.sh        # Launch the demo (interactive, default)
-#   ./demos/F00N-name.sh --ci   # CI mode — quick health-check and exit
+# Usage: ./demos/F00N-name.sh [--ci]
 #
 # Coverage (maps to spec.md):
-#   ✅ FR-001 [Requirement name]   → Demonstrated: [how the user can see this]
-#   ✅ FR-002 [Requirement name]   → Demonstrated: [how the user can see this]
-#   ⬜ FR-003 [Requirement name]   → Not demoed: [reason, e.g., requires external service]
+#   ✅ FR-001 [Requirement]  → Demonstrated: [how]
+#   ⬜ FR-002 [Requirement]  → Not demoed: [reason]
 #
 # Demo Components:
-#   [component name] | [file path] | Demo-only | Remove after F0XX-[feature]
-#   [component name] | [file path] | Promotable | Extended by F0XX-[feature]
-#
-# Prerequisites: [What must be running/installed]
+#   [name] | [path] | Demo-only/Promotable | [lifecycle note]
 set -euo pipefail
 
-CI_MODE=false
-[ "${1:-}" = "--ci" ] && CI_MODE=true
-
-# --- Cleanup handler ---
-cleanup() {
-  echo ""
-  echo "Shutting down demo..."
-  [Commands to clean up — e.g., stop server, remove temp data]
-}
+CI_MODE=false; [ "${1:-}" = "--ci" ] && CI_MODE=true
+cleanup() { echo "Shutting down demo..."; }
 trap cleanup EXIT
 
-echo "══════════════════════════════════════════════════"
-echo "  Demo: [Feature Name]"
-echo "══════════════════════════════════════════════════"
-echo ""
+echo "══ Demo: [Feature Name] ══"
 
-# ─── Setup ──────────────────────────────────────────────────
-echo "Setting up..."
-[Commands to prepare: seed DB, build assets, etc.]
+# ─── Setup & Start ───
+echo "Setting up..."; # [seed DB, build assets, etc.]
+echo "Starting [Feature Name]..."; # [start server in background]
 
-# ─── Start the Feature ──────────────────────────────────────
-echo "Starting [Feature Name]..."
-[Commands to start the service — e.g., start server in background]
+# ─── Health Check ───
+curl -sf http://localhost:3000/health || { echo "❌ Health check failed"; exit 1; }
+echo "✅ [Service] running"
 
-# ─── Health Check ───────────────────────────────────────────
-echo ""
-echo "Running health check..."
-[Quick checks to verify the demo environment is alive]
-# e.g., curl -sf http://localhost:3000/health || { echo "❌ Health check failed"; exit 1; }
-echo "  ✅ [Service] is running on [port/URL]"
+if [ "$CI_MODE" = true ]; then echo "=== CI health check passed ==="; exit 0; fi
 
-# ─── CI Mode: exit after health check ───────────────────────
-if [ "$CI_MODE" = true ]; then
-  echo ""
-  echo "=== CI health check passed ==="
-  exit 0
-fi
+# ─── Interactive: Try it ───
+echo "🎯 [Feature Name] is live!"
+echo "  👉 Open: http://localhost:3000/[page]"
+echo "  👉 API:  curl http://localhost:3000/api/[endpoint]"
+echo "Press Ctrl+C to stop."
 
-# ─── Interactive: Show the user what to try ─────────────────
-echo ""
-echo "══════════════════════════════════════════════════"
-echo "  🎯 [Feature Name] is live! Try it:"
-echo "══════════════════════════════════════════════════"
-echo ""
-[Print concrete things the user can DO right now:]
-echo "  👉 Open in browser: http://localhost:3000/[page]"
-echo ""
-echo "  👉 Try the API:"
-echo "     curl http://localhost:3000/api/[endpoint]"
-echo ""
-echo "  👉 [Another thing to try]:"
-echo "     [Concrete command or URL]"
-echo ""
-echo "──────────────────────────────────────────────────"
-echo "  Press Ctrl+C to stop the demo."
-echo "──────────────────────────────────────────────────"
-echo ""
-
-# Keep the service running until the user stops it
 wait || true
 ```
 
