@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--auto] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
+argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, Skill, AskUserQuestion]
 ---
 
@@ -54,12 +54,10 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 
 # Adoption — Wrap existing code with SDD documentation (after reverse-spec)
 /smart-sdd adopt                         # Adopt existing code with SDD docs
-/smart-sdd adopt --auto                  # Without stopping for confirmation
 /smart-sdd adopt --from ./path           # Read artifacts from specified path
 
 # Pipeline — Run the full SDD pipeline (after init, add, or reverse-spec)
 /smart-sdd pipeline                      # With per-step confirmation
-/smart-sdd pipeline --auto               # Without stopping for confirmation
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
 
 # Step Mode — Execute a specific step for a specific Feature
@@ -87,9 +85,6 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd parity                        # Check parity against original source
 /smart-sdd parity --source ./old-project # Specify source path explicitly
 
-# --auto can be combined with any command to skip confirmation
-/smart-sdd specify F001 --auto
-/smart-sdd pipeline --from ./path --auto
 ```
 
 ---
@@ -140,7 +135,6 @@ $ARGUMENTS parsing rules:
   --prd <path>    → Path to PRD document (for init and add commands)
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
-  --auto          → Skip Checkpoint confirmation and execute all steps automatically
   --domain <val>  → Project domain profile: "app" (default). Determines demo pattern, parity dimensions, and verify steps
 ```
 
@@ -226,7 +220,7 @@ For reverse-spec domain profiles (analysis axes, registries, etc.), see `../reve
 
 All spec-kit command executions follow a mandatory 4-step protocol: **(1) Assemble** context per [`reference/injection/{command}.md`](reference/injection/) → **(2) Checkpoint** HARD STOP for user approval → **(3) Execute** spec-kit + **Review** artifacts (HARD STOP) → **(4) Update** global artifacts.
 
-Full procedures (CheckpointApproval, ReviewApproval, `--auto`/`--dangerously-skip-permissions` handling, Skill Invocation Fallback) are defined in `commands/pipeline.md`.
+Full procedures (CheckpointApproval, ReviewApproval, Skill Invocation Fallback) are defined in `commands/pipeline.md`.
 
 ---
 
@@ -255,26 +249,6 @@ For git branch operations: see `reference/branch-management.md`.
 ---
 
 ## Shared Rules
-
-### `--auto` Mode
-
-When `--auto` is specified:
-- BOTH Checkpoint (Step 2) and Review (Step 3b-c) are skipped — content is still displayed for transparency, but execution proceeds immediately without waiting for user approval
-- This is the ONLY way to bypass HARD STOPs
-- Clarify scan still runs; if ambiguities found, `speckit-clarify` uses its own recommendation as default
-- For `init`: Phase 2 Checkpoint is skipped; if `--prd` is provided, reasonable defaults are used throughout
-- For `parity`: Phase 4 HARD STOPs are skipped; groups are auto-assigned per suggested grouping (conservative: no auto-exclusions)
-- For `expand`: Tier selection is skipped if argument was provided
-- Error handling AskUserQuestion calls are NOT skipped (errors always need user attention)
-
-### `--dangerously-skip-permissions` Mode
-
-When `--dangerously-skip-permissions` is active:
-- AskUserQuestion is replaced with regular text messages ("Approve as-is / Request modifications?") and WAIT for text response
-- Checkpoints are NOT auto-skipped — only `--auto` does that
-- For `init`: Branch question is skipped (stay on current branch). `--prd` argument is recommended to minimize interaction
-- Interactive Q&A still requires user input (but via text, not AskUserQuestion)
-- All other functionality is identical
 
 ### Non-Git Projects
 

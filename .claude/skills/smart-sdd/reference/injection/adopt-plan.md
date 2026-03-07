@@ -2,7 +2,7 @@
 
 > Per-command injection rules for the **plan** step within `/smart-sdd adopt`.
 > This is a variant of the standard `plan` injection — documents existing architecture as-is rather than designing new architecture.
-> For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+> For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 
 ---
 

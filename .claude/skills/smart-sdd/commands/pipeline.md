@@ -1,16 +1,15 @@
 # Pipeline Execution — Common Protocol + Feature Pipeline
 
-> Reference: Read after `/smart-sdd pipeline` or any step-mode command (constitution, specify, plan, tasks, analyze, implement, verify) is invoked. For shared rules (MANDATORY RULES, --auto), see SKILL.md.
+> Reference: Read after `/smart-sdd pipeline` or any step-mode command (constitution, specify, plan, tasks, analyze, implement, verify) is invoked. For shared rules (MANDATORY RULES), see SKILL.md.
 > For per-command context injection details, read `reference/injection/{command}.md` (shared patterns in `reference/context-injection-rules.md`).
 > For git branch operations, also read `reference/branch-management.md`.
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
-**All spec-kit command executions follow this 4-step protocol. Each step MUST be executed in order. No step may be skipped (unless `--auto` mode is active). In particular, Execute (Step 3) includes a mandatory Review HARD STOP — the spec-kit command runs, then the Review is presented, all in one continuous action.**
+**All spec-kit command executions follow this 4-step protocol. Each step MUST be executed in order. No step may be skipped. In particular, Execute (Step 3) includes a mandatory Review HARD STOP — the spec-kit command runs, then the Review is presented, all in one continuous action.**
 
 > ⚠️ **The most common failure mode is skipping Review.** After executing a spec-kit command (Step 3), you MUST stop, display the generated artifacts, and ask the user for approval. Do NOT proceed to Update without Review. Do NOT combine Execute and Update into a single flow.
 >
-> **`--auto` mode summary**: When `--auto` is specified, BOTH Checkpoint (Step 2) and Review (Step 3b-c) are skipped — their content is still displayed for transparency, but execution proceeds immediately without waiting for user approval. This is the ONLY way to bypass these stops. Without `--auto`, every Checkpoint and Review is a mandatory HARD STOP.
 
 ### 1. Assemble — Context Assembly
 
@@ -82,10 +81,6 @@ PROCEDURE CheckpointApproval:
 ```
 
 **⚠️ CRITICAL**: After AskUserQuestion returns, you MUST check the response BEFORE doing anything else. If the response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed to Execute.
-
-**Mode overrides**:
-- `--auto`: Skip the LOOP entirely. Content is still displayed for transparency but execution proceeds immediately.
-- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Approve as-is / Request modifications?") and WAIT for text response. Checkpoints are NOT auto-skipped — only `--auto` does that.
 
 ### 3. Execute — spec-kit Command Execution
 
@@ -208,10 +203,6 @@ PROCEDURE ReviewApproval:
 ```
 
 **⚠️ CRITICAL**: After AskUserQuestion returns, you MUST check the response BEFORE doing anything else. If the response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed to Update.
-
-**Mode overrides**:
-- `--auto`: Skip the LOOP entirely (Step 3b content is still displayed for transparency).
-- `--dangerously-skip-permissions`: Replace AskUserQuestion with a text message ("Approve / Request modifications / I've finished editing?") and WAIT for text response.
 
 **Per-command option overrides**: Some commands use context-specific options (e.g., Clarify: "Run clarify again", Analyze: outcome-dependent, Verify: pass/fail-specific). See [context-injection-rules.md](reference/context-injection-rules.md) for details.
 
@@ -397,8 +388,7 @@ Executes the following steps **strictly in order** for each Feature.
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
 
-> **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip. The only exception is `--auto` mode.
->
+> **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip.>
 > **CRITICAL**: After each `speckit-*` command completes, it prints its own "Next phase:" or "Next step:" message. **IGNORE these messages completely — do NOT show them to the user.** smart-sdd controls the flow: after Execute, you MUST immediately proceed to the Review(STOP) step, not follow spec-kit's suggestions.
 
 #### Clarify Trigger (after specify Review)
@@ -415,8 +405,6 @@ After `speckit-specify` completes and the user approves the Review, **automatica
    - If unresolved ambiguities remain, display them and ask if the user wants to run clarify again or proceed
 4. **If no ambiguities found**: Skip clarify and proceed directly to plan
    - Display: "✅ No critical ambiguities detected in spec.md. Proceeding to plan."
-
-**`--auto` mode**: Clarify scan still runs. If ambiguities are found, `speckit-clarify` executes but uses its own recommendation/suggestion as the default answer for each question (clarify's built-in "recommended" option). The user can still intervene if watching.
 
 #### Per-Feature Environment Variable Check (implement step)
 

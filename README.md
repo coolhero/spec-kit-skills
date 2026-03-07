@@ -165,8 +165,8 @@ All spec-kit command executions follow this 4-step protocol:
 | Step | Description |
 |------|------------|
 | **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. Also references actual implementation results from preceding Features (under `specs/{NNN-feature}/`). If a source file is missing or a section contains only placeholder text, that source is gracefully skipped |
-| **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify before execution. If modifications are requested, applies changes and re-confirms. **Skipped only in `--auto` mode** (summary is still displayed but execution proceeds immediately). In `--dangerously-skip-permissions` environments, confirmation is requested via regular text message instead of AskUserQuestion |
-| **Execute+Review** | Executes the corresponding spec-kit command and **immediately** — without stopping — presents the generated/modified artifacts for review. The user can approve, request modifications (re-execute), or edit artifacts directly. **HARD STOP** — same rules as Checkpoint. Execute and Review are ONE continuous action to prevent agent from stopping between them. **Review skipped only in `--auto` mode** |
+| **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify before execution. If modifications are requested, applies changes and re-confirms |
+| **Execute+Review** | Executes the corresponding spec-kit command and **immediately** — without stopping — presents the generated/modified artifacts for review. The user can approve, request modifications (re-execute), or edit artifacts directly. **HARD STOP** — same rules as Checkpoint. Execute and Review are ONE continuous action to prevent agent from stopping between them |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress status in `sdd-state.md` |
 
 ### Per-Command Context Injection
@@ -215,8 +215,6 @@ If the argument is omitted, the current directory is analyzed.
 | `--stack same` | Use the same tech stack as existing project (skip interactive prompt) |
 | `--stack new` | Migrate to a new tech stack (skip interactive prompt) |
 | `--name <name>` | Set new project name for identity renaming (e.g., original → new brand) |
-
-> **Note**: When running with `--dangerously-skip-permissions`, interactive prompts (AskUserQuestion) may be auto-skipped. Always provide `--scope` and `--stack` arguments in such environments to ensure correct strategy selection.
 
 #### Execution Workflow
 
@@ -415,12 +413,10 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 
 # SDD Adoption -- Document existing code with SDD artifacts
 /smart-sdd adopt                        # Adopt pipeline: specify → plan → analyze → verify
-/smart-sdd adopt --auto                 # Without stopping for confirmation
 /smart-sdd adopt --from ./path          # Read artifacts from specified path
 
 # Pipeline -- Run the full SDD pipeline (after init, add, or reverse-spec)
 /smart-sdd pipeline                      # With per-step confirmation
-/smart-sdd pipeline --auto               # Without stopping for confirmation
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
 
 # Step Mode -- Execute a specific step for a specific Feature
@@ -456,9 +452,6 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 /speckit-diff --local ./spec-kit-repo    # Compare against local spec-kit source
 /speckit-diff --output report.md         # Write report to file
 
-# --auto can be combined with any command to skip confirmation
-/smart-sdd specify F001 --auto
-/smart-sdd pipeline --from ./path --auto
 ```
 
 #### Four Project Modes

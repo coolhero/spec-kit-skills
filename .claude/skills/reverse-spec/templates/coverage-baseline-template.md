@@ -55,7 +55,6 @@ Items found in the original source that are not assigned to any Feature. Each it
 > - `new-feature` — New Feature created to cover this item (see roadmap.md)
 > - `cross-cutting` — Flagged as cross-cutting concern for constitution/infrastructure Feature
 > - `excluded` — Intentionally excluded (see Intentional Exclusions below)
-> - `unclassified` — Not yet classified (only when `--dangerously-skip-permissions` skips the classification HARD STOP)
 
 ---
 

@@ -33,9 +33,6 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 - "Create a new branch" — Create and checkout a new branch for the SDD work
 
 **If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
-
-> **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
-
 **Step 4 — Auto-initialize case study logging**:
 Check if `case-study-log.md` exists at the target directory root:
 - **If not exists**: Read the case-study skill's `templates/case-study-log-template.md` and write it to `{target-directory}/case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
@@ -92,7 +89,7 @@ If the user selects "Yes":
    - **Phase 4-3 coverage baseline**: When classifying unmapped items, highlight items containing the original project name prefix (e.g., "CherryINOAuth") and suggest renamed versions (e.g., "AngduINOAuth" or "INOAuth")
    - **constitution-seed.md**: Include a "Naming Conventions" section documenting the old → new mapping
 
-> **Note**: This question can be skipped via `--name <new-name>` argument. If `--dangerously-skip-permissions` is set without `--name`, the original project name is kept as-is.
+> **Note**: This question can be skipped via `--name <new-name>` argument.
 
 ### Decision History Recording — Strategy
 
@@ -544,7 +541,7 @@ Tier 3 (Optional):
   F004-analytics  — [rationale]
 ```
 
-**THEN**, ask via AskUserQuestion for approval/adjustments. **If response is empty → re-ask.** If AskUserQuestion is unavailable (e.g., `--dangerously-skip-permissions` environment), display the results and proceed with the proposed classification.
+**THEN**, ask via AskUserQuestion for approval/adjustments. **If response is empty → re-ask.**
 
 ### Decision History Recording — Architecture
 
@@ -760,10 +757,6 @@ Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-
 - Record all intentional exclusions with their reasons and descriptions
 - Add coverage notes from the classification process
 
-#### `--dangerously-skip-permissions` handling
-
-When AskUserQuestion is unavailable, display unmapped items via regular text and ask for classification via text message. Items without explicit classification are marked as `unclassified` in coverage-baseline.md for later review via `/smart-sdd parity`.
-
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M4.
 
 ### 4-4. Completion Report
@@ -791,7 +784,6 @@ Demo Groups: [K] groups defined — Integration Demos trigger when all Features 
 Next steps:
   /smart-sdd pipeline       — Run the full SDD pipeline for rebuild (recommended)
   /smart-sdd adopt          — Run the adoption pipeline to wrap existing code with SDD docs
-  /smart-sdd pipeline --auto — Run without stopping for per-step confirmation
   /smart-sdd parity          — Check implementation parity against original source (after pipeline completes)
 
 smart-sdd will automatically:

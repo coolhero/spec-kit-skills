@@ -1,7 +1,7 @@
 # Adopt — SDD Adoption Pipeline
 
 > Reference: Read after `/smart-sdd adopt` is invoked.
-> For shared rules (MANDATORY RULES, --auto, Common Protocol), see SKILL.md.
+> For shared rules (MANDATORY RULES, Common Protocol), see SKILL.md.
 > For per-step injection details, read `reference/injection/adopt-{specify,plan,verify}.md`.
 > For git branch operations, also read `reference/branch-management.md`.
 
@@ -108,6 +108,8 @@ This establishes a baseline to distinguish pre-existing issues from adoption-int
 Use AskUserQuestion:
 - **"Run bootstrap"** — Proceed with the full environment bootstrap below
 - **"Skip — environment is ready"** — Skip to Phase 0. Record in sdd-state.md: `Environment Bootstrap: skipped (user confirmed ready)`
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ### Step 1 — Dependency Installation
 
@@ -339,7 +341,7 @@ Key behaviors:
 
    Merge Feature branch [branch-name] to main?
    ```
-   Options: "Approve merge", "Review issues first"
+   Use AskUserQuestion with options: "Approve merge", "Review issues first". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 3. **After merge**:
    - Feature status → `adopted`
@@ -394,6 +396,8 @@ Use AskUserQuestion:
 - "Accept recommended" — Use the suggested run method
 - "Use different command" — User specifies custom command
 - "Skip final demo" — No demo creation (not recommended)
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ### Step 3 — Create Demo Script
 

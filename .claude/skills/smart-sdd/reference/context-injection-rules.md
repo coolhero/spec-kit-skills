@@ -34,11 +34,6 @@ The following patterns apply to ALL commands:
 
 **BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
 **SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
-
-> **`--auto` mode**: When `--auto` is specified, all Checkpoint and Review steps are skipped — the context summary and artifact review are still displayed for transparency, but execution proceeds immediately without waiting for user approval.
->
-> **`--dangerously-skip-permissions` environment**: When AskUserQuestion is unavailable, Checkpoints and Reviews are still enforced — the content is displayed and a regular text message asks the user for confirmation. Only `--auto` skips Checkpoints and Reviews.
-
 ---
 
 ## Missing/Sparse Content Handling

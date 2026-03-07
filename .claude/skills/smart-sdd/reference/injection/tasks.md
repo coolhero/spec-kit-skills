@@ -1,7 +1,7 @@
 # Context Injection: Tasks
 
 > Per-command injection rules for `/smart-sdd tasks [FID]`.
-> For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+> For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 
 ---
 

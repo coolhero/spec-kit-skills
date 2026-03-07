@@ -503,3 +503,36 @@ Multiple features were designed specifically to prevent AI agent misbehavior:
 - Suppress spec-kit "Next step" output (agents auto-advancing past review)
 
 This pattern suggests that agent guardrails are as important as the workflow logic itself.
+
+---
+
+## [2026-03-07] HARD STOP Enforcement Audit + Mode Simplification
+
+### HARD STOP Empty Response Enforcement (13 locations fixed)
+
+**Problem**: User input was being skipped during execution. Audit revealed 13 HARD STOP locations where `AskUserQuestion` was called but lacked inline "If response is empty → re-ask" enforcement text. These locations used `(CheckpointApproval)` shorthand referencing pipeline.md's procedure, but agents don't reliably cross-reference other files for procedural definitions.
+
+**Root cause**: `add.md` is loaded independently from `pipeline.md`. When add.md referenced `(CheckpointApproval)`, the agent had no access to the procedure definition in pipeline.md that contained the empty-response loop logic.
+
+**Fix**: Added explicit inline enforcement `**If response is empty → re-ask** (per MANDATORY RULE 1).` to all 13 locations:
+- `add.md` (7): Pre-Check, Phase 2, Phase 3, Phase 4, Phase 5, Phase 5c, Phase 6
+- `adopt.md` (3): Bootstrap skip, Merge checkpoint, Final demo
+- `verify-phases.md` (2): Phase 1 fail, Phase 3 fail
+- `coverage.md` (1): Gap resolution choice
+
+Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STOP** — Use AskUserQuestion with options: [...]`.
+
+### `--auto` and `--dangerously-skip-permissions` Removal
+
+**Decision**: Removed both modes entirely from all skill files and READMEs.
+
+**Rationale**: These modes created confusion and conflicted with the HARD STOP enforcement philosophy. `--auto` was the only way to bypass HARD STOPs, which undermined the safety-first design. `--dangerously-skip-permissions` added complexity for an edge case that diluted the clarity of the enforcement rules. Both can be re-implemented later if needed.
+
+**Scope**: ~30 files modified across smart-sdd commands, reference files, injection files, reverse-spec, case-study, and both READMEs (EN+KO).
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Empty response enforcement | Inline at every HARD STOP | Agents don't cross-reference procedures from other files |
+| `(CheckpointApproval)` shorthand | Replaced with full inline format | Shorthand was not being followed by agents |
+| `--auto` mode | Removed entirely | Conflicted with HARD STOP enforcement philosophy |
+| `--dangerously-skip-permissions` | Removed entirely | Added complexity for edge case, diluted enforcement clarity |

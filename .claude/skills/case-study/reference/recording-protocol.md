@@ -2,7 +2,7 @@
 
 > **Execution reference** — Workflow files trigger recording by referencing `§ M{N}` of this document. The agent reads the corresponding section and appends an entry to `case-study-log.md` (project root).
 
-Recording is **automatic** at each milestone — the agent composes observations from available context. No user interaction is needed, including in `--auto` and `--dangerously-skip-permissions` modes.
+Recording is **automatic** at each milestone — the agent composes observations from available context. No user interaction is needed.
 
 ---
 

@@ -2,7 +2,7 @@
 
 > Per-command injection rules for the **specify** step within `/smart-sdd adopt`.
 > This is a variant of the standard `specify` injection — optimized for wrapping existing code with SDD documentation rather than defining new features.
-> For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+> For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 
 ---
 

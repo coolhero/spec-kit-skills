@@ -227,21 +227,6 @@ One row per group decision from Phase 4.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M7.
 
-### `--auto` Mode
-
-When `--auto` is specified:
-- Phases 1-3 (automated analysis and report generation) proceed normally
-- Phase 4 HARD STOPs are skipped:
-  - Groups are auto-assigned based on the suggested grouping in Phase 3
-  - "Create new Feature" for groups with a clear Feature scope
-  - "Create infrastructure Feature" for cross-cutting groups (constitution update included)
-  - No gaps are auto-excluded (conservative: all gaps are treated as actionable)
-- Phase 5 displays the results as usual
-
-### `--dangerously-skip-permissions` handling
-
-Same handling as other commands: AskUserQuestion replaced with text messages. Classification prompts display options as regular text and wait for text response.
-
 ---
 
 ## Catch-Up Workflow: Handling Original Source Updates

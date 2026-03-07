@@ -1,6 +1,6 @@
 # Verify Command — Phase Details
 
-> Read after `/smart-sdd verify [FID]` is invoked. For Common Protocol (Checkpoint, Review, `--auto`), see `pipeline.md`.
+> Read after `/smart-sdd verify [FID]` is invoked. For Common Protocol (Checkpoint, Review), see `pipeline.md`.
 > For per-command injection rules, see `reference/injection/verify.md`.
 
 ---
@@ -33,7 +33,7 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - "Show failure details" — display full test/build/lint output
 - "Acknowledge limited verification" — proceed with ⚠️ limited-verify (requires reason)
 
-**Do NOT proceed to Phase 2** until all three checks pass **OR** the user explicitly acknowledges limited verification.
+**If response is empty → re-ask** (per MANDATORY RULE 1). **Do NOT proceed to Phase 2** until all three checks pass **OR** the user explicitly acknowledges limited verification.
 
 **Limited-verify exception path**: If the user selects "Acknowledge limited verification":
 1. Ask for the reason (e.g., "Tests require external service not available", "Build depends on Feature B not yet merged", "DB migration requires completed Feature C")
@@ -132,7 +132,7 @@ Please create a demo script at demos/F00N-name.sh that:
 - "Show failure details" — display full demo script output
 - "Acknowledge limited verification" — proceed with ⚠️ limited-verify (requires reason)
 
-**Do NOT proceed to Phase 4** until the demo passes **OR** the user explicitly acknowledges limited verification.
+**If response is empty → re-ask** (per MANDATORY RULE 1). **Do NOT proceed to Phase 4** until the demo passes **OR** the user explicitly acknowledges limited verification.
 
 **Limited-verify exception path** (same as Phase 1): If the user selects "Acknowledge limited verification":
 1. Ask for the reason (e.g., "Demo requires Feature B's UI not yet built", "No frontend in this Feature — pure library")

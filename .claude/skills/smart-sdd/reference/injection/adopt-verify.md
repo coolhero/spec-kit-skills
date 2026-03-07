@@ -2,7 +2,7 @@
 
 > Per-command injection rules for the **verify** step within `/smart-sdd adopt`.
 > This is a variant of the standard `verify` injection — test failures are non-blocking (pre-existing issues), and Feature status is set to `adopted` instead of `completed`.
-> For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+> For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 
 ---
 

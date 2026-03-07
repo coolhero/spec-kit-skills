@@ -1,6 +1,6 @@
 # Init Command — Greenfield Project Setup
 
-> Reference: Read after `/smart-sdd init` is invoked. For shared rules (MANDATORY RULES, --auto, argument parsing), see SKILL.md.
+> Reference: Read after `/smart-sdd init` is invoked. For shared rules (MANDATORY RULES, argument parsing), see SKILL.md.
 
 ## Init Command — Greenfield Project Setup
 
@@ -36,8 +36,6 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 - "Create a new branch" — Create and checkout a new branch for the SDD work
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
-
-> **`--dangerously-skip-permissions` mode**: Skip branch question. Stay on current branch.
 
 **Step 4 — Auto-initialize case study logging**:
 Check if `case-study-log.md` exists at project root:
@@ -162,14 +160,3 @@ Next steps:
   /smart-sdd constitution       — Finalize the constitution first (optional)
 ```
 
-> **`--auto` mode**: Automatically selects "Define Features now" and chains into add. If `--prd` was provided, add runs in PRD mode.
-
-> **`--dangerously-skip-permissions` mode**: Same as --auto behavior — chains into add automatically.
-
-#### Init and --auto Mode
-
-When `--auto` is specified, the Phase 2 Checkpoint is skipped (content is displayed but proceeds immediately) and Feature Definition chains into add automatically. Interactive Q&A in Phases 1-2 still requires user input. If `--prd` is provided with `--auto`, reasonable defaults are used throughout (all 6 Best Practices, AI-suggested conventions, PRD-based Feature extraction).
-
-#### Init and --dangerously-skip-permissions
-
-Same handling as other commands: interactive prompts use regular text messages instead of AskUserQuestion. The `--prd` argument is recommended in this environment to minimize required interaction. Feature definition chains into add automatically.

@@ -59,7 +59,6 @@ Phase 6 → Generate final artifacts → DELETE specs/add-draft.md
 ## Pre-Check: Pending Feature Review (Conditional)
 
 > Runs ONCE before Phase 1, only when both completed AND pending Features exist.
-> Skipped when `--auto` is active.
 
 When a project has partially implemented Features from reverse-spec (some completed, some still pending), the user may want to clean up stale pending Features before defining new ones.
 
@@ -90,12 +89,14 @@ Would you like to review these before adding new Features?
 - **"Keep all — proceed to add"** → Skip cleanup, continue to Phase 1
 - **"Review and clean up"** → Enter cleanup flow (see below)
 
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
 ### Cleanup Flow
 
 If the user selects "Review and clean up":
 
 1. Present each pending Feature with details (description, dependencies, SBI count)
-2. Ask via AskUserQuestion (multiSelect): "Which Features would you like to remove?"
+2. Ask via AskUserQuestion (multiSelect): "Which Features would you like to remove?" **If response is empty → re-ask** (per MANDATORY RULE 1).
 3. For each selected Feature, clean up:
    - **`roadmap.md`**: Remove from Feature Catalog, Dependency Graph, Release Groups, Demo Groups
    - **`sdd-state.md`**: Remove from Feature Progress, Feature Mapping, Demo Group Progress
@@ -377,7 +378,7 @@ Using the script output + Phase 1 candidates, identify:
 
 Update `specs/add-draft.md` with Phase 2 results.
 
-**HARD STOP** (CheckpointApproval): "Approve analysis", "Request modifications"
+**HARD STOP** — Use AskUserQuestion with options: "Approve analysis", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 
@@ -440,7 +441,7 @@ Assign the next available Feature ID(s) based on existing Features in roadmap.md
 
 Update `specs/add-draft.md` with the confirmed Feature structure.
 
-**HARD STOP** (CheckpointApproval): "Accept proposal", "Request modifications"
+**HARD STOP** — Use AskUserQuestion with options: "Accept proposal", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 
@@ -510,7 +511,7 @@ If no new behaviors: proceed without expansion.
 
 Update `specs/add-draft.md` with SBI mapping and NEW entries.
 
-**HARD STOP** (CheckpointApproval): "Accept SBI selection", "Modify selection"
+**HARD STOP** — Use AskUserQuestion with options: "Accept SBI selection", "Modify selection". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 If no unmapped behaviors match the filter AND no new behaviors: display "No SBI changes" and proceed to Phase 5.
 
@@ -551,11 +552,13 @@ Based on the new Feature's entity/API dependencies and user scenario:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** (CheckpointApproval):
+**HARD STOP** — Use AskUserQuestion with options:
 - **"Accept recommendation"** — Use the suggested group assignment
 - **"Join [other group]"** — Join a different existing group (specify which)
 - **"Create new Demo Group"** — Define a brand new demo group for this Feature
 - **"No demo group"** — Infrastructure/cross-cutting Feature, no user-facing demo
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ### 5c. New Demo Group Creation (if selected)
 
@@ -667,7 +670,7 @@ Update `specs/add-draft.md` with Demo Group assignment.
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** (CheckpointApproval): "Approve and finalize", "Request modifications"
+**HARD STOP** — Use AskUserQuestion with options: "Approve and finalize", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 If "Request modifications": loop back to the relevant Phase (user indicates which aspect to change).
 

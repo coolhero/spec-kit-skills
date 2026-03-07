@@ -1,7 +1,7 @@
 # Context Injection: Verify
 
 > Per-command injection rules for `/smart-sdd verify [FID]`.
-> For shared patterns (HARD STOP, Checkpoint, --auto, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+> For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 > For the full verification workflow (Phase 1-4 execution details), see [verify-phases.md](../../commands/verify-phases.md).
 
 ---
