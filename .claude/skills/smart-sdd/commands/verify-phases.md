@@ -111,7 +111,15 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - Demo-only components are marked with `// @demo-only` (removed after all Features complete)
 - Promotable components are marked with `// @demo-scaffold — will be extended by F00N-[feature]`
 
-**Step 4 — Execute the demo in CI mode (`--ci`)**:
+**Step 4 — Validate CI/Interactive path convergence**:
+Before running the demo, **read the demo script source** and verify:
+- The `if [ "$CI_MODE" = true ]` exit point comes **AFTER** the actual Feature startup command (e.g., `npm run dev`, `tauri dev`, server start), not before
+- CI mode and interactive mode use the **same startup commands** — CI must not take a shortcut path (e.g., only checking build without starting the Feature)
+- **REJECT if**: the CI branch exits before the Feature's main process is started — this means CI can pass while the actual demo fails
+
+> **Why this matters**: A demo that passes CI but fails for the user is worse than no CI check at all. Example: CI checks "frontend build" → passes. User runs the demo → `tauri: command not found`. The CI check gave false confidence.
+
+**Step 5 — Execute the demo in CI mode (`--ci`)**:
 - Run `demos/F00N-name.sh --ci` and verify it completes without errors (health check passes)
 - Capture the demo output (stdout/stderr) for the Review display
 - **Runtime error scan (BLOCKING)**: After demo execution, scan the captured stdout/stderr for runtime error patterns:
