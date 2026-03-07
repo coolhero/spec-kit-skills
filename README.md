@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | Last updated: 2026-03-07 20:49 KST
+[한국어 README](README.ko.md) | Last updated: 2026-03-07 21:03 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -572,9 +572,47 @@ Five read-only bash scripts reduce agent context consumption by pre-aggregating 
 | `pipeline-status.sh` | Pipeline progress overview | Session orientation |
 | `validate.sh` | Cross-file consistency check | After artifact updates |
 
-#### Feature Restructuring
+#### Mid-Pipeline Feature Modification
 
-During pipeline execution, Feature definitions can be modified using `/smart-sdd restructure`. This command supports splitting, merging, moving requirements, changing dependencies, and deleting Features. All changes are automatically propagated to every affected artifact (roadmap, registries, pre-context files, sdd-state) with user approval before execution.
+Requirements change. During pipeline execution, smart-sdd provides multiple mechanisms to modify spec artifacts without starting over:
+
+**1. Restructure — Modify Feature definitions**
+
+`/smart-sdd restructure` handles structural changes to Features:
+- **Split**: One Feature → two or more (narrow the scope)
+- **Merge**: Two or more Features → one (combine related work)
+- **Move**: Transfer requirements, entities, or APIs between Features
+- **Reorder**: Change dependency relationships
+- **Delete**: Remove Features entirely
+
+All changes are automatically propagated to every affected artifact (roadmap, registries, pre-context files, sdd-state) with user approval. Affected steps are marked with 🔀 for re-execution.
+
+**2. Manual editing at Review checkpoints**
+
+Every pipeline step ends with a Review checkpoint offering three options:
+- **"Approve"** — Continue to next step
+- **"Request modifications"** — Ask the agent to make specific changes
+- **"I've finished editing"** — Edit spec artifacts directly in your editor, then return
+
+This means at any Review checkpoint (specify, plan, tasks, analyze, implement, verify), you can open `spec.md`, `plan.md`, `tasks.md`, etc. in your editor, make changes, and the pipeline will re-read and re-validate the modified artifacts before proceeding.
+
+**3. Pipeline `--start` — Re-run from a specific step**
+
+After making changes, use `/smart-sdd pipeline --start <step>` to re-run the pipeline from a specific step (e.g., `--start plan` to regenerate plans based on updated specs). Prerequisites are validated automatically.
+
+**4. Coverage / Parity — Post-completion gap detection**
+
+After Features are implemented:
+- `/smart-sdd coverage` detects unmapped source behaviors and can add them to existing Features (marks affected steps with 🔀 from specify onward)
+- `/smart-sdd parity` (brownfield rebuild) detects structural and logic gaps, with options to add gaps to existing Features or create remediation Features
+
+**Recommended workflow by timing**:
+
+| When | Recommended Action |
+|------|-------------------|
+| During specify/plan/tasks (pre-implementation) | Edit at Review checkpoint or use `restructure` |
+| During implement/verify (code exists) | Complete the current step, then `restructure` or `--start` |
+| After pipeline completes | Use `coverage` or `parity` to detect and remediate gaps |
 
 #### Pipeline Mode Details
 

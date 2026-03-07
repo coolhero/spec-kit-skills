@@ -627,3 +627,14 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | Per-Feature eligibility | Eligible (prerequisites met), Blocked (prerequisites missing), Already-past (resume from next uncompleted) | Three-way classification gives clear feedback; doesn't force re-execution of completed steps |
 | HARD STOP pre-check | Display eligible/blocked summary, user confirms before proceeding | User sees exactly which Features will run and which are blocked; prevents surprise failures |
 | Phase 0 always skipped | Constitution verified but never re-executed in --start mode | Constitution is a one-time setup; if it's not done, pipeline should be run normally first |
+
+---
+
+## [2026-03-07] README — Mid-Pipeline Feature Modification Section
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Section rename | "Feature Restructuring" → "Mid-Pipeline Feature Modification" | Original title only covered `restructure`; new title encompasses all 4 modification mechanisms |
+| 4 mechanisms documented | restructure, manual editing at Review, `--start`, coverage/parity | Users need a single reference for all ways to handle requirement changes during pipeline |
+| Timing-based recommendations | Table mapping pipeline phase → recommended action | Different mechanisms suit different pipeline stages; clear guidance reduces confusion |
+| Review checkpoint editing highlighted | "I've finished editing" option at every Review step | This existing capability was undocumented in README; critical for ad-hoc changes during pipeline |
