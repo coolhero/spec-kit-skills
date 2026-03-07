@@ -19,7 +19,7 @@ The original source path is resolved in this priority order:
 
 1. `--source <path>` argument (if provided)
 2. `Source Path` field from `sdd-state.md`
-3. If neither is available: use AskUserQuestion to prompt the user for the path
+3. If neither is available: use AskUserQuestion to prompt the user for the path. **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 **Verification**: Before proceeding, verify the resolved source path exists and is accessible. If not found, display error and ask user to provide a valid path.
 

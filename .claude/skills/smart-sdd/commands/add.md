@@ -564,7 +564,7 @@ Based on the new Feature's entity/API dependencies and user scenario:
 
 If the user selects "Create new Demo Group":
 
-1. Ask for group details via AskUserQuestion:
+1. Ask for group details via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1):
    - **Scenario name**: Short name (e.g., "Notification Management")
    - **Description**: One-line user journey description
 
