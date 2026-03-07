@@ -223,6 +223,12 @@ When creating `specs/history.md` for the first time, use this header:
 > Records key strategic and architectural decisions with rationale.
 ```
 
+**Project Context block** (required for rebuild/adoption — written ONCE after the header):
+- **Rebuild**: Include Mode, Original (name + path), Target (name + path), Stack, Identity mapping
+- **Adoption**: Include Mode, Project (name + path), Purpose
+- **Greenfield**: No Project Context block needed (no original source)
+- See `reverse-spec/commands/analyze.md` § Decision History Recording for the full format
+
 **Recording rules**:
 1. Create the file with the header above if it doesn't exist
 2. APPEND only — never overwrite or reorder existing entries

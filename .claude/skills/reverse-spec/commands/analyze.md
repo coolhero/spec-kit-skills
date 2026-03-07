@@ -102,7 +102,35 @@ After all Phase 0 questions are answered, **append** to `specs/history.md` (crea
 > Records key strategic and architectural decisions with rationale.
 ```
 
-Add a dated section under the header:
+**Rebuild mode**: If this is a rebuild project (not adoption), add a Project Context block immediately after the header:
+
+```markdown
+## Project Context
+
+| | Details |
+|---|---------|
+| **Mode** | Rebuild |
+| **Original** | [original-project-name] (`[absolute-path-to-source]`) |
+| **Target** | [new-project-name] (`[absolute-path-to-target]`) |
+| **Stack** | [Same Stack / New Stack: old-stack → new-stack] |
+| **Identity** | [original-name] → [new-name] (or "Same") |
+```
+
+This block is written ONCE at creation time and never modified. It serves as a permanent record of what is being rebuilt from what.
+
+**Adoption mode**: If this is an adoption project:
+
+```markdown
+## Project Context
+
+| | Details |
+|---|---------|
+| **Mode** | Adoption |
+| **Project** | [project-name] (`[absolute-path]`) |
+| **Purpose** | Wrapping existing code with SDD documentation |
+```
+
+Add a dated section after the Project Context:
 
 ```markdown
 ---
