@@ -708,3 +708,242 @@ implement에서 verify로 넘어가기 위한 필수 조건:
 - [ ] speckit-implement 내부 동작과의 충돌 가능성 (spec-kit이 자체 테스트를 실행하는 경우)
 - [ ] 태스크 레벨 검증이 context window를 과도하게 소모하지 않는지
 - [ ] 데스크톱 앱(Electron/Tauri)에서 빌드 게이트의 "서버 시작" 조건을 어떻게 적용할지
+
+---
+
+## Part 9: 파이프라인 단계별 버그 예방 강화 (F006 Post-Mortem)
+
+> F006 구현 중 발견된 실제 버그 7건을 분석하여, 파이프라인 각 단계에서 사전 방지할 수 있는 검증/규칙을 도출.
+> Part 8이 "실행해서 잡자"라면, Part 9는 "애초에 발생을 막자".
+
+### 발견된 버그 유형과 근본 원인
+
+| # | 버그 | 근본 원인 | 누락된 단계 |
+|---|------|-----------|-------------|
+| 1 | remark-gfm v4의 `\p{...}` 정규식 → WKWebView 런타임 크래시 | 패키지 선택 시 타겟 런타임 JS 엔진 호환성 미검증 | plan |
+| 2 | Zustand 셀렉터 `?? []` → 매 렌더마다 새 참조 → 무한 리렌더 | 상태 관리 라이브러리 anti-pattern 규칙 없음 | plan/implement |
+| 3 | `h-full` (height: 100%) → WebKit flex item에서 레이아웃 붕괴 | CSS 레이아웃의 타겟 WebView 엔진 호환성 미검증 | implement |
+| 4 | Provider 스토어 미로드, executor 하드코딩, 빈 토픽 무시 | Cross-Feature 의존 시 초기화 순서/데이터 흐름 미검증 | analyze/implement |
+| 5 | `provider.healthStatus.status` → healthStatus 없는 provider 크래시 | IPC 경계에서 optional 필드 안전성 미검증 | implement |
+| 6 | 토픽 자동생성 → loadMessages → 인메모리 메시지 덮어씀 | 비동기 상태 업데이트 간 경쟁 조건 미식별 | plan/implement |
+| 7 | 빌드 성공 + 125/125 테스트 통과 → 런타임 버그 6건 | verify가 빌드/테스트에만 의존, 런타임 미검증 | verify |
+
+### 단계별 개선안
+
+---
+
+#### 9-A. plan 단계 강화
+
+**1. Target Runtime Compatibility Matrix**
+
+plan의 Research Decisions에 타겟 런타임 호환성 체크 추가:
+
+```
+Target Runtime Compatibility:
+  Runtime: WKWebView (macOS 12+) / WebView2 / WebKitGTK
+  JS Engine Constraints:
+    - ❌ Unicode property escapes (\p{...}) — WKWebView < macOS 13
+    - ❌ RegExp lookbehind assertions — WKWebView < macOS 16.4
+    - ⚠️ Top-level await — WebKitGTK version dependent
+  Package Selection Rule:
+    - npm 패키지 선택 시 타겟 런타임의 JS 엔진 지원 여부 확인 필수
+    - caniuse.com / MDN Compat Data 참조
+```
+
+방지하는 버그: #1 (패키지 호환성), #3 (CSS 호환성)
+
+**2. State Management Anti-pattern Checklist**
+
+plan의 Research Decisions에 상태 관리 라이브러리별 규칙 추가:
+
+```
+Zustand:
+  - ❌ 셀렉터에서 인라인 fallback 값 사용 금지 (매 렌더 새 참조 생성)
+    Bad:  useStore(s => s.items[id] ?? [])
+    Good: const EMPTY = []; useStore(s => s.items[id] ?? EMPTY)
+  - ❌ 셀렉터에서 새 객체/배열 생성 금지
+  - ✅ fallback 값은 모듈 레벨 상수로 정의
+
+Redux Toolkit:
+  - ❌ createSelector 없이 파생 데이터 인라인 계산 금지
+  - ✅ reselect memoization 활용
+
+React Query / TanStack Query:
+  - ❌ select 콜백에서 새 객체 생성 금지
+  - ✅ structuralSharing 활용
+```
+
+방지하는 버그: #2 (무한 리렌더), #6 (경쟁 조건의 일부)
+
+**3. Async State Race Condition Analysis**
+
+plan 단계에서 비동기 상태 충돌 가능성 분석:
+
+```
+Race Condition Checklist:
+  - store.setState와 IPC/API 호출이 동시에 같은 키를 업데이트하는가?
+  - optimistic update 후 서버 응답이 이를 덮어쓰는 경우가 있는가?
+  - 자동 생성(create) → 즉시 로드(load) 시 빈 응답이 인메모리 데이터를 밀어내는가?
+  → 해당 경우: guard 패턴 필수 (이미 데이터 있으면 skip)
+```
+
+방지하는 버그: #6 (경쟁 조건)
+
+---
+
+#### 9-B. analyze 단계 강화
+
+**4. Cross-Feature Data Flow Analysis**
+
+analyze 단계에서 Feature 간 데이터 의존성 분석:
+
+```
+Cross-Feature Data Flow:
+  이 Feature가 참조하는 다른 Feature의 스토어:
+    - ProviderStore (F003) — provider 목록, 선택된 provider
+    - SettingsStore (F002) — 사용자 설정
+
+  초기화 순서 검증:
+    - [ ] ProviderStore가 앱 시작 시 로드되는가? → ❌ Settings 탭 방문 시에만 로드
+    - [ ] 해당 스토어 데이터가 없을 때(empty state) 동작이 정의되어 있는가?
+    - [ ] Placeholder/하드코딩 값 대신 실제 스토어에서 읽는가?
+
+  의존 스토어 초기화 누락 시:
+    → implement에서 앱 초기화 로직에 스토어 로드 추가 필수
+```
+
+방지하는 버그: #4 (초기화 누락, placeholder 값)
+
+---
+
+#### 9-C. implement 단계 강화
+
+**5. IPC Boundary Safety Rules**
+
+IPC/API 경계에서의 타입 안전성 규칙:
+
+```
+Tauri IPC (Rust → TypeScript):
+  - 모든 IPC 응답 객체의 필드 접근은 optional chaining 사용
+    Bad:  provider.healthStatus.status
+    Good: provider.healthStatus?.status ?? 'unknown'
+  - 또는 Rust 쪽에서 serde(default) 설정으로 항상 값 보장
+
+REST API (JSON → TypeScript):
+  - API 응답의 모든 중첩 필드 접근에 null check 필수
+  - Zod/io-ts 등 런타임 스키마 검증 권장
+
+GraphQL:
+  - nullable 필드는 코드에서도 null 처리 필수
+```
+
+방지하는 버그: #5 (optional 필드 크래시)
+
+**6. Platform CSS Constraints (도메인별)**
+
+타겟 플랫폼의 CSS 제약사항 주입:
+
+```
+Tauri (WKWebView):
+  - ❌ flex item 자식의 height: 100% → WebKit에서 동작 안 함
+    → flex-1 min-h-0 사용
+  - ❌ -webkit-app-region: drag과 pointer-events 충돌
+  - ⚠️ backdrop-filter → -webkit-backdrop-filter 필요
+  - ⚠️ scroll-behavior: smooth → WKWebView 버전별 차이
+
+Electron (Chromium):
+  - 대부분 Chrome과 동일하나 Electron 버전별 Chromium 버전 차이 주의
+  - ❌ window.open 동작이 브라우저와 다름
+```
+
+방지하는 버그: #3 (레이아웃 붕괴)
+
+**7. Cross-Feature Integration Checklist**
+
+다른 Feature의 데이터를 사용하는 코드에 대한 강제 체크:
+
+```
+다른 Feature 스토어 참조 시 필수 확인:
+  - [ ] 해당 스토어가 앱 시작 시 초기화되는가?
+  - [ ] 데이터가 아직 로드되지 않은 상태(loading/empty)의 UI가 정의되어 있는가?
+  - [ ] 실제 스토어에서 읽는가? (하드코딩/placeholder 아닌지)
+  - [ ] 해당 스토어의 데이터가 변경될 때 이 컴포넌트가 올바르게 리렌더되는가?
+```
+
+방지하는 버그: #4 (초기화 누락)
+
+---
+
+#### 9-D. verify 단계 강화
+
+**8. Empty State Rendering Smoke Test**
+
+verify Phase 2에 추가 — 모든 스토어가 초기 상태일 때 렌더링 검증:
+
+```
+Empty State Test:
+  - 모든 스토어를 초기값(빈 배열, null, undefined)으로 설정
+  - 각 페이지/라우트를 렌더링
+  - 크래시 없이 렌더링되는가?
+  - 의미 있는 empty state UI가 표시되는가? (빈 화면이 아닌)
+```
+
+방지하는 버그: #4 (초기 상태 크래시), #5 (optional 필드 크래시)
+
+**9. Runtime Launch Verification**
+
+verify Phase 3 강화 — "빌드 성공 ≠ 런타임 성공" 원칙 적용:
+
+```
+빌드/테스트 통과 후 추가 검증:
+  - [ ] 앱이 실제로 실행되는가? (프로세스 시작 + 크래시 없음)
+  - [ ] 기본 화면이 렌더링되는가? (빈 화면 아닌)
+  - [ ] 첫 번째 인터랙션이 동작하는가? (클릭/입력 → 반응)
+  - [ ] JS 콘솔에 에러가 없는가?
+```
+
+방지하는 버그: #7 (빌드 통과 but 런타임 실패)
+
+→ Part 8의 "데모 사전 실행"과 연결됨. Part 8이 메커니즘(실행+fix 루프), Part 9가 검증 항목(무엇을 검사할지).
+
+---
+
+### 수정 대상 (예상)
+
+| 단계 | 수정 파일 | 추가 내용 |
+|------|-----------|-----------|
+| plan | `reference/injection/plan.md` | Target Runtime Compatibility Matrix, Anti-pattern Checklist, Race Condition Analysis |
+| analyze | `reference/injection/analyze.md` | Cross-Feature Data Flow Analysis |
+| implement | `reference/injection/implement.md` | IPC Safety Rules, Platform CSS Constraints, Integration Checklist |
+| implement | `domains/app.md` | 프레임워크/플랫폼별 제약사항 (Tauri, Electron 등) |
+| verify | `commands/verify-phases.md` | Empty State Test (Phase 2), Runtime Launch (Phase 3) |
+
+### Part 8과의 관계
+
+```
+Part 8: 구조적 개선 — "실행하고 고치자"
+  - 태스크 레벨 빌드 검증 (언제 실행할지)
+  - 데모 사전 실행 (언제 실행할지)
+  - 자동 Fix 루프 (실패 시 어떻게 고칠지)
+  - 빌드 게이트 (통과 조건)
+
+Part 9: 내용적 개선 — "이런 버그를 막자"
+  - 무엇을 검사할지 (호환성, anti-pattern, 데이터 흐름, 경쟁 조건)
+  - 어떤 규칙을 주입할지 (IPC 안전성, CSS 제약, 초기화 체크)
+  - 어떤 테스트를 추가할지 (empty state, runtime launch)
+
+→ Part 8의 "빌드 게이트"에서 Part 9의 검증 항목을 실행
+→ Part 8의 "자동 Fix 루프"에서 Part 9의 규칙 위반을 수정
+```
+
+### 구현 우선순위: 높음 (실전 버그 기반, Part 8과 함께 구현)
+
+### 미결정 사항
+
+- [ ] plan 단계 검증 항목이 context window를 과도하게 소모하는지 (라이브러리별 anti-pattern 목록 크기)
+- [ ] 도메인 프로파일(app.md)에 플랫폼별 제약을 얼마나 상세히 넣을지 (Tauri/Electron/웹앱 각각)
+- [ ] Cross-Feature Data Flow Analysis를 analyze에 넣을지 implement에 넣을지
+- [ ] Empty State Test를 자동화할 수 있는지 (테스트 코드 생성 vs 수동 체크리스트)
+- [ ] State Management Anti-pattern을 라이브러리별로 관리할지, 공통 원칙만 유지할지
+- [ ] IPC Safety Rules가 Tauri 외 다른 프레임워크(Electron IPC, React Native Bridge)에도 적용 가능한지
+- [ ] Race Condition Analysis의 실효성 — plan 단계에서 미리 식별 가능한 범위의 한계

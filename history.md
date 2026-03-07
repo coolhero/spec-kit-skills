@@ -658,3 +658,14 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 근본 원인 진단 | implement 중 코드 미실행 + 자동 fix 루프 부재 | 코드 작성 → 최초 실행(verify Phase 3)까지 간격이 너무 크고, 실패 시 에이전트가 자동 수정하지 않음. 데모가 전혀 동작하지 않거나 런타임 에러 다수 발생 |
 | 4대 메커니즘 제안 | A: 태스크 레벨 빌드 검증, B: 데모 사전 실행, C: 자동 Fix 루프, D: 빌드 게이트 | A는 에러 조기 발견, B는 implement 완료 전 데모 1회 실행, C는 verify 실패 시 자동 수정(최대 3회), D는 implement → verify 전이 조건 |
 | 우선순위 | 높음 (현재 가장 큰 실사용 문제) | 실제 테스트에서 데모 동작 문제가 가장 빈번하게 보고됨 |
+
+---
+
+## [2026-03-07] TODO Part 9 — F006 Post-Mortem 기반 파이프라인 단계별 버그 예방
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 데이터 소스 | F006 구현 중 발견된 실제 버그 7건 분석 | 추상적 개선이 아닌 실전 버그 기반 설계. 빌드+테스트 125/125 통과했지만 런타임 버그 6건 발생 |
+| Part 8과의 관계 | Part 8 = 구조(언제/어떻게 실행), Part 9 = 내용(무엇을 검사) | Part 8의 빌드 게이트에서 Part 9의 검증 항목 실행, Part 8의 Fix 루프에서 Part 9의 규칙 위반 수정 |
+| 4단계 개선 | plan(호환성+anti-pattern+경쟁조건), analyze(데이터흐름), implement(IPC안전+CSS제약+통합체크), verify(empty state+런타임) | 7건의 버그 각각에 대해 "어느 단계에서 막았어야 하는가" 역추적하여 배치 |
+| 주요 발견 | "빌드 성공 ≠ 런타임 성공" — verify가 빌드/테스트에만 의존 | 125/125 테스트 통과했지만 WKWebView 호환성, Zustand 무한 리렌더, IPC 필드 크래시 등 6건 미검출 |
