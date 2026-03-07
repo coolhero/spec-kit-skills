@@ -338,9 +338,8 @@ Executes the following steps **strictly in order** for each Feature.
 **Every "Review" below is a HARD STOP — you MUST use AskUserQuestion and WAIT for explicit user approval before continuing.**
 
 ```
-0. pre-flight → Ensure on main branch (clean state)
+0. pre-flight → Ensure on main branch (clean state) → Create Feature branch {NNN}-{short-name}
 1. specify    → Assemble → Checkpoint(STOP) → speckit-specify → Review(STOP) → Update
-                (spec-kit creates Feature branch: {NNN}-{short-name})
    1b. clarify → Auto-scan spec.md for ambiguities → speckit-clarify (conditional sub-step of specify)
 2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
 3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP)
@@ -417,7 +416,7 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 > **Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names.
 
-> **Git branching**: spec-kit automatically creates a Feature branch during `speckit-specify`. All subsequent steps (plan through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
+> **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.
 
@@ -509,7 +508,7 @@ Executes a single command. Validates prerequisites, then runs the common protoco
 | Command | Prerequisite | Validation Method |
 |---------|-------------|-------------------|
 | `constitution` | constitution-seed exists | Check existence of `BASE_PATH/constitution-seed.md` |
-| `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]-[name]/pre-context.md`. Verify current branch is `main` (spec-kit will create the Feature branch) |
+| `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]-[name]/pre-context.md`. Verify current branch is `main`. **Create Feature branch**: `git checkout -b {NNN}-{short-name}` before running speckit-specify |
 | `plan` | spec.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/spec.md`. Verify current branch matches the Feature |
 | `tasks` | plan.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/plan.md`. Verify current branch matches the Feature |
 | `analyze` | tasks.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/tasks.md`. Verify current branch matches the Feature |

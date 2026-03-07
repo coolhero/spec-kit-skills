@@ -11,15 +11,15 @@ smart-sdd integrates with spec-kit's Feature branch workflow to ensure each Feat
 ### Branch Lifecycle
 
 ```
-main ─── (start) ──→ speckit-specify creates branch {NNN}-{short-name}
-                          │
-                          ├── plan, tasks, implement, verify (all on Feature branch)
-                          │
-                          ├── Post-Feature updates (entity-registry, api-registry, etc.)
-                          │
-                          ├── Merge Checkpoint (HARD STOP — user approval)
-                          │
-main ←── (merge) ────────┘
+main ─── (pre-flight) ──→ smart-sdd creates branch {NNN}-{short-name}
+                               │
+                               ├── specify, plan, tasks, implement, verify (all on Feature branch)
+                               │
+                               ├── Post-Feature updates (entity-registry, api-registry, etc.)
+                               │
+                               ├── Merge Checkpoint (HARD STOP — user approval)
+                               │
+main ←── (merge) ─────────────┘
 ```
 
 ### Pre-Flight: Before Starting a Feature
@@ -31,12 +31,19 @@ Before executing `specify` for a new Feature:
    - If there are uncommitted changes: Warn the user and ask how to proceed (stash, commit, or abort)
 2. **Ensure main is up to date**: Run `git status` to check for uncommitted changes
    - If the project has a remote: Suggest `git pull` but do not force it
+3. **Create Feature branch**: smart-sdd creates and switches to the Feature branch
+   ```bash
+   git checkout -b {NNN}-{short-name}
+   ```
+   - `{NNN}` = spec-kit Name prefix from sdd-state.md Feature Mapping (e.g., `001`)
+   - `{short-name}` = Feature short name (e.g., `auth`, `product-catalog`)
+   - Record the branch name in sdd-state.md Feature Mapping → Branch column
+
+> **Why smart-sdd creates the branch**: spec-kit is initialized with `--no-git` (Step 0c) to avoid conflicts with existing git repos. This means `speckit-specify` does NOT create Feature branches. smart-sdd handles all git operations explicitly.
 
 ### During Feature Development (specify → verify)
 
-spec-kit handles the branch creation automatically during `speckit-specify`:
-- Creates branch `{NNN}-{short-name}` and switches to it
-- All subsequent commands (`plan`, `tasks`, `implement`, `verify`) execute on this Feature branch
+All commands (`specify`, `plan`, `tasks`, `implement`, `verify`) execute on the Feature branch created by smart-sdd:
 - smart-sdd validates the current branch matches the expected Feature branch before each step
 
 **Branch validation** (for `plan`, `tasks`, `implement`, `verify`):
