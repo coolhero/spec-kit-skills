@@ -583,3 +583,24 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | generate.md Section 2 structured | Project Context table + Strategic Decisions + Anticipated Challenges | Background section was unstructured; now has clear subsections from history.md |
 | generate.md Section 8 Impact Assessment | Before vs After comparison table + "What was delivered" from M6 entries | Outcomes section lacked concrete before/after impact measurement |
 | history.md as primary case-study source | Added guidance note: "history.md is the richest source of decision context" | Multiple sections (2,4,5,7,8) should pull from history.md; previously underutilized |
+
+---
+
+## [2026-03-07] Pipeline Reset + Reverse-Spec Checkpoint
+
+### `smart-sdd reset` Command
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Reset command | `commands/reset.md` — deletes pipeline state, preserves reverse-spec | Users frequently need to restart smart-sdd pipeline from scratch after experimental runs; manual cleanup is error-prone |
+| Two modes | `reset` (pipeline only) vs `reset --all` (include logs) | Default preserves case-study-log and history.md for reference; `--all` provides clean slate |
+| Registry restoration | Restore entity/api-registry from `reverse-spec-complete` tag | Registries are modified during pipeline (new entities/APIs added); reset should return to reverse-spec baseline |
+| Skip pre-validation | Reset bypasses spec-kit CLI check + project init check | Destructive operation doesn't need spec-kit installed; has its own pre-validation in reset.md Step 1 |
+
+### Reverse-Spec Completion Checkpoint
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Commit + tag approach | Auto-commit + `git tag -f reverse-spec-complete` after Phase 4-4 | Tag provides stable reference point for `smart-sdd reset`; commit ensures clean git state before pipeline starts |
+| Tag over branch | Tag instead of separate branch | Branch requires merge step and can cause state confusion; tag is a permanent, immutable reference point |
+| Force-tag (`-f`) | Overwrite tag on re-run | Users may run reverse-spec multiple times; latest run should always be the reset target |

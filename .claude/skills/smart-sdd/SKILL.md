@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|status"
+argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -78,6 +78,10 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd expand T2,T3                  # Activate Tier 2 and Tier 3 Features
 /smart-sdd expand full                   # Activate all remaining deferred Features
 
+# Reset pipeline state (start smart-sdd over from scratch)
+/smart-sdd reset                         # Reset pipeline, keep reverse-spec artifacts + logs
+/smart-sdd reset --all                   # Reset pipeline + reinitialize case-study-log + clean history.md
+
 # Status check
 /smart-sdd status                        # Check overall progress status
 
@@ -129,7 +133,7 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity)
+  First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity | reset)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
   --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>    → Path to PRD document (for init and add commands)
@@ -142,7 +146,7 @@ $ARGUMENTS parsing rules:
 - If `--from` is specified: use that path
 - If not specified: `./specs/reverse-spec/`
 
-**Pre-validation** (all commands except `init`, which has its own Pre-Phase):
+**Pre-validation** (all commands except `init` and `reset`, which have their own Pre-Phase/Pre-Validation):
 
 **Step 0a. Git check**: Run `git rev-parse --is-inside-work-tree`. If not a repo → `git init` + initial commit. If git not installed → warn and continue without git.
 
@@ -193,6 +197,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
 | `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
 | `parity` | `commands/parity.md` | Check parity against original source |
+| `reset` | `commands/reset.md` | Reset pipeline state (keep reverse-spec artifacts) |
 | `status` | `commands/status.md` | Check progress |
 
 For all commands: also read `domains/{domain}.md` for domain-specific behavior.

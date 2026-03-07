@@ -787,3 +787,31 @@ smart-sdd will automatically:
   4. Update entity-registry.md and api-registry.md as Features are completed
   5. Track SBI coverage (B### → FR-### mapping) and Demo Group progress in sdd-state.md
 ```
+
+### 4-5. Completion Checkpoint (commit + tag)
+
+After displaying the Completion Report, create a git checkpoint so the user can reset smart-sdd pipeline state back to this point:
+
+1. **Stage all reverse-spec artifacts**:
+   ```bash
+   git add specs/reverse-spec/ specs/history.md case-study-log.md .env.example .gitignore
+   ```
+
+2. **Commit**:
+   ```bash
+   git commit -m "chore: reverse-spec analysis complete — [N] Features extracted"
+   ```
+
+3. **Tag** (for smart-sdd reset to reference):
+   ```bash
+   git tag -f reverse-spec-complete
+   ```
+
+4. Display:
+   ```
+   📌 Checkpoint: Tagged as 'reverse-spec-complete'
+      Use /smart-sdd reset to return to this point if you need to restart the pipeline.
+   ```
+
+> **If not a git repo**: Skip this step entirely. Display: "ℹ️ No git repository — checkpoint not created."
+> **If tag already exists**: Overwrite with `-f` flag (user may have run reverse-spec multiple times).

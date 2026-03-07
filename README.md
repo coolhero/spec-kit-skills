@@ -437,6 +437,10 @@ A skill that **wraps** spec-kit commands, automatically injecting cross-Feature 
 /smart-sdd expand T2,T3                  # Activate Tier 2 and Tier 3 Features
 /smart-sdd expand full                   # Activate all remaining deferred Features
 
+# Reset pipeline state (start smart-sdd over from scratch)
+/smart-sdd reset                         # Reset pipeline, keep reverse-spec artifacts + logs
+/smart-sdd reset --all                   # Full reset including case-study-log + history.md pipeline entries
+
 # Status check
 /smart-sdd status                        # Check overall progress status
 

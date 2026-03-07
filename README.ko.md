@@ -441,6 +441,10 @@ spec-kit 커맨드를 **감싸서(wrapping)** 실행하며, 각 단계에 교차
 /smart-sdd expand T2,T3                  # Tier 2, Tier 3 Feature 활성화
 /smart-sdd expand full                   # 보류된 모든 Feature 활성화
 
+# 파이프라인 상태 초기화 (smart-sdd를 처음부터 다시 시작)
+/smart-sdd reset                         # 파이프라인 초기화, reverse-spec 산출물 + 로그 보존
+/smart-sdd reset --all                   # 전체 초기화 (case-study-log + history.md 파이프라인 항목 포함)
+
 # 상태 확인
 /smart-sdd status                        # 전체 진행 상태 조회
 
