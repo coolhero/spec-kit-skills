@@ -1285,3 +1285,124 @@ Downgrade Compatibility Matrix (plan 단계):
 - [ ] 10-D: store dependency graph를 plan에서 자동 생성할 수 있는지 (코드 분석 기반)
 - [ ] 10-E: persistence 라이브러리별 write 모드 목록의 관리 범위 (Tauri 외 다른 프레임워크도?)
 - [ ] 10-F: 다운그레이드 호환성 정보 소스 (npm changelog? GitHub releases? 자동 수집 가능한지)
+
+---
+
+## Part 11: Demo 실패의 근본 원인 — 5가지 구조적 공백 (F006 종합 분석)
+
+> F006-chat 구현에서 발견된 모든 버그를 역추적하여 도출한 파이프라인의 구조적 공백.
+> Part 8/9/10의 개별 개선 항목들이 왜 필요한지를 상위 프레임으로 설명.
+
+### 전제: 발견된 버그 10건 전부 정적 분석 통과
+
+| 버그 | tsc | build | 실제 동작 |
+|------|-----|-------|-----------|
+| Zustand `?? []` 참조 불안정 | ✅ | ✅ | 무한 리렌더 |
+| remark-gfm v4 Unicode regex | ✅ | ✅ | WebKit 크래시 |
+| `h-full` vs `flex-1` WebKit | ✅ | ✅ | 빈 화면 |
+| Provider registry 미등록 | ✅ | ✅ | executor 생성 실패 |
+| `store.save()` 누락 | ✅ | ✅ | 데이터 휘발 |
+| `healthStatus?.` 누락 | ✅ | ✅ | TypeError |
+| Store 초기화 순서 | ✅ | ✅ | providers: 0 |
+| deleteTopic double-set | ✅ | ✅ | 중간 상태 불일치 |
+| loadMessages 이중 호출 | ✅ | ✅ | StrictMode 충돌 |
+| executorRef 미초기화 | ✅ | ✅ | stale executor |
+
+---
+
+### 공백 1: Runtime Verification 부재
+
+verify 단계가 `tsc --noEmit` + `npm run build` + unit test로 구성. 이 세 가지 모두 정적 분석.
+specify에서 정의한 동작(behavior)이 implement 이후 실제로 동작하는지 확인하는 **runtime verification loop**이 파이프라인에 존재하지 않음.
+
+- **현재 상태**: 정적 분석만 존재
+- **필요한 것**: Smoke launch + ErrorBoundary 기반 runtime check
+- **관련 Part**: Part 8 (implement-time verification), Part 10-B (smoke launch 구체화)
+
+---
+
+### 공백 2: Feature 간 Integration Contract 부재
+
+SDD는 Feature 단위로 specify → plan → tasks → implement → verify를 실행. 각 Feature는 독립적으로 스펙되고 독립적으로 검증됨. 하지만 실제 앱에서 Feature는 독립적으로 동작하지 않음.
+
+발견된 cross-feature 버그:
+- F003(provider) → F006(chat): `ProviderList.tsx`의 `healthStatus` optional chaining 누락이 F006 실행 시에야 발견
+- F003(provider) → F006(chat): Provider store가 `App.tsx`에서 로드되지 않아 chat에서 `providers: 0`
+- F004(assistant) → F006(chat): Assistant store의 초기화 타이밍과 chat의 auto-topic 생성이 충돌
+
+pre-context에 "F003에 의존"이라고 적혀 있지만, 이것은 **문서적 참조**일 뿐 **실행 가능한 계약**이 아님. F003이 F006에게 제공해야 하는 것(초기화된 provider store, nullable 필드 명세, registry 등록 완료 상태)이 검증 가능한 형태로 정의되어 있지 않음.
+
+- **현재 상태**: 문서적 참조만 존재
+- **필요한 것**: Feature 간 제공/소비 계약의 실행 가능한 정의
+- **관련 Part**: Part 9-B (Cross-Feature Data Flow), Part 10-C (Nullable Field Tracking), Part 10-D (Store Dependency Graph)
+
+---
+
+### 공백 3: Target Runtime Constraints 무인식
+
+spec-kit의 어떤 단계에서도 타겟 런타임의 제약 조건을 수집하거나 반영하지 않음.
+
+이번 프로젝트의 런타임: Tauri 2.x + WKWebView (macOS 12, Darwin 21.6.0)
+- Chrome DevTools 없음 — 에러를 볼 수 없어서 ErrorBoundary를 직접 만들어야 했음
+- WebKit JS 엔진 — `\p{...}` Unicode regex 미지원 → remark-gfm v4 크래시
+- WebKit CSS 렌더러 — `h-full` (percentage height) flex container에서 해석 불가
+- WKWebView 고유 동작 — `console.log` 접근 불가, 디버깅 수단 제한
+
+Stack은 "Tauri 2.x + React + TypeScript"로 명시되었지만, Tauri 2.x가 내부적으로 WKWebView를 사용한다는 것, 그리고 WKWebView의 JS/CSS 제약은 어디에도 기록되지 않았음.
+
+- **현재 상태**: Stack 이름만 기록
+- **필요한 것**: 타겟 런타임의 JS/CSS/API 제약 조건 명세
+- **관련 Part**: Part 9-A (Target Runtime Compatibility Matrix), Part 10-F (Downgrade Compatibility)
+
+---
+
+### 공백 4: Framework Behavioral Contract 누락
+
+버그의 절반 이상이 프레임워크의 암묵적 동작 규칙을 위반해서 발생:
+
+| 프레임워크 | 암묵적 규칙 | 위반 결과 |
+|------------|-------------|-----------|
+| Zustand | selector가 매 렌더마다 새 참조를 반환하면 무한 리렌더 | `?? []` → 무한 루프 |
+| React StrictMode | effect가 2번 실행됨 → side-effect에 멱등성 필요 | loadMessages 이중 호출 |
+| React | useRef는 컴포넌트 생명주기에 바인딩 → prop 변경 시 수동 리셋 필요 | executorRef stale |
+| tauri-plugin-store | `set()`은 메모리만 변경, `save()`를 호출해야 디스크에 기록 | 데이터 휘발 |
+| ES Modules | side-effect import는 명시적으로 import해야 실행됨 | registry 비어있음 |
+
+이것들은 TypeScript 타입 시스템이 잡을 수 없음. specify 단계에서 "Zustand을 state management로 사용한다"고만 적고, "Zustand selector는 referential stability를 보장해야 한다"는 어디에도 적히지 않음. implement를 실행하는 AI가 해당 프레임워크의 모든 함정을 미리 알고 있어야 한다는 전제인데, 실제로는 그렇지 않음.
+
+- **현재 상태**: 프레임워크 이름만 기록
+- **필요한 것**: 프레임워크별 함정(pitfall) 체크리스트
+- **관련 Part**: Part 9-A (Anti-pattern Checklist), Part 10-E (Persistence Write-Through)
+
+---
+
+### 공백 5: Module Dependency Graph 부재
+
+plan 단계는 파일 목록과 변경 계획을 생성하지만 모듈 간 import graph를 추적하지 않음.
+
+이번에 발생한 가장 치명적인 버그:
+```
+src/lib/ai/providers/index.ts  →  registerBuiltinProviders() 호출
+src/lib/ai/registry.ts         →  providerRegistry (비어있음)
+src/lib/ai/executor.ts          →  providerRegistry.resolve() → undefined → throw
+```
+
+`providers/index.ts`는 어디에서도 import되지 않았음. `executor.ts`는 `registry.ts`를 직접 import하지만, registry에 adapter를 등록하는 `providers/index.ts`는 import하지 않음. plan 단계에서 "executor.ts가 registry.ts를 사용한다"고만 계획하고, "registry에 adapter를 등록하는 모듈이 import chain에 포함되어야 한다"는 계획하지 않았음.
+
+- **현재 상태**: 파일 목록만 존재
+- **필요한 것**: Import chain + side-effect 실행 보장 추적
+- **관련 Part**: Part 10-A (Module Import Graph Validation), Part 10-D (Store Dependency Graph)
+
+---
+
+### 종합: 5가지 공백 → Part 매핑
+
+| # | 공백 | 현재 상태 | 필요한 것 | 관련 Part |
+|---|------|-----------|-----------|-----------|
+| 1 | Runtime Verification | 정적 분석만 존재 | Smoke launch + runtime check | Part 8, 10-B |
+| 2 | Integration Contract | 문서적 참조만 존재 | Feature 간 계약의 실행 가능한 정의 | Part 9-B, 10-C, 10-D |
+| 3 | Runtime Constraints | Stack 이름만 기록 | 타겟 런타임 JS/CSS/API 제약 명세 | Part 9-A, 10-F |
+| 4 | Behavioral Contract | 프레임워크 이름만 기록 | 프레임워크별 pitfall 체크리스트 | Part 9-A, 10-E |
+| 5 | Module Dependency Graph | 파일 목록만 존재 | Import chain + side-effect 보장 | Part 10-A, 10-D |
+
+**결론**: 이 5가지가 해결되지 않으면, 모든 Feature에서 동일한 패턴의 실패가 반복됨. implement가 아무리 완벽해도, verify가 정적 분석에서 멈추는 한, demo에서 실패하는 것은 구조적으로 불가피.

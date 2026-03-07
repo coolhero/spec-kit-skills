@@ -696,3 +696,17 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 10-D Store Dependency Graph | plan/tasks에서 스토어 의존 그래프 명시적 생성 (Part 9-A/B 확장) | Provider store가 App.tsx에서 미로드 → chat Feature 전체 동작 실패 사례 |
 | 10-E Persistence Write-Through | implement에서 write-back 라이브러리 save() 호출 검증 (NEW) | tauri-plugin-store set()이 in-memory only인데 save() 누락 사례 |
 | 10-F Downgrade Compatibility | plan에서 패키지 다운그레이드 시 타입/API 호환성 매트릭스 (Part 9-A 확장) | remark-gfm v4→v3 다운그레이드 시 TypeScript 타입 불일치 사례 |
+
+---
+
+## [2026-03-07] TODO Part 11 — Demo 실패의 근본 원인 5가지 구조적 공백 (F006 종합 분석)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 분석 방법 | F006 버그 10건 전수 역추적 → 5가지 구조적 공백 도출 | 개별 버그 수정이 아닌 파이프라인 구조 자체의 문제 식별 |
+| 공백 1: Runtime Verification | verify가 정적 분석(tsc/build/unit test)에서 멈춤 | 10건 전부 정적 분석 통과 → runtime verification loop 부재가 근본 원인 |
+| 공백 2: Integration Contract | Feature 간 의존이 문서적 참조뿐, 실행 가능한 계약 없음 | F003→F006 cross-feature 버그 3건이 Feature 독립 검증 구조에서 누락 |
+| 공백 3: Runtime Constraints | Stack 이름만 기록, 런타임 제약 무인식 | WKWebView의 JS/CSS 제약이 constitution/specify 어디에도 반영 안 됨 |
+| 공백 4: Behavioral Contract | 프레임워크 이름만 기록, 암묵적 동작 규칙 누락 | Zustand referential stability, React StrictMode 멱등성, tauri-plugin-store write-back 등 타입 시스템이 잡을 수 없는 함정 |
+| 공백 5: Module Dependency Graph | 파일 목록만 존재, import chain 미추적 | side-effect import 누락으로 registry 패턴 전체 실패 |
+| Part 8-10과의 관계 | Part 11은 상위 프레임, Part 8-10은 구체적 해법 | 5가지 공백이 해결되지 않으면 모든 Feature에서 동일 패턴 실패 반복 |
