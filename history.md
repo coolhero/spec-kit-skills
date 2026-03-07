@@ -536,3 +536,21 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | `(CheckpointApproval)` shorthand | Replaced with full inline format | Shorthand was not being followed by agents |
 | `--auto` mode | Removed entirely | Conflicted with HARD STOP enforcement philosophy |
 | `--dangerously-skip-permissions` | Removed entirely | Added complexity for edge case, diluted enforcement clarity |
+
+### Comprehensive Dry-Run Audit (3 additional fixes)
+
+**Audit scope**: Full dry-run of all 4 user journeys (Greenfield, SDD Adoption, Rebuild, Incremental) + Step Mode + utility commands. Traced SKILL.md routing → command files → cross-file transitions for every command path.
+
+**Findings**: 3 additional AskUserQuestion locations missing re-ask enforcement (missed in the initial 13-location audit):
+- `pipeline.md`: Constitution Incremental Update approval
+- `add.md`: Phase 5c New Demo Group creation details input
+- `parity.md`: Source path resolution fallback prompt
+
+**Fix**: Added inline `**If response is empty → re-ask** (per MANDATORY RULE 1)` to all 3 locations.
+
+**False positive from audit**: recording-protocol.md relative path (`../../case-study/reference/recording-protocol.md`) was flagged as broken but verified correct — `commands/` → `../../` = `skills/` → `case-study/` ✓
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 3 additional re-ask enforcement | Inline at each location | Same pattern as initial 13-location fix |
+| recording-protocol.md paths | Kept as-is | Relative paths verified correct via filesystem test |
