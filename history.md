@@ -795,3 +795,9 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 산출물 위치 | pre-context.md → "Runtime Exploration Results" 섹션 (Feature별 분배) | 기존 pre-context 구조 안에 통합. Phase 4-2에서 라우트-Feature 매핑 기반 분배 |
 | adopt 모드 | Phase 1.5 전체 스킵 | adoption은 기존 앱을 문서화하는 것이므로 런타임 탐색 불필요 |
 | .env 보안 규칙 | secret 변수에 실제 값 절대 미기입. placeholder 주석만 | NEVER write actual secret values to .env — 기존 env var 보안 규칙과 일관 |
+
+### MCP-GUIDE.md 트러블슈팅 섹션 추가
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 트러블슈팅 추가 | 설치 확인 + Failed to connect 해결 가이드 | MCP 서버는 login shell 거치지 않아 .zshrc PATH 미적용. `-e PATH=...`로 환경변수 명시 필요. 실제 설치 테스트에서 발견된 문제 |
