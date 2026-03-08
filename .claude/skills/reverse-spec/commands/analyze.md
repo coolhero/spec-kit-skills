@@ -343,47 +343,47 @@ If the project was detected as an Electron app in Phase 1 AND `playwright_availa
 ```
 🔍 Runtime Exploration Available
 
-Playwright MCP가 감지되었습니다. 원본 앱을 실제로 실행하고
-브라우저로 탐색하여 UI/UX를 기록할 수 있습니다.
+Playwright MCP detected. You can run the original app and
+explore it via browser to capture UI/UX details.
 
-이 단계는 선택사항이며, 스킵해도 Phase 2 코드 분석은 정상 진행됩니다.
-단, 실행하면 UI 레이아웃, 사용자 플로우, 시각 정보를 더 정확하게 추출합니다.
+This step is optional — skipping it will not affect Phase 2 code analysis.
+However, running it enables more accurate extraction of UI layout, user flows, and visual information.
 ```
 Ask via AskUserQuestion:
-- **"Run Runtime Exploration (Recommended)"** — 앱 실행 + 브라우저 탐색
-- **"Skip — code analysis only"** — Phase 2로 바로 이동
+- **"Run Runtime Exploration (Recommended)"** — launch app + browser exploration
+- **"Skip — code analysis only"** — proceed directly to Phase 2
 
 **If Playwright MCP is available AND Electron AND `electron_mode = cdp`**:
 (CDP already configured — standard flow)
 ```
 🔍 Runtime Exploration Available
 
-Playwright MCP + CDP 연결이 감지되었습니다. Electron 앱을 실행하고
-브라우저로 탐색하여 UI/UX를 기록할 수 있습니다.
+Playwright MCP + CDP connection detected. You can run the Electron app and
+explore it via browser to capture UI/UX details.
 ```
 Ask via AskUserQuestion:
-- **"Run Runtime Exploration (Recommended)"** — Electron 앱 실행 + CDP 탐색
-- **"Skip — code analysis only"** — Phase 2로 바로 이동
+- **"Run Runtime Exploration (Recommended)"** — launch Electron app + CDP exploration
+- **"Skip — code analysis only"** — proceed directly to Phase 2
 
 **If Playwright MCP is available AND Electron AND `electron_mode = cdp_not_configured`**:
 ```
-🔍 Runtime Exploration — CDP 설정 필요
+🔍 Runtime Exploration — CDP Configuration Required
 
-Electron 앱이 감지되었으나 Playwright MCP에 CDP endpoint가 설정되어 있지 않습니다.
-Electron 앱의 Runtime Exploration에는 CDP 사전 설정이 필요합니다.
+Electron app detected, but Playwright MCP does not have a CDP endpoint configured.
+Runtime Exploration for Electron apps requires CDP pre-configuration.
 
-CDP 사전 설정 방법 (세션 시작 전):
-  1. Electron 앱을 CDP 포트와 함께 실행:
+CDP pre-configuration (before session start):
+  1. Run the Electron app with a CDP port:
      [build-tool-specific command] --remote-debugging-port=9222
-  2. Playwright MCP를 CDP 모드로 등록:
+  2. Register Playwright MCP in CDP mode:
      claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-  3. Claude Code 재시작 → /reverse-spec 재실행
+  3. Restart Claude Code → re-run /reverse-spec
 
-자세한 내용: MCP-GUIDE.md § CDP 사전 설정 방식 참조
+Details: see MCP-GUIDE.md § CDP Pre-Configuration
 ```
 Ask via AskUserQuestion:
-- **"Skip — code analysis only (Recommended)"** — Phase 2로 바로 이동 (CDP 없이도 코드 분석으로 충분한 Feature 추출 가능)
-- **"Configure CDP mode (requires Claude Code restart)"** — MCP 재설정 + 재시작
+- **"Skip — code analysis only (Recommended)"** — proceed directly to Phase 2 (code analysis alone is sufficient for Feature extraction without CDP)
+- **"Configure CDP mode (requires Claude Code restart)"** — reconfigure MCP + restart
 
 If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP (run `claude mcp remove playwright` then `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`, preserving any `-e PATH=...` from the original config), display restart instructions, and record `Runtime Exploration: skipped (CDP reconfiguration — restart needed)`. Proceed to Phase 2.
 
@@ -391,18 +391,18 @@ If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP (run `claude m
 ```
 🔍 Runtime Exploration
 
-Playwright MCP가 감지되지 않았습니다.
-Runtime Exploration에는 Playwright MCP가 필요합니다.
+Playwright MCP not detected.
+Runtime Exploration requires Playwright MCP.
 
-설치 방법:
+Installation:
   claude mcp add playwright -- npx @playwright/mcp@latest
-  → Claude Code 재시작
+  → Restart Claude Code
 
-설치 가이드: MCP-GUIDE.md 참조 (트러블슈팅 포함)
+Installation guide: see MCP-GUIDE.md (includes troubleshooting)
 ```
 Ask via AskUserQuestion:
-- **"Playwright MCP 설치 후 재시도"** (Recommended) — 사용자가 설치 후 다시 시도
-- **"Skip — code analysis only"** — Phase 2로 바로 이동
+- **"Retry after installing Playwright MCP"** (Recommended) — user installs and retries
+- **"Skip — code analysis only"** — proceed directly to Phase 2
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright MCP)` and proceed to Phase 2.
 
@@ -427,28 +427,28 @@ Present the assessment results in three tiers:
 ```
 📋 Environment Readiness for Runtime Exploration
 
-── ✅ Auto-resolvable (에이전트가 처리) ─────────────────
-  □ [package manager] install ([dependency dir] 미존재)
-  □ .env 생성 (from .env.example — config 변수 기본값 설정)
+── ✅ Auto-resolvable (agent handles) ────────────────────
+  □ [package manager] install ([dependency dir] not found)
+  □ .env creation (from .env.example — set config variable defaults)
 
 ── ⚠️ Requires Your Action ─────────────────────────────
   □ [VAR_NAME] — [description] ([category: secret])
-    💡 [hint: e.g., "docker-compose.yml에 postgres 서비스 정의 있음
-       → docker compose up -d postgres 로 시작 가능"]
+    💡 [hint: e.g., "postgres service defined in docker-compose.yml
+       → start with docker compose up -d postgres"]
   □ [VAR_NAME] — [description] ([category: secret])
 
-── ℹ️ Optional (없어도 기본 탐색 가능) ──────────────────
-  □ [VAR_NAME] — [description] (탐색 시 불필요)
+── ℹ️ Optional (basic exploration possible without) ─────
+  □ [VAR_NAME] — [description] (not needed for exploration)
 ──────────────────────────────────────────────────────────
 
 Dev Server: `[start command]` (port [N])
 ```
 
 Ask via AskUserQuestion:
-- **"Docker Compose로 인프라 시작 + 진행"** — `docker compose up -d` 실행 후 계속 (only shown if `docker-compose.yml` exists with relevant services)
-- **"환경 준비 완료 — 진행"** — 사용자가 이미 수동으로 환경 설정한 경우
-- **"일부 서비스 없이 진행"** — 부분 탐색 (일부 기능 에러 가능 인지)
-- **"Skip Runtime Exploration"** — 환경 설정이 복잡하여 스킵
+- **"Start infrastructure via Docker Compose + proceed"** — run `docker compose up -d` then continue (only shown if `docker-compose.yml` exists with relevant services)
+- **"Environment ready — proceed"** — user has already configured the environment manually
+- **"Proceed without some services"** — partial exploration (some features may error)
+- **"Skip Runtime Exploration"** — skip due to complex environment setup
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (environment complexity)` and proceed to Phase 2.
 
@@ -463,7 +463,7 @@ Execute auto-resolvable steps:
 
 1. **Dependency installation**:
    Run the detected package manager install command (e.g., `npm install`, `pip install -r requirements.txt`)
-   - If fails → display error message → HARD STOP: "해결 후 재시도" / "Skip Runtime Exploration"
+   - If fails → display error message → HARD STOP: "Resolve and retry" / "Skip Runtime Exploration"
 
 2. **`.env` creation** (if `.env` does not exist and `.env.example` exists):
    Copy `.env.example` → `.env`, apply defaults for `config` variables, leave `secret` variables as placeholders
@@ -472,7 +472,7 @@ Execute auto-resolvable steps:
 3. **Docker Compose** (if user selected this option):
    Run `docker compose up -d`
    - Wait for services to be ready (up to 30 seconds)
-   - If fails → display error → HARD STOP: "재시도" / "수동 설정 후 계속" / "Skip"
+   - If fails → display error → HARD STOP: "Retry" / "Continue after manual setup" / "Skip"
 
 4. **Build step** (if detected as necessary):
    Run the build command (e.g., `npm run build`)
@@ -514,13 +514,13 @@ Run the start command (or CDP-modified command for Electron) as a background pro
 If the app fails to start within the timeout:
 1. Capture and analyze stderr/stdout error messages
 2. Classify the error:
-   - Missing environment variable → "`.env`에 `[VAR]` 설정 필요"
-   - DB connection refused → "데이터베이스 연결 실패 — DB가 실행 중인지 확인"
-   - Port in use → "포트 `[N]` 사용 중 — 기존 프로세스 종료 필요"
-   - Module not found → "`[package]` 미설치 — `npm install` 재실행 필요"
-   - Build error → "빌드 에러 — 소스 코드 문제일 수 있음"
+   - Missing environment variable → "`.env` requires `[VAR]` to be set"
+   - DB connection refused → "Database connection failed — check if DB is running"
+   - Port in use → "Port `[N]` is in use — terminate the existing process"
+   - Module not found → "`[package]` not installed — re-run `npm install`"
+   - Build error → "Build error — may be a source code issue"
 3. Display error with suggestion → HARD STOP:
-   - "문제 해결 후 재시도"
+   - "Resolve and retry"
    - "Skip Runtime Exploration"
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
@@ -539,22 +539,22 @@ Analyze the source code to identify likely first-run configuration requirements:
 **Step 2 — Present setup guidance**:
 
 ```
-🔧 앱 초기 설정
+🔧 App Initial Setup
 
-앱이 실행되었지만, 핵심 기능을 탐색하려면 앱 내 설정이 필요할 수 있습니다.
+The app is running, but some in-app configuration may be needed to explore core features.
 
-코드 분석에서 감지된 설정 항목:
-  • [항목 1: 예) Settings → AI Provider에서 API Key 입력]
-  • [항목 2: 예) Settings → Model 선택]
-  • [항목 3: 예) 최초 실행 시 온보딩 완료]
+Setup items detected from code analysis:
+  • [Item 1: e.g., Settings → Enter API Key in AI Provider]
+  • [Item 2: e.g., Settings → Select Model]
+  • [Item 3: e.g., Complete onboarding on first run]
 
-앱에서 직접 설정을 완료한 후 "준비 완료"를 선택해주세요.
-설정 없이도 UI 구조 탐색은 가능합니다.
+Please complete the setup in the app, then select "Ready".
+UI structure exploration is possible even without setup.
 ```
 
 **HARD STOP** — Use AskUserQuestion:
-- "설정 완료 — 전체 탐색 진행" (Recommended)
-- "설정 없이 UI 구조만 탐색"
+- "Setup complete — proceed with full exploration" (Recommended)
+- "Explore UI structure only (without setup)"
 - "Skip Runtime Exploration"
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
@@ -695,7 +695,7 @@ Key observations:
 **Step 3 — Dev server cleanup**:
 1. Terminate the dev server process
 2. If Docker Compose was started: leave services running (user may need them for `smart-sdd`)
-   - Display: "ℹ️ Docker Compose 서비스는 계속 실행 중입니다. 종료: `docker compose down`"
+   - Display: "ℹ️ Docker Compose services are still running. To stop: `docker compose down`"
 3. `.env` file created during setup: leave in place (reusable for `smart-sdd`)
 
 **Step 4 — Proceed to Phase 2**:

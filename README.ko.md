@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-08 16:46 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-09 07:45 KST
 
 **[spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 교차 Feature 인텔리전스를 추가하는 Claude Code 커스텀 스킬**
 

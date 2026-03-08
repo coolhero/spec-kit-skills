@@ -27,8 +27,8 @@ When verify discovers a bug, classify its severity before fixing:
 2. Display: `🔴 Major issue detected — requires re-implementation, not a quick fix`
 3. Set verify status to `failure` with the issue description
 4. **HARD STOP** — Use AskUserQuestion:
-   - "implement로 돌아가서 수정" — return to implement step with the issue context
-   - "Minor로 재분류하고 즉시 수정" — user overrides severity classification
+   - "Return to implement with fixes" — return to implement step with the issue context
+   - "Reclassify as Minor and fix now" — user overrides severity classification
    **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 **Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt.
@@ -140,8 +140,8 @@ Phase 3 Checklist (must complete ALL in order):
   Installation guide: MCP-GUIDE.md
   ```
   **Use AskUserQuestion** with options:
-  - "Playwright MCP 설치 후 재시도"
-  - "UI 검증 Skip"
+  - "Retry after installing Playwright MCP"
+  - "Skip UI verification"
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 - **Electron CDP Configuration Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
@@ -170,8 +170,8 @@ Phase 3 Checklist (must complete ALL in order):
         3. Restart Claude Code
      ```
      **Use AskUserQuestion** — this is NOT optional, NOT skippable:
-     - "CDP 설정 후 재시도" — user configures CDP, then re-run verify
-     - "UI 검증 Skip — health check만 수행" — skip Playwright UI verification, proceed with demo script health check only
+     - "Retry after CDP configuration" — user configures CDP, then re-run verify
+     - "Skip UI verification — health check only" — skip Playwright UI verification, proceed with demo script health check only
      **If response is empty → re-ask** (per MANDATORY RULE 1)
      **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
 
@@ -197,8 +197,8 @@ Phase 3 Checklist (must complete ALL in order):
        ⚠️ App started but CDP connection failed.
        ```
        **Use AskUserQuestion**:
-       - "재시도" — retry the connection probe
-       - "UI 검증 Skip — health check만 수행"
+       - "Retry" — retry the connection probe
+       - "Skip UI verification — health check only"
        **If response is empty → re-ask** (per MANDATORY RULE 1)
 
   **SC-level UI Verification**:
