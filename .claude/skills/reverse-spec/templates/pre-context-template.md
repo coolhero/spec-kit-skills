@@ -9,34 +9,48 @@
 ## Runtime Exploration Results
 
 > Observations from running the original application during `/reverse-spec` Phase 1.5.
+> Extracted from `specs/reverse-spec/runtime-exploration.md` — only the `## Screen:` sections belonging to this Feature are included here.
 > These provide visual and behavioral context that code reading alone cannot capture.
 > If runtime exploration was skipped, write: "Skipped — [reason: no MCP | environment issues | user choice]"
 
+### App-Wide Context
+
+- **Component library**: [from runtime-exploration.md App-Wide Observations]
+- **Theme/color scheme**: [from runtime-exploration.md App-Wide Observations]
+
+> Only include App-Wide items relevant to this Feature. Omit if not applicable.
+
 ### Screens in This Feature
 
-| Route | Title | Key Elements | Layout Pattern |
-|-------|-------|--------------|----------------|
-| `[/path]` | [Page title] | [Key UI elements: forms, tables, editors, etc.] | [sidebar+content / centered-form / full-width / split-pane / etc.] |
+> Copied from `## Screen:` sections in runtime-exploration.md whose routes belong to this Feature.
+> If a screen is shared across Features, include it in the primary owner's pre-context and reference from others.
 
-> Only list screens that belong to this Feature. If a screen is shared across Features, list it in the primary owner's pre-context and reference it from others.
+#### /route-path — [Page Title]
 
-### Observed User Flows
+**Layout**: [sidebar+content / centered-form / full-width / split-pane / ...]
 
-| Flow | Steps | Notes |
-|------|-------|-------|
-| [Flow name] | `[/route1] → [action] → [/route2] → [action] → [/route3]` | [Observations: redirects, toasts, loading states, etc.] |
+**UI Elements**:
+- [Key elements: forms, tables, editors, modals, etc.]
+- [Interactive elements: buttons, dropdowns, toggles, etc.]
 
-> Record the actual navigation paths observed during runtime exploration. These inform SC-### (Success Criteria) drafts below and downstream UI action mapping.
+**User Flows**:
+| Flow | Steps | Observations |
+|------|-------|--------------|
+| [Flow name] | `/this-route` → [action] → `/next-route` → ... | redirects, toasts, loading states |
 
-### Runtime Observations
+**Runtime Behavior**:
+- **Loading states**: [skeleton, spinner, progressive, optimistic updates]
+- **Empty states**: [placeholder messages, illustrations, CTAs when no data]
+- **Error handling**: [validation messages, toast notifications, error boundaries]
+- **Console errors**: [JS errors observed on this screen, if any]
 
-- **Error Handling**: [Observed validation messages, toast notifications, error pages, error boundaries]
-- **Loading States**: [Skeleton loaders, spinners, progressive loading, optimistic updates]
-- **Empty States**: [How the app handles no data — placeholder messages, illustrations, CTAs]
-- **Notable UI Patterns**: [Rich text editor, drag-and-drop, real-time updates, keyboard shortcuts, etc.]
-- **Console Errors**: [JS errors observed during exploration, if any — with route context]
+**Notes**: [Notable patterns, special interactions, accessibility observations]
 
-> If runtime exploration was skipped, write "N/A" for each item.
+#### /another-route — [Page Title]
+
+(... same structure per screen ...)
+
+> If runtime exploration was skipped, write "N/A" for all items above.
 
 ---
 
