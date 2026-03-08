@@ -6,6 +6,40 @@
 
 ---
 
+## Runtime Exploration Results
+
+> Observations from running the original application during `/reverse-spec` Phase 1.5.
+> These provide visual and behavioral context that code reading alone cannot capture.
+> If runtime exploration was skipped, write: "Skipped — [reason: no MCP | environment issues | user choice]"
+
+### Screens in This Feature
+
+| Route | Title | Key Elements | Layout Pattern |
+|-------|-------|--------------|----------------|
+| `[/path]` | [Page title] | [Key UI elements: forms, tables, editors, etc.] | [sidebar+content / centered-form / full-width / split-pane / etc.] |
+
+> Only list screens that belong to this Feature. If a screen is shared across Features, list it in the primary owner's pre-context and reference it from others.
+
+### Observed User Flows
+
+| Flow | Steps | Notes |
+|------|-------|-------|
+| [Flow name] | `[/route1] → [action] → [/route2] → [action] → [/route3]` | [Observations: redirects, toasts, loading states, etc.] |
+
+> Record the actual navigation paths observed during runtime exploration. These inform SC-### (Success Criteria) drafts below and downstream UI action mapping.
+
+### Runtime Observations
+
+- **Error Handling**: [Observed validation messages, toast notifications, error pages, error boundaries]
+- **Loading States**: [Skeleton loaders, spinners, progressive loading, optimistic updates]
+- **Empty States**: [How the app handles no data — placeholder messages, illustrations, CTAs]
+- **Notable UI Patterns**: [Rich text editor, drag-and-drop, real-time updates, keyboard shortcuts, etc.]
+- **Console Errors**: [JS errors observed during exploration, if any — with route context]
+
+> If runtime exploration was skipped, write "N/A" for each item.
+
+---
+
 ## Source Reference
 
 **Source Root**: `$SOURCE_ROOT`

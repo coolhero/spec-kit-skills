@@ -289,11 +289,294 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 ---
 
+## Phase 1.5 — Runtime Exploration (Optional)
+
+> **Purpose**: Run the original application and explore it interactively before deep code analysis. This provides visual and behavioral context (UI layout, user flows, actual states) that code reading alone cannot capture. The observations enrich Phase 2 analysis and Phase 4 deliverables.
+>
+> **When to skip**: This phase is relevant only for **rebuild mode**. Skip entirely when `--adopt` is specified (adoption documents existing code in-place — no need to explore the app you're already running).
+
+### 1.5-0. MCP Availability Check + User Choice (HARD STOP)
+
+**Step 1 — Detect Playwright MCP**:
+Check if Playwright MCP tools are available by verifying the existence of `browser_navigate`, `browser_snapshot`, and `browser_click` tools.
+
+**Step 2 — Present options based on detection result**:
+
+**If Playwright MCP is available**:
+```
+🔍 Runtime Exploration Available
+
+Playwright MCP가 감지되었습니다. 원본 앱을 실제로 실행하고
+브라우저로 탐색하여 UI/UX를 기록할 수 있습니다.
+
+이 단계는 선택사항이며, 스킵해도 Phase 2 코드 분석은 정상 진행됩니다.
+단, 실행하면 UI 레이아웃, 사용자 플로우, 시각 정보를 더 정확하게 추출합니다.
+```
+Ask via AskUserQuestion:
+- **"Run Runtime Exploration (Recommended)"** — 앱 실행 + 브라우저 탐색
+- **"Skip — code analysis only"** — Phase 2로 바로 이동
+
+**If Playwright MCP is NOT available**:
+```
+🔍 Runtime Exploration
+
+Playwright MCP가 감지되지 않았습니다.
+앱을 실행할 수는 있지만, 자동 브라우저 탐색은 불가능합니다.
+설치: claude mcp add playwright -- npx @playwright/mcp@latest
+```
+Ask via AskUserQuestion:
+- **"Manual Exploration"** — 에이전트가 앱 실행 후 사용자가 직접 탐색 결과 공유
+- **"Skip — code analysis only"** — Phase 2로 바로 이동
+
+**If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (user choice)` and proceed to Phase 2.
+
+### 1.5-1. Environment Assessment (Automated)
+
+Diagnose what the app needs to run, based on Phase 1 results. The agent performs this assessment **automatically before asking the user**:
+
+| Assessment Item | Method |
+|-----------------|--------|
+| **Package manager + dependency state** | Detect from lock files (`package-lock.json` → npm, `yarn.lock` → yarn, `pnpm-lock.yaml` → pnpm, `bun.lockb` → bun). Check if dependency directory (`node_modules/`, `.venv/`, `vendor/`) exists |
+| **Environment variables** | Read `.env.example` (or `.env.development`, `.env.template`). Classify each variable: `config` (PORT, NODE_ENV, BASE_URL — agent can set defaults), `secret` (API keys, passwords, tokens — user must provide), `feature-flag` (ENABLE_XXX — agent can set defaults). Check if `.env` already exists |
+| **Database dependency** | Detect DB type from ORM config/dependencies (Prisma → `schema.prisma`, Sequelize, TypeORM, Django `settings.py`, etc.). SQLite = no setup needed. External DB (PostgreSQL, MySQL, MongoDB) = user action needed |
+| **Docker Compose availability** | Check for `docker-compose.yml` or `compose.yml`. List defined services (DB, Redis, etc.) |
+| **Dev server start command** | Parse `package.json` scripts for `dev`, `start`, `serve`, `dev:web`, `electron:dev`, `tauri dev`, etc. For Python: detect `manage.py runserver`, `uvicorn`, `flask run`, etc. For Go: detect `go run` or `air` |
+| **Build prerequisites** | Detect if a build step is needed before dev server (TypeScript compilation, monorepo workspace builds, native module compilation) |
+| **Platform-specific requirements** | Electron: electron binary, native dependencies (`node-gyp`). Tauri: Rust toolchain, system dependencies |
+
+### 1.5-2. Environment Readiness Checklist (HARD STOP)
+
+Present the assessment results in three tiers:
+
+```
+📋 Environment Readiness for Runtime Exploration
+
+── ✅ Auto-resolvable (에이전트가 처리) ─────────────────
+  □ [package manager] install ([dependency dir] 미존재)
+  □ .env 생성 (from .env.example — config 변수 기본값 설정)
+
+── ⚠️ Requires Your Action ─────────────────────────────
+  □ [VAR_NAME] — [description] ([category: secret])
+    💡 [hint: e.g., "docker-compose.yml에 postgres 서비스 정의 있음
+       → docker compose up -d postgres 로 시작 가능"]
+  □ [VAR_NAME] — [description] ([category: secret])
+
+── ℹ️ Optional (없어도 기본 탐색 가능) ──────────────────
+  □ [VAR_NAME] — [description] (탐색 시 불필요)
+──────────────────────────────────────────────────────────
+
+Dev Server: `[start command]` (port [N])
+```
+
+Ask via AskUserQuestion:
+- **"Docker Compose로 인프라 시작 + 진행"** — `docker compose up -d` 실행 후 계속 (only shown if `docker-compose.yml` exists with relevant services)
+- **"환경 준비 완료 — 진행"** — 사용자가 이미 수동으로 환경 설정한 경우
+- **"일부 서비스 없이 진행"** — 부분 탐색 (일부 기능 에러 가능 인지)
+- **"Skip Runtime Exploration"** — 환경 설정이 복잡하여 스킵
+
+**If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (environment complexity)` and proceed to Phase 2.
+
+**Rules**:
+- ⚠️ NEVER write actual secret values to `.env`. For `secret` category variables, write a placeholder comment: `# REQUIRES: your-value-here`
+- `config` category variables: use values from `.env.example` or sensible defaults (e.g., `PORT=3000`, `NODE_ENV=development`)
+- `feature-flag` category variables: default to enabled (`true` or `1`) to maximize explorable features
+
+### 1.5-3. Auto Setup
+
+Execute auto-resolvable steps:
+
+1. **Dependency installation**:
+   Run the detected package manager install command (e.g., `npm install`, `pip install -r requirements.txt`)
+   - If fails → display error message → HARD STOP: "해결 후 재시도" / "Skip Runtime Exploration"
+
+2. **`.env` creation** (if `.env` does not exist and `.env.example` exists):
+   Copy `.env.example` → `.env`, apply defaults for `config` variables, leave `secret` variables as placeholders
+   - If `.env` already exists → skip (do NOT overwrite user's existing `.env`)
+
+3. **Docker Compose** (if user selected this option):
+   Run `docker compose up -d`
+   - Wait for services to be ready (up to 30 seconds)
+   - If fails → display error → HARD STOP: "재시도" / "수동 설정 후 계속" / "Skip"
+
+4. **Build step** (if detected as necessary):
+   Run the build command (e.g., `npm run build`)
+   - If fails → display error → HARD STOP (same options as above)
+
+### 1.5-4. App Launch + Readiness Check
+
+**Step 1 — Identify and run the start command**:
+Use the dev server command identified in 1.5-1. Run it as a background process, capturing stdout/stderr.
+
+> **Multiple start commands**: If multiple dev-related scripts exist (e.g., `dev`, `dev:web`, `electron:dev`), ask the user which one to run via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**Step 2 — Wait for readiness**:
+- Monitor stdout for readiness signals: `ready`, `listening on`, `started`, `compiled`, `Local:`, `http://localhost`
+- Alternatively, poll the expected port with `lsof -i :[PORT]`
+- Timeout: 60 seconds
+
+**Step 3 — Handle launch failure**:
+If the app fails to start within the timeout:
+1. Capture and analyze stderr/stdout error messages
+2. Classify the error:
+   - Missing environment variable → "`.env`에 `[VAR]` 설정 필요"
+   - DB connection refused → "데이터베이스 연결 실패 — DB가 실행 중인지 확인"
+   - Port in use → "포트 `[N]` 사용 중 — 기존 프로세스 종료 필요"
+   - Module not found → "`[package]` 미설치 — `npm install` 재실행 필요"
+   - Build error → "빌드 에러 — 소스 코드 문제일 수 있음"
+3. Display error with suggestion → HARD STOP:
+   - "문제 해결 후 재시도"
+   - "Skip Runtime Exploration"
+
+   **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+### 1.5-5. Runtime Exploration
+
+#### Path A — Automated Exploration (Playwright MCP)
+
+With the app running, systematically explore using Playwright MCP:
+
+**Phase A — Initial Landing**:
+1. `browser_navigate` → `http://localhost:[PORT]`
+2. `browser_snapshot` → capture accessibility tree (page structure, elements, roles)
+3. `browser_take_screenshot` → record initial screen
+4. `browser_console_messages` → check for initial JS errors
+
+**Phase B — Navigation Discovery**:
+1. From the accessibility tree, identify navigation elements (`nav`, sidebar, menu, tabs, header links)
+2. Collect all internal navigation links (URL + text)
+3. Cross-reference with route definitions found in Phase 1 code scan (if available)
+
+**Phase C — Screen-by-Screen Survey**:
+For each discovered route (in navigation order):
+1. `browser_navigate` → target URL
+2. `browser_snapshot` → capture page structure
+3. Record per screen:
+   - **Route path** and page title/heading
+   - **Key UI elements**: buttons, forms, tables, lists, editors, charts (from accessibility tree roles)
+   - **Layout pattern**: sidebar+content, full-width, centered-form, split-pane, etc.
+   - **Data display type**: table, card grid, tree view, editor, empty state, etc.
+   - **Interactive elements**: form inputs, dropdowns, toggles, drag targets
+4. If console errors appear → record them (continue exploration)
+
+**Phase D — Key Flow Identification** (observation only):
+Based on screens discovered, identify apparent user flows:
+- Authentication flow (if login form exists)
+- CRUD patterns (list → detail → edit)
+- Wizard/multi-step flows
+- Settings/configuration pages
+- Record flows as route sequences, **without performing data entry or state-changing actions**
+
+**Budget Control**:
+- Maximum screens: 20 (if more routes exist, sample representative ones and note "N more similar pages")
+- Per-screen time: 10 seconds max
+- Total exploration budget: 5 minutes
+- Repeated layout patterns: sample 3, then note "N more with same pattern"
+
+#### Path B — Manual Exploration (no Playwright MCP)
+
+With the app running:
+
+```
+📋 Manual Exploration Request
+
+앱이 http://localhost:[PORT] 에서 실행 중입니다.
+자동 탐색이 불가능하므로, 아래 정보를 확인 후 공유해주세요:
+
+1. 주요 화면 목록 (URL + 간단한 설명)
+2. 네비게이션 구조 (메뉴, 사이드바 항목)
+3. 핵심 사용자 플로우 (예: 로그인 → 대시보드 → ...)
+4. 특이한 UI 패턴 (에디터, 차트, 드래그앤드롭 등)
+
+스크린샷을 공유해주시면 더 정확한 분석이 가능합니다.
+```
+
+Ask via AskUserQuestion:
+- **"관찰 결과 공유 준비됨"** — user provides observations as text/screenshots
+- **"Skip"** — proceed without runtime data
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+After the user shares observations, parse and structure them into the same format as Path A output.
+
+### 1.5-6. Observation Recording + Cleanup
+
+**Step 1 — Structure observations**:
+Compile exploration results into a structured format that will be distributed to each Feature's `pre-context.md` during Phase 4-2. Store as agent working memory (not written to a file at this point — the data flows into Phase 2 analysis context and Phase 4 deliverables).
+
+**Observation structure**:
+```
+Screen Inventory:
+  - Route, Title, Key Elements, Layout Pattern, Notable observations
+
+Navigation Structure:
+  - Top-level nav items, sub-navigation patterns, routing scheme
+
+User Flows Observed:
+  - Flow name, Steps (route sequence), Observations
+
+UI Patterns:
+  - Component library (detected from rendered DOM class names/attributes)
+  - Common layout patterns across screens
+  - Theme/color scheme
+  - Responsive behavior (if observed)
+
+Runtime Health:
+  - Console errors encountered during exploration
+  - Failed page loads (routes that errored)
+  - Loading states observed (skeleton, spinner, progressive)
+  - Empty states handling
+```
+
+**Step 2 — Report summary to user**:
+```
+📊 Runtime Exploration Summary
+
+Screens explored: [N]
+Navigation items: [N]
+User flows identified: [N]
+Console errors: [N] ([critical count] critical)
+Layout patterns: [list of patterns]
+
+Key observations:
+  - [Notable finding 1]
+  - [Notable finding 2]
+```
+
+**Step 3 — Dev server cleanup**:
+1. Terminate the dev server process
+2. If Docker Compose was started: leave services running (user may need them for `smart-sdd`)
+   - Display: "ℹ️ Docker Compose 서비스는 계속 실행 중입니다. 종료: `docker compose down`"
+3. `.env` file created during setup: leave in place (reusable for `smart-sdd`)
+
+**Step 4 — Proceed to Phase 2**:
+The exploration observations are now available as context for Phase 2 deep analysis. When analyzing code in Phase 2, cross-reference with runtime observations:
+- Validate route definitions against actually observed screens
+- Enrich entity extraction with observed data display patterns
+- Verify API endpoints against observed network behavior (if captured)
+- Note discrepancies between code structure and runtime behavior
+
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
+```
+### M1.5 — Runtime Exploration
+- **Timestamp**: [ISO timestamp]
+- **Mode**: [automated (Playwright) | manual | skipped]
+- **Screens explored**: [N]
+- **Key findings**: [1-2 sentence summary]
+```
+
+---
+
 ## Phase 2 — Deep Analysis
 
 > **Domain Profile**: Read `domains/{domain}.md` § Analysis Axes for the domain-specific extraction targets used throughout this Phase.
 
 Perform deep analysis using patterns appropriate to the tech stack identified in Phase 1. For large codebases, leverage parallel sub-agents via the Task tool.
+
+> **Phase 1.5 Cross-Reference**: If Runtime Exploration was performed, use the observations to enrich analysis:
+> - Validate route definitions against actually observed screens
+> - Enrich entity extraction with observed data display patterns (tables, forms, card views)
+> - Cross-reference API endpoints with observed user interactions
+> - Note discrepancies between code structure and runtime behavior (e.g., routes defined in code but not reachable in UI)
 
 ### 2-1. Data Model Extraction
 Extract entities from appropriate sources depending on the tech stack identified in Phase 1. See `domains/{domain}.md` § Data Model Extraction for the technology-to-search-target mapping and extraction details.
@@ -633,6 +916,7 @@ F003-order (12 entries): B019–B030
 ```
 
 Contents to include in each pre-context.md:
+- **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Distribute the Phase 1.5 observations to each Feature based on route-to-Feature mapping. For each Feature: list screens (routes) belonging to this Feature, observed user flows involving this Feature's screens, and runtime observations (error handling, loading states, empty states, notable UI patterns). If Phase 1.5 was skipped, write "Skipped — [reason]"
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
 - **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/app.md` § 3-7 for format)
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects

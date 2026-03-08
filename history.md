@@ -758,3 +758,40 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | F5: adoption verify 분기 | verify-phases.md 헤더에 adoption 모드 분기 안내 추가 | step-mode로 `/smart-sdd verify F001`을 adopted Feature에 실행 시, adoption 특화 동작을 알 수 있는 경로가 없었음 |
 | F6: 템플릿 경로 명시화 | 4곳의 산문형 참조 → 명시적 상대 경로 링크 `[...](../../case-study/templates/...)` | recording-protocol은 이미 명시적 상대 경로 사용. 템플릿도 동일 패턴으로 통일 |
 | validate.sh 연결 강화 | pipeline.md Phase 0 완료 + 전체 완료 시 자동 호출, 스크립트 헤더 갱신 | 헤더에 "Post-artifact update validation"이라 명시하면서 실제 자동 호출 지점 없었음. 핵심 2곳(Phase 0 후, 전체 완료 후)에 연결 |
+
+## [2026-03-08] MCP-GUIDE.md 신규 — 런타임 검증용 MCP 설정 가이드
+
+> MCP 조사 결과를 기반으로 플랫폼별 권장 MCP 확정 + 사용자 가이드 작성
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 기본 MCP 통일 | Playwright MCP (웹앱 + Electron) | 하나의 MCP로 두 플랫폼 커버. MS 공식, 25개 도구, 접근성 트리 기반. Claude Preview는 dev server 관리 보조용으로 유지 |
+| Electron 연결 방식 | 방법 A: `--electron-app` (권장) + 방법 B: CDP fallback | PR #1291 머지 확인. 안정 릴리스 미포함 가능성 있어 CDP(`--cdp-endpoint`)를 검증된 대안으로 병기 |
+| Tauri MCP | 향후 확장 예정으로 분류 | 베타(v0.9.0), Bridge Plugin 필요, 안정성 미검증. 웹+Electron 우선 지원 후 확대 |
+| 가이드 파일명 | `MCP-GUIDE.md` | 하이픈 분리로 가독성 확보. 프로젝트 루트 대문자 관례(CLAUDE.md, README.md) 유지 |
+| README 연결 | 헤더 링크 + Prerequisites에 optional 항목 추가 | README.md, README.ko.md 동기화. 필수가 아닌 선택 사항으로 명시 |
+
+---
+
+## [2026-03-08] TODO 재구성 + A-1 Runtime Exploration 구현
+
+### TODO.md 전면 재구성
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 12 Parts → 4 Groups | A (Runtime Interaction), B (Bug Prevention), C (Spec-Code Drift), D (Structural Gap Reference) | 1409줄 → ~280줄. 중복 통합 (Part 4⊂Part 2, Part 10→Parts 8/9), 구현 순서 테이블 추가 |
+| 구현 순서 | A-6 → A-4 → A-3 → A-5 → A-2 → A-1 → B-1~4 → C | 의존성 기반: MCP 감지(A-6) → 수동 fallback(A-4) → 자동 검증(A-3) → 데이터 소스(A-5) → implement 검증(A-2) → reverse-spec 탐색(A-1) |
+
+### A-1: reverse-spec Phase 1.5 Runtime Exploration
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Phase 위치 | Phase 1 (Surface Scan)과 Phase 2 (Deep Analysis) 사이 | Phase 1 이후 tech stack 파악 완료 → 실행 방법 판단 가능. Phase 2 전에 시각/행동 컨텍스트 확보 → 코드 분석 정확도 향상 |
+| MCP 감지 시점 | Phase 1.5 Step 0에서 Playwright MCP 가용성 확인 | verify의 A-6 감지와 독립적. reverse-spec은 별도 스킬이므로 자체 감지 필요 |
+| 환경 설정 3분류 | Auto-resolvable / Requires User Action / Optional | 에이전트가 자동 처리 가능한 범위를 명확히 구분. secret은 절대 자동 설정 불가 |
+| Docker Compose 활용 | docker-compose.yml 감지 시 인프라 자동 시작 옵션 제공 | 가장 마찰 적은 환경 구성 경로. DB, Redis 등을 사용자 수동 설정 대신 원클릭 |
+| 탐색 예산 | 최대 20화면, 화면당 10초, 전체 5분 | 컨텍스트 윈도우 소모 제한. 반복 패턴은 샘플링 (3개 이상 → "N more similar") |
+| Manual fallback | Playwright 없을 때 에이전트가 앱 실행 → 사용자에게 수동 탐색 요청 | MCP 없이도 가치 제공. 사용자 관찰 결과를 같은 포맷으로 기록 |
+| 산출물 위치 | pre-context.md → "Runtime Exploration Results" 섹션 (Feature별 분배) | 기존 pre-context 구조 안에 통합. Phase 4-2에서 라우트-Feature 매핑 기반 분배 |
+| adopt 모드 | Phase 1.5 전체 스킵 | adoption은 기존 앱을 문서화하는 것이므로 런타임 탐색 불필요 |
+| .env 보안 규칙 | secret 변수에 실제 값 절대 미기입. placeholder 주석만 | NEVER write actual secret values to .env — 기존 env var 보안 규칙과 일관 |
