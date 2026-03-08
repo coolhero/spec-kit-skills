@@ -5,14 +5,15 @@
 
 ---
 
-## [2026-03-08] smart-sdd verify — Fix CDP probe logic and strengthen HARD STOP
+## [2026-03-08] smart-sdd verify — Agent-managed app lifecycle for UI verification
 
 | # | Decision | Choice | Rationale |
 |---|----------|--------|-----------|
-| 1 | CDP probe 3-way classification | Distinguished: (A) standard mode = new tab page, (B) CDP configured but app not running = connection failure, (C) CDP active = app content visible | Original probe conflated cases A and B. When Playwright MCP has `--cdp-endpoint` but nothing is on port 9222, `browser_snapshot` fails — agent misread this as "standard browser mode." These are completely different situations requiring different user instructions. |
-| 2 | Case B — separate HARD STOP | Added dedicated HARD STOP for "CDP configured but app not running" with "앱 실행 후 재시도" option | User only needs to start the app with `--remote-debugging-port=9222`, NOT reconfigure Playwright MCP. Previous logic would have shown CDP setup instructions for an already-configured CDP. |
-| 3 | HARD STOP bypass prevention | Added explicit anti-bypass language: "Do NOT skip, do NOT auto-decide, do NOT rationalize" | Session B agent acknowledged the HARD STOP requirement but bypassed it by rationalizing that "health check already passed and UI verification is non-blocking." |
-| 4 | "Non-blocking" clarification | Clarified that "non-blocking" means results don't block verify, NOT that verification can be skipped | Agent misinterpreted "UI verification failures are NOT blocking" as permission to skip the entire UI verification step without user consent. |
+| 1 | App lifecycle ownership | Agent starts/stops the app — never asks the user to manually start, restart, or stop | Session B agent asked user to run `npx electron-vite dev -- --remote-debugging-port=9222` manually and wait. This is unnecessary friction — the agent can start the app itself via Bash, wait for it to be ready, then verify. |
+| 2 | Case B — no HARD STOP needed | CDP configured + app not running → agent auto-starts the app (no user action required) | Previous design had a HARD STOP for Case B, but the user has nothing to decide — CDP is already configured, the agent just needs to start the app with the correct flags. Only Case A (CDP not configured) requires user action (reconfiguring Playwright MCP). |
+| 3 | CDP probe timing | Probe runs twice: (1) before app launch to detect configuration, (2) after app launch to confirm connection | Single probe before app launch always fails for Case B (app not running), leading to false "standard mode" detection or unnecessary user interaction. |
+| 4 | HARD STOP bypass prevention | Kept anti-bypass language for Case A (the only case requiring user action) | Previous bypass issues with health-check rationalization still apply to Case A. |
+| 5 | "Non-blocking" clarification | Kept: results don't block verify, but verification itself cannot be skipped without user consent | Agent misinterpreted this in earlier session. |
 
 ---
 

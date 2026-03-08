@@ -93,7 +93,8 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - **REJECT if**: the script has no interactive experience (i.e., only runs assertions and exits with no live Feature)
 
 **Step 2b — UI Verification Hook** (MCP required):
-> **App Session Management**: Demo script starts the app → all SC verifications in the same session → shut down after Phase completes. See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
+> **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down. Do NOT ask the user to start or restart the app manually. The agent starts the app itself (with CDP flags for Electron), runs all SC verifications, then shuts down the app when done.
+> See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
 
 - **MCP Detection**: Check availability of Playwright MCP (or corresponding tools from MCP Capability Map)
 - **If MCP not available**: Display warning and HARD STOP:
@@ -106,30 +107,30 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
   - "UI 검증 Skip"
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-- **Electron CDP Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
+- **Electron CDP Configuration Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
   Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
 
-  1. **Probe**: Call `browser_snapshot` to check current Playwright connection state. There are THREE possible outcomes — distinguish them carefully:
+  1. **Probe**: Call `browser_snapshot` to check current Playwright MCP configuration. There are THREE possible outcomes:
 
      | Probe result | Meaning | Action |
      |---|---|---|
-     | Snapshot shows Electron app content | CDP active + app running | → Proceed to UI verification |
-     | Snapshot shows a default new tab / Chrome start page | Standard mode (no `--cdp-endpoint` configured) | → **Case A**: CDP not configured |
-     | Tool call fails / connection refused / empty result | CDP IS configured but app is NOT running on the CDP port | → **Case B**: CDP configured, app not started |
+     | Snapshot shows Electron app content | CDP active + app already running | → Proceed directly to SC-level UI verification |
+     | Snapshot shows a default new tab / Chrome start page | Standard mode (no `--cdp-endpoint` configured) | → **Case A**: CDP not configured — HARD STOP |
+     | Tool call fails / connection refused / empty result | CDP IS configured but app is NOT running on the CDP port | → **Case B**: CDP configured — agent will start the app |
 
-     **CRITICAL**: Do NOT confuse Case B with "standard mode." When Playwright MCP has `--cdp-endpoint` configured but nothing is listening on that port, `browser_snapshot` will fail with a connection error. This means CDP IS set up correctly — the app just needs to be started with `--remote-debugging-port=9222`.
+     **CRITICAL**: Do NOT confuse Case B with "standard mode." When Playwright MCP has `--cdp-endpoint` configured but nothing is listening on that port, `browser_snapshot` will fail with a connection error (`ECONNREFUSED`). This means CDP IS set up correctly — the app just needs to be started.
 
   2. **Case A — CDP not configured (standard mode detected)**: This is a **MANDATORY HARD STOP**.
+     This is the ONLY case that requires user action — the user must reconfigure Playwright MCP itself.
      Display notice:
      ```
      ⚠️ Electron 앱은 CDP 모드가 필요합니다.
         현재 Playwright MCP가 표준 브라우저 모드로 설정되어 있습니다.
 
         CDP 설정 방법:
-        1. 앱을 --remote-debugging-port=9222 로 실행
-        2. claude mcp remove playwright -s user
-        3. claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-        4. Claude Code 재시작
+        1. claude mcp remove playwright -s user
+        2. claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+        3. Claude Code 재시작
      ```
      **Use AskUserQuestion** — this is NOT optional, NOT skippable:
      - "CDP 설정 후 재시도" — user configures CDP, then re-run verify
@@ -137,40 +138,44 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      **If response is empty → re-ask** (per MANDATORY RULE 1)
      **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
 
-  3. **Case B — CDP configured but app not running**: This is a **MANDATORY HARD STOP**.
-     Display notice:
-     ```
-     ℹ️ Playwright MCP가 CDP 모드로 설정되어 있지만, 현재 CDP 포트에 연결되는 앱이 없습니다.
-        Electron 앱을 --remote-debugging-port=9222 로 실행하면 Playwright가 자동으로 연결됩니다.
+  3. **Case B — CDP configured, app not running**: No user action needed. The agent starts the app itself.
+     Display: `ℹ️ CDP 모드 확인됨. 앱을 자동으로 시작합니다.`
+     Proceed to the App Launch step below.
 
-        실행 예시:
-        npx electron-vite dev -- --remote-debugging-port=9222
-     ```
-     **Use AskUserQuestion** — this is NOT optional, NOT skippable:
-     - "앱 실행 후 재시도" — user starts the Electron app with CDP port, then re-run verify
-     - "UI 검증 Skip — health check만 수행" — skip Playwright UI verification, proceed with demo script health check only
-     **If response is empty → re-ask** (per MANDATORY RULE 1)
-     **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
+  4. **If CDP active and app already connected**: Skip app launch, proceed directly to SC-level UI verification.
 
-  4. **If CDP active and app connected**: Proceed to SC-level UI verification below.
+  > **Tip**: If `/reverse-spec` was run with CDP for the same Electron stack, Playwright MCP is already in CDP mode.
 
-  > **Tip**: If `/reverse-spec` was run with CDP for the same Electron stack, Playwright MCP is already in CDP mode. Just start the new app with `--remote-debugging-port=9222` and it will connect automatically.
+- **If MCP available** (and CDP check passed for Electron) — perform App Launch + SC-level UI verification:
 
-  Do NOT skip, do NOT auto-decide, do NOT rationalize around HARD STOPs even if health check passed. Health check status is irrelevant to the CDP decision — it belongs to the user.
+  **App Launch** (agent-managed — do NOT ask the user to start/restart the app):
+  1. Detect the project's dev start command from `package.json` scripts or project config (e.g., `npx electron-vite dev`, `npm run dev`)
+  2. For Electron with CDP: Append `-- --remote-debugging-port=9222` to the start command
+  3. Start the app in background via Bash (e.g., `npx electron-vite dev -- --remote-debugging-port=9222 &`)
+  4. Wait for the app to be ready: poll health endpoint or wait ~10 seconds
+  5. Probe with `browser_snapshot` to confirm CDP connection:
+     - If connected (app content visible) → proceed to SC verification
+     - If still failing after app started → display error and HARD STOP:
+       ```
+       ⚠️ 앱이 시작되었지만 CDP 연결에 실패했습니다.
+       ```
+       **Use AskUserQuestion**:
+       - "재시도" — retry the connection probe
+       - "UI 검증 Skip — health check만 수행"
+       **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-- **If MCP available** (and CDP check passed for Electron) — perform SC-level UI verification:
+  **SC-level UI Verification**:
   1. Parse demo script Coverage header → extract FR-###/SC-### + UI Action list
-  2. Start app (demo script `--ci` or directly)
-  3. Verify each SC-###:
+  2. Verify each SC-###:
      - ✅-marked SC: Execute UI Action sequence
        - `navigate /path` → move via Navigate capability
        - `fill selector` → input via Type capability
        - `click selector` → click via Click capability
        - `verify selector visible` → confirm element existence via Snapshot capability
      - ⬜-marked SC: Skip (record reason)
-  4. Collect JS errors from Console logs (TypeError, ReferenceError, etc.)
-  5. Detect page load failures
-  6. Result report:
+  3. Collect JS errors from Console logs (TypeError, ReferenceError, etc.)
+  4. Detect page load failures
+  5. Result report:
   ```
   📊 UI Verification Report for [FID]:
     SC-001: ✅ navigate → fill → click → verify OK
@@ -180,11 +185,13 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
     Console errors: [N] (TypeError: 2, ReferenceError: 1)
   ```
 
+  **App Shutdown**: After all SC verifications complete, terminate the app process started above. Do NOT leave it running.
+
 - **Result classification** (all warnings, NOT blocking):
   - SC interaction failure: ⚠️ warning (false positive possible — selector changes, etc.)
   - JS console errors (TypeError/ReferenceError): ⚠️ warning + highlighted
   - Page load failure: ⚠️ warning
-- **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent. The CDP HARD STOP above must always be presented to the user.
+- **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent. The Case A CDP HARD STOP must always be presented to the user.
 - See [reference/ui-testing-integration.md](../reference/ui-testing-integration.md) for full guide
 
 **Step 3 — Check coverage mapping and demo components**:
