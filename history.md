@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-03-08] README — Remove `<details>` collapsible tags for Confluence compatibility
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | `<details>` tags | Removed from both READMEs | `<details>` HTML tags are not supported in Confluence wiki pages. Converted `<summary><h2>` to regular `## ` headings for universal compatibility. |
+
+---
+
 ## [2026-03-08] Playwright MCP Detection — Config File Read → Tool List Check
 
 | # | Decision | Choice | Rationale |

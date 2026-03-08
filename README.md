@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-08 16:28 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-08 16:46 KST
 
 **Custom Claude Code skills that add cross-Feature intelligence to [spec-kit](https://github.com/github/spec-kit) SDD workflows**
 
@@ -141,8 +141,7 @@ All journeys converge to **incremental mode** as the steady state.
 
 ---
 
-<details>
-<summary><h2>📖 Detailed Reference</h2></summary>
+## Detailed Reference
 
 ### How It Works — Common Protocol
 
@@ -177,10 +176,7 @@ All spec-kit command executions follow this 4-step protocol:
 
 **Preceding Feature results take priority**: If a dependent Feature's plan is already complete, the finalized `data-model.md` and `contracts/` are referenced instead of registry drafts.
 
-</details>
-
-<details>
-<summary><h2>📖 /reverse-spec — Detailed Workflow</h2></summary>
+## /reverse-spec — Detailed Workflow
 
 ### Usage
 
@@ -292,10 +288,7 @@ Generates: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-regi
 | For /speckit.plan | plan | Dependencies, entity/API schema drafts, technical decisions |
 | For /speckit.analyze | analyze | Cross-Feature verification points, impact scope |
 
-</details>
-
-<details>
-<summary><h2>📖 /smart-sdd — Detailed Workflow</h2></summary>
+## /smart-sdd — Detailed Workflow
 
 ### Full Command Reference
 
@@ -426,10 +419,7 @@ F003-order      | T2   |         |      |       |         |           |        |
 | `pipeline-status.sh` | Pipeline progress overview |
 | `validate.sh` | Cross-file consistency check |
 
-</details>
-
-<details>
-<summary><h2>📖 End-to-End Workflow Examples</h2></summary>
+## End-to-End Workflow Examples
 
 ### Scenario 1: Greenfield — New task management app
 
@@ -489,10 +479,7 @@ F003-order      | T2   |         |      |       |         |           |        |
    +-- Update: Notification entity → entity-registry
 ```
 
-</details>
-
-<details>
-<summary><h2>📖 Reference</h2></summary>
+## Reference
 
 ### Installation — Alternative Methods
 
@@ -597,4 +584,4 @@ Tech Stack (detected at runtime)    ← Framework-specific file patterns, ORM ty
 
 Use `--domain` to select a profile (default: `app`). See `domains/_schema.md` for creating custom profiles.
 
-</details>
+
