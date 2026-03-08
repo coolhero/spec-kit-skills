@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. A Reverse Specification skill that extracts specs from existing implementations.
-argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt]"
+argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt] [--skip-to <phase>]"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
 
@@ -34,6 +34,7 @@ $ARGUMENTS parsing rules:
   --name <val>  → New project name (skips Phase 0 Question 3 if provided; implies rename from detected project name)
   --domain <val> → Project domain profile: "app" (default). Determines analysis axes, registries, and Feature boundary heuristics
   --adopt       → SDD Adoption mode: forces --scope full --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
+  --skip-to <phase> → (DEV/TEST) Jump directly to a specific phase. Skips all preceding phases with sensible defaults. Valid values: "1.5", "2", "3", "4". Example: --skip-to 1.5 to test Runtime Exploration.
 ```
 
 ---
@@ -62,6 +63,7 @@ After parsing arguments, read `commands/analyze.md` for the complete workflow. E
 | **Pre-Phase** | Git Repository Setup | Ensure CWD has a git repository for branch-based workflow |
 | **Phase 0** | Strategy Questions | Determine scope, stack strategy, project identity |
 | **Phase 1** | Project Scan | Identify tech stack, directory structure, static resources |
+| **Phase 1.5** | Runtime Exploration | (Optional, rebuild only) Run the original app and explore interactively |
 | **Phase 2** | Deep Analysis | Extract entities, APIs, business logic, behaviors |
 | **Phase 3** | Feature Classification | Identify Features, assign IDs, classify importance (core scope) |
 | **Phase 4** | Deliverable Generation | Generate artifacts, source coverage baseline, completion report |

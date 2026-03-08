@@ -4,6 +4,30 @@ Complete workflow for analyzing existing source code and generating the Global E
 
 ---
 
+## `--skip-to` Quick-Jump (DEV/TEST)
+
+> **This section is only relevant when `--skip-to <phase>` is specified.** Otherwise, skip to Pre-Phase below.
+
+When `--skip-to` is provided, bypass all preceding phases with minimal defaults to quickly reach and test a specific phase:
+
+**`--skip-to 1.5`** (Runtime Exploration):
+1. **Skip**: Pre-Phase, Phase 0, most of Phase 1
+2. **Auto-resolve**: scope=`full`, stack=`same`, no rename, domain=`app`
+3. **Minimal Phase 1**: Read only `package.json` (or equivalent) from the target directory to detect:
+   - Tech stack (language, framework)
+   - Dev server scripts (`dev`, `start`, `serve`, etc.)
+   - Dependencies (for package manager detection)
+   - `.env.example` existence
+4. **Jump to**: Phase 1.5 Step 0 (MCP Availability Check)
+
+**`--skip-to 2`**: Auto-resolve Phase 0, execute full Phase 1, skip Phase 1.5, jump to Phase 2.
+**`--skip-to 3`**: Auto-resolve Phase 0, execute Phase 1+2, skip Phase 1.5, jump to Phase 3.
+**`--skip-to 4`**: Auto-resolve Phase 0, execute Phase 1+2+3, skip Phase 1.5, jump to Phase 4.
+
+> ⚠️ `--skip-to` is for development/testing purposes only. Skipped phases produce no artifacts, so downstream phases may have missing context. Do NOT use in production runs.
+
+---
+
 ## Pre-Phase — Git Repository Setup
 
 Before starting analysis, ensure the CWD (output directory) has a git repository. This enables branch-based workflow management throughout the SDD pipeline.
