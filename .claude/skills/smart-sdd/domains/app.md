@@ -111,4 +111,18 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 
 When Playwright MCP is available during `verify` Phase 3:
 - Demo script starts the server → Playwright navigates to demo URL → verifies page loads and key elements exist
-- If not available: falls back to health endpoint check only (no degradation)
+- SC-level UI verification: Automatically execute UI Action sequences from Coverage header via MCP
+- If not available: HARD STOP — MCP install guide or UI verification Skip
+
+---
+
+## 7. Bug Prevention Rules
+
+> Per-stage bug prevention rules. See each stage's injection file for details.
+
+| Stage | Checks | Reference |
+|------|----------|------|
+| **plan (B-1)** | Runtime Compatibility, State Management Anti-patterns, Async Race Conditions, Store Dependency Graph | `injection/plan.md` § Bug Prevention |
+| **analyze (B-2)** | Cross-Feature Data Flow, Nullable Field Tracking | `injection/analyze.md` § Bug Prevention |
+| **implement (B-3)** | IPC Boundary Safety, Platform CSS, Cross-Feature Integration, Persistence Write-Through | `injection/implement.md` § Bug Prevention |
+| **verify (B-4)** | Empty State Smoke Test, Smoke Launch Criteria | `verify-phases.md` § Phase 3b |

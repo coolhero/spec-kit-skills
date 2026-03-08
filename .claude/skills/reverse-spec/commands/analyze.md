@@ -574,6 +574,15 @@ Based on screens discovered, identify apparent user flows:
 - Total exploration budget: 5 minutes
 - Repeated layout patterns: sample 3, then note "N more with same pattern"
 
+**Crash Recovery**:
+When app process termination or MCP connection loss is detected during exploration:
+1. Preserve already collected screen data (immediately write explored screens to runtime-exploration.md)
+2. HARD STOP — **Use AskUserQuestion** with options:
+   - "Restart app and continue exploration" — restart the app, skip already-explored screens, resume from remaining screens
+   - "Proceed with data collected so far" — complete Phase 1.5 with only the collected data
+   - "Skip Runtime Exploration" — skip Phase 1.5 entirely
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
 ### 1.5-6. Observation Recording + Cleanup
 
 **Step 1 — Write `specs/reverse-spec/runtime-exploration.md`**:
@@ -713,6 +722,8 @@ For each source file identified in Phase 1, extract a **function-level inventory
 - Skip internal/private helpers that are implementation details, not behaviors
 
 This inventory feeds into each Feature's `pre-context.md` → "Source Behavior Inventory" section (Phase 4-2) and is used by `/smart-sdd verify` for Feature-level completeness checking.
+
+> **SBI Generation Timing**: Phase 2-6 generates the project-wide global SBI. At this point, Feature classification has not yet been performed (done in Phase 3), so no per-Feature filtering is applied. Per-Feature filtering and B### ID assignment are performed in Phase 4-2.
 
 ### 2-7. UI Component Feature Extraction (Frontend/Fullstack Projects Only)
 
@@ -1027,8 +1038,17 @@ F003-order (12 entries): B019–B030
 
 Contents to include in each pre-context.md:
 - **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Read `specs/reverse-spec/runtime-exploration.md` and distribute observations to each Feature based on route-to-Feature mapping. For each Feature: extract the `## Screen:` sections whose routes belong to this Feature, include associated user flows and runtime behavior from those screen blocks, and add relevant App-Wide Observations. If Phase 1.5 was skipped or the file does not exist, write "Skipped — [reason]"
+
+  **Route-to-Feature Mapping Algorithm**:
+  1. Feature boundaries are determined by file/module in Phase 3-1
+  2. Phase 1 code scan identifies page component files for each route
+  3. Mapping: route → page component file → Feature that owns the file (Phase 3-1 boundary)
+  4. Shared routes: included in primary owner Feature, referenced in other Features
+  5. Unmappable routes: recorded in App-Wide Observations
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
 - **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/app.md` § 3-7 for format)
+
+  > **SBI Per-Feature Filtering**: Filter only behaviors belonging to this Feature's source files from the Phase 2-6 global SBI. B### IDs are assigned sequentially and uniquely across the entire project in Feature ID order.
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files

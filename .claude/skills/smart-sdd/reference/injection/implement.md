@@ -92,12 +92,87 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
 
 5. **Update `demos/README.md`** — see [demo-standard.md § 8](../demo-standard.md) for format.
 
+## Runtime Verification + Fix Loop
+
+> **Purpose**: Resolve G4 — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
+> **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
+
+### Per-Task Runtime Verification
+
+After each `speckit-implement` task completes (before starting the next task):
+
+**Step 1 — Build Gate**:
+- Run build command (`npm run build`, `cargo build`, etc.)
+- **Build failure**: Enter Auto-Fix Loop (see below)
+- **Build success**: Proceed to Step 2
+
+**Step 2 — Runtime Check** (when MCP available):
+1. If app is not yet running: start app (dev server / Electron / etc.)
+2. Navigate to the screen related to the completed task
+3. Snapshot to confirm normal rendering (not an error screen)
+4. Check Console logs for JS errors (TypeError, ReferenceError, etc.)
+5. **Success**: Proceed to next task (keep app running)
+6. **Failure**: Enter Auto-Fix Loop
+
+**Without MCP**: Replace Step 2 with build success confirmation only (Level 1 verification)
+
+### Post-Implement Full Verification
+
+After all tasks complete, before Review:
+
+1. Start app (or keep running if already started)
+2. Identify verifiable items from the Feature's SC-### list
+3. Navigate to each SC-related screen → Snapshot → confirm normal rendering
+4. Scan Console logs for all errors
+5. **If failures found**: Enter Auto-Fix Loop
+6. **All pass**: Display "Runtime Verified: ✅" in Review Display
+
+### Auto-Fix Loop
+
+Attempt automatic fix when runtime verification fails:
+
+```
+FIX_LOOP (max 3 attempts):
+  1. Analyze stdout/stderr error messages
+  2. Classify error type:
+     - Import/Module: path errors, unregistered modules
+     - Config: missing/invalid config files
+     - Type: type mismatches, unimplemented interfaces
+     - API: endpoint mismatches, schema errors
+     - Runtime: null reference, undefined access
+  3. Modify related source files
+  4. Rebuild → re-verify
+  5. Same error repeats: break loop → error report
+```
+
+**Loop break conditions**:
+- Same error after 3 attempts → break
+- New error resets counter (different issue)
+- Error from external dependency (DB, API server, etc.) → break immediately, show reason
+
+**Break report**:
+```
+⚠️ Runtime Verification — Auto-Fix failed:
+  Error: [error message]
+  Attempts: [N]
+  Classification: [error type]
+  Files modified: [list of attempted fix files]
+
+You can fix manually or proceed to Review with this state.
+```
+
+**Use AskUserQuestion** with options:
+- "Fix manually and re-verify"
+- "Proceed to Review as-is" — Review includes ⚠️ marker
+**If response is empty → re-ask** (per MANDATORY RULE 1)
+
 ## Injected Content
 
 - Automatically executes `speckit-implement` based on tasks.md
 - Static resource copy instructions from pre-context.md (if applicable)
 - Naming remapping context from pre-context.md (if applicable) — displays old → new identifier mapping before execution
 - If Demo-Ready Delivery is active: demo surface implementation + executable demo script creation (`demos/F00N-name.sh`)
+- **Runtime verification**: Per-task build gate + runtime check (MCP available 시), post-implement full SC verification
 
 ## Checkpoint
 
@@ -134,6 +209,14 @@ After `speckit-implement` completes:
 ── Build Status ─────────────────────────────────
 [Build success/failure]
 
+── Runtime Verification ────────────────────────
+[Per-task verification summary:
+ Task 1: ✅ Build + Runtime OK
+ Task 2: ✅ Build + Runtime OK
+ Task 3: ⚠️ Build OK, Runtime Fix (1 attempt)
+ Post-implement: ✅ [N]/[M] SCs verified]
+[If MCP not available: "Build-only verification (Level 1)"]
+
 ── Demo Status (if Demo-Ready Delivery active) ──
 [Demo surface created: yes/no
  demos/F00N-name.sh: created/updated]
@@ -148,6 +231,35 @@ You can open and edit any of these files directly, then select
 ```
 
 **HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
+
+---
+
+## Bug Prevention Checks (B-3)
+
+> Bug prevention rules applied during code writing in the implement stage.
+> Reminded at Checkpoint before speckit-implement execution, compliance checked during Review.
+
+### IPC Boundary Safety (Electron/Tauri)
+
+- **IPC Message Validity**: Prevent argument type/count mismatches in main↔renderer IPC calls
+- **Context Isolation**: Confirm renderer cannot directly access Node.js APIs
+- **IPC Error Handling**: Recovery strategy for IPC call failures (process crash, timeout)
+
+### Platform CSS Constraints
+
+- **Electron/Tauri Webview CSS Constraints**: Desktop-specific CSS considerations (`-webkit-app-region: drag`, frameless window layouts)
+- **Cross-browser Compatibility**: CSS Grid/Flexbox fallbacks, vendor prefix requirements
+
+### Cross-Feature Integration
+
+- **Import Path Validation**: Verify correct paths when importing modules from other Features
+- **Interface Contract Compliance**: Confirm actual implementation of shared entities/APIs matches entity-registry/api-registry contracts
+- **Module Import Graph**: Prevent circular imports, check tree-shaking impact when using barrel exports
+
+### Data Persistence Safety
+
+- **Write-Through Consistency**: Synchronization strategy between in-memory state changes and persistence layer (DB, localStorage, file)
+- **Optimistic Update Rollback**: Mechanism to restore previous state when optimistic updates fail
 
 ---
 

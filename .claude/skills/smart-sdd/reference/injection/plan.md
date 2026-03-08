@@ -10,6 +10,7 @@
 | File | Section | Filtering |
 |------|---------|-----------|
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference layout patterns and Component Library for component architecture decisions. **If section says "Skipped"**, proceed without runtime context |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in data models and API contracts |
 | `BASE_PATH/entity-registry.md` | Related entity sections | See rules below |
 | `BASE_PATH/api-registry.md` | Related API sections | See rules below |
@@ -60,6 +61,7 @@ Reference the actual implementation results of dependent preceding Features:
 - **Draft entity schemas**: Related entities filtered from entity-registry (or finalized schemas from preceding Features)
 - **Draft API contracts**: Related APIs filtered from api-registry (or finalized contracts from preceding Features)
 - **Stack migration context** (New Stack only): Technology mapping, per-Feature migration notes, and patterns requiring rethinking from stack-migration.md. Skipped if Same Stack or file missing
+- **Runtime exploration context**: If present, layout patterns (e.g., three-column, split-pane) and Component Library observations from Phase 1.5 runtime exploration — reference layout patterns when designing component structure, and observed Component Library when choosing UI framework approach. If the section says "Skipped", proceed without runtime context
 - **Technical decisions**: Draft technical decisions from pre-context
 - **Preceding Feature actual results**: Reference data-model and contracts from Features that have already completed plan
 - **Naming remapping**: If Naming Remapping section exists in pre-context, remind that entity names, API names, and technical terms should use the new identifiers
@@ -101,6 +103,14 @@ Feature: [FID] - [Feature Name]
 ── Stack Migration Context (New Stack only) ──────
 [If New Stack strategy: show technology mapping, migration notes for this Feature,
  and patterns that require rethinking. Omitted if Same Stack or file missing.]
+
+── Runtime Exploration Context ──────────────────
+[If present in pre-context — show layout and component observations]
+  Layout Patterns: [observed layout patterns, e.g., three-column, split-pane, tab-based]
+  Component Library: [observed UI components and framework elements]
+  ⚠️ Reference layout patterns when designing component structure,
+    and observed Component Library when choosing UI framework approach.
+[If "Skipped" — display: "Runtime exploration skipped — proceeding without runtime context."]
 
 ── Preceding Feature Overrides ───────────────────
 [If applicable: show which drafts were replaced by finalized schemas from preceding Features]
@@ -155,6 +165,36 @@ You can open and edit these files directly, then select
 ```
 
 **HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
+
+---
+
+## Bug Prevention Checks (B-1)
+
+> Pre-implementation bug prevention checks at the plan stage.
+> Items below are reviewed during post-plan Review; omissions are shown as ⚠️ warnings.
+
+### Runtime Compatibility
+
+- **Target Runtime Constraints**: Verify JS/CSS constraints of target runtime (browser version, Node.js version, Electron version)
+- **API Compatibility**: Confirm Web API / Node API availability in target runtime (e.g., `structuredClone`, CSS `container queries`)
+- **Polyfill Strategy**: Specify polyfill approach when using unsupported APIs
+
+### State Management Anti-patterns
+
+- **Shared Mutable State**: Detect patterns where multiple components/modules directly mutate the same state
+- **Circular Dependencies**: Check for circular dependencies between stores
+- **Store Initialization Order**: Warn about logic that depends on store initialization order
+
+### Async & Concurrency
+
+- **Race Condition Analysis**: Identify concurrent requests, optimistic updates, debounce/throttle points
+- **Unhandled Promise Rejection**: Specify error handling strategy for async functions
+- **Cleanup on Unmount**: Strategy for cleaning up subscriptions/timers/listeners on component unmount
+
+### Dependency Safety
+
+- **Store Dependency Graph**: Visualize dependency directions between stores/services, detect cycles
+- **Downgrade Compatibility**: Check for breaking changes when dependent library major versions differ
 
 ---
 

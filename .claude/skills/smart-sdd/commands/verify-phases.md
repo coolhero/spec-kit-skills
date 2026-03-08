@@ -92,16 +92,47 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - The `--ci` flag must be supported for automated verification: runs setup + health check, then exits cleanly
 - **REJECT if**: the script has no interactive experience (i.e., only runs assertions and exits with no live Feature)
 
-**Step 2b — UI Verification Hook** (optional — only if Playwright MCP available):
-- After health check passes and before `--ci` exits, if Playwright MCP tools are available in the session:
-  1. Parse demo script stdout for URLs (pattern: `http://localhost:\d+/...`)
-  2. Navigate to each URL via Playwright
-  3. Verify page loads (no error state, page title present)
-  4. If demo script has a `# Playwright` header comment: run listed assertions (element existence, clickability)
-  5. Take screenshot for review evidence
-  6. Report: `UI verification: ✅ [N] pages verified, [N] elements checked`
-- **If Playwright MCP not available**: skip silently (no warning, no degradation)
-- **If UI verification fails**: report as warning (⚠️), not blocker — health check already passed
+**Step 2b — UI Verification Hook** (MCP required):
+> **App Session Management**: Demo script starts the app → all SC verifications in the same session → shut down after Phase completes. See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
+
+- **MCP Detection**: Check availability of Playwright MCP (or corresponding tools from MCP Capability Map)
+- **If MCP not available**: Display warning and HARD STOP:
+  ```
+  ⚠️ Playwright MCP가 설치되어 있지 않습니다. UI 검증을 수행할 수 없습니다.
+  MCP 설치: MCP-GUIDE.md 참조
+  ```
+  **Use AskUserQuestion** with options:
+  - "Playwright MCP 설치 후 재시도"
+  - "UI 검증 Skip"
+  **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+- **If MCP available** — perform SC-level UI verification:
+  1. Parse demo script Coverage header → extract FR-###/SC-### + UI Action list
+  2. Start app (demo script `--ci` or directly)
+  3. Verify each SC-###:
+     - ✅-marked SC: Execute UI Action sequence
+       - `navigate /path` → move via Navigate capability
+       - `fill selector` → input via Type capability
+       - `click selector` → click via Click capability
+       - `verify selector visible` → confirm element existence via Snapshot capability
+     - ⬜-marked SC: Skip (record reason)
+  4. Collect JS errors from Console logs (TypeError, ReferenceError, etc.)
+  5. Detect page load failures
+  6. Result report:
+  ```
+  📊 UI Verification Report for [FID]:
+    SC-001: ✅ navigate → fill → click → verify OK
+    SC-002: ✅ navigate → click → verify OK
+    SC-003: ⬜ skipped (WebSocket)
+    SC-004: ⚠️ FAIL — verify .result not found after click
+    Console errors: [N] (TypeError: 2, ReferenceError: 1)
+  ```
+
+- **Result classification** (all warnings, NOT blocking):
+  - SC interaction failure: ⚠️ warning (false positive possible — selector changes, etc.)
+  - JS console errors (TypeError/ReferenceError): ⚠️ warning + highlighted
+  - Page load failure: ⚠️ warning
+- **UI verification failures are NOT blocking since health check already passed** — results included in Review
 - See [reference/ui-testing-integration.md](../reference/ui-testing-integration.md) for full guide
 
 **Step 3 — Check coverage mapping and demo components**:
@@ -164,6 +195,28 @@ Please create a demo script at demos/F00N-name.sh that:
 
 - Update `demos/README.md` (Demo Hub) with the Feature's demo and what the user can experience:
   - `./demos/F00N-name.sh` — launches [brief description of the live demo experience]
+
+### Phase 3b: Bug Prevention Verification (B-4)
+
+> Additional checks to automatically verify basic stability of code written during implement.
+> Runs after Phase 3 Demo-Ready, before Phase 4 Update.
+
+**Empty State Smoke Test**:
+- Start app with all stores/state set to initial (empty) state
+- Confirm main screen renders without crashes (Error Boundary not triggered)
+- Confirm no critical JS errors in Console (TypeError, ReferenceError, etc.)
+- **When MCP available**: Auto-verify via Navigate → Snapshot
+- **Without MCP**: Substitute with build + server start success check
+
+**Smoke Launch Criteria** (basic app stability):
+1. Process starts — no immediate exit with non-zero exit code
+2. Main screen renders — not a blank page or error screen
+3. Error Boundary not triggered — React/Vue/Svelte error boundaries not activated
+4. No JS errors — Console free of TypeError, ReferenceError, SyntaxError
+
+**Result classification**: ⚠️ warning (NOT blocking) — results included in Review
+
+---
 
 ### Phase 4: Global Evolution Update
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found

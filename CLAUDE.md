@@ -10,6 +10,12 @@
 
 - **에이전트 워킹 메모리 대신 파일에 기록**: Phase 간 전달되는 중간 산출물은 에이전트 메모리에 보관하지 않고 반드시 파일로 저장합니다. 에이전트 메모리는 컨텍스트 윈도우 한계, 세션 단절, Phase 간 정보 손실에 취약합니다. 파일로 저장하면 언제든 다시 읽을 수 있고, 사용자가 내용을 직접 확인·수정할 수 있으며, 다른 세션에서도 활용 가능합니다.
 
+## Language
+
+- **All artifacts MUST be written in English.** This includes skill files (SKILL.md, commands/*.md, reference/*.md, domains/*.md, templates/*.md), TODO.md, history.md, MCP-GUIDE.md, and all other project files.
+- **Exception**: `README.ko.md` is the only file written in Korean.
+- User-facing AskUserQuestion option labels may use Korean if contextually appropriate for Korean-speaking users, but the surrounding documentation and comments must be in English.
+
 ## Conventions
 
 - 변경 시 항상 `specs/history.md`에 이력을 기록합니다.

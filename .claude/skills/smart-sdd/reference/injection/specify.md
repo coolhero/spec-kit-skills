@@ -16,6 +16,7 @@
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference observed UI layouts, user flows, and errors when drafting FR/SC. **If section says "Skipped"**, proceed without runtime context |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in requirements |
 
 ### Source Reference Path Resolution
@@ -44,9 +45,10 @@ To resolve file paths at runtime:
 
 - **Feature summary**: Feature description and scope from pre-context
 - **Draft requirements (FR-###)**: Draft Functional Requirements extracted from pre-context
-- **Draft acceptance criteria (SC-###)**: Draft Success Criteria / Acceptance Scenario extracted from pre-context
+- **Draft acceptance criteria (SC-###)**: Draft Success Criteria / Acceptance Scenario extracted from pre-context. For UI Features, SCs should include verifiable UI actions where possible (e.g., "User enters credentials in login form and clicks Submit → dashboard screen is displayed"). These SC descriptions are converted to automated verification actions in the demo script's Coverage header
 - **Source behavior inventory**: If present, the function-level behavior list with priorities — remind that each P1/P2 behavior should map to at least one FR-###. This prevents functionality loss during rebuild. **NEW entries** (Origin=`new`): Treat as new requirements to be specified, not as coverage of existing code. They should still map to FR-### but do not represent original source behaviors
 - **UI component features**: If present, the third-party UI library capabilities — remind that each UI feature should map to an FR-###. These features (toolbar items, editing modes, plugins) are invisible to function-level analysis
+- **Runtime exploration observations**: If present, the per-screen UI observations from Phase 1.5 runtime exploration — observed UI layouts inform FR descriptions, observed user flows inform SC scenarios, observed errors inform edge case SCs. If the section says "Skipped", note it and proceed without runtime context
 - **Business rules**: List of rules for the Feature from business-logic-map (skipped if business-logic-map.md does not exist)
 - **Edge cases**: Edge cases found in pre-context and business-logic-map
 - **Original source reference**: File list from Source Reference (skipped if Source Reference is N/A)
@@ -92,6 +94,17 @@ Feature: [FID] - [Feature Name]
 [If present in pre-context — list UI library capabilities]
   NoteEditor (@toast-ui/editor): Bold/Italic toolbar, WYSIWYG mode, ...
   ⚠️ Ensure each UI feature maps to an FR-###.
+
+── Runtime Exploration Observations ─────────────
+[If present in pre-context — show per-screen observations]
+  Layout: [observed layout pattern, e.g., three-column, split-pane]
+  Key Elements: [observed interactive elements, forms, tables]
+  User Flows: [observed navigation paths and interactions]
+  Errors/Edge Cases: [observed error states or edge cases]
+  ⚠️ Reference observed UI layouts when describing FR scope,
+    observed user flows when writing SC scenarios,
+    and observed errors when defining edge case SCs.
+[If "Skipped" — display: "Runtime exploration skipped — proceeding without runtime context."]
 
 ── Business Rules (from business-logic-map) ──────
 [List each business rule with its description]

@@ -5,6 +5,58 @@
 
 ---
 
+## [2026-03-08] Pipeline Gap Analysis & Runtime Verification
+
+### Pipeline Gap Resolution (G1–G7)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| G1+G2: Runtime Exploration injection | Add runtime-exploration.md consumption to specify/plan injection | UI observations (layouts, flows, errors) must inform FR/SC drafts and component design |
+| G3: Route→Feature Mapping | Define transitive mapping: route → page component → module → Feature | Phase 4-2 stated "distribute via mapping" but never defined the algorithm |
+| G4: Runtime Verification + Fix Loop | Per-task build gate + runtime check in implement, with auto-fix (max 3 attempts) | implement generating code without running it caused bug explosion at verify time |
+| G5: MCP Required Policy | Replace silent-skip with HARD STOP when MCP is absent | Silent skip was inconsistent with MCP required policy; users must know UI verification is skipped |
+| G6: Electron Crash Recovery | HARD STOP with 3 options: restart + continue, proceed with collected data, skip | Exploration data loss on crash was unrecoverable without explicit recovery mechanism |
+| G7: SBI Filtering Process | Explicitly document Phase 2-6 global → Phase 4-2 per-Feature filtering | Process was implicit, causing confusion about when B### IDs are assigned |
+
+### Runtime Verification Architecture
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Per-task vs. end-of-implement verification | Both: per-task build gate + post-implement full SC verification | Per-task catches errors early; post-implement ensures no regressions |
+| Auto-Fix Loop limit | Max 3 attempts per error, break on same error repeat | Prevents infinite loops while allowing automatic recovery from common issues |
+| MCP-dependent verification | Level 1 (build only) without MCP, Level 2 (runtime) with MCP | Graceful degradation — still valuable without MCP, enhanced with it |
+
+### SC→UI Action Mapping & Auto Verification
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Coverage header format | SC-level with UI actions (navigate → fill → click → verify) | FR-level coverage was too coarse for automated verification |
+| UI verification result classification | All warnings, NOT blocking | False positives from selector changes make blocking unreliable |
+| App session management | Start once, Navigate for screen switching, stop after phase completes | Avoids expensive app restart between each SC verification |
+
+### Bug Prevention Rules (B-1~4)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Per-stage prevention | B-1 (plan), B-2 (analyze), B-3 (implement), B-4 (verify) | Each stage has unique bug categories; prevention is more efficient than detection |
+| B-4 Empty State Smoke Test | Warning, not blocking | Stability check should not gate verification — informational for developer awareness |
+| Bug Prevention reference in domains/app.md | Stage-to-check mapping table | Central reference for which checks apply at which pipeline stage |
+
+### Language Policy
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| All artifacts in English | English for all files except README.ko.md | Consistency and broader accessibility; Korean-only README.ko.md preserved for Korean users |
+
+### MCP Capability Map
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Abstract MCP capabilities | Map generic capabilities (Navigate, Snapshot, Click, Type, Console) to MCP-specific tool names | Future-proofs against MCP tool changes; supports Tauri MCP extension |
+| MCP-GUIDE.md as central reference | Single file for all MCP configuration and capability mapping | Prevents MCP-specific details from scattering across multiple skill files |
+
+---
+
 ## [2026-02-28] Initial Architecture
 
 ### Core Design Decisions

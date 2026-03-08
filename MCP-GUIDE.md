@@ -259,27 +259,69 @@ claude mcp add playwright \
 
 ---
 
-## Playwright MCP 제공 기능
+## MCP Capability Map
 
-| 기능 | 도구 | 용도 |
-|------|------|------|
-| 페이지 이동 | `browser_navigate` | URL 이동, 앞/뒤 |
-| DOM 구조 | `browser_snapshot` | 접근성 트리 기반 — 텍스트, role, 요소 구조 |
-| 클릭 | `browser_click` | 요소 클릭 |
-| 텍스트 입력 | `browser_type` | 필드에 텍스트 입력 |
-| 호버 | `browser_hover` | 마우스 오버 |
-| 드래그 | `browser_drag` | 드래그앤드롭 |
-| 셀렉트 | `browser_select_option` | 드롭다운 선택 |
-| 키 입력 | `browser_press_key` | Enter, Escape 등 |
-| 대기 | `browser_wait_for` | 요소 출현/조건 대기 |
-| 스크린샷 | `browser_take_screenshot` | 시각적 확인 |
-| 콘솔 로그 | `browser_console_messages` | JS 에러/경고 수집 |
-| 네트워크 | `browser_network_requests` | API 요청 모니터링 |
-| 파일 업로드 | `browser_file_upload` | 파일 입력 |
-| 다이얼로그 | `browser_handle_dialog` | alert/confirm/prompt 처리 |
-| 탭 관리 | `browser_tab_*` | 멀티탭 시나리오 |
-| PDF 저장 | `browser_pdf_save` | 페이지를 PDF로 저장 |
-| 테스트 생성 | `browser_generate_playwright_test` | 인터랙션을 Playwright 테스트 코드로 변환 |
+> 에이전트가 런타임 인터랙션 시 사용하는 capability와 MCP별 도구 매핑.
+> 새 MCP 추가 시 이 테이블에 열을 추가하면 된다. 각 스킬의 instruction은 **Capability 이름**으로 작성되므로 수정 불필요.
+
+### Capability 감지
+
+에이전트는 각 단계(reverse-spec Phase 1.5, implement 검증, verify SC 검증) 시작 시 **한 번** 감지를 수행한다:
+
+1. 아래 Detect 행의 도구 존재 여부로 어떤 MCP가 활성인지 판별
+2. 감지된 MCP의 도구명을 사용하여 이후 instruction 실행
+3. **어떤 MCP도 감지되지 않으면** → 설치 안내 + Skip 옵션 (HARD STOP)
+
+### Capability Table
+
+| Capability | 용도 | Playwright MCP | Tauri MCP (향후) |
+|-----------|------|---------------|-----------------|
+| **Detect** | MCP 가용성 판별 | `browser_navigate` 존재 여부 | `webview_navigate` 존재 여부 |
+| **Navigate** | URL/라우트 이동 | `browser_navigate` | `webview_navigate` |
+| **Snapshot** | 페이지 구조 캡처 (접근성 트리) | `browser_snapshot` | `webview_snapshot` |
+| **Click** | 요소 클릭 | `browser_click` | `webview_click` |
+| **Type** | 텍스트 입력 | `browser_type` | `webview_type` |
+| **Select** | 드롭다운 선택 | `browser_select_option` | `webview_select` |
+| **Press** | 키보드 입력 | `browser_press_key` | `webview_press_key` |
+| **Wait** | 요소/조건 대기 | `browser_wait_for` | `webview_wait` |
+| **Console** | JS 콘솔 메시지 수집 | `browser_console_messages` | `webview_console` |
+| **Network** | 네트워크 요청 모니터링 | `browser_network_requests` | — |
+| **Dialog** | alert/confirm/prompt 처리 | `browser_handle_dialog` | — |
+
+> **사용 방법**: 각 스킬의 instruction에서 "**Navigate** capability로 URL 이동" 등으로 기술.
+> 에이전트는 감지된 MCP에 따라 위 테이블에서 구체적 도구명을 확인하여 호출.
+
+### 사용 시점별 필요 Capability
+
+| 시점 | 필수 Capability | 선택 Capability |
+|------|----------------|----------------|
+| **reverse-spec Phase 1.5** (원본 앱 탐색) | Detect, Navigate, Snapshot, Console | Wait |
+| **implement 런타임 검증** (태스크별 확인) | Detect, Navigate, Snapshot, Console | — |
+| **verify SC UI 검증** (SC 액션 실행) | Detect, Navigate, Snapshot, Click, Type, Console | Select, Press, Wait |
+
+### 앱 세션 관리 원칙
+
+MCP는 Claude Code 세션 내내 상주하지만, **앱(dev server)의 시작/종료는 비용이 크다**. 따라서:
+
+- **implement**: 첫 태스크 검증 시 앱 기동 → 이후 태스크는 Navigate로 화면 전환만 → Review 완료 후 종료
+- **verify**: demo script가 앱 기동 → SC 검증 전부 같은 세션 → Phase 완료 후 종료
+- **reverse-spec**: Phase 1.5 시작 시 앱 기동 → 전체 탐색 → Phase 1.5 종료 시 cleanup
+
+> ⚠️ 태스크마다 앱을 재시작하지 않는다. Navigate capability로 화면 전환하여 검증.
+
+### Playwright MCP 전체 도구 목록
+
+Capability Map에 포함되지 않은 Playwright 전용 도구:
+
+| 도구 | 용도 |
+|------|------|
+| `browser_hover` | 마우스 오버 |
+| `browser_drag` | 드래그앤드롭 |
+| `browser_file_upload` | 파일 입력 |
+| `browser_tab_*` | 멀티탭 시나리오 |
+| `browser_take_screenshot` | 시각적 확인 |
+| `browser_pdf_save` | 페이지를 PDF로 저장 |
+| `browser_generate_playwright_test` | 인터랙션을 Playwright 테스트 코드로 변환 |
 
 ## Claude Preview 보조 기능
 

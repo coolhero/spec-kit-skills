@@ -108,6 +108,24 @@ directly, then select "I've finished editing" to re-analyze.
 
 ---
 
+## Bug Prevention Checks (B-2)
+
+> Pre-detect cross-Feature potential bugs at the analyze stage.
+> Verify items below in addition to speckit-analyze results.
+
+### Cross-Feature Data Flow
+
+- **Inter-Feature Data Dependencies**: Verify data flow direction from entity-registry "Used by Features" relationships
+- **Initialization Order**: When Feature A depends on Feature B's data, confirm A safely handles absence of B's data in initial state
+- **Event Propagation**: Check handling of missing sender / unregistered receiver cases in cross-Feature event propagation
+
+### Nullable Field Tracking
+
+- **Shared Interface Optional Fields**: Confirm optional fields in shared entities (entity-registry) are safely accessed by consuming Features
+- **Type Narrowing**: Verify type guard / optional chaining strategy for nullable field access
+
+---
+
 ## Post-Step Update Rules
 
 Update `sdd-state.md` per generic step-completion rules in [state-schema.md](../state-schema.md). Record analysis results (issue count, severity) in Feature Detail Log. No Global Evolution Layer artifact updates.
