@@ -920,3 +920,48 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 전체 파이프라인 추적 | reverse-spec 산출물 → specify → plan → implement → verify 정보 흐름 7개 Gap 식별 | runtime-exploration.md가 수집만 되고 소비 안 됨(G1/G2), 라우트→Feature 매핑 미정의(G3), implement 런타임 검증 전무(G4), verify UI silent-skip(G5), Electron 크래시(G6), SBI 필터링 모호(G7) |
 | TODO 재구성 | Gap 기반 10개 과업으로 재편. A-4(수동 체크리스트) 제거, A-6 단순화 | verify도 MCP 필수. 수동 fallback 불필요. Gap 해소가 곧 과업 |
 | runtime-exploration.md 품질 평가 | Cherry Studio 17화면 탐색 결과 — Phase 1.5 목적에 충분 | UI 요소, 레이아웃, 컴포넌트 라이브러리, 에러, 빈 상태 등 코드만으로는 파악 불가한 정보 확보됨 |
+
+---
+
+## [2026-03-08] Cross-File Consistency Fixes
+
+11 cross-file consistency issues resolved:
+
+| Item | Fix | Files |
+|------|-----|-------|
+| implement.md MCP-GUIDE.md link path | `../../../../` → `../../../../../` | injection/implement.md |
+| B-2 result classification missing | Added "⚠️ warning (NOT blocking)" | injection/analyze.md |
+| B-3 result classification missing | Added "⚠️ warning (NOT blocking)" | injection/implement.md |
+| implement.md MCP absent silent degradation | Added warning message display | injection/implement.md |
+| implement.md Review Display "Test Results" | Removed (tests run in verify, not implement) | injection/implement.md |
+| app.md §7 B-rule naming mismatches | 4 items fixed to match injection files | domains/app.md |
+| app.md §6 "screenshot" | Changed to "Snapshot" | domains/app.md |
+| MCP detection 3-tool check | Changed to Capability Map Detect (browser_navigate only) | referenced files |
+| pipeline.md Step 5 & 6 summary gaps | Added Demo-Ready/B-3/SC UI Verify/Phase 3b | pipeline.md |
+| pre-context-template.md skip notation | "N/A" → "Skipped — [reason]" | pre-context-template.md |
+| Git commit message language | Added "MUST be written in English" to CLAUDE.md | CLAUDE.md |
+
+---
+
+## [2026-03-08] Session B Testing Fixes — CDP/Electron Runtime Exploration
+
+### Problem Evolution
+
+Testing `/reverse-spec` on cherry-studio (Electron app) revealed that Phase 1.5 Runtime Exploration for Electron apps required CDP (Chrome DevTools Protocol) configuration in Playwright MCP, which necessitated Claude Code restart — losing all session progress.
+
+| Fix Round | What Changed | Result |
+|-----------|-------------|--------|
+| Round 1 | CDP verification: `browser_navigate` to localhost:9222 → MCP config file read | Correct detection, wrong timing |
+| Round 2 | Moved CDP check to Phase 1.5-0 Step 1b (before user choice) | Correct timing, manual reconfiguration |
+| Round 3 | Auto-run `claude mcp remove/add` commands | Automatic, but still requires restart |
+| Round 4 (**final**) | **Web Preview Mode** — renderer dev server only, no CDP needed | No restart needed |
+
+### Web Preview Mode Design
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Default Electron exploration mode | Web Preview (방법 C) instead of CDP (방법 B) | CDP requires MCP reconfiguration + Claude Code restart, which loses all session progress (Phase 0, Phase 1 results). Web Preview avoids this entirely |
+| Renderer dev server detection | Check `package.json` for `dev:web`/`dev:renderer` scripts → build tool detection fallback | Most Electron apps have renderer as independent web app (Vite, Webpack) that can run standalone |
+| CDP as explicit opt-in | "Configure CDP mode (requires Claude Code restart)" option preserved | Users who need full Electron features (IPC, native menus, system tray) can still use CDP |
+| Web Preview limitations disclosed | Warning: "Electron 전용 기능은 보이지 않습니다" | Transparent about trade-offs; UI layout/flow analysis is sufficient for reverse-spec purposes |
+| MCP-GUIDE.md 방법 C | Added Web Preview Mode as third Electron connection method | Complete documentation alongside existing 방법 A (--electron-app) and 방법 B (CDP) |

@@ -324,10 +324,11 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 **Step 1 — Detect Playwright MCP**:
 Check if Playwright MCP is available using the Detect capability: verify the existence of `browser_navigate` tool. See [MCP-GUIDE.md](../../../MCP-GUIDE.md) § MCP Capability Map.
 
-**Step 1b — Electron apps: early CDP config check** (skip for non-Electron):
+**Step 1b — Electron apps: exploration mode selection** (skip for non-Electron):
 
-If the project was detected as an Electron app in Phase 1, check CDP configuration NOW — before asking the user about Runtime Exploration. This avoids wasting time if reconfiguration is needed.
+If the project was detected as an Electron app in Phase 1, determine the exploration approach NOW — before asking the user about Runtime Exploration. This avoids wasting time on approaches that won't work.
 
+**Sub-step 1 — Check CDP configuration**:
 Read MCP config files directly (do NOT use `browser_navigate`):
 1. Read these files in order (stop at first match containing `playwright`):
    - `.claude/settings.local.json` (project local)
@@ -336,11 +337,27 @@ Read MCP config files directly (do NOT use `browser_navigate`):
    - `~/.claude/settings.json` (user)
 2. Find `mcpServers.playwright.args` array
 3. Check if `--cdp-endpoint` exists in the args
-4. Store result as `cdp_configured = true/false` for use in Step 2
+4. If `cdp_configured = true`: Set `electron_mode = cdp`. Skip to Step 2.
+
+**Sub-step 2 — If CDP NOT configured: detect Web Preview capability**:
+
+> **Why Web Preview?**: CDP configuration requires changing MCP settings + Claude Code restart, which loses all session progress (Phase 0, Phase 1 results, etc.). Web Preview Mode avoids this by running ONLY the renderer's dev server and navigating to it via standard Playwright — no MCP reconfiguration or restart needed.
+
+Detection strategy (ordered by reliability):
+
+1. **Explicit renderer scripts**: Check `package.json` scripts for renderer-only dev commands:
+   - Look for keys matching: `dev:web`, `dev:renderer`, `start:web`, `start:renderer`, `web`, `preview:web`
+   - If found → `renderer_command = "npm run [script-name]"`, detect port from the script or default to 5173
+2. **Build tool detection**: If no explicit script found, detect the Electron build tool and construct a renderer-only command:
+   - **electron-vite** (`electron.vite.config.{ts,js,mjs}` exists): Renderer entry is typically `src/renderer/index.html`. Command: `npx vite --root src/renderer` (default port 5173)
+   - **electron-forge + webpack** (`forge.config.{ts,js}` + `webpack.renderer.config.js`): Command: `npx webpack serve --config webpack.renderer.config.js`
+   - **Other**: Check for `vite.config.{ts,js}` or `webpack.config.js` in a `renderer/` or `src/renderer/` subdirectory
+3. Store results: `web_preview_possible = true/false`, `renderer_command`, `renderer_port`
+4. Set `electron_mode = web_preview` (if possible) or `electron_mode = cdp_required`
 
 **Step 2 — Present options based on detection result**:
 
-**If Playwright MCP is available AND (non-Electron OR cdp_configured)**:
+**If Playwright MCP is available AND non-Electron**:
 ```
 🔍 Runtime Exploration Available
 
@@ -354,28 +371,52 @@ Ask via AskUserQuestion:
 - **"Run Runtime Exploration (Recommended)"** — 앱 실행 + 브라우저 탐색
 - **"Skip — code analysis only"** — Phase 2로 바로 이동
 
-**If Playwright MCP is available BUT Electron AND NOT cdp_configured**:
-
-**Auto-reconfigure**: Do NOT ask the user to run commands manually. The agent MUST reconfigure automatically:
-
-1. Run: `claude mcp remove playwright`
-2. Run: `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`
-   - If the original config had a `-e PATH=...` environment variable, preserve it by adding `-e PATH=...` to the new command
-3. Display:
+**If Playwright MCP is available AND Electron AND `electron_mode = cdp`**:
+(CDP already configured — standard flow)
 ```
-✅ Playwright MCP가 CDP 모드로 재설정되었습니다.
+🔍 Runtime Exploration Available
 
-⚠️ Claude Code를 재시작해야 MCP 설정이 반영됩니다.
-   재시작 후 /reverse-spec을 다시 실행하세요.
-
-💡 Runtime Exploration 완료 후 원래 설정으로 되돌리려면:
-  claude mcp remove playwright
-  claude mcp add playwright -- npx @playwright/mcp@latest
+Playwright MCP + CDP 연결이 감지되었습니다. Electron 앱을 실행하고
+브라우저로 탐색하여 UI/UX를 기록할 수 있습니다.
 ```
-
 Ask via AskUserQuestion:
-- **"확인 — Claude Code 재시작 후 다시 실행할게요"** — 사용자가 재시작 후 `/reverse-spec` 다시 실행
-- **"Skip — code analysis only"** — CDP 설정은 유지하되 이번에는 Phase 2로 바로 이동
+- **"Run Runtime Exploration (Recommended)"** — Electron 앱 실행 + CDP 탐색
+- **"Skip — code analysis only"** — Phase 2로 바로 이동
+
+**If Playwright MCP is available AND Electron AND `electron_mode = web_preview`**:
+```
+🔍 Runtime Exploration — Web Preview Mode
+
+Electron 앱이 감지되었으나 Playwright MCP에 CDP가 설정되어 있지 않습니다.
+Web Preview Mode로 renderer의 dev server만 실행하여 UI를 탐색합니다.
+
+⚠️ 제한사항: Electron 전용 기능(네이티브 메뉴, IPC, 시스템 트레이,
+   파일 시스템 접근)은 보이지 않습니다.
+   웹 UI 레이아웃과 사용자 흐름 파악에는 충분합니다.
+
+Renderer: `[renderer_command]` (port [renderer_port])
+```
+Ask via AskUserQuestion:
+- **"Run in Web Preview Mode (Recommended)"** — renderer dev server + standard Playwright (재시작 불필요)
+- **"Skip — code analysis only"** — Phase 2로 바로 이동
+- **"Configure CDP mode (requires Claude Code restart)"** — 전체 Electron 기능 필요 시
+
+If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP, then display restart instructions and record `Runtime Exploration: skipped (CDP reconfiguration — restart needed)`. Proceed to Phase 2.
+
+**If Playwright MCP is available AND Electron AND `electron_mode = cdp_required`** (web preview not possible):
+```
+🔍 Runtime Exploration — CDP Required
+
+Electron 앱이 감지되었으나, renderer를 독립 실행할 수 있는 스크립트를 찾지 못했습니다.
+Runtime Exploration을 위해서는 CDP 설정이 필요합니다.
+
+⚠️ CDP 설정 변경 후 Claude Code를 재시작해야 하므로 현재 세션의 진행 상태가 초기화됩니다.
+```
+Ask via AskUserQuestion:
+- **"Configure CDP mode (requires Claude Code restart)"** — MCP 재설정 + 재시작
+- **"Skip — code analysis only"** — Phase 2로 바로 이동
+
+If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP (run `claude mcp remove playwright` then `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`, preserving any `-e PATH=...` from the original config), display restart instructions, and record `Runtime Exploration: skipped (CDP reconfiguration — restart needed)`. Proceed to Phase 2.
 
 **If Playwright MCP is NOT available**:
 ```
@@ -475,9 +516,18 @@ Use the dev server command identified in 1.5-1.
 
 > **Multiple start commands**: If multiple dev-related scripts exist (e.g., `dev`, `dev:web`, `electron:dev`), ask the user which one to run via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-**Step 1b — Electron apps: modify command for CDP** (skip for non-Electron):
+**Step 1b — Electron apps: launch command selection** (skip for non-Electron):
 
-If the start command runs an Electron app, **replace it** with the CDP-enabled version. Do NOT run the original command — Playwright MCP cannot connect to Electron without CDP.
+The launch command depends on the `electron_mode` determined in Phase 1.5-0 Step 1b.
+
+**If `electron_mode = web_preview`**:
+- Use the `renderer_command` detected in Phase 1.5-0 (e.g., `npm run dev:web`, `npx vite --root src/renderer`)
+- Do NOT launch the full Electron app — only the renderer's dev server
+- The readiness port is `renderer_port` (e.g., 5173), not the Electron app's port
+- Display: `🌐 Web Preview Mode — renderer dev server만 실행합니다. Electron 전용 기능은 보이지 않습니다.`
+
+**If `electron_mode = cdp`**:
+Replace the start command with the CDP-enabled version. Do NOT run the original command — Playwright MCP needs CDP to connect to Electron.
 
 | Build Tool | CDP-Enabled Start Command |
 |-----------|--------------------------|
@@ -491,15 +541,14 @@ If the start command runs an Electron app, **replace it** with the CDP-enabled v
 
 After launching, verify CDP is active: `lsof -i :9222`. If no result → the CDP flag was not picked up. Check the build tool and retry with the correct syntax.
 
-**Step 1c — Electron apps: CDP config already verified** (skip for non-Electron):
-
-> CDP configuration was already verified in Phase 1.5-0 Step 1b. If the user reached this point, `--cdp-endpoint` is confirmed present. No additional check needed — proceed to Step 2.
-
 **Step 2 — Run and wait for readiness**:
-Run the start command (or CDP-modified command for Electron) as a background process, capturing stdout/stderr.
+Run the start command (or modified command for Electron — CDP or Web Preview) as a background process, capturing stdout/stderr.
 - Monitor stdout for readiness signals: `ready`, `listening on`, `started`, `compiled`, `Local:`, `http://localhost`
 - Alternatively, poll the expected port with `lsof -i :[PORT]`
+  - Web Preview Mode: poll `renderer_port` (e.g., 5173)
+  - CDP Mode: poll both the app port and port 9222
 - Timeout: 60 seconds
+- **Web Preview Mode**: After readiness, navigate to `http://localhost:[renderer_port]` via standard Playwright MCP (no CDP connection needed)
 
 **Step 3 — Handle launch failure**:
 If the app fails to start within the timeout:
