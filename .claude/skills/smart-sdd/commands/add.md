@@ -119,7 +119,7 @@ If the user selects "Review and clean up":
    ```
 6. Proceed to Phase 1
 
-**Important**: Only Features with status `pending` can be removed via this flow. Features that are `in_progress`, `completed`, or `adopted` are NOT eligible. For those, use `/smart-sdd restructure`.
+**Important**: Only Features with status `pending` can be removed via this flow. Features that are `in_progress`, `completed`, or `adopted` are NOT eligible. For those, manually edit the artifacts following `reference/restructure-guide.md`.
 
 ---
 

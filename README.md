@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-09 08:04 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-09 08:30 KST
 
 **Custom Claude Code skills that add cross-Feature intelligence to [spec-kit](https://github.com/github/spec-kit) SDD workflows**
 
@@ -322,7 +322,6 @@ Generates: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-regi
 /smart-sdd verify F001                   # Verify Feature
 
 # Management
-/smart-sdd restructure                   # Split, merge, move, reorder, delete Features
 /smart-sdd expand T2                     # Activate Tier 2 Features
 /smart-sdd expand full                   # Activate all remaining Features
 /smart-sdd reset                         # Reset pipeline state

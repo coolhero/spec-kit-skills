@@ -425,7 +425,7 @@ Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed,
 - **Core scope**: Initially only Tier 1 Features are active (`Active Tiers: T1` in `sdd-state.md`). Tier 2/3 Features are `deferred` and skipped until activated via `/smart-sdd expand`.
 - **Full scope**: All Features are active — no deferred Features exist.
 - **Adopted Features**: Features with status `adopted` (from `/smart-sdd adopt`) are skipped. To transition them to `completed`, re-run the standard pipeline — it will re-execute tasks + implement + verify.
-- **Restructured Features**: Processed starting from their first 🔀 step (see `commands/restructure.md`).
+- **Restructured Features**: Processed starting from their first 🔀 step (see `reference/restructure-guide.md`).
 - **--start mode**: When `--start <step>` is specified, only eligible Features (verified during --start Pre-check) are processed. For each eligible Feature, steps before the `--start` step are skipped — execution begins from the `--start` step (or the next uncompleted step if `--start` step is already ✅). All other rules (HARD STOPs, Common Protocol, branch validation) apply normally.
 
 **CRITICAL: Each Feature must complete ALL steps (from its starting step through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.

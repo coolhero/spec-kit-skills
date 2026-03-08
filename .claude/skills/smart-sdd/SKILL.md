@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|restructure|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -78,9 +78,6 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd implement F001               # Implement Feature F001
 /smart-sdd verify F001                   # Verify Feature F001
 
-# Feature restructuring — Modify Feature definitions mid-pipeline
-/smart-sdd restructure                   # Interactive: describe what to change
-
 # Scope expansion (core scope only — brownfield rebuild with scope=core)
 /smart-sdd expand                        # Interactive: select which Tiers to activate
 /smart-sdd expand T2                     # Activate Tier 2 Features
@@ -142,7 +139,7 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | adopt | restructure | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity | reset)
+  First token  → command (init | add | adopt | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity | reset)
   Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
   --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>    → Path to PRD document (for init and add commands)
@@ -170,7 +167,7 @@ Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skil
 
 **Step 1. roadmap.md check** (skip for `init` and `status`): Verify `roadmap.md` exists at BASE_PATH. If not found → suggest `/smart-sdd init` or `/reverse-spec`.
 
-**Additional rules**: `add`/`restructure` require roadmap + registries + sdd-state.md. `status` without sdd-state.md → "No project initialized yet". BASE_PATH is relative to CWD.
+**Additional rules**: `add` requires roadmap + registries + sdd-state.md. `status` without sdd-state.md → "No project initialized yet". BASE_PATH is relative to CWD.
 
 ---
 
@@ -207,7 +204,6 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `pipeline` | `commands/pipeline.md` | Full SDD pipeline execution |
 | `constitution`, `specify`, `plan`, `tasks`, `analyze`, `implement` | `commands/pipeline.md` | Step mode — execute a specific pipeline step |
 | `verify` | `commands/pipeline.md` + `commands/verify-phases.md` | Step mode — verify with Phase 1-4 details |
-| `restructure` | `commands/restructure.md` | Modify Feature structure |
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
 | `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
 | `parity` | `commands/parity.md` | Check parity against original source |

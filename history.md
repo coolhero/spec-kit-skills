@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-09] smart-sdd — Demote restructure command to reference guide
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | restructure complexity | Convert from 6-phase automated command to reference checklist | 233-line command with heavyweight impact analysis added disproportionate complexity for a rarely-used operation. Most restructure operations (especially on pending Features) only need roadmap.md + pre-context edits |
+| 2 | Knowledge preservation | Keep ID Stability Policy, Re-Execution Rules, Artifact Checklist in `reference/restructure-guide.md` | The restructure knowledge (what artifacts to update, re-execution rules) is valuable as a reference — the automated orchestration was overkill |
+| 3 | Pipeline integration | Keep `restructured` status + 🔀 markers in state-schema and pipeline | Features can still be marked restructured and re-executed; the pipeline already handles this. Only the dedicated command entry point was removed |
+
+---
+
+## [2026-03-09] smart-sdd — UX: friendly continuation prompts
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Suppress spec-kit messages | Add explicit pattern list to SUPPRESS rule | spec-kit's "Ready for /speckit.clarify" messages were leaking to users, causing confusion about what to do next |
+| 2 | Step Mode completion | Add Step Mode Completion section with progress bar + next-step mapping | Step Mode had no post-completion guidance (unlike Pipeline Mode). Users didn't know what to do after a step finished |
+| 3 | Universal "continue" | All pause/completion messages now offer `💡 Type "continue"` as primary action | One-word action is easier than remembering command syntax. Applied consistently across pipeline, init, expand, restructure-guide, parity |
+
+---
+
 ## [2026-03-08] smart-sdd add — Vertical Slice Check in Phase 3
 
 | # | Decision | Choice | Rationale |

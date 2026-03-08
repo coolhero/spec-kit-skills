@@ -77,7 +77,7 @@ If the user skips Environment Bootstrap, record a single row:
 - ⚠️ : Limited (verify only — user acknowledged limited verification with a recorded reason; merge is allowed with reminder)
 - ⏭️ : Skipped
 - 🔒 : Deferred (outside current Active Tiers, activate via `/smart-sdd expand`)
-- 🔀 : Needs re-execution (Feature affected by `/smart-sdd restructure` or `/smart-sdd parity` — affected steps must be re-run)
+- 🔀 : Needs re-execution (Feature affected by restructure or `/smart-sdd parity` — affected steps must be re-run; see `reference/restructure-guide.md`)
 - (blank) : Not started
 
 ### Feature Status Values
@@ -86,7 +86,7 @@ If the user skips Environment Bootstrap, record a single row:
 - `completed` : All steps (including merge) are ✅ — code was built from SDD specs (greenfield/rebuild)
 - `adopted` : All adopt steps (specify → plan → analyze → verify → merge) are ✅ — existing code wrapped with SDD docs (adoption only). Distinct from `completed`: signals legacy code that may have pre-existing issues
 - `deferred` : Outside current Active Tiers (core scope only)
-- `restructured` : Feature was modified via `/smart-sdd restructure` — has 🔀 steps that need re-execution
+- `restructured` : Feature was modified (split/merge/move/delete) — has 🔀 steps that need re-execution (see `reference/restructure-guide.md`)
 
 ---
 
@@ -134,7 +134,7 @@ Update history of Global Evolution Layer files.
 
 ## Restructure Log
 
-Feature restructuring history. Recorded when `/smart-sdd restructure` is executed.
+Feature restructuring history. Recorded when Feature structure is modified (see `reference/restructure-guide.md`).
 
 | Date/Time | Operation | Details | Affected Features |
 |-----------|-----------|---------|-------------------|
@@ -358,7 +358,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 - If no → update completed count (e.g., `3/4`)
 - When a Feature is added to an existing group via `add`: change group Status to `🔄 re-run needed (F00N added)`
 
-### When a Feature is Restructured (via /smart-sdd restructure)
+### When a Feature is Restructured (see reference/restructure-guide.md)
 - Change affected step cells to 🔀 (all steps from the first affected step onward)
 - Change Feature Progress Status to `restructured`
 - Record the restructure operation in the Restructure Log
