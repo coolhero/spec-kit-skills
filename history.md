@@ -5,12 +5,14 @@
 
 ---
 
-## [2026-03-08] smart-sdd verify — Strengthen Electron CDP HARD STOP (anti-bypass)
+## [2026-03-08] smart-sdd verify — Fix CDP probe logic and strengthen HARD STOP
 
 | # | Decision | Choice | Rationale |
 |---|----------|--------|-----------|
-| 1 | HARD STOP bypass prevention | Added explicit anti-bypass language: "Do NOT skip, do NOT auto-decide, do NOT rationalize" | Session B agent acknowledged the HARD STOP requirement but bypassed it by rationalizing that "health check already passed and UI verification is non-blocking." Strengthened wording to remove any rationalization escape hatch. |
-| 2 | "Non-blocking" clarification | Clarified that "non-blocking" means results don't block verify, NOT that verification can be skipped | Agent misinterpreted "UI verification failures are NOT blocking" as permission to skip the entire UI verification step without user consent. Added explicit disambiguation. |
+| 1 | CDP probe 3-way classification | Distinguished: (A) standard mode = new tab page, (B) CDP configured but app not running = connection failure, (C) CDP active = app content visible | Original probe conflated cases A and B. When Playwright MCP has `--cdp-endpoint` but nothing is on port 9222, `browser_snapshot` fails — agent misread this as "standard browser mode." These are completely different situations requiring different user instructions. |
+| 2 | Case B — separate HARD STOP | Added dedicated HARD STOP for "CDP configured but app not running" with "앱 실행 후 재시도" option | User only needs to start the app with `--remote-debugging-port=9222`, NOT reconfigure Playwright MCP. Previous logic would have shown CDP setup instructions for an already-configured CDP. |
+| 3 | HARD STOP bypass prevention | Added explicit anti-bypass language: "Do NOT skip, do NOT auto-decide, do NOT rationalize" | Session B agent acknowledged the HARD STOP requirement but bypassed it by rationalizing that "health check already passed and UI verification is non-blocking." |
+| 4 | "Non-blocking" clarification | Clarified that "non-blocking" means results don't block verify, NOT that verification can be skipped | Agent misinterpreted "UI verification failures are NOT blocking" as permission to skip the entire UI verification step without user consent. |
 
 ---
 

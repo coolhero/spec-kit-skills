@@ -109,16 +109,21 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - **Electron CDP Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
   Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
 
-  1. **Probe**: Call `browser_snapshot` to check current Playwright connection state:
-     - If snapshot shows the Electron app content (e.g., matching the Feature's UI) → CDP is active, proceed
-     - If snapshot shows a blank page / default browser tab → CDP is NOT configured
-     - If the tool call fails → Playwright MCP is not functional
+  1. **Probe**: Call `browser_snapshot` to check current Playwright connection state. There are THREE possible outcomes — distinguish them carefully:
 
-  2. **If CDP not configured** — this is a **MANDATORY HARD STOP**. You MUST use AskUserQuestion. Do NOT skip, do NOT auto-decide, do NOT rationalize around this step even if health check passed. Health check status is irrelevant — this decision belongs to the user.
+     | Probe result | Meaning | Action |
+     |---|---|---|
+     | Snapshot shows Electron app content | CDP active + app running | → Proceed to UI verification |
+     | Snapshot shows a default new tab / Chrome start page | Standard mode (no `--cdp-endpoint` configured) | → **Case A**: CDP not configured |
+     | Tool call fails / connection refused / empty result | CDP IS configured but app is NOT running on the CDP port | → **Case B**: CDP configured, app not started |
+
+     **CRITICAL**: Do NOT confuse Case B with "standard mode." When Playwright MCP has `--cdp-endpoint` configured but nothing is listening on that port, `browser_snapshot` will fail with a connection error. This means CDP IS set up correctly — the app just needs to be started with `--remote-debugging-port=9222`.
+
+  2. **Case A — CDP not configured (standard mode detected)**: This is a **MANDATORY HARD STOP**.
      Display notice:
      ```
      ⚠️ Electron 앱은 CDP 모드가 필요합니다.
-        현재 Playwright MCP가 표준 브라우저 모드로 연결되어 있어 Electron 앱 UI를 검증할 수 없습니다.
+        현재 Playwright MCP가 표준 브라우저 모드로 설정되어 있습니다.
 
         CDP 설정 방법:
         1. 앱을 --remote-debugging-port=9222 로 실행
@@ -132,9 +137,26 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      **If response is empty → re-ask** (per MANDATORY RULE 1)
      **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
 
-  3. **If CDP active**: Proceed to SC-level UI verification below.
+  3. **Case B — CDP configured but app not running**: This is a **MANDATORY HARD STOP**.
+     Display notice:
+     ```
+     ℹ️ Playwright MCP가 CDP 모드로 설정되어 있지만, 현재 CDP 포트에 연결되는 앱이 없습니다.
+        Electron 앱을 --remote-debugging-port=9222 로 실행하면 Playwright가 자동으로 연결됩니다.
 
-  > **Tip**: If `/reverse-spec` was run with CDP for the same Electron stack, Playwright MCP may already be in CDP mode. Start the new app with `--remote-debugging-port=9222` and it will connect automatically.
+        실행 예시:
+        npx electron-vite dev -- --remote-debugging-port=9222
+     ```
+     **Use AskUserQuestion** — this is NOT optional, NOT skippable:
+     - "앱 실행 후 재시도" — user starts the Electron app with CDP port, then re-run verify
+     - "UI 검증 Skip — health check만 수행" — skip Playwright UI verification, proceed with demo script health check only
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+     **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
+
+  4. **If CDP active and app connected**: Proceed to SC-level UI verification below.
+
+  > **Tip**: If `/reverse-spec` was run with CDP for the same Electron stack, Playwright MCP is already in CDP mode. Just start the new app with `--remote-debugging-port=9222` and it will connect automatically.
+
+  Do NOT skip, do NOT auto-decide, do NOT rationalize around HARD STOPs even if health check passed. Health check status is irrelevant to the CDP decision — it belongs to the user.
 
 - **If MCP available** (and CDP check passed for Electron) — perform SC-level UI verification:
   1. Parse demo script Coverage header → extract FR-###/SC-### + UI Action list
