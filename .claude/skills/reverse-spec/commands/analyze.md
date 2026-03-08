@@ -346,10 +346,13 @@ Ask via AskUserQuestion:
 
 Playwright MCP가 감지되지 않았습니다.
 앱을 실행할 수는 있지만, 자동 브라우저 탐색은 불가능합니다.
-설치: claude mcp add playwright -- npx @playwright/mcp@latest
+대신 스크린샷 기반 탐색(Path B)으로 진행할 수 있습니다.
+
+자동 탐색을 원하시면 Playwright MCP를 설치하세요:
+  claude mcp add playwright -- npx @playwright/mcp@latest
 ```
 Ask via AskUserQuestion:
-- **"Manual Exploration"** — 에이전트가 앱 실행 후 사용자가 직접 탐색 결과 공유
+- **"Screenshot-Assisted Exploration"** (Recommended) — 앱 실행 후 사용자가 스크린샷 공유, 에이전트가 분석
 - **"Skip — code analysis only"** — Phase 2로 바로 이동
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (user choice)` and proceed to Phase 2.
@@ -432,6 +435,41 @@ Execute auto-resolvable steps:
 Use the dev server command identified in 1.5-1. Run it as a background process, capturing stdout/stderr.
 
 > **Multiple start commands**: If multiple dev-related scripts exist (e.g., `dev`, `dev:web`, `electron:dev`), ask the user which one to run via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+> **Electron / Desktop apps (CDP setup)**:
+> If the start command runs an Electron app, enable Chrome DevTools Protocol (CDP) to allow Playwright MCP to connect to the Electron window. The flag syntax depends on the build tool:
+>
+> | Build Tool | CDP-Enabled Start Command |
+> |-----------|--------------------------|
+> | **electron-vite** | `npx electron-vite dev -- --remote-debugging-port=9222` |
+> | **electron-forge** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run start` |
+> | **electron-builder** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run dev` |
+> | **Direct electron** | `npx electron . --remote-debugging-port=9222` |
+> | **Other / Unknown** | Append ` -- --remote-debugging-port=9222` after the dev command |
+>
+> ⚠️ **electron-vite requires the `--` separator** before `--remote-debugging-port`. It does NOT pick up the `ELECTRON_ARGS` environment variable. This is the most common cause of CDP connection failure with electron-vite projects.
+>
+> After the Electron app starts with CDP enabled, Playwright MCP must be configured with `--cdp-endpoint http://localhost:9222` to connect.
+> If Playwright MCP was **not** started with this flag, inform the user:
+> ```
+> ⚠️ Playwright MCP CDP 연결 필요
+>
+> Electron 앱이 CDP 포트 9222에서 실행 중이지만,
+> Playwright MCP가 --cdp-endpoint 없이 시작되어 연결할 수 없습니다.
+>
+> 해결 방법:
+>   claude mcp remove playwright
+>   claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+>   → Claude Code 재시작
+>
+> 또는 Screenshot-Assisted Exploration (Path B)으로 진행할 수 있습니다.
+> ```
+> Ask via AskUserQuestion:
+> - **"Playwright MCP 재설정 후 재시도"** — user reconfigures and restarts
+> - **"Path B로 진행 (Screenshot-Assisted)"** (Recommended) — fall back to screenshot-based exploration
+> - **"Skip Runtime Exploration"**
+>
+> **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 **Step 2 — Wait for readiness**:
 - Monitor stdout for readiness signals: `ready`, `listening on`, `started`, `compiled`, `Local:`, `http://localhost`
@@ -532,31 +570,94 @@ Based on screens discovered, identify apparent user flows:
 - Total exploration budget: 5 minutes
 - Repeated layout patterns: sample 3, then note "N more with same pattern"
 
-#### Path B — Manual Exploration (no Playwright MCP)
+#### Path B — Screenshot-Assisted Exploration (no Playwright MCP)
 
-With the app running:
+With the app running, guide the user through a **screenshot-based** exploration flow. This approach leverages the agent's multimodal image analysis to extract UI information from screenshots, significantly reducing user effort compared to text-only descriptions.
+
+**Step B-1 — Prepare exploration plan**:
+
+Using Phase 1 code scan results (routes, navigation components, page components), create a prioritized list of screens to explore:
 
 ```
-📋 Manual Exploration Request
+📸 Screenshot-Assisted Exploration
 
-앱이 http://localhost:[PORT] 에서 실행 중입니다.
-자동 탐색이 불가능하므로, 아래 정보를 확인 후 공유해주세요:
+앱이 실행 중입니다. 자동 브라우저 탐색이 불가능하므로,
+스크린샷 기반으로 UI를 분석합니다.
 
-1. 주요 화면 목록 (URL + 간단한 설명)
-2. 네비게이션 구조 (메뉴, 사이드바 항목)
-3. 핵심 사용자 플로우 (예: 로그인 → 대시보드 → ...)
-4. 특이한 UI 패턴 (에디터, 차트, 드래그앤드롭 등)
+코드 분석에서 감지된 주요 화면:
+  1. [Main/Home — 첫 화면]
+  2. [Route/Page — 설명]
+  3. [Settings — 설정 화면]
+  ... (최대 10개)
 
-스크린샷을 공유해주시면 더 정확한 분석이 가능합니다.
+진행 방식:
+  1. 앱에서 해당 화면으로 이동
+  2. 스크린샷 캡처 (macOS: Cmd+Shift+4 → 영역 선택)
+  3. 채팅에 스크린샷을 드래그하거나 붙여넣기
+  4. 에이전트가 스크린샷을 분석하여 UI 정보 추출
+
+첫 번째 화면(메인 화면)의 스크린샷을 공유해주세요.
 ```
 
 Ask via AskUserQuestion:
-- **"관찰 결과 공유 준비됨"** — user provides observations as text/screenshots
-- **"Skip"** — proceed without runtime data
+- **"스크린샷 공유 준비됨"** (Recommended) — user will share screenshots one by one
+- **"Skip Runtime Exploration"** — proceed without runtime data
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-After the user shares observations, parse and structure them into the same format as Path A output.
+**Step B-2 — Per-screen screenshot analysis**:
+
+For each screenshot the user shares:
+
+1. **Analyze the screenshot** using multimodal vision to extract:
+   - **Layout pattern**: sidebar+content, centered-form, full-width, split-pane, etc.
+   - **Key UI elements**: forms, tables, editors, modals, buttons, inputs, toggles
+   - **Navigation elements**: menus, tabs, breadcrumbs, sidebar items visible
+   - **Component library indicators**: Material UI, Ant Design, Tailwind, Shadcn, etc. (from visual style)
+   - **Theme/color scheme**: dark/light mode, primary colors, accent colors
+   - **Data states**: empty state, loaded data, loading indicators, error messages
+
+2. **Present extracted observations** to the user for confirmation:
+   ```
+   📋 [Screen Name] 분석 결과:
+
+   Layout: [detected layout]
+   UI Elements:
+     - [element 1]
+     - [element 2]
+   Component Library: [detected or "uncertain"]
+
+   맞나요? 수정/추가 사항이 있으면 알려주세요.
+   다음 화면의 스크린샷을 공유하거나, "탐색 완료"를 선택해주세요.
+   ```
+
+3. **Ask about user flows** from this screen:
+   "이 화면에서 시작하는 주요 사용자 동선이 있나요? (예: 버튼 클릭 → 다른 화면으로 이동)"
+
+**Step B-3 — Additional screens** (optional):
+
+After covering the planned screens:
+
+```
+📸 추가 탐색
+
+계획된 화면 탐색이 완료되었습니다.
+추가로 캡처할 화면이 있나요?
+
+  • 모달/다이얼로그 (버튼 클릭 시 나타나는 팝업)
+  • 컨텍스트 메뉴 (우클릭 메뉴)
+  • 에러 상태 화면
+  • 빈 데이터 상태
+  • 반응형 레이아웃 (창 크기 변경 시)
+```
+
+Ask via AskUserQuestion:
+- **"추가 스크린샷 공유"** — user shares more screenshots
+- **"탐색 완료"** (Recommended) — proceed to observation recording
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+After completing exploration, compile all screenshot analysis results into the same structured format as Path A output (runtime-exploration.md).
 
 ### 1.5-6. Observation Recording + Cleanup
 
@@ -569,7 +670,7 @@ Write the file with the following structure:
 # Runtime Exploration Results
 
 > Generated by `/reverse-spec` Phase 1.5 — [ISO timestamp]
-> Mode: [automated (Playwright) | manual]
+> Mode: [automated (Playwright) | screenshot-assisted]
 > Target: [target directory path]
 
 ## App-Wide Observations
@@ -653,7 +754,7 @@ Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration
 ```
 ### M1.5 — Runtime Exploration
 - **Timestamp**: [ISO timestamp]
-- **Mode**: [automated (Playwright) | manual | skipped]
+- **Mode**: [automated (Playwright) | screenshot-assisted | skipped]
 - **Screens explored**: [N]
 - **Key findings**: [1-2 sentence summary]
 ```

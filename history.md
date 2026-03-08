@@ -810,3 +810,13 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | runtime-exploration.md 구조 | 데이터 타입별(안A) → 라우트/화면 중심(안B) | 각 화면의 UI+흐름+행동+에러가 한 블록에 모여 기능 재현 관점에서 완결. Phase 4-2에서 라우트→Feature 매핑으로 직접 분배 가능 |
 | 파일 위치 | `specs/reverse-spec/runtime-exploration.md` | reverse-spec 산출물 경로 컨벤션 준수 |
 | Step 1.5-4b 추가 | App Initial Setup — 앱 내 UI 설정 HARD STOP | .env는 인프라 레벨, 앱 내 설정(API provider, model 선택, 온보딩)은 별도 계층. Cherry Studio 테스트에서 발견 — API key를 Settings UI에서 입력해야 AI 채팅 기능 탐색 가능 |
+
+### Electron CDP 가이드 + Path B Screenshot-Assisted 개선
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Electron CDP 가이드 추가 | Step 1.5-4에 빌드 도구별 CDP 플래그 테이블 | electron-vite는 `ELECTRON_ARGS` 무시. `--` separator가 필수. Cherry Studio 테스트에서 CDP 연결 실패 원인으로 확인 |
+| Playwright MCP CDP 재설정 안내 | Electron 앱 탐색 시 `--cdp-endpoint` 없으면 HARD STOP으로 재설정 or Path B 선택 | Playwright MCP가 일반 웹 브라우저용으로 시작된 경우 Electron CDP에 연결 불가. 사용자에게 명확한 선택지 제공 |
+| Path B 리네이밍 | "Manual Exploration" → "Screenshot-Assisted Exploration" | 실제 목적을 정확히 반영. 텍스트 수동 입력이 아닌 스크린샷 기반 분석 |
+| Path B 방식 변경 | 텍스트 설명 요청 → 스크린샷 공유+멀티모달 분석 | 사용자가 모든 UI 요소를 텍스트로 타이핑하는 것은 비현실적 (Cherry Studio 테스트에서 확인). 스크린샷 1장 공유 → 에이전트 자동 분석이 훨씬 효율적 |
+| Path B 탐색 계획 | 코드 분석 기반 화면 목록 사전 작성 | Phase 1 코드 스캔에서 라우트/페이지 정보 이미 확보. 사용자가 "어디를 봐야 하는지" 알 수 있도록 안내 |

@@ -11,7 +11,7 @@
 > Observations from running the original application during `/reverse-spec` Phase 1.5.
 > Extracted from `specs/reverse-spec/runtime-exploration.md` — only the `## Screen:` sections belonging to this Feature are included here.
 > These provide visual and behavioral context that code reading alone cannot capture.
-> If runtime exploration was skipped, write: "Skipped — [reason: no MCP | environment issues | user choice]"
+> If runtime exploration was skipped, write: "Skipped — [reason: environment issues | user choice]"
 
 ### App-Wide Context
 
