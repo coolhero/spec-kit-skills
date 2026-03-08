@@ -11,6 +11,7 @@
 |---|------|-----|
 | 1 | `reverse-spec/analyze.md` Step 1c | CDP verification: replaced `browser_navigate` test with MCP config file read — deterministic, works before app launch, avoids agent navigating to CDP URL itself |
 | 2 | `reverse-spec/analyze.md` Phase 1.5-0 | Moved CDP config check from Step 1c (after user choice) to Phase 1.5-0 Step 1b (before user choice) — avoids wasting user time selecting "Run" only to be told CDP isn't configured |
+| 3 | `reverse-spec/analyze.md` Phase 1.5-0 | Auto-reconfigure: agent runs `claude mcp remove/add` commands automatically instead of telling user to do it manually. User only needs to restart Claude Code. |
 
 ---
 

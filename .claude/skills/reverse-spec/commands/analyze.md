@@ -355,20 +355,27 @@ Ask via AskUserQuestion:
 - **"Skip — code analysis only"** — Phase 2로 바로 이동
 
 **If Playwright MCP is available BUT Electron AND NOT cdp_configured**:
+
+**Auto-reconfigure**: Do NOT ask the user to run commands manually. The agent MUST reconfigure automatically:
+
+1. Run: `claude mcp remove playwright`
+2. Run: `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`
+   - If the original config had a `-e PATH=...` environment variable, preserve it by adding `-e PATH=...` to the new command
+3. Display:
 ```
-🔍 Runtime Exploration — CDP 설정 필요
+✅ Playwright MCP가 CDP 모드로 재설정되었습니다.
 
-Playwright MCP가 감지되었지만, Electron 앱 연결에 필요한
---cdp-endpoint가 설정되어 있지 않습니다.
+⚠️ Claude Code를 재시작해야 MCP 설정이 반영됩니다.
+   재시작 후 /reverse-spec을 다시 실행하세요.
 
-Runtime Exploration을 실행하려면 MCP를 재설정해야 합니다:
+💡 Runtime Exploration 완료 후 원래 설정으로 되돌리려면:
   claude mcp remove playwright
-  claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-  → Claude Code 재시작 필요
+  claude mcp add playwright -- npx @playwright/mcp@latest
 ```
+
 Ask via AskUserQuestion:
-- **"Playwright MCP 재설정 후 재시도"** (Recommended) — 재설정 후 Claude Code 재시작, `/reverse-spec` 다시 실행
-- **"Skip — code analysis only"** — Phase 2로 바로 이동
+- **"확인 — Claude Code 재시작 후 다시 실행할게요"** — 사용자가 재시작 후 `/reverse-spec` 다시 실행
+- **"Skip — code analysis only"** — CDP 설정은 유지하되 이번에는 Phase 2로 바로 이동
 
 **If Playwright MCP is NOT available**:
 ```
