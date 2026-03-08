@@ -816,7 +816,11 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Electron CDP 가이드 추가 | Step 1.5-4에 빌드 도구별 CDP 플래그 테이블 | electron-vite는 `ELECTRON_ARGS` 무시. `--` separator가 필수. Cherry Studio 테스트에서 CDP 연결 실패 원인으로 확인 |
-| Playwright MCP CDP 재설정 안내 | Electron 앱 탐색 시 `--cdp-endpoint` 없으면 HARD STOP으로 재설정 or Path B 선택 | Playwright MCP가 일반 웹 브라우저용으로 시작된 경우 Electron CDP에 연결 불가. 사용자에게 명확한 선택지 제공 |
-| Path B 리네이밍 | "Manual Exploration" → "Screenshot-Assisted Exploration" | 실제 목적을 정확히 반영. 텍스트 수동 입력이 아닌 스크린샷 기반 분석 |
-| Path B 방식 변경 | 텍스트 설명 요청 → 스크린샷 공유+멀티모달 분석 | 사용자가 모든 UI 요소를 텍스트로 타이핑하는 것은 비현실적 (Cherry Studio 테스트에서 확인). 스크린샷 1장 공유 → 에이전트 자동 분석이 훨씬 효율적 |
-| Path B 탐색 계획 | 코드 분석 기반 화면 목록 사전 작성 | Phase 1 코드 스캔에서 라우트/페이지 정보 이미 확보. 사용자가 "어디를 봐야 하는지" 알 수 있도록 안내 |
+| Playwright MCP CDP 재설정 안내 | Electron 앱 탐색 시 `--cdp-endpoint` 없으면 HARD STOP으로 재설정 or Skip | Playwright MCP가 일반 웹 브라우저용으로 시작된 경우 Electron CDP에 연결 불가. 사용자에게 명확한 선택지 제공 |
+
+### Path B 제거 — Playwright MCP 필수화
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Path B 제거 | MCP 없으면 설치 안내 or Skip. 수동 탐색 경로 삭제 | MCP 설치는 한 줄 명령어. CDP 연결 실패도 재설정으로 해결 가능. 스크린샷 몇 장으로 얻는 정보 대비 사용자 부담이 과도. Skip해도 Phase 2 코드 분석 + SBI + UI Components 등 다른 메커니즘으로 보완됨 |
+| Path A 라벨 제거 | "Path A — Automated Exploration" → "1.5-5. Runtime Exploration (Automated via Playwright MCP)" | Path B가 없으면 A/B 구분 불필요 |

@@ -345,17 +345,19 @@ Ask via AskUserQuestion:
 🔍 Runtime Exploration
 
 Playwright MCP가 감지되지 않았습니다.
-앱을 실행할 수는 있지만, 자동 브라우저 탐색은 불가능합니다.
-대신 스크린샷 기반 탐색(Path B)으로 진행할 수 있습니다.
+Runtime Exploration에는 Playwright MCP가 필요합니다.
 
-자동 탐색을 원하시면 Playwright MCP를 설치하세요:
+설치 방법:
   claude mcp add playwright -- npx @playwright/mcp@latest
+  → Claude Code 재시작
+
+설치 가이드: MCP-GUIDE.md 참조 (트러블슈팅 포함)
 ```
 Ask via AskUserQuestion:
-- **"Screenshot-Assisted Exploration"** (Recommended) — 앱 실행 후 사용자가 스크린샷 공유, 에이전트가 분석
+- **"Playwright MCP 설치 후 재시도"** (Recommended) — 사용자가 설치 후 다시 시도
 - **"Skip — code analysis only"** — Phase 2로 바로 이동
 
-**If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (user choice)` and proceed to Phase 2.
+**If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright MCP)` and proceed to Phase 2.
 
 ### 1.5-1. Environment Assessment (Automated)
 
@@ -462,12 +464,10 @@ Use the dev server command identified in 1.5-1. Run it as a background process, 
 >   claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
 >   → Claude Code 재시작
 >
-> 또는 Screenshot-Assisted Exploration (Path B)으로 진행할 수 있습니다.
 > ```
 > Ask via AskUserQuestion:
-> - **"Playwright MCP 재설정 후 재시도"** — user reconfigures and restarts
-> - **"Path B로 진행 (Screenshot-Assisted)"** (Recommended) — fall back to screenshot-based exploration
-> - **"Skip Runtime Exploration"**
+> - **"Playwright MCP 재설정 후 재시도"** (Recommended) — user reconfigures and restarts
+> - **"Skip Runtime Exploration"** — Phase 2로 바로 이동
 >
 > **If response is empty → re-ask** (per MANDATORY RULE 1).
 
@@ -527,9 +527,7 @@ Analyze the source code to identify likely first-run configuration requirements:
 
 > **Note**: If no initial setup needs are detected from the code, skip this step and proceed directly to 1.5-5.
 
-### 1.5-5. Runtime Exploration
-
-#### Path A — Automated Exploration (Playwright MCP)
+### 1.5-5. Runtime Exploration (Automated via Playwright MCP)
 
 With the app running, systematically explore using Playwright MCP:
 
@@ -570,95 +568,6 @@ Based on screens discovered, identify apparent user flows:
 - Total exploration budget: 5 minutes
 - Repeated layout patterns: sample 3, then note "N more with same pattern"
 
-#### Path B — Screenshot-Assisted Exploration (no Playwright MCP)
-
-With the app running, guide the user through a **screenshot-based** exploration flow. This approach leverages the agent's multimodal image analysis to extract UI information from screenshots, significantly reducing user effort compared to text-only descriptions.
-
-**Step B-1 — Prepare exploration plan**:
-
-Using Phase 1 code scan results (routes, navigation components, page components), create a prioritized list of screens to explore:
-
-```
-📸 Screenshot-Assisted Exploration
-
-앱이 실행 중입니다. 자동 브라우저 탐색이 불가능하므로,
-스크린샷 기반으로 UI를 분석합니다.
-
-코드 분석에서 감지된 주요 화면:
-  1. [Main/Home — 첫 화면]
-  2. [Route/Page — 설명]
-  3. [Settings — 설정 화면]
-  ... (최대 10개)
-
-진행 방식:
-  1. 앱에서 해당 화면으로 이동
-  2. 스크린샷 캡처 (macOS: Cmd+Shift+4 → 영역 선택)
-  3. 채팅에 스크린샷을 드래그하거나 붙여넣기
-  4. 에이전트가 스크린샷을 분석하여 UI 정보 추출
-
-첫 번째 화면(메인 화면)의 스크린샷을 공유해주세요.
-```
-
-Ask via AskUserQuestion:
-- **"스크린샷 공유 준비됨"** (Recommended) — user will share screenshots one by one
-- **"Skip Runtime Exploration"** — proceed without runtime data
-
-**If response is empty → re-ask** (per MANDATORY RULE 1).
-
-**Step B-2 — Per-screen screenshot analysis**:
-
-For each screenshot the user shares:
-
-1. **Analyze the screenshot** using multimodal vision to extract:
-   - **Layout pattern**: sidebar+content, centered-form, full-width, split-pane, etc.
-   - **Key UI elements**: forms, tables, editors, modals, buttons, inputs, toggles
-   - **Navigation elements**: menus, tabs, breadcrumbs, sidebar items visible
-   - **Component library indicators**: Material UI, Ant Design, Tailwind, Shadcn, etc. (from visual style)
-   - **Theme/color scheme**: dark/light mode, primary colors, accent colors
-   - **Data states**: empty state, loaded data, loading indicators, error messages
-
-2. **Present extracted observations** to the user for confirmation:
-   ```
-   📋 [Screen Name] 분석 결과:
-
-   Layout: [detected layout]
-   UI Elements:
-     - [element 1]
-     - [element 2]
-   Component Library: [detected or "uncertain"]
-
-   맞나요? 수정/추가 사항이 있으면 알려주세요.
-   다음 화면의 스크린샷을 공유하거나, "탐색 완료"를 선택해주세요.
-   ```
-
-3. **Ask about user flows** from this screen:
-   "이 화면에서 시작하는 주요 사용자 동선이 있나요? (예: 버튼 클릭 → 다른 화면으로 이동)"
-
-**Step B-3 — Additional screens** (optional):
-
-After covering the planned screens:
-
-```
-📸 추가 탐색
-
-계획된 화면 탐색이 완료되었습니다.
-추가로 캡처할 화면이 있나요?
-
-  • 모달/다이얼로그 (버튼 클릭 시 나타나는 팝업)
-  • 컨텍스트 메뉴 (우클릭 메뉴)
-  • 에러 상태 화면
-  • 빈 데이터 상태
-  • 반응형 레이아웃 (창 크기 변경 시)
-```
-
-Ask via AskUserQuestion:
-- **"추가 스크린샷 공유"** — user shares more screenshots
-- **"탐색 완료"** (Recommended) — proceed to observation recording
-
-**If response is empty → re-ask** (per MANDATORY RULE 1).
-
-After completing exploration, compile all screenshot analysis results into the same structured format as Path A output (runtime-exploration.md).
-
 ### 1.5-6. Observation Recording + Cleanup
 
 **Step 1 — Write `specs/reverse-spec/runtime-exploration.md`**:
@@ -670,7 +579,7 @@ Write the file with the following structure:
 # Runtime Exploration Results
 
 > Generated by `/reverse-spec` Phase 1.5 — [ISO timestamp]
-> Mode: [automated (Playwright) | screenshot-assisted]
+> Mode: automated (Playwright)
 > Target: [target directory path]
 
 ## App-Wide Observations
@@ -754,7 +663,7 @@ Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration
 ```
 ### M1.5 — Runtime Exploration
 - **Timestamp**: [ISO timestamp]
-- **Mode**: [automated (Playwright) | screenshot-assisted | skipped]
+- **Mode**: [automated (Playwright) | skipped]
 - **Screens explored**: [N]
 - **Key findings**: [1-2 sentence summary]
 ```
