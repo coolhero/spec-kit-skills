@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-03-08] smart-sdd verify — Strengthen Electron CDP HARD STOP (anti-bypass)
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | HARD STOP bypass prevention | Added explicit anti-bypass language: "Do NOT skip, do NOT auto-decide, do NOT rationalize" | Session B agent acknowledged the HARD STOP requirement but bypassed it by rationalizing that "health check already passed and UI verification is non-blocking." Strengthened wording to remove any rationalization escape hatch. |
+| 2 | "Non-blocking" clarification | Clarified that "non-blocking" means results don't block verify, NOT that verification can be skipped | Agent misinterpreted "UI verification failures are NOT blocking" as permission to skip the entire UI verification step without user consent. Added explicit disambiguation. |
+
+---
+
 ## [2026-03-08] smart-sdd verify — Add Electron CDP check with user choice
 
 | # | Decision | Choice | Rationale |

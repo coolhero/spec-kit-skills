@@ -114,7 +114,8 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      - If snapshot shows a blank page / default browser tab → CDP is NOT configured
      - If the tool call fails → Playwright MCP is not functional
 
-  2. **If CDP not configured**: Display notice and **HARD STOP with user choice**:
+  2. **If CDP not configured** — this is a **MANDATORY HARD STOP**. You MUST use AskUserQuestion. Do NOT skip, do NOT auto-decide, do NOT rationalize around this step even if health check passed. Health check status is irrelevant — this decision belongs to the user.
+     Display notice:
      ```
      ⚠️ Electron 앱은 CDP 모드가 필요합니다.
         현재 Playwright MCP가 표준 브라우저 모드로 연결되어 있어 Electron 앱 UI를 검증할 수 없습니다.
@@ -125,10 +126,11 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
         3. claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
         4. Claude Code 재시작
      ```
-     **Use AskUserQuestion** with options:
+     **Use AskUserQuestion** — this is NOT optional, NOT skippable:
      - "CDP 설정 후 재시도" — user configures CDP, then re-run verify
      - "UI 검증 Skip — health check만 수행" — skip Playwright UI verification, proceed with demo script health check only
      **If response is empty → re-ask** (per MANDATORY RULE 1)
+     **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
 
   3. **If CDP active**: Proceed to SC-level UI verification below.
 
@@ -160,7 +162,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
   - SC interaction failure: ⚠️ warning (false positive possible — selector changes, etc.)
   - JS console errors (TypeError/ReferenceError): ⚠️ warning + highlighted
   - Page load failure: ⚠️ warning
-- **UI verification failures are NOT blocking since health check already passed** — results included in Review
+- **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent. The CDP HARD STOP above must always be presented to the user.
 - See [reference/ui-testing-integration.md](../reference/ui-testing-integration.md) for full guide
 
 **Step 3 — Check coverage mapping and demo components**:
