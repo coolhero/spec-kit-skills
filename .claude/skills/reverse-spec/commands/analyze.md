@@ -541,8 +541,7 @@ With the app running, systematically explore using Playwright MCP:
 **Phase A — Initial Landing**:
 1. `browser_navigate` → `http://localhost:[PORT]`
 2. `browser_snapshot` → capture accessibility tree (page structure, elements, roles)
-3. `browser_take_screenshot` → record initial screen
-4. `browser_console_messages` → check for initial JS errors
+3. `browser_console_messages` → check for initial JS errors
 
 **Phase B — Navigation Discovery**:
 1. From the accessibility tree, identify navigation elements (`nav`, sidebar, menu, tabs, header links)
