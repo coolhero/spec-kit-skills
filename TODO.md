@@ -1,7 +1,7 @@
-# TODO — Runtime Interaction & Quality Enhancement
+# TODO — Feature 개발 완결성 확보
 
-> spec-kit-skills 파이프라인의 핵심 개선 영역 정리.
-> 이전 TODO (Parts 0-11)를 재구성. MCP 조사 결과 반영.
+> 파이프라인 전체를 추적하여 발견한 정보 흐름 단절(Gap)을 해소하고,
+> 런타임 실행 기반 검증을 추가하여 Feature 기능 재현의 정확도를 확보한다.
 
 ---
 
@@ -32,77 +32,133 @@
 | UI Component Features (Phase 2-7) | 라이브러리 config/plugin 기반 기능 | ✅ |
 | FR ↔ SBI 매핑 (specify + verify) | B### → FR-### 추적으로 스펙 누락 방지 | ✅ |
 | Parity Check | 구현 완료 후 원본과 구조/로직/UI 대비 | ✅ |
-
-**이 TODO의 범위**: 위 메커니즘이 커버하지 못하는 영역 — **런타임 실행 기반 검증**.
+| Runtime Exploration (Phase 1.5) | 시각/행동 컨텍스트 수집 — 코드만 읽어서는 알 수 없는 UI/UX | ✅ |
 
 ---
 
-## MCP 구성 (확정)
+## 파이프라인 Gap 분석
+
+> 2026-03-08 전체 파이프라인 추적 결과. reverse-spec 산출물 → smart-sdd 소비까지 정보 흐름 단절 지점.
+
+```
+reverse-spec                          smart-sdd
+┌─────────────┐                    ┌──────────┐
+│ Phase 1.5   │──runtime-exploration.md──→│ specify  │ ❌ G1: 미소비
+│ Runtime     │                    │          │
+│ Exploration │──→ pre-context.md ──→│          │ ✅ 소비 (SBI, 드래프트 FR/SC)
+└─────────────┘                    └──────────┘
+       │                                │
+       │                           ┌──────────┐
+       │                           │  plan    │ ❌ G2: runtime-exploration 미소비
+       │                           └──────────┘
+       │                                │
+       │                           ┌──────────┐
+       │                           │implement │ ❌ G4: 런타임 검증 전무
+       │                           └──────────┘
+       │                                │
+       │                           ┌──────────┐
+       └───────────────────────────→│ verify   │ ⚠️ G5: UI 검증 silent-skip
+                                   └──────────┘
+
+Phase 4-2: ❌ G3 — 라우트→Feature 매핑 알고리즘 미정의
+Phase 1.5: ❌ G6 — Electron 크래시 복구 없음
+Phase 2-6→4-2: ⚠️ G7 — SBI Feature별 필터링 시점 모호
+```
+
+| Gap | 심각도 | 설명 |
+|-----|--------|------|
+| **G1** | High | runtime-exploration.md가 specify(injection/specify.md)에서 미소비. UI 관찰이 FR/SC에 반영 안 됨 |
+| **G2** | High | runtime-exploration.md가 plan(injection/plan.md)에서 미소비. 컴포넌트 설계 시 실제 UI 패턴 참조 불가 |
+| **G3** | Medium | Phase 4-2에서 "라우트→Feature 매핑으로 분배"라고 명시하지만 매핑 알고리즘이 정의되지 않음 |
+| **G4** | Critical | implement가 코드만 생성하고 한 번도 실행하지 않음. verify에서 처음 실행 → 버그 폭발 |
+| **G5** | Medium | verify Phase 3 UI 검증이 MCP 없으면 경고 없이 silent-skip. MCP 필수 정책 미반영 |
+| **G6** | Low | Electron 앱이 Runtime Exploration 중 크래시하면 복구 메커니즘 없음 |
+| **G7** | Low | SBI가 Phase 2에서 글로벌 생성 → Phase 3에서 Feature 분류 → Phase 4-2에서 필터. 과정이 암묵적 |
+
+---
+
+## MCP 정책 (확정)
 
 | 플랫폼 | MCP | 비고 |
 |--------|-----|------|
 | 웹앱 | Playwright MCP | 기본 |
-| Electron | Playwright MCP (`--electron-app` 또는 `--cdp-endpoint`) | 동일 MCP |
+| Electron | Playwright MCP (`--cdp-endpoint`) | CDP 임시 전환 필요 |
 | Tauri v2 | Tauri MCP (향후 확장) | 현재 미지원 |
+
+**MCP 필수 정책**: reverse-spec, verify 모두 Playwright MCP 필수. 없으면 설치 안내 또는 Skip.
 
 상세: [MCP-GUIDE.md](MCP-GUIDE.md)
 
-보조: Claude Preview (dev server 실행/관리, CSS 정밀 검사)
+---
+
+## 과업 목록
+
+### 1. G1+G2 해소: runtime-exploration → specify/plan 주입
+
+> **Gap**: runtime-exploration.md 데이터가 수집만 되고 specify/plan에서 소비되지 않음.
+
+**specify 주입** (`smart-sdd/reference/injection/specify.md`):
+- pre-context의 Runtime Exploration Results 섹션을 Checkpoint 주입 컨텐츠에 포함
+- UI 레이아웃, 사용자 플로우, 관찰된 에러를 FR/SC 초안에 반영하도록 가이드 추가
+- 예: 화면에서 관찰된 "API auth failure 인라인 알림" → SC에 에러 핸들링 시나리오 포함
+
+**plan 주입** (`smart-sdd/reference/injection/plan.md`):
+- Runtime Exploration의 Layout 패턴, Component Library 정보를 컴포넌트 설계 참조로 주입
+- 예: "Three-column layout (sidebar + chat + input)" → plan에서 컴포넌트 분할 시 참조
+
+**수정 대상**: `injection/specify.md`, `injection/plan.md`
+**난이도**: 낮음
+**의존**: —
 
 ---
 
-## A. Runtime Interaction (핵심)
+### 2. G3 해소: 라우트→Feature 매핑 알고리즘 명시
 
-에이전트가 앱을 실행하고 인터랙션하여 동작을 확인하는 능력. 세 시점에 적용.
+> **Gap**: Phase 4-2가 "라우트→Feature 매핑으로 분배"라고만 명시. HOW가 없음.
 
-### A-1. reverse-spec Runtime Exploration ✅ 구현 완료
+**알고리즘 정의** (`reverse-spec/commands/analyze.md` Phase 4-2):
+- Phase 3-1에서 Feature 경계를 파일/모듈 기반으로 결정함
+- Phase 1에서 라우트 파일/페이지 컴포넌트가 어떤 모듈에 속하는지 이미 파악됨
+- 따라서: **라우트 → 페이지 컴포넌트 → 모듈 → Feature** 의 추이적 관계로 매핑
+- 공유 라우트(예: Settings)는 primary owner Feature에 포함, 다른 Feature에서 참조
+- Phase 4-2에 이 알고리즘을 명시적으로 기술
 
-> 원본 Part 6 (UI Fidelity) 대체. rebuild 시 원본 앱을 실제로 돌려보며 파악.
-> **역할**: 입력 품질 강화 — 코드만 읽어서는 알 수 없는 시각/행동 컨텍스트를 수집.
-
-**구현 완료** (2026-03-08):
-- `reverse-spec/commands/analyze.md` — Phase 1.5 전체 삽입 (Step 0~6: MCP 확인, 환경 진단, 체크리스트, 자동 셋업, 앱 실행, 탐색, 기록)
-- 산출물: `specs/reverse-spec/runtime-exploration.md` — 라우트/화면 중심 구조 (각 화면 블록에 UI+흐름+행동+에러 통합)
-- Phase 2: `runtime-exploration.md` 읽어서 코드 분석 보강
-- Phase 4-2: 라우트→Feature 매핑으로 각 `pre-context.md`에 분배
-- `reverse-spec/templates/pre-context-template.md` — Runtime Exploration Results 섹션 (라우트 중심 포맷)
-
-**미완료 (downstream 연결)**:
-- `smart-sdd/reference/injection/specify.md` — UI 관찰 정보 주입 (pre-context의 Runtime Exploration → FR/SC 초안 반영)
-- `smart-sdd/reference/injection/plan.md` — 컴포넌트 설계 시 runtime-exploration.md의 UI Patterns 참조
-
-**A-1 산출물의 downstream 활용**:
-```
-runtime-exploration.md
-  ├→ Phase 2: 코드 분석 교차 검증 (구현 완료)
-  ├→ Phase 4-2: pre-context.md 분배 (구현 완료)
-  ├→ A-5: User Flows → SC UI Action 매핑 소스 (미구현)
-  ├→ A-2: 예상 행동 vs 실제 행동 비교 기준 (미구현)
-  └→ A-3: 화면별 검증 시나리오 참조 (미구현)
-```
+**수정 대상**: `reverse-spec/commands/analyze.md` (Phase 4-2)
+**난이도**: 낮음
+**의존**: —
 
 ---
 
-### A-2. implement 중 Feature 런타임 검증
+### 3. G5 해소: verify MCP 필수 정책 반영
 
-> 원본 Part 8 강화. "빌드 확인"에서 "SC 실행 확인"으로 격상.
-> **역할**: 구현 검증 — 코드 작성 직후 즉시 실행하여 문제 조기 발견.
-> **데이터 소스**: `runtime-exploration.md`의 화면별 예상 행동을 비교 기준으로 활용 가능.
+> **Gap**: verify Phase 3 UI 검증이 MCP 없으면 silent-skip. MCP 필수 정책과 불일치.
 
-**문제**: implement가 코드만 생성하고 한 번도 실행하지 않음. verify에서 처음 실행 → 버그 폭발.
+**변경**:
+- verify Phase 3 Step 2b: MCP 감지 → 없으면 경고 메시지 + "MCP 설치 후 재시도" / "UI 검증 Skip" HARD STOP
+- silent-skip 제거
+- `sdd-state.md`에 `UI Verify Mode` 필드 불필요 (항상 auto → MCP 있으면 실행, 없으면 HARD STOP)
 
-**해결**: 태스크 완료 후 실제로 앱을 띄워서 동작 확인.
+**수정 대상**: `smart-sdd/commands/verify-phases.md`
+**난이도**: 낮음
+**의존**: —
 
+---
+
+### 4. G4 해소: implement 런타임 검증 + Fix 루프
+
+> **Gap**: implement가 코드만 생성하고 한 번도 실행하지 않음. verify에서 처음 실행 → 버그 폭발.
+> **가장 큰 실사용 문제.**
+
+**태스크 완료 후 런타임 검증**:
 ```
-Task 1 (로그인 폼) → 코드 작성
-  → 앱 실행 → /login 이동 → 폼이 보이는지? → ✅
-  → 이메일/비밀번호 입력 → 제출 → 리다이렉트 되는지? → ❌ 500 에러
-  → 에러 분석 → API 라우트 누락 발견 → 수정 → 재확인 → ✅
+Task 완료 → 앱 실행 → 해당 화면 이동 → 정상 렌더링 확인
+  → ✅ 다음 태스크
+  → ❌ 에러 분석 → 수정 → 재확인 (최대 3회)
 ```
 
-**검증 수준** (태스크 완료 후):
-- Level 1: 빌드 성공 + 서버 시작 (최소)
-- Level 2: + 해당 태스크 관련 SC 실행 (표준, 권장)
+**검증 수준**:
+- Level 1: 빌드 성공 + 서버/앱 시작 (최소)
+- Level 2: + 해당 태스크 관련 SC 실행 확인 (표준, 권장)
 - Level 3: + 이전 태스크 SC 회귀 확인 (강화)
 
 **implement 완료 후** (Review 전):
@@ -115,195 +171,122 @@ Task 1 (로그인 폼) → 코드 작성
 3. 관련 소스 수정 → 재실행
 4. 같은 에러 반복 시 루프 중단, 사용자에게 리포트
 
-**수정 대상**:
-- `smart-sdd/reference/injection/implement.md` — 태스크별 런타임 검증 + Fix 루프
-- `smart-sdd/commands/pipeline.md` — implement → verify 전이 조건 (빌드 게이트)
-- `smart-sdd/reference/demo-standard.md` — 데모 사전 실행 가이드
-
-**구현 우선순위**: 높음 (가장 큰 실사용 문제)
+**수정 대상**: `injection/implement.md`, `pipeline.md`, `demo-standard.md`
+**난이도**: 중간
+**의존**: —
 
 ---
 
-### A-3. verify SC 기반 UI 검증
+### 5. SC→UI Action 매핑 (specify/plan 단계)
 
-> 원본 Parts 2+4 통합. verify Phase 3를 SC-### 인터랙션 검증으로 강화.
-> **역할**: 출력 검증 — 구현 결과가 SC를 충족하는지 자동 확인.
-> **데이터 소스**: `runtime-exploration.md`의 화면별 Runtime Behavior를 검증 시나리오 참조로 활용.
+> A-3 (verify SC 검증)의 데이터 소스. runtime-exploration의 User Flows를 검증 가능한 UI 액션으로 변환.
 
-**문제**: verify Phase 3가 "서버 시작 + health check"에서 멈춤. "유저가 실제로 쓸 수 있는가"를 검증하지 않음.
-
-**해결**: SC-###의 UI action 시나리오를 Playwright MCP로 자동 실행.
+**목적**: UI Feature의 SC-###에서 검증 가능한 UI 액션을 추출. verify 시점에 자동 검증의 소스.
 
 ```
-확장된 verify Phase 3 Step 2b:
+Coverage header 포맷 (demo script):
+  FR-001 (Chat):
+    SC-001: navigate / → fill input → click Send → verify message appears
+    SC-002: navigate / → click model selector → verify dropdown visible
+    SC-003: ⬜ (requires WebSocket — skip auto-verify)
+```
+
+**수정 대상**: `injection/specify.md`, `injection/plan.md`, `demo-standard.md`
+**난이도**: 중간
+**의존**: 과업 1 (specify/plan에 runtime 주입) 완료 후
+
+---
+
+### 6. verify SC 기반 자동 UI 검증
+
+> verify Phase 3를 SC-### 인터랙션 검증으로 강화.
+
+**확장된 verify Phase 3 Step 2b**:
 1. Parse demo script → URL 추출
-2. browser_navigate → 페이지 이동
+2. `browser_navigate` → 페이지 이동
 3. 페이지 로드 확인
-4. ★ browser_console_messages → JS 에러/경고 수집
-5. ★ SC-### interaction verification:
+4. `browser_console_messages` → JS 에러/경고 수집
+5. SC-### interaction verification:
    - Coverage header에서 SC + UI action 읽기
-   - 각 SC: action 수행 → 결과 확인 → 스크린샷
+   - 각 SC: action 수행 → 결과 확인
    - pass/fail 기록
 6. 최종 리포트
-```
 
 **결과 분류**:
 - SC 인터랙션 실패: ⚠️ warning (false positive 가능, BLOCK 아님)
 - JS 콘솔 에러 (TypeError/ReferenceError): ⚠️ warning + 강조
 - 페이지 로드 실패: ⚠️ warning
 
-**Playwright 없는 경우**: 수동 체크리스트 생성 (A-4)
-
-**수정 대상**:
-- `smart-sdd/commands/verify-phases.md` — Step 2b 확장
-- `smart-sdd/reference/ui-testing-integration.md` — Phase A+ 상세
-- `smart-sdd/reference/demo-standard.md` — Coverage 헤더 포맷 확장
-
-**구현 우선순위**: 높음
+**수정 대상**: `verify-phases.md`, `demo-standard.md`
+**난이도**: 중간
+**의존**: 과업 5 (SC→UI Action 매핑)
 
 ---
 
-### A-4. 수동 검증 체크리스트 (fallback)
+### 7. G6 해소: Electron 크래시 핸들링
 
-> 원본 Part 3. Playwright MCP 없을 때의 fallback.
+> **Gap**: Runtime Exploration 중 Electron 앱이 크래시하면 이미 탐색한 데이터가 손실됨.
 
-**동작**: SC-### 기반 수동 검증 체크리스트를 생성하여 유저가 직접 확인.
+**변경** (`reverse-spec/commands/analyze.md` Phase 1.5-5):
+- 탐색 중 Playwright 연결 끊김/프로세스 종료 감지
+- 이미 수집한 화면 데이터 보존 (탐색 완료된 화면까지 runtime-exploration.md에 기록)
+- HARD STOP: "앱 재시작 후 이어서 탐색" / "현재까지 수집한 데이터로 진행" / "Skip"
 
-```
-📋 UI Manual Verification Checklist for F001-auth
-
-□ SC-001: /login 이동 → email/password 입력 → "Sign In" 클릭
-  → Expected: /dashboard로 리다이렉트, 유저명 표시
-□ SC-002: /login → 잘못된 이메일 → "Sign In" 클릭
-  → Expected: "Invalid email format" 에러 메시지
-```
-
-**HARD STOP**: "All passed" / "Some failed" / "Skip UI verification"
-
-**수정 대상**:
-- `smart-sdd/commands/verify-phases.md` — Step 2b fallback 분기
-- `smart-sdd/reference/demo-standard.md` — 체크리스트 생성 가이드
-
-**구현 우선순위**: 높음 (도구 의존 없이 즉시 활용 가능)
+**수정 대상**: `reverse-spec/commands/analyze.md` (Phase 1.5-5)
+**난이도**: 낮음
+**의존**: —
 
 ---
 
-### A-5. SC→UI Action 매핑 (spec/plan 단계)
+### 8. G7 해소: SBI Feature별 필터링 프로세스 명시
 
-> 원본 Part 1. A-2, A-3, A-4의 데이터 소스.
-> **역할**: 입력→검증 브릿지 — Runtime Exploration(A-1)의 관찰 결과를 검증 가능한 UI 액션으로 변환.
-> **데이터 소스**: `runtime-exploration.md`의 User Flows → SC별 UI action sequence로 매핑.
+> **Gap**: SBI가 Phase 2에서 글로벌 생성 → Phase 4-2에서 Feature별 필터. 과정이 암묵적.
 
-**목적**: UI Feature의 SC-###에서 검증 가능한 UI 액션을 추출. verify 시점에 자동/수동 검증의 소스로 활용.
+**변경** (`reverse-spec/commands/analyze.md`):
+- Phase 2-6: "글로벌 SBI를 생성한다. Feature 분류는 Phase 3 이후 Phase 4-2에서 수행" 명시
+- Phase 4-2: "Phase 2-6의 글로벌 SBI에서 이 Feature의 소스 파일에 속하는 행동만 필터한다. B### ID는 Feature ID 순서로 전체 프로젝트에서 유일하게 부여" 명시
 
-```
-Coverage header 포맷 (demo script 또는 plan.md):
-  FR-001 (Login):
-    SC-001: ✅ navigate /login → fill email/password → click "Sign In" → verify redirect /dashboard
-    SC-002: ✅ navigate /login → fill invalid email → click "Sign In" → verify error visible
-    SC-004: ⬜ (requires WebSocket — manual verify)
-```
-
-**수정 대상**:
-- `smart-sdd/reference/injection/specify.md` — SC 작성 시 UI verifiability 기준
-- `smart-sdd/reference/injection/plan.md` — UI Feature에 SC별 UI action hint 생성
-- `smart-sdd/reference/demo-standard.md` — Coverage 헤더 SC-### 매핑에 UI action 컬럼
-
-**구현 우선순위**: 중 (다음 파이프라인 실행부터 적용)
+**수정 대상**: `reverse-spec/commands/analyze.md` (Phase 2-6, Phase 4-2)
+**난이도**: 낮음
+**의존**: —
 
 ---
 
-### A-6. MCP 감지 + 모드 결정
+### 9. Bug Prevention — 단계별 버그 예방 규칙
 
-> 원본 Part 0 간소화. Playwright MCP 통일로 단순화됨.
+> "실행해서 잡자" (A) 외에, "애초에 발생을 막자" (B).
 
-**감지 로직** (verify Phase 3 실행 시):
-1. Playwright MCP 도구 (`browser_navigate`, `browser_click` 등) 존재 확인
-2. 있으면 → A-3 (자동 검증)
-3. 없으면 → A-4 (수동 체크리스트)
+**B-1. plan 단계**:
+- Target Runtime Compatibility (JS/CSS 제약)
+- State Management Anti-patterns
+- Async Race Condition Analysis
+- Store Dependency Graph
+- Downgrade Compatibility
 
-**선호도 기록** (선택적, constitution 단계):
-- `sdd-state.md`에 `UI Verify Mode: auto | playwright-mcp | manual`
-- 기본값: `auto` (런타임 감지)
+**B-2. analyze 단계**:
+- Cross-Feature Data Flow (Feature 간 데이터 의존성 + 초기화 순서)
+- Nullable Field Tracking (공유 인터페이스 optional 필드 안전성)
 
-**수정 대상**:
-- `smart-sdd/commands/verify-phases.md` — Phase 3 Step 2b MCP 분기
-- `smart-sdd/reference/state-schema.md` — UI Verify Mode 필드
+**B-3. implement 단계**:
+- IPC Boundary Safety
+- Platform CSS Constraints
+- Cross-Feature Integration Checklist
+- Module Import Graph Validation
+- Persistence Layer Write-Through
 
-**구현 우선순위**: 높음 (A-3, A-4의 전제조건)
+**B-4. verify 단계**:
+- Empty State Smoke Test (모든 스토어 초기 상태에서 크래시 없이 렌더링)
+- Smoke Launch Criteria (프로세스 시작 + 메인 화면 렌더링 + Error Boundary 미트리거 + JS 에러 없음)
 
----
-
-## B. Bug Prevention (단계별 버그 예방)
-
-> 원본 Parts 9+10 통합. F006 post-mortem 기반.
-> A가 "실행해서 잡자"라면, B는 "애초에 발생을 막자".
-
-### B-1. plan 단계 강화
-
-**추가할 검증/규칙**:
-
-1. **Target Runtime Compatibility**: 타겟 런타임의 JS/CSS 제약 (예: WKWebView에서 `\p{...}` 미지원)
-2. **State Management Anti-patterns**: 라이브러리별 함정 (예: Zustand selector referential stability)
-3. **Async Race Condition Analysis**: 비동기 상태 충돌 가능성 분석
-4. **Store Dependency Graph**: 스토어 간 의존 + 초기화 순서 명시
-5. **Downgrade Compatibility**: 패키지 다운그레이드 시 타입/API 호환성
-
-> 구체적 예시 (Zustand `?? []`, WKWebView CSS 등)는 `domains/app.md`에 프레임워크별 pitfall로 관리.
-
-**수정 대상**:
-- `smart-sdd/reference/injection/plan.md`
-- `smart-sdd/domains/app.md`
+**수정 대상**: `injection/plan.md`, `injection/analyze.md`, `injection/implement.md`, `verify-phases.md`, `domains/app.md`
+**난이도**: 낮~중
+**의존**: —
 
 ---
 
-### B-2. analyze 단계 강화
+### 10. Spec-Code Drift
 
-**추가할 검증**:
-
-1. **Cross-Feature Data Flow**: Feature 간 데이터 의존성 + 초기화 순서 검증
-2. **Nullable Field Tracking**: 공유 인터페이스의 optional 필드가 안전하게 사용되는지
-
-**수정 대상**:
-- `smart-sdd/reference/injection/analyze.md`
-
----
-
-### B-3. implement 단계 강화
-
-**추가할 규칙**:
-
-1. **IPC Boundary Safety**: IPC/API 경계에서 optional chaining + null check 강제
-2. **Platform CSS Constraints**: 타겟 플랫폼 CSS 제약 주입
-3. **Cross-Feature Integration Checklist**: 다른 Feature 스토어 참조 시 필수 확인
-4. **Module Import Graph Validation**: side-effect import가 import chain에 포함되는지
-5. **Persistence Layer Write-Through**: write-back 라이브러리의 save/flush 호출 확인
-
-> 구체적 규칙 (Tauri IPC, WKWebView CSS 등)은 `domains/app.md`에서 관리.
-
-**수정 대상**:
-- `smart-sdd/reference/injection/implement.md`
-- `smart-sdd/domains/app.md`
-
----
-
-### B-4. verify 단계 강화
-
-**추가할 검증**:
-
-1. **Empty State Smoke Test**: 모든 스토어 초기 상태에서 크래시 없이 렌더링되는지
-2. **Smoke Launch Criteria**: 프로세스 시작 + 메인 화면 렌더링 + Error Boundary 미트리거 + JS 에러 없음
-
-> A-2 (implement 런타임 검증)과 A-3 (verify SC 검증)이 이 항목들의 실행 메커니즘.
-
-**수정 대상**:
-- `smart-sdd/commands/verify-phases.md`
-
----
-
-## C. Spec-Code Drift (독립)
-
-> 원본 Part 5. implement 도중/이후 코드 변경 시 spec 아티팩트 역동기화.
+> implement 도중/이후 코드 변경 시 spec 아티팩트 역동기화.
 
 **문제**: 파이프라인 도중 "OAuth도 추가해줘" → 코드는 변경, spec/plan/tasks에 미반영.
 
@@ -313,60 +296,55 @@ Coverage header 포맷 (demo script 또는 plan.md):
 - C. 별도 `sync` 커맨드
 
 **상태**: 미결정 — 접근 방식 결정 필요
-
-**구현 우선순위**: 낮음 (A, B 완료 후)
-
----
-
-## D. Structural Gap Reference (Part 11)
-
-> F006에서 발견된 5가지 구조적 공백. A, B의 근거 문서.
-
-| # | 공백 | 해결 항목 |
-|---|------|----------|
-| 1 | Runtime Verification 부재 | A-2, A-3 |
-| 2 | Integration Contract 부재 | B-2, B-3 |
-| 3 | Runtime Constraints 무인식 | B-1 |
-| 4 | Behavioral Contract 누락 | B-1, B-3 |
-| 5 | Module Dependency Graph 부재 | B-3 |
+**구현 우선순위**: 낮음 (과업 1~9 완료 후)
 
 ---
 
 ## 구현 순서
 
-| 순서 | 항목 | 파일 수정 | 난이도 | 의존 |
-|------|------|-----------|--------|------|
-| 1 | A-6: MCP 감지 | verify-phases.md, state-schema.md | 낮음 | — |
-| 2 | A-4: 수동 체크리스트 | verify-phases.md, demo-standard.md | 낮음 | A-6 |
-| 3 | A-3: SC 자동 검증 | verify-phases.md, ui-testing-integration.md | 중간 | A-6 |
-| 4 | A-5: SC→UI Action 매핑 | injection/specify.md, injection/plan.md | 중간 | — |
-| 5 | A-2: implement 런타임 검증 | injection/implement.md, pipeline.md | 중간 | — |
-| ~~6~~ | ~~A-1: reverse-spec 탐색~~ | ~~analyze.md, pre-context-template.md, runtime-exploration.md~~ | ~~중간~~ | ✅ 완료 (downstream 연결 잔여) |
-| 7 | B-1~4: 버그 예방 규칙 | injection/*.md, domains/app.md | 낮~중 | — |
-| 8 | C: Spec-Code Drift | 미정 | 미정 | A, B |
+| 순서 | 과업 | Gap | 수정 파일 | 난이도 | 의존 |
+|------|------|-----|-----------|--------|------|
+| 1 | runtime-exploration → specify/plan 주입 | G1+G2 | injection/specify.md, injection/plan.md | 낮음 | — |
+| 2 | 라우트→Feature 매핑 알고리즘 | G3 | analyze.md (Phase 4-2) | 낮음 | — |
+| 3 | verify MCP 필수 정책 | G5 | verify-phases.md | 낮음 | — |
+| 4 | implement 런타임 검증 + Fix 루프 | G4 | injection/implement.md, pipeline.md | 중간 | — |
+| 5 | SC→UI Action 매핑 | — | injection/specify.md, injection/plan.md, demo-standard.md | 중간 | 과업 1 |
+| 6 | verify SC 자동 UI 검증 | — | verify-phases.md, demo-standard.md | 중간 | 과업 5 |
+| 7 | Electron 크래시 핸들링 | G6 | analyze.md (Phase 1.5-5) | 낮음 | — |
+| 8 | SBI 필터링 프로세스 명시 | G7 | analyze.md (Phase 2-6, 4-2) | 낮음 | — |
+| 9 | Bug Prevention (B-1~4) | — | injection/*.md, verify-phases.md, domains/app.md | 낮~중 | — |
+| 10 | Spec-Code Drift | — | 미정 | 미정 | 과업 1~9 |
+
+> 과업 1~3, 7, 8은 독립적이므로 **병렬 진행 가능**.
+> 과업 4는 독립적이지만 가장 큰 변경이므로 별도 집중.
+> 과업 5→6은 순서 의존.
 
 ---
 
 ## 미결정 사항
 
-### A 관련
 - [ ] SC 인터랙션 실패를 BLOCK으로 승격할 조건이 있는가?
-- [ ] 스크린샷 저장 위치 (프로젝트 내? 임시?)
 - [ ] Coverage 헤더 UI action을 필수로 할지 optional로 할지
-- [ ] 수동 체크리스트 실패 시 limited verification과 동일 처리할지
 - [ ] 자동 Fix 루프 최대 횟수 (3회? 5회?)
 - [ ] 빌드 게이트를 강제할지 override 가능하게 할지
 - [ ] 데스크톱 앱에서 빌드 게이트의 "서버 시작" 조건 적용 방법
+- [ ] B-1 plan 단계 검증 항목의 context window 소모량
+- [ ] B-1 State Management Anti-pattern을 라이브러리별로 할지 공통 원칙만 할지
+- [ ] Spec-Code Drift A/B/C 접근 방식 결정
 
-### B 관련
-- [ ] plan 단계 검증 항목의 context window 소모량
-- [ ] domains/app.md에 플랫폼별 제약 상세도
-- [ ] State Management Anti-pattern을 라이브러리별로 할지 공통 원칙만 할지
-- [ ] Cross-Feature Data Flow Analysis를 analyze에 넣을지 implement에 넣을지
+---
 
-### C 관련
-- [ ] A/B/C 접근 방식 중 가장 실용적인 것
-- [ ] 역전파 시 기존 FR 번호 체계 유지 방법
+## Structural Gap Reference
+
+> F006에서 발견된 5가지 구조적 공백. 과업과의 매핑.
+
+| # | 공백 | 해결 과업 |
+|---|------|----------|
+| 1 | Runtime Verification 부재 | 과업 4, 6 |
+| 2 | Integration Contract 부재 | 과업 9 (B-2, B-3) |
+| 3 | Runtime Constraints 무인식 | 과업 9 (B-1) |
+| 4 | Behavioral Contract 누락 | 과업 9 (B-1, B-3) |
+| 5 | Module Dependency Graph 부재 | 과업 9 (B-3) |
 
 ---
 
@@ -375,8 +353,7 @@ Coverage header 포맷 (demo script 또는 plan.md):
 > Tauri MCP (hypothesi/mcp-server-tauri) 안정화 후 추가.
 
 **추가할 내용**:
-- A-6에 Tauri MCP 분기 (webview_interact, webview_screenshot 등)
-- A-3에 Tauri 자동 검증 흐름 (IPC 검증 포함)
-- A-4에 데스크톱 앱 특화 수동 체크리스트
-- B-3에 Tauri IPC Safety Rules, Platform CSS Constraints
+- 과업 3에 Tauri MCP 분기 (webview_interact, webview_screenshot 등)
+- 과업 6에 Tauri 자동 검증 흐름 (IPC 검증 포함)
+- 과업 9 (B-3)에 Tauri IPC Safety Rules, Platform CSS Constraints
 - MCP Bridge Plugin 자동 설치 (신규 프로젝트)

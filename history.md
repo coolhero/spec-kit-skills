@@ -824,3 +824,11 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 |----------|--------|-----------|
 | Path B 제거 | MCP 없으면 설치 안내 or Skip. 수동 탐색 경로 삭제 | MCP 설치는 한 줄 명령어. CDP 연결 실패도 재설정으로 해결 가능. 스크린샷 몇 장으로 얻는 정보 대비 사용자 부담이 과도. Skip해도 Phase 2 코드 분석 + SBI + UI Components 등 다른 메커니즘으로 보완됨 |
 | Path A 라벨 제거 | "Path A — Automated Exploration" → "1.5-5. Runtime Exploration (Automated via Playwright MCP)" | Path B가 없으면 A/B 구분 불필요 |
+
+### 파이프라인 Gap 분석 + TODO 재구성
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| 전체 파이프라인 추적 | reverse-spec 산출물 → specify → plan → implement → verify 정보 흐름 7개 Gap 식별 | runtime-exploration.md가 수집만 되고 소비 안 됨(G1/G2), 라우트→Feature 매핑 미정의(G3), implement 런타임 검증 전무(G4), verify UI silent-skip(G5), Electron 크래시(G6), SBI 필터링 모호(G7) |
+| TODO 재구성 | Gap 기반 10개 과업으로 재편. A-4(수동 체크리스트) 제거, A-6 단순화 | verify도 MCP 필수. 수동 fallback 불필요. Gap 해소가 곧 과업 |
+| runtime-exploration.md 품질 평가 | Cherry Studio 17화면 탐색 결과 — Phase 1.5 목적에 충분 | UI 요소, 레이아웃, 컴포넌트 라이브러리, 에러, 빈 상태 등 코드만으로는 파악 불가한 정보 확보됨 |
