@@ -61,7 +61,9 @@ which npx
 # ✗ ~/.nvm/... 또는 ~/.fnm/... → 아래 참고
 ```
 
-**Homebrew로 설치하면** 시스템 PATH에 자동 등록되어 추가 설정 없이 동작합니다:
+**원인**: MCP 서버는 Claude Code가 자식 프로세스로 직접 spawn하므로 `.zshrc`/`.bashrc`를 읽지 않습니다. nvm/fnm은 셸 초기화 파일에서 PATH를 동적으로 설정하기 때문에 MCP 프로세스에서는 npx를 찾을 수 없습니다.
+
+**해결**: Homebrew로 설치하면 시스템 PATH(`/opt/homebrew/bin`)에 자동 등록되어 추가 설정 없이 동작합니다:
 
 ```bash
 brew install node
