@@ -324,9 +324,23 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 **Step 1 — Detect Playwright MCP**:
 Check if Playwright MCP is available using the Detect capability: verify the existence of `browser_navigate` tool. See [MCP-GUIDE.md](../../../MCP-GUIDE.md) § MCP Capability Map.
 
+**Step 1b — Electron apps: early CDP config check** (skip for non-Electron):
+
+If the project was detected as an Electron app in Phase 1, check CDP configuration NOW — before asking the user about Runtime Exploration. This avoids wasting time if reconfiguration is needed.
+
+Read MCP config files directly (do NOT use `browser_navigate`):
+1. Read these files in order (stop at first match containing `playwright`):
+   - `.claude/settings.local.json` (project local)
+   - `.claude/settings.json` (project)
+   - `~/.claude/settings.local.json` (user local)
+   - `~/.claude/settings.json` (user)
+2. Find `mcpServers.playwright.args` array
+3. Check if `--cdp-endpoint` exists in the args
+4. Store result as `cdp_configured = true/false` for use in Step 2
+
 **Step 2 — Present options based on detection result**:
 
-**If Playwright MCP is available**:
+**If Playwright MCP is available AND (non-Electron OR cdp_configured)**:
 ```
 🔍 Runtime Exploration Available
 
@@ -338,6 +352,22 @@ Playwright MCP가 감지되었습니다. 원본 앱을 실제로 실행하고
 ```
 Ask via AskUserQuestion:
 - **"Run Runtime Exploration (Recommended)"** — 앱 실행 + 브라우저 탐색
+- **"Skip — code analysis only"** — Phase 2로 바로 이동
+
+**If Playwright MCP is available BUT Electron AND NOT cdp_configured**:
+```
+🔍 Runtime Exploration — CDP 설정 필요
+
+Playwright MCP가 감지되었지만, Electron 앱 연결에 필요한
+--cdp-endpoint가 설정되어 있지 않습니다.
+
+Runtime Exploration을 실행하려면 MCP를 재설정해야 합니다:
+  claude mcp remove playwright
+  claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+  → Claude Code 재시작 필요
+```
+Ask via AskUserQuestion:
+- **"Playwright MCP 재설정 후 재시도"** (Recommended) — 재설정 후 Claude Code 재시작, `/reverse-spec` 다시 실행
 - **"Skip — code analysis only"** — Phase 2로 바로 이동
 
 **If Playwright MCP is NOT available**:
@@ -454,38 +484,9 @@ If the start command runs an Electron app, **replace it** with the CDP-enabled v
 
 After launching, verify CDP is active: `lsof -i :9222`. If no result → the CDP flag was not picked up. Check the build tool and retry with the correct syntax.
 
-**Step 1c — Electron apps: verify Playwright MCP has `--cdp-endpoint`** (skip for non-Electron):
+**Step 1c — Electron apps: CDP config already verified** (skip for non-Electron):
 
-Playwright MCP must be configured with `--cdp-endpoint http://localhost:9222` to connect to the Electron app.
-
-**Verification method — read MCP config files directly** (do NOT use `browser_navigate` for this check):
-1. Read these files in order (stop at first match containing `playwright`):
-   - `.claude/settings.local.json` (project local)
-   - `.claude/settings.json` (project)
-   - `~/.claude/settings.local.json` (user local)
-   - `~/.claude/settings.json` (user)
-2. Find `mcpServers.playwright.args` array
-3. Check if `--cdp-endpoint` exists in the args
-
-**If `--cdp-endpoint` is present**: Proceed to Step 2.
-**If `--cdp-endpoint` is NOT present**: Inform the user:
-```
-⚠️ Playwright MCP CDP 연결 필요
-
-Electron 앱이 CDP 포트 9222에서 실행 중이지만,
-Playwright MCP가 --cdp-endpoint 없이 시작되어 연결할 수 없습니다.
-
-해결 방법:
-  claude mcp remove playwright
-  claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-  → Claude Code 재시작 필요 (MCP 설정은 재시작 후 반영됩니다)
-```
-
-Ask via AskUserQuestion:
-- **"Playwright MCP 재설정 후 재시도"** (Recommended) — user reconfigures, restarts Claude Code, then re-runs `/reverse-spec`
-- **"Skip Runtime Exploration"** — Phase 2로 바로 이동
-
-**If response is empty → re-ask** (per MANDATORY RULE 1).
+> CDP configuration was already verified in Phase 1.5-0 Step 1b. If the user reached this point, `--cdp-endpoint` is confirmed present. No additional check needed — proceed to Step 2.
 
 **Step 2 — Run and wait for readiness**:
 Run the start command (or CDP-modified command for Electron) as a background process, capturing stdout/stderr.
