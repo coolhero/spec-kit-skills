@@ -57,6 +57,32 @@
 
 ---
 
+## [2026-03-08] Cross-File Consistency Fixes
+
+> 11 issues found during comprehensive flow review (4 parallel audits).
+
+| # | Severity | File | Fix |
+|---|----------|------|-----|
+| 1 | BROKEN | `injection/implement.md` | MCP-GUIDE.md link path: `../../../../` → `../../../../../` |
+| 2 | HIGH | `injection/analyze.md` | B-2 result classification added: ⚠️ warning (NOT blocking) |
+| 3 | HIGH | `injection/implement.md` | B-3 result classification added: ⚠️ warning (NOT blocking) |
+| 4 | MEDIUM | `injection/implement.md` | MCP absent: added explicit `⚠️` warning message (was silent degradation) |
+| 5 | MEDIUM | `injection/implement.md` | Review Display: removed "Test Results" section (tests run in verify, not implement) |
+| 6 | MEDIUM | `domains/app.md` §7 | B-rule naming aligned with actual section headings (4 items) |
+| 7 | MEDIUM | `domains/app.md` §6 | "screenshot" → "Snapshot" (Capability Map terminology) |
+| 8 | MEDIUM | `reverse-spec/analyze.md` | MCP detection: 3-tool check → Capability Map Detect (browser_navigate only) |
+| 9 | LOW | `pipeline.md` Step 5 | Added Demo-Ready Delivery and B-3 remind to implement summary |
+| 10 | LOW | `pipeline.md` Step 6 | Added SC UI Verify and Phase 3b (B-4) to verify summary |
+| 11 | LOW | `pre-context-template.md` | Skip notation unified: "N/A" → "Skipped — [reason]" |
+
+### Design Decision
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Commit message language | English only (added to CLAUDE.md) | Consistency with English-first artifact policy |
+
+---
+
 ## [2026-02-28] Initial Architecture
 
 ### Core Design Decisions

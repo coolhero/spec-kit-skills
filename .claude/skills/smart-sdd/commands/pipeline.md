@@ -423,8 +423,8 @@ Executes the following steps **strictly in order** for each Feature.
 2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
 3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP) → Update
 4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
-5. implement  → Env check(STOP if missing) → Checkpoint(STOP) → speckit-implement + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Review(STOP)
-6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → Review(STOP) → Update
+5. implement  → Env check(STOP if missing) → Checkpoint(STOP, B-3 remind) → speckit-implement + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Demo-Ready Delivery → Review(STOP)
+6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → SC UI Verify → Phase 3b (B-4) → Review(STOP) → Update
 7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──

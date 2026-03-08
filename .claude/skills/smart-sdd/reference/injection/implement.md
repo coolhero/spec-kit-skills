@@ -95,7 +95,7 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
 ## Runtime Verification + Fix Loop
 
 > **Purpose**: Resolve G4 — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
-> **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
+> **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [MCP-GUIDE.md](../../../../../MCP-GUIDE.md) for MCP Capability Map.
 
 ### Per-Task Runtime Verification
 
@@ -114,7 +114,7 @@ After each `speckit-implement` task completes (before starting the next task):
 5. **Success**: Proceed to next task (keep app running)
 6. **Failure**: Enter Auto-Fix Loop
 
-**Without MCP**: Replace Step 2 with build success confirmation only (Level 1 verification)
+**Without MCP**: Display `⚠️ MCP not available — runtime verification limited to build gate only (Level 1).` at first task verification. Replace Step 2 with build success confirmation only. Post-implement SC verification is skipped.
 
 ### Post-Implement Full Verification
 
@@ -189,9 +189,8 @@ After `speckit-implement` completes:
 **Files to read**:
 1. `specs/{NNN-feature}/tasks.md` — Re-read to cross-reference which tasks were completed
 2. All source files created/modified during implementation — use `git diff --name-only` on the Feature branch to identify them
-3. Test output — capture from the test run during implementation
-4. Build output — capture from the build step during implementation
-5. `demos/{FID}-{name}.sh` (or `.ts`/`.py`/etc.) — If Demo-Ready Delivery is active, read the demo script
+3. Build output — capture from the build step during implementation
+4. `demos/{FID}-{name}.sh` (or `.ts`/`.py`/etc.) — If Demo-Ready Delivery is active, read the demo script
 
 **Display format**:
 ```
@@ -203,11 +202,8 @@ After `speckit-implement` completes:
  - New files: path — purpose
  - Modified files: path — what changed]
 
-── Test Results ─────────────────────────────────
-[Test pass/fail summary: X/Y tests passed]
-
 ── Build Status ─────────────────────────────────
-[Build success/failure]
+[Final build success/failure]
 
 ── Runtime Verification ────────────────────────
 [Per-task verification summary:
@@ -238,6 +234,7 @@ You can open and edit any of these files directly, then select
 
 > Bug prevention rules applied during code writing in the implement stage.
 > Reminded at Checkpoint before speckit-implement execution, compliance checked during Review.
+> **Result classification**: ⚠️ warning (NOT blocking) — violations found during Review are reported as recommendations. They do not block verify.
 
 ### IPC Boundary Safety (Electron/Tauri)
 

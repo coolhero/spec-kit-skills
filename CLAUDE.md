@@ -18,6 +18,7 @@
 
 ## Conventions
 
+- **Git commit messages MUST be written in English.**
 - 변경 시 항상 `specs/history.md`에 이력을 기록합니다.
 - README.md와 README.ko.md는 항상 동기화 상태를 유지합니다.
 - README 수정 시 `Last updated:` 타임스탬프를 **반드시** 현재 시간으로 갱신합니다. `date '+%Y-%m-%d %H:%M KST'` 명령으로 실제 시간을 확인한 후 적용하세요. 추측하지 마세요.

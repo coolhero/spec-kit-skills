@@ -105,7 +105,7 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 
 | Feature Type | UI Verification | Condition |
 |-------------|----------------|-----------|
-| Has UI (frontend/fullstack) | Demo URL navigation + screenshot + element check | Playwright MCP available |
+| Has UI (frontend/fullstack) | Demo URL navigation + Snapshot + element check | Playwright MCP available |
 | Backend/API only | Skip (API health check only) | — |
 | CLI/Library | Skip | — |
 
@@ -122,7 +122,7 @@ When Playwright MCP is available during `verify` Phase 3:
 
 | Stage | Checks | Reference |
 |------|----------|------|
-| **plan (B-1)** | Runtime Compatibility, State Management Anti-patterns, Async Race Conditions, Store Dependency Graph | `injection/plan.md` § Bug Prevention |
+| **plan (B-1)** | Runtime Compatibility, State Management Anti-patterns, Async & Concurrency, Dependency Safety | `injection/plan.md` § Bug Prevention |
 | **analyze (B-2)** | Cross-Feature Data Flow, Nullable Field Tracking | `injection/analyze.md` § Bug Prevention |
-| **implement (B-3)** | IPC Boundary Safety, Platform CSS, Cross-Feature Integration, Persistence Write-Through | `injection/implement.md` § Bug Prevention |
+| **implement (B-3)** | IPC Boundary Safety, Platform CSS Constraints, Cross-Feature Integration, Data Persistence Safety | `injection/implement.md` § Bug Prevention |
 | **verify (B-4)** | Empty State Smoke Test, Smoke Launch Criteria | `verify-phases.md` § Phase 3b |

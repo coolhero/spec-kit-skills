@@ -50,7 +50,7 @@
 
 (... same structure per screen ...)
 
-> If runtime exploration was skipped, write "N/A" for all items above.
+> If runtime exploration was skipped, write "Skipped — [reason]" for this entire section (matching the section-level skip notation above).
 
 ---
 

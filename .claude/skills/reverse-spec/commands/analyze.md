@@ -322,7 +322,7 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 ### 1.5-0. MCP Availability Check + User Choice (HARD STOP)
 
 **Step 1 — Detect Playwright MCP**:
-Check if Playwright MCP tools are available by verifying the existence of `browser_navigate`, `browser_snapshot`, and `browser_click` tools.
+Check if Playwright MCP is available using the Detect capability: verify the existence of `browser_navigate` tool. See [MCP-GUIDE.md](../../../MCP-GUIDE.md) § MCP Capability Map.
 
 **Step 2 — Present options based on detection result**:
 

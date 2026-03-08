@@ -112,6 +112,7 @@ directly, then select "I've finished editing" to re-analyze.
 
 > Pre-detect cross-Feature potential bugs at the analyze stage.
 > Verify items below in addition to speckit-analyze results.
+> **Result classification**: ⚠️ warning (NOT blocking) — findings are included in the Review Display as recommendations. They do not block implementation.
 
 ### Cross-Feature Data Flow
 
