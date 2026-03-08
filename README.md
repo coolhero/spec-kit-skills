@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-08 09:02 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-08 14:48 KST
 
 **A collection of Claude Code custom skills that augment spec-kit-based Spec-Driven Development (SDD) workflows**
 
@@ -90,7 +90,7 @@ All journeys converge to **incremental mode** as the steady state.
 
 - [Claude Code](https://claude.ai/claude-code) CLI must be installed
 - [spec-kit](https://github.com/github/spec-kit) skill must be installed (for `/smart-sdd` usage)
-- (Optional) [Playwright MCP](https://github.com/microsoft/playwright-mcp) for runtime UI verification — see **[MCP Setup Guide](MCP-GUIDE.md)**
+- [Playwright MCP](https://github.com/microsoft/playwright-mcp) for runtime UI exploration and verification — `claude mcp add --scope user playwright -- npx @playwright/mcp@latest` — see **[MCP Setup Guide](MCP-GUIDE.md)** for Electron CDP setup and troubleshooting
 
 ### Installation
 

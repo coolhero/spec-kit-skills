@@ -19,6 +19,13 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 
 Analyzes existing source code to extract project-level global context needed for spec-kit-based SDD (Spec-Driven Development) redevelopment.
 
+**Prerequisites**: [Playwright MCP](https://github.com/microsoft/playwright-mcp) must be installed and connected before starting. Phase 1.5 (Runtime Exploration) uses Playwright to navigate and explore the target app's UI. Without it, Runtime Exploration is skipped and only code analysis is performed. For Electron apps, CDP must be pre-configured — see [MCP-GUIDE.md](../../../MCP-GUIDE.md).
+
+```bash
+# Install (one-time)
+claude mcp add --scope user playwright -- npx @playwright/mcp@latest
+```
+
 **Target Directory** (source to analyze): First positional argument from `$ARGUMENTS` (defaults to the current directory if not specified)
 **Output Directory** (where artifacts are written): Always the **current working directory** (CWD) where the skill was invoked — NOT the target directory. The target directory is read-only; no files are written there.
 

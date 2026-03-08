@@ -28,6 +28,13 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 >
 > Tests belong in `verify` Phase 1. Demos show the **real thing running**. The user must be able to see, touch, and use the Feature.
 
+**Prerequisites**: [Playwright MCP](https://github.com/microsoft/playwright-mcp) must be installed and connected. Used for runtime verification (`implement`) and UI testing (`verify`). For Electron apps, CDP must be pre-configured — see [MCP-GUIDE.md](../../../MCP-GUIDE.md).
+
+```bash
+# Install (one-time)
+claude mcp add --scope user playwright -- npx @playwright/mcp@latest
+```
+
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with four project modes:
 
 - **Greenfield**: New project setup via `/smart-sdd init`, then Feature definition via `/smart-sdd add`

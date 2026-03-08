@@ -5,7 +5,16 @@
 
 ---
 
-## [2026-03-08] Session B Testing Fixes
+## [2026-03-08] Playwright MCP Detection — Config File Read → Tool List Check
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Detection method | Tool list check instead of config file read | Config file location varies by install method (CLI `claude mcp add`, plugin marketplace, manual). `settings.json`/`settings.local.json` check was failing because Playwright was installed as a marketplace plugin (stored in `~/.claude/plugins/`), not in `settings.json`. Checking available tools is the only reliable method. |
+| 2 | CDP detection | `browser_snapshot` behavioral probe instead of config file read | Same root cause — `mcpServers.playwright.args` check in `settings.json` fails for plugin-installed Playwright. Calling `browser_snapshot` and examining content (Electron app vs blank page) is 100% reliable. |
+| 3 | CDP pre-setup flow | Skip 1.5-4 (app launch) when `electron_mode = cdp` | If `browser_snapshot` already shows Electron app content, app is running and CDP is connected. No need to launch again. |
+| 4 | MCP-GUIDE.md | Added warning against config file detection, documented behavioral detection | Prevent future agents from reverting to config file reads |
+
+### Previous Session B Fixes (superseded by above)
 
 | # | File | Fix |
 |---|------|-----|
@@ -956,12 +965,14 @@ Testing `/reverse-spec` on cherry-studio (Electron app) revealed that Phase 1.5 
 | Round 3 | Auto-run `claude mcp remove/add` commands | Automatic, but still requires restart |
 | Round 4 (**final**) | **Web Preview Mode** — renderer dev server only, no CDP needed | No restart needed |
 
-### Web Preview Mode Design
+### Web Preview Mode → CDP Pre-Setup (방향 전환)
+
+Web Preview Mode를 구현했으나, CDP가 업계 표준이고 Web Preview는 자체 제작 워크어라운드에 불과하다는 점에서 CDP 사전 설정 방식으로 전환.
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Default Electron exploration mode | Web Preview (방법 C) instead of CDP (방법 B) | CDP requires MCP reconfiguration + Claude Code restart, which loses all session progress (Phase 0, Phase 1 results). Web Preview avoids this entirely |
-| Renderer dev server detection | Check `package.json` for `dev:web`/`dev:renderer` scripts → build tool detection fallback | Most Electron apps have renderer as independent web app (Vite, Webpack) that can run standalone |
-| CDP as explicit opt-in | "Configure CDP mode (requires Claude Code restart)" option preserved | Users who need full Electron features (IPC, native menus, system tray) can still use CDP |
-| Web Preview limitations disclosed | Warning: "Electron 전용 기능은 보이지 않습니다" | Transparent about trade-offs; UI layout/flow analysis is sufficient for reverse-spec purposes |
-| MCP-GUIDE.md 방법 C | Added Web Preview Mode as third Electron connection method | Complete documentation alongside existing 방법 A (--electron-app) and 방법 B (CDP) |
+| Default Electron exploration mode | **CDP 사전 설정** (세션 시작 전 준비) | CDP가 업계 표준. Web Preview Mode는 renderer만 독립 실행하는 자체 워크어라운드 — 제한사항(IPC, 네이티브 메뉴 등 미지원)이 있고 비표준 |
+| Web Preview Mode 삭제 | analyze.md, MCP-GUIDE.md에서 모든 Web Preview 코드/문서 제거 | CDP 사전 설정으로 세션 중간 재시작 문제를 해결. Web Preview는 불필요 |
+| Playwright MCP를 전제조건으로 명시 | SKILL.md (reverse-spec, smart-sdd) + README에 Prerequisites로 추가 | 런타임 감지 대신 사전 준비 강조. 인자보다 전제조건이 적합 (Playwright 없이도 코드 분석은 가능) |
+| Snapshot 기반 탐색 (Screenshot 미사용) | `browser_snapshot` (접근성 트리)만 사용, `browser_take_screenshot` 미사용 | Snapshot이 Feature 추출에 충분한 구조적 정보 제공. Screenshot은 시각적 외관만 제공 + 컨텍스트 윈도우 소모 |
+| MCP-GUIDE.md Electron 방법 | 방법 A (`--electron-app`) + 방법 B (CDP) 두 가지로 정리 | 방법 C (Web Preview) 삭제. CDP 사전 설정 방식 + 원복 절차 문서화 |
