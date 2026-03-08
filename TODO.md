@@ -5,17 +5,35 @@
 
 ---
 
-## 핵심 문제
+## 핵심 목표: Feature 기능 재현의 정확도
 
-현재 파이프라인은 **코드를 한 번도 실행하지 않고** 스펙 추출 → 구현 → 검증을 수행한다:
+원본 앱의 Feature를 새 프로젝트에서 **동일하게 재현**하려면, 파이프라인 전반에 걸쳐 기능 손실을 방지해야 한다.
 
 ```
-reverse-spec:  코드만 읽음  → 앱을 써본 적 없이 스펙 추출
-implement:     코드만 씀   → 한 번도 실행 안 하고 다음 feature로
-verify:        빌드+테스트  → 서버 뜨는지만 확인하고 "통과"
+              입력 품질                구현 검증               출력 검증
+         (reverse-spec)           (implement)              (verify)
+         ┌──────────┐            ┌──────────┐           ┌──────────┐
+         │ 코드 분석  │            │ 코드 작성  │           │ 빌드+테스트│
+    현재  │ (Phase 2) │  ───────→  │ (실행 안함) │  ──────→  │ (서버만)  │
+         └──────────┘            └──────────┘           └──────────┘
+                ↓                       ↓                      ↓
+         ┌──────────┐            ┌──────────┐           ┌──────────┐
+         │ + 런타임   │            │ + 태스크별  │           │ + SC 기반  │
+    개선  │   탐색    │  ───────→  │   실행 확인 │  ──────→  │  UI 검증  │
+         │ (Ph 1.5) │            │ + Fix 루프 │           │ + Parity  │
+         └──────────┘            └──────────┘           └──────────┘
 ```
 
-**근본 해결**: 에이전트가 앱을 실제로 실행하고 인터랙션하는 능력 — 같은 메커니즘(Playwright MCP)을 세 시점에 적용.
+**이미 구현된 기능 재현 메커니즘** (코드 분석 기반):
+
+| 메커니즘 | 무엇을 잡는가 | 상태 |
+|----------|-------------|------|
+| SBI (Source Behavior Inventory) | 함수 레벨 기능 손실 — exported function 전수 추적 | ✅ |
+| UI Component Features (Phase 2-7) | 라이브러리 config/plugin 기반 기능 | ✅ |
+| FR ↔ SBI 매핑 (specify + verify) | B### → FR-### 추적으로 스펙 누락 방지 | ✅ |
+| Parity Check | 구현 완료 후 원본과 구조/로직/UI 대비 | ✅ |
+
+**이 TODO의 범위**: 위 메커니즘이 커버하지 못하는 영역 — **런타임 실행 기반 검증**.
 
 ---
 
@@ -40,21 +58,36 @@ verify:        빌드+테스트  → 서버 뜨는지만 확인하고 "통과"
 ### A-1. reverse-spec Runtime Exploration ✅ 구현 완료
 
 > 원본 Part 6 (UI Fidelity) 대체. rebuild 시 원본 앱을 실제로 돌려보며 파악.
+> **역할**: 입력 품질 강화 — 코드만 읽어서는 알 수 없는 시각/행동 컨텍스트를 수집.
 
 **구현 완료** (2026-03-08):
 - `reverse-spec/commands/analyze.md` — Phase 1.5 전체 삽입 (Step 0~6: MCP 확인, 환경 진단, 체크리스트, 자동 셋업, 앱 실행, 탐색, 기록)
-- `reverse-spec/templates/pre-context-template.md` — Runtime Exploration Results 섹션 추가 (Screens, Flows, Observations)
-- Phase 2, Phase 4-2에 Phase 1.5 참조 가이드 추가
+- 산출물: `specs/reverse-spec/runtime-exploration.md` — 라우트/화면 중심 구조 (각 화면 블록에 UI+흐름+행동+에러 통합)
+- Phase 2: `runtime-exploration.md` 읽어서 코드 분석 보강
+- Phase 4-2: 라우트→Feature 매핑으로 각 `pre-context.md`에 분배
+- `reverse-spec/templates/pre-context-template.md` — Runtime Exploration Results 섹션 (라우트 중심 포맷)
 
 **미완료 (downstream 연결)**:
-- `smart-sdd/reference/injection/specify.md` — UI 관찰 정보 주입
-- `smart-sdd/reference/injection/plan.md` — 컴포넌트 설계 시 UI 참조
+- `smart-sdd/reference/injection/specify.md` — UI 관찰 정보 주입 (pre-context의 Runtime Exploration → FR/SC 초안 반영)
+- `smart-sdd/reference/injection/plan.md` — 컴포넌트 설계 시 runtime-exploration.md의 UI Patterns 참조
+
+**A-1 산출물의 downstream 활용**:
+```
+runtime-exploration.md
+  ├→ Phase 2: 코드 분석 교차 검증 (구현 완료)
+  ├→ Phase 4-2: pre-context.md 분배 (구현 완료)
+  ├→ A-5: User Flows → SC UI Action 매핑 소스 (미구현)
+  ├→ A-2: 예상 행동 vs 실제 행동 비교 기준 (미구현)
+  └→ A-3: 화면별 검증 시나리오 참조 (미구현)
+```
 
 ---
 
 ### A-2. implement 중 Feature 런타임 검증
 
 > 원본 Part 8 강화. "빌드 확인"에서 "SC 실행 확인"으로 격상.
+> **역할**: 구현 검증 — 코드 작성 직후 즉시 실행하여 문제 조기 발견.
+> **데이터 소스**: `runtime-exploration.md`의 화면별 예상 행동을 비교 기준으로 활용 가능.
 
 **문제**: implement가 코드만 생성하고 한 번도 실행하지 않음. verify에서 처음 실행 → 버그 폭발.
 
@@ -94,6 +127,8 @@ Task 1 (로그인 폼) → 코드 작성
 ### A-3. verify SC 기반 UI 검증
 
 > 원본 Parts 2+4 통합. verify Phase 3를 SC-### 인터랙션 검증으로 강화.
+> **역할**: 출력 검증 — 구현 결과가 SC를 충족하는지 자동 확인.
+> **데이터 소스**: `runtime-exploration.md`의 화면별 Runtime Behavior를 검증 시나리오 참조로 활용.
 
 **문제**: verify Phase 3가 "서버 시작 + health check"에서 멈춤. "유저가 실제로 쓸 수 있는가"를 검증하지 않음.
 
@@ -156,6 +191,8 @@ Task 1 (로그인 폼) → 코드 작성
 ### A-5. SC→UI Action 매핑 (spec/plan 단계)
 
 > 원본 Part 1. A-2, A-3, A-4의 데이터 소스.
+> **역할**: 입력→검증 브릿지 — Runtime Exploration(A-1)의 관찰 결과를 검증 가능한 UI 액션으로 변환.
+> **데이터 소스**: `runtime-exploration.md`의 User Flows → SC별 UI action sequence로 매핑.
 
 **목적**: UI Feature의 SC-###에서 검증 가능한 UI 액션을 추출. verify 시점에 자동/수동 검증의 소스로 활용.
 
@@ -304,7 +341,7 @@ Coverage header 포맷 (demo script 또는 plan.md):
 | 3 | A-3: SC 자동 검증 | verify-phases.md, ui-testing-integration.md | 중간 | A-6 |
 | 4 | A-5: SC→UI Action 매핑 | injection/specify.md, injection/plan.md | 중간 | — |
 | 5 | A-2: implement 런타임 검증 | injection/implement.md, pipeline.md | 중간 | — |
-| ~~6~~ | ~~A-1: reverse-spec 탐색~~ | ~~analyze.md (reverse-spec), pre-context-template.md~~ | ~~중간~~ | ✅ 완료 |
+| ~~6~~ | ~~A-1: reverse-spec 탐색~~ | ~~analyze.md, pre-context-template.md, runtime-exploration.md~~ | ~~중간~~ | ✅ 완료 (downstream 연결 잔여) |
 | 7 | B-1~4: 버그 예방 규칙 | injection/*.md, domains/app.md | 낮~중 | — |
 | 8 | C: Spec-Code Drift | 미정 | 미정 | A, B |
 
