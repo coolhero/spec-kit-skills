@@ -86,6 +86,7 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 | **Real-time** | WebSocket/SSE needed? What events? Reconnection handling? |
 | **Frontend routing** | New pages/routes? Navigation integration? Protected routes? |
 | **Middleware** | Request middleware needed? (auth, logging, rate limiting, CORS) |
+| **UI Completeness** | Does this Feature manage data users will configure/view? If yes, should a minimal management UI (settings page, list view, config panel) be included in this Feature's scope? |
 
 ### Perspective 5 (Quality) — Additional Probes
 

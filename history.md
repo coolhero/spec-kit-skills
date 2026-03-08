@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-03-08] smart-sdd add — Vertical Slice Check in Phase 3
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Backend-only Feature detection | Add Vertical Slice Check (step 3b) to Phase 3 Scope Negotiation | F002 was defined with full backend (stores, factories, IPC) but zero UI. Playwright verify had nothing to test. Detecting this at add-time prevents incomplete vertical slices |
+| 2 | Enforcement level | Warning + option (not blocker) | Some Features are legitimately backend-only (libraries, infrastructure). The check surfaces the gap for user decision, doesn't block |
+| 3 | UI Completeness probe | Add to app.md § 5 Perspective 4 | Surfaces the "do you need UI?" question during Phase 1 elaboration, before scope is finalized |
+| 4 | Gap signal update | Strengthen Perspective 4 gap signal in feature-elaboration-framework.md | Explicitly flags the "stores/services defined but no UI touchpoints" pattern |
+
+---
+
 ## [2026-03-08] smart-sdd verify — Promote Step 2b to Step 3 with mandatory checklist
 
 | # | Decision | Choice | Rationale |

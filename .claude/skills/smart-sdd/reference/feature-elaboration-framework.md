@@ -84,7 +84,7 @@ How does this Feature connect to users and other Features?
 - **Events**: Events emitted/consumed (if event-driven architecture)
 - **External integrations**: Third-party services, APIs, or systems
 
-**Gap signals**: No APIs mentioned, no UI hints for user-facing Features, unclear dependencies.
+**Gap signals**: No APIs mentioned, no UI hints for user-facing Features, unclear dependencies. Feature defines data stores or services that users will configure/view but lists no UI touchpoints — potential horizontal layer instead of vertical slice.
 
 **Example questions**:
 - "이 기능이 제공해야 할 API 엔드포인트가 있나요?"

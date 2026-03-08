@@ -397,7 +397,31 @@ Evaluate the user's request against:
 - Number of distinct user scenarios
 - Estimated FR/SC count
 
-### 3b. Feature Proposal
+### 3b. Vertical Slice Check
+
+Before proposing the Feature structure, check whether the candidate is a **complete vertical slice** or a **horizontal layer**:
+
+1. Read the Phase 1 candidate's Capabilities (Perspective 2) and Interfaces (Perspective 4)
+2. **Detect backend-only scope**: The candidate defines stores, services, factories, CRUD operations, or data management — but Perspective 4 lists no UI touchpoints (pages, modals, panels, settings views)
+3. **Determine Feature type**:
+   - **User-facing** (app with UI, desktop app, web app): UI completeness matters
+   - **Infrastructure/Library/CLI-only**: UI not expected — skip this check silently
+
+**If user-facing Feature AND no UI touchpoints listed**:
+
+Display warning in the scope proposal (3c):
+```
+⚠️ Vertical Slice Check: This Feature defines [stores/services/CRUD operations]
+   but has no UI components in scope. Users will have no way to interact with
+   these capabilities through the application interface.
+
+   Recommendation: Include a minimal UI (settings page, management panel, or
+   config view) so this Feature is a complete vertical slice.
+```
+
+This warning is included in the Phase 3 proposal display. The user can choose to add minimal UI or proceed without it.
+
+### 3c. Feature Proposal
 
 Present options based on complexity:
 
@@ -427,7 +451,7 @@ Option B (Recommended): Split into 2 Features
     Depends on: F009
 ```
 
-### 3c. Tier Assignment (core scope only)
+### 3d. Tier Assignment (core scope only)
 
 If the project uses `core` scope (read from `sdd-state.md`):
 - Propose Tier classification for each new Feature
@@ -436,7 +460,7 @@ If the project uses `core` scope (read from `sdd-state.md`):
 
 If `full` scope: skip Tier assignment.
 
-### 3d. Feature ID Assignment
+### 3e. Feature ID Assignment
 
 Assign the next available Feature ID(s) based on existing Features in roadmap.md:
 - Read the highest existing F### ID
@@ -444,7 +468,12 @@ Assign the next available Feature ID(s) based on existing Features in roadmap.md
 
 Update `specs/add-draft.md` with the confirmed Feature structure.
 
-**HARD STOP** — Use AskUserQuestion with options: "Accept proposal", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1).
+**HARD STOP** — Use AskUserQuestion with options:
+- "Accept proposal"
+- "Add minimal UI to scope" — (shown only when Vertical Slice Check warning was triggered) agent adds basic UI touchpoints (settings page, management panel, or config view) to the candidate's Perspective 4 Interfaces
+- "Request modifications"
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 
