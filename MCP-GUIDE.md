@@ -63,11 +63,10 @@ which npx
 
 **원인**: MCP 서버는 Claude Code가 자식 프로세스로 직접 spawn하므로 `.zshrc`/`.bashrc`를 읽지 않습니다. nvm/fnm은 셸 초기화 파일에서 PATH를 동적으로 설정하기 때문에 MCP 프로세스에서는 npx를 찾을 수 없습니다.
 
-**해결**: Homebrew로 설치하면 시스템 PATH(`/opt/homebrew/bin`)에 자동 등록되어 추가 설정 없이 동작합니다:
+**해결**: 시스템 PATH에 등록되는 방식으로 Node.js를 설치하세요:
 
-```bash
-brew install node
-```
+- [nodejs.org 공식 설치 패키지](https://nodejs.org/) → `/usr/local/bin`
+- Homebrew: `brew install node` → `/opt/homebrew/bin`
 
 > **Tip**: `--scope user`로 등록하면 모든 프로젝트에서 사용 가능합니다. 특정 프로젝트에서만 사용하려면 `--scope project`를 사용하세요.
 
