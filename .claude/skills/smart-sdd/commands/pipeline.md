@@ -292,7 +292,7 @@ When `--start <step>` is specified, the pipeline skips all steps before the desi
    Classify each Feature:
    - **Eligible**: All prerequisite steps are ✅ → Feature will be processed from `--start` onward
    - **Blocked**: One or more prerequisite steps are not ✅ → Feature cannot be processed
-   - **Already past start**: If the Feature has already completed the `--start` step (✅), it picks up from its next uncompleted step (normal resume behavior). If ALL steps including merge are ✅ → skip (completed)
+   - **Already past start**: If the Feature has already completed the `--start` step (✅), **reset that step to 🔀 and re-execute it**. This is the whole point of `--start` — the user explicitly chose a step to re-run. If ALL steps including merge are ✅ → the `--start` step is still re-executed (mark it 🔀, then process from there)
 
 4. **Display summary (HARD STOP)**:
 
@@ -301,14 +301,14 @@ When `--start <step>` is specified, the pipeline skips all steps before the desi
 
    ── Eligible Features ─────────────────────────
      ✅ [FID]-[name]: [prerequisite steps all ✅] → will run: [step] → ... → merge
-     ✅ [FID]-[name]: [step] already ✅ → will resume from: [next-uncompleted-step]
-     ⏭️ [FID]-[name]: completed → skip
+     🔀 [FID]-[name]: [step] already ✅ → will re-run from: [step]
+     ⏭️ [FID]-[name]: completed → will re-run from: [step]
 
    ── Blocked Features (prerequisites not met) ──
      ❌ [FID]-[name]: missing: [step1] ([status]), [step2] ([status])
 
    ──────────────────────────────────────────────
-   [N] Features will be processed, [M] blocked, [K] skipped (completed/deferred).
+   [N] Features will be processed ([K] re-run), [M] blocked, [D] skipped (deferred).
    ```
 
    Use AskUserQuestion (HARD STOP):
@@ -317,19 +317,19 @@ When `--start <step>` is specified, the pipeline skips all steps before the desi
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-   If no eligible Features exist (all are blocked or completed), display:
+   If no eligible Features exist (all are blocked), display:
    ```
    ❌ No eligible Features for --start [step].
-   [Blocked reasons or "All Features already completed."]
+   [Blocked reasons]
    ```
    And stop the pipeline.
 
 5. **Pipeline flow with --start**:
    - **Phase 0 (Constitution)**: Always skipped (constitution is a prerequisite, verified in step 2 above)
-   - **Phase 1~N (Features)**: For each eligible Feature in Release Group order, skip steps before `--start` and execute from `--start` (or from the next uncompleted step if `--start` step is already ✅) through merge
+   - **Phase 1~N (Features)**: For each eligible Feature in Release Group order, skip steps before `--start` and **force re-execute from `--start`** through merge. If the `--start` step was already ✅, mark it 🔀 in sdd-state.md before executing.
    - All other pipeline rules apply: HARD STOPs, Common Protocol, branch validation, env var check, etc.
 
-> **Note**: `--start` does NOT reset or re-run already-completed steps. It only changes where the pipeline begins for each Feature. To force re-execution of completed steps, use `/smart-sdd reset` first, then re-run the pipeline.
+> **Note**: `--start` **forces re-execution** of the named step, even if it was already ✅. Steps AFTER the named step that were already ✅ are also re-executed (marked 🔀). Steps BEFORE the named step are not affected.
 
 ### Phase 0: Constitution Finalization
 

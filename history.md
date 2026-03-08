@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-03-09] smart-sdd — Fix --start to force re-execute named step
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | --start re-execution | `--start <step>` now forces re-execution of the named step even if already ✅ | User ran `--start verify` for F003 but pipeline skipped to merge because verify was ✅. The whole point of `--start` is to re-run from a specific step — skipping it defeated the purpose |
+| 2 | Step marking | Already-✅ steps at `--start` are marked 🔀 before re-executing | Consistent with existing restructured-step semantics. Steps AFTER the named step are also re-executed |
+| 3 | Feature ID ordering confirmation | Confirmed rule already exists in reverse-spec (analyze.md lines 919-930): "Within each Release Group, Tier 1 first, then Tier 2, then Tier 3" | Angdu Studio's F003→F005 gap was an execution error (agent didn't follow the rule), not a skill design gap. No skill change needed |
+
+---
+
 ## [2026-03-09] smart-sdd — Demote restructure command to reference guide
 
 | # | Decision | Choice | Rationale |
