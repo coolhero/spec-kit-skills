@@ -35,6 +35,37 @@ When verify discovers a bug, classify its severity before fixing:
 
 ---
 
+### Pre-flight: MCP Availability Check
+
+**Run this BEFORE Phase 1.** Determines whether UI verification is possible for Phase 3 Step 3.
+
+**Detection method** — check if Playwright MCP tools exist in the current session:
+1. Attempt to call `browser_snapshot` (the most reliable probe)
+2. Alternatively, check if any tool matching `browser_navigate` or `mcp__playwright__browser_snapshot` exists in your available tools
+
+**Result classification**:
+
+| Probe result | MCP Status | Set variable |
+|---|---|---|
+| Tool exists and returns content (page snapshot) | ✅ Active + connected | `MCP_STATUS = active` |
+| Tool exists but fails with connection error (ECONNREFUSED) | ✅ Configured but app not running | `MCP_STATUS = configured` |
+| Tool does not exist / "unknown tool" error | ❌ Not installed | `MCP_STATUS = unavailable` |
+
+**If `MCP_STATUS = unavailable`**: Display warning and **HARD STOP** immediately:
+```
+⚠️ Playwright MCP is not installed. UI verification (Phase 3 Step 3) will be skipped.
+Installation: claude mcp add playwright -- npx @playwright/mcp@latest
+See MCP-GUIDE.md for details.
+```
+**Use AskUserQuestion**:
+- "Install and retry" — user installs MCP, then restart verify
+- "Continue without UI verification" — proceed, Phase 3 Step 3 will be skipped
+**If response is empty → re-ask** (per MANDATORY RULE 1)
+
+**Record the user's choice.** Phase 3 Step 3 will use this result — do NOT re-detect or re-ask.
+
+---
+
 ### Phase 1: Execution Verification (BLOCKING)
 
 Run each check and record results. **If any check fails, verification is BLOCKED — do not proceed to Phase 2/3/4.**
@@ -131,18 +162,11 @@ Phase 3 Checklist (must complete ALL in order):
 
 **Step 3 — UI Verification via Playwright MCP** (MANDATORY — do NOT skip):
 > **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down. Do NOT ask the user to start or restart the app manually. The agent starts the app itself (with CDP flags for Electron), runs all SC verifications, then shuts down the app when done.
-> See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
 
-- **MCP Detection**: Check availability of Playwright MCP (or corresponding tools from MCP Capability Map)
-- **If MCP not available**: Display warning and HARD STOP:
-  ```
-  ⚠️ Playwright MCP is not installed. UI verification cannot be performed.
-  Installation guide: MCP-GUIDE.md
-  ```
-  **Use AskUserQuestion** with options:
-  - "Retry after installing Playwright MCP"
-  - "Skip UI verification"
-  **If response is empty → re-ask** (per MANDATORY RULE 1)
+- **MCP Status Check**: Use the `MCP_STATUS` from the Pre-flight check (run before Phase 1).
+  - If `MCP_STATUS = unavailable` AND user chose "Continue without UI verification" → skip to Step 4. Display: `⏭️ UI verification skipped (Playwright MCP not available — acknowledged in Pre-flight)`
+  - If `MCP_STATUS = active` or `MCP_STATUS = configured` → proceed with Electron CDP check below
+  - **If Pre-flight was somehow skipped**: Call `browser_snapshot` NOW. If the tool does not exist, display the HARD STOP from Pre-flight and wait for user response. **Do NOT silently skip.**
 
 - **Electron CDP Configuration Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
   Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
