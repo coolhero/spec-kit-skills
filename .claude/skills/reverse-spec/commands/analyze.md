@@ -1248,15 +1248,25 @@ After displaying the Completion Report, create a git checkpoint so the user can 
    git tag -f reverse-spec-complete
    ```
 
-4. **Playwright MCP CDP cleanup** (if CDP was used in Phase 1.5):
-   If Playwright MCP was configured with `--cdp-endpoint` for Electron Runtime Exploration, remind the user to restore standard mode before starting `/smart-sdd`:
+4. **Playwright MCP CDP notice** (if CDP was used in Phase 1.5):
+   If Playwright MCP was configured with `--cdp-endpoint` for Electron Runtime Exploration, display the appropriate notice based on stack strategy:
+
+   **Same stack (Electron rebuild)** — CDP mode is reusable for `/smart-sdd` verify:
+   ```
+   ℹ️ Playwright MCP is in CDP mode (--cdp-endpoint http://localhost:9222).
+      This is fine for /smart-sdd — when verify needs to test the new Electron app,
+      start it with --remote-debugging-port=9222 and Playwright will connect automatically.
+   ```
+
+   **New stack (non-Electron)** — CDP mode must be restored to standard:
    ```
    ⚠️ Playwright MCP is still in CDP mode (--cdp-endpoint http://localhost:9222).
-      Before starting /smart-sdd, restore standard browser mode:
+      Your new stack is not Electron, so restore standard browser mode before /smart-sdd:
         claude mcp remove playwright -s user
         claude mcp add --scope user playwright -- npx @playwright/mcp@latest
       Then restart Claude Code.
    ```
+
    Skip this notice if Phase 1.5 was skipped or CDP was not configured.
 
 5. Display:
