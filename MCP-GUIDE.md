@@ -53,45 +53,21 @@ claude mcp get playwright
 
 #### `Failed to connect` — npx/node를 찾지 못하는 경우
 
-MCP 서버는 Claude Code가 별도 자식 프로세스로 직접 실행하므로 `.zshrc`/`.bashrc`의 PATH 설정이 적용되지 않을 수 있습니다. 특히 Node.js가 `/usr/local/bin`에 설치되어 있지만 MCP 프로세스의 PATH에 포함되지 않는 경우 발생합니다.
-
-**진단:**
+`claude mcp get playwright`에서 `Status: ✗ Failed to connect`가 표시되면 Node.js/npx가 시스템 PATH(`/usr/local/bin` 또는 `/opt/homebrew/bin`)에 설치되어 있는지 확인하세요.
 
 ```bash
-# Node.js 위치 확인
-which node    # 또는: ls /usr/local/bin/node
-node --version
+which npx
+# ✓ /opt/homebrew/bin/npx 또는 /usr/local/bin/npx → 정상
+# ✗ ~/.nvm/... 또는 ~/.fnm/... → 아래 참고
 ```
 
-**해결:** PATH 환경변수를 포함해서 MCP를 등록합니다.
+**Homebrew로 설치하면** 시스템 PATH에 자동 등록되어 추가 설정 없이 동작합니다:
 
 ```bash
-# 기존 제거
-claude mcp remove playwright -s local   # 또는 -s user, -s project (현재 스코프에 맞게)
-
-# PATH 포함해서 재등록
-claude mcp add --scope user playwright \
-  -e PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin \
-  -- npx @playwright/mcp@latest
+brew install node
 ```
 
 > **Tip**: `--scope user`로 등록하면 모든 프로젝트에서 사용 가능합니다. 특정 프로젝트에서만 사용하려면 `--scope project`를 사용하세요.
-
-#### nvm / fnm 사용 시
-
-Node.js 버전 매니저를 사용하는 경우, 해당 매니저가 설정하는 경로를 포함해야 합니다:
-
-```bash
-# nvm 사용 시 (경로 예시 — 실제 버전에 맞게 수정)
-claude mcp add --scope user playwright \
-  -e PATH=$HOME/.nvm/versions/node/v20.x.x/bin:/usr/bin:/bin \
-  -- npx @playwright/mcp@latest
-
-# fnm 사용 시
-claude mcp add --scope user playwright \
-  -e PATH=$HOME/.fnm/node-versions/v20.x.x/installation/bin:/usr/bin:/bin \
-  -- npx @playwright/mcp@latest
-```
 
 ---
 
@@ -247,9 +223,7 @@ claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpo
 
 ```bash
 claude mcp remove playwright
-claude mcp add playwright \
-  -e PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin \
-  -- npx @playwright/mcp@latest
+claude mcp add --scope user playwright -- npx @playwright/mcp@latest
 # → Claude Code 재시작
 ```
 
