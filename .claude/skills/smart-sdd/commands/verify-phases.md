@@ -123,8 +123,8 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - **MCP Detection**: Check availability of Playwright MCP (or corresponding tools from MCP Capability Map)
 - **If MCP not available**: Display warning and HARD STOP:
   ```
-  ⚠️ Playwright MCP가 설치되어 있지 않습니다. UI 검증을 수행할 수 없습니다.
-  MCP 설치: MCP-GUIDE.md 참조
+  ⚠️ Playwright MCP is not installed. UI verification cannot be performed.
+  Installation guide: MCP-GUIDE.md
   ```
   **Use AskUserQuestion** with options:
   - "Playwright MCP 설치 후 재시도"
@@ -148,13 +148,13 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      This is the ONLY case that requires user action — the user must reconfigure Playwright MCP itself.
      Display notice:
      ```
-     ⚠️ Electron 앱은 CDP 모드가 필요합니다.
-        현재 Playwright MCP가 표준 브라우저 모드로 설정되어 있습니다.
+     ⚠️ Electron apps require CDP mode for Playwright to connect.
+        Playwright MCP is currently in standard browser mode.
 
-        CDP 설정 방법:
+        CDP setup:
         1. claude mcp remove playwright -s user
         2. claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-        3. Claude Code 재시작
+        3. Restart Claude Code
      ```
      **Use AskUserQuestion** — this is NOT optional, NOT skippable:
      - "CDP 설정 후 재시도" — user configures CDP, then re-run verify
@@ -163,7 +163,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
 
   3. **Case B — CDP configured, app not running**: No user action needed. The agent starts the app itself.
-     Display: `ℹ️ CDP 모드 확인됨. 앱을 자동으로 시작합니다.`
+     Display: `ℹ️ CDP mode confirmed. Starting the app automatically.`
      Proceed to the App Launch step below.
 
   4. **If CDP active and app already connected**: Skip app launch, proceed directly to SC-level UI verification.
@@ -181,7 +181,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      - If connected (app content visible) → proceed to SC verification
      - If still failing after app started → display error and HARD STOP:
        ```
-       ⚠️ 앱이 시작되었지만 CDP 연결에 실패했습니다.
+       ⚠️ App started but CDP connection failed.
        ```
        **Use AskUserQuestion**:
        - "재시도" — retry the connection probe

@@ -14,6 +14,14 @@ spec-kit-skills is designed to work with browser automation tools like **Playwri
 
 Playwright MCP is a Model Context Protocol server that gives Claude Code the ability to control a browser — navigate pages, click elements, fill forms, take screenshots, and run visual assertions. When installed, it provides tools like `browser_navigate`, `browser_click`, `browser_screenshot`, etc.
 
+### App Session Management
+
+The agent manages the entire app lifecycle during UI verification — it starts the app, runs all SC verifications in a single session, then shuts down the app when done. The user is never asked to manually start, restart, or stop the app.
+
+For **Electron apps with CDP**: The agent appends `--remote-debugging-port=9222` to the dev start command and launches the app in background via Bash. After all SC verifications complete, the agent terminates the process.
+
+See `commands/verify-phases.md` Step 2b for the full procedure.
+
 ### Integration Architecture
 
 ```
