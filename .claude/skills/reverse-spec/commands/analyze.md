@@ -456,9 +456,19 @@ After launching, verify CDP is active: `lsof -i :9222`. If no result → the CDP
 
 **Step 1c — Electron apps: verify Playwright MCP has `--cdp-endpoint`** (skip for non-Electron):
 
-Playwright MCP must be configured with `--cdp-endpoint http://localhost:9222` to connect to the Electron app. Attempt a `browser_navigate` to any URL. If Playwright opens its own browser window instead of connecting to the running Electron app, it means `--cdp-endpoint` is not configured.
+Playwright MCP must be configured with `--cdp-endpoint http://localhost:9222` to connect to the Electron app.
 
-In that case, inform the user:
+**Verification method — read MCP config files directly** (do NOT use `browser_navigate` for this check):
+1. Read these files in order (stop at first match containing `playwright`):
+   - `.claude/settings.local.json` (project local)
+   - `.claude/settings.json` (project)
+   - `~/.claude/settings.local.json` (user local)
+   - `~/.claude/settings.json` (user)
+2. Find `mcpServers.playwright.args` array
+3. Check if `--cdp-endpoint` exists in the args
+
+**If `--cdp-endpoint` is present**: Proceed to Step 2.
+**If `--cdp-endpoint` is NOT present**: Inform the user:
 ```
 ⚠️ Playwright MCP CDP 연결 필요
 

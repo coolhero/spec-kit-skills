@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-03-08] Session B Testing Fixes
+
+| # | File | Fix |
+|---|------|-----|
+| 1 | `reverse-spec/analyze.md` Step 1c | CDP verification: replaced `browser_navigate` test with MCP config file read — deterministic, works before app launch, avoids agent navigating to CDP URL itself |
+
+---
+
 ## [2026-03-08] Pipeline Gap Analysis & Runtime Verification
 
 ### Pipeline Gap Resolution (G1–G7)
