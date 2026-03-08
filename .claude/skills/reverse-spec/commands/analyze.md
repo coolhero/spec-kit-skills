@@ -916,18 +916,26 @@ Group Features into Release Groups based on dependency layers:
 
 > **This step runs AFTER Phase 3-3 (Tier Classification).** If Scope = Full, run immediately after 3-2 (no Tier classification needed).
 
-**Feature ID Assignment Rules — IDs MUST follow the actual implementation (Release Group) order**:
+**Feature ID Assignment Rules — IDs MUST follow the pipeline execution order (Tier-first)**:
 
 **If Scope = Core**:
-1. Start with Release Group 1, then Release Group 2, etc.
-2. Within each Release Group, Tier 1 Features come first, then Tier 2, then Tier 3
-3. Within the same Tier in the same Release Group, maintain topological order
-4. Assign F001, F002, ... sequentially across all Release Groups
+1. **Tier-first global ordering**: Assign ALL Tier 1 Features first, then ALL Tier 2, then ALL Tier 3
+2. Within each Tier, follow Release Group order (RG-1 first, then RG-2, etc.)
+3. Within the same Tier and Release Group, maintain topological order
+4. Assign F001, F002, ... sequentially across all Tiers
 
 This ensures:
 - Feature IDs directly correspond to the pipeline execution order
-- `F001 → F002 → F003 → ...` is the order Features will actually be built
-- No ID gaps or out-of-order processing in the pipeline
+- When only T1 is active: `F001 → F002 → F003 → F004` — no gaps, no skips
+- When T2 is activated later, its Features continue sequentially from where T1 ends
+- No ID gaps or out-of-order processing at any Tier activation level
+
+**Example** (12 Features, 4 Release Groups):
+```
+T1 Features (in RG order): F001, F002, F003, F004   ← pipeline processes these first
+T2 Features (in RG order): F005, F006, F007          ← activated when T2 starts
+T3 Features (in RG order): F008, F009, F010, F011, F012 ← activated when T3 starts
+```
 
 **If Scope = Full**:
 1. Start with Release Group 1, then Release Group 2, etc.
