@@ -433,45 +433,52 @@ Execute auto-resolvable steps:
 
 ### 1.5-4. App Launch + Readiness Check
 
-**Step 1 — Identify and run the start command**:
-Use the dev server command identified in 1.5-1. Run it as a background process, capturing stdout/stderr.
+**Step 1 — Identify the start command**:
+Use the dev server command identified in 1.5-1.
 
 > **Multiple start commands**: If multiple dev-related scripts exist (e.g., `dev`, `dev:web`, `electron:dev`), ask the user which one to run via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-> **Electron / Desktop apps (CDP setup)**:
-> If the start command runs an Electron app, enable Chrome DevTools Protocol (CDP) to allow Playwright MCP to connect to the Electron window. The flag syntax depends on the build tool:
->
-> | Build Tool | CDP-Enabled Start Command |
-> |-----------|--------------------------|
-> | **electron-vite** | `npx electron-vite dev -- --remote-debugging-port=9222` |
-> | **electron-forge** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run start` |
-> | **electron-builder** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run dev` |
-> | **Direct electron** | `npx electron . --remote-debugging-port=9222` |
-> | **Other / Unknown** | Append ` -- --remote-debugging-port=9222` after the dev command |
->
-> ⚠️ **electron-vite requires the `--` separator** before `--remote-debugging-port`. It does NOT pick up the `ELECTRON_ARGS` environment variable. This is the most common cause of CDP connection failure with electron-vite projects.
->
-> After the Electron app starts with CDP enabled, Playwright MCP must be configured with `--cdp-endpoint http://localhost:9222` to connect.
-> If Playwright MCP was **not** started with this flag, inform the user:
-> ```
-> ⚠️ Playwright MCP CDP 연결 필요
->
-> Electron 앱이 CDP 포트 9222에서 실행 중이지만,
-> Playwright MCP가 --cdp-endpoint 없이 시작되어 연결할 수 없습니다.
->
-> 해결 방법:
->   claude mcp remove playwright
->   claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
->   → Claude Code 재시작
->
-> ```
-> Ask via AskUserQuestion:
-> - **"Playwright MCP 재설정 후 재시도"** (Recommended) — user reconfigures and restarts
-> - **"Skip Runtime Exploration"** — Phase 2로 바로 이동
->
-> **If response is empty → re-ask** (per MANDATORY RULE 1).
+**Step 1b — Electron apps: modify command for CDP** (skip for non-Electron):
 
-**Step 2 — Wait for readiness**:
+If the start command runs an Electron app, **replace it** with the CDP-enabled version. Do NOT run the original command — Playwright MCP cannot connect to Electron without CDP.
+
+| Build Tool | CDP-Enabled Start Command |
+|-----------|--------------------------|
+| **electron-vite** | `npx electron-vite dev -- --remote-debugging-port=9222` |
+| **electron-forge** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run start` |
+| **electron-builder** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run dev` |
+| **Direct electron** | `npx electron . --remote-debugging-port=9222` |
+| **Other / Unknown** | Append ` -- --remote-debugging-port=9222` after the dev command |
+
+⚠️ **electron-vite requires the `--` separator** before `--remote-debugging-port`. It does NOT pick up the `ELECTRON_ARGS` environment variable. This is the most common cause of CDP connection failure with electron-vite projects.
+
+After launching, verify CDP is active: `lsof -i :9222`. If no result → the CDP flag was not picked up. Check the build tool and retry with the correct syntax.
+
+**Step 1c — Electron apps: verify Playwright MCP has `--cdp-endpoint`** (skip for non-Electron):
+
+Playwright MCP must be configured with `--cdp-endpoint http://localhost:9222` to connect to the Electron app. Attempt a `browser_navigate` to any URL. If Playwright opens its own browser window instead of connecting to the running Electron app, it means `--cdp-endpoint` is not configured.
+
+In that case, inform the user:
+```
+⚠️ Playwright MCP CDP 연결 필요
+
+Electron 앱이 CDP 포트 9222에서 실행 중이지만,
+Playwright MCP가 --cdp-endpoint 없이 시작되어 연결할 수 없습니다.
+
+해결 방법:
+  claude mcp remove playwright
+  claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+  → Claude Code 재시작 필요 (MCP 설정은 재시작 후 반영됩니다)
+```
+
+Ask via AskUserQuestion:
+- **"Playwright MCP 재설정 후 재시도"** (Recommended) — user reconfigures, restarts Claude Code, then re-runs `/reverse-spec`
+- **"Skip Runtime Exploration"** — Phase 2로 바로 이동
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**Step 2 — Run and wait for readiness**:
+Run the start command (or CDP-modified command for Electron) as a background process, capturing stdout/stderr.
 - Monitor stdout for readiness signals: `ready`, `listening on`, `started`, `compiled`, `Local:`, `http://localhost`
 - Alternatively, poll the expected port with `lsof -i :[PORT]`
 - Timeout: 60 seconds
