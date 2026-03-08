@@ -1248,7 +1248,18 @@ After displaying the Completion Report, create a git checkpoint so the user can 
    git tag -f reverse-spec-complete
    ```
 
-4. Display:
+4. **Playwright MCP CDP cleanup** (if CDP was used in Phase 1.5):
+   If Playwright MCP was configured with `--cdp-endpoint` for Electron Runtime Exploration, remind the user to restore standard mode before starting `/smart-sdd`:
+   ```
+   ⚠️ Playwright MCP is still in CDP mode (--cdp-endpoint http://localhost:9222).
+      Before starting /smart-sdd, restore standard browser mode:
+        claude mcp remove playwright -s user
+        claude mcp add --scope user playwright -- npx @playwright/mcp@latest
+      Then restart Claude Code.
+   ```
+   Skip this notice if Phase 1.5 was skipped or CDP was not configured.
+
+5. Display:
    ```
    📌 Checkpoint: Tagged as 'reverse-spec-complete'
       Use /smart-sdd reset to return to this point if you need to restart the pipeline.

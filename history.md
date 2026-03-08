@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-03-08] reverse-spec Completion — Add CDP cleanup notice
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | CDP mode cleanup | Added Playwright MCP CDP restore notice at Phase 4-5 Completion Checkpoint | After reverse-spec completes with Electron CDP exploration, Playwright MCP remains in CDP mode (`--cdp-endpoint`). If user starts `/smart-sdd pipeline` without restoring standard mode, Playwright will fail to connect (no Electron app on port 9222). The notice reminds users to restore standard browser mode before proceeding. |
+
+---
+
 ## [2026-03-08] README — Remove `<details>` collapsible tags for Confluence compatibility
 
 | # | Decision | Choice | Rationale |
