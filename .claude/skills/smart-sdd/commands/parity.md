@@ -203,7 +203,7 @@ Gaps found: [N total]
 Generated: specs/reverse-spec/parity-report.md
 Updated: specs/reverse-spec/sdd-state.md
 
-Next steps:
+💡 Type "continue" to resume the pipeline, or run:
   /smart-sdd pipeline       — Resume pipeline for new/modified Features
   /smart-sdd status         — View updated progress
 ```

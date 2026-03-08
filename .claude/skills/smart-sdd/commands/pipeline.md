@@ -96,7 +96,16 @@ If the spec-kit command fails (error, crash, partial output):
 4. If "Abort step": Record failure in sdd-state.md, do NOT proceed to Review
 5. If "Troubleshoot": Help the user diagnose and fix the issue, then offer to retry
 
-**⚠️ CRITICAL — SUPPRESS spec-kit output**: spec-kit commands print "Next phase:", "Suggested commit:", and other messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
+**⚠️ CRITICAL — SUPPRESS spec-kit output**: spec-kit commands print their own next-step messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
+
+Suppress these patterns (non-exhaustive):
+- "Ready for /speckit.clarify or /speckit.plan"
+- "Ready for /speckit.plan"
+- "Next phase: ..."
+- "Suggested commit: ..."
+- Any "Ready for /speckit.*" guidance
+
+**Never show spec-kit's own navigation messages.** smart-sdd provides its own continuation prompts.
 
 **⚠️⚠️⚠️ EXECUTE + REVIEW CONTINUITY RULE ⚠️⚠️⚠️**
 
@@ -112,6 +121,15 @@ Instead, in the SAME response where the spec-kit command completed, IMMEDIATELY:
 3. Call AskUserQuestion for approval (Step 3c below)
 
 **If you find yourself about to generate a response after Execute without showing the Review — STOP. You are violating this rule. Continue to Step 3b.**
+
+> **Fallback — if Review cannot proceed in the same response** (e.g., context limit, tool error):
+> Instead of showing raw spec-kit output and stopping silently, display a friendly continuation prompt:
+> ```
+> ✅ [command] executed for [FID] - [Feature Name].
+>
+> 💡 Type "continue" to review the results.
+> ```
+> This ensures the user always knows what to do next, even if the flow breaks unexpectedly.
 
 #### Step 3b. Display the Review Content
 
@@ -570,10 +588,9 @@ This is the ONLY case where "Next steps" with commands should be displayed:
 ```
 ⏸️ Pipeline paused at [FID]-[name] → [current-step]
 
-To resume:
-  /smart-sdd pipeline       — Resume from where you left off
-  /smart-sdd [step] [FID]   — Resume a specific step (e.g., /smart-sdd implement F003)
-  /smart-sdd status         — Check current state
+💡 Type "continue" to resume from where you left off.
+   Or run: /smart-sdd pipeline
+   Or run: /smart-sdd [step] [FID]  (e.g., /smart-sdd implement F003)
 ```
 
 > **Pipeline continuity rule**: The pipeline is a CONTINUOUS flow. The only reasons to stop are: (1) HARD STOP checkpoints requiring user approval, (2) BLOCK conditions (verify/merge gates), (3) All Features completed, or (4) Unrecoverable error. Between Features, between Phases — the pipeline keeps running. Never display "Next steps" with commands unless the pipeline is actually stopping.
@@ -612,6 +629,41 @@ Do NOT proceed with the step.
 > Full naming convention and conversion rules: see `reference/state-schema.md` § Feature Mapping.
 
 **Quick reference**: `F001-auth` (smart-sdd) ↔ `001-auth` (spec-kit/git branch). Strip/prepend `F` prefix. The `short-name` MUST match between both systems.
+
+### Step Mode Completion
+
+After the full common protocol completes (Update done), display a friendly summary with clear next-step guidance:
+
+```
+✅ [command] complete — [FID] [Feature Name]
+
+[1-2 line summary: what was produced or decided]
+
+📍 specify → plan → tasks → analyze → implement → verify → merge
+            ↑ done
+
+💡 Type "continue" to proceed to [next-step].
+   Or run: /smart-sdd [next-step] [FID]
+```
+
+**Next-step mapping** (use the appropriate prompt):
+
+| Completed | Next | Prompt |
+|-----------|------|--------|
+| constitution | specify | `💡 Type "continue" to start specifying the first Feature.` |
+| specify | plan | `💡 Type "continue" to proceed to planning. (Or /smart-sdd clarify [FID] to refine the spec first.)` |
+| clarify | specify | `💡 Type "continue" to re-run specify with the clarifications applied.` |
+| plan | tasks | `💡 Type "continue" to generate the task breakdown.` |
+| tasks | analyze | `💡 Type "continue" to run cross-artifact analysis.` |
+| analyze | implement | `💡 Type "continue" to start implementation.` |
+| implement | verify | `💡 Type "continue" to run verification.` |
+| verify | merge | `💡 Type "continue" to merge this Feature.` |
+| merge | *(next Feature)* | `💡 Type "continue" to start the next Feature, or /smart-sdd status to check progress.` |
+
+**Rules**:
+- The `📍` progress bar shows the pipeline position with `↑ done` under the completed step
+- The `💡` prompt always offers "continue" as the primary action — one word, easy to type
+- Never show spec-kit's own "Ready for /speckit.*" messages — use this template instead
 
 ---
 

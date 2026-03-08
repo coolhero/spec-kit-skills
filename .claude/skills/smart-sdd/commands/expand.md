@@ -64,8 +64,9 @@ Auto-include the dependency Feature.
     F004-cart (T2) → pending
     F005-payment (T2) → pending
 
-  Next: /smart-sdd pipeline    — Resume pipeline (picks up newly activated Features)
-        /smart-sdd specify F004 — Start specifying a specific Feature
+💡 Type "continue" to resume the pipeline, or run:
+  /smart-sdd pipeline     — Resume pipeline (picks up newly activated Features)
+  /smart-sdd specify F004 — Start specifying a specific Feature
 ```
 
 **Decision History Recording — Scope Expansion**:

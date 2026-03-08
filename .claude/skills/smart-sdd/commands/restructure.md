@@ -181,7 +181,7 @@ After all changes are applied, verify consistency and display the completion rep
 **Updated artifacts**: [list each file with change summary]
 **Pipeline impact**: [Features needing re-execution from which step (🔀)]
 **Manual cleanup**: [rm commands for old spec-kit dirs/branches]
-**Next steps**: /smart-sdd specify [FID] or /smart-sdd pipeline
+💡 Type "continue" to resume, or run: /smart-sdd specify [FID] or /smart-sdd pipeline
 ```
 
 **Decision History Recording — Restructure**:

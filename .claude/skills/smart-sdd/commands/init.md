@@ -155,7 +155,9 @@ Then ask the user via AskUserQuestion whether to define Features now:
 
 **If "Later"**:
 ```
-Next steps:
+✅ Project initialized!
+
+💡 When you're ready, type "continue" or run one of:
   /smart-sdd add                — Define your first Feature(s)
   /smart-sdd constitution       — Finalize the constitution first (optional)
 ```
