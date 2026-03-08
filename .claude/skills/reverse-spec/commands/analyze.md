@@ -453,6 +453,42 @@ If the app fails to start within the timeout:
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 
+### 1.5-4b. App Initial Setup (HARD STOP)
+
+Many apps require **in-app configuration** before core features become usable — API keys entered through a settings UI, provider selection, onboarding wizards, initial account setup, etc. These are distinct from environment variables (`.env`) and cannot be automated by the agent (they often involve secrets entered through the app's own UI).
+
+**Step 1 — Detect initial setup needs**:
+Analyze the source code to identify likely first-run configuration requirements:
+- Settings/preferences pages that configure external services (API providers, OAuth, SMTP, etc.)
+- Onboarding flows or setup wizards (first-run detection in code)
+- In-app credential storage (e.g., `localStorage`, IndexedDB, Electron Store, SQLite)
+- Provider/model selection UI (common in AI apps)
+
+**Step 2 — Present setup guidance**:
+
+```
+🔧 앱 초기 설정
+
+앱이 실행되었지만, 핵심 기능을 탐색하려면 앱 내 설정이 필요할 수 있습니다.
+
+코드 분석에서 감지된 설정 항목:
+  • [항목 1: 예) Settings → AI Provider에서 API Key 입력]
+  • [항목 2: 예) Settings → Model 선택]
+  • [항목 3: 예) 최초 실행 시 온보딩 완료]
+
+앱에서 직접 설정을 완료한 후 "준비 완료"를 선택해주세요.
+설정 없이도 UI 구조 탐색은 가능합니다.
+```
+
+**HARD STOP** — Use AskUserQuestion:
+- "설정 완료 — 전체 탐색 진행" (Recommended)
+- "설정 없이 UI 구조만 탐색"
+- "Skip Runtime Exploration"
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+> **Note**: If no initial setup needs are detected from the code, skip this step and proceed directly to 1.5-5.
+
 ### 1.5-5. Runtime Exploration
 
 #### Path A — Automated Exploration (Playwright MCP)
@@ -537,6 +573,10 @@ Write the file with the following structure:
 > Target: [target directory path]
 
 ## App-Wide Observations
+
+### Initial Setup Requirements
+- **In-app configuration**: [Settings needed before full use — e.g., API provider setup, model selection, onboarding]
+- **Setup completed**: [yes / partial / no — and what was configured]
 
 ### Navigation Structure
 - **Top-level nav**: [item1, item2, item3, ...]

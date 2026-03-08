@@ -809,3 +809,4 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 | 에이전트 메모리 → 파일 영속화 | 모든 Phase 간 중간 산출물은 파일로 저장 (CLAUDE.md Design Principles에 원칙 추가) | 메모리는 컨텍스트 윈도우 한계/세션 단절/Phase 간 정보 손실에 취약. 파일은 재읽기/사용자 확인·수정/다른 세션 활용 가능 |
 | runtime-exploration.md 구조 | 데이터 타입별(안A) → 라우트/화면 중심(안B) | 각 화면의 UI+흐름+행동+에러가 한 블록에 모여 기능 재현 관점에서 완결. Phase 4-2에서 라우트→Feature 매핑으로 직접 분배 가능 |
 | 파일 위치 | `specs/reverse-spec/runtime-exploration.md` | reverse-spec 산출물 경로 컨벤션 준수 |
+| Step 1.5-4b 추가 | App Initial Setup — 앱 내 UI 설정 HARD STOP | .env는 인프라 레벨, 앱 내 설정(API provider, model 선택, 온보딩)은 별도 계층. Cherry Studio 테스트에서 발견 — API key를 Settings UI에서 입력해야 AI 채팅 기능 탐색 가능 |
