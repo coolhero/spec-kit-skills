@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-03-08] smart-sdd verify — Add Electron CDP check with user choice
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Electron CDP detection in verify | Added `browser_snapshot` probe + HARD STOP with user choice | Electron apps require CDP for Playwright UI verification. Without CDP, Playwright opens a separate Chromium browser that cannot interact with the Electron window. User gets explicit choice: configure CDP or skip UI verification. |
+| 2 | User choice design | "CDP 설정 후 재시도" vs "UI 검증 Skip" | User must explicitly decide — auto-skipping hides the fact that UI wasn't verified; forcing CDP setup blocks users who just want health-check-only verification. |
+
+---
+
 ## [2026-03-08] reverse-spec Completion — Add CDP cleanup notice
 
 | # | Decision | Choice | Rationale |

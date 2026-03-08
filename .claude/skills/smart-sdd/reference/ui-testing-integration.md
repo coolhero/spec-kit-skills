@@ -120,6 +120,18 @@ Without Playwright MCP:
 
 ## 4. Troubleshooting
 
+### Electron Apps Require CDP Mode
+
+Playwright MCP in standard mode opens a separate Chromium browser — it cannot interact with Electron app windows. Electron apps require CDP (Chrome DevTools Protocol):
+
+1. Start the Electron app with `--remote-debugging-port=9222`
+2. Configure Playwright MCP with `--cdp-endpoint http://localhost:9222`
+3. Restart Claude Code
+
+If `/reverse-spec` was run with CDP for the same Electron project, Playwright MCP may already be in CDP mode. Just start the new app on the same port.
+
+See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for detailed CDP setup instructions.
+
 ### Playwright MCP Not Detected
 
 If verify Phase 3 falls back to health-check-only mode:

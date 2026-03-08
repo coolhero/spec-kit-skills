@@ -106,7 +106,35 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
   - "UI 검증 Skip"
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-- **If MCP available** — perform SC-level UI verification:
+- **Electron CDP Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
+  Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
+
+  1. **Probe**: Call `browser_snapshot` to check current Playwright connection state:
+     - If snapshot shows the Electron app content (e.g., matching the Feature's UI) → CDP is active, proceed
+     - If snapshot shows a blank page / default browser tab → CDP is NOT configured
+     - If the tool call fails → Playwright MCP is not functional
+
+  2. **If CDP not configured**: Display notice and **HARD STOP with user choice**:
+     ```
+     ⚠️ Electron 앱은 CDP 모드가 필요합니다.
+        현재 Playwright MCP가 표준 브라우저 모드로 연결되어 있어 Electron 앱 UI를 검증할 수 없습니다.
+
+        CDP 설정 방법:
+        1. 앱을 --remote-debugging-port=9222 로 실행
+        2. claude mcp remove playwright -s user
+        3. claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+        4. Claude Code 재시작
+     ```
+     **Use AskUserQuestion** with options:
+     - "CDP 설정 후 재시도" — user configures CDP, then re-run verify
+     - "UI 검증 Skip — health check만 수행" — skip Playwright UI verification, proceed with demo script health check only
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+  3. **If CDP active**: Proceed to SC-level UI verification below.
+
+  > **Tip**: If `/reverse-spec` was run with CDP for the same Electron stack, Playwright MCP may already be in CDP mode. Start the new app with `--remote-debugging-port=9222` and it will connect automatically.
+
+- **If MCP available** (and CDP check passed for Electron) — perform SC-level UI verification:
   1. Parse demo script Coverage header → extract FR-###/SC-### + UI Action list
   2. Start app (demo script `--ci` or directly)
   3. Verify each SC-###:
