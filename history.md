@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-03-08] smart-sdd verify — Bug Fix Severity Rule (Minor vs Major)
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Verify-phase code fixes | Severity-based: Minor = fix inline, Major = return to implement | Verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue (e.g., frozen object pattern, service architecture) leads to suboptimal code that works but accumulates tech debt. |
+| 2 | Major threshold | 3+ files touched, public API change, or architectural reasoning required | Simple heuristic to distinguish "add the missing line" from "restructure the approach." User can override to Minor if they disagree. |
+
+---
+
 ## [2026-03-08] smart-sdd verify — Agent-managed app lifecycle for UI verification
 
 | # | Decision | Choice | Rationale |

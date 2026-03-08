@@ -11,6 +11,30 @@
 
 Running `/smart-sdd verify [FID]` performs post-implementation verification. This step runs **after implement** to validate that the actual code works correctly and is consistent with the broader project.
 
+### Bug Fix Severity Rule — verify is for FINDING, not REWRITING
+
+When verify discovers a bug, classify its severity before fixing:
+
+| Severity | Examples | Action |
+|---|---|---|
+| **Minor** | Missing import, typo, null check, off-by-one, missing CSS class, simple config fix | ✅ Fix inline during verify — commit as `fix:` |
+| **Major** | Frozen object pattern change, service communication architecture, data flow restructuring, new component/module needed, API contract change | ❌ Do NOT fix inline. **Report and BLOCK** — return to implement (or plan if architectural) |
+
+**How to distinguish**: If the fix touches **3+ files**, changes a **public API/interface**, or requires **architectural reasoning** (not just "add the missing line"), it is Major.
+
+**When Major issue is found**:
+1. Record the issue in the verify result report with full details
+2. Display: `🔴 Major issue detected — requires re-implementation, not a quick fix`
+3. Set verify status to `failure` with the issue description
+4. **HARD STOP** — Use AskUserQuestion:
+   - "implement로 돌아가서 수정" — return to implement step with the issue context
+   - "Minor로 재분류하고 즉시 수정" — user overrides severity classification
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+**Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt.
+
+---
+
 ### Phase 1: Execution Verification (BLOCKING)
 
 Run each check and record results. **If any check fails, verification is BLOCKED — do not proceed to Phase 2/3/4.**
