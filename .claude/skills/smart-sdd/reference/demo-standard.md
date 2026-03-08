@@ -107,7 +107,7 @@ wait || true
   - ❌ WRONG: Start Feature → health check → `exit 0` immediately (no stability window — misses crash-after-startup)
 - **Stability window**: After initial health check, CI mode waits ~10 seconds then re-checks health. This catches applications that start successfully but crash or hang shortly after startup (e.g., event loop blocking, resource exhaustion, delayed initialization failure)
 - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Each SC-### includes verifiable UI actions (navigate, fill, click, verify) for automated verification during `verify` Phase 3. Use ⬜ for items that can't be auto-verified (WebSocket, external API, etc.)
-- **SC→UI Action format**: `navigate /path → fill selector → click selector → verify selector visible`. Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 2b to parse and replay these actions via MCP
+- **SC→UI Action format**: `navigate /path → fill selector → click selector → verify selector visible`. Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 3 to parse and replay these actions via MCP
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
 - **Playwright header** (optional): For UI Features, include a `# Playwright` comment section with URLs and element assertions for automated UI verification. See [reference/ui-testing-integration.md](ui-testing-integration.md)

@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-03-08] smart-sdd verify — Promote Step 2b to Step 3 with mandatory checklist
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Step 2b sub-step naming | Renumber to Step 3 (independent top-level step) | Agent skipped "Step 2b" entirely — sub-step numbering signals optional/supplementary. Promoting to Step 3 makes it equal to other steps |
+| 2 | Phase 3 checklist | Add explicit 7-item checklist at top of Phase 3 | Agent jumped from Step 1 straight to demo --ci execution (Step 5), skipping Steps 2b, 3, 4, and Phase 3b. Checklist forces sequential completion |
+| 3 | Cross-references | Update ui-testing-integration.md + demo-standard.md | "Step 2b" references updated to "Phase 3 Step 3". history.md entries kept as-is (historical record) |
+
+---
+
 ## [2026-03-08] smart-sdd verify — Bug Fix Severity Rule (Minor vs Major)
 
 | # | Decision | Choice | Rationale |

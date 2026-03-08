@@ -20,7 +20,7 @@ The agent manages the entire app lifecycle during UI verification — it starts 
 
 For **Electron apps with CDP**: The agent appends `--remote-debugging-port=9222` to the dev start command and launches the app in background via Bash. After all SC verifications complete, the agent terminates the process.
 
-See `commands/verify-phases.md` Step 2b for the full procedure.
+See `commands/verify-phases.md` Phase 3 Step 3 for the full procedure.
 
 ### Integration Architecture
 

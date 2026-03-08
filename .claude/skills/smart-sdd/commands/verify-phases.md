@@ -102,6 +102,19 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).
 > **quickstart.md reference**: If `specs/{NNN-feature}/quickstart.md` exists, use it as the authoritative source for how the Feature should be launched and verified. The demo script must follow quickstart.md's run instructions.
 
+**⚠️ Phase 3 has 6 mandatory steps + Phase 3b. Do NOT skip any step or jump directly to demo execution.**
+
+```
+Phase 3 Checklist (must complete ALL in order):
+  □ Step 1: Demo script exists and is executable
+  □ Step 2: Demo launches the real Feature
+  □ Step 3: UI Verification via Playwright MCP  ← MANDATORY, not optional
+  □ Step 4: Coverage mapping and demo components
+  □ Step 5: CI/Interactive path convergence
+  □ Step 6: Execute demo --ci
+  □ Phase 3b: Bug Prevention Verification
+```
+
 **Step 1 — Check demo script exists AND is a real demo (NOT markdown, NOT test-only)**:
 - Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
 - **REJECT if**: the file is `.md`, contains `## Demo Steps`, or consists of prose instructions instead of executable commands
@@ -116,7 +129,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - The `--ci` flag must be supported for automated verification: runs setup + health check, then exits cleanly
 - **REJECT if**: the script has no interactive experience (i.e., only runs assertions and exits with no live Feature)
 
-**Step 2b — UI Verification Hook** (MCP required):
+**Step 3 — UI Verification via Playwright MCP** (MANDATORY — do NOT skip):
 > **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down. Do NOT ask the user to start or restart the app manually. The agent starts the app itself (with CDP flags for Electron), runs all SC verifications, then shuts down the app when done.
 > See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for MCP Capability Map.
 
@@ -218,7 +231,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent. The Case A CDP HARD STOP must always be presented to the user.
 - See [reference/ui-testing-integration.md](../reference/ui-testing-integration.md) for full guide
 
-**Step 3 — Check coverage mapping and demo components**:
+**Step 4 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to what the user can try/see in the demo
   - Each FR/SC should be either ✅ (demonstrated) or ⬜ (not demoed with reason)
   - **Aim for maximum coverage** — every functional requirement should be experienceable in the demo unless genuinely impossible
@@ -227,7 +240,7 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
 - Demo-only components are marked with `// @demo-only` (removed after all Features complete)
 - Promotable components are marked with `// @demo-scaffold — will be extended by F00N-[feature]`
 
-**Step 4 — Validate CI/Interactive path convergence**:
+**Step 5 — Validate CI/Interactive path convergence**:
 Before running the demo, **read the demo script source** and verify:
 - The `if [ "$CI_MODE" = true ]` exit point comes **AFTER** the actual Feature startup command (e.g., `npm run dev`, `tauri dev`, server start), not before
 - CI mode and interactive mode use the **same startup commands** — CI must not take a shortcut path (e.g., only checking build without starting the Feature)
@@ -235,7 +248,7 @@ Before running the demo, **read the demo script source** and verify:
 
 > **Why this matters**: A demo that passes CI but fails for the user is worse than no CI check at all. Example: CI checks "frontend build" → passes. User runs the demo → `tauri: command not found`. The CI check gave false confidence.
 
-**Step 5 — Execute the demo in CI mode (`--ci`)**:
+**Step 6 — Execute the demo in CI mode (`--ci`)**:
 - Run `demos/F00N-name.sh --ci` and verify it completes without errors
 - The demo script's CI mode MUST include a **stability window** (~10 seconds) between the initial health check and exit — verify the script includes this (see demo-standard.md template)
 - If the demo script lacks a stability window (exits immediately after first health check), **WARN** and recommend updating the script to include one
