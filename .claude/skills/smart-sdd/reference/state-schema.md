@@ -76,6 +76,20 @@ If the user skips Environment Bootstrap, record a single row:
 
 ---
 
+## Foundation Verified
+
+> Written by Foundation Gate (pipeline.md Step 3b). Read by pipeline to determine if Foundation Gate can be skipped for subsequent Features.
+
+```
+Foundation Verified: [ISO date] | [PASS/WARN/FAIL] | [details summary]
+```
+
+**Example**: `Foundation Verified: 2024-01-15T10:30:00 | WARN | Build ✅, Toolchain ⚠️ (lint not installed), CSS Theme ✅, Layout ✅`
+
+**Skip logic**: If this field exists AND no Foundation-affecting changes since the recorded date → skip Foundation Gate. Foundation-affecting changes = modifications to files outside `specs/` (theme config, store definitions, layout components, IPC handlers, build config, package.json).
+
+---
+
 ## Feature Progress
 
 **Full scope** (no Tier column):
@@ -109,6 +123,9 @@ If the user skips Environment Bootstrap, record a single row:
 - `adopted` : All adopt steps (specify → plan → analyze → verify → merge) are ✅ — existing code wrapped with SDD docs (adoption only). Distinct from `completed`: signals legacy code that may have pre-existing issues
 - `deferred` : Outside current Active Tiers (core scope only)
 - `restructured` : Feature was modified (split/merge/move/delete) — has 🔀 steps that need re-execution (see `reference/restructure-guide.md`)
+- `regression-specify` : Verify found regression requiring re-run from specify step
+- `regression-plan` : Verify found regression requiring re-run from plan step
+- `regression-implement` : Verify found regression requiring re-run from implement step
 
 ---
 
@@ -118,6 +135,8 @@ If the user skips Environment Bootstrap, record a single row:
 |------|--------|---------|--------|
 | `⚠️ RUNTIME-DEGRADED` | implement (MCP unavailable) | Feature was implemented without runtime verification | verify Phase 3 BLOCKS if MCP is still unavailable — requires user acknowledgment |
 | `⚠️ NEVER-RUNTIME-VERIFIED — [reason]` | verify (MCP still unavailable) | User acknowledged no runtime verification will be done | Recorded for traceability. Not blocking further pipeline steps |
+| `⚠️ RUNTIME-ERRORS-ACKNOWLEDGED — [reason]` | implement (Runtime Error Zero Gate) | User acknowledged runtime errors exist but chose to proceed | verify Phase 1 will still check; recorded for traceability |
+| `⚠️ FOUNDATION-OVERRIDE — [reason]` | pipeline (Foundation Gate) | User overrode a BLOCKING Foundation check failure | Foundation issues may surface during Feature verification |
 
 ---
 

@@ -51,6 +51,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] UX behavior contract: [list each temporal scenario to verify] (async UI Features only)
   - [ ] Enablement interfaces: [list each "Enables →" entry to verify]
   - [ ] Blocked-by prerequisites: [list each "Blocked by ←" status]
+  - [ ] API compatibility matrix: [list each provider to verify — auth, endpoints, headers] (if plan.md has API Compat Matrix)
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
@@ -63,6 +64,13 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] Coverage ≥ 50% of FR/SC items (warn if below)
   - [ ] Demo Components header comment with Category and Fate
   - [ ] Component markers (@demo-only / @demo-scaffold)
+  - [ ] VERIFY_STEPS functional verification: [list each SC with VERIFY_STEPS block]
+  - [ ] Visual fidelity check: [source screenshot vs current] (rebuild only)
+
+── Phase 3b: Bug Prevention Verification ──────────
+[Applies to all Features with implementation]
+  - [ ] Empty state smoke test: app starts with no user data → no crash
+  - [ ] Smoke launch criteria met (app loads within timeout)
 
 ── Phase 4: Global Evolution Consistency ─────────
 [List entities/APIs to verify against registry]
@@ -111,6 +119,8 @@ After verification execution completes:
     [⚠️ Failed: provider settings panel not interactive (if any)]
   - Blocked-by prerequisites: [N]/[N] verified
     [⚠️ F001-shell not verified yet (if any)]
+  - API compatibility matrix: [N]/[N] providers verified
+    [⚠️ Provider X: auth method mismatch (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]
@@ -121,6 +131,13 @@ After verification execution completes:
   - ✅/❌ FR/SC Coverage mapping present (≥ 50% of spec FR/SC items)
   - ✅/❌ Demo Components header comment present
   - ✅/❌ Component markers present
+  - VERIFY_STEPS: [N]/[N] SC functional tests passed
+    [⚠️ SC-003 wait-for timeout (if any)]
+  - Visual fidelity: [match/differences found] (rebuild only)
+
+── Phase 3b: Bug Prevention Verification ───────────
+  - ✅/❌ Empty state smoke test: [result]
+  - ✅/❌ Smoke launch criteria: [result — load time]
 
 ── Phase 4: Global Evolution Consistency ───────────
   - entity-registry: [match/discrepancies found]
