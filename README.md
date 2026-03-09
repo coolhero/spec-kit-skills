@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-09 09:38 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 07:51 KST
 
 **Custom Claude Code skills that add cross-Feature intelligence to [spec-kit](https://github.com/github/spec-kit) SDD workflows**
 
@@ -21,7 +21,8 @@
 ```bash
 git clone https://github.com/coolhero/spec-kit-skills.git
 cd spec-kit-skills
-./install.sh    # creates symlinks → ~/.claude/skills/
+./install.sh      # creates symlinks → ~/.claude/skills/
+# ./uninstall.sh  # removes symlinks (to uninstall)
 ```
 
 ### First Commands
@@ -171,8 +172,8 @@ All spec-kit command executions follow this 4-step protocol:
 | `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized from preceding Features) |
 | `tasks` | `plan.md` | Automatic execution based on plan |
 | `analyze` | `spec.md` + `plan.md` + `tasks.md` | Cross-artifact consistency analysis |
-| `implement` | `tasks.md` + `pre-context.md` | Static resources, env var verification, naming remapping |
-| `verify` | `pre-context.md` + registries | Cross-Feature entity/API consistency, impact scope |
+| `implement` | `tasks.md` + `plan.md` + `pre-context.md` | Interaction chains, UX behavior contract, API compatibility matrix, env var verification, naming remapping, runtime verification + fix loop |
+| `verify` | `pre-context.md` + registries + `plan.md` | Cross-Feature entity/API consistency, interaction chain completeness, UX behavior contract, API compatibility matrix, enablement smoke test, impact scope |
 
 **Preceding Feature results take priority**: If a dependent Feature's plan is already complete, the finalized `data-model.md` and `contracts/` are referenced instead of registry drafts.
 
@@ -355,6 +356,10 @@ Phase 6: Finalization         — Create artifacts, update roadmap/sdd-state
 
 ```
 Phase 0: Constitution Finalization
+Foundation Gate (first Feature only):
+   - Build check (BLOCKING), Toolchain Pre-flight (lint/test availability),
+     CSS theme, state management, IPC bridge, layout verification
+   - Results cached in sdd-state.md — skipped for subsequent Features
 Phase 1~N: Per Feature (in Release Group order):
    0. pre-flight → Ensure on main branch
    1. specify    → (pre-context + business-logic injection) → /speckit-specify
@@ -362,18 +367,22 @@ Phase 1~N: Per Feature (in Release Group order):
    3. plan       → (pre-context + registry injection) → /speckit-plan
    4. tasks      → /speckit-tasks
    5. analyze    → /speckit-analyze (consistency check)
-   6. implement  → Env var check (HARD STOP) → /speckit-implement
-   7. verify     → 4-phase verification
+   6. implement  → Env var check (HARD STOP) → /speckit-implement → runtime verification + fix loop
+   7. verify     → 4-phase verification (+ Phase 3b bug prevention)
    8. merge      → Checkpoint (HARD STOP) → Merge to main
 ```
 
 ### 4-Phase Verification
 
 ```
-Phase 1: Execution (tests, build, lint) — BLOCKS on failure
-Phase 2: Cross-Feature Consistency + Behavior Completeness
-Phase 3: Demo-Ready Verification — BLOCKS on failure
-Phase 4: Global Evolution Update (registries, sdd-state)
+Phase 1:  Execution (tests, build, lint) — BLOCKS on failure
+          Lint tool detection per ecosystem (auto-install offer if missing)
+Phase 2:  Cross-Feature Consistency — entity/API compat, interaction chains,
+          UX behavior contract, API compatibility matrix, enablement smoke test
+Phase 3:  Demo-Ready Verification — BLOCKS on failure
+          + VERIFY_STEPS functional tests, visual fidelity (rebuild)
+Phase 3b: Bug Prevention — empty state smoke test, smoke launch criteria
+Phase 4:  Global Evolution Update (registries, sdd-state)
 ```
 
 ### Post-Feature Processing
@@ -381,9 +390,9 @@ Phase 4: Global Evolution Update (registries, sdd-state)
 | Timing | Processing |
 |--------|-----------|
 | After plan | Update entity-registry.md and api-registry.md |
-| After implement | Update roadmap.md status to completed |
+| After implement | Runtime Error Zero Gate — BLOCKS if console errors detected |
 | After implement | Impact analysis on subsequent Feature pre-contexts |
-| After verify | Record results in sdd-state.md |
+| After verify | Record results in sdd-state.md, update roadmap.md status |
 | After verify | Merge Feature branch to main (HARD STOP) |
 
 ### Source Behavior Coverage (SBI)
@@ -405,6 +414,8 @@ F003-order      | T2   |         |      |       |         |           |        |
 ```
 
 ### Aggregation Scripts
+
+Located in `.claude/skills/smart-sdd/scripts/`. Designed for use within the smart-sdd pipeline context.
 
 | Script | Purpose |
 |--------|---------|

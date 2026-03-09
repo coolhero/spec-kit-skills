@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-09 09:38 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 07:51 KST
 
 **[spec-kit](https://github.com/github/spec-kit) SDD 워크플로우에 교차 Feature 인텔리전스를 추가하는 Claude Code 커스텀 스킬**
 
@@ -21,7 +21,8 @@
 ```bash
 git clone https://github.com/coolhero/spec-kit-skills.git
 cd spec-kit-skills
-./install.sh    # ~/.claude/skills/에 심링크 생성
+./install.sh      # ~/.claude/skills/에 심링크 생성
+# ./uninstall.sh  # 심링크 제거 (제거 시)
 ```
 
 ### 첫 번째 커맨드
@@ -170,8 +171,8 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 | `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | 의존성 정보, 엔티티/API 스키마 초안 (또는 선행 Feature 확정 스키마) |
 | `tasks` | `plan.md` | plan 기반 자동 실행 |
 | `analyze` | `spec.md` + `plan.md` + `tasks.md` | 교차 산출물 일관성 분석 |
-| `implement` | `tasks.md` + `pre-context.md` | 정적 리소스, 환경 변수 검증, 네이밍 리매핑 |
-| `verify` | `pre-context.md` + registries | 교차 Feature 엔티티/API 일관성, 영향 범위 |
+| `implement` | `tasks.md` + `plan.md` + `pre-context.md` | 인터랙션 체인, UX 행동 계약, API 호환성 매트릭스, 환경 변수 검증, 네이밍 리매핑, 런타임 검증 + 수정 루프 |
+| `verify` | `pre-context.md` + registries + `plan.md` | 교차 Feature 엔티티/API 일관성, 인터랙션 체인 완전성, UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트, 영향 범위 |
 
 **선행 Feature 결과 우선 적용**: 의존하는 선행 Feature의 plan이 완료되었으면, 레지스트리 초안 대신 확정된 `data-model.md`와 `contracts/`를 우선 참조합니다.
 
@@ -352,6 +353,10 @@ Phase 6: 확정              — 아티펙트 생성, roadmap/sdd-state 갱신
 
 ```
 Phase 0: Constitution 확정
+Foundation Gate (첫 번째 Feature만):
+   - 빌드 검사 (차단), Toolchain Pre-flight (lint/test 도구 가용성),
+     CSS 테마, 상태 관리, IPC 브릿지, 레이아웃 검증
+   - 결과를 sdd-state.md에 캐시 — 이후 Feature에서는 건너뜀
 Phase 1~N: Feature별 (Release Group 순서):
    0. pre-flight → main 브랜치 확인
    1. specify    → (pre-context + 비즈니스 로직 주입) → /speckit-specify
@@ -359,18 +364,22 @@ Phase 1~N: Feature별 (Release Group 순서):
    3. plan       → (pre-context + 레지스트리 주입) → /speckit-plan
    4. tasks      → /speckit-tasks
    5. analyze    → /speckit-analyze (일관성 검사)
-   6. implement  → 환경 변수 확인 (HARD STOP) → /speckit-implement
-   7. verify     → 4단계 검증
+   6. implement  → 환경 변수 확인 (HARD STOP) → /speckit-implement → 런타임 검증 + 수정 루프
+   7. verify     → 4단계 검증 (+ Phase 3b 버그 예방)
    8. merge      → 체크포인트 (HARD STOP) → main에 머지
 ```
 
 ### 4단계 검증
 
 ```
-Phase 1: 실행 검증 (테스트, 빌드, 린트) — 실패 시 차단
-Phase 2: 교차 Feature 일관성 + 동작 완전성
-Phase 3: Demo-Ready 검증 — 실패 시 차단
-Phase 4: Global Evolution 갱신 (레지스트리, sdd-state)
+Phase 1:  실행 검증 (테스트, 빌드, 린트) — 실패 시 차단
+          에코시스템별 린트 도구 감지 (미설치 시 자동 설치 제안)
+Phase 2:  교차 Feature 일관성 — 엔티티/API 호환, 인터랙션 체인,
+          UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트
+Phase 3:  Demo-Ready 검증 — 실패 시 차단
+          + VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축)
+Phase 3b: 버그 예방 — 빈 상태 스모크 테스트, 스모크 런치 기준
+Phase 4:  Global Evolution 갱신 (레지스트리, sdd-state)
 ```
 
 ### Feature 완료 후 처리
@@ -378,9 +387,9 @@ Phase 4: Global Evolution 갱신 (레지스트리, sdd-state)
 | 시점 | 처리 |
 |------|------|
 | plan 후 | entity-registry.md, api-registry.md 갱신 |
-| implement 후 | roadmap.md 상태를 completed로 갱신 |
+| implement 후 | Runtime Error Zero Gate — 콘솔 에러 감지 시 차단 |
 | implement 후 | 후속 Feature pre-context 영향 분석 |
-| verify 후 | sdd-state.md에 결과 기록 |
+| verify 후 | sdd-state.md에 결과 기록, roadmap.md 상태 갱신 |
 | verify 후 | Feature 브랜치를 main에 머지 (HARD STOP) |
 
 ### Source Behavior Coverage (SBI)
@@ -402,6 +411,8 @@ F003-order      | T2   |         |      |       |         |           |        |
 ```
 
 ### 집계 스크립트
+
+`.claude/skills/smart-sdd/scripts/`에 위치. smart-sdd 파이프라인 컨텍스트 내에서 사용.
 
 | 스크립트 | 목적 |
 |---------|------|
