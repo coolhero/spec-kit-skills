@@ -14,6 +14,16 @@
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Static Resources" section | **If present and non-empty** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
+| `SPEC_PATH/[NNN-feature]/plan.md` | "Pattern Constraints" section | **If present** — inject as mandatory reference for every task execution |
+| `specs/reverse-spec/visual-references/manifest.md` | Relevant screens | **Rebuild mode only, if exists** — inject as visual target reference |
+
+## Pattern Constraints Injection
+
+If plan.md contains a `## Pattern Constraints` section, this section MUST be included in the context for **every** `speckit-implement` task execution. This is critical when tasks are executed by parallel agents or across context window boundaries — each agent must receive the Pattern Constraints to maintain consistency.
+
+Display before each task: `📋 Pattern Constraints (from plan.md): [constraint count] constraints active`
+
+This prevents the scenario where parallel agents independently generate code with inconsistent patterns (e.g., one agent uses stable selectors while another creates new arrays per selector call).
 
 ## Static Resource Handling
 
@@ -114,7 +124,32 @@ After each `speckit-implement` task completes (before starting the next task):
 5. **Success**: Proceed to next task (keep app running)
 6. **Failure**: Enter Auto-Fix Loop
 
-**Without MCP**: Display `⚠️ MCP not available — runtime verification limited to build gate only (Level 1).` at first task verification. Replace Step 2 with build success confirmation only. Post-implement SC verification is skipped.
+**Without MCP (Level 1 Degradation) — HARD STOP**:
+
+At first task verification, display:
+```
+⚠️ Runtime Verification Degraded — Level 1 (build-only)
+  MCP not available. Runtime verification is limited to:
+  ✅ Build gate (compile/transpile)
+  ❌ Runtime rendering check — SKIPPED
+  ❌ Console error scan — SKIPPED
+  ❌ Post-implement SC verification — SKIPPED
+
+  Risk: Bugs that pass build but fail at runtime (selector instability,
+  layout effect timing, infinite re-renders) will NOT be caught until verify.
+```
+
+Use AskUserQuestion (**HARD STOP**):
+- "Continue with Level 1 (build-only)" — proceed, but record `RUNTIME-DEGRADED` flag
+- "Install MCP and retry" — user installs MCP, restart implement verification
+
+**If response is empty → re-ask** (per MANDATORY RULE 1)
+
+If "Continue with Level 1":
+- Record `⚠️ RUNTIME-DEGRADED` in sdd-state.md Feature Progress (Detail column)
+- Replace Step 2 with build success confirmation only
+- Post-implement SC verification and Post-Implement Pattern Compliance Scan are skipped
+- The verify step will display a prominent reminder and may BLOCK if MCP is still unavailable (see verify-phases.md Phase 3)
 
 ### Post-Implement Full Verification
 
@@ -126,6 +161,28 @@ After all tasks complete, before Review:
 4. Scan Console logs for all errors
 5. **If failures found**: Enter Auto-Fix Loop
 6. **All pass**: Display "Runtime Verified: ✅" in Review Display
+
+### Post-Implement Pattern Compliance Scan
+
+After Post-Implement Full Verification, run a grep-based anti-pattern scan on files changed by this Feature (use `git diff --name-only main` on the Feature branch).
+
+**Skip if**: plan.md has no `## Pattern Constraints` section, OR `RUNTIME-DEGRADED` flag is set.
+
+**Scan rules** (derived from plan.md Pattern Constraints — examples below are illustrative; actual patterns depend on the project's stack):
+
+| Pattern Constraint | Grep/Search Pattern | Severity |
+|---|---|---|
+| Selector reference stability | Selector callbacks containing `.filter(`, `.map(`, `.slice(`, `Object.keys(` — creating new references per call | ⚠️ warning — likely infinite re-render |
+| DOM measurement in async effect | `useEffect` callback body containing `getBoundingClientRect`, `offsetHeight`, `scrollHeight`, `clientHeight`, `offsetWidth` | ⚠️ warning — layout flicker |
+| Missing Error Boundary | Route/page-level components (files under `pages/`, `routes/`, `views/`) without `ErrorBoundary` or `error.tsx` sibling | ⚠️ warning |
+| Unbatched state updates | Multiple sequential `setState(` / `set(` / `store.` calls within same function without `batch(` wrapper | ⚠️ warning |
+
+**Result classification**: ⚠️ warning (NOT blocking). Violations are reported in the Review Display as a "Pattern Compliance" section. The agent MAY auto-fix simple violations before Review (e.g., wrapping a selector with `useShallow`, changing `useEffect` to `useLayoutEffect`).
+
+**Important**: The grep patterns above are illustrative. Derive actual search patterns from:
+1. The project's specific state management library
+2. The project's specific framework
+3. The Pattern Constraints section in plan.md
 
 ### Auto-Fix Loop
 

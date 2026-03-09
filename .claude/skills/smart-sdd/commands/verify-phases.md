@@ -163,6 +163,14 @@ Phase 3 Checklist (must complete ALL in order):
 **Step 3 — UI Verification via Playwright MCP** (MANDATORY — do NOT skip):
 > **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down. Do NOT ask the user to start or restart the app manually. The agent starts the app itself (with CDP flags for Electron), runs all SC verifications, then shuts down the app when done.
 
+- **Runtime Degradation Flag Check**: Read sdd-state.md Feature Progress for this Feature. If Detail column shows `⚠️ RUNTIME-DEGRADED`:
+  - Display: `⚠️ This Feature was implemented without runtime verification (MCP was unavailable during implement). Runtime bugs (selector instability, layout timing, infinite re-renders) may exist undetected.`
+  - If `MCP_STATUS` is now `active` or `configured`: proceed with full UI verification (this is the **recovery path** — extra scrutiny)
+  - If `MCP_STATUS` is STILL `unavailable`: **BLOCKING HARD STOP** — this Feature has NEVER had any runtime verification. Use AskUserQuestion:
+    - "Install MCP and retry verify"
+    - "Acknowledge NO runtime verification" — requires reason via "Other" input. Sets verify to `limited` status with `⚠️ NEVER-RUNTIME-VERIFIED — [reason]`
+  - **If response is empty → re-ask** (per MANDATORY RULE 1)
+
 - **MCP Status Check**: Use the `MCP_STATUS` from the Pre-flight check (run before Phase 1).
   - If `MCP_STATUS = unavailable` AND user chose "Continue without UI verification" → skip to Step 4. Display: `⏭️ UI verification skipped (Playwright MCP not available — acknowledged in Pre-flight)`
   - If `MCP_STATUS = active` or `MCP_STATUS = configured` → proceed with Electron CDP check below
@@ -255,6 +263,25 @@ Phase 3 Checklist (must complete ALL in order):
 - **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent. The Case A CDP HARD STOP must always be presented to the user.
 - See [reference/ui-testing-integration.md](../reference/ui-testing-integration.md) for full guide
 
+**Step 3b — Visual Fidelity Check** (rebuild mode only — skip for greenfield/add):
+
+If `specs/reverse-spec/visual-references/manifest.md` exists AND this Feature covers screens listed in the manifest:
+
+1. Read the manifest to identify which reference screenshots apply to this Feature (match by screen name, route, or Feature coverage from pre-context)
+2. For each matching screen:
+   a. Navigate to the equivalent screen in the rebuilt app (use demo URL or route from spec.md)
+   b. Take a screenshot of the current rebuilt state
+   c. Read BOTH the reference screenshot and current screenshot
+   d. Compare: layout structure, key element presence, obvious visual regressions
+3. Report per screen:
+   - `✅ Visual match` — layout structure and key elements consistent
+   - `⚠️ Visual deviation` — describe specific differences (missing elements, layout shift, style mismatch, color/spacing drift)
+   - `❌ Major regression` — screen fundamentally different or broken
+4. **Result**: ⚠️ warnings (NOT blocking) — deviations documented in Review
+5. User can acknowledge intentional deviations ("redesigned on purpose") vs. unintentional gaps during Review
+
+If visual references don't exist or no screens match this Feature: skip silently.
+
 **Step 4 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to what the user can try/see in the demo
   - Each FR/SC should be either ✅ (demonstrated) or ⬜ (not demoed with reason)
@@ -286,6 +313,13 @@ Before running the demo, **read the demo script source** and verify:
   - Process exit with non-zero code
 - **If runtime errors are detected**: The demo is considered **FAILED** even if the health check (HTTP 200) passed — a healthy port does not mean the application is functioning correctly (e.g., Vite dev server may respond while Electron main process has fatal errors)
 - Display each detected error with its source line for user review
+- **Browser console error scan (when MCP available)**: After demo --ci passes the stdout/stderr scan above, if `MCP_STATUS = active`:
+  1. Navigate to the app's main URL (from demo script's "Try it" output or health check URL)
+  2. Wait 5 seconds for the page to stabilize
+  3. Read browser Console logs for: `TypeError`, `ReferenceError`, `Maximum update depth exceeded`, `unhandled rejection`, infinite render warnings
+  4. **If browser console errors detected**: Demo is FAILED even if health endpoint returned 200 and stdout was clean — these are client-side-only bugs (infinite re-renders, selector instability, DOM timing) that never appear in server output
+  5. Display: `❌ Browser console errors detected: [N] errors — [first error message]`
+  6. If `MCP_STATUS ≠ active`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (MCP not active)`
 
 **If any check fails**, display and BLOCK:
 ```

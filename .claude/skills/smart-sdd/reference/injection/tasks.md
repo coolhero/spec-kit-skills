@@ -50,6 +50,61 @@ Add these tasks now or add them during the "I've finished editing" step.
 
 > **Rationale**: Demo surfaces (routes, pages, data fixtures) should be built incrementally during `implement`, not deferred until all Features are complete. Injecting demo tasks into `tasks.md` at this stage prevents the "batch-at-the-end" anti-pattern where demo code is rushed or skipped.
 
+**Pattern Audit task injection check** (only if plan.md contains a `## Pattern Constraints` section):
+After reading tasks.md, scan the task list for pattern-audit-related tasks (keywords: "pattern constraint", "pattern audit", "selector", "reference equality", "layout effect", "error boundary", "anti-pattern"). If **no pattern audit tasks are found**, append:
+
+```
+── ⚠️ Pattern Audit Task Missing ──────────────────
+Pattern Constraints are defined in plan.md but tasks.md has no audit task.
+Without an explicit task, pattern constraints may be forgotten during implement.
+
+Recommended task to add (insert before the last implementation phase):
+  1. Pattern Audit: verify all components comply with Pattern Constraints
+     - Check selector reference stability (no new array/object per call)
+     - Check DOM measurement effect timing (useLayoutEffect, not useEffect)
+     - Check Error Boundary coverage (every route/page wrapped)
+
+Add this task now or add it during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+**Integration test task injection check** (only if Feature has UI components — detected from plan.md architecture or pre-context tech stack):
+After reading tasks.md, scan for integration/render test tasks (keywords: "render test", "integration test", "component test", "mount test", "smoke test", "rendering test"). If **no integration test tasks are found**, append:
+
+```
+── ⚠️ Integration Test Task Missing ───────────────
+This Feature has UI components but tasks.md has no render/integration test.
+Unit tests with mocked stores cannot catch selector instability, layout
+timing bugs, or infinite re-render loops.
+
+Recommended task to add (insert after main implementation tasks):
+  1. Integration smoke test: mount key components with real store state,
+     verify renders without infinite loops, console errors, or layout flicker
+
+Add this task now or add it during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+**Feature size warning** (always checked):
+After reading tasks.md, count the total number of tasks. Also read plan.md to estimate file count from architecture/phases:
+
+```
+── ⚠️ Feature Size Warning ────────────────────────
+[Only shown if thresholds exceeded]
+
+Task count: [N] tasks (threshold: 100)
+  ⚠️ Features with 100+ tasks risk inconsistent patterns across parallel
+  agents and are hard to verify. Consider splitting into sub-Features
+  via /smart-sdd add.
+
+Estimated file count: [N] files (threshold: 50)
+  ⚠️ Features touching 50+ files are hard to review and test holistically.
+  Consider splitting along module boundaries.
+
+These are recommendations, not blockers. Proceed if the Feature is inherently large.
+────────────────────────────────────────────────────
+```
+
 **Display format**:
 ```
 📋 Review: tasks.md for [FID] - [Feature Name]
@@ -64,6 +119,20 @@ Add these tasks now or add them during the "I've finished editing" step.
 
 ── ⚠️ Demo Tasks Missing ──────────────────────────
 [Only if Demo-Ready Delivery active AND no demo tasks found in tasks.md]
+
+── ⚠️ Pattern Audit Task Missing ─────────────────
+[Only if plan.md has a Pattern Constraints section AND tasks.md has no
+ pattern-audit-related task (keywords: "pattern constraint", "pattern audit",
+ "selector", "reference equality", "layout effect", "error boundary", "anti-pattern")]
+
+── ⚠️ Integration Test Task Missing ──────────────
+[Only if Feature has UI components (detected from plan.md architecture or
+ pre-context tech stack) AND tasks.md has no render/integration test task
+ (keywords: "render test", "integration test", "component test", "mount test",
+  "smoke test", "rendering test")]
+
+── ⚠️ Feature Size Warning ───────────────────────
+[Only if task count > 100 OR estimated file count > 50]
 
 ── Files You Can Edit ─────────────────────────
   📄 specs/{NNN-feature}/tasks.md

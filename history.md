@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-09] Runtime-First Verification & Visual Fidelity — 9 changes across pipeline
+
+Root cause: F005-chat-ui passed full pipeline but app didn't work (Zustand selector instability → infinite re-render, useEffect DOM flicker). Verify equated "build passes" with "app works."
+
+| # | Change | File(s) | Impact |
+|---|--------|---------|--------|
+| 1 | Pattern Constraints mandatory in plan.md output | injection/plan.md | Stack-generic framework interaction patterns (selector stability, layout effect timing, Error Boundary) |
+| 2 | MCP degradation → HARD STOP (was silent warning) | injection/implement.md, verify-phases.md | Prevents Features from shipping with zero runtime verification unnoticed |
+| 3 | Demo --ci captures browser console errors | demo-standard.md, verify-phases.md | Catches client-side-only bugs (infinite re-renders) that health endpoints miss |
+| 4 | Pattern Audit + Integration Test task injection warnings | injection/tasks.md | Warns if tasks.md lacks audit or render test tasks |
+| 5 | Post-implement anti-pattern grep scan | injection/implement.md | Automated detection of selector instability, DOM timing, missing Error Boundary |
+| 6 | Runtime-First Verification principle in constitution | constitution-seed-template.md | "Build passes ≠ app works" as foundational principle |
+| 7 | Feature size warning (100+ tasks, 50+ files) | injection/tasks.md | Soft warning for oversized Features that risk pattern inconsistency |
+| 8 | Visual Reference Capture + Fidelity Check (rebuild) | reverse-spec/analyze.md, verify-phases.md | Screenshots of original app → compare against rebuilt UI in verify |
+| 9 | Pattern Reference injection for parallel agents | injection/implement.md | Each agent receives Pattern Constraints to maintain consistency |
+
+---
+
 ## [2026-03-09] smart-sdd — Single-Feature pipeline default + remove Step Mode
 
 | # | Decision | Choice | Rationale |

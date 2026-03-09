@@ -149,6 +149,11 @@ After `speckit-plan` completes:
 ── Implementation Phases ────────────────────────
 [Phase breakdown with deliverables from plan.md]
 
+── Pattern Constraints ─────────────────────────
+[List each constraint with stack pattern and rationale.
+ If section is missing from plan.md output, display:
+ "⚠️ Pattern Constraints section missing — must be added before approval."]
+
 ── Differences from Draft ───────────────────────
 [Compare with pre-context.md drafts:
  - Added: entities/APIs that spec-kit added beyond the drafts
@@ -195,6 +200,36 @@ You can open and edit these files directly, then select
 
 - **Store Dependency Graph**: Visualize dependency directions between stores/services, detect cycles
 - **Downgrade Compatibility**: Check for breaking changes when dependent library major versions differ
+
+---
+
+## Pattern Constraints (mandatory plan.md output section)
+
+After speckit-plan completes, verify the generated `plan.md` includes a **`## Pattern Constraints`** section. If absent, the agent MUST add it during Review before approval.
+
+Pattern Constraints identify framework+library interaction patterns known to cause **runtime-only bugs** (pass build, fail at runtime). They are derived from the project's tech stack detected from constitution and pre-context — NOT library-specific but **stack-pattern-generic**.
+
+### Required constraint categories (include all that apply):
+
+| Stack Pattern | Constraint | Rationale |
+|---|---|---|
+| **External store + reactive framework** (Zustand/Redux/MobX + React/Vue/Svelte) | Selector return values MUST be referentially stable. No new array/object/filtered-list creation per selector call. Use shallow comparison, memoized selectors, or select raw state + derive in component | Frameworks with synchronous external store integration (useSyncExternalStore, computed) will infinite-loop if selectors create new references on every call |
+| **Imperative DOM measurement** (resize, scroll position, element size) | Use synchronous layout effects (useLayoutEffect / watchPostEffect / beforeUpdate) for DOM size/position reads, NOT async effects (useEffect / onMounted) | Async effects execute after browser paint — the browser renders one frame with stale/wrong measurements, causing visible flicker |
+| **Concurrent/Fiber rendering** (React 18+, Vue 3 Suspense) | No side effects in render path. Pure components must be idempotent under concurrent mode | Concurrent rendering may invoke render multiple times before commit |
+| **SSR + hydration** (Next.js, Nuxt, SvelteKit) | Components must produce identical output on server and client for initial render | Hydration mismatch causes full client-side re-render and state loss |
+| **Event handler + state update** | Batch state updates within event handlers. Avoid sequential setState calls triggering multiple re-renders | Unbatched updates cause intermediate renders with inconsistent state |
+
+### Always include (regardless of stack):
+- **Error Boundary requirement**: Every route/page-level component MUST be wrapped with an Error Boundary (or framework equivalent). Uncaught render errors must not crash the entire application — they must be caught, reported, and display a fallback UI.
+
+### Visual Reference context (rebuild mode only):
+- If `specs/reverse-spec/visual-references/` exists and contains reference screenshots for screens this Feature covers, note the relevant screenshot paths in Pattern Constraints. These serve as visual targets for implementation fidelity.
+
+### How Pattern Constraints flow downstream:
+1. **plan.md** → Pattern Constraints section documents the constraints
+2. **tasks.md** → Pattern Audit task(s) reference the constraints
+3. **implement** → Each parallel agent receives Pattern Constraints as context before task execution
+4. **verify** → Post-implement pattern compliance grep validates constraint adherence
 
 ---
 

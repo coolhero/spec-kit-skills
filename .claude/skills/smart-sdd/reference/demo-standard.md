@@ -79,10 +79,23 @@ echo "✅ [Service] running"
 # Wait briefly after startup to catch crash-after-start, hangs, and delayed errors.
 if [ "$CI_MODE" = true ]; then
   echo "Stability check (10s)..."
-  sleep 10
+  # Capture stderr during stability window
+  APP_LOG=$(mktemp)
+  sleep 10 2>"$APP_LOG" &
+  SLEEP_PID=$!
+  wait $SLEEP_PID
   # Re-check: is the process still alive and responding?
   curl -sf http://localhost:3000/health || { echo "❌ Stability check failed — app crashed after startup"; exit 1; }
-  echo "=== CI health + stability check passed ==="
+  # ─── Runtime Error Scan ───
+  # Check for client-side errors captured in app output
+  if grep -qiE 'TypeError|ReferenceError|SyntaxError|unhandled rejection|FATAL|panic:|Maximum update depth exceeded' "$APP_LOG" 2>/dev/null; then
+    echo "❌ Runtime errors detected during stability window:"
+    grep -iE 'TypeError|ReferenceError|SyntaxError|unhandled rejection|FATAL|panic:|Maximum update depth exceeded' "$APP_LOG"
+    rm -f "$APP_LOG"
+    exit 1
+  fi
+  rm -f "$APP_LOG"
+  echo "=== CI health + stability + runtime error check passed ==="
   exit 0
 fi
 
@@ -106,6 +119,7 @@ wait || true
   - ❌ WRONG: Build check → `if CI then exit` → Start Feature → interactive instructions → wait
   - ❌ WRONG: Start Feature → health check → `exit 0` immediately (no stability window — misses crash-after-startup)
 - **Stability window**: After initial health check, CI mode waits ~10 seconds then re-checks health. This catches applications that start successfully but crash or hang shortly after startup (e.g., event loop blocking, resource exhaustion, delayed initialization failure)
+- **Runtime error detection (CI only)**: During the stability window, capture app stderr/stdout and scan for runtime error patterns (`TypeError`, `ReferenceError`, `SyntaxError`, `Maximum update depth exceeded`, `unhandled rejection`, `FATAL`, `panic:`). These client-side errors (infinite re-renders, selector instability) do NOT cause HTTP health checks to fail but indicate a broken app. CI mode MUST exit 1 if runtime errors are detected, even if the health endpoint returns 200
 - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Each SC-### includes verifiable UI actions (navigate, fill, click, verify) for automated verification during `verify` Phase 3. Use ⬜ for items that can't be auto-verified (WebSocket, external API, etc.)
 - **SC→UI Action format**: `navigate /path → fill selector → click selector → verify selector visible`. Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 3 to parse and replay these actions via MCP
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions

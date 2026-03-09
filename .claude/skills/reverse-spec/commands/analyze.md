@@ -698,8 +698,38 @@ Key observations:
    - Display: "ℹ️ Docker Compose services are still running. To stop: `docker compose down`"
 3. `.env` file created during setup: leave in place (reusable for `smart-sdd`)
 
-**Step 4 — Proceed to Phase 2**:
-Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Phase 2 will read this file to cross-reference code analysis with runtime observations.
+**Step 4 — Visual Reference Capture** (rebuild mode only):
+
+After runtime exploration, capture screenshots of key screens as **visual reference artifacts** for the rebuild pipeline. These screenshots serve as the target UI that the rebuilt app should match.
+
+**When to capture**: Always attempt when Playwright MCP is available AND app was explored in Step 3. Skip if exploration was skipped or MCP is unavailable.
+
+**Procedure**:
+1. For each screen explored in Step 3 (from the navigation log):
+   - Navigate to the screen URL/route
+   - Wait for content to stabilize (~3 seconds)
+   - Take a screenshot → save to `specs/reverse-spec/visual-references/{screen-name}.png`
+2. Generate `specs/reverse-spec/visual-references/manifest.md`:
+   ```markdown
+   # Visual Reference Manifest
+
+   | Screen | Route/URL | Screenshot | Key UI Elements |
+   |--------|-----------|------------|-----------------|
+   | [name] | [route]   | {screen-name}.png | [notable elements: sidebar, nav, form, list...] |
+   ```
+3. Display: `📸 Visual references captured: [N] screens → specs/reverse-spec/visual-references/`
+
+**When MCP unavailable or app cannot be launched**:
+- Display: `⚠️ Visual reference capture skipped (MCP/app not available). You can provide screenshots manually at: specs/reverse-spec/visual-references/`
+- Create the `visual-references/` directory and an empty `manifest.md` with the template header
+
+**Usage downstream**:
+- `plan` step: Visual references injected as context for UI architecture decisions
+- `implement` step: References displayed during Review for visual fidelity awareness
+- `verify` step: Phase 3 Visual Fidelity Check compares rebuilt UI against reference screenshots
+
+**Step 5 — Proceed to Phase 2**:
+Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
 ```
@@ -707,6 +737,7 @@ Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration
 - **Timestamp**: [ISO timestamp]
 - **Mode**: [automated (Playwright) | skipped]
 - **Screens explored**: [N]
+- **Visual references captured**: [N screenshots | skipped]
 - **Key findings**: [1-2 sentence summary]
 ```
 
