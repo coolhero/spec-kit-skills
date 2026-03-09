@@ -238,6 +238,26 @@
 
 > If no platform constraints from preceding Features, write "None".
 
+### Functional Enablement Chain
+
+> Functional (not structural) dependencies between Features.
+> Unlike entity/API dependencies above, these describe **runtime behavioral prerequisites** —
+> "Feature X's UI must work for Feature Y to function."
+> These are discovered during `/reverse-spec` Phase 3 or `/smart-sdd add` when analyzing how Features interact at runtime.
+
+| Direction | Target Feature | Functional Dependency | Failure Impact |
+|-----------|---------------|----------------------|----------------|
+| Enables → | [F00N-feature] | [What this Feature provides that the target needs at runtime] | [What breaks if this doesn't work] |
+| Blocked by ← | [F00N-feature] | [What this Feature needs from the source at runtime] | [What breaks if the source doesn't work] |
+
+> Examples:
+>   Enables → F005-chat: Provider settings panel works → F005 cannot configure AI providers
+>   Blocked by ← F001-shell: Window frame config applied → Custom titlebar drag non-functional
+>
+> If no functional enablement dependencies, write "None — this Feature is functionally independent."
+> For specify: Ensure SC-### cover the functional interfaces that downstream Features depend on.
+> For verify: Check that functional enablement interfaces actually work at runtime.
+
 ### Related Entities (data-model.md draft)
 
 #### Owned Entities

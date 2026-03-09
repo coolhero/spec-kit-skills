@@ -122,6 +122,40 @@ Review the above content. You can:
   - Edit entity-registry.md, api-registry.md, or pre-context.md directly before proceeding
 ```
 
+## Interaction Chain Verification (UI Features only)
+
+> **Skip for**: backend-only, CLI, or library Features (no UI interaction).
+> Detected from: constitution-seed.md project type, or if spec.md has no UI-related SCs.
+
+After `speckit-plan` completes, check the generated `plan.md` for an `## Interaction Chains` section. For Features with UI interactions, this section documents the full propagation path of user actions — from click/input through store mutation to DOM effect to visual result.
+
+**Required format** (one row per interactive FR):
+
+```markdown
+## Interaction Chains
+
+| FR | User Action | Handler | Store Mutation | DOM Effect | Visual Result | Verify Method |
+|----|-------------|---------|---------------|------------|---------------|---------------|
+| FR-012 | Click theme toggle | onThemeChange() | settings.theme='dark' | body.classList.add('dark') | Background → #1e1e2e | verify-effect body class "dark" |
+| FR-015 | Change font size | onFontSize(18) | settings.fontSize=18 | body.style.fontSize='18px' | All text enlarges | verify-effect body style.fontSize "18px" |
+| FR-018 | Toggle sidebar | onToggleSidebar() | ui.sidebarOpen=false | sidebar.classList.add('hidden') | Sidebar disappears | verify-state .sidebar class "hidden" |
+```
+
+**If `## Interaction Chains` is missing from plan.md** (UI Feature):
+- Display in Review: `⚠️ Interaction Chains section missing — UI propagation paths not documented.`
+- This is a **warning** (not blocking), but strongly recommended before approval.
+- The Verify Method column feeds directly into:
+  1. **demo Coverage header** → `verify-state`/`verify-effect` verbs in SC→UI Action format
+  2. **verify Phase 3** → Tier 2/3 functional SC verification
+  3. **implement tasks** → each chain step becomes a testable implementation unit
+
+**Downstream flow**:
+1. **plan.md** → chains defined (Verify Method column)
+2. **tasks.md** → each chain step decomposed into testable tasks (not just "implement handler" — also "apply DOM effect" and "verify visual result")
+3. **implement** → full chain implemented (handler + store + DOM + visual), not just the handler
+4. **verify** → Tier 2 (State Change) and Tier 3 (Side Effect) verification uses Verify Method column
+5. **demo** → Coverage header includes `verify-state`/`verify-effect` from Verify Method
+
 ## Review Display Content
 
 > **⚠️ SUPPRESS spec-kit output**: `speckit-plan` prints navigation messages like "Ready for /speckit.tasks" — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-plan executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
@@ -155,6 +189,13 @@ After `speckit-plan` completes:
 [List each constraint with stack pattern and rationale.
  If section is missing from plan.md output, display:
  "⚠️ Pattern Constraints section missing — must be added before approval."]
+
+── Interaction Chains (UI Features only) ───────
+[If UI Feature: show the Interaction Chains table from plan.md.
+ Each row = one interactive FR with full propagation path.
+ If section is missing from plan.md for a UI Feature, display:
+ "⚠️ Interaction Chains section missing — UI propagation paths not documented."
+ If non-UI Feature: omit this section entirely.]
 
 ── Differences from Draft ───────────────────────
 [Compare with pre-context.md drafts:

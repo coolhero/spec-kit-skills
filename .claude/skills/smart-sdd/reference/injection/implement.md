@@ -46,6 +46,39 @@ If the Feature's `pre-context.md` has a non-empty Source Reference section AND `
 
 > **Rationale**: The specify and plan steps read original source files via `injection/specify.md` Source Reference Path Resolution. But implement — the step that actually writes code — had no equivalent. This gap meant agents implemented code without ever seeing the original implementation, leading to behavioral and visual divergence in rebuild projects.
 
+## CSS Value Map Generation (rebuild mode with utility CSS)
+
+> **Skip if**: `specs/reverse-spec/visual-references/style-tokens.md` does not exist, OR the project does not use a utility CSS framework (detected from constitution tech stack — if plain CSS/SCSS/CSS-in-JS → skip).
+> Applies to: rebuild mode with utility CSS frameworks (Tailwind, UnoCSS, WindiCSS).
+
+Before the first UI-related `speckit-implement` task (one-time):
+
+1. Read `specs/reverse-spec/visual-references/style-tokens.md` → extract CSS property-value pairs organized by category (colors, spacing, typography, layout)
+2. Read the utility framework config (e.g., `tailwind.config.js`, `uno.config.ts`) → identify available utility classes and custom theme values
+3. Generate `specs/{NNN-feature}/css-value-map.md`:
+
+```markdown
+# CSS Value Map — [FID]-[Feature Name]
+
+> Auto-generated from style-tokens.md + utility framework config.
+> MUST be referenced during UI implementation — do NOT guess styles.
+
+| Category | Original Value | CSS Property | Utility Class | Note |
+|----------|---------------|-------------|---------------|------|
+| Color | #1e1e2e | background-color | bg-[#1e1e2e] | Header background |
+| Color | #e2e8f0 | border-color | border-slate-200 | Card border |
+| Spacing | 16px | padding | p-4 | Content area |
+| Spacing | 24px | gap | gap-6 | Grid gap |
+| Typography | 14px | font-size | text-sm | Body text |
+| Typography | 600 | font-weight | font-semibold | Headings |
+| Layout | 8px | border-radius | rounded-lg | Cards |
+| Layout | 240px | width | w-60 | Sidebar width |
+```
+
+4. Display: `📋 CSS Value Map: [N] mappings generated → specs/{NNN-feature}/css-value-map.md`
+
+**MUST rule**: When implementing UI components, reference this mapping table for every CSS value. Do NOT invent "typical web app styles" or use generic defaults. Each CSS value from the original source has an explicit utility class target.
+
 ## Static Resource Handling
 
 Before or during implementation, if the Feature's `pre-context.md` has a non-empty Static Resources section:
@@ -76,6 +109,43 @@ Before implementation, if the Feature's `pre-context.md` has a non-empty Environ
 
 **Greenfield projects**: Environment Variables section may be empty or contain "TBD" entries. Display TBD entries as reminders during implementation.
 **Incremental (add) projects**: `.env` should already exist. Verify required variables are present.
+
+## Plugin/Dependency Pre-flight
+
+> Runs ONCE at the start of implement (before the first task).
+> **Purpose**: Verify all required dependencies are installed before writing code that imports them.
+> Prevents mid-implementation discovery of missing packages, which wastes time and produces incomplete results.
+
+**Step 1 — Package dependency check**:
+1. Read `specs/{NNN-feature}/plan.md` → extract mentioned libraries/packages (from architecture decisions, Pattern Constraints, technology choices)
+2. Read the project's dependency manifest (`package.json`, `Cargo.toml`, `requirements.txt`, `go.mod`, etc.)
+3. For each dependency mentioned in plan.md that is not a standard library:
+   - Check if it exists in dependencies/devDependencies
+   - If missing: add to Missing Dependencies list
+4. Display result:
+   ```
+   📦 Dependency Pre-flight for [FID]:
+     ✅ react, zustand, electron — installed
+     ❌ @radix-ui/react-dialog — NOT in package.json
+     ❌ lucide-react — NOT in package.json
+   ```
+5. If any missing: use AskUserQuestion (**HARD STOP**):
+   - "Install missing dependencies" — run the appropriate install command (e.g., `npm install @radix-ui/react-dialog lucide-react`)
+   - "Skip — I'll install manually"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+   If "Install missing dependencies": execute the install command, then re-check to verify installation succeeded.
+
+**Step 2 — UI component library check** (only if project uses component libraries like shadcn/ui, Headless UI, etc.):
+1. Read `specs/{NNN-feature}/plan.md` → extract mentioned UI components (Button, Dialog, Select, Tabs, etc.)
+2. Check if those components exist in the project (e.g., `components/ui/button.tsx` for shadcn/ui)
+3. If missing: display which components need to be added
+4. Use AskUserQuestion (**HARD STOP**):
+   - "Add missing components" — run the library's add command (e.g., `npx shadcn@latest add dialog tabs select`)
+   - "Skip — I'll add manually"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+   If "Add missing components": execute the add commands, then verify the component files were created.
+
+**Skip if**: No external dependencies mentioned in plan.md, or all dependencies already installed.
 
 ## Naming Remapping (only if pre-context has a Naming Remapping section)
 

@@ -96,6 +96,18 @@ if [ "$CI_MODE" = true ]; then
   fi
   rm -f "$APP_LOG"
   echo "=== CI health + stability + runtime error check passed ==="
+  # ─── Functional Verification (--verify mode) ───
+  # Extends CI mode: after health + stability pass, execute VERIFY_STEPS via Playwright MCP.
+  # The verify agent reads the VERIFY_STEPS block below and replays actions via MCP.
+  # This section is a marker — actual execution is handled by the verify agent, not bash.
+  if [ "${2:-}" = "--verify" ]; then
+    echo "Functional verification mode — VERIFY_STEPS block will be parsed by the verify agent."
+    echo "=== Awaiting Playwright MCP verification ==="
+    # Do NOT exit here — the verify agent will drive the remaining steps.
+    # Fall through to keep the app running while verification happens.
+    wait || true
+    exit 0
+  fi
   exit 0
 fi
 
@@ -121,7 +133,24 @@ wait || true
 - **Stability window**: After initial health check, CI mode waits ~10 seconds then re-checks health. This catches applications that start successfully but crash or hang shortly after startup (e.g., event loop blocking, resource exhaustion, delayed initialization failure)
 - **Runtime error detection (CI only)**: During the stability window, capture app stderr/stdout and scan for runtime error patterns (`TypeError`, `ReferenceError`, `SyntaxError`, `Maximum update depth exceeded`, `unhandled rejection`, `FATAL`, `panic:`). These client-side errors (infinite re-renders, selector instability) do NOT cause HTTP health checks to fail but indicate a broken app. CI mode MUST exit 1 if runtime errors are detected, even if the health endpoint returns 200
 - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Each SC-### includes verifiable UI actions (navigate, fill, click, verify) for automated verification during `verify` Phase 3. Use ⬜ for items that can't be auto-verified (WebSocket, external API, etc.)
-- **SC→UI Action format**: `navigate /path → fill selector → click selector → verify selector visible`. Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 3 to parse and replay these actions via MCP
+- **SC→UI Action format** (3-tier verification verbs):
+  - **Tier 1 — Presence**: `verify selector visible` — confirm element existence (default)
+  - **Tier 2 — State Change**: `verify-state selector attribute "expected"` — confirm DOM attribute/class change after interaction (e.g., `verify-state html class "dark"`, `verify-state #checkbox checked "true"`)
+  - **Tier 3 — Side Effect**: `verify-effect target-selector property "expected"` — confirm downstream DOM propagation on a DIFFERENT element (e.g., `verify-effect body style.fontSize "18px"`, `verify-effect .toast visible`)
+  - Full sequence example: `navigate /settings → click button#theme-toggle → verify-state html class "dark" → verify-effect body style.backgroundColor "#1a1a2e"`
+  - Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 3 to parse and replay these actions via MCP. Tier 2/3 verbs are parsed from the Interaction Chains table's Verify Method column (see plan.md)
+- **VERIFY_STEPS block** (optional, for UI Features): Include a comment block after the Coverage header that defines functional verification steps. These steps are parsed by the verify agent (Phase 3 Step 6b) and executed via Playwright MCP:
+  ```bash
+  # VERIFY_STEPS:
+  #   navigate /settings
+  #   click button#theme-toggle
+  #   verify-state html class "dark"
+  #   navigate /settings/display
+  #   fill input#font-size 18
+  #   verify-effect body style.fontSize "18px"
+  ```
+  Uses the same verb syntax as SC→UI Action format (including `verify-state`/`verify-effect` from Interaction Chains).
+  The `--verify` flag causes CI mode to keep the app running for Playwright verification instead of exiting immediately.
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
 - **Playwright header** (optional): For UI Features, include a `# Playwright` comment section with URLs and element assertions for automated UI verification. See [reference/ui-testing-integration.md](ui-testing-integration.md)

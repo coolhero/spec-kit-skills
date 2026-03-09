@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-03-09] Pipeline v2: "Build Success ≠ Feature Complete" Root Fix — 9 changes (V1-V9)
+
+Root problem: F004/F005 verified successfully but didn't work at runtime. 4 of 6 bugs were invisible to automated checks (build/test). Two remaining gaps after S1-S15: (A) Functional verification — verify checks "element visible?" but not "button works?", (B) Foundation — 7/7 bugs were Foundation-level issues (CSS theme, Zustand patterns, IPC bridge, layout) with no pre-Feature validation.
+
+| # | Change | File(s) | Impact |
+|---|--------|---------|--------|
+| V1 | 3-Tier Functional SC Verification (Presence→State→Effect) | verify-phases.md, demo-standard.md | Extends verify beyond "element visible?" to check state changes and side effects |
+| V2 | Interaction Chains (Side Effect Chain at plan) | injection/plan.md | Documents full propagation path: User Action→Handler→Store→DOM→Visual→Verify |
+| V3 | CSS Value Map Generation (style-tokens→utility mapping) | injection/implement.md | Explicit original CSS value→Tailwind utility class mapping; no more guessing |
+| V4 | Demo Functional Verification (`--verify` flag + VERIFY_STEPS) | demo-standard.md, verify-phases.md | Playwright MCP replays VERIFY_STEPS block for automated functional verification |
+| V5 | Edge Case Matrix at specify | injection/specify.md | Structured edge case→SC coverage table; warns on uncovered edge cases |
+| V6 | Cross-Feature Functional Enablement Chain | pre-context-template.md, injection/specify.md | Runtime behavioral dependencies (not just entity/API) between Features |
+| V7 | Foundation Verification Gate (pre-Feature validation) | pipeline.md | Validates CSS theme, state management, IPC, layout BEFORE first Feature |
+| V8 | Plugin/Dependency Pre-flight at implement | injection/implement.md | Checks plan.md dependencies against package.json before writing code |
+| V9 | Verify Pipeline Regression Routing (4-level severity) | verify-phases.md, injection/verify.md | Routes verify feedback to correct stage: Minor (inline) / Major-Implement / Major-Plan / Major-Spec |
+
+Key design decisions:
+- V1 Tier 2/3 failures are **warnings** (not blocking) — same severity as existing SC failures
+- V7 runs ONCE before first Feature; only Build check is BLOCKING, others are warnings
+- V8 uses HARD STOP for missing dependencies (follows MANDATORY RULE 1)
+- V9 preserves existing Bug Fix Severity Rule structure (per CLAUDE.md rule 4), extends from 2-level to 4-level
+
+---
+
 ## [2026-03-09] HARD STOP audit — re-ask text + explicit options
 
 Full audit of 56 HARD STOP points. Found and fixed 16 issues:

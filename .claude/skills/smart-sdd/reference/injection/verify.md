@@ -146,11 +146,23 @@ If issues were found, you can fix them directly, then select
 - Display: "⚠️ Verification completed with limitations. Merge allowed — re-verify when limitations are resolved."
 
 **HARD STOP** (ReviewApproval):
-- If any phase failed: Options: "Fix issues and re-verify", "I've finished editing", "Acknowledge limited verification"
+- If any phase failed: Options: "Fix issues and re-verify", "Return to implement", "Return to plan", "Return to specify", "I've finished editing", "Acknowledge limited verification"
 - If all phases passed: Options: "Approve", "I've finished editing", "Re-run verification"
 - If limited verification: Options: "Approve (with ⚠️ limited status)", "Fix issues and re-verify", "I've finished editing"
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**Pipeline regression handling** (when user selects "Return to [stage]"):
+1. Record regression reason in `sdd-state.md` Feature Detail Log with timestamp
+2. Set Feature status to `regression-[stage]` (e.g., `regression-plan`)
+3. Preserve verify results as context for re-run after regression fixes
+4. Display: `↩️ Returning to [stage] for [FID]. Verify results preserved as regression context.`
+5. Resume pipeline from the selected stage (specify → plan → tasks → implement → verify)
+
+**Regression classification guide** (see verify-phases.md Bug Fix Severity Rule for details):
+- **Return to implement**: 3+ files OR new component needed, but spec and plan are correct
+- **Return to plan**: Architecture/data-model/contracts need revision (spec is correct)
+- **Return to specify**: Requirements themselves are wrong or incomplete
 
 ---
 

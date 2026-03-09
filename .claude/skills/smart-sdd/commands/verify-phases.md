@@ -13,25 +13,38 @@ Running `/smart-sdd verify [FID]` performs post-implementation verification. Thi
 
 ### Bug Fix Severity Rule — verify is for FINDING, not REWRITING
 
-When verify discovers a bug, classify its severity before fixing:
+When verify discovers a bug (or the user provides feedback during Review), classify its severity and **route to the correct pipeline stage**:
 
 | Severity | Examples | Action |
 |---|---|---|
 | **Minor** | Missing import, typo, null check, off-by-one, missing CSS class, simple config fix | ✅ Fix inline during verify — commit as `fix:` |
-| **Major** | Frozen object pattern change, service communication architecture, data flow restructuring, new component/module needed, API contract change | ❌ Do NOT fix inline. **Report and BLOCK** — return to implement (or plan if architectural) |
+| **Major-Implement** | Frozen object pattern change, missing component, state flow restructuring, new module needed | ❌ Return to **implement** — re-run affected tasks with issue context |
+| **Major-Plan** | Wrong architecture pattern, missing data model field, API contract mismatch, component structure redesign needed | ❌ Return to **plan** — re-run speckit-plan with updated constraints |
+| **Major-Spec** | Missing functional requirement, wrong acceptance criteria, scope gap, requirement misinterpretation | ❌ Return to **specify** — re-run speckit-specify with corrected requirements |
 
-**How to distinguish**: If the fix touches **3+ files**, changes a **public API/interface**, or requires **architectural reasoning** (not just "add the missing line"), it is Major.
+**How to classify**:
+- **Minor**: Fix touches ≤2 files, no API/interface change, no architectural reasoning needed
+- **Major-Implement**: Fix touches 3+ files OR needs a new component, but spec and plan are correct
+- **Major-Plan**: The plan's architecture, data model, or contracts need revision (spec is correct, but the plan made wrong choices)
+- **Major-Spec**: The requirements themselves are wrong or incomplete (everything downstream — plan, tasks, implement — is built on wrong assumptions)
 
-**When Major issue is found**:
-1. Record the issue in the verify result report with full details
-2. Display: `🔴 Major issue detected — requires re-implementation, not a quick fix`
-3. Set verify status to `failure` with the issue description
+**When any Major issue is found**:
+1. Record the issue in the verify result report with full details and the recommended regression target
+2. Display: `🔴 [Severity] issue detected — requires pipeline regression to [target stage]`
+3. Set verify status to `failure` with the issue description and regression target
 4. **HARD STOP** — Use AskUserQuestion:
-   - "Return to implement with fixes" — return to implement step with the issue context
-   - "Reclassify as Minor and fix now" — user overrides severity classification
+   - "Return to [target stage] with issue context" — pipeline regression with preserved context
+   - "Reclassify severity and fix now" — user overrides severity classification
    **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-**Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt.
+**Pipeline regression handling** (when user confirms "Return to [stage]"):
+1. Record regression reason in `sdd-state.md` Feature Detail Log: `↩️ REGRESSION to [stage] — [reason]`
+2. Set Feature status to `regression-[stage]` (e.g., `regression-specify`, `regression-plan`)
+3. Preserve current verify results as context — the re-run starts with knowledge of what went wrong
+4. Display: `↩️ Returning to [stage] for [FID]. Verify results preserved as regression context.`
+5. Resume pipeline from the selected stage — all subsequent steps (specify → plan → tasks → implement → verify) re-execute
+
+**Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt. Additionally, user feedback during verify Review often identifies issues that are not bugs but rather spec-level or plan-level problems. Without structured regression routing, these fixes happen ad-hoc, outside the pipeline's quality gates.
 
 ---
 
@@ -196,6 +209,7 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 4: Coverage mapping and demo components
   □ Step 5: CI/Interactive path convergence
   □ Step 6: Execute demo --ci
+  □ Step 6b: Execute VERIFY_STEPS (functional verification)
   □ Phase 3b: Bug Prevention Verification
 ```
 
@@ -308,10 +322,41 @@ Phase 3 Checklist (must complete ALL in order):
     Console errors: [N] (TypeError: 2, ReferenceError: 1)
   ```
 
-  **App Shutdown**: After all SC verifications complete, terminate the app process started above. Do NOT leave it running.
+  **Tier 2/3 Functional Verification** (after Tier 1 Presence verification):
+
+  After Tier 1 (`verify selector visible`) completes for each SC, extend verification for SCs that have `verify-state` or `verify-effect` verbs in the Coverage header:
+
+  **Tier 2 — State Change**: For SCs with `verify-state` in their UI Action sequence:
+  - Execute the full UI Action sequence (navigate, fill, click) then check the specified attribute/class/text change
+  - `verify-state selector attribute expected` → check DOM attribute after interaction
+  - Examples: checkbox `checked` attribute, class toggled (`.active`, `.dark`), text content updated, `aria-expanded` changed
+  - Wait 1 second between interaction and verification to allow state propagation
+
+  **Tier 3 — Side Effect**: For SCs with `verify-effect` in their UI Action sequence:
+  - After Tier 2 passes, check the downstream propagation on a DIFFERENT element
+  - `verify-effect target-selector property expected` → check DOM property/style on the downstream target
+  - Examples: theme change → `body` class contains `"dark"`, font size change → `body` style.fontSize is `"18px"`, setting save → `.toast` is visible
+  - Wait 1 second between interaction and verification
+
+  **Extended result report** (replaces the basic report above when Tier 2/3 are present):
+  ```
+  📊 UI Verification Report for [FID]:
+    SC-001: ✅T1 ✅T2 ✅T3 — Full pass
+    SC-002: ✅T1 ❌T2 (click did not toggle .active) — State change failed
+    SC-003: ✅T1 ✅T2 ❌T3 (theme not applied to body) — Side effect not propagated
+    SC-004: ✅T1 (no T2/T3 — presence-only SC)
+    SC-005: ⬜ skipped (WebSocket)
+    Console errors: [N] (TypeError: 2, ReferenceError: 1)
+  ```
+
+  If no `verify-state` or `verify-effect` verbs exist in any SC's Coverage header, skip Tiers 2/3 entirely and use the basic Tier 1 report format.
+
+  **App Shutdown**: After all SC verifications (including Tier 2/3) complete, terminate the app process started above. Do NOT leave it running.
 
 - **Result classification** (all warnings, NOT blocking):
-  - SC interaction failure: ⚠️ warning (false positive possible — selector changes, etc.)
+  - SC Tier 1 (presence) failure: ⚠️ warning (false positive possible — selector changes, etc.)
+  - SC Tier 2 (state change) failure: ⚠️ warning — indicates interaction doesn't produce expected state change
+  - SC Tier 3 (side effect) failure: ⚠️ warning — indicates state change doesn't propagate to downstream DOM
   - JS console errors (TypeError/ReferenceError): ⚠️ warning + highlighted
   - Page load failure: ⚠️ warning
 - **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent. The Case A CDP HARD STOP must always be presented to the user.
@@ -403,6 +448,36 @@ Please create a demo script at demos/F00N-name.sh that:
 
 - Update `demos/README.md` (Demo Hub) with the Feature's demo and what the user can experience:
   - `./demos/F00N-name.sh` — launches [brief description of the live demo experience]
+
+**Step 6b — Execute VERIFY_STEPS** (if MCP available and VERIFY_STEPS block exists):
+
+After demo `--ci` passes, check for a `# VERIFY_STEPS:` comment block in the demo script:
+
+1. Parse the demo script for a `# VERIFY_STEPS:` comment block (lines starting with `#   ` after `# VERIFY_STEPS:`)
+2. If block exists AND `MCP_STATUS` is `active` or `configured`:
+   - Keep the app running (from the demo `--ci --verify` invocation)
+   - Execute each step via Playwright MCP using the same verbs as SC-level verification:
+     - `navigate /path` → Navigate to URL
+     - `click selector` → Click element
+     - `fill selector value` → Fill input field
+     - `verify selector visible` → Tier 1: confirm element exists
+     - `verify-state selector attribute "expected"` → Tier 2: check DOM attribute after interaction
+     - `verify-effect target-selector property "expected"` → Tier 3: check downstream DOM propagation
+   - Wait 1 second between interaction and verification steps
+   - Report per-step results:
+     ```
+     📊 VERIFY_STEPS Functional Verification:
+       Step 1: navigate /settings → ✅
+       Step 2: click button#theme-toggle → ✅
+       Step 3: verify-state html class "dark" → ❌ (class is still "light")
+       Step 4: navigate /settings/display → ✅
+       Step 5: fill input#font-size 18 → ✅
+       Step 6: verify-effect body style.fontSize "18px" → ✅
+       Result: 5/6 passed, 1 failed
+     ```
+   - `verify-state`/`verify-effect` failures → ⚠️ **warning** (NOT blocking)
+3. If VERIFY_STEPS block not found: `ℹ️ Functional verification not configured — VERIFY_STEPS block absent in demo script`
+4. If MCP unavailable: skip silently (already degraded from Pre-flight)
 
 ### Phase 3b: Bug Prevention Verification (B-4)
 

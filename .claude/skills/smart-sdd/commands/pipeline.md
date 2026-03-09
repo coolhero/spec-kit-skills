@@ -270,6 +270,54 @@ If deferred Features exist (core scope only), list them:
 
 This step is informational only — no user confirmation required.
 
+### Step 3b — Foundation Verification Gate (first Feature only)
+
+> Runs ONCE before the first Feature enters the pipeline.
+> **Skip for**: greenfield projects (no Foundation exists yet — nothing to validate), OR if `sdd-state.md` records `Foundation Verified: [date]` with no Foundation-affecting changes since.
+
+**Purpose**: Validate cross-cutting Foundation systems (CSS theme, state management patterns, IPC bridge, core layout) before Feature code builds on them. In F004/F005, all runtime bugs were Foundation-level — CSS theme not loading, Zustand selector instability, IPC bridge disconnected, layout patterns breaking. No amount of Feature-level testing catches a broken Foundation.
+
+**When to run**: Before the FIRST Feature's `specify` step. Also re-run if a preceding Feature modified Foundation files (detected via `git diff` on files outside `specs/`).
+
+**Foundation Checklist** (check all that apply based on constitution tech stack):
+
+| Category | Check | Method | Blocking? |
+|----------|-------|--------|-----------|
+| **Build** | Clean build succeeds | Run build command → exit 0 | ❌ **BLOCKING** |
+| **CSS Theme** | Theme variables load at runtime | Start app → inspect `document.documentElement` computed styles for CSS custom properties | ⚠️ warning |
+| **CSS Theme** | Theme switching works (if applicable) | Toggle theme → verify body class or CSS variable change | ⚠️ warning |
+| **State Management** | Store initialization succeeds | Import store → call `getState()` → verify non-null | ⚠️ warning |
+| **State Management** | Selector stability | Call selector twice → verify referential equality (no new object per call) | ⚠️ warning |
+| **IPC Bridge** (Electron) | Main↔Renderer communication | Send test IPC message → verify response | ⚠️ warning |
+| **Layout** | Core layout renders without error | Navigate to base route → snapshot → no error screen | ⚠️ warning |
+
+**Execution**:
+1. Run build → **BLOCK on failure** (same as Phase 1 build gate)
+2. If MCP available (Playwright active/configured): start app → run applicable checks → report
+3. If MCP unavailable: build-only mode. Display:
+   `⚠️ Foundation verification limited to build check (MCP unavailable). Runtime Foundation issues may surface during Feature implementation.`
+
+**Result display**:
+```
+🏗️ Foundation Verification:
+  ✅ Build: clean build succeeded
+  ✅ CSS Theme: custom properties loaded (--bg-primary, --text-primary, ...)
+  ⚠️ State Management: selector stability NOT verified (no stores defined yet)
+  ⏭️ IPC Bridge: skipped (not Electron)
+  ✅ Layout: base route renders without error
+
+Foundation status: PASS (1 warning)
+```
+
+**Record** in `sdd-state.md`: `Foundation Verified: [date] | [PASS/WARN/FAIL] | [details]`
+- PASS or WARN → proceed to Feature pipeline
+- Any BLOCKING check fails → **HARD STOP**. Use AskUserQuestion:
+  - "Fix Foundation issues and retry" — user fixes, agent re-runs gate
+  - "Override and proceed" — requires reason via "Other" input. Records `⚠️ FOUNDATION-OVERRIDE — [reason]`
+  **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+**On subsequent Features**: Skip if `Foundation Verified` exists in `sdd-state.md` AND no Foundation-affecting changes since last verification. Foundation-affecting changes = modifications to files outside `specs/` (theme config, store definitions, layout components, IPC handlers, build config).
+
 ### Step 4 — Feature Selection
 
 Determines which Feature(s) to process based on the invocation arguments.

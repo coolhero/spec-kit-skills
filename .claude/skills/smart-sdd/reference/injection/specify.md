@@ -118,6 +118,14 @@ Feature: [FID] - [Feature Name]
 ── Preceding Feature References ──────────────────
 [If applicable: what was referenced from preceding Features]
 
+── Functional Enablement Chain ─────────────────
+[If present in pre-context — show enablement/blocking relationships]
+  Enables → F005-chat: Provider settings panel works
+  Blocked by ← F001-shell: Window frame config applied
+  ⚠️ Ensure SC-### cover the functional interfaces that downstream Features depend on.
+    These interfaces are what downstream Features need to work at runtime.
+[If section empty, absent, or "None": skip this block entirely]
+
 ──────────────────────────────────────────────────
 Review the above content. You can:
   - Approve as-is to proceed with speckit-specify
@@ -133,8 +141,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 
 1. **SBI Accuracy Cross-Check** (if applicable — rebuild/adoption with SBI)
 2. **Platform Constraint FR Verification** (if applicable — pre-context has Platform Constraints)
-3. **Assemble Review Display** (include any ⚠️ warnings from steps 1-2)
-4. **HARD STOP** (ReviewApproval)
+3. **Edge Case Coverage Check** (if applicable — pre-context has Edge Cases)
+4. **Assemble Review Display** (include any ⚠️ warnings from steps 1-3)
+5. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -177,6 +186,29 @@ If pre-context has a "Platform Constraints from Preceding Features" section with
    ```
 
 **Skip if**: No Platform Constraints section, or section says "None".
+
+### Edge Case Coverage Check
+
+> **Purpose**: Edge cases from pre-context are often listed as free text without structured scenarios (expected result + verify method). This check ensures each edge case is covered by at least one SC-###, so they don't surface as surprise bugs during implementation.
+
+If pre-context contains an "Edge Cases" section with entries:
+
+1. For each edge case, search `spec.md` SC-### descriptions for a matching scenario
+2. Build a coverage matrix and append to Review Display:
+   ```
+   ── ⚠️ Edge Case Coverage ─────────────────────
+   | Edge Case | Covered by SC | Expected Result | Verify Method |
+   |-----------|--------------|-----------------|---------------|
+   | Empty form submit | SC-005 | Validation error shown | verify-state .error visible |
+   | Network timeout | NOT COVERED | Retry or error toast | — |
+   | Max-length input | SC-012 | Input truncated | verify-state input maxLength "100" |
+
+   ⚠️ [N] edge cases have no corresponding SC-###.
+   ────────────────────────────────────────────────
+   ```
+3. This is a **warning** (NOT blocking) — included in Review Display. The user decides whether to add missing SCs or proceed without them.
+
+**Skip if**: No Edge Cases section in pre-context, or section is empty/contains only "N/A".
 
 ### Review Display Content
 
