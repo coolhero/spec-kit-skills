@@ -12,6 +12,14 @@
 
 5. **verify-phases.md — Agent-managed app lifecycle**: UI 검증 시 앱 시작/종료는 에이전트가 직접 관리합니다. 사용자에게 앱을 수동으로 시작/재시작하라고 요청하지 마세요. CDP 프로브 로직의 세부 구현은 개선할 수 있지만, "에이전트가 앱을 직접 관리한다"는 원칙은 유지해야 합니다.
 
+6. **analyze.md — Feature ID Tier-first ordering**: Feature ID는 Tier 우선 전역 순서로 할당합니다 (T1 전체 → T2 전체 → T3 전체, 각 Tier 내에서는 RG 순서). RG 우선 순서로 되돌리지 마세요. T1만 활성화된 파이프라인에서 ID 갭이 발생합니다.
+
+7. **verify-phases.md — Playwright MCP Pre-flight**: verify Phase 1 시작 전 Playwright MCP 가용성 체크(active/configured/unavailable)를 반드시 수행합니다. 이 pre-flight를 제거하거나 건너뛰지 마세요. Electron 앱의 경우 CDP 사전 설정이 필요합니다.
+
+8. **pipeline.md — Execute+Review Continuity**: speckit-* 명령 실행 후 결과 요약만 표시하고 멈추지 마세요. Execute와 Review는 하나의 연속 동작입니다. `speckit-* 완료 → artifact 읽기 → Review 표시 → AskUserQuestion 호출`이 반드시 같은 응답에서 이루어져야 합니다. 컨텍스트 한계로 불가능한 경우에만 fallback 메시지(`💡 Type "continue" to review the results.`)를 표시합니다.
+
+9. **pipeline.md — Inter-step Continuity**: Feature 내 step 간 전환(예: plan Update → tasks Checkpoint)은 자동으로 이어져야 합니다. step 완료 후 "completed" 메시지만 표시하고 멈추지 마세요. 멈출 수 있는 유일한 지점은 HARD STOP(사용자 승인 대기), BLOCK 조건, Feature 완료, 복구 불가 에러뿐입니다.
+
 ## Design Principles
 
 - **에이전트 워킹 메모리 대신 파일에 기록**: Phase 간 전달되는 중간 산출물은 에이전트 메모리에 보관하지 않고 반드시 파일로 저장합니다. 에이전트 메모리는 컨텍스트 윈도우 한계, 세션 단절, Phase 간 정보 손실에 취약합니다. 파일로 저장하면 언제든 다시 읽을 수 있고, 사용자가 내용을 직접 확인·수정할 수 있으며, 다른 세션에서도 활용 가능합니다.

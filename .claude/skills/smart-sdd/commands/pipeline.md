@@ -488,8 +488,12 @@ Executes the following steps **strictly in order** for each Feature.
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
 
-> **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip.>
+> **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip.
+>
 > **CRITICAL**: After each `speckit-*` command completes, it prints its own "Next phase:" or "Next step:" message. **IGNORE these messages completely — do NOT show them to the user.** smart-sdd controls the flow: after Execute, you MUST immediately proceed to the Review(STOP) step, not follow spec-kit's suggestions.
+
+> **⚠️ INTER-STEP CONTINUITY — DO NOT STOP BETWEEN STEPS**:
+> After a step's Update completes and there are remaining steps, **IMMEDIATELY begin the next step** (e.g., plan Update done → start tasks Checkpoint). Do NOT display a "completed" summary and wait. Do NOT show "Next steps" commands. The pipeline is a continuous flow within a Feature — the ONLY valid pause points are HARD STOPs (awaiting user approval), BLOCK conditions, Feature completion, or unrecoverable errors. If you find yourself about to generate a response that ends without starting the next step — **STOP, you are breaking continuity. Proceed to the next step.**
 
 #### Clarify Trigger (after specify Review)
 
@@ -630,6 +634,8 @@ Next steps:
 ```
 
 > **Pipeline continuity rule**: Within a single Feature, the pipeline is a CONTINUOUS flow. The only reasons to stop are: (1) HARD STOP checkpoints requiring user approval, (2) BLOCK conditions (verify/merge gates), (3) Feature completed, or (4) Unrecoverable error. Never display "Next steps" with commands unless the pipeline is actually stopping.
+>
+> **Common violation**: After a step's Review is approved and Update completes, the agent displays a "✅ step completed" message and stops — forcing the user to type "continue". This is WRONG. After Update, immediately begin the next step's Assemble/Checkpoint. The user should only see HARD STOP prompts (AskUserQuestion), not "continue" prompts between steps.
 
 ---
 
