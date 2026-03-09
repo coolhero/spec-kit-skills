@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:28 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:30 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -292,6 +292,28 @@ Generates: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-regi
 | For /speckit.specify | specify | Feature summary, FR/SC drafts, edge cases |
 | For /speckit.plan | plan | Dependencies, entity/API schema drafts, technical decisions |
 | For /speckit.analyze | analyze | Cross-Feature verification points, impact scope |
+
+## Using spec-kit without smart-sdd
+
+After running `/reverse-spec`, you can use plain spec-kit with the generated `speckit-prompt.md` instead of smart-sdd. This gives you the cross-Feature context that smart-sdd would normally inject automatically, but as a manual guide.
+
+**Setup:**
+
+1. Run `/reverse-spec` on your codebase — generates artifacts in `specs/reverse-spec/`
+2. Copy `specs/reverse-spec/speckit-prompt.md` into your project's `CLAUDE.md` (or feed it to the agent at session start)
+3. Run spec-kit commands (`specify`, `plan`, etc.) directly — the prompt tells the agent which artifacts to read before each command
+
+**What the prompt covers:**
+- **Artifact Map** — which reverse-spec files exist and what each one does
+- **Per-command context** — for each spec-kit command (specify / plan / implement / verify), which artifacts to read and what to check after execution
+- **Cross-Feature rules** — how to maintain consistency when entities or APIs are shared across Features
+
+**When to use smart-sdd instead:**
+- You want fully automated context injection (no manual steps)
+- You need advanced checks: SBI cross-verification, CSS Value Map, Pattern Compliance Scan, Runtime Error Zero Gate
+- You need automatic state tracking across Features (`sdd-state.md`)
+
+---
 
 ## /smart-sdd — Detailed Workflow
 
