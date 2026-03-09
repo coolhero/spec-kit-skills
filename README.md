@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-09 08:30 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-09 09:38 KST
 
 **Custom Claude Code skills that add cross-Feature intelligence to [spec-kit](https://github.com/github/spec-kit) SDD workflows**
 
@@ -306,20 +306,16 @@ Generates: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-regi
 /smart-sdd adopt                         # Adopt pipeline: specify → plan → analyze → verify
 /smart-sdd adopt --from ./path           # Read artifacts from specified path
 
-# Pipeline
-/smart-sdd pipeline                      # With per-step confirmation
+# Pipeline (one Feature at a time by default)
+/smart-sdd pipeline                      # Next single Feature (auto-select)
+/smart-sdd pipeline F003                 # Target F003 specifically
+/smart-sdd pipeline --start verify       # Next Feature, re-run from verify
+/smart-sdd pipeline F003 --start verify  # F003, re-run from verify
+/smart-sdd pipeline --all                # All eligible Features (batch mode)
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
-/smart-sdd pipeline --start implement    # Start from implement step
-/smart-sdd pipeline --start verify       # Start from verify step
 
-# Step Mode
+# Constitution (standalone)
 /smart-sdd constitution                  # Finalize constitution
-/smart-sdd specify F001                  # Specify Feature
-/smart-sdd plan F001                     # Plan Feature
-/smart-sdd tasks F001                    # Generate tasks
-/smart-sdd analyze F001                  # Cross-artifact consistency check
-/smart-sdd implement F001               # Implement Feature
-/smart-sdd verify F001                   # Verify Feature
 
 # Management
 /smart-sdd expand T2                     # Activate Tier 2 Features
