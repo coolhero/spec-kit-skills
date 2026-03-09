@@ -2,12 +2,12 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:08 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:09 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
 - **Reverse-Spec** — 브라운필드 코드베이스를 Spec 중심으로 재정렬하여 레거시를 계약 기반 체계로 편입시킵니다.
-- **Smart-SDD** — spec-kit 명령을 교차 Feature 컨텍스트로 확장하여, 한 Feature의 변경이 다른 Feature를 깨뜨리지 않도록 합니다.
+- **Smart-SDD** — spec-kit 명령 실행 시 관련 Feature의 계약·상태를 자동 주입하고, 변경이 기존 계약을 위반하지 않는지 검증하여 Feature 간 정합성을 유지합니다.
 
 ---
 
