@@ -127,6 +127,79 @@ implementation tasks for complex source files.
 
 > **Estimation heuristic**: ~100 lines of original source ≈ 1 implementation task (varies by complexity). Files over 300 lines typically need 3+ tasks.
 
+**Interaction Chain task injection check** (only if plan.md contains an `## Interaction Chains` section):
+After reading tasks.md, scan for tasks that address the full chain propagation (keywords: "interaction chain", "DOM effect", "store mutation", "visual result", "propagation", "classList", "style."). If tasks only mention handlers (e.g., "implement onThemeChange") but NOT the DOM/visual steps, append:
+
+```
+── ⚠️ Interaction Chain Tasks Incomplete ────────────
+Interaction Chains are defined in plan.md but tasks.md only covers handlers —
+DOM effects and visual results are missing as explicit tasks.
+
+Each chain row should generate tasks for the FULL propagation:
+  Handler → Store Mutation → DOM Effect → Visual Result
+
+Missing chain steps:
+  FR-012 (theme toggle): ❌ No task for body.classList.add('dark')
+  FR-015 (font size):    ❌ No task for body.style.fontSize assignment
+
+Add DOM/visual tasks now or during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+**UX Behavior Contract task injection check** (only if plan.md contains a `## UX Behavior Contract` section):
+After reading tasks.md, scan for async UX behavior tasks (keywords: "auto-scroll", "loading state", "spinner", "error recovery", "cleanup", "unmount", "streaming", "loading indicator", "abort"). If **no UX behavior tasks are found**, append:
+
+```
+── ⚠️ UX Behavior Tasks Missing ───────────────────
+UX Behavior Contract is defined in plan.md but tasks.md has no
+explicit tasks for temporal UX patterns.
+
+Each contract row should generate implementation tasks:
+  - Streaming auto-scroll → task: "Implement auto-scroll during streaming"
+  - Loading state → task: "Implement loading spinner show/hide"
+  - Error recovery → task: "Implement error toast + input re-enable"
+  - Cleanup on unmount → task: "Implement stream abort on component unmount"
+
+Without explicit tasks, the agent implements the function but not the experience.
+Add UX behavior tasks now or during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+**API Compatibility Matrix task injection check** (only if plan.md contains an `## API Compatibility Matrix` section):
+After reading tasks.md, scan for per-provider tasks (keywords: provider names from the matrix, "provider adapter", "auth method", "per-provider", "API compatibility"). If tasks only mention one provider or use generic "API integration", append:
+
+```
+── ⚠️ Per-Provider Tasks Missing ──────────────────
+API Compatibility Matrix is defined in plan.md with [N] providers
+but tasks.md does not have per-provider implementation tasks.
+
+Each provider should have explicit tasks:
+  - OpenAI: auth (Bearer), endpoints (/v1/chat/completions), response parsing
+  - Anthropic: auth (x-api-key + version header), endpoints (/v1/messages), response parsing
+  - Ollama: no-auth local mode, endpoints (/api/chat), response parsing
+
+Without per-provider tasks, one provider's pattern gets applied to all.
+Add provider-specific tasks now or during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+**SDK Migration task injection check** (only if plan.md contains an `## SDK Migration Awareness` section or mentions SDK version upgrade):
+After reading tasks.md, scan for SDK migration tasks (keywords: "SDK migration", "breaking change", "API rename", "version upgrade", "deprecated"). If **no SDK migration tasks are found**, append:
+
+```
+── ⚠️ SDK Migration Tasks Missing ─────────────────
+SDK version upgrade detected in plan.md but tasks.md has no
+"SDK API contract verification" task.
+
+Recommended task: verify each breaking change was handled:
+  - API renames applied (e.g., textDelta → text)
+  - Default behavior changes accounted for
+  - Deprecated APIs replaced
+
+Add this task now or during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
 **Feature size warning** (always checked):
 After reading tasks.md, count the total number of tasks. Also read plan.md to estimate file count from architecture/phases:
 
@@ -182,6 +255,23 @@ These are recommendations, not blockers. Proceed if the Feature is inherently la
 ── ℹ️ Source Complexity Reference ───────────────────
 [Only if rebuild/adoption mode AND pre-context has Source Reference files.
  Shows original file sizes and estimated task count comparison]
+
+── ⚠️ Interaction Chain Tasks Incomplete ──────────
+[Only if plan.md has Interaction Chains AND tasks.md only covers
+ handlers without DOM effect/visual result tasks]
+
+── ⚠️ UX Behavior Tasks Missing ──────────────────
+[Only if plan.md has UX Behavior Contract AND tasks.md has no
+ explicit tasks for temporal UX patterns (auto-scroll, loading,
+ error recovery, cleanup)]
+
+── ⚠️ Per-Provider Tasks Missing ─────────────────
+[Only if plan.md has API Compatibility Matrix AND tasks.md has
+ no per-provider implementation tasks]
+
+── ⚠️ SDK Migration Tasks Missing ────────────────
+[Only if plan.md mentions SDK version upgrade AND tasks.md has
+ no SDK migration verification task]
 
 ── ⚠️ Feature Size Warning ───────────────────────
 [Only if task count > 100 OR estimated file count > 50]

@@ -277,6 +277,25 @@ If `pre-context.md` contains a "Functional Enablement Chain" section with "Enabl
 3. If source Feature IS verified AND app is running: run source Feature's demo in `--ci` mode to confirm it still works
    - If demo fails → ⚠️ warning: `Source Feature F00N-[feature] demo --ci failed — may affect this Feature`
 
+**Step 5 — API Compatibility Matrix Verification** (if plan.md has API Compatibility Matrix):
+
+If `plan.md` contains an `## API Compatibility Matrix` section with 2+ providers:
+
+1. For each provider row in the matrix, verify the implementation handles provider-specific details:
+   - **Auth method**: grep for each provider's auth pattern (e.g., `Bearer`, `x-api-key`, `anthropic-version`)
+   - **Endpoint URLs**: grep for each provider's base URL or endpoint paths
+   - **Response parsing**: grep for each provider's response format (e.g., `choices[0].message`, `content[0].text`)
+2. Report:
+   ```
+   📊 API Compatibility Matrix Verification:
+     OpenAI:    Auth ✅ (Bearer found) | Endpoint ✅ | Response ✅
+     Anthropic: Auth ✅ (x-api-key found) | Endpoint ✅ | Response ❌ — using OpenAI response format
+       ⚠️ Response parsing uses choices[0].message but Anthropic returns content[0].text
+     Ollama:    Auth ✅ (no-auth) | Endpoint ✅ | Response ✅
+   ```
+3. Provider-specific mismatch → ⚠️ **HIGH warning** — will cause runtime auth/parsing failures
+4. **Skip if**: No API Compatibility Matrix in plan.md, or < 2 providers
+
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
@@ -399,6 +418,11 @@ Phase 3 Checklist (must complete ALL in order):
        - `fill selector` → input via Type capability
        - `click selector` → click via Click capability
        - `verify selector visible` → confirm element existence via Snapshot capability
+       - `wait-for selector visible [timeout]` → wait until element appears (use Playwright `toBeVisible({ timeout })` or MCP poll loop)
+       - `wait-for selector gone [timeout]` → wait until element disappears (use Playwright `toBeHidden({ timeout })` or MCP poll loop)
+       - `wait-for selector textContent "pattern" [timeout]` → wait until element text matches (use Playwright `toHaveText` or MCP text poll)
+       - `verify-scroll selector "bottom"` → evaluate `scrollTop + clientHeight >= scrollHeight - 5` via JavaScript execution
+       - `trigger selector event` → dispatch event via JavaScript execution
      - ⬜-marked SC: Skip (record reason)
   3. Collect JS errors from Console logs (TypeError, ReferenceError, etc.)
   4. Detect page load failures
@@ -553,7 +577,12 @@ After demo `--ci` passes, check for a `# VERIFY_STEPS:` comment block in the dem
      - `verify selector visible` → Tier 1: confirm element exists
      - `verify-state selector attribute "expected"` → Tier 2: check DOM attribute after interaction
      - `verify-effect target-selector property "expected"` → Tier 3: check downstream DOM propagation
-   - Wait 1 second between interaction and verification steps
+     - `wait-for selector visible [timeout]` → wait until element appears (poll with timeout, default 10s)
+     - `wait-for selector gone [timeout]` → wait until element disappears (poll with timeout)
+     - `wait-for selector textContent "pattern" [timeout]` → wait until element text matches pattern
+     - `verify-scroll selector "bottom"` → evaluate `scrollTop + clientHeight >= scrollHeight - 5` via JavaScript
+     - `trigger selector event` → dispatch event via JavaScript execution
+   - Wait 1 second between interaction and verification steps (temporal verbs handle their own timeouts)
    - Report per-step results:
      ```
      📊 VERIFY_STEPS Functional Verification:

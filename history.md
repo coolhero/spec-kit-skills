@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-09] Cross-file Consistency Fix — 9 issues (7 critical + 2 bugs)
+
+Post W1-W10 cross-file consistency audit found 12 issues. Fixed 9 (critical + bugs):
+
+**Downstream flow breaks fixed (7 critical)**:
+- injection/tasks.md: Added 4 new task injection checks (Interaction Chain, UX Behavior Contract, API Compatibility Matrix, SDK Migration) — tasks.md now receives and enforces downstream guidance from plan.md
+- injection/implement.md: Added 3 new Read Targets + injection sections (Interaction Chains, UX Behavior Contract, API Compatibility Matrix) — implement now receives chain/contract/matrix context per task
+- verify-phases.md: Added Step 5 (API Compatibility Matrix Verification) — per-provider auth/endpoint/response grep check
+
+**Reference bugs fixed (2)**:
+- injection/plan.md: UX Behavior Contract downstream flow said "Phase 3" → fixed to "Phase 2 Step 3b"
+- verify-phases.md: Added temporal verb MCP mappings (wait-for, verify-scroll, trigger) to Step 3 and Step 6b
+
+**Deferred (3 minor)**: Phase 3 checklist Step 3b missing, verify-scroll "not-bottom" mapping, css-value-map isolated to implement
+
+---
+
 ## [2026-03-09] W10: Async UX Behavior Chains + UX Behavior Contract
 
 Interaction Chains (V2) covered synchronous state propagation (click→handler→store→DOM) but missed temporal/async UX patterns — streaming auto-scroll, loading state transitions, error recovery, cleanup on unmount. These caused real bugs (e.g., chat doesn't scroll during streaming, spinner never disappears, memory leak on unmount).

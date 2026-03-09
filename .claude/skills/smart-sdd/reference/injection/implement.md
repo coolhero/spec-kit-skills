@@ -15,6 +15,9 @@
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "Pattern Constraints" section | **If present** — inject as mandatory reference for every task execution |
+| `SPEC_PATH/[NNN-feature]/plan.md` | "Interaction Chains" section | **If present (UI Features)** — inject chain propagation context for each task |
+| `SPEC_PATH/[NNN-feature]/plan.md` | "UX Behavior Contract" section | **If present (async UI Features)** — inject temporal UX expectations for each task |
+| `SPEC_PATH/[NNN-feature]/plan.md` | "API Compatibility Matrix" section | **If present (multi-provider)** — inject per-provider contracts for each task |
 | `specs/reverse-spec/visual-references/manifest.md` | Relevant screens | **Rebuild mode only, if exists** — inject as visual target reference |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** (Source Path ≠ N/A). Resolve file paths per specify.md Source Reference Path Resolution rules |
 | `specs/reverse-spec/visual-references/style-tokens.md` | Entire file | **Rebuild mode only, if exists** — inject as CSS reference for matching original styles |
@@ -26,6 +29,26 @@ If plan.md contains a `## Pattern Constraints` section, this section MUST be inc
 Display before each task: `📋 Pattern Constraints (from plan.md): [constraint count] constraints active`
 
 This prevents the scenario where parallel agents independently generate code with inconsistent patterns (e.g., one agent uses stable selectors while another creates new arrays per selector call).
+
+## Interaction Chains Injection (UI Features)
+
+If plan.md contains an `## Interaction Chains` section, inject the relevant chain rows for each task. When a task implements a handler (e.g., `onThemeChange`), the agent MUST also implement the full chain: Store Mutation → DOM Effect → Visual Result — not just the handler function.
+
+Display before each UI-related task: `📋 Interaction Chains: [N] chains active — implement full propagation (Handler → Store → DOM → Visual)`
+
+For tasks implementing `async-flow:` rows, the agent MUST implement the full temporal sequence: loading state → streaming updates → completion → error recovery → cleanup.
+
+## UX Behavior Contract Injection (async UI Features)
+
+If plan.md contains a `## UX Behavior Contract` section, inject the contract rows for each task that involves async operations (streaming, loading, API calls). The agent MUST implement the Expected Behavior described in the contract — not just the functional handler.
+
+Display before each async-related task: `📋 UX Behavior Contract: [N] scenarios — implement temporal behavior (loading, streaming, error recovery, cleanup)`
+
+## API Compatibility Matrix Injection (multi-provider Features)
+
+If plan.md contains an `## API Compatibility Matrix` section, inject the full matrix for each task that involves API integration. The agent MUST follow the specific provider's row (auth method, endpoint, headers, response format) — NOT apply one provider's pattern to all.
+
+Display before each API-related task: `📋 API Compatibility Matrix: [N] providers — follow per-provider contracts (auth, endpoints, response format)`
 
 ## Source Reference Injection (rebuild/adoption mode)
 

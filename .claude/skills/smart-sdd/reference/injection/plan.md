@@ -335,7 +335,7 @@ The UX Behavior Contract makes **expected temporal behavior** explicit — thing
 1. **plan.md** → UX Behavior Contract defined
 2. **tasks.md** → each UX behavior generates explicit implementation tasks (not just "add streaming" but "add auto-scroll during streaming", "add scroll-pause on user scroll-up", "add loading skeleton after 3s")
 3. **implement** → each task explicitly implements the temporal behavior
-4. **verify** → UX Smoke Test in Phase 3 uses Verify Method column for temporal checks
+4. **verify** → Phase 2 Step 3b (UX Behavior Contract Verification) uses Verify Method column for temporal checks
 5. **demo** → VERIFY_STEPS includes temporal verification sequences (wait-for + verify)
 
 ## Bug Prevention Checks (B-1)
