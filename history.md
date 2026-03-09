@@ -5,6 +5,41 @@
 
 ---
 
+## [2026-03-09] Specify/Tasks/Implement Accuracy Guards — 4 additional changes
+
+Root cause (continued): Even with S1-S11 source reference + MCP improvements, pipeline still lacked accuracy verification at key handoff points. SBI text can be misinterpreted without cross-checking actual source (e.g., "3 tabs" vs "2 tabs"); tasks can be under-scoped relative to original complexity; components can be "implemented" as `() => null` stubs.
+
+| # | Change | File(s) | Impact |
+|---|--------|---------|--------|
+| S12 | SBI Accuracy Cross-Check + Platform Constraint FR Verification | injection/specify.md | Catches SBI misinterpretation (tab count, conditional views) and missing platform FRs |
+| S13 | Visual Verification Task injection | injection/tasks.md | Warns if UI rebuild tasks.md has no visual comparison task |
+| S14 | Stub/Empty Implementation Detection | injection/implement.md | Detects `() => null`, `return null`, `// TODO` in grep scan |
+| S15 | Source Complexity Annotation | injection/tasks.md | Shows original file sizes → helps estimate if tasks are under-scoped |
+
+---
+
+## [2026-03-09] Source Reference Pipeline & Playwright MCP Active Use — 11 supplementary changes
+
+Root cause: F005-chat-ui post-mortem revealed TWO additional gap categories beyond runtime verification. (A) Information supply gaps: agent can't fix what it can't see — original source files invisible during implement, platform constraints not propagated, no concrete CSS values, coarse component mapping. (B) Playwright MCP structural gaps: 3-way dependency (App → MCP → Session) order matters, initial ToolSearch failure becomes permanent, no CDP diagnostic, no UI fix escalation.
+
+| # | Change | File(s) | Impact |
+|---|--------|---------|--------|
+| S1 | Source Reference Active Read during implement | injection/implement.md | Original source files read before each task for rebuild fidelity |
+| S2 | Platform Constraint dependency type + propagation | roadmap-template.md, pre-context-template.md, analyze.md | `frame:false` → `app-region:drag` propagated to downstream Features |
+| S3 | Style Token Extraction during Phase 1.5 | analyze.md, injection/implement.md | Concrete CSS values (colors, spacing, fonts) extracted via browser_evaluate |
+| S4 | Component-to-Source Mapping (Rebuild Target) | pre-context-template.md, analyze.md, injection/plan.md | Original files mapped to planned target paths for task matching |
+| S5 | CDP Endpoint Diagnostic Fallback | verify-phases.md, analyze.md | `curl localhost:9222` diagnostic before generic "install MCP" dead end |
+| S6 | Verify Phase 0: Build + App Start before MCP check | verify-phases.md | App running before MCP detection → tools load correctly |
+| S7 | UI Fix Escalation Principle | injection/implement.md | 2+ failed code-reasoning fixes → re-check MCP/CDP availability |
+| S8 | MCP-GUIDE.md CDP troubleshooting | MCP-GUIDE.md | "Connected" confusion, CDP order, 5-row troubleshooting table |
+| S9 | SKILL.md Electron CDP prerequisites | smart-sdd/SKILL.md | Explicit Electron CDP install command + start order warning |
+| S10 | Implement-time Playwright MUST/SHOULD/MAY | injection/implement.md | Playwright not verify-only: MUST/SHOULD/MAY usage classification |
+| S11 | RUNTIME-DEGRADED in state-schema | state-schema.md | Special flags documented: RUNTIME-DEGRADED, NEVER-RUNTIME-VERIFIED |
+
+Design constraint: MCP-GUIDE.md line 246 warns file-based MCP detection is unreliable. CDP diagnostic uses `curl` (runtime check), not config file reading.
+
+---
+
 ## [2026-03-09] Runtime-First Verification & Visual Fidelity — 9 changes across pipeline
 
 Root cause: F005-chat-ui passed full pipeline but app didn't work (Zustand selector instability → infinite re-render, useEffect DOM flicker). Verify equated "build passes" with "app works."

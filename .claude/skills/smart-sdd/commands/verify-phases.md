@@ -35,9 +35,42 @@ When verify discovers a bug, classify its severity before fixing:
 
 ---
 
+### Phase 0: Runtime Environment Readiness (UI Features only)
+
+> Run BEFORE Pre-flight MCP check. Ensures the app can be reached by Playwright.
+> Skip for non-UI Features (backend-only, library, CLI — detected from constitution-seed.md or pre-context.md).
+
+**0-1. Build**: Run the project's build command (from `quickstart.md` or constitution).
+- Build failure → BLOCK (same as Phase 1 build gate). Do NOT proceed to MCP check.
+- Display: `🔨 Building project for runtime verification...`
+
+**0-2. Start App with CDP** (Electron projects):
+- Read build tool from pre-context/constitution tech stack
+- Start app with CDP: per MCP-GUIDE.md Electron build tool table
+  (e.g., `npx electron-vite preview -- --remote-debugging-port=9222` or `npx electron out/main/index.js --remote-debugging-port=9222`)
+- Record PID for cleanup after verify completes
+- Display: `🚀 Starting Electron app with CDP on port 9222...`
+
+**0-2 alt. Start Dev Server** (Web projects):
+- Start dev server (from `quickstart.md` or `launch.json`)
+- Wait for port readiness (poll health endpoint or port, max 30s)
+- Display: `🚀 Starting dev server...`
+
+**0-3. Verify CDP Connection** (Electron only):
+- Run `curl -s http://localhost:9222/json/version`
+- Retry: 3 attempts, 3s interval
+- All fail → HARD STOP: `CDP connection failed after app start. Check app startup logs.`
+  Use AskUserQuestion: "Retry" / "Continue without UI verification"
+  **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+**0-4. Note**: After Phase 0, the app is running. Pre-flight MCP check (next) can now detect tools correctly.
+If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight section below) provides specific guidance.
+
+---
+
 ### Pre-flight: MCP Availability Check
 
-**Run this BEFORE Phase 1.** Determines whether UI verification is possible for Phase 3 Step 3.
+**Run this BEFORE Phase 1.** (After Phase 0 if applicable.) Determines whether UI verification is possible for Phase 3 Step 3.
 
 **Detection method** — check if Playwright MCP tools exist in the current session:
 1. Attempt to call `browser_snapshot` (the most reliable probe)
@@ -51,14 +84,34 @@ When verify discovers a bug, classify its severity before fixing:
 | Tool exists but fails with connection error (ECONNREFUSED) | ✅ Configured but app not running | `MCP_STATUS = configured` |
 | Tool does not exist / "unknown tool" error | ❌ Not installed | `MCP_STATUS = unavailable` |
 
-**If `MCP_STATUS = unavailable`**: Display warning and **HARD STOP** immediately:
+**If `MCP_STATUS = unavailable`** — run CDP Endpoint Diagnostic before HARD STOP:
+
+**CDP Diagnostic** (Electron projects only — detected from constitution-seed.md or pre-context.md tech stack):
+1. Run `curl -s http://localhost:9222/json/version` (timeout 3s)
+2. **If curl succeeds** (returns JSON): CDP is active but Playwright tools are not loaded.
+   - Diagnosis: `CDP endpoint is running at localhost:9222. Playwright MCP tools are not loaded in this session.`
+   - Likely cause: Claude Code session was started before the app, or MCP is not configured with `--cdp-endpoint`.
+   - Solution: `Restart Claude Code session (the app is already running with CDP).`
+3. **If curl fails** (connection refused / timeout): CDP endpoint is not running.
+   - Diagnosis: `CDP endpoint not running.`
+   - Solution: `Start the Electron app with --remote-debugging-port=9222, then restart Claude Code session.`
+
+**Non-Electron projects**: Skip CDP probe. Show standard install instructions.
+
+Display the diagnostic result (if applicable), then **HARD STOP**:
 ```
 ⚠️ Playwright MCP is not installed. UI verification (Phase 3 Step 3) will be skipped.
+
+[If Electron + CDP diagnostic ran]:
+  📋 CDP Diagnostic: [diagnosis from above]
+  💡 Solution: [solution from above]
+
 Installation: claude mcp add playwright -- npx @playwright/mcp@latest
+For Electron apps: claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
 See MCP-GUIDE.md for details.
 ```
 **Use AskUserQuestion**:
-- "Install and retry" — user installs MCP, then restart verify
+- "Restart session after setup" — user follows diagnostic instructions, restarts
 - "Continue without UI verification" — proceed, Phase 3 Step 3 will be skipped
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 
@@ -208,7 +261,8 @@ Phase 3 Checklist (must complete ALL in order):
      **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
 
   3. **Case B — CDP configured, app not running**: No user action needed. The agent starts the app itself.
-     Display: `ℹ️ CDP mode confirmed. Starting the app automatically.`
+     **If app was started in Phase 0**: Reuse the running instance — do NOT start a second app. Check if the Phase 0 process is still alive (`kill -0 $PID`), and if so, proceed directly to SC-level UI verification.
+     **Otherwise**: Display: `ℹ️ CDP mode confirmed. Starting the app automatically.`
      Proceed to the App Launch step below.
 
   4. **If CDP active and app already connected**: Skip app launch, proceed directly to SC-level UI verification.

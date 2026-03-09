@@ -90,6 +90,15 @@ If the user skips Environment Bootstrap, record a single row:
 
 ---
 
+### Special Flags (Detail/Notes column)
+
+| Flag | Set By | Meaning | Impact |
+|------|--------|---------|--------|
+| `⚠️ RUNTIME-DEGRADED` | implement (MCP unavailable) | Feature was implemented without runtime verification | verify Phase 3 BLOCKS if MCP is still unavailable — requires user acknowledgment |
+| `⚠️ NEVER-RUNTIME-VERIFIED — [reason]` | verify (MCP still unavailable) | User acknowledged no runtime verification will be done | Recorded for traceability. Not blocking further pipeline steps |
+
+---
+
 ## Feature Detail Log
 
 ### F001-auth

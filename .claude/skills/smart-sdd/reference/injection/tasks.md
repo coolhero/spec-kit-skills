@@ -10,6 +10,7 @@
 | File | Section | Filtering |
 |------|---------|-----------|
 | `SPEC_PATH/[NNN-feature]/plan.md` | Entire file | Current Feature |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** — for Source Complexity Annotation. Resolve file paths per `injection/specify.md` Source Reference Path Resolution rules |
 
 ## Injected Content
 
@@ -85,6 +86,45 @@ Add this task now or add it during the "I've finished editing" step.
 ────────────────────────────────────────────────────
 ```
 
+**Visual verification task injection check** (only if Feature has UI components AND rebuild mode — detected from plan.md architecture or pre-context tech stack):
+After reading tasks.md, scan the task list for visual verification tasks (keywords: "visual verif", "screenshot", "playwright", "visual comparison", "visual check", "UI comparison", "layout verif", "visual fidelity"). If **no visual verification tasks are found**, append:
+
+```
+── ⚠️ Visual Verification Task Missing ─────────────
+This Feature has UI components (rebuild mode) but tasks.md has no
+visual verification task. Without explicit visual checks, the rebuilt
+UI may diverge from the original (wrong layout, missing elements,
+incorrect spacing/colors).
+
+Recommended task to add (insert after main UI implementation tasks):
+  1. Visual fidelity check: compare key screens against visual-references/
+     screenshots. Verify layout structure, element count (tabs, buttons),
+     and spacing match the original.
+
+Add this task now or add it during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+**Source complexity annotation** (rebuild/adoption mode — skip if greenfield):
+After reading tasks.md, if pre-context.md has a "Source Reference" section with original files:
+1. Read the original file sizes (line counts) from the Source Reference list
+2. If tasks seem significantly under-scoped relative to original complexity, append:
+
+```
+── ℹ️ Source Complexity Reference ───────────────────
+Original source files for this Feature:
+  [filename.tsx]: [N] lines → estimated [M] tasks
+  [filename.tsx]: [N] lines → estimated [M] tasks
+  Total original: ~[N] lines across [M] files
+
+Current tasks.md: [T] tasks
+If tasks seem under-scoped, consider adding more granular
+implementation tasks for complex source files.
+────────────────────────────────────────────────────
+```
+
+> **Estimation heuristic**: ~100 lines of original source ≈ 1 implementation task (varies by complexity). Files over 300 lines typically need 3+ tasks.
+
 **Feature size warning** (always checked):
 After reading tasks.md, count the total number of tasks. Also read plan.md to estimate file count from architecture/phases:
 
@@ -130,6 +170,16 @@ These are recommendations, not blockers. Proceed if the Feature is inherently la
  pre-context tech stack) AND tasks.md has no render/integration test task
  (keywords: "render test", "integration test", "component test", "mount test",
   "smoke test", "rendering test")]
+
+── ⚠️ Visual Verification Task Missing ─────────────
+[Only if Feature has UI components (rebuild mode) AND tasks.md has no
+ visual verification task (keywords: "visual verif", "screenshot",
+ "playwright", "visual comparison", "visual check", "UI comparison",
+ "layout verif", "visual fidelity")]
+
+── ℹ️ Source Complexity Reference ───────────────────
+[Only if rebuild/adoption mode AND pre-context has Source Reference files.
+ Shows original file sizes and estimated task count comparison]
 
 ── ⚠️ Feature Size Warning ───────────────────────
 [Only if task count > 100 OR estimated file count > 50]

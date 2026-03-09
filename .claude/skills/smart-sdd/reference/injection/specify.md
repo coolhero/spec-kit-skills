@@ -125,9 +125,60 @@ Review the above content. You can:
   - Edit pre-context.md or business-logic-map.md directly before proceeding
 ```
 
+### Post-Execution Verification Sequence
+
+After `speckit-specify` completes and BEFORE assembling the Review Display, run these checks in order:
+
+1. **SBI Accuracy Cross-Check** (if applicable — rebuild/adoption with SBI)
+2. **Platform Constraint FR Verification** (if applicable — pre-context has Platform Constraints)
+3. **Assemble Review Display** (include any ⚠️ warnings from steps 1-2)
+4. **HARD STOP** (ReviewApproval)
+
+### SBI Accuracy Cross-Check (rebuild/adoption mode)
+
+> **Purpose**: SBI text can be misinterpreted without checking the actual source. Example: "Manage sidebar tabs (assistants, topics, sessions)" was interpreted as 3 separate tabs, but the original had 2 tabs (sessions was a conditional view within topics). Reading the source prevents such misinterpretation.
+
+If pre-context has SBI entries AND Source Reference files:
+
+1. Read the original source files **relevant to P1/P2 SBI entries** (resolved via Source Reference Path Resolution above — only files whose functions appear in P1/P2 SBI, not all Source Reference files)
+2. For each P1/P2 SBI entry that maps to an FR-###, spot-check:
+   - Does the FR description match what the source code actually does?
+   - Are counts correct? (e.g., tab count, form field count, block type count)
+   - Are conditional behaviors captured? (e.g., feature flags, platform-specific branches)
+3. If any discrepancy is found, append to Review Display:
+   ```
+   ── ⚠️ SBI Accuracy Concerns ─────────────────────
+   B105 → FR-012: SBI says "3 sidebar tabs" but source HomeTabs.tsx
+     shows 2 tabs (Sessions is conditional view within Topics tab).
+   → Recommend updating FR-012 before approval.
+   ────────────────────────────────────────────────────
+   ```
+4. **If visual references exist** (`specs/reverse-spec/visual-references/`): Cross-reference UI structure claims in FRs against reference screenshots. Visual references are the ground truth for tab counts, layout structure, and visible elements.
+
+**Skip if**: No SBI entries, or Source Reference = "N/A" (greenfield).
+
+### Platform Constraint FR Verification
+
+> **Purpose**: Platform Constraints from preceding Features (in pre-context.md) impose requirements that MUST appear as explicit FRs. Missing these causes critical bugs (e.g., frameless window with no drag region).
+
+If pre-context has a "Platform Constraints from Preceding Features" section with entries:
+
+1. For each Platform Constraint entry, check whether an FR-### addresses the required action
+2. If any constraint is NOT covered by an FR, append to Review Display:
+   ```
+   ── ⚠️ Platform Constraint Coverage Gap ──────────
+   Constraint: "Frameless window" (F001-shell → frame: false)
+   Required: -webkit-app-region: drag on navbar, no-drag on interactive elements
+   ⚠️ No FR-### found that addresses this constraint.
+   → Recommend adding an FR for window drag region.
+   ────────────────────────────────────────────────────
+   ```
+
+**Skip if**: No Platform Constraints section, or section says "None".
+
 ### Review Display Content
 
-After `speckit-specify` completes:
+After `speckit-specify` completes and post-execution checks above have run:
 
 **Files to read**:
 1. `specs/{NNN-feature}/spec.md` — Read the **entire file** and extract FR-###, SC-###, scope sections

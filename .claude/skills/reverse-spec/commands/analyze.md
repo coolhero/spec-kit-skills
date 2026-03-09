@@ -388,15 +388,36 @@ Ask via AskUserQuestion:
 If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP (run `claude mcp remove playwright` then `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`, preserving any `-e PATH=...` from the original config), display restart instructions, and record `Runtime Exploration: skipped (CDP reconfiguration — restart needed)`. Proceed to Phase 2.
 
 **If Playwright MCP is NOT available**:
+
+**CDP Endpoint Diagnostic** (Electron projects only — skip for non-Electron):
+Before showing the HARD STOP, run a quick diagnostic to provide specific guidance:
+1. Run `curl -s http://localhost:9222/json/version` (timeout 3s)
+2. **If curl succeeds** (returns JSON): CDP is active but Playwright tools are not loaded.
+   - Diagnosis: "CDP endpoint is running at localhost:9222. Playwright MCP tools are not loaded in this session. This typically means the Claude Code session was started before the app, or MCP is not configured with `--cdp-endpoint`."
+   - Solution: "Restart Claude Code session (the app is already running with CDP)."
+3. **If curl fails** (connection refused / timeout): CDP endpoint is not running.
+   - Diagnosis: "CDP endpoint not running. The Electron app must be started with `--remote-debugging-port=9222` before Playwright can connect."
+   - Solution: "Start the app with CDP, then restart Claude Code session."
+
+Display the diagnostic result (if applicable), then show the HARD STOP:
+
 ```
 🔍 Runtime Exploration
 
 Playwright MCP not detected.
 Runtime Exploration requires Playwright MCP.
 
+[If Electron + CDP diagnostic ran]:
+  📋 CDP Diagnostic: [diagnosis from above]
+  💡 Solution: [solution from above]
+
 Installation:
   claude mcp add playwright -- npx @playwright/mcp@latest
   → Restart Claude Code
+
+For Electron apps with CDP:
+  claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+  → Start app with --remote-debugging-port=9222 BEFORE starting Claude Code
 
 Installation guide: see MCP-GUIDE.md (includes troubleshooting)
 ```
@@ -728,8 +749,46 @@ After runtime exploration, capture screenshots of key screens as **visual refere
 - `implement` step: References displayed during Review for visual fidelity awareness
 - `verify` step: Phase 3 Visual Fidelity Check compares rebuilt UI against reference screenshots
 
+**Step 4b — Style Token Extraction** (rebuild mode only, MCP available):
+
+After visual reference screenshots, extract concrete CSS values from the running app for implementation-time reference. Code-reading alone cannot capture computed styles, and agents guessing colors/spacing leads to visual divergence.
+
+1. Navigate to the app's main screen (or the most representative screen explored in Step 3)
+2. Use `browser_evaluate` to extract:
+   - CSS custom properties from `:root` (e.g., `--color-primary`, `--spacing-md`, `--font-family`)
+   - Computed styles from landmark elements: `header`, `nav`, `main`, `aside`, `footer` (background, color, padding, font)
+   - Body typography: `fontFamily`, `fontSize`, `lineHeight`, `color`, `backgroundColor`
+3. Save to `specs/reverse-spec/visual-references/style-tokens.md`:
+   ```markdown
+   # Style Tokens
+
+   ## CSS Custom Properties
+   | Property | Value |
+   |----------|-------|
+   | `--color-primary` | `#3b82f6` |
+   | ... | ... |
+
+   ## Landmark Styles
+   | Element | Property | Value |
+   |---------|----------|-------|
+   | `header` | `background` | `#1e1e2e` |
+   | `header` | `height` | `48px` |
+   | ... | ... | ... |
+
+   ## Typography
+   | Property | Value |
+   |----------|-------|
+   | `font-family` | `'Inter', sans-serif` |
+   | `font-size` | `14px` |
+   | ... | ... |
+   ```
+4. Display: `🎨 Style tokens extracted → specs/reverse-spec/visual-references/style-tokens.md`
+5. If extraction fails (cross-origin restrictions, SPA not rendered, or app is server-rendered without client JS):
+   - Display: `⚠️ Style token extraction skipped — [reason]. You can add tokens manually.`
+   - Create an empty `style-tokens.md` with the template header only
+
 **Step 5 — Proceed to Phase 2**:
-Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Phase 2 will read these to cross-reference code analysis with runtime observations.
+Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Style tokens (if extracted) are saved in `specs/reverse-spec/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
 ```
@@ -932,6 +991,14 @@ Derive inter-Feature dependencies:
 - **API Dependency**: Calls APIs provided by another Feature
 - **Entity Dependency**: References entities owned by another Feature
 - **Event Dependency**: Subscribes to events published by another Feature
+- **Platform Constraint**: Runtime environment setup by one Feature that downstream Features must respect (window config, CSS requirements, security policies, IPC channels)
+
+**Platform constraint detection** (Electron/Tauri/Desktop apps):
+- Scan BrowserWindow/Window options: `frame`, `transparent`, `titleBarStyle`, `titleBarOverlay`, `webPreferences`
+- Scan security headers: CSP, CORS policies in main process
+- Scan IPC channel registrations used by downstream Features
+- Record as `Platform constraint` dependency type in Dependency Graph
+- Example: `frame: false` in F001-shell → all downstream UI Features must implement custom titlebar with `-webkit-app-region: drag`
 
 Record dependency directions and types, and visualize them as a Mermaid diagram.
 
@@ -1111,7 +1178,7 @@ Contents to include in each pre-context.md:
   3. Mapping: route → page component file → Feature that owns the file (Phase 3-1 boundary)
   4. Shared routes: included in primary owner Feature, referenced in other Features
   5. Unmappable routes: recorded in App-Wide Observations
-- **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy
+- **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy. Include a **Rebuild Target** column set to `[TBD]` for all files — this column will be populated during `/speckit.plan` when the target architecture is decided
 - **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/app.md` § 3-7 for format)
 
   > **SBI Per-Feature Filtering**: Filter only behaviors belonging to this Feature's source files from the Phase 2-6 global SBI. B### IDs are assigned sequentially and uniquely across the entire project in Feature ID order.

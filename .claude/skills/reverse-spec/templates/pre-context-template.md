@@ -62,13 +62,14 @@
 
 ### Related Original File List
 
-| File Path | Role |
-|-----------|------|
-| `[relative/path/filename]` | [Role description: e.g., User model definition] |
-| `[relative/path/filename]` | [Role description: e.g., Authentication middleware] |
-| `[relative/path/filename]` | [Role description: e.g., Login API handler] |
-| `[relative/path/filename]` | [Role description: e.g., Authentication-related tests] |
+| File Path | Role | Rebuild Target |
+|-----------|------|----------------|
+| `[relative/path/filename]` | [Role description: e.g., User model definition] | `[TBD]` |
+| `[relative/path/filename]` | [Role description: e.g., Authentication middleware] | `[TBD]` |
+| `[relative/path/filename]` | [Role description: e.g., Login API handler] | `[TBD]` |
+| `[relative/path/filename]` | [Role description: e.g., Authentication-related tests] | `[TBD]` |
 
+> **Rebuild Target**: Expected file path in the new project. Set to `[TBD]` during `/reverse-spec`. Populated during `/speckit.plan` when the target architecture is decided. Used during `/smart-sdd implement` to match original source files to implementation tasks.
 > Original sources are referenced directly from their original locations without copying.
 > When proceeding with /speckit.specify and /speckit.plan, resolve each path as `[Source Root]/[File Path]` and read the files to review existing implementations.
 
@@ -221,6 +222,21 @@
 |-------------------|----------------|-----------------|
 | F001-auth | Entity reference | References User entity via FK |
 | F001-auth | API call | Uses authentication middleware (Bearer Token verification) |
+
+### Platform Constraints from Preceding Features
+
+> Constraints imposed by preceding Features' platform/window/environment configuration.
+> These are NOT entity/API dependencies — they are runtime environment requirements
+> that this Feature must respect during implementation.
+> Common in Electron/Tauri/Desktop apps where window config, security policies, or IPC channels
+> created by infrastructure Features affect all downstream UI Features.
+
+| Constraint | Source Feature | Source Decision | Impact on This Feature |
+|-----------|---------------|-----------------|----------------------|
+| Frameless window | F001-shell | `BrowserWindow({ frame: false })` | Must implement custom titlebar with `-webkit-app-region: drag` for window dragging |
+| CSP strict mode | F001-shell | `Content-Security-Policy: script-src 'self'` | Cannot use inline scripts or eval() |
+
+> If no platform constraints from preceding Features, write "None".
 
 ### Related Entities (data-model.md draft)
 

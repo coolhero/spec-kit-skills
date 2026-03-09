@@ -94,10 +94,13 @@ graph TD
 
 ### Dependency Table
 
+> Dependency Types: `Entity reference`, `API call`, `Event dependency`, `Platform constraint` (window config, CSS requirements, runtime environment setup that downstream Features must respect).
+
 | Feature | Depends On | Dependency Type | Dependency Details |
 |---------|------------|-----------------|-------------------|
 | F002 | F001 | Entity reference | References User entity via FK |
 | F003 | F001 | API call | Uses authentication middleware |
+| F005 | F001 | Platform constraint | frame:false requires custom titlebar with -webkit-app-region: drag |
 
 ---
 

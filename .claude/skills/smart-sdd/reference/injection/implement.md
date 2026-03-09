@@ -16,6 +16,8 @@
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "Pattern Constraints" section | **If present** — inject as mandatory reference for every task execution |
 | `specs/reverse-spec/visual-references/manifest.md` | Relevant screens | **Rebuild mode only, if exists** — inject as visual target reference |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** (Source Path ≠ N/A). Resolve file paths per specify.md Source Reference Path Resolution rules |
+| `specs/reverse-spec/visual-references/style-tokens.md` | Entire file | **Rebuild mode only, if exists** — inject as CSS reference for matching original styles |
 
 ## Pattern Constraints Injection
 
@@ -24,6 +26,25 @@ If plan.md contains a `## Pattern Constraints` section, this section MUST be inc
 Display before each task: `📋 Pattern Constraints (from plan.md): [constraint count] constraints active`
 
 This prevents the scenario where parallel agents independently generate code with inconsistent patterns (e.g., one agent uses stable selectors while another creates new arrays per selector call).
+
+## Source Reference Injection (rebuild/adoption mode)
+
+If the Feature's `pre-context.md` has a non-empty Source Reference section AND `sdd-state.md` Source Path ≠ `N/A`:
+
+1. Read `Source Path` from `sdd-state.md` (Source Root)
+2. Resolve each file in the "Related Original File List" table as `[Source Path]/[File Path]`
+3. Before each `speckit-implement` task:
+   a. Identify which original source files are relevant to the current task (match by Rebuild Target column if populated, otherwise by Role/component name)
+   b. Read those files and inject as reference context
+   c. Display: `📂 Source Reference: [N] original files loaded for task context`
+4. Reference Guide determines HOW to use the source:
+   - Same Stack: Actively reuse patterns, match test structure, reference concrete values (CSS, padding, border-radius, etc.)
+   - New Stack: Extract business logic only, use idiomatic new-stack patterns. Still reference concrete CSS/style values from original for visual fidelity
+
+**Skip if**: Source Path = `N/A` (greenfield) or Source Reference = "N/A".
+**Incremental (add)**: Source Path = `.` — files are in the current project. Read them for context but do not copy.
+
+> **Rationale**: The specify and plan steps read original source files via `injection/specify.md` Source Reference Path Resolution. But implement — the step that actually writes code — had no equivalent. This gap meant agents implemented code without ever seeing the original implementation, leading to behavioral and visual divergence in rebuild projects.
 
 ## Static Resource Handling
 
@@ -149,7 +170,7 @@ If "Continue with Level 1":
 - Record `⚠️ RUNTIME-DEGRADED` in sdd-state.md Feature Progress (Detail column)
 - Replace Step 2 with build success confirmation only
 - Post-implement SC verification and Post-Implement Pattern Compliance Scan are skipped
-- The verify step will display a prominent reminder and may BLOCK if MCP is still unavailable (see verify-phases.md Phase 3)
+- The verify step will display a prominent reminder and may BLOCK if MCP is still unavailable (see verify-phases.md Pre-flight + Phase 3 Step 3 RUNTIME-DEGRADED check)
 
 ### Post-Implement Full Verification
 
@@ -176,8 +197,11 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 | DOM measurement in async effect | `useEffect` callback body containing `getBoundingClientRect`, `offsetHeight`, `scrollHeight`, `clientHeight`, `offsetWidth` | ⚠️ warning — layout flicker |
 | Missing Error Boundary | Route/page-level components (files under `pages/`, `routes/`, `views/`) without `ErrorBoundary` or `error.tsx` sibling | ⚠️ warning |
 | Unbatched state updates | Multiple sequential `setState(` / `set(` / `store.` calls within same function without `batch(` wrapper | ⚠️ warning |
+| Stub/empty implementation | Function bodies containing only `return null`, `() => null`, `return undefined`, `return <>`, `return <></>`, `// TODO`, `throw new Error('Not implemented')` | ⚠️ warning — hollow implementation |
 
-**Result classification**: ⚠️ warning (NOT blocking). Violations are reported in the Review Display as a "Pattern Compliance" section. The agent MAY auto-fix simple violations before Review (e.g., wrapping a selector with `useShallow`, changing `useEffect` to `useLayoutEffect`).
+> **Stub detection rationale**: During rebuild, registering components with `render: () => null` or `return null` creates the illusion of "implementation complete" while delivering zero functionality. Each component/function must have a meaningful implementation — at minimum, rendering its key UI elements or performing its core logic. If a component is intentionally deferred, it should be explicitly marked as out-of-scope in spec.md, not silently stubbed.
+
+**Result classification**: ⚠️ warning (NOT blocking). Violations are reported in the Review Display as a "Pattern Compliance" section. The agent MAY auto-fix simple violations before Review (e.g., wrapping a selector with `useShallow`, changing `useEffect` to `useLayoutEffect`). Stub violations SHOULD be flagged prominently — they indicate under-implementation, not a pattern issue.
 
 **Important**: The grep patterns above are illustrative. Derive actual search patterns from:
 1. The project's specific state management library
@@ -223,13 +247,52 @@ You can fix manually or proceed to Review with this state.
 - "Proceed to Review as-is" — Review includes ⚠️ marker
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 
+## UI Fix Escalation — Visual Tool Re-check
+
+> **Principle**: If an agent has attempted 2+ code-reasoning UI fixes for the same visual issue
+> and the user still reports the problem, the agent MUST re-check visual tool availability
+> before attempting another code-only fix.
+
+**Trigger**: User reports UI issue persists after 2+ fix attempts for the same problem category (layout, styling, rendering, spacing, visual appearance).
+
+**Re-check procedure**:
+1. Attempt `browser_snapshot` — if available now (MCP became active mid-session), USE IT immediately
+2. If tool still unavailable, run CDP probe: `curl -s http://localhost:9222/json/version`
+   - Success: "CDP is active. Playwright MCP tools need session restart to load."
+     → HARD STOP: recommend session restart for visual debugging
+   - Failure: "Neither MCP nor CDP available."
+     → Display: `⚠️ Code-reasoning has failed to resolve this UI issue after [N] attempts. Visual confirmation is needed. Please start the app with CDP and restart the session.`
+3. If MCP IS available: take screenshot/snapshot → diagnose from actual rendering → fix
+
+**Rationale**: CSS is context-dependent — `w-full` renders differently depending on parent `flex`, `overflow`, `position` chains. Tailwind utility class interactions are unpredictable from code alone. After 2 failed code-reasoning attempts, visual confirmation is more efficient than a third guess.
+
+## Playwright MCP Usage During Implement (when MCP available)
+
+> Playwright is not just for verify. When MCP is available during implement,
+> use it proactively for visual confirmation.
+
+### MUST (required)
+- Per-task runtime verification (Step 2 above) — navigate, snapshot, console check
+- Post-implement SC verification — verify all SCs render correctly
+
+### SHOULD (recommended)
+- After CSS/styling changes: take snapshot to confirm visual result
+- After layout changes: compare before/after snapshots
+- When implementing UI components: verify rendering matches visual-references (if available)
+- When fixing UI bugs: take snapshot BEFORE fix to diagnose, AFTER fix to confirm
+
+### MAY (optional)
+- Compare rebuilt UI with original source screenshots (visual-references/)
+- Test responsive layouts (resize viewport)
+- Test dark/light mode if applicable
+
 ## Injected Content
 
 - Automatically executes `speckit-implement` based on tasks.md
 - Static resource copy instructions from pre-context.md (if applicable)
 - Naming remapping context from pre-context.md (if applicable) — displays old → new identifier mapping before execution
 - If Demo-Ready Delivery is active: demo surface implementation + executable demo script creation (`demos/F00N-name.sh`)
-- **Runtime verification**: Per-task build gate + runtime check (MCP available 시), post-implement full SC verification
+- **Runtime verification**: Per-task build gate + runtime check (when MCP available), post-implement full SC verification
 
 ## Checkpoint
 

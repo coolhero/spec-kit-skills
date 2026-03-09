@@ -245,3 +245,8 @@ Pattern Constraints identify framework+library interaction patterns known to cau
    - Newly defined APIs → Add to api-registry
    - Contract changes in existing APIs → Update api-registry
    - Update "Cross-Feature Consumers" information
+5. **Rebuild Target Update** (rebuild/adoption mode only — skip if Source Path = `N/A`):
+   Read `SPEC_PATH/[NNN-feature-name]/plan.md` architecture/file structure → Update `BASE_PATH/features/[FID]-[name]/pre-context.md` "Related Original File List" table:
+   - For each original source file, populate the `Rebuild Target` column with the expected new path from the plan's architecture
+   - Match by component role/functionality (e.g., original `ChatPanel.vue` → new `src/components/ChatPanel.tsx`)
+   - If a 1:1 mapping is unclear, set `Rebuild Target` to `[multiple]` or `[see plan.md]`
