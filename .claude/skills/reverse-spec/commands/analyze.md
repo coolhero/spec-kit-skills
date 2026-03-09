@@ -1142,6 +1142,12 @@ Generate the following files in order. Each file follows the template structure 
      OAUTH_CLIENT_ID=your-oauth-client-id
      ```
 
+8. **`specs/reverse-spec/speckit-prompt.md`** — See [speckit-prompt-template.md](templates/speckit-prompt-template.md)
+   - Standalone prompt for using spec-kit without smart-sdd
+   - Per-command context guide: which artifacts to read before each spec-kit command (specify, plan, implement, verify)
+   - Cross-Feature awareness rules
+   - Fill dynamic fields: PROJECT_NAME, scope, stack, Feature count/Tier breakdown, Feature catalog table (from roadmap.md)
+
 ### 4-2. Feature-Level Deliverables
 
 For each Feature, generate `specs/reverse-spec/features/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](templates/pre-context-template.md).
@@ -1318,6 +1324,7 @@ Generation complete:
 - ...
 - case-study-log.md                                 (observation log for milestone tracking — project root)
 - .env.example                                    (rebuild only — if env vars detected)
+- specs/reverse-spec/speckit-prompt.md             (spec-kit standalone usage prompt)
 
 SBI: [N] source behaviors tracked (B001–B[N]) across [M] Features
 Demo Groups: [K] groups defined — Integration Demos trigger when all Features in a group are verified
@@ -1326,6 +1333,10 @@ Next steps:
   /smart-sdd pipeline       — Run the full SDD pipeline for rebuild (recommended)
   /smart-sdd adopt          — Run the adoption pipeline to wrap existing code with SDD docs
   /smart-sdd parity          — Check implementation parity against original source (after pipeline completes)
+
+  Or use spec-kit standalone with the generated prompt:
+  Copy specs/reverse-spec/speckit-prompt.md into CLAUDE.md, then run spec-kit commands directly.
+  The prompt guides which artifacts to read before each command.
 
 smart-sdd will automatically:
   1. Finalize constitution based on constitution-seed.md

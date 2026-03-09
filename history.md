@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-10] spec-kit Standalone Prompt — speckit-prompt.md
+
+reverse-spec generates `speckit-prompt.md` for users who run spec-kit without smart-sdd. Provides the manual equivalent of smart-sdd's cross-Feature context injection.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Standalone prompt file | `specs/reverse-spec/speckit-prompt.md` generated as Phase 4-1 artifact | Lowers barrier — users benefit from reverse-spec artifacts without committing to smart-sdd |
+| 2 | Per-command context guide | specify/plan/implement/verify each list which artifacts to read | Maps directly to smart-sdd's Assemble step — manual version of automated injection |
+| 3 | Core injection only | Omits advanced checks (SBI cross-check, CSS Value Map, Pattern Compliance Scan) | Keep prompt actionable — advanced automation is smart-sdd's value proposition |
+| 4 | CLAUDE.md integration | Prompt designed to be copied into project's CLAUDE.md | Ensures agent reads it automatically at session start |
+
+**Files**: reverse-spec/templates/speckit-prompt-template.md (new), reverse-spec/commands/analyze.md, README.md, README.ko.md
+
+---
+
 ## [2026-03-09] Toolchain Pre-flight: Lint Tool Detection at Foundation Gate
 
 ESLint not installed → verify Phase 1 "eslint: command not found" repeated at every Feature (F001, F004, F005). Root cause: no early detection of lint tool availability.

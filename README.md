@@ -2,11 +2,11 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:09 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:28 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
-- **Reverse-Spec** analyzes brownfield codebases and realigns them around Specs — bringing legacy code into the contract-based system.
+- **Reverse-Spec** analyzes brownfield codebases and realigns them around Specs — bringing legacy code into the contract-based system. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** automatically assembles and injects related Features' contracts and state into each spec-kit command, then verifies changes don't violate existing contracts — keeping cross-Feature consistency intact.
 
 ---
@@ -278,6 +278,7 @@ Generates: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-regi
 | `entity-registry.md` | Complete entity list, fields, relationships, cross-Feature mapping |
 | `api-registry.md` | Complete API endpoint index, detailed contracts, cross-Feature dependencies |
 | `business-logic-map.md` | Per-Feature business rules, validations, workflows |
+| `speckit-prompt.md` | Standalone prompt for using spec-kit without smart-sdd — per-command context guide |
 
 **Feature-Level — `pre-context.md`**:
 
