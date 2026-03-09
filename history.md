@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-03-09] Post-Execution Output Suppression — per-command inline reinforcement
+
+Root cause: Agent showed spec-kit's "Ready for /speckit.clarify or /speckit.plan." message after speckit-specify instead of smart-sdd's fallback message. pipeline.md had suppression rules (lines 99-108), but per-command injection files had no inline reminder — agent ignored the generic rules at execution time.
+
+Fix: Added `⚠️ SUPPRESS spec-kit output` inline blockquote to all 10 injection files' Review Display Content sections + shared pattern in context-injection-rules.md. Each reminder includes the specific fallback message format: `✅ [command] executed for [FID].\n💡 Type "continue" to review the results.`
+
+---
+
 ## [2026-03-09] Specify/Tasks/Implement Accuracy Guards — 4 additional changes
 
 Root cause (continued): Even with S1-S11 source reference + MCP improvements, pipeline still lacked accuracy verification at key handoff points. SBI text can be misinterpreted without cross-checking actual source (e.g., "3 tabs" vs "2 tabs"); tasks can be under-scoped relative to original complexity; components can be "implemented" as `() => null` stubs.

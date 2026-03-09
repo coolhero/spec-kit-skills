@@ -27,6 +27,8 @@ speckit-tasks will be executed based on plan.md. Do you want to proceed?
 
 ## Review Display Content
 
+> **⚠️ SUPPRESS spec-kit output**: `speckit-tasks` prints navigation messages like "Ready for /speckit.implement" — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-tasks executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+
 After `speckit-tasks` completes:
 
 **Files to read**:

@@ -46,6 +46,8 @@ FR→Task coverage gaps are classified by the following severity rules:
 
 ## Review Display Content
 
+> **⚠️ SUPPRESS spec-kit output**: `speckit-analyze` prints navigation messages — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-analyze executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+
 After `speckit-analyze` completes:
 
 **Files to read**:

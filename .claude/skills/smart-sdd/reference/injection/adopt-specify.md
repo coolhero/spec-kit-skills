@@ -101,6 +101,8 @@ Review the above content. You can:
 
 ## Review Display Content
 
+> **⚠️ SUPPRESS spec-kit output**: `speckit-specify` prints navigation messages like "Ready for /speckit.plan" — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+
 After `speckit-specify` completes:
 
 **Files to read**:

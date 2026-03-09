@@ -127,6 +127,8 @@ Review the above content. You can:
 
 ### Post-Execution Verification Sequence
 
+> **⚠️ SUPPRESS spec-kit output**: `speckit-specify` prints messages like "Ready for /speckit.clarify or /speckit.plan." — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the verification steps and Review Display below. If context limit prevents continuing, show instead: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+
 After `speckit-specify` completes and BEFORE assembling the Review Display, run these checks in order:
 
 1. **SBI Accuracy Cross-Check** (if applicable — rebuild/adoption with SBI)

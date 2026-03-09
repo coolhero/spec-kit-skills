@@ -304,6 +304,8 @@ speckit-implement will be executed based on tasks.md. Do you want to proceed?
 
 ## Review Display Content
 
+> **⚠️ SUPPRESS spec-kit output**: `speckit-implement` prints navigation messages like "Suggested commit: ..." — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-implement executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+
 After `speckit-implement` completes:
 
 **Files to read**:

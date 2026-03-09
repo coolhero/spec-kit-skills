@@ -30,6 +30,13 @@ The following patterns apply to ALL commands:
 
 **Checkpoint pattern**: All Checkpoints are HARD STOPs per `commands/pipeline.md` Step 2 (PROCEDURE CheckpointApproval). Even simplified Checkpoints (single-line message) require AskUserQuestion and WAIT.
 
+**Post-Execution Output Suppression**: After ANY spec-kit command completes, **suppress ALL spec-kit navigation messages** — never show them to the user. spec-kit prints its own next-step guidance (e.g., `"Ready for /speckit.plan"`, `"Ready for /speckit.clarify or /speckit.plan"`, `"Next phase: ..."`, `"Suggested commit: ..."`), but smart-sdd controls the workflow, not spec-kit. After suppressing the output, immediately proceed to the Review Display + HARD STOP. **If context limit prevents continuing in the same response**, display the fallback message instead of spec-kit's output:
+```
+✅ [command] executed for [FID] - [Feature Name].
+
+💡 Type "continue" to review the results.
+```
+
 ---
 
 **BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)

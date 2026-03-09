@@ -77,6 +77,8 @@ Please verify they accurately reflect the codebase's philosophy."]
 
 ## Review Display Content
 
+> **⚠️ SUPPRESS spec-kit output**: `speckit-constitution` prints navigation messages — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-constitution executed.\n💡 Type "continue" to review the results.`
+
 After `speckit-constitution` completes:
 
 **Files to read**:
