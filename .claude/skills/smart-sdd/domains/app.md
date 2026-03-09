@@ -44,8 +44,54 @@
 |------|----------|-----------|-------------|
 | **Test** | Yes (BLOCKING) | Detect from `package.json` scripts, `pyproject.toml`, `Makefile`, `Cargo.toml` | Run unit + integration tests. Failure blocks pipeline |
 | **Build** | Yes (BLOCKING) | Detect build command from project config | Run project build. Failure blocks pipeline |
-| **Lint** | Yes (BLOCKING) | Detect lint tool from project config | Run lint check. Failure blocks pipeline |
+| **Lint** | Yes (BLOCKING) | Detect per § 3b Lint Tool Detection Rules | Run lint check. Failure blocks pipeline. Tool-not-found is a toolchain issue (non-blocking), not a code quality issue |
 | **Demo-Ready** | Conditional (if constitution VI active) | Check `demos/F00N-name.sh` exists | Execute demo script with `--ci` flag. Verify health check passes |
+
+### 3b. Lint Tool Detection Rules
+
+> Used by Foundation Gate (Toolchain Pre-flight) and verify Phase 1.
+> Detection follows a priority order — the first match wins.
+
+**Node.js / TypeScript** (detected by `package.json` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `package.json` → `scripts.lint` field exists | `npm run lint` (or `pnpm run lint` / `yarn lint` per lockfile) |
+| 2 | Flat config: `eslint.config.{js,mjs,cjs}` exists | `npx eslint .` |
+| 3 | Legacy config: `.eslintrc{,.js,.json,.yml,.yaml}` exists | `npx eslint .` |
+| 4 | `biome.json` or `biome.jsonc` exists | `npx biome check .` |
+| 5 | None of the above | `ℹ️ not configured` |
+
+**Python** (detected by `pyproject.toml` / `setup.py` / `requirements.txt` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `pyproject.toml` → `[tool.ruff]` section exists, or `ruff.toml` / `.ruff.toml` exists | `ruff check .` |
+| 2 | `.flake8` exists, or `setup.cfg` with `[flake8]` section | `flake8 .` |
+| 3 | None of the above | `ℹ️ not configured` |
+
+**Go** (detected by `go.mod` presence):
+- `.golangci.yml` / `.golangci.yaml` exists → `golangci-lint run`
+- Fallback: `go vet ./...` (built-in, always available)
+
+**Rust** (detected by `Cargo.toml` presence):
+- `cargo clippy -- -D warnings` (clippy is a standard rustup component)
+- If not installed: `⚠️ not installed — run: rustup component add clippy`
+
+**Executable verification**: After detecting the lint command, verify the tool is actually runnable:
+- Run `[tool] --version` (e.g., `npx eslint --version`, `ruff --version`) → exit 0 = `✅ available`
+- Exit ≠ 0 or "command not found" → `⚠️ not installed`
+
+**Install guidance** (displayed when tool is configured but not installed):
+
+| Tool | Install Command |
+|------|----------------|
+| ESLint | `npm install --save-dev eslint` |
+| Biome | `npm install --save-dev @biomejs/biome` |
+| ruff | `pip install ruff` (or `uv pip install ruff`) |
+| flake8 | `pip install flake8` |
+| golangci-lint | `go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest` |
+| clippy | `rustup component add clippy` |
 
 ### Limited Verification
 

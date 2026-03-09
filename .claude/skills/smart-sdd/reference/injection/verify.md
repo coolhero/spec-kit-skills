@@ -39,7 +39,7 @@ Show the **actual verification checklist** so the user can see what will be chec
 ── Phase 1: Execution Verification ───────────────
   - Test command: [actual test command]
   - Build command: [actual build command]
-  - Lint command: [actual lint command or "not configured"]
+  - Lint command: [actual lint command | "not configured" | "⚠️ not installed — skipped per Toolchain Pre-flight"]
 
 ── Phase 2: Cross-Feature Verification ───────────
 [List each cross-verification point from pre-context]
@@ -95,7 +95,7 @@ After verification execution completes:
 ── Phase 1: Execution Verification ───────────────
   Tests: [passed count]/[total count] passed
   Build: [success/failure]
-  Lint: [success/failure/not configured]
+  Lint: [success/failure/not configured/skipped (not installed)]
 
 ── Phase 2: Cross-Feature Consistency ─────────────
 [Results for each cross-verification point]

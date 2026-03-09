@@ -50,7 +50,7 @@ Mode: ADOPTION — Non-blocking verification
   pre-existing issues, NOT blockers.
   - Test command: [actual test command]
   - Build command: [actual build command]
-  - Lint command: [actual lint command or "not configured"]
+  - Lint command: [actual lint command | "not configured" | "⚠️ not installed — skipped per Toolchain Pre-flight"]
 
 ── Phase 2: Cross-Feature Verification ───────────
 [Same as standard — cross-verification points from pre-context]
@@ -106,7 +106,7 @@ After verification execution completes:
     [If no tests]: 📝 No test suite — recorded as baseline
   Build: [success/failure]
     [If failure]: ⚠️ Build failure recorded as pre-existing issue
-  Lint: [success/failure/not configured]
+  Lint: [success/failure/not configured/skipped (not installed)]
 
 ── Phase 2: Cross-Feature Consistency ─────────────
   - ✅/❌ Entity compatibility: [result]

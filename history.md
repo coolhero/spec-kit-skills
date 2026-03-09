@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-03-09] Toolchain Pre-flight: Lint Tool Detection at Foundation Gate
+
+ESLint not installed → verify Phase 1 "eslint: command not found" repeated at every Feature (F001, F004, F005). Root cause: no early detection of lint tool availability.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Detect once, cache result | Foundation Gate Toolchain Pre-flight detects lint/test/build tool availability → records in sdd-state.md `## Toolchain` section | Avoids re-discovering same "command not found" error at every Feature verify |
+| 2 | Lint detection rules per ecosystem | `domains/app.md` § 3b defines priority-ordered detection for Node.js, Python, Go, Rust | "Detect lint tool from project config" was too vague — agent had no algorithm to follow |
+| 3 | Tool-not-found ≠ lint failure | verify Phase 1 distinguishes exit 127 (toolchain issue, non-blocking) from exit 1 (code quality, blocking) | "eslint: command not found" is not a code quality problem — it should not block the pipeline |
+| 4 | Toolchain is WARNING, not BLOCKING | Missing lint tool displays ⚠️ + install guidance but does not block Foundation Gate | Matches existing Foundation Gate pattern (only Build is BLOCKING). Users may intentionally not use a linter |
+| 5 | Backward compatibility | If sdd-state.md has no `## Toolchain` section, verify Phase 1 falls through to on-the-fly detection | Existing projects without Foundation Gate results continue to work as before |
+
+**Files**: state-schema.md, domains/app.md, pipeline.md, verify-phases.md, injection/verify.md, injection/adopt-verify.md
+
+---
+
 ## [2026-03-09] Cross-file Consistency Fix — 9 issues (7 critical + 2 bugs)
 
 Post W1-W10 cross-file consistency audit found 12 issues. Fixed 9 (critical + bugs):

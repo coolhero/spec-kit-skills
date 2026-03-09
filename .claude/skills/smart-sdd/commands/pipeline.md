@@ -290,9 +290,36 @@ This step is informational only — no user confirmation required.
 | **State Management** | Selector stability | Call selector twice → verify referential equality (no new object per call) | ⚠️ warning |
 | **IPC Bridge** (Electron) | Main↔Renderer communication | Send test IPC message → verify response | ⚠️ warning |
 | **Layout** | Core layout renders without error | Navigate to base route → snapshot → no error screen | ⚠️ warning |
+| **Toolchain** | Lint/Test/Build tools available | Detect per `domains/{domain}.md` § 3b → verify executable | ⚠️ warning |
 
 **Execution**:
 1. Run build → **BLOCK on failure** (same as Phase 1 build gate)
+1b. **Toolchain Pre-flight** — Verify development tools are available:
+   Read `domains/{domain}.md` § 3b (Lint Tool Detection Rules) and follow the detection order.
+
+   1. **Lint detection**: Follow the domain-specific detection rules to identify the lint command.
+      If a lint command is found, verify it is executable (`--version` check or binary exists).
+   2. **Test detection**: Detect test command from project config (`package.json` → `scripts.test`, `pyproject.toml` → `[tool.pytest]`, `Makefile` test target, etc.).
+      Verify it is executable.
+   3. **Build detection**: Record the build command already verified in Step 1.
+
+   **Result display**:
+   ```
+   🔧 Toolchain Pre-flight:
+     Build: ✅ npm run build
+     Test:  ✅ npm test
+     Lint:  ⚠️ eslint — configured (.eslintrc.json found) but NOT installed
+            💡 Install: npm install --save-dev eslint
+   ```
+
+   **Classification**:
+   - Tool configured + installed → `✅ available`
+   - Tool configured but NOT installed → `⚠️ warning` (NOT blocking) + display install guidance from `domains/{domain}.md` § 3b
+   - Tool not configured → `ℹ️ not configured` (informational note)
+
+   **Record** in `sdd-state.md` → `## Toolchain` section (see `reference/state-schema.md`).
+   This cached result is read by verify Phase 1 to skip unavailable tools without re-discovering.
+
 2. **Generate Foundation test file** (`tests/foundation.spec.ts` or equivalent):
    Based on constitution tech stack, generate a Playwright test file for applicable checks:
    ```typescript
@@ -326,6 +353,7 @@ This step is informational only — no user confirmation required.
 ```
 🏗️ Foundation Verification:
   ✅ Build: clean build succeeded
+  🔧 Toolchain: Build ✅, Test ✅, Lint [✅ available / ⚠️ not installed / ℹ️ not configured]
   ✅ CSS Theme: custom properties loaded (--bg-primary, --text-primary, ...)
   ⚠️ State Management: selector stability NOT verified (no stores defined yet)
   ⏭️ IPC Bridge: skipped (not Electron)

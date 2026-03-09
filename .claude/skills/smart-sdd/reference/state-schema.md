@@ -54,6 +54,28 @@ If the user skips Environment Bootstrap, record a single row:
 
 ---
 
+## Toolchain
+
+> Detected by Foundation Gate Toolchain Pre-flight. verify Phase 1 reads this to skip unavailable tools.
+
+| Tool | Command | Status | Detected At |
+|------|---------|--------|-------------|
+| Build | npm run build | ✅ available | 2024-01-15T10:00:00 |
+| Test | npm test | ✅ available | 2024-01-15T10:00:00 |
+| Lint | npx eslint . | ⚠️ not installed | 2024-01-15T10:00:00 |
+
+**Status values**:
+- `✅ available` : Tool detected and executable
+- `⚠️ not installed` : Config found but tool binary missing or not executable
+- `ℹ️ not configured` : No configuration found for this tool type
+
+**Update rules**:
+- **Written by**: Foundation Gate Toolchain Pre-flight (first Feature or Foundation re-run)
+- **Updated by**: verify Phase 1 Step 3b (retroactive — if user installed the tool between Features)
+- **Re-detection trigger**: Foundation Gate re-runs when Foundation-affecting files change (e.g., `package.json` change qualifies)
+
+---
+
 ## Feature Progress
 
 **Full scope** (no Tier column):

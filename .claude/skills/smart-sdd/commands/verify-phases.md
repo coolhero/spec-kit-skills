@@ -138,14 +138,36 @@ Run each check and record results. **If any check fails, verification is BLOCKED
 
 1. **Test check**: Detect and execute the project's test command (from `package.json` scripts, `pyproject.toml`, `Makefile`, etc.)
 2. **Build check**: Run the build command and confirm no errors
-3. **Lint check**: Run the lint tool if configured
+3. **Lint check**: Detect and execute the lint tool per domain detection rules.
 
-**If ANY check fails**, display and STOP:
+   **Step 3a — Check Toolchain state** (from Foundation Gate):
+   Read `sdd-state.md` → `## Toolchain` section → Lint row Status:
+   - `⚠️ not installed` → **skip lint entirely**. Display:
+     `⏭️ Lint: skipped — tool not installed (detected in Foundation Gate). Install [command] to enable.`
+     This is NOT a Phase 1 failure. Record lint result as `skipped (not installed)`.
+   - `✅ available` → proceed to Step 3b (execute lint)
+   - `ℹ️ not configured` → **skip**. Display: `ℹ️ Lint: not configured`. Record as `not configured`.
+   - Toolchain section absent (legacy sdd-state.md or Foundation Gate not yet run) → fall through to Step 3b (detect on-the-fly for backward compatibility)
+
+   **Step 3b — Execute lint** (when tool is available or status unknown):
+   1. Detect the lint command per `domains/{domain}.md` § 3b (Lint Tool Detection Rules)
+   2. Run the detected lint command
+   3. **Distinguish failure types**:
+      - **Tool not found** (exit code 127 / "command not found"): This is a **toolchain issue**, NOT a code quality issue.
+        Display: `⚠️ Lint: tool not found ([command]). This is a toolchain issue, not a code problem.`
+        Update `sdd-state.md` Toolchain → Lint status to `⚠️ not installed` (retroactive update).
+        Treat as **skipped** for Phase 1 — do NOT block.
+      - **Lint errors found** (exit code 1 with lint output): This is a **code quality issue**.
+        Display: `❌ Lint: [N] errors found`
+        This IS a Phase 1 failure — **BLOCKS** per normal rules.
+      - **Lint passes** (exit code 0): Display: `✅ Lint: passed`
+
+**If ANY check fails** (test, build, or lint errors), display and STOP:
 ```
 ❌ Execution Verification failed for [FID] - [Feature Name]:
   Tests: [PASS/FAIL — pass count/total, failure details]
   Build: [PASS/FAIL — error summary]
-  Lint:  [PASS/FAIL — critical issue count]
+  Lint:  [PASS/FAIL/skipped (not installed)/not configured]
 
 Fix the failing checks before verification can continue.
 Verification is BLOCKED — merge will not be allowed until all checks pass.
