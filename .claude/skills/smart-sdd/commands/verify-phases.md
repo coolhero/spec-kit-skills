@@ -193,6 +193,61 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
    - This is a **warning, not a blocker** — the user may proceed but should consider whether the omission is intentional
 6. If no Source Behavior Inventory exists (greenfield/add), skip this step
 
+**Step 3 — Interaction Chain Completeness** (UI Features with Interaction Chains in plan.md):
+
+If `plan.md` contains an `## Interaction Chains` section:
+
+1. Parse each row: FR | User Action | **Handler** | **Store Mutation** | **DOM Effect** | Visual Result | Verify Method
+2. For each chain, verify the key implementation steps exist in the Feature's code (use `git diff --name-only` to scope to changed files):
+   - **Handler**: grep for the function name (e.g., `onThemeChange`, `handleFontSize`)
+   - **Store Mutation**: grep for the store field assignment (e.g., `settings.theme`, `setTheme`, `theme =`)
+   - **DOM Effect**: grep for the DOM manipulation (e.g., `classList.add`, `classList.toggle`, `style.fontSize`)
+3. Report:
+   ```
+   📊 Interaction Chain Completeness:
+     FR-012 (theme toggle): Handler ✅ → Store ✅ → DOM ✅ — Full chain
+     FR-015 (font size):    Handler ✅ → Store ✅ → DOM ❌ — Chain broken at DOM Effect
+       ⚠️ Store mutation `settings.fontSize` found, but no corresponding `style.fontSize` assignment
+   ```
+4. Broken chains → ⚠️ warning (NOT blocking) — but highlighted in Review as likely runtime failure
+5. **Skip if**: No Interaction Chains section in plan.md, or Feature is backend-only
+
+**Step 4 — Enablement Interface Smoke Test** (if Functional Enablement Chain exists):
+
+If `pre-context.md` contains a "Functional Enablement Chain" section with "Enables →" entries:
+
+> This Feature provides runtime interfaces that downstream Features depend on.
+> Verify these interfaces actually work BEFORE downstream Features are built.
+
+1. Parse "Enables →" rows: Target Feature | Functional Dependency | Failure Impact
+2. For each enablement interface:
+   a. **Code existence check** (always — no MCP needed):
+      - Grep for the interface (function, component, API endpoint) in the Feature's code
+      - If not found → ❌ "Enablement interface not implemented"
+   b. **Runtime smoke test** (if MCP or Playwright CLI available):
+      - Navigate to the relevant screen and verify the interface element is visible/interactive
+      - For API endpoints: `curl` the endpoint and verify non-error response
+3. Report:
+   ```
+   🔗 Enablement Interface Smoke Test:
+     Enables → F005-chat: Provider settings panel
+       Code: ✅ SettingsPanel component exists
+       Runtime: ✅ /settings renders, provider dropdown visible
+     Enables → F006-export: Export API endpoint
+       Code: ✅ /api/export handler exists
+       Runtime: ✅ curl /api/export → 200 OK
+   ```
+4. **Failed enablement** → ⚠️ **HIGH warning** — downstream Features will likely fail
+   Display: `⚠️ Enablement interface for [target] not working — [target Feature] will be blocked at runtime`
+5. **Skip if**: No "Enables →" entries in Functional Enablement Chain
+
+**Also check "Blocked by ←" entries** (this Feature's prerequisites):
+1. For each "Blocked by ←" row, check if the source Feature has verify status = `success` in sdd-state.md
+2. If source Feature is NOT verified: display warning:
+   `⚠️ Blocked by F00N-[feature] which has NOT passed verify yet. This Feature's runtime may be affected.`
+3. If source Feature IS verified AND app is running: run source Feature's demo in `--ci` mode to confirm it still works
+   - If demo fails → ⚠️ warning: `Source Feature F00N-[feature] demo --ci failed — may affect this Feature`
+
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
@@ -239,7 +294,13 @@ Phase 3 Checklist (must complete ALL in order):
   - **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 - **MCP Status Check**: Use the `MCP_STATUS` from the Pre-flight check (run before Phase 1).
-  - If `MCP_STATUS = unavailable` AND user chose "Continue without UI verification" → skip to Step 4. Display: `⏭️ UI verification skipped (Playwright MCP not available — acknowledged in Pre-flight)`
+  - If `MCP_STATUS = unavailable` AND user chose "Continue without UI verification":
+    - **CLI Playwright fallback**: If `demos/verify/F00N-name.spec.ts` exists, run SC verification via CLI instead of skipping entirely:
+      1. Ensure app is running (from demo `--ci` or start it)
+      2. Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=json`
+      3. Map test results back to SC-### coverage (Tier 1/2/3 results reported normally)
+      4. Display: `ℹ️ SC verification via Playwright CLI (MCP unavailable — using generated test file)`
+    - If no test file exists: skip to Step 4. Display: `⏭️ UI verification skipped (Playwright MCP not available — acknowledged in Pre-flight)`
   - If `MCP_STATUS = active` or `MCP_STATUS = configured` → proceed with Electron CDP check below
   - **If Pre-flight was somehow skipped**: Call `browser_snapshot` NOW. If the tool does not exist, display the HARD STOP from Pre-flight and wait for user response. **Do NOT silently skip.**
 
@@ -477,7 +538,14 @@ After demo `--ci` passes, check for a `# VERIFY_STEPS:` comment block in the dem
      ```
    - `verify-state`/`verify-effect` failures → ⚠️ **warning** (NOT blocking)
 3. If VERIFY_STEPS block not found: `ℹ️ Functional verification not configured — VERIFY_STEPS block absent in demo script`
-4. If MCP unavailable: skip silently (already degraded from Pre-flight)
+4. If MCP unavailable BUT `demos/verify/F00N-name.spec.ts` (or `.spec.js`) exists:
+   - Ensure app is running (from demo `--ci` execution in Step 6)
+   - Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=list`
+   - Parse test results (pass/fail per test case)
+   - Report in same format as MCP-driven VERIFY_STEPS above
+   - Display: `ℹ️ Functional verification via Playwright CLI (MCP unavailable — using generated test file)`
+5. If MCP unavailable AND no test file exists: skip with notice:
+   `⚠️ Functional verification skipped — no MCP and no generated test file (demos/verify/F00N-name.spec.ts)`
 
 ### Phase 3b: Bug Prevention Verification (B-4)
 

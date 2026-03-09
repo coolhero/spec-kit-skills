@@ -142,8 +142,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 1. **SBI Accuracy Cross-Check** (if applicable — rebuild/adoption with SBI)
 2. **Platform Constraint FR Verification** (if applicable — pre-context has Platform Constraints)
 3. **Edge Case Coverage Check** (if applicable — pre-context has Edge Cases)
-4. **Assemble Review Display** (include any ⚠️ warnings from steps 1-3)
-5. **HARD STOP** (ReviewApproval)
+4. **Multi-Provider API Detection** (if applicable — 2+ external API providers in FR-###)
+5. **Assemble Review Display** (include any ⚠️ warnings from steps 1-4)
+6. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -209,6 +210,32 @@ If pre-context contains an "Edge Cases" section with entries:
 3. This is a **warning** (NOT blocking) — included in Review Display. The user decides whether to add missing SCs or proceed without them.
 
 **Skip if**: No Edge Cases section in pre-context, or section is empty/contains only "N/A".
+
+### Multi-Provider API Detection
+
+> **Purpose**: When a Feature integrates multiple external API providers (e.g., OpenAI, Anthropic, Ollama), each provider has unique auth methods, endpoints, headers, and response formats. If SC-### only covers one provider's pattern, the others fail silently at runtime.
+
+If spec.md FR-### descriptions mention 2+ external API providers:
+
+1. Scan FR-### and SC-### for provider names (OpenAI, Anthropic, Google, Azure, Ollama, Groq, Mistral, Cohere, etc.)
+2. If 2+ providers found, check if SC-### exist for EACH provider's unique behavior:
+   - Different auth flows per provider
+   - Different response parsing per provider
+   - Provider-specific error handling
+3. If any provider lacks dedicated SC-###, append to Review Display:
+   ```
+   ── ⚠️ Multi-Provider Coverage Gap ──────────────
+   [N] providers detected but only [M] have dedicated SC-###:
+     ✅ OpenAI: SC-003 (auth), SC-008 (response parsing)
+     ❌ Anthropic: No SC for x-api-key auth or anthropic-version header
+     ❌ Ollama: No SC for no-auth local mode
+
+   ⚠️ Missing provider-specific SCs may cause runtime auth/parsing failures.
+   ────────────────────────────────────────────────
+   ```
+4. **Warning (NOT blocking)** — included in Review Display.
+
+**Skip if**: < 2 providers detected, or Feature does not call external APIs.
 
 ### Review Display Content
 

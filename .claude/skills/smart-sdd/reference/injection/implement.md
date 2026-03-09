@@ -193,6 +193,20 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
 
 5. **Update `demos/README.md`** — see [demo-standard.md § 8](../demo-standard.md) for format.
 
+6. **Generate VERIFY_STEPS test file** (if demo script contains a `# VERIFY_STEPS:` block):
+   - Parse the VERIFY_STEPS block → convert each verb to Playwright API call:
+     - `navigate /path` → `await page.goto(BASE_URL + '/path')`
+     - `click selector` → `await page.click('selector')`
+     - `fill selector value` → `await page.fill('selector', 'value')`
+     - `verify selector visible` → `await expect(page.locator('selector')).toBeVisible()`
+     - `verify-state selector attribute "expected"` → `await expect(page.locator('selector')).toHaveAttribute('attribute', 'expected')` (or `toHaveClass` for class)
+     - `verify-effect target property "expected"` → custom assertion (evaluate `getComputedStyle` + assert for style properties; `toHaveClass` for class; `toBeVisible` for visible)
+   - Generate `demos/verify/F00N-name.spec.ts` with the converted assertions
+   - Display: `📋 Generated verify test: demos/verify/F00N-name.spec.ts ([N] assertions)`
+   - **Skip if**: No VERIFY_STEPS block in demo script, or project has no Playwright dependency
+   - **Playwright dependency check**: If `@playwright/test` is not in devDependencies, display:
+     `ℹ️ Playwright not installed — VERIFY_STEPS test file not generated. Add @playwright/test to use CLI verification fallback.`
+
 ## Runtime Verification + Fix Loop
 
 > **Purpose**: Resolve G4 — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
@@ -250,14 +264,42 @@ After all tasks complete, before Review:
 2. Identify verifiable items from the Feature's SC-### list
 3. Navigate to each SC-related screen → Snapshot → confirm normal rendering
 4. Scan Console logs for all errors
-5. **If failures found**: Enter Auto-Fix Loop
-6. **All pass**: Display "Runtime Verified: ✅" in Review Display
+5. **Runtime Error Zero Gate** (BLOCKING when runtime verification is available):
+   - Collect all JS errors from Console: TypeError, ReferenceError, SyntaxError, unhandled rejection, Maximum update depth exceeded
+   - **If runtime errors found AND MCP/Playwright CLI is available**:
+     Display:
+     ```
+     ❌ Runtime Error Zero Gate FAILED — [N] runtime errors detected:
+       - [Error type]: [message] — [source file]
+       - [Error type]: [message] — [source file]
+
+     These errors indicate the Feature does NOT work at runtime despite build success.
+     Fix runtime errors before proceeding to Review.
+     ```
+     Enter Auto-Fix Loop (max 3 attempts). If auto-fix fails → **HARD STOP**:
+     Use AskUserQuestion:
+     - "Fix manually and re-verify" — user fixes, agent re-runs runtime check
+     - "Proceed with runtime errors" — requires reason. Records `⚠️ RUNTIME-ERRORS-ACKNOWLEDGED — [reason]` in sdd-state.md
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+   - **If RUNTIME-DEGRADED** (no runtime check possible): skip this gate, but display:
+     `⚠️ Runtime Error Zero Gate skipped — RUNTIME-DEGRADED. Static analysis (Pattern Compliance Scan) is primary verification.`
+6. **All pass**: Display "Runtime Verified: ✅ 0 errors" in Review Display
 
 ### Post-Implement Pattern Compliance Scan
 
 After Post-Implement Full Verification, run a grep-based anti-pattern scan on files changed by this Feature (use `git diff --name-only main` on the Feature branch).
 
-**Skip if**: plan.md has no `## Pattern Constraints` section, OR `RUNTIME-DEGRADED` flag is set.
+**Skip if**: plan.md has no `## Pattern Constraints` section.
+
+> **Note**: This scan runs even when `RUNTIME-DEGRADED` is set. Without runtime verification, static analysis is the last line of defense against anti-patterns. The scan is grep-based and does not require MCP.
+
+**Enhanced scan when RUNTIME-DEGRADED**: When the `RUNTIME-DEGRADED` flag is set, extend the scan with additional checks:
+- All ⚠️ warnings are promoted to **⚠️ HIGH** severity (still non-blocking, but prominently displayed)
+- Add extra patterns to the scan rules below:
+  - Hardcoded `localhost` URLs outside test/demo files (may indicate demo-only code leaking into production)
+  - Missing error handling in async functions (`async` without `try/catch` or `.catch`)
+  - `console.log` statements in non-test files (should be removed or replaced with proper logging)
+- Display: `🔍 Enhanced pattern scan (RUNTIME-DEGRADED — static analysis is primary verification)`
 
 **Scan rules** (derived from plan.md Pattern Constraints — examples below are illustrative; actual patterns depend on the project's stack):
 
@@ -277,6 +319,30 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 1. The project's specific state management library
 2. The project's specific framework
 3. The Pattern Constraints section in plan.md
+
+### CSS Value Map Compliance Scan (rebuild mode with utility CSS)
+
+> **Skip if**: `specs/{NNN-feature}/css-value-map.md` does not exist.
+> Runs after Pattern Compliance Scan, before Review.
+
+1. Read `css-value-map.md` → extract Original Value column (all CSS values)
+2. Identify UI files changed in this Feature (`git diff --name-only` → filter `.tsx`, `.jsx`, `.vue`, `.svelte`, `.css`, `.scss`)
+3. For each Original Value, grep UI files for hardcoded usage:
+   - Color values: `#1e1e2e`, `rgb(30, 30, 46)` (look for hex/rgb variants)
+   - Spacing values: `16px`, `1rem` (when the map has a utility class equivalent)
+   - Skip values already using the correct utility class (e.g., `bg-[#1e1e2e]` is OK)
+4. Report:
+   ```
+   📋 CSS Value Map Compliance:
+     ✅ 12/15 values use mapped utility classes
+     ⚠️ 3 hardcoded values found:
+       - src/components/Header.tsx:24 — `background: #1e1e2e` → should be `bg-[#1e1e2e]`
+       - src/components/Card.tsx:8 — `padding: 16px` → should be `p-4`
+       - src/components/Card.tsx:12 — `border-radius: 8px` → should be `rounded-lg`
+   ```
+5. **Severity**: ⚠️ warning (NOT blocking) — agent MAY auto-fix before Review
+
+**Important**: Only scan for values that appear in css-value-map.md. Do NOT flag CSS values that are not in the map (they may be intentionally new or different).
 
 ### Auto-Fix Loop
 
@@ -404,6 +470,11 @@ After `speckit-implement` completes:
  Task 3: ⚠️ Build OK, Runtime Fix (1 attempt)
  Post-implement: ✅ [N]/[M] SCs verified]
 [If MCP not available: "Build-only verification (Level 1)"]
+
+── Runtime Error Status ─────────────────────────
+  Runtime errors: [0 errors ✅ / N errors ❌ / DEGRADED ⚠️]
+  [If errors acknowledged: ⚠️ RUNTIME-ERRORS-ACKNOWLEDGED — [reason]]
+  [If DEGRADED: "Static analysis only — runtime not verified"]
 
 ── Demo Status (if Demo-Ready Delivery active) ──
 [Demo surface created: yes/no

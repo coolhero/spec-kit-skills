@@ -47,6 +47,9 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] API contract compatibility: [specific check]
   - [ ] Business rule consistency: [specific check]
   - [ ] Source behavior completeness: [P1: N behaviors, P2: N behaviors] (rebuild only)
+  - [ ] Interaction chain completeness: [list each chain to verify] (UI Features only)
+  - [ ] Enablement interfaces: [list each "Enables →" entry to verify]
+  - [ ] Blocked-by prerequisites: [list each "Blocked by ←" status]
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
@@ -100,6 +103,11 @@ After verification execution completes:
   - ✅/❌ Business rule consistency: [result]
   - Source behavior coverage: P1 [N]/[N] ([%]), P2 [N]/[N] ([%])
     [⚠️ Uncovered P1: funcA, funcB (if any)]
+  - Interaction chains: [N]/[N] complete [⚠️ Broken: FR-015 DOM Effect missing (if any)]
+  - Enablement interfaces: [N]/[N] verified
+    [⚠️ Failed: provider settings panel not interactive (if any)]
+  - Blocked-by prerequisites: [N]/[N] verified
+    [⚠️ F001-shell not verified yet (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]

@@ -76,26 +76,38 @@ curl -sf http://localhost:3000/health || { echo "❌ Health check failed"; exit 
 echo "✅ [Service] running"
 
 # ─── Stability Window (CI only) ───
-# Wait briefly after startup to catch crash-after-start, hangs, and delayed errors.
+# Multi-check stability: 3 health probes over 15 seconds to catch intermittent issues.
+# Catches: crash-after-start, gradual memory exhaustion, delayed initialization failure,
+# intermittent health flapping. A single 10s check can miss bugs that appear between 5-12s.
 if [ "$CI_MODE" = true ]; then
-  echo "Stability check (10s)..."
-  # Capture stderr during stability window
+  echo "Stability check (15s, 3 probes)..."
   APP_LOG=$(mktemp)
-  sleep 10 2>"$APP_LOG" &
-  SLEEP_PID=$!
-  wait $SLEEP_PID
-  # Re-check: is the process still alive and responding?
-  curl -sf http://localhost:3000/health || { echo "❌ Stability check failed — app crashed after startup"; exit 1; }
+  STABILITY_FAIL=false
+
+  for i in 1 2 3; do
+    sleep 5
+    if ! curl -sf http://localhost:3000/health > /dev/null 2>&1; then
+      echo "❌ Stability probe $i/3 failed — app became unhealthy"
+      STABILITY_FAIL=true
+      break
+    fi
+    echo "  ✅ Probe $i/3 passed ($(( i * 5 ))s)"
+  done
+
   # ─── Runtime Error Scan ───
-  # Check for client-side errors captured in app output
+  # Check for client-side errors captured in app output (regardless of probe results)
   if grep -qiE 'TypeError|ReferenceError|SyntaxError|unhandled rejection|FATAL|panic:|Maximum update depth exceeded' "$APP_LOG" 2>/dev/null; then
     echo "❌ Runtime errors detected during stability window:"
     grep -iE 'TypeError|ReferenceError|SyntaxError|unhandled rejection|FATAL|panic:|Maximum update depth exceeded' "$APP_LOG"
-    rm -f "$APP_LOG"
-    exit 1
+    STABILITY_FAIL=true
   fi
   rm -f "$APP_LOG"
-  echo "=== CI health + stability + runtime error check passed ==="
+
+  if [ "$STABILITY_FAIL" = true ]; then
+    echo "❌ Stability check failed"
+    exit 1
+  fi
+  echo "=== CI health + stability (3-probe) + runtime error check passed ==="
   # ─── Functional Verification (--verify mode) ───
   # Extends CI mode: after health + stability pass, execute VERIFY_STEPS via Playwright MCP.
   # The verify agent reads the VERIFY_STEPS block below and replays actions via MCP.
@@ -127,10 +139,10 @@ wait || true
 - **Default = interactive**: The script launches the Feature and keeps it running. The user interacts with it via browser, curl, CLI, etc.
 - **`--ci` flag**: For `verify` Phase 3 automation — runs setup + health check + stability window, then exits. No user interaction needed
 - **⚠️ CI/Interactive path convergence (CRITICAL)**: CI mode MUST execute the **same startup commands** as interactive mode. The CI exit point must come **AFTER** the Feature is actually started, health-checked, AND stability-verified — never before. If CI mode takes a shortcut (e.g., only checks the build without running `npm run dev` / `tauri dev`), the CI check becomes meaningless: it can pass while the actual demo fails.
-  - ✅ CORRECT: Start Feature → health check → **stability window (10s)** → re-check → `exit 0`
+  - ✅ CORRECT: Start Feature → health check → **stability window (15s, 3 probes)** → `exit 0`
   - ❌ WRONG: Build check → `if CI then exit` → Start Feature → interactive instructions → wait
   - ❌ WRONG: Start Feature → health check → `exit 0` immediately (no stability window — misses crash-after-startup)
-- **Stability window**: After initial health check, CI mode waits ~10 seconds then re-checks health. This catches applications that start successfully but crash or hang shortly after startup (e.g., event loop blocking, resource exhaustion, delayed initialization failure)
+- **Stability window (multi-probe)**: After initial health check, CI mode performs 3 health probes at 5-second intervals (total 15s). This catches: crash-after-startup, gradual memory exhaustion, delayed initialization failure, intermittent health flapping. A single 10s check can miss bugs that appear between 5-12 seconds
 - **Runtime error detection (CI only)**: During the stability window, capture app stderr/stdout and scan for runtime error patterns (`TypeError`, `ReferenceError`, `SyntaxError`, `Maximum update depth exceeded`, `unhandled rejection`, `FATAL`, `panic:`). These client-side errors (infinite re-renders, selector instability) do NOT cause HTTP health checks to fail but indicate a broken app. CI mode MUST exit 1 if runtime errors are detected, even if the health endpoint returns 200
 - **Coverage header REQUIRED**: Map each FR-###/SC-### from spec.md to what the user can see/try in the demo. Each SC-### includes verifiable UI actions (navigate, fill, click, verify) for automated verification during `verify` Phase 3. Use ⬜ for items that can't be auto-verified (WebSocket, external API, etc.)
 - **SC→UI Action format** (3-tier verification verbs):
@@ -151,6 +163,20 @@ wait || true
   ```
   Uses the same verb syntax as SC→UI Action format (including `verify-state`/`verify-effect` from Interaction Chains).
   The `--verify` flag causes CI mode to keep the app running for Playwright verification instead of exiting immediately.
+- **VERIFY_STEPS test file** (generated during implement, alongside demo script):
+  When a VERIFY_STEPS block exists, also generate `demos/verify/F00N-name.spec.ts` (or `.spec.js`).
+  This file converts each VERIFY_STEPS verb to a Playwright API call:
+  - `navigate /path` → `await page.goto(BASE_URL + '/path')`
+  - `click selector` → `await page.click('selector')`
+  - `fill selector value` → `await page.fill('selector', 'value')`
+  - `verify selector visible` → `await expect(page.locator('selector')).toBeVisible()`
+  - `verify-state selector attribute "expected"` → `toHaveAttribute` / `toHaveClass`
+  - `verify-effect target property "expected"` → `getComputedStyle` evaluation + assert
+  This enables `--ci --verify` to run via CLI Playwright (no MCP needed):
+  ```bash
+  npx playwright test demos/verify/F00N-name.spec.ts --reporter=list 2>&1
+  ```
+  Also used by verify Phase 3 as a CLI fallback when MCP is unavailable (see verify-phases.md Step 6b).
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
 - **Playwright header** (optional): For UI Features, include a `# Playwright` comment section with URLs and element assertions for automated UI verification. See [reference/ui-testing-integration.md](ui-testing-integration.md)

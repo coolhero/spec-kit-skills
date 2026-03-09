@@ -293,9 +293,34 @@ This step is informational only — no user confirmation required.
 
 **Execution**:
 1. Run build → **BLOCK on failure** (same as Phase 1 build gate)
-2. If MCP available (Playwright active/configured): start app → run applicable checks → report
-3. If MCP unavailable: build-only mode. Display:
-   `⚠️ Foundation verification limited to build check (MCP unavailable). Runtime Foundation issues may surface during Feature implementation.`
+2. **Generate Foundation test file** (`tests/foundation.spec.ts` or equivalent):
+   Based on constitution tech stack, generate a Playwright test file for applicable checks:
+   ```typescript
+   // Auto-generated Foundation verification
+   import { test, expect } from '@playwright/test';
+   test('CSS theme variables load', async ({ page }) => {
+     await page.goto('http://localhost:PORT/');
+     const bgColor = await page.evaluate(() =>
+       getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
+     );
+     expect(bgColor).not.toBe('');
+   });
+   test('Core layout renders without error', async ({ page }) => {
+     await page.goto('http://localhost:PORT/');
+     const errors: string[] = [];
+     page.on('pageerror', e => errors.push(e.message));
+     await page.waitForTimeout(3000);
+     expect(errors.filter(e => /TypeError|ReferenceError|SyntaxError/.test(e))).toHaveLength(0);
+   });
+   ```
+   Generate additional tests based on the Foundation Checklist above (State Management, IPC Bridge, etc.).
+   Replace `PORT` with the actual dev server port from constitution/package.json.
+3. **Run Foundation tests** (3-tier fallback):
+   a. If `@playwright/test` is in devDependencies: start app in background → run `npx playwright test tests/foundation.spec.ts --reporter=list` → parse results → map to Checklist
+   b. Else if MCP available: start app → run applicable checks via MCP (existing behavior)
+   c. Else: build-only mode. Display:
+      `⚠️ Foundation verification limited to build check. Install @playwright/test OR configure Playwright MCP for runtime checks.`
+4. **Foundation test file is committed** — becomes a regression test for all subsequent Features. Re-run on subsequent Features only if Foundation-affecting files changed.
 
 **Result display**:
 ```

@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-03-09] Pipeline v3: MCP-Independent Verification & Structural Enforcement — 9 changes (W1-W9)
+
+Post-V1-V9 analysis revealed ~70% of Pipeline v2 value depends on MCP availability. Without MCP, Tier 2/3 SC verification, VERIFY_STEPS, Foundation Gate runtime checks are all silently skipped. Additionally, agent compliance with "MUST" rules lacks structural enforcement, and cross-Feature functional dependencies aren't checked until Integration Demo.
+
+| # | Change | File(s) | Impact |
+|---|--------|---------|--------|
+| W1 | Playwright CLI Fallback for VERIFY_STEPS & SC verification | verify-phases.md, demo-standard.md, injection/implement.md | `npx playwright test` as MCP-independent fallback; generates `demos/verify/F00N-name.spec.ts` |
+| W2 | Foundation Test File Generation (MCP-independent) | pipeline.md | Auto-generates `tests/foundation.spec.ts`; 3-tier fallback: Playwright CLI → MCP → build-only |
+| W3 | Pattern Scan unconditional (remove RUNTIME-DEGRADED skip) | injection/implement.md | Static analysis runs ALWAYS; enhanced mode when RUNTIME-DEGRADED (promoted severity, extra patterns) |
+| W4 | CSS Value Map Compliance Scan | injection/implement.md | Grep-based verification that css-value-map.md utility classes are actually used (not hardcoded) |
+| W5 | Interaction Chain Completeness Check at verify | verify-phases.md | Greps for Handler→Store→DOM chain existence; broken chains = ⚠️ warning |
+| W6 | Cross-Feature Enablement Smoke Test at verify | verify-phases.md, injection/verify.md | Verifies "Enables →" interfaces + "Blocked by ←" prerequisites at individual Feature verify |
+| W7 | Enhanced Stability Window (multi-probe) | demo-standard.md | 3 probes × 5s = 15s; runtime error scan during stability window |
+| W8 | API Compatibility Matrix + SDK Migration Awareness at plan | injection/plan.md, injection/specify.md | Per-provider auth/endpoint/header matrix; SDK breaking changes documentation; multi-provider SC coverage |
+| W9 | Runtime Error Zero Gate at implement completion | injection/implement.md | BLOCKING gate: console errors = 0 required; Auto-Fix Loop + HARD STOP if errors persist |
+
+Key design decisions:
+- W1/W2 use same Playwright engine via CLI (`npx playwright test`) — no MCP dependency for functional verification
+- W3 promotes warnings to HIGH severity when RUNTIME-DEGRADED — static analysis is last defense
+- W5/W6 are grep-based (no MCP needed) for code existence checks; runtime smoke tests are MCP-optional
+- W8 adds SDK Migration Awareness (not in original plan) — catches `textDelta→text` style breaking changes at plan time
+- W9 HARD STOP follows MANDATORY RULE 1 pattern; respects RUNTIME-DEGRADED gracefully (skip gate, not fail)
+
+---
+
 ## [2026-03-09] Pipeline v2: "Build Success ≠ Feature Complete" Root Fix — 9 changes (V1-V9)
 
 Root problem: F004/F005 verified successfully but didn't work at runtime. 4 of 6 bugs were invisible to automated checks (build/test). Two remaining gaps after S1-S15: (A) Functional verification — verify checks "element visible?" but not "button works?", (B) Foundation — 7/7 bugs were Foundation-level issues (CSS theme, Zustand patterns, IPC bridge, layout) with no pre-Feature validation.

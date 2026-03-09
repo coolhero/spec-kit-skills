@@ -156,6 +156,51 @@ After `speckit-plan` completes, check the generated `plan.md` for an `## Interac
 4. **verify** → Tier 2 (State Change) and Tier 3 (Side Effect) verification uses Verify Method column
 5. **demo** → Coverage header includes `verify-state`/`verify-effect` from Verify Method
 
+## API Compatibility Matrix Verification (Features with external API integration)
+
+> **Skip for**: Features with no external API calls, or single-provider integrations.
+> Detected from: pre-context Source Behavior Inventory (API call behaviors), spec.md FR-### mentioning providers.
+
+After `speckit-plan` completes, check if the Feature integrates **2+ external API providers**.
+Detection: scan plan.md and spec.md for multiple provider names (OpenAI, Anthropic, Google, Azure, Ollama, Groq, Mistral, Cohere, etc.)
+
+If multi-provider integration detected, check plan.md for an `## API Compatibility Matrix` section.
+
+**Required format** (one row per provider):
+
+| Provider | Auth Method | Base URL | Key Header | Model Endpoint | Chat Endpoint | Response Format | Notes |
+|----------|-----------|----------|-----------|---------------|--------------|----------------|-------|
+| OpenAI | Bearer token | https://api.openai.com | Authorization: Bearer $KEY | GET /v1/models | POST /v1/chat/completions | `{choices:[{message}]}` | Standard |
+| Anthropic | API key header | https://api.anthropic.com | x-api-key: $KEY | GET /v1/models | POST /v1/messages | `{content:[{text}]}` | Requires anthropic-version header |
+| Ollama | None (local) | http://localhost:11434 | — | GET /api/tags | POST /api/chat | `{message:{content}}` | No auth needed |
+
+If `## API Compatibility Matrix` is missing from plan.md:
+- Display: `⚠️ API Compatibility Matrix missing — multiple providers detected but per-provider differences not documented.`
+- Display: `Risk: Using one provider's pattern for all (e.g., OpenAI Bearer + /v1/models for Anthropic) causes runtime auth failures.`
+- This is a **warning in Review** (not blocking), but strongly recommended before approval.
+
+**Downstream flow**:
+1. **plan.md** → matrix defined with per-provider contracts
+2. **tasks.md** → provider adapter/strategy tasks include all provider variations
+3. **implement** → each provider implementation follows its matrix row
+4. **verify** → test each provider's auth/endpoint independently (not just the "default" one)
+
+## SDK Migration Awareness (Features with SDK version upgrades)
+
+> **Skip for**: Features with no SDK/library version changes.
+> Detected from: plan.md mentioning version upgrade (e.g., "AI SDK v5→v6", "Dexie v3→v4").
+
+If plan.md references an SDK/library **major version upgrade**:
+
+1. Check if plan.md documents the **breaking changes** relevant to this Feature:
+   - API renames (e.g., `textDelta` → `text`, `maxTokens` → `maxOutputTokens`)
+   - Default behavior changes (e.g., default base URL changed)
+   - Removed/deprecated APIs
+2. If breaking changes are NOT documented:
+   - Display: `⚠️ SDK migration detected ([library] v[old]→v[new]) but breaking changes not documented in plan.md.`
+   - Display: `Risk: Type-checked build may pass while runtime behavior breaks due to renamed/removed APIs.`
+3. **Downstream flow**: tasks.md should include an "SDK API contract verification" task that validates each breaking change was handled.
+
 ## Review Display Content
 
 > **⚠️ SUPPRESS spec-kit output**: `speckit-plan` prints navigation messages like "Ready for /speckit.tasks" — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-plan executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
@@ -196,6 +241,19 @@ After `speckit-plan` completes:
  If section is missing from plan.md for a UI Feature, display:
  "⚠️ Interaction Chains section missing — UI propagation paths not documented."
  If non-UI Feature: omit this section entirely.]
+
+── API Compatibility Matrix (multi-provider only) ─
+[If 2+ external API providers detected: show the matrix from plan.md.
+ Each row = one provider with auth, endpoints, response format.
+ If section is missing from plan.md for a multi-provider Feature, display:
+ "⚠️ API Compatibility Matrix missing — per-provider differences not documented."
+ If single-provider or no external API: omit this section entirely.]
+
+── SDK Migration (version upgrades only) ─────────
+[If SDK/library major version upgrade detected: show documented breaking changes.
+ If breaking changes not documented, display:
+ "⚠️ SDK migration detected but breaking changes not documented."
+ If no version upgrade: omit this section entirely.]
 
 ── Differences from Draft ───────────────────────
 [Compare with pre-context.md drafts:
