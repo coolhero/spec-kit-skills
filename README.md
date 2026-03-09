@@ -2,9 +2,9 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 07:51 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:04 KST
 
-**Custom Claude Code skills that add cross-Feature intelligence to [spec-kit](https://github.com/github/spec-kit) SDD workflows**
+**Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope — realigning even brownfield codebases via Reverse-Spec into contract-based development controllable by AI**
 
 ---
 
