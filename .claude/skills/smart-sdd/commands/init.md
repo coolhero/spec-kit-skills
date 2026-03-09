@@ -78,7 +78,7 @@ Check if `case-study-log.md` exists at project root:
    - Error handling patterns
    - Testing patterns
 
-4. **Checkpoint (HARD STOP)**: Display the complete constitution-seed content. Use AskUserQuestion to ask for approval. **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.** **If response is empty → re-ask** (per MANDATORY RULE 1).
+4. **Checkpoint (HARD STOP)**: Display the complete constitution-seed content. Use AskUserQuestion with options: "Approve as-is", "Request modifications" (per PROCEDURE CheckpointApproval in pipeline.md). **You MUST STOP and WAIT for the user's response. Do NOT proceed to Phase 3 until the user explicitly approves.** **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 **Decision History Recording — Constitution**:
 After the user approves the Phase 2 Checkpoint, **append** to `specs/history.md` (create with the standard header if it doesn't exist — see SKILL.md § History File Header):

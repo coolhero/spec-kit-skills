@@ -81,7 +81,7 @@ If on a Feature branch with uncommitted changes, warn:
 ⚠️ You have uncommitted changes on branch {branch-name}.
 These will be lost if you reset. Commit or stash first.
 ```
-Display AskUserQuestion: "Discard changes and continue" / "Cancel reset"
+Display AskUserQuestion: "Discard changes and continue" / "Cancel reset". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ### 4-2. Delete pipeline artifacts
 

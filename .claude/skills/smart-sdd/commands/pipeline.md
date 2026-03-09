@@ -652,7 +652,7 @@ Next steps:
 When new architectural principles or conventions are discovered during Feature progression:
 
 1. **Checkpoint indication**: "Proposing a Constitution update: [principle content]"
-2. **User approval**: Uses AskUserQuestion to confirm approval. **If response is empty → re-ask** (per MANDATORY RULE 1)
+2. **User approval**: Uses AskUserQuestion with options: "Approve constitution update", "Reject — keep current version", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1)
 3. **Execute update**: If approved, performs a MINOR version update via `speckit-constitution`
 4. **Impact analysis**: Displays a warning if already completed Features are affected
 

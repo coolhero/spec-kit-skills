@@ -140,7 +140,7 @@ If the install command fails, display the error and ask the user to resolve it b
 
    Please create .env with the required values, then confirm to continue.
    ```
-   **If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT proceed without explicit user confirmation that .env is created.
+   Use AskUserQuestion with options: "I've created .env — continue", "Skip environment setup". **If response is empty → re-ask** (per MANDATORY RULE 1). Do NOT proceed without explicit user confirmation that .env is created.
 4. **If `.env` exists**: Continue silently
 
 ### Step 3 — Smoke Test (Build + Test + Run Baseline)

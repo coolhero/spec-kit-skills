@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-09] HARD STOP audit — re-ask text + explicit options
+
+Full audit of 56 HARD STOP points. Found and fixed 16 issues:
+- 12 injection files' Review HARD STOPs: added inline `**If response is empty → re-ask** (per MANDATORY RULE 1)` text
+- pipeline.md constitution incremental update: added explicit options ("Approve constitution update", "Reject", "Request modifications")
+- init.md constitution seed checkpoint: added CheckpointApproval procedure reference + explicit options
+- adopt.md environment config: added AskUserQuestion options ("I've created .env — continue", "Skip environment setup")
+- reset.md uncommitted changes: added re-ask text
+- verify.md Integration Demo trigger: added re-ask text
+
+---
+
 ## [2026-03-09] Post-Execution Output Suppression — per-command inline reinforcement
 
 Root cause: Agent showed spec-kit's "Ready for /speckit.clarify or /speckit.plan." message after speckit-specify instead of smart-sdd's fallback message. pipeline.md had suppression rules (lines 99-108), but per-command injection files had no inline reminder — agent ignored the generic rules at execution time.

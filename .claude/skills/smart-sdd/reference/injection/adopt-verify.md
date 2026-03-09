@@ -135,6 +135,8 @@ Skipped — Adoption mode does not create per-Feature demos (existing code verif
 - Options: "Approve (status: adopted)", "Fix issues and re-verify", "I've finished editing"
 - Note: "Approve" sets status to `adopted`, NOT `completed`
 
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
 ---
 
 ## Post-Step Update Rules

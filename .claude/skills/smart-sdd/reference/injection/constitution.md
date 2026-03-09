@@ -102,7 +102,7 @@ You can open and edit this file directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 

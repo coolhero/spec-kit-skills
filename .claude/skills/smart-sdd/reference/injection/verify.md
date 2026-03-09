@@ -150,6 +150,8 @@ If issues were found, you can fix them directly, then select
 - If all phases passed: Options: "Approve", "I've finished editing", "Re-run verification"
 - If limited verification: Options: "Approve (with ⚠️ limited status)", "Fix issues and re-verify", "I've finished editing"
 
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
 ---
 
 ## Post-Step Update Rules
@@ -182,7 +184,7 @@ If issues were found, you can fix them directly, then select
      🎯 All Features in [DG-0N: Scenario] are now verified!
      Run Integration Demo to verify the end-to-end scenario?
      ```
-     Options: "Run Integration Demo", "Defer Integration Demo"
+     Options: "Run Integration Demo", "Defer Integration Demo". **If response is empty → re-ask** (per MANDATORY RULE 1).
      For execution procedure, see [demo-standard.md § 7](../demo-standard.md).
 
 ### After Merge Completion

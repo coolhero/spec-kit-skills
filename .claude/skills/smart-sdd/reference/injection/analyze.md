@@ -108,6 +108,8 @@ directly, then select "I've finished editing" to re-analyze.
 - If CRITICAL issues: Options: "Resolve now", "I've finished editing", "View full report"
 - If no CRITICAL issues: Options: "Approve", "Address issues first", "I've finished editing"
 
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
 ---
 
 ## Bug Prevention Checks (B-2)

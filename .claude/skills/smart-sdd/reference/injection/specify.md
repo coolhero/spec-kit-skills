@@ -217,7 +217,7 @@ You can open and edit this file directly, then select
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 
@@ -294,7 +294,7 @@ You can open and edit this file directly, then select
 
 **If remaining ambiguities exist**: Offer to re-run clarify or proceed.
 
-**HARD STOP** (ReviewApproval): Options: "Approve", "Run clarify again", "I've finished editing"
+**HARD STOP** (ReviewApproval): Options: "Approve", "Run clarify again", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 

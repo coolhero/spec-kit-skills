@@ -137,7 +137,7 @@ After `speckit-specify` completes:
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing"
+**HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
 
