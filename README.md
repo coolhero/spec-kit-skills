@@ -2,11 +2,11 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:32 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:35 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
-- **Reverse-Spec** analyzes brownfield codebases and realigns them around Specs. Supports both Rebuild (rewrite from scratch using the original as reference) and Adopt (keep existing code, add SDD documentation). Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
+- **Reverse-Spec** reverse-extracts implicit contracts (behaviors, interfaces, data models) from brownfield codebases and realigns them into Specs — bringing legacy code into the contract-based system. Supports both Rebuild (rewrite from scratch using the original as reference) and Adopt (keep existing code, add SDD documentation). Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** automatically assembles and injects related Features' contracts and state into each spec-kit command, then verifies changes don't violate existing contracts — keeping cross-Feature consistency intact.
 
 ---
