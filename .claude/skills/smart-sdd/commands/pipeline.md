@@ -1,6 +1,6 @@
 # Pipeline Execution — Common Protocol + Feature Pipeline
 
-> Reference: Read after `/smart-sdd pipeline` or any step-mode command (constitution, specify, plan, tasks, analyze, implement, verify) is invoked. For shared rules (MANDATORY RULES), see SKILL.md.
+> Reference: Read after `/smart-sdd pipeline` or `/smart-sdd constitution` is invoked. For shared rules (MANDATORY RULES), see SKILL.md.
 > For per-command context injection details, read `reference/injection/{command}.md` (shared patterns in `reference/context-injection-rules.md`).
 > For git branch operations, also read `reference/branch-management.md`.
 
@@ -201,11 +201,21 @@ Reports the changes to the user after the update.
 
 ## Pipeline Mode
 
-Running `/smart-sdd pipeline` progresses through the entire workflow sequentially.
+Running `/smart-sdd pipeline` processes **one Feature at a time** by default. Use `--all` for batch processing.
+
+```
+/smart-sdd pipeline                        → next single Feature (auto-select)
+/smart-sdd pipeline F003                   → F003 specifically
+/smart-sdd pipeline --start verify         → next Feature, from verify
+/smart-sdd pipeline F003 --start verify    → F003, from verify
+/smart-sdd pipeline --all                  → all eligible Features (batch)
+/smart-sdd pipeline --all --start verify   → all eligible Features, from verify
+/smart-sdd constitution                    → finalize constitution (standalone)
+```
 
 ### Pipeline Initialization
 
-Before Phase 0, initialize the state and validate the source path.
+Before Feature processing, initialize the state and validate the source path.
 
 **Step 1 — State file initialization**:
 If `BASE_PATH/sdd-state.md` does not exist, create it:
@@ -260,25 +270,58 @@ If deferred Features exist (core scope only), list them:
 
 This step is informational only — no user confirmation required.
 
-### Pipeline --start Mode
+### Step 4 — Feature Selection
 
-When `--start <step>` is specified, the pipeline skips all steps before the designated start step and begins execution from that step onward for every active Feature. This is useful when spec artifacts (specify through tasks/analyze) are already complete and you want to run implement for all Features, or when you need to re-run verify across the board.
+Determines which Feature(s) to process based on the invocation arguments.
+
+#### 4a. Single-Feature Mode (default — no `--all`)
+
+**If Feature ID is specified** (e.g., `pipeline F003`):
+1. Validate FID exists in sdd-state.md
+2. If Feature is `deferred` → BLOCK: "❌ [FID] is deferred (Tier [N]). Run /smart-sdd expand first."
+3. Use this Feature as the **target Feature**
+
+**If no Feature ID specified** (e.g., `pipeline` or `pipeline --start verify`):
+Auto-select the **next Feature** in pipeline order:
+1. First Feature with `in_progress` status → resume it
+2. If none, first Feature with `restructured` status → re-run from 🔀 step
+3. If none, first Feature with `pending` status → start it
+4. If none (all completed/adopted/deferred) → "✅ All active Features are completed!" and stop
+
+Display the selected Feature:
+```
+🎯 Target Feature: [FID]-[name] ([status])
+   [Current position: specify/plan/tasks/... or "starting fresh"]
+```
+
+#### 4b. Batch Mode (`--all`)
+
+When `--all` is specified, ALL active Features (not `completed`, `adopted`, or `deferred`) are selected for processing. They will be processed in Release Group order, one at a time, each Feature completing all steps before moving to the next.
+
+Display the batch plan:
+```
+📋 Batch Mode: [N] Features will be processed
+
+  [FID]-[name]: [status] → [starting step]
+  [FID]-[name]: [status] → [starting step]
+  ...
+
+[D] deferred, [C] completed (skipped).
+```
+
+#### 4c. --start Pre-check (when `--start <step>` is specified)
 
 **Valid `--start` values**: `specify`, `plan`, `tasks`, `analyze`, `implement`, `verify`
 
-**Step 4 — --start Pre-check (only when --start is specified)**:
-
 1. **Validate start step**: Confirm the value is one of the valid steps above. If invalid, display error and list valid values.
 
-2. **Constitution check**: Verify `.specify/memory/constitution.md` exists and is finalized (not the initial template). If not finalized → BLOCK the pipeline:
+2. **Constitution check**: Verify `.specify/memory/constitution.md` exists and is finalized. If not → BLOCK:
    ```
    ❌ Constitution has not been finalized.
    Run /smart-sdd pipeline (without --start) or /smart-sdd constitution first.
    ```
 
-3. **Prerequisite scan**: For each active Feature (not `completed`, `adopted`, or `deferred`), check that all steps BEFORE the `--start` step have ✅ status in sdd-state.md Feature Progress.
-
-   **Prerequisite mapping**:
+3. **Prerequisite check** (for selected Feature(s) from 4a or 4b):
 
    | --start | Required prerequisites (must be ✅) |
    |---------|--------------------------------------|
@@ -289,47 +332,43 @@ When `--start <step>` is specified, the pipeline skips all steps before the desi
    | implement | specify, plan, tasks, analyze |
    | verify | specify, plan, tasks, analyze, implement |
 
-   Classify each Feature:
-   - **Eligible**: All prerequisite steps are ✅ → Feature will be processed from `--start` onward
-   - **Blocked**: One or more prerequisite steps are not ✅ → Feature cannot be processed
-   - **Already past start**: If the Feature has already completed the `--start` step (✅), **reset that step to 🔀 and re-execute it**. This is the whole point of `--start` — the user explicitly chose a step to re-run. If ALL steps including merge are ✅ → the `--start` step is still re-executed (mark it 🔀, then process from there)
+   - If prerequisites not met → BLOCK with missing step details
+   - If the `--start` step is already ✅ → **mark it 🔀 and re-execute**. This is the purpose of `--start` — force re-run from a specific step
+   - Steps AFTER `--start` that were already ✅ are also re-executed (marked 🔀)
 
-4. **Display summary (HARD STOP)**:
+4. **Display confirmation (HARD STOP)**:
 
+   **Single-Feature mode**:
    ```
-   📋 Pipeline --start [step]
+   📋 Pipeline --start [step] for [FID]-[name]
+
+   Prerequisites: ✅ all met
+   [step] status: [✅ → will re-run | pending → will run]
+   Flow: [step] → ... → merge
+   ```
+
+   **Batch mode** (`--all`):
+   ```
+   📋 Pipeline --start [step] (batch)
 
    ── Eligible Features ─────────────────────────
-     ✅ [FID]-[name]: [prerequisite steps all ✅] → will run: [step] → ... → merge
-     🔀 [FID]-[name]: [step] already ✅ → will re-run from: [step]
-     ⏭️ [FID]-[name]: completed → will re-run from: [step]
+     ✅ [FID]-[name]: will run [step] → ... → merge
+     🔀 [FID]-[name]: will re-run from [step]
 
    ── Blocked Features (prerequisites not met) ──
-     ❌ [FID]-[name]: missing: [step1] ([status]), [step2] ([status])
+     ❌ [FID]-[name]: missing: [step1], [step2]
 
    ──────────────────────────────────────────────
-   [N] Features will be processed ([K] re-run), [M] blocked, [D] skipped (deferred).
+   [N] Features will be processed, [M] blocked, [D] deferred.
    ```
 
    Use AskUserQuestion (HARD STOP):
-   - "Proceed with [N] eligible Features"
-   - "Abort — fix blocked Features first"
+   - "Proceed" (single) / "Proceed with [N] Features" (batch)
+   - "Abort"
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-   If no eligible Features exist (all are blocked), display:
-   ```
-   ❌ No eligible Features for --start [step].
-   [Blocked reasons]
-   ```
-   And stop the pipeline.
-
-5. **Pipeline flow with --start**:
-   - **Phase 0 (Constitution)**: Always skipped (constitution is a prerequisite, verified in step 2 above)
-   - **Phase 1~N (Features)**: For each eligible Feature in Release Group order, skip steps before `--start` and **force re-execute from `--start`** through merge. If the `--start` step was already ✅, mark it 🔀 in sdd-state.md before executing.
-   - All other pipeline rules apply: HARD STOPs, Common Protocol, branch validation, env var check, etc.
-
-> **Note**: `--start` **forces re-execution** of the named step, even if it was already ✅. Steps AFTER the named step that were already ✅ are also re-executed (marked 🔀). Steps BEFORE the named step are not affected.
+> **Note**: `--start` **forces re-execution** of the named step, even if already ✅. Steps AFTER the named step that were already ✅ are also re-executed (marked 🔀). Steps BEFORE the named step are not affected.
 
 ### Phase 0: Constitution Finalization
 
@@ -418,15 +457,16 @@ Check if `case-study-log.md` exists at project root:
 >   Steps: specify → plan → tasks → analyze → implement → verify → merge
 > ```
 
-### Phase 1~N: Progress Features in Release Group Order
+### Phase 1~N: Process Features
 
-Follows the Release Groups order from `BASE_PATH/roadmap.md`. **Skips completed, adopted, and deferred Features** — only processes Features with `pending`, `in_progress`, or `restructured` status in `sdd-state.md`.
+Processes the Feature(s) selected in Step 4 (Feature Selection). In single-Feature mode (default), only ONE Feature is processed. In batch mode (`--all`), Features are processed in Release Group order.
 
-- **Core scope**: Initially only Tier 1 Features are active (`Active Tiers: T1` in `sdd-state.md`). Tier 2/3 Features are `deferred` and skipped until activated via `/smart-sdd expand`.
-- **Full scope**: All Features are active — no deferred Features exist.
-- **Adopted Features**: Features with status `adopted` (from `/smart-sdd adopt`) are skipped. To transition them to `completed`, re-run the standard pipeline — it will re-execute tasks + implement + verify.
-- **Restructured Features**: Processed starting from their first 🔀 step (see `reference/restructure-guide.md`).
-- **--start mode**: When `--start <step>` is specified, only eligible Features (verified during --start Pre-check) are processed. For each eligible Feature, steps before the `--start` step are skipped — execution begins from the `--start` step (or the next uncompleted step if `--start` step is already ✅). All other rules (HARD STOPs, Common Protocol, branch validation) apply normally.
+**Feature processing rules**:
+- **Core scope**: Only active-Tier Features are processed. Deferred Features are skipped.
+- **Full scope**: All Features are active.
+- **Adopted Features**: Status `adopted` → skipped. To transition to `completed`, target with `pipeline [FID]`.
+- **Restructured Features**: Start from first 🔀 step (see `reference/restructure-guide.md`).
+- **--start mode**: Skip steps before `--start`, force re-execute from `--start` onward. Already-✅ steps at or after `--start` are marked 🔀.
 
 **CRITICAL: Each Feature must complete ALL steps (from its starting step through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
@@ -532,138 +572,72 @@ If there were notable decisions during this Feature's pipeline (specify → veri
 
 > **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
 
-#### Next Step Guidance (after each Feature completion)
+#### Feature Completion
 
-**If more Features remain in the pipeline**:
+**Single-Feature mode (default)**:
 
-Display progress and ask whether the user wants to test before proceeding:
+After the Feature completes all steps through merge:
 ```
 ✅ [FID]-[name] completed and merged to main!
 
 📊 Progress: [completed]/[total] Features done
-→ Next: [next-FID]-[next-name]
-  Steps: specify → plan → tasks → analyze → implement → verify → merge
+💡 Next Feature: /smart-sdd pipeline (auto-selects [next-FID]-[next-name])
+   Or target: /smart-sdd pipeline [next-FID]
 ```
 
+The pipeline STOPS here. The user runs `pipeline` again when ready for the next Feature.
+
+**Batch mode (`--all`)**:
+
+After each Feature completes, ask whether to continue to the next:
+
 **HARD STOP**: Use AskUserQuestion:
-- "Proceed to next Feature" — continue pipeline immediately
-- "Test first — I'll type 'continue' when ready" — pause pipeline for user testing
+- "Proceed to next Feature ([next-FID]-[next-name])"
+- "Stop here — I'll continue later"
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-If "Proceed": immediately start the next Feature's pre-flight (Step 0).
-If "Test first": display the pause message and wait:
+If "Stop here":
 ```
-⏸️ Pipeline paused for testing. Take your time!
-To resume: /smart-sdd pipeline (or type "continue")
-
-→ Next: [next-FID]-[next-name]
-  Steps: specify → plan → tasks → analyze → implement → verify → merge
+⏸️ Pipeline paused. [completed]/[total] Features done.
+💡 Resume: /smart-sdd pipeline --all
 ```
 
-> **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display the pause message above.
-
-**If all Features are completed**:
+**All Features completed** (both modes):
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M8.
 
 ```
-🎉 All Features completed!
+🎉 All active Features completed!
 
-📊 Final Status: [total]/[total] Features done
+📊 Final Status: [completed]/[total] Features done
   Constitution: ✅ v[version]
 
-All Features have been implemented, verified, and merged to main.
-
 Next steps:
-  /smart-sdd status         — View final progress report
-  /smart-sdd add            — Add new Features to the project
+  /smart-sdd pipeline         — Process next Feature (if any remain)
+  /smart-sdd status           — View final progress report
+  /smart-sdd add              — Add new Features to the project
 ```
 
 **Final validation**: Run `scripts/validate.sh <project-root>` to verify cross-file consistency across all completed Features. Display any ❌ errors or ⚠️ warnings.
 
 **If the pipeline is interrupted mid-Feature** (e.g., context limit, user pauses, error):
-
-This is the ONLY case where "Next steps" with commands should be displayed:
 ```
 ⏸️ Pipeline paused at [FID]-[name] → [current-step]
 
 💡 Type "continue" to resume from where you left off.
-   Or run: /smart-sdd pipeline
-   Or run: /smart-sdd [step] [FID]  (e.g., /smart-sdd implement F003)
+   Or run: /smart-sdd pipeline [FID]
 ```
 
-> **Pipeline continuity rule**: The pipeline is a CONTINUOUS flow. The only reasons to stop are: (1) HARD STOP checkpoints requiring user approval, (2) BLOCK conditions (verify/merge gates), (3) All Features completed, or (4) Unrecoverable error. Between Features, between Phases — the pipeline keeps running. Never display "Next steps" with commands unless the pipeline is actually stopping.
+> **Pipeline continuity rule**: Within a single Feature, the pipeline is a CONTINUOUS flow. The only reasons to stop are: (1) HARD STOP checkpoints requiring user approval, (2) BLOCK conditions (verify/merge gates), (3) Feature completed, or (4) Unrecoverable error. Never display "Next steps" with commands unless the pipeline is actually stopping.
 
 ---
 
-## Step Mode
-
-Executes a single command. Validates prerequisites, then runs the common protocol (Assemble → Checkpoint → Execute+Review → Update).
-
-### Prerequisite Validation
-
-| Command | Prerequisite | Validation Method |
-|---------|-------------|-------------------|
-| `constitution` | constitution-seed exists | Check existence of `BASE_PATH/constitution-seed.md` |
-| `specify` | pre-context exists, on main branch | Check existence of `BASE_PATH/features/[FID]-[name]/pre-context.md`. Verify current branch is `main`. **Create Feature branch**: `git checkout -b {NNN}-{short-name}` before running speckit-specify |
-| `plan` | spec.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/spec.md`. Verify current branch matches the Feature |
-| `tasks` | plan.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/plan.md`. Verify current branch matches the Feature |
-| `analyze` | tasks.md exists, on Feature branch | Check existence of `specs/[NNN-feature-name]/tasks.md`. Verify current branch matches the Feature |
-| `implement` | analyze completed (no CRITICAL issues), on Feature branch | Confirm analyze completion in `sdd-state.md`. Check no CRITICAL issues remain. Verify current branch matches the Feature |
-| `verify` | implement completed, on Feature branch | Confirm implement completion in `sdd-state.md`. Verify current branch matches the Feature |
-
-If prerequisites are not met, displays an error message and guides the user to the required preceding step.
-
-**Deferred Feature check** (core scope only — full scope has no deferred Features): Before checking other prerequisites, verify the Feature's status in `sdd-state.md`. If the Feature is `deferred` (outside current Active Tiers), display:
-```
-❌ [FID]-[name] is deferred (Tier [N], outside current scope: [Active Tiers]).
-Run /smart-sdd expand [Tier] first to activate Tier [N] Features.
-```
-Do NOT proceed with the step.
-
-**Branch validation**: For `plan` through `verify`, the current git branch must be the Feature branch (pattern: `{NNN}-*`). If not on the correct branch, display the expected branch name and guide the user. For `specify`, the current branch should be `main` — if already on a Feature branch, warn the user.
-
-### Feature ID → spec-kit Feature Name Mapping
+## Feature ID → spec-kit Feature Name Mapping
 
 > Full naming convention and conversion rules: see `reference/state-schema.md` § Feature Mapping.
 
 **Quick reference**: `F001-auth` (smart-sdd) ↔ `001-auth` (spec-kit/git branch). Strip/prepend `F` prefix. The `short-name` MUST match between both systems.
-
-### Step Mode Completion
-
-After the full common protocol completes (Update done), display a friendly summary with clear next-step guidance:
-
-```
-✅ [command] complete — [FID] [Feature Name]
-
-[1-2 line summary: what was produced or decided]
-
-📍 specify → plan → tasks → analyze → implement → verify → merge
-            ↑ done
-
-💡 Type "continue" to proceed to [next-step].
-   Or run: /smart-sdd [next-step] [FID]
-```
-
-**Next-step mapping** (use the appropriate prompt):
-
-| Completed | Next | Prompt |
-|-----------|------|--------|
-| constitution | specify | `💡 Type "continue" to start specifying the first Feature.` |
-| specify | plan | `💡 Type "continue" to proceed to planning. (Or /smart-sdd clarify [FID] to refine the spec first.)` |
-| clarify | specify | `💡 Type "continue" to re-run specify with the clarifications applied.` |
-| plan | tasks | `💡 Type "continue" to generate the task breakdown.` |
-| tasks | analyze | `💡 Type "continue" to run cross-artifact analysis.` |
-| analyze | implement | `💡 Type "continue" to start implementation.` |
-| implement | verify | `💡 Type "continue" to run verification.` |
-| verify | merge | `💡 Type "continue" to merge this Feature.` |
-| merge | *(next Feature)* | `💡 Type "continue" to start the next Feature, or /smart-sdd status to check progress.` |
-
-**Rules**:
-- The `📍` progress bar shows the pipeline position with `↑ done` under the completed step
-- The `💡` prompt always offers "continue" as the primary action — one word, easy to type
-- Never show spec-kit's own "Ready for /speckit.*" messages — use this template instead
 
 ---
 

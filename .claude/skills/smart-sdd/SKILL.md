@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--domain app]  # commands: init|add|adopt|pipeline|constitution|specify|plan|tasks|analyze|implement|verify|coverage|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--all] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -63,20 +63,17 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd adopt                         # Adopt existing code with SDD docs
 /smart-sdd adopt --from ./path           # Read artifacts from specified path
 
-# Pipeline — Run the full SDD pipeline (after init, add, or reverse-spec)
-/smart-sdd pipeline                      # With per-step confirmation
+# Pipeline — Run the SDD pipeline (one Feature at a time by default)
+/smart-sdd pipeline                      # Next single Feature (auto-select)
+/smart-sdd pipeline F003                 # Target F003 specifically
+/smart-sdd pipeline --start verify       # Next Feature, re-run from verify
+/smart-sdd pipeline F003 --start verify  # F003, re-run from verify
+/smart-sdd pipeline --all                # All eligible Features (batch mode)
+/smart-sdd pipeline --all --start impl   # Batch, from implement step
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
-/smart-sdd pipeline --start implement    # Start from implement step (all Features)
-/smart-sdd pipeline --start verify       # Start from verify step (all Features)
 
-# Step Mode — Execute a specific step for a specific Feature
+# Constitution (standalone)
 /smart-sdd constitution                  # Finalize constitution (one-time)
-/smart-sdd specify F001                  # Specify Feature F001
-/smart-sdd plan F001                     # Plan Feature F001
-/smart-sdd tasks F001                    # Generate tasks for Feature F001
-/smart-sdd analyze F001                  # Analyze cross-artifact consistency (before implement)
-/smart-sdd implement F001               # Implement Feature F001
-/smart-sdd verify F001                   # Verify Feature F001
 
 # Scope expansion (core scope only — brownfield rebuild with scope=core)
 /smart-sdd expand                        # Interactive: select which Tiers to activate
@@ -139,13 +136,14 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 
 ```
 $ARGUMENTS parsing rules:
-  First token  → command (init | add | adopt | expand | pipeline | constitution | specify | plan | tasks | analyze | implement | verify | coverage | status | parity | reset)
-  Second token → feature-id (format: F001, required when command is specify/plan/tasks/analyze/implement/verify)
+  First token  → command (init | add | adopt | expand | pipeline | constitution | coverage | status | parity | reset)
+  Second token → feature-id (format: F001, optional for pipeline command — targets specific Feature)
   --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
   --prd <path>    → Path to PRD document (for init and add commands)
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
   --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify
+  --all           → Process all eligible Features in batch mode (only for pipeline command). Default is single-Feature mode.
   --domain <val>  → Project domain profile: "app" (default). Determines demo pattern, parity dimensions, and verify steps
 ```
 
@@ -201,9 +199,11 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `init` | `commands/init.md` | Greenfield project setup |
 | `add` | `commands/add.md` | Add Features to existing project |
 | `adopt` | `commands/adopt.md` | SDD adoption pipeline — wrap existing code with SDD docs |
-| `pipeline` | `commands/pipeline.md` | Full SDD pipeline execution |
-| `constitution`, `specify`, `plan`, `tasks`, `analyze`, `implement` | `commands/pipeline.md` | Step mode — execute a specific pipeline step |
-| `verify` | `commands/pipeline.md` + `commands/verify-phases.md` | Step mode — verify with Phase 1-4 details |
+| `pipeline` | `commands/pipeline.md` | SDD pipeline — one Feature at a time (default) or batch (`--all`) |
+| `pipeline [FID]` | `commands/pipeline.md` | Target a specific Feature |
+| `pipeline --start [step]` | `commands/pipeline.md` | Re-run from a specific step (force re-execute even if ✅) |
+| `constitution` | `commands/pipeline.md` | Finalize constitution (standalone, one-time) |
+| `verify` (with pipeline) | `commands/pipeline.md` + `commands/verify-phases.md` | Verify with Phase 1-4 details |
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
 | `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
 | `parity` | `commands/parity.md` | Check parity against original source |

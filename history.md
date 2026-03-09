@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-03-09] smart-sdd — Single-Feature pipeline default + remove Step Mode
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Single-Feature default | `pipeline` processes ONE Feature at a time by default | User only needed F003 but `--start verify` re-ran all 3 completed Features. Single-Feature default gives precise control without requiring `--only` flags |
+| 2 | Feature targeting | `pipeline F003` targets a specific Feature; `pipeline --all` for batch mode | Replaces old behavior where pipeline always processed all Features. Simple, composable syntax |
+| 3 | Step Mode removal | Removed 7 step-mode commands (specify, plan, tasks, analyze, implement, verify + step mode section) | `pipeline F003 --start verify` fully replaces `/smart-sdd verify F003`. Reduces 10 entry points to 3 (pipeline, pipeline [FID], constitution) |
+| 4 | Feature auto-selection | Without FID: picks first in_progress → restructured → pending Feature | Intuitive "resume where you left off" behavior. No ambiguity about which Feature to process |
+
+---
+
 ## [2026-03-09] smart-sdd — Fix --start to force re-execute named step
 
 | # | Decision | Choice | Rationale |
