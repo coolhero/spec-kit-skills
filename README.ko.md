@@ -2,9 +2,11 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:04 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:06 KST
 
-**[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 보완하고, Reverse-Spec 기반으로 브라운필드 코드베이스까지 Spec 중심 재정렬하여 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
+**[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
+
+Reverse-Spec으로 브라운필드 코드베이스를 Spec 중심으로 재정렬하여, 그린필드부터 레거시까지 모든 변경·확장이 AI가 관리 가능한 계약 안에서 이루어지도록 합니다.
 
 ---
 
