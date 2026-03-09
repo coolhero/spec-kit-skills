@@ -314,8 +314,14 @@ This step is informational only — no user confirmation required.
 
    **Classification**:
    - Tool configured + installed → `✅ available`
-   - Tool configured but NOT installed → `⚠️ warning` (NOT blocking) + display install guidance from `domains/{domain}.md` § 3b
+   - Tool configured but NOT installed → `⚠️ warning` — offer auto-install (see below)
    - Tool not configured → `ℹ️ not configured` (informational note)
+
+   **Auto-install offer** (when tool is configured but not installed):
+   Use AskUserQuestion:
+   - "Install now" — run the install command from `domains/{domain}.md` § 3b install guidance (e.g., `npm install --save-dev eslint`). After install, re-verify (`--version` check). If successful → update status to `✅ available`.
+   - "Skip — proceed without lint" — record `⚠️ not installed`, verify Phase 1 will skip lint checks for all Features.
+   **If response is empty → re-ask** (per MANDATORY RULE 1).
 
    **Record** in `sdd-state.md` → `## Toolchain` section (see `reference/state-schema.md`).
    This cached result is read by verify Phase 1 to skip unavailable tools without re-discovering.

@@ -155,8 +155,10 @@ Run each check and record results. **If any check fails, verification is BLOCKED
    3. **Distinguish failure types**:
       - **Tool not found** (exit code 127 / "command not found"): This is a **toolchain issue**, NOT a code quality issue.
         Display: `⚠️ Lint: tool not found ([command]). This is a toolchain issue, not a code problem.`
-        Update `sdd-state.md` Toolchain → Lint status to `⚠️ not installed` (retroactive update).
-        Treat as **skipped** for Phase 1 — do NOT block.
+        **Offer auto-install** via AskUserQuestion:
+        - "Install now" — run the install command from `domains/{domain}.md` § 3b (e.g., `npm install --save-dev eslint`). After install, re-run lint. If lint passes → record `✅ available` + `✅ Lint: passed`. If lint finds errors → record `✅ available` + report lint errors as normal Phase 1 failure.
+        - "Skip — proceed without lint" — record `⚠️ not installed` in `sdd-state.md` Toolchain. Treat as skipped, do NOT block.
+        **If response is empty → re-ask** (per MANDATORY RULE 1).
       - **Lint errors found** (exit code 1 with lint output): This is a **code quality issue**.
         Display: `❌ Lint: [N] errors found`
         This IS a Phase 1 failure — **BLOCKS** per normal rules.
