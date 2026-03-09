@@ -151,6 +151,14 @@ wait || true
   - **Tier 3 — Side Effect**: `verify-effect target-selector property "expected"` — confirm downstream DOM propagation on a DIFFERENT element (e.g., `verify-effect body style.fontSize "18px"`, `verify-effect .toast visible`)
   - Full sequence example: `navigate /settings → click button#theme-toggle → verify-state html class "dark" → verify-effect body style.backgroundColor "#1a1a2e"`
   - Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 3 to parse and replay these actions via MCP. Tier 2/3 verbs are parsed from the Interaction Chains table's Verify Method column (see plan.md)
+  - **Temporal verification verbs** (for async UX flows from UX Behavior Contract):
+    - `wait-for selector visible [timeout]` — wait until element appears (default timeout 10s). For loading states, streaming indicators
+    - `wait-for selector gone [timeout]` — wait until element disappears. For loading→complete transitions
+    - `wait-for selector textContent "pattern" [timeout]` — wait until element text matches regex. For streaming text verification
+    - `verify-scroll selector "bottom"` — verify element is scrolled to bottom (`scrollTop + clientHeight >= scrollHeight - threshold`). For auto-scroll during streaming
+    - `verify-scroll selector "not-bottom"` — verify element is NOT at bottom (user scrolled up)
+    - `trigger selector event` — dispatch custom event for testing (e.g., `trigger .chat-input submit`)
+    - Full async sequence example: `navigate /chat → fill .chat-input "Hello" → click button#send → wait-for .spinner visible → wait-for .message-content visible → wait-for .spinner gone 15 → verify-scroll .chat-area "bottom" → verify-state button#send disabled "false"`
 - **VERIFY_STEPS block** (optional, for UI Features): Include a comment block after the Coverage header that defines functional verification steps. These steps are parsed by the verify agent (Phase 3 Step 6b) and executed via Playwright MCP:
   ```bash
   # VERIFY_STEPS:
@@ -160,6 +168,16 @@ wait || true
   #   navigate /settings/display
   #   fill input#font-size 18
   #   verify-effect body style.fontSize "18px"
+  #
+  # Async UX verification (from UX Behavior Contract):
+  #   navigate /chat
+  #   fill .chat-input "test message"
+  #   click button#send
+  #   wait-for .spinner visible
+  #   wait-for .message-content visible
+  #   wait-for .spinner gone 15
+  #   verify-scroll .chat-area "bottom"
+  #   verify-state button#send disabled "false"
   ```
   Uses the same verb syntax as SC→UI Action format (including `verify-state`/`verify-effect` from Interaction Chains).
   The `--verify` flag causes CI mode to keep the app running for Playwright verification instead of exiting immediately.
@@ -172,6 +190,11 @@ wait || true
   - `verify selector visible` → `await expect(page.locator('selector')).toBeVisible()`
   - `verify-state selector attribute "expected"` → `toHaveAttribute` / `toHaveClass`
   - `verify-effect target property "expected"` → `getComputedStyle` evaluation + assert
+  - `wait-for selector visible [timeout]` → `await expect(page.locator('selector')).toBeVisible({ timeout })`
+  - `wait-for selector gone [timeout]` → `await expect(page.locator('selector')).toBeHidden({ timeout })`
+  - `wait-for selector textContent "pattern" [timeout]` → `await expect(page.locator('selector')).toHaveText(pattern, { timeout })`
+  - `verify-scroll selector "bottom"` → `await page.evaluate(s => { const el = document.querySelector(s); return el.scrollTop + el.clientHeight >= el.scrollHeight - 5; }, 'selector')` + assert true
+  - `trigger selector event` → `await page.locator('selector').dispatchEvent('event')`
   This enables `--ci --verify` to run via CLI Playwright (no MCP needed):
   ```bash
   npx playwright test demos/verify/F00N-name.spec.ts --reporter=list 2>&1

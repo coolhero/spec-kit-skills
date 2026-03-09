@@ -48,6 +48,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] Business rule consistency: [specific check]
   - [ ] Source behavior completeness: [P1: N behaviors, P2: N behaviors] (rebuild only)
   - [ ] Interaction chain completeness: [list each chain to verify] (UI Features only)
+  - [ ] UX behavior contract: [list each temporal scenario to verify] (async UI Features only)
   - [ ] Enablement interfaces: [list each "Enables →" entry to verify]
   - [ ] Blocked-by prerequisites: [list each "Blocked by ←" status]
 
@@ -104,6 +105,8 @@ After verification execution completes:
   - Source behavior coverage: P1 [N]/[N] ([%]), P2 [N]/[N] ([%])
     [⚠️ Uncovered P1: funcA, funcB (if any)]
   - Interaction chains: [N]/[N] complete [⚠️ Broken: FR-015 DOM Effect missing (if any)]
+  - UX behavior contract: [N]/[N] scenarios verified
+    [⚠️ Missing: auto-scroll not implemented, cleanup on unmount missing (if any)]
   - Enablement interfaces: [N]/[N] verified
     [⚠️ Failed: provider settings panel not interactive (if any)]
   - Blocked-by prerequisites: [N]/[N] verified

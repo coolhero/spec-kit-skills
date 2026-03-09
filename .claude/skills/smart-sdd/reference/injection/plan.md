@@ -141,6 +141,27 @@ After `speckit-plan` completes, check the generated `plan.md` for an `## Interac
 | FR-018 | Toggle sidebar | onToggleSidebar() | ui.sidebarOpen=false | sidebar.classList.add('hidden') | Sidebar disappears | verify-state .sidebar class "hidden" |
 ```
 
+**Async UX Behavior rows** (for Features with streaming, loading, or multi-step async operations):
+
+Interaction Chains cover **synchronous** state propagation (click → handler → store → DOM). For Features with **asynchronous UX flows** (streaming responses, loading states, error recovery), add rows with the `async-flow` prefix in the User Action column:
+
+```markdown
+| FR | User Action | Handler | Store Mutation | DOM Effect | Visual Result | Verify Method |
+|----|-------------|---------|---------------|------------|---------------|---------------|
+| FR-020 | async-flow: Send message | onSend() | chat.loading=true | .spinner visible, .input disabled | Loading indicator shown | verify-state .spinner visible |
+| FR-020 | async-flow: Streaming response | onChunk(text) | chat.messages[-1].content+=text | .message-content textContent updates | Text appears incrementally | verify-effect .message-content textContent "non-empty" |
+| FR-020 | async-flow: Stream complete | onComplete() | chat.loading=false | .spinner hidden, .input enabled, auto-scroll | Input re-enabled, scrolled to bottom | verify-effect .chat-area scrollTop "bottom" |
+| FR-020 | async-flow: Stream error | onError(err) | chat.error=err | .error-toast visible, .input enabled | Error message shown, can retry | verify-state .error-toast visible |
+```
+
+**Async-flow rows capture temporal UX patterns** that sync chains miss:
+- **Loading state transitions**: loading=true → spinner visible → loading=false → spinner hidden
+- **Streaming behavior**: incremental content updates + auto-scroll during stream
+- **Error recovery**: error display + input re-enabled + retry capability
+- **Cleanup**: subscriptions/listeners cleaned up on completion or error
+
+Without async-flow rows, the agent implements the handler but may skip: auto-scroll during streaming, loading spinner management, error recovery UI, cleanup on unmount.
+
 **If `## Interaction Chains` is missing from plan.md** (UI Feature):
 - Display in Review: `⚠️ Interaction Chains section missing — UI propagation paths not documented.`
 - This is a **warning** (not blocking), but strongly recommended before approval.
@@ -150,8 +171,8 @@ After `speckit-plan` completes, check the generated `plan.md` for an `## Interac
   3. **implement tasks** → each chain step becomes a testable implementation unit
 
 **Downstream flow**:
-1. **plan.md** → chains defined (Verify Method column)
-2. **tasks.md** → each chain step decomposed into testable tasks (not just "implement handler" — also "apply DOM effect" and "verify visual result")
+1. **plan.md** → chains defined (Verify Method column) — including async-flow rows
+2. **tasks.md** → each chain step decomposed into testable tasks (not just "implement handler" — also "apply DOM effect" and "verify visual result"). Async-flow rows generate explicit tasks for loading state, streaming behavior, error recovery, and cleanup
 3. **implement** → full chain implemented (handler + store + DOM + visual), not just the handler
 4. **verify** → Tier 2 (State Change) and Tier 3 (Side Effect) verification uses Verify Method column
 5. **demo** → Coverage header includes `verify-state`/`verify-effect` from Verify Method
@@ -242,6 +263,13 @@ After `speckit-plan` completes:
  "⚠️ Interaction Chains section missing — UI propagation paths not documented."
  If non-UI Feature: omit this section entirely.]
 
+── UX Behavior Contract (async UI Features only) ─
+[If UI Feature with async operations: show the UX Behavior Contract table.
+ Each row = one temporal scenario with expected behavior and verify method.
+ If section is missing from plan.md for an applicable Feature, display:
+ "⚠️ UX Behavior Contract missing — temporal UX expectations not documented."
+ If sync-only UI Feature or non-UI Feature: omit this section entirely.]
+
 ── API Compatibility Matrix (multi-provider only) ─
 [If 2+ external API providers detected: show the matrix from plan.md.
  Each row = one provider with auth, endpoints, response format.
@@ -273,6 +301,42 @@ You can open and edit these files directly, then select
 **HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
+
+## UX Behavior Contract (mandatory for UI Features with async operations)
+
+> **Skip for**: backend-only, CLI, or library Features. Also skip for UI Features with only synchronous interactions (forms, toggles, navigation — covered by Interaction Chains alone).
+> **Required for**: UI Features with streaming, real-time updates, complex loading states, or multi-step async flows.
+
+After speckit-plan completes, verify the generated `plan.md` includes a **`## UX Behavior Contract`** section for applicable Features. If absent, the agent MUST add it during Review before approval.
+
+The UX Behavior Contract makes **expected temporal behavior** explicit — things that FR-### describes functionally but not experientially. Without this, the agent implements the function but not the experience.
+
+**Required format**:
+
+```markdown
+## UX Behavior Contract
+
+| Scenario | Expected Behavior | Failure Behavior | Verify Method |
+|----------|-------------------|------------------|---------------|
+| Streaming response active | Chat area auto-scrolls to show latest text; user scroll-up pauses auto-scroll | No scroll = user can't see new text without manual scrolling | verify-effect .chat-area scrollTop "bottom" |
+| Message sending | Send button disabled + spinner; input field disabled | Double-send if button not disabled; lost input if field clears prematurely | verify-state button#send disabled "true" |
+| API error during stream | Error toast appears; input re-enabled; partial response preserved | Silent failure = user thinks app frozen; lost partial response | verify-state .error-toast visible |
+| Long loading (>3s) | Skeleton/placeholder shown; cancel option available | Blank screen = user thinks app crashed | verify-state .skeleton visible |
+| Component unmount during stream | Stream subscription cancelled; no state update after unmount | Memory leak; "setState on unmounted component" warning | — (code review) |
+```
+
+**Key principles**:
+- Each row describes a **temporal scenario** (not just input→output, but what happens over time)
+- **Expected Behavior** = what the user should see/experience
+- **Failure Behavior** = what happens if this is NOT implemented (helps agent understand WHY it matters)
+- **Verify Method** = same verb syntax as Interaction Chains, feeds into VERIFY_STEPS and demo
+
+**Downstream flow**:
+1. **plan.md** → UX Behavior Contract defined
+2. **tasks.md** → each UX behavior generates explicit implementation tasks (not just "add streaming" but "add auto-scroll during streaming", "add scroll-pause on user scroll-up", "add loading skeleton after 3s")
+3. **implement** → each task explicitly implements the temporal behavior
+4. **verify** → UX Smoke Test in Phase 3 uses Verify Method column for temporal checks
+5. **demo** → VERIFY_STEPS includes temporal verification sequences (wait-for + verify)
 
 ## Bug Prevention Checks (B-1)
 

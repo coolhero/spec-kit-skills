@@ -209,8 +209,37 @@ If `plan.md` contains an `## Interaction Chains` section:
      FR-015 (font size):    Handler ✅ → Store ✅ → DOM ❌ — Chain broken at DOM Effect
        ⚠️ Store mutation `settings.fontSize` found, but no corresponding `style.fontSize` assignment
    ```
-4. Broken chains → ⚠️ warning (NOT blocking) — but highlighted in Review as likely runtime failure
-5. **Skip if**: No Interaction Chains section in plan.md, or Feature is backend-only
+4. **Async-flow rows**: If Interaction Chains contain `async-flow:` rows, additionally verify:
+   - **Loading state**: grep for loading state management (e.g., `loading = true`, `setLoading`, `isLoading`)
+   - **Error recovery**: grep for error handler + UI recovery (e.g., `catch`, `onError`, error state → enabled input)
+   - **Cleanup**: grep for subscription/listener cleanup (e.g., `unsubscribe`, `abort`, `removeEventListener`, `cleanup`)
+5. Broken chains → ⚠️ warning (NOT blocking) — but highlighted in Review as likely runtime failure
+6. **Skip if**: No Interaction Chains section in plan.md, or Feature is backend-only
+
+**Step 3b — UX Behavior Contract Verification** (UI Features with UX Behavior Contract in plan.md):
+
+If `plan.md` contains a `## UX Behavior Contract` section:
+
+1. Parse each row: Scenario | Expected Behavior | Failure Behavior | Verify Method
+2. For each scenario, verify the implementation exists:
+   - **Code check** (grep-based, no MCP needed):
+     - Scroll behavior: grep for `scrollTop`, `scrollIntoView`, `scrollTo` in Feature's UI files
+     - Loading states: grep for loading/spinner state management
+     - Error recovery: grep for error state + input re-enable pattern
+     - Cleanup on unmount: grep for cleanup in `useEffect` return / `onUnmounted` / `componentWillUnmount`
+   - **Runtime check** (if MCP or Playwright CLI available):
+     - Execute the Verify Method from the contract row (same verb syntax as Interaction Chains)
+3. Report:
+   ```
+   📋 UX Behavior Contract Verification:
+     Streaming auto-scroll:  Code ✅ (scrollIntoView found) | Runtime ✅ (verify-scroll .chat-area "bottom" passed)
+     Loading state:          Code ✅ (isLoading state found) | Runtime ✅ (wait-for .spinner visible passed)
+     Error recovery:         Code ✅ (error handler found)   | Runtime ⬜ (requires API error — skip)
+     Cleanup on unmount:     Code ❌ (no cleanup in useEffect return)
+       ⚠️ Missing cleanup may cause memory leak or "setState on unmounted component" warning
+   ```
+4. Missing implementations → ⚠️ warning (NOT blocking) — but highlighted in Review
+5. **Skip if**: No UX Behavior Contract in plan.md, or Feature is backend-only / sync-only UI
 
 **Step 4 — Enablement Interface Smoke Test** (if Functional Enablement Chain exists):
 

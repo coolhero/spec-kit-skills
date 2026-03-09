@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-09] W10: Async UX Behavior Chains + UX Behavior Contract
+
+Interaction Chains (V2) covered synchronous state propagation (click→handler→store→DOM) but missed temporal/async UX patterns — streaming auto-scroll, loading state transitions, error recovery, cleanup on unmount. These caused real bugs (e.g., chat doesn't scroll during streaming, spinner never disappears, memory leak on unmount).
+
+Changes:
+1. **Async-flow rows in Interaction Chains** (injection/plan.md) — `async-flow:` prefix for temporal UX behaviors (loading→streaming→complete→error states)
+2. **UX Behavior Contract section** (injection/plan.md) — mandatory for UI Features with async operations. Documents expected temporal behavior, failure consequences, and verify methods
+3. **Temporal verification verbs** (demo-standard.md, injection/implement.md) — `wait-for`, `wait-for ... gone`, `wait-for ... textContent`, `verify-scroll`, `trigger`. Extends VERIFY_STEPS with async-capable assertions
+4. **UX Behavior Contract Verification** (verify-phases.md Step 3b) — grep for scroll, loading, error recovery, cleanup patterns. Runtime check via temporal verbs when Playwright available
+5. **Checkpoint/Review Display update** (injection/verify.md) — UX behavior contract items shown in Phase 2
+
+Key principle: "동작한다"의 기준을 "빌드 성공"에서 "실제 사용자 시나리오 통과"로 올리는 것.
+
+---
+
 ## [2026-03-09] Pipeline v3: MCP-Independent Verification & Structural Enforcement — 9 changes (W1-W9)
 
 Post-V1-V9 analysis revealed ~70% of Pipeline v2 value depends on MCP availability. Without MCP, Tier 2/3 SC verification, VERIFY_STEPS, Foundation Gate runtime checks are all silently skipped. Additionally, agent compliance with "MUST" rules lacks structural enforcement, and cross-Feature functional dependencies aren't checked until Integration Demo.

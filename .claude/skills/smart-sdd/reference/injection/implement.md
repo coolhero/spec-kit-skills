@@ -201,6 +201,11 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
      - `verify selector visible` → `await expect(page.locator('selector')).toBeVisible()`
      - `verify-state selector attribute "expected"` → `await expect(page.locator('selector')).toHaveAttribute('attribute', 'expected')` (or `toHaveClass` for class)
      - `verify-effect target property "expected"` → custom assertion (evaluate `getComputedStyle` + assert for style properties; `toHaveClass` for class; `toBeVisible` for visible)
+     - `wait-for selector visible [timeout]` → `await expect(page.locator('selector')).toBeVisible({ timeout })`
+     - `wait-for selector gone [timeout]` → `await expect(page.locator('selector')).toBeHidden({ timeout })`
+     - `wait-for selector textContent "pattern" [timeout]` → `await expect(page.locator('selector')).toHaveText(pattern, { timeout })`
+     - `verify-scroll selector "bottom"` → `await page.evaluate(s => { const el = document.querySelector(s); return el.scrollTop + el.clientHeight >= el.scrollHeight - 5; }, 'selector')` + expect true
+     - `trigger selector event` → `await page.locator('selector').dispatchEvent('event')`
    - Generate `demos/verify/F00N-name.spec.ts` with the converted assertions
    - Display: `📋 Generated verify test: demos/verify/F00N-name.spec.ts ([N] assertions)`
    - **Skip if**: No VERIFY_STEPS block in demo script, or project has no Playwright dependency
