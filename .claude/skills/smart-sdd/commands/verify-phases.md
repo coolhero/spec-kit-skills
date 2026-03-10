@@ -46,6 +46,33 @@ When verify discovers a bug (or the user provides feedback during Review), class
 
 **Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt. Additionally, user feedback during verify Review often identifies issues that are not bugs but rather spec-level or plan-level problems. Without structured regression routing, these fixes happen ad-hoc, outside the pipeline's quality gates.
 
+### Verify-time Change Recording — All Source Modifications
+
+The Bug Fix Severity Rule above handles **bugs** (wrong behavior). But verify may also discover **implementation gaps** — missing behavior that falls within the scope of an existing FR-### or task but was not completed during implement. Unlike a bug, an implementation gap is *absent* behavior, not *wrong* behavior (e.g., missing i18n keys, unimplemented edge case within a documented SC, missing config entry referenced in tasks).
+
+**Classification of ALL source modifications during verify**:
+
+| Change Type | Scope Test | Action |
+|-------------|-----------|--------|
+| Bug Fix (Minor) | Wrong behavior, ≤2 files, no API change | Fix inline (per Bug Fix Severity Rule) |
+| Implementation Gap | Missing behavior within existing FR/task scope, ≤2 files, no API change | Fix inline + record as gap fill |
+| Design Change | New behavior beyond FR/task scope, OR 3+ files, OR API/contract change | Pipeline regression (per Bug Fix Severity Rule Major-*) |
+
+**Decision flow** (when modifying source during verify):
+1. Is this fixing **wrong** behavior? → Bug Fix → Apply Bug Fix Severity Rule
+2. Is this adding **missing** behavior within an existing FR/task?
+   - ≤2 files, no API/interface change → **Implementation Gap** — fix inline + record
+   - 3+ files OR API change → **Major-Implement** regression
+3. Is this adding behavior **beyond** existing FR/task scope? → **Design Change** → Major-* regression
+
+**Recording requirement** (in sdd-state.md Notes after verify completes):
+All inline changes (Minor bug fixes + Implementation gap fills) must be summarized in the Notes column. This recording ensures:
+- **Transparency**: user sees what was changed during verify beyond the planned verification
+- **Audit trail**: if a "gap fill" was actually a scope expansion, the record enables review
+- **Pattern detection**: repeated gap fills in the same area suggest implement phase quality issues
+
+Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
+
 ---
 
 ### Verify Initialization — Compaction-Safe Checkpoint

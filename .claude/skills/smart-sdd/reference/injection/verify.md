@@ -151,6 +151,12 @@ After verification execution completes:
   ⚠️ Phase 3: [reason] (or "N/A — passed normally")
   Overall status: limited (merge allowed with reminder)
 
+── Verify-time Changes (if applicable) ─────────────
+[Only shown if source was modified during verify]
+  Bug fixes (Minor): [count] — [brief list]
+  Gap fills: [count] — [brief list]
+  Total files modified: [count]
+
 ──────────────────────────────────────────────────
 ```
 
@@ -210,6 +216,7 @@ If issues were found, you can fix them directly, then select
    - Cross-Feature verification results
    - Overall verification status (`success` / `limited` / `failure`)
    - If limited: record `⚠️ LIMITED — [reason]` and/or `⚠️ DEMO-LIMITED — [reason]` in Notes
+   - **Verify-time changes**: If source was modified during verify, record in Notes: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])` (see verify-phases.md § Verify-time Change Recording)
 3. **SBI Coverage Update** (rebuild/adoption only):
    - Run `scripts/sbi-coverage.sh <project-root>` to get current coverage
    - Update `sdd-state.md` Source Behavior Coverage: matched SBI entries → `✅ verified`
