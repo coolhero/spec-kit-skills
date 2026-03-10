@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:59 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 10:09 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -172,11 +172,11 @@ All spec-kit command executions follow this 4-step protocol:
 |---------|-----------------|-----------------|
 | `constitution` | `constitution-seed.md` | Full content (architecture principles, Best Practices, Global Evolution operational principles) |
 | `specify` | `pre-context.md` + `business-logic-map.md` | Feature summary, FR/SC drafts, business rules, edge cases, source reference |
-| `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized from preceding Features) |
+| `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized from preceding Features), integration contracts (cross-Feature data shape + bridge) |
 | `tasks` | `plan.md` | Automatic execution based on plan |
 | `analyze` | `spec.md` + `plan.md` + `tasks.md` | Cross-artifact consistency analysis |
 | `implement` | `tasks.md` + `plan.md` + `pre-context.md` | Interaction chains, UX behavior contract, API compatibility matrix, env var verification, naming remapping, runtime verification + fix loop |
-| `verify` | `pre-context.md` + registries + `plan.md` | Cross-Feature entity/API consistency, interaction chain completeness, UX behavior contract, API compatibility matrix, enablement smoke test, impact scope |
+| `verify` | `pre-context.md` + registries + `plan.md` | Cross-Feature entity/API consistency, interaction chain completeness, UX behavior contract, API compatibility matrix, enablement smoke test, integration contract shape verification, SC verification matrix, impact scope |
 
 **Preceding Feature results take priority**: If a dependent Feature's plan is already complete, the finalized `data-model.md` and `contracts/` are referenced instead of registry drafts.
 
@@ -404,11 +404,18 @@ Phase 1~N: Per Feature (in Release Group order):
 Phase 1:  Execution (tests, build, lint) — BLOCKS on failure
           Lint tool detection per ecosystem (auto-install offer if missing)
 Phase 2:  Cross-Feature Consistency — entity/API compat, interaction chains,
-          UX behavior contract, API compatibility matrix, enablement smoke test
+          UX behavior contract, API compatibility matrix, enablement smoke test,
+          integration contract shape verification (Provider↔Consumer + bridge)
 Phase 3:  Demo-Ready Verification — BLOCKS on failure
+          SC Verification Matrix: classify ALL SCs → cdp-auto / test-covered /
+          external-dep / manual. Coverage gate warns if < 50%.
           + VERIFY_STEPS functional tests, visual fidelity (rebuild)
 Phase 3b: Bug Prevention — empty state smoke test, smoke launch criteria
 Phase 4:  Global Evolution Update (registries, sdd-state)
+
+Verify-time Change Recording: ALL source modifications during verify
+(agent-discovered or user-feedback) classified as Bug Fix / Implementation
+Gap / Design Change, with mandatory recording in sdd-state.md Notes.
 
 Verify Progress Checkpoint: Phase-by-phase status written to sdd-state.md,
 survives context compaction. Resumption Protocol re-reads verify-phases.md
