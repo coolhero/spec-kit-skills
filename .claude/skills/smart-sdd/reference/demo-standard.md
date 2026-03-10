@@ -1,7 +1,7 @@
 # Demo-Ready Delivery Standard
 
 > Single source of truth for demo script requirements, template, and anti-patterns.
-> Referenced by: `reference/injection/implement.md` (creation), `commands/verify-phases.md` Phase 3 (verification), `reference/injection/tasks.md` (task injection), `domains/app.md` § 1 (domain profile), `reference/injection/verify.md` + `reference/state-schema.md` (Integration Demo trigger).
+> Referenced by: `reference/injection/implement.md` (creation), `commands/verify-phases.md` Phase 3 (verification), `reference/injection/tasks.md` (task injection), `domains/_core.md` § S1 (demo pattern) + active interface modules § S1 (interface-specific overrides), `reference/injection/verify.md` + `reference/state-schema.md` (Integration Demo trigger).
 > For the MANDATORY rule, see `SKILL.md` Rule 2.
 
 ---

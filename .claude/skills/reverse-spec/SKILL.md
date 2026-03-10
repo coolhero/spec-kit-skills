@@ -39,7 +39,8 @@ $ARGUMENTS parsing rules:
   --scope <val> → Implementation scope: "core" or "full" (skips Phase 0 Question 1 if provided)
   --stack <val> → Tech stack strategy: "same" or "new" (skips Phase 0 Question 2 if provided)
   --name <val>  → New project name (skips Phase 0 Question 3 if provided; implies rename from detected project name)
-  --domain <val> → Project domain profile: "app" (default). Determines analysis axes, registries, and Feature boundary heuristics
+  --domain <val> → Project domain profile: "app" (default). Backward-compatible alias for --profile
+  --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
   --adopt       → SDD Adoption mode: forces --scope full --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
   --skip-to <phase> → (DEV/TEST) Jump directly to a specific phase. Skips all preceding phases with sensible defaults. Valid values: "1.5", "2", "3", "4". Example: --skip-to 1.5 to test Runtime Exploration.
 ```
@@ -48,16 +49,15 @@ $ARGUMENTS parsing rules:
 
 ## Domain Profile
 
-The `--domain` argument selects the domain profile that governs domain-specific behavior throughout all Phases. Default: `app`.
+The `--profile` argument (or `--domain` for backward compatibility) selects the domain profile. Default: `app` (expands to `fullstack-web` profile).
 
-**Loading**: Read `domains/{domain}.md` before starting Phase 1. The profile defines:
-- **Analysis Axes** (Phase 2): What to extract during deep analysis
-- **Project Type Classification** (Phase 1): How to classify the project
-- **Registries** (Phase 4): Which registry files to generate
-- **Feature Boundary Heuristics** (Phase 3): How to identify Feature boundaries
-- **Tier Classification Axes** (Phase 3): How to evaluate Feature importance (core scope)
+**Loading**: Read `domains/_resolver.md` before starting Phase 1. The resolver loads modules based on the detected or specified profile:
 
-For the default `app` domain, detailed extraction patterns for each technology stack are defined in `domains/app.md`.
+1. `domains/_core.md` — Universal analysis framework (always loaded)
+2. `domains/interfaces/{interface}.md` — For each active interface (http-api, gui, cli, data-io)
+3. `domains/concerns/{concern}.md` — For each active concern (detection signals for auto-detection)
+
+Loaded modules provide: **Detection Signals** (R1), **Project Type Classification** (R2), **Analysis Axes** (R3), **Registries** (R4), **Feature Boundary Heuristics** (R5), **Tier Classification Axes** (R6).
 
 ---
 

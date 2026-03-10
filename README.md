@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 10:21 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -648,18 +648,24 @@ See [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd) for th
 
 </details>
 
-### Domain Profiles
+### Architecture: 3-Axis Domain Composition
 
-Currently optimized for **application development** (backend, frontend, fullstack, mobile, library). Profiles for data science, AI/ML, embedded systems are planned.
+Domain-specific behavior (SC generation, verification strategy, elaboration probes, bug prevention) is decomposed into three independent axes that compose without duplication:
 
 ```
-Core Workflow (domain-agnostic)     ← Phases, checkpoints, pipeline orchestration
-    ↓ reads
-Domain Profile (swappable)          ← Analysis axes, extraction patterns, demo/verify conventions
-    ↓ applies to
-Tech Stack (detected at runtime)    ← Framework-specific file patterns, ORM types, API styles
+Interface (what the app exposes)     Concern (cross-cutting patterns)     Scenario (why we're building)
+├── http-api                         ├── async-state                      ├── greenfield
+├── gui                              ├── ipc                              ├── rebuild
+├── cli                              ├── external-sdk                     ├── incremental
+└── data-io                          ├── i18n                             └── adoption
+                                     ├── realtime
+                                     └── auth
 ```
 
-Use `--domain` to select a profile (default: `app`). See `domains/_schema.md` for creating custom profiles.
+A **Domain Profile** = selected Interfaces + selected Concerns + Scenario. For example: `desktop-app = [gui] + [async-state, ipc] + rebuild`. The agent loads only the modules relevant to the project, keeping context efficient.
+
+**Module loading order**: `_core.md` (always) → each active Interface → each active Concern → Scenario → user custom (`domain-custom.md`).
+
+Use `--profile` (or `--domain` for backward compatibility) to select a profile. See `domains/_schema.md` for the module schema and `domains/_resolver.md` for the loading protocol. Project-level customization is supported via `specs/reverse-spec/domain-custom.md`.
 
 

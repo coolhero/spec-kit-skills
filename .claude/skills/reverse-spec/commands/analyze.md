@@ -186,10 +186,10 @@ Identify the overall structure and tech stack of the target directory.
 - Identify exclusion targets such as `.gitignore`, `node_modules/`, `venv/`, etc.
 
 ### 1-2. Tech Stack Detection
-Read configuration files to identify the tech stack. See `domains/{domain}.md` § Tech Stack Detection for the detection-target-to-file mapping.
+Read configuration files to identify the tech stack. See `domains/_core.md` § R3 (Tech Stack Detection) for the detection-target-to-file mapping.
 
 ### 1-3. Project Type Classification
-Classify the project type based on the collected information. Use the project types defined in `domains/{domain}.md` § Project Type Classification.
+Classify the project type based on the collected information. Use the project types defined in `domains/_core.md` § R2 (Project Type Classification).
 
 ### 1-4. Module/Package Boundary Identification
 - Identify logical module boundaries from the directory structure
@@ -804,7 +804,7 @@ Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration
 
 ## Phase 2 — Deep Analysis
 
-> **Domain Profile**: Read `domains/{domain}.md` § Analysis Axes for the domain-specific extraction targets used throughout this Phase.
+> **Domain Profile**: Read `domains/_core.md` § R3 + active interface modules § R3 for the domain-specific extraction targets used throughout this Phase.
 
 Perform deep analysis using patterns appropriate to the tech stack identified in Phase 1. For large codebases, leverage parallel sub-agents via the Task tool.
 
@@ -815,25 +815,25 @@ Perform deep analysis using patterns appropriate to the tech stack identified in
 > - Note discrepancies between code structure and runtime behavior — e.g., routes defined in code but not reachable in UI (Screen Inventory vs code routes)
 
 ### 2-1. Data Model Extraction
-Extract entities from appropriate sources depending on the tech stack identified in Phase 1. See `domains/{domain}.md` § Data Model Extraction for the technology-to-search-target mapping and extraction details.
+Extract entities from appropriate sources depending on the tech stack identified in Phase 1. See `domains/_core.md` § R3 (Data Model Extraction) for the technology-to-search-target mapping and extraction details.
 
 ### 2-2. API Endpoint Extraction
-Extract APIs from appropriate sources depending on the tech stack identified in Phase 1. See `domains/{domain}.md` § API Endpoint Extraction for the technology-to-search-target mapping and extraction details.
+Extract APIs from appropriate sources depending on the tech stack identified in Phase 1. See `domains/interfaces/http-api.md` § R3 (API Endpoint Extraction) for the technology-to-search-target mapping and extraction details. Note: only applies when http-api interface is active.
 
 ### 2-3. Business Logic Extraction
-Extract business rules, validation, workflows, and external integrations from the service layer and domain logic. See `domains/{domain}.md` § Business Logic Extraction for extraction categories.
+Extract business rules, validation, workflows, and external integrations from the service layer and domain logic. See `domains/_core.md` § R3 (Business Logic Extraction) for extraction categories.
 
 ### 2-4. Inter-Module Dependency Mapping
-Analyze import/require statements, service call relationships, shared utilities, and event-based coupling. See `domains/{domain}.md` § Inter-Module Dependency Mapping for details.
+Analyze import/require statements, service call relationships, shared utilities, and event-based coupling. See `domains/_core.md` § R3 (Inter-Module Dependency Mapping) for details.
 
 ### 2-5. Environment Variable Extraction
-Scan the codebase for environment variable usage to identify runtime configuration requirements. See `domains/{domain}.md` § Environment Variable Extraction for the technology-to-search-pattern mapping and per-variable extraction details.
+Scan the codebase for environment variable usage to identify runtime configuration requirements. See `domains/_core.md` § R3 (Environment Variable Extraction) for the technology-to-search-pattern mapping and per-variable extraction details.
 
 ⚠️ NEVER read or record actual secret values from `.env` files. Only read `.env.example` or detect variable names from code patterns.
 
 ### 2-6. Source Behavior Inventory
 
-For each source file identified in Phase 1, extract a **function-level inventory** of exported/public behaviors (P1 core / P2 important / P3 nice-to-have). This captures discrete units of functionality that structural extraction (entities, APIs) may miss. See `domains/{domain}.md` § Source Behavior Inventory for extraction targets, priority classification, and scan patterns.
+For each source file identified in Phase 1, extract a **function-level inventory** of exported/public behaviors (P1 core / P2 important / P3 nice-to-have). This captures discrete units of functionality that structural extraction (entities, APIs) may miss. See `domains/_core.md` § R3 (Source Behavior Inventory) for extraction targets, priority classification, and scan patterns.
 
 - Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
 - Skip internal/private helpers that are implementation details, not behaviors
@@ -846,7 +846,7 @@ This inventory feeds into each Feature's `pre-context.md` → "Source Behavior I
 
 > Skip this step entirely for backend-only, library, or CLI projects.
 
-Third-party UI libraries provide user-facing capabilities through **configuration and plugins**, not through exported functions — invisible to function-level analysis but significant functionality that must be reproduced. See `domains/{domain}.md` § UI Component Feature Extraction for the 3-step process (identify → extract → record) and library category mapping.
+Third-party UI libraries provide user-facing capabilities through **configuration and plugins**, not through exported functions — invisible to function-level analysis but significant functionality that must be reproduced. See `domains/interfaces/gui.md` § R3 (UI Component Feature Extraction) for the 3-step process (identify → extract → record) and library category mapping. Note: only applies when gui interface is active.
 
 This inventory feeds into each Feature's `pre-context.md` → "UI Component Features" section (Phase 4-2) and is compared during `/smart-sdd parity` → UI Feature Parity.
 
@@ -857,7 +857,7 @@ Upon completing Phase 2, report a summary of the number of entities, APIs, busin
 ## Phase 3 — Feature Classification and Importance Analysis
 
 ### 3-1. Feature Boundary Identification
-Identify logical functional units (Features) based on the Phase 2 analysis results, using the boundary heuristics defined in `domains/{domain}.md` § Feature Boundary Heuristics.
+Identify logical functional units (Features) based on the Phase 2 analysis results, using the boundary heuristics defined in `domains/_core.md` § R5 (Feature Boundary Heuristics).
 
 Define the following for each Feature:
 - Feature name (concise English name)
@@ -1053,7 +1053,7 @@ This ensures:
 
 First, identify the project domain: understand what kind of system the project is (e-commerce, SaaS, CMS, education platform, financial service, etc.) and determine which features are foundational within that domain.
 
-Evaluate each Feature comprehensively across the analysis axes and assign to Tier 1 (Essential) / Tier 2 (Recommended) / Tier 3 (Optional). See `domains/{domain}.md` § Tier Classification Axes for the evaluation criteria and Tier definitions. For each Feature, a **specific rationale** for the assigned Tier must be provided.
+Evaluate each Feature comprehensively across the analysis axes and assign to Tier 1 (Essential) / Tier 2 (Recommended) / Tier 3 (Optional). See `domains/_core.md` § R6 (Tier Classification Axes) for the evaluation criteria and Tier definitions. For each Feature, a **specific rationale** for the assigned Tier must be provided.
 
 **FIRST**, display the full Tier classification table showing each Feature's assigned Tier and rationale (using temporary names — final Feature IDs will be assigned in Phase 3-2b after Tier approval):
 ```
@@ -1185,7 +1185,7 @@ Contents to include in each pre-context.md:
   4. Shared routes: included in primary owner Feature, referenced in other Features
   5. Unmappable routes: recorded in App-Wide Observations
 - **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy. Include a **Rebuild Target** column set to `[TBD]` for all files — this column will be populated during `/speckit.plan` when the target architecture is decided
-- **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/app.md` § 3-7 for format)
+- **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/_core.md` § R3 (Source Behavior Inventory) for format)
 
   > **SBI Per-Feature Filtering**: Filter only behaviors belonging to this Feature's source files from the Phase 2-6 global SBI. B### IDs are assigned sequentially and uniquely across the entire project in Feature ID order.
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects

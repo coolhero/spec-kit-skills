@@ -275,7 +275,7 @@ This step is informational only — no user confirmation required.
 > Runs ONCE before the first Feature enters the pipeline.
 > **Skip for**: greenfield projects (no Foundation exists yet — nothing to validate), OR if `sdd-state.md` records `Foundation Verified: [date]` with no Foundation-affecting changes since.
 
-**Purpose**: Validate cross-cutting Foundation systems (CSS theme, state management patterns, IPC bridge, core layout) before Feature code builds on them. In F004/F005, all runtime bugs were Foundation-level — CSS theme not loading, Zustand selector instability, IPC bridge disconnected, layout patterns breaking. No amount of Feature-level testing catches a broken Foundation.
+**Purpose**: Validate cross-cutting Foundation systems (CSS theme, state management patterns, IPC bridge, core layout) before Feature code builds on them. Common Foundation-level bugs include: CSS theme not loading, state selector instability, IPC bridge disconnection, layout patterns breaking. No amount of Feature-level testing catches a broken Foundation.
 
 **When to run**: Before the FIRST Feature's `specify` step. Also re-run if a preceding Feature modified Foundation files (detected via `git diff` on files outside `specs/`).
 
@@ -290,12 +290,12 @@ This step is informational only — no user confirmation required.
 | **State Management** | Selector stability | Call selector twice → verify referential equality (no new object per call) | ⚠️ warning |
 | **IPC Bridge** (Electron) | Main↔Renderer communication | Send test IPC message → verify response | ⚠️ warning |
 | **Layout** | Core layout renders without error | Navigate to base route → snapshot → no error screen | ⚠️ warning |
-| **Toolchain** | Lint/Test/Build tools available | Detect per `domains/{domain}.md` § 3b → verify executable | ⚠️ warning |
+| **Toolchain** | Lint/Test/Build tools available | Detect per `domains/_core.md` § S3b → verify executable | ⚠️ warning |
 
 **Execution**:
 1. Run build → **BLOCK on failure** (same as Phase 1 build gate)
 1b. **Toolchain Pre-flight** — Verify development tools are available:
-   Read `domains/{domain}.md` § 3b (Lint Tool Detection Rules) and follow the detection order.
+   Read `domains/_core.md` § S3b (Lint Tool Detection Rules) and follow the detection order.
 
    1. **Lint detection**: Follow the domain-specific detection rules to identify the lint command.
       If a lint command is found, verify it is executable (`--version` check or binary exists).
@@ -319,7 +319,7 @@ This step is informational only — no user confirmation required.
 
    **Auto-install offer** (when tool is configured but not installed):
    Use AskUserQuestion:
-   - "Install now" — run the install command from `domains/{domain}.md` § 3b install guidance (e.g., `npm install --save-dev eslint`). After install, re-verify (`--version` check). If successful → update status to `✅ available`.
+   - "Install now" — run the install command from `domains/_core.md` § S3b install guidance (e.g., `npm install --save-dev eslint`). After install, re-verify (`--version` check). If successful → update status to `✅ available`.
    - "Skip — proceed without lint" — record `⚠️ not installed`, verify Phase 1 will skip lint checks for all Features.
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 

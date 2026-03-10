@@ -1363,3 +1363,40 @@ Web Preview Mode를 구현했으나, CDP가 업계 표준이고 Web Preview는 �
 | Playwright MCP를 전제조건으로 명시 | SKILL.md (reverse-spec, smart-sdd) + README에 Prerequisites로 추가 | 런타임 감지 대신 사전 준비 강조. 인자보다 전제조건이 적합 (Playwright 없이도 코드 분석은 가능) |
 | Snapshot 기반 탐색 (Screenshot 미사용) | `browser_snapshot` (접근성 트리)만 사용, `browser_take_screenshot` 미사용 | Snapshot이 Feature 추출에 충분한 구조적 정보 제공. Screenshot은 시각적 외관만 제공 + 컨텍스트 윈도우 소모 |
 | MCP-GUIDE.md Electron 방법 | 방법 A (`--electron-app`) + 방법 B (CDP) 두 가지로 정리 | 방법 C (Web Preview) 삭제. CDP 사전 설정 방식 + 원복 절차 문서화 |
+
+---
+
+## [2026-03-10] 3-Axis Modular Domain Architecture
+
+Decomposed monolithic `domains/app.md` (both smart-sdd and reverse-spec) into a composable 3-axis module system: Interface × Concern × Scenario. ~30 new module files created, 24 references updated across the codebase.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Domain decomposition model | 3 independent axes: Interface (http-api, gui, cli, data-io), Concern (async-state, ipc, external-sdk, i18n, realtime, auth), Scenario (greenfield, rebuild, incremental, adoption) | Monolithic app.md treated all app types identically. Hybrid apps (e.g., Electron = gui + http-api + ipc) required duplicating rules. Axes compose without duplication |
+| 2 | Content migration strategy | Cross-reference, not extraction — implement.md and verify-phases.md content stays in place, modules act as activation gates | 598/870-line procedural workflows with 30+ HARD STOPs, internal cross-references, sequential flow. Extracting fragments would break them |
+| 3 | Module section schema | Unified S1-S7 (smart-sdd) + R1-R6 (reverse-spec) numbering across all module types | Consistent structure enables predictable loading. Omitting sections that don't apply keeps modules minimal |
+| 4 | Backward compatibility | `app.md` → shim that auto-expands to `fullstack-web` profile; old sdd-state.md `**Domain**: app` auto-migrated to new format | Existing projects with `--domain app` continue to work without manual migration |
+| 5 | Profile manifests | ~10-line files listing interfaces + concerns; scenario determined by sdd-state.md Origin | Profiles are pure composition declarations, not content. Content lives in modules |
+| 6 | User customization | `specs/reverse-spec/domain-custom.md` using same S1-S7 schema, loaded last (highest priority) | Project-specific rules (e.g., idempotency SCs for payment endpoints) without forking modules |
+| 7 | F005/F006 generalization | Specific references (Zustand selector, AI SDK v6, hover flicker) → universal patterns | Lessons are reusable across projects. Specific case studies preserved in history.md only |
+| 8 | Loading protocol | `_core.md` (always) → each interface → each concern → scenario → custom | Predictable, ordered, cacheable by agent context |
+
+**Files**: 30+ new files in `domains/` (both skills), 24 reference updates across SKILL.md, pipeline.md, verify-phases.md, add.md, parity.md, analyze.md, implement.md, state-schema.md, feature-elaboration-framework.md, demo-standard.md, ui-testing-integration.md, README.md, README.ko.md
+
+---
+
+## [2026-03-10] v4 Improvement Gap Analysis — Selective Adoption
+
+Analyzed v4 improvement document (F005 MCP tool integration case study, proposals #9-#18) against current codebase. Found 5/10 already fully covered (#9, #10/#16, #12, #14), 2 shallow (#11, #13), 3 not covered (#15, #17, #18). Adopted 4 improvements after cost/benefit analysis; rejected 3 as unnecessary or impractical.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | #15 Root Cause Tracing | Added upstream tracing step (2b) to Auto-Fix Loop | Core prevention for multi-iteration fix loops. v4 case: 5 iterations because each fix patched downstream symptoms instead of tracing upstream to SDK stream event behavior |
+| 2 | #13 Stuck Stream Defense | Added stale/timeout to async-state S1 lifecycle + UX Behavior Contract template | Lightweight: one SC anti-pattern + one contract row. Existing error/cleanup patterns assumed stream eventually completes; silent stream (no events, no error) was unaddressed |
+| 3 | #17 Plan Deviation Quick Check | Added Step 1b to verify Phase 2: entity count, API count, tasks completion rate | Lighter than v4's full FR sampling. Catches structural drift without consuming 34-FR × grep context. Full FR coverage is specify's job (FR→SC mapping), not verify's |
+| 4 | #18 Verification Depth Tags | Added `(code)` / `(runtime)` tags to Phase 2 report formats (Steps 3, 3b, 4, 6) | Prevents "6/6 pass" conflation of grep-existence with runtime-confirmation. Minimal cost — format change only |
+| 5 | #11 MCP Protocol | Not adopted | Already covered by #14 (per-task runtime check) + #10 (SDK trust classification) + #12 (CDP verification). MCP-specific protocol would over-couple to one technology |
+| 6 | #17 Full FR Sampling | Not adopted | Root cause is specify-stage SC quality, not verify-stage coverage. FR re-sampling at verify is redundant if SCs are well-defined, and expensive if they aren't |
+| 7 | #18 Delegation Rules | Not adopted | Sub-agent internal judgment quality cannot be enforced by skill rules. Report format tags (#18 adopted) are the practical alternative |
+
+**Files**: implement.md (Auto-Fix Loop), async-state.md (S1), plan.md (UX Behavior Contract), verify-phases.md (Phase 2 Step 1b + report formats)

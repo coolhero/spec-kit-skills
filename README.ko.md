@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 10:21 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -645,16 +645,22 @@ specs/
 
 </details>
 
-### 도메인 프로필
+### 아키텍처: 3축 도메인 합성
 
-현재 **애플리케이션 개발** (backend, frontend, fullstack, mobile, library)에 최적화. 데이터 사이언스, AI/ML, 임베디드 시스템 프로필은 계획 중.
+도메인별 동작(SC 생성, 검증 전략, 정교화 프로브, 버그 방지)을 세 개의 독립 축으로 분해하여 중복 없이 합성합니다:
 
 ```
-Core Workflow (도메인 불가지)      ← Phases, 체크포인트, 파이프라인 오케스트레이션
-    ↓ reads
-Domain Profile (교체 가능)        ← 분석 축, 추출 패턴, 데모/검증 규약
-    ↓ applies to
-Tech Stack (런타임 감지)          ← 프레임워크별 파일 패턴, ORM 타입, API 스타일
+Interface (앱이 노출하는 것)        Concern (횡단 관심사)                Scenario (왜 만드는가)
+├── http-api                       ├── async-state                     ├── greenfield
+├── gui                            ├── ipc                             ├── rebuild
+├── cli                            ├── external-sdk                    ├── incremental
+└── data-io                        ├── i18n                            └── adoption
+                                   ├── realtime
+                                   └── auth
 ```
 
-`--domain`으로 프로필 선택 (기본: `app`). 커스텀 프로필 생성은 `domains/_schema.md` 참고.
+**Domain Profile** = 선택된 Interface + 선택된 Concern + Scenario. 예: `desktop-app = [gui] + [async-state, ipc] + rebuild`. 에이전트는 프로젝트에 관련된 모듈만 로드하여 컨텍스트 효율을 유지합니다.
+
+**모듈 로딩 순서**: `_core.md` (항상) → 활성 Interface → 활성 Concern → Scenario → 사용자 커스텀 (`domain-custom.md`).
+
+`--profile` (또는 하위 호환 `--domain`)로 프로필 선택. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md` 참고. 프로젝트별 커스터마이징은 `specs/reverse-spec/domain-custom.md`로 지원됩니다.

@@ -1,40 +1,83 @@
-# Domain Profile Schema
+# Domain Module Schema (reverse-spec)
 
-> Every domain profile MUST define sections 1-6. Sections 7-9 are optional (defined in smart-sdd domain profiles). The agent reads the active profile during execution and adapts each Phase accordingly.
+> Defines the section schema for domain modules used during reverse-spec analysis.
+> Every module (interface, concern) follows this schema. Omit sections that don't apply.
+> For smart-sdd module sections (S1-S7), see `../smart-sdd/domains/_schema.md`.
 
 ---
 
-## Required Sections
+## Module Types
 
-### 1. Detection Signals
-File/directory patterns that indicate a project belongs to this domain. Used for auto-detection if `--domain` is not specified.
+| Type | Location | Purpose |
+|------|----------|---------|
+| **Interface** | `interfaces/{name}.md` | Interface-specific extraction axes (http-api, gui, cli, data-io) |
+| **Concern** | `concerns/{name}.md` | Concern-specific detection signals (async-state, ipc, external-sdk, i18n, realtime, auth) |
+| **Core** | `_core.md` | Universal analysis framework loaded for ALL projects |
 
-### 2. Project Type Classification
-Project type categories for Phase 1-3 classification. Each type has a name and description.
+---
 
-### 3. Analysis Axes
-Phase 2 Deep Analysis extraction targets. Each axis defines:
-- **Name**: Short identifier
-- **Description**: What this axis captures
-- **Extraction Targets**: File patterns, code patterns, and frameworks to scan
+## Section Schema (R1–R6)
 
-### 4. Registries
-Registry files to generate during Phase 4. Each registry defines:
-- **File name**: Output filename (e.g., `entity-registry.md`)
-- **Purpose**: What cross-Feature information it tracks
-- **Template**: Reference to template file in `templates/`
+### R1. Detection Signals (interfaces, concerns)
 
-### 5. Feature Boundary Heuristics
+File/directory patterns that indicate this module is relevant to the project. Used for auto-detection during profile resolution.
+
+| Field | Description |
+|-------|-------------|
+| **File patterns** | Config files, directory structures, package dependencies |
+| **Code patterns** | Import statements, API usage patterns, framework markers |
+
+### R2. Project Type Classification (_core only)
+
+Project type categories for Phase 1-3 classification.
+
+| Field | Description |
+|-------|-------------|
+| **Type name** | Category identifier (e.g., `backend`, `frontend`, `fullstack`) |
+| **Description** | What characterizes this type |
+| **Indicators** | File/directory signals that suggest this type |
+
+### R3. Analysis Axes (interfaces — additions to _core)
+
+Phase 2 Deep Analysis extraction targets specific to this interface.
+
+| Field | Description |
+|-------|-------------|
+| **Axis name** | Short identifier (e.g., `API Endpoint Extraction`) |
+| **Description** | What this axis captures |
+| **Extraction targets** | File patterns, code patterns, frameworks to scan |
+| **Output format** | How extracted data should be recorded |
+
+### R4. Registries (_core only)
+
+Registry files to generate during Phase 4.
+
+| Field | Description |
+|-------|-------------|
+| **File name** | Output filename (e.g., `entity-registry.md`) |
+| **Purpose** | What cross-Feature information it tracks |
+| **Template** | Reference to template file in `templates/` |
+
+### R5. Feature Boundary Heuristics (_core only)
+
 Criteria for identifying Feature boundaries in Phase 3-1. Domain-specific signals that indicate where one Feature ends and another begins.
 
-### 6. Tier Classification Axes
+### R6. Tier Classification Axes (_core only)
+
 Importance analysis criteria for Phase 3-3 (core scope only). Each axis evaluates Features from a different perspective to determine Tier placement.
 
-### 7. Demo Pattern — Optional (defined in smart-sdd domain profile if applicable)
-How a completed Feature should be demonstrated.
+---
 
-### 8. Parity Dimensions — Optional (defined in smart-sdd domain profile if applicable)
-Dimensions for source parity comparison.
+## Loading Order
 
-### 9. Verify Steps — Optional (defined in smart-sdd domain profile if applicable)
-Verification steps to execute after Feature implementation.
+Modules are loaded in this order during reverse-spec execution:
+
+```
+1. _core.md                              (ALWAYS — universal analysis framework)
+2. interfaces/{interface}.md             (for EACH detected/specified interface)
+3. concerns/{concern}.md                 (for EACH detected/specified concern)
+```
+
+**Merge rule**: Later modules extend earlier ones:
+- **R1 Detection Signals**: Append (accumulate from all modules)
+- **R3 Analysis Axes**: Append (add module-specific extraction targets to _core axes)

@@ -396,7 +396,19 @@ FIX_LOOP (max 3 attempts):
      - Type: type mismatches, unimplemented interfaces
      - API: endpoint mismatches, schema errors
      - Runtime: null reference, undefined access
-  3. Modify related source files
+  2b. Upstream tracing (MANDATORY for Runtime/API errors):
+     Before modifying code, trace the data flow from source to error point:
+       a. Identify the value that caused the error (e.g., `result.content` is undefined)
+       b. Trace upstream: where was this value created? What boundaries did it cross?
+          (IPC serialize → SDK callback → stream event → store → component)
+       c. Add a temporary debug log at each boundary to confirm actual runtime values
+       d. Fix at the EARLIEST point where the value diverges from expectation
+     Why: Fixing at the error point (downstream) patches the symptom.
+     The same root cause will surface as a different symptom in the next iteration.
+     Example: 5 fix iterations for "tool result not displayed" — each fixed a crash
+     but the root cause was "SDK stream event doesn't carry tool output" (upstream).
+     A single upstream trace would have found this in 1 iteration.
+  3. Modify related source files (at the upstream origin, not just the error site)
   4. Rebuild → re-verify
   5. Same error repeats: break loop → error report
 ```
@@ -538,6 +550,11 @@ You can open and edit any of these files directly, then select
 > Reminded at Checkpoint before speckit-implement execution, compliance checked during Review.
 > **Result classification**: ⚠️ warning (NOT blocking) — violations found during Review are reported as recommendations. They do not block verify.
 
+> **Module-conditional activation**: Before applying B-3 rules, read `sdd-state.md` Domain Profile.
+> Only apply rules whose activating module is in the active Interfaces or Concerns.
+> Rules not matched by any active module are SKIPPED (not errors).
+> See `domains/_core.md` § S7 for the full activation conditions table.
+
 ### IPC Boundary Safety (Electron/Tauri)
 
 - **IPC Message Validity**: Prevent argument type/count mismatches in main↔renderer IPC calls
@@ -555,7 +572,7 @@ When implementing code that calls external SDK functions, classify each call by 
 | **Medium** — Async functions, resolved values | Return usually matches types; edge cases under error/timeout | `generateText().text`, `fetch().json()`, `db.query()` | `?? fallback` on all fields; `try/catch` around call |
 | **Low** — Stream events, callbacks, experimental APIs | Type definitions may not reflect actual runtime values; timing-dependent | `fullStream` part events, `experimental_*` callbacks, WebSocket `onmessage` | **Mandatory**: debug log actual values before coding against them; never trust `.d.ts` alone; use runtime type guards (`typeof x === 'string'`) |
 
-> **Rationale**: F005 MCP tool integration — AI SDK v6's `.d.ts` declared `output` on tool-result stream events, but the actual runtime value was `undefined`. Trusting the type definition led to 5 fix iterations. A single debug log confirming `part.result === undefined` would have identified the root cause in one iteration. **Rule: Low-trust SDK calls → debug log first, code second.**
+> **Rationale**: SDK type definitions may declare fields that don't exist at runtime (e.g., `.d.ts` declares `output` on stream events, but actual value is `undefined`). Trusting type definitions alone without runtime verification leads to multiple fix iterations. A single debug log confirming the actual runtime value identifies the root cause immediately. **Rule: Low-trust SDK calls → debug log first, code second.**
 
 ### Platform CSS Constraints
 
@@ -578,7 +595,7 @@ When implementing hover, click, or popup interactions, check the following befor
 - **Popup occlusion**: Does the hover popup obscure adjacent interactive elements? → Review z-index and positioning
 - **Scroll-through interference**: Does scrolling through a list trigger hover effects on every item passed? → CSS transitions naturally handle this; React state hover does not
 
-> **Rationale**: F006 lesson — message-level `onMouseEnter` caused Copy buttons to flash on every message during scroll. CSS `group-hover` with `transition-opacity` resolved the issue with zero re-renders. Prefer CSS for pure visibility toggles; reserve React state for interactions that require data loading or complex logic.
+> **Rationale**: Applying hover/click handlers (e.g., `onMouseEnter/Leave`) to items in a scrollable list causes UI flicker as the cursor passes through each item during scroll. CSS-only solutions (`group-hover` with `transition-opacity`) resolve this with zero re-renders. Prefer CSS for pure visibility toggles; reserve React state for interactions that require data loading or complex logic.
 
 ### Data Persistence Safety
 

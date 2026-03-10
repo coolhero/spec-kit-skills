@@ -1,7 +1,7 @@
 # Parity Command — Brownfield Source Parity Check
 
 > Reference: Read after `/smart-sdd parity` is invoked. For shared rules, see SKILL.md.
-> For domain-specific parity dimensions, also read `domains/{domain}.md` § Parity Dimensions.
+> For domain-specific parity dimensions, also read `domains/_core.md` § S2 + active interface modules § S2.
 
 ## Parity Command — Brownfield Source Parity Check
 

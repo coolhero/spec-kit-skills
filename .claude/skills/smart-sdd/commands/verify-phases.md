@@ -216,13 +216,13 @@ Run each check and record results. **If any check fails, verification is BLOCKED
    - Toolchain section absent (legacy sdd-state.md or Foundation Gate not yet run) → fall through to Step 3b (detect on-the-fly for backward compatibility)
 
    **Step 3b — Execute lint** (when tool is available or status unknown):
-   1. Detect the lint command per `domains/{domain}.md` § 3b (Lint Tool Detection Rules)
+   1. Detect the lint command per `domains/_core.md` § S3b (Lint Tool Detection Rules)
    2. Run the detected lint command
    3. **Distinguish failure types**:
       - **Tool not found** (exit code 127 / "command not found"): This is a **toolchain issue**, NOT a code quality issue.
         Display: `⚠️ Lint: tool not found ([command]). This is a toolchain issue, not a code problem.`
         **Offer auto-install** via AskUserQuestion:
-        - "Install now" — run the install command from `domains/{domain}.md` § 3b (e.g., `npm install --save-dev eslint`). After install, re-run lint. If lint passes → record `✅ available` + `✅ Lint: passed`. If lint finds errors → record `✅ available` + report lint errors as normal Phase 1 failure.
+        - "Install now" — run the install command from `domains/_core.md` § S3b (e.g., `npm install --save-dev eslint`). After install, re-run lint. If lint passes → record `✅ available` + `✅ Lint: passed`. If lint finds errors → record `✅ available` + report lint errors as normal Phase 1 failure.
         - "Skip — proceed without lint" — record `⚠️ not installed` in `sdd-state.md` Toolchain. Treat as skipped, do NOT block.
         **If response is empty → re-ask** (per MANDATORY RULE 1).
       - **Lint errors found** (exit code 1 with lint output): This is a **code quality issue**.
@@ -297,6 +297,21 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
 - Verify that entity-registry.md and api-registry.md match the actual implementation
 
+**Step 1b — Plan Deviation Quick Check**:
+Lightweight sanity check to catch structural drift between plan artifacts and implementation:
+1. **Entity count**: Count entities in `data-model.md` (or plan.md data model section) → compare to actual model/type/schema files. Flag if actual count differs by ±30% or more.
+2. **API/IPC channel count**: Count endpoints/channels in `contracts/` → compare to actual route/handler definitions. Flag if mismatch.
+3. **Tasks completion rate**: Read `tasks.md` checkbox states → report completion rate. If uncompleted tasks exist, list them with a note: `⚠️ [N] tasks not marked complete — verify if intentionally deferred or missed.`
+4. Report:
+   ```
+   📋 Plan Deviation Quick Check:
+     Entities: plan [N] / actual [N] — ✅ match (or ⚠️ ±[N] drift)
+     API channels: plan [N] / actual [N] — ✅ match (or ⚠️ ±[N] drift)
+     Tasks: [N]/[total] complete ([%])
+   ```
+5. Any flag → ⚠️ warning (NOT blocking). Helps reviewer spot gaps before Phase 3.
+6. **Skip if**: No data-model.md, no contracts/, or Feature has < 5 tasks (too small to drift)
+
 **Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `rebuild`):
 If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:
 
@@ -325,9 +340,9 @@ If `plan.md` contains an `## Interaction Chains` section:
    - **Handler**: grep for the function name (e.g., `onThemeChange`, `handleFontSize`)
    - **Store Mutation**: grep for the store field assignment (e.g., `settings.theme`, `setTheme`, `theme =`)
    - **DOM Effect**: grep for the DOM manipulation (e.g., `classList.add`, `classList.toggle`, `style.fontSize`)
-3. Report:
+3. Report (tag each check `(code)` for grep-based, `(runtime)` for MCP/Playwright-verified):
    ```
-   📊 Interaction Chain Completeness:
+   📊 Interaction Chain Completeness (code):
      FR-012 (theme toggle): Handler ✅ → Store ✅ → DOM ✅ — Full chain
      FR-015 (font size):    Handler ✅ → Store ✅ → DOM ❌ — Chain broken at DOM Effect
        ⚠️ Store mutation `settings.fontSize` found, but no corresponding `style.fontSize` assignment
@@ -352,13 +367,13 @@ If `plan.md` contains a `## UX Behavior Contract` section:
      - Cleanup on unmount: grep for cleanup in `useEffect` return / `onUnmounted` / `componentWillUnmount`
    - **Runtime check** (if MCP or Playwright CLI available):
      - Execute the Verify Method from the contract row (same verb syntax as Interaction Chains)
-3. Report:
+3. Report (each check tagged `(code)` or `(runtime)` to distinguish verification depth):
    ```
    📋 UX Behavior Contract Verification:
-     Streaming auto-scroll:  Code ✅ (scrollIntoView found) | Runtime ✅ (verify-scroll .chat-area "bottom" passed)
-     Loading state:          Code ✅ (isLoading state found) | Runtime ✅ (wait-for .spinner visible passed)
-     Error recovery:         Code ✅ (error handler found)   | Runtime ⬜ (requires API error — skip)
-     Cleanup on unmount:     Code ❌ (no cleanup in useEffect return)
+     Streaming auto-scroll:  (code) ✅ scrollIntoView found | (runtime) ✅ verify-scroll passed
+     Loading state:          (code) ✅ isLoading state found | (runtime) ✅ wait-for .spinner passed
+     Error recovery:         (code) ✅ error handler found   | (runtime) ⬜ requires API error — skip
+     Cleanup on unmount:     (code) ❌ no cleanup in useEffect return
        ⚠️ Missing cleanup may cause memory leak or "setState on unmounted component" warning
    ```
 4. Missing implementations → ⚠️ warning (NOT blocking) — but highlighted in Review
@@ -379,15 +394,15 @@ If `pre-context.md` contains a "Functional Enablement Chain" section with "Enabl
    b. **Runtime smoke test** (if MCP or Playwright CLI available):
       - Navigate to the relevant screen and verify the interface element is visible/interactive
       - For API endpoints: `curl` the endpoint and verify non-error response
-3. Report:
+3. Report (each check tagged `(code)` or `(runtime)` to distinguish verification depth):
    ```
    🔗 Enablement Interface Smoke Test:
      Enables → F005-chat: Provider settings panel
-       Code: ✅ SettingsPanel component exists
-       Runtime: ✅ /settings renders, provider dropdown visible
+       (code) ✅ SettingsPanel component exists
+       (runtime) ✅ /settings renders, provider dropdown visible
      Enables → F006-export: Export API endpoint
-       Code: ✅ /api/export handler exists
-       Runtime: ✅ curl /api/export → 200 OK
+       (code) ✅ /api/export handler exists
+       (runtime) ✅ curl /api/export → 200 OK
    ```
 4. **Failed enablement** → ⚠️ **HIGH warning** — downstream Features will likely fail
    Display: `⚠️ Enablement interface for [target] not working — [target Feature] will be blocked at runtime`
@@ -437,16 +452,16 @@ Verifies that the data shape contracts defined in plan.md are actually implement
       - Grep for the bridge function/adapter in the Feature's code
       - If Bridge is specified but code not found → ❌ "Bridge adapter NOT FOUND"
       - If Bridge is `—` (shapes directly compatible): skip bridge check
-3. Report:
+3. Report (each check tagged `(code)` or `(runtime)` to distinguish verification depth):
    ```
    🔗 Integration Contract Verification:
      Provides → F005-chat: getActiveTools()
-       Interface: ✅ found in src/stores/mcp-store.ts
-       Shape: ✅ returns Tool[] matching consumer expectation
+       (code) Interface: ✅ found in src/stores/mcp-store.ts
+       (code) Shape: ✅ returns Tool[] matching consumer expectation
      Consumes ← F003-chat-core: ParameterBuilder.build(assistant)
-       Interface: ✅ found in src/services/parameter-builder.ts
-       Consumer expects: {mcpMode, mcpServers}
-       Bridge: ❌ mapMCPStoreToAssistant() NOT FOUND
+       (code) Interface: ✅ found in src/services/parameter-builder.ts
+       (code) Consumer expects: {mcpMode, mcpServers}
+       (code) Bridge: ❌ mapMCPStoreToAssistant() NOT FOUND
        ⚠️ No adapter transforms useMCPStore state → assistant.mcpServers format
    ```
 4. **Result classification**:
@@ -458,6 +473,9 @@ Verifies that the data shape contracts defined in plan.md are actually implement
    Display: `⚠️ Integration Contracts not defined in plan.md — cross-Feature data shape compatibility not verified. Consider running /smart-sdd plan [FID] to add contracts.`
 
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
+
+> **Interface conditional**: Phase 3 UI verification only executes when `gui` is in the active Interfaces (from sdd-state.md Domain Profile).
+> For pure API/CLI/data-io projects, skip Phase 3 entirely and proceed to Phase 3b.
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).

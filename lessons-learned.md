@@ -141,3 +141,8 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
 **Situation**: After adding W1~W10, downstream files (injection/tasks, implement, verify) were not updated
 **Resolution**: Full pipeline ↔ verify ↔ injection flow audit, 9 issues fixed
 **Lesson**: When adding new mechanisms, always trace "which downstream files read this value."
+
+### L9. Feature-Specific References → Universal Patterns
+**Situation**: Bug prevention rules and lessons referenced specific Feature cases (e.g., "F005 Zustand selector instability", "F006 AI SDK v6 tool() requires execute callback", "F006 hover flicker on message scroll"). These are useful for case-study context but make rules appear narrowly applicable.
+**Resolution**: Generalized to universal patterns: "State selector instability: creating new object/array references per render", "SDK function expects callable/executable object but receives metadata-only object", "Hover/click interaction applied to overly broad container causes re-renders during scroll". Specific case histories preserved in history.md.
+**Lesson**: Bug prevention rules should describe the *pattern*, not the *instance*. Specific cases belong in decision history, not in operational rules that the agent evaluates on every run.
