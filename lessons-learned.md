@@ -62,6 +62,28 @@
 **Countermeasures**: Integration Contracts (plan.md section defining Provider/Consumer shapes + bridges), Integration Contract Data Shape Verification (verify Phase 2 Step 6)
 **Coverage**: ~80% — catches shape mismatches and missing bridges at plan+verify, but cannot catch all semantic compatibility issues
 
+## G8. i18n Key Coverage Gap
+
+**Problem**: Components use `t('key')` but keys are missing from locale JSON files → UI shows raw key strings instead of translations
+**Case**: F006 — 7 i18n keys added to components but missing from `ko.json`. Build/tests pass because i18next silently falls back to key string. Only discovered during CDP UI verification.
+**Countermeasures**: Per-task i18n completeness check (implement Step 1b), verify Phase 1 Step 4 i18n coverage lint (cross-check code→locale + locale→locale)
+**Coverage**: ~95% — grep-based extraction covers standard `t()` patterns; dynamic key construction (`t(\`prefix.${var}\`)`) is not detectable
+
+## G9. SDK API Contract Gap (Placeholder Implementation)
+
+**Problem**: Code passes metadata-only objects to SDK functions that expect callable objects → build passes (loose types), runtime silently fails
+**Case**: F006 MCP tool injection — `ParameterBuilder` returned `{ type: "mcp", serverId: "xxx" }` instead of `tool({ execute: async () => {...} })`. AI SDK ignored the objects, AI responded without tools.
+**Also**: F005 MCP — `fullStream` tool-result `part.result === undefined` despite `.d.ts` declaring `output` field. 5 fix iterations due to trusting type definitions.
+**Countermeasures**: SDK API contract gap detection in Pattern Compliance Scan, Loose type bypass warning, External SDK Type Trust Classification (High/Medium/Low trust levels)
+**Coverage**: ~70% — grep-based detection catches common patterns; complex SDK contract mismatches require runtime verification
+
+## G10. UI Interaction Over-exposure
+
+**Problem**: Hover/click interactions applied to overly broad areas → UI flickers, re-renders, poor UX during scroll
+**Case**: F006 — message-level `onMouseEnter/Leave` state caused Copy button to flash on every message during scroll. CSS `group-hover` with `transition-opacity` resolved with zero re-renders.
+**Countermeasures**: UI Interaction Surface Audit checklist in implement B-3 (hover area scope, response timing, CSS vs React state, scroll interference)
+**Coverage**: ~60% — checklist raises awareness but requires agent judgment; no automated detection
+
 ---
 
 ## Countermeasure Lineage
@@ -72,6 +94,8 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → W5~W6 (Chain Completeness, Enablement) → W8~W9 (API Matrix, Zero Gate)
   → W10 (UX Behavior Contract) → Toolchain Pre-flight → Verify Progress Checkpoint
   → SC Verification Matrix (runtime coverage) → Integration Contracts (cross-Feature shapes)
+  → i18n Coverage Lint (translation completeness) → SDK API Contract Gap + Type Trust Classification
+  → UI Interaction Surface Audit (hover/click UX)
 ```
 
 ---

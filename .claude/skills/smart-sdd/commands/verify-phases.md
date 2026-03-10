@@ -230,12 +230,45 @@ Run each check and record results. **If any check fails, verification is BLOCKED
         This IS a Phase 1 failure — **BLOCKS** per normal rules.
       - **Lint passes** (exit code 0): Display: `✅ Lint: passed`
 
-**If ANY check fails** (test, build, or lint errors), display and STOP:
+4. **i18n coverage check** (skip if project has no i18n / translation framework):
+
+   Detect i18n framework: search for `i18next`, `react-intl`, `vue-i18n`, `@angular/localize`, `gettext` in config/package files. If none found → skip entirely.
+
+   **Step 4a — Collect used keys**: Grep source files (`src/**/*.{ts,tsx,js,jsx,vue,svelte}`) for translation call patterns:
+   - `t('key')`, `t("key")`, `$t('key')`, `i18n.t('key')`, `useTranslation` + `t('key')`
+   - Extract the key strings into a deduplicated list
+
+   **Step 4b — Collect defined keys**: For each locale JSON/YAML file (e.g., `en.json`, `ko.json`, `messages_en.properties`):
+   - Extract all key paths (flattened dot-notation for nested JSON)
+
+   **Step 4c — Cross-check**:
+   | Check | Severity |
+   |-------|----------|
+   | Key used in code but missing in ANY locale file | ❌ ERROR — UI will show raw key string |
+   | Key in locale A but missing in locale B | ⚠️ WARNING — incomplete translation |
+   | Key defined but never used in code | ℹ️ INFO — dead key (not blocking) |
+
+   **Display**:
+   ```
+   🌐 i18n Coverage:
+     Keys used in code: [N]
+     Locale files: [list e.g., en.json, ko.json]
+     Missing keys (code → locale): [N] ❌
+       [key1] — missing in: ko.json
+       [key2] — missing in: en.json, ko.json
+     Incomplete translations: [N] ⚠️
+     Dead keys: [N] ℹ️
+   ```
+
+   **Blocking**: Missing keys (code references a key that exists in NO locale file) → Phase 1 FAILURE. Incomplete translations (key in one locale but not another) → ⚠️ WARNING (not blocking, but reported).
+
+**If ANY check fails** (test, build, lint errors, or missing i18n keys), display and STOP:
 ```
 ❌ Execution Verification failed for [FID] - [Feature Name]:
   Tests: [PASS/FAIL — pass count/total, failure details]
   Build: [PASS/FAIL — error summary]
   Lint:  [PASS/FAIL/skipped (not installed)/not configured]
+  i18n:  [PASS/FAIL/skipped (no i18n) — missing key count]
 
 Fix the failing checks before verification can continue.
 Verification is BLOCKED — merge will not be allowed until all checks pass.

@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-03-10] G8-G10 — v4 Remaining Items: i18n, SDK Contract Gap, UI Interaction Audit
+
+Reviewed F006 v4 improvement document (16 items) against current codebase. Found 12/16 already addressed, 2 not addressed (#4 i18n, #7 UI interaction), 2 partially addressed (#6 SDK completeness, #16 SDK trust).
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | i18n Coverage in verify Phase 1 | Step 4: grep t() keys → cross-check all locale files → BLOCK on missing | F006: 7 keys missing from ko.json, only found by CDP. Build/test cannot catch i18n gaps |
+| 2 | i18n Completeness in implement | Step 1b per-task: auto-add missing keys to all locales after UI tasks | Catch at implement time instead of verify time — cheaper to fix |
+| 3 | SDK API Contract Gap pattern | New scan rules: missing execute/callback, loose type bypass (Record\<string, unknown\>) | F006: metadata-only objects silently ignored by AI SDK; F005: .d.ts said `output` exists but runtime said `undefined` |
+| 4 | External SDK Type Trust Classification | High/Medium/Low trust → increasing defense requirements | Low-trust (stream events, experimental APIs) → mandatory debug log before coding |
+| 5 | UI Interaction Surface Audit | B-3 checklist: hover area, timing, CSS vs state, scroll interference, popup occlusion | F006: message hover → Copy button flash. CSS group-hover resolved with 0 re-renders |
+
+**Files**: verify-phases.md, injection/implement.md, injection/verify.md, lessons-learned.md, history.md
+
+---
+
 ## [2026-03-10] README User-Facing Meaning Review
 
 README was accurate but described mechanisms from an implementation perspective ("injection source: pre-context.md + entity-registry.md") rather than from a user perspective ("what does each command know about my project?"). Full review applied the user-facing meaning principle across 6 sections.

@@ -42,6 +42,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - Test command: [actual test command]
   - Build command: [actual build command]
   - Lint command: [actual lint command | "not configured" | "⚠️ not installed — skipped per Toolchain Pre-flight"]
+  - i18n check: [locale files to cross-check | "skipped — no i18n framework detected"]
 
 ── Phase 2: Cross-Feature Verification ───────────
 [List each cross-verification point from pre-context]
@@ -113,6 +114,7 @@ After verification execution completes:
   Tests: [passed count]/[total count] passed
   Build: [success/failure]
   Lint: [success/failure/not configured/skipped (not installed)]
+  i18n: [N keys checked, N missing ❌ / all present ✅ / skipped (no i18n)]
 
 ── Phase 2: Cross-Feature Consistency ─────────────
 [Results for each cross-verification point]

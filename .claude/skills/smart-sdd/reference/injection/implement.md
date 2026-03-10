@@ -249,6 +249,13 @@ After each `speckit-implement` task completes (before starting the next task):
 - **Build failure**: Enter Auto-Fix Loop (see below)
 - **Build success**: Proceed to Step 2
 
+**Step 1b — i18n Completeness Check** (when project uses i18n — skip otherwise):
+After each task that creates/modifies UI files:
+1. Grep the task's changed files for translation call patterns (`t('key')`, `$t('key')`, etc.)
+2. For each extracted key, check existence in ALL locale JSON files
+3. Missing key → auto-add to all locale files (copy from source locale, mark others with `[TRANSLATE]` or copy existing translation pattern)
+4. Display: `🌐 i18n: [N] keys checked, [N] added to [locale list]`
+
 **Step 2 — Runtime Check** (when MCP available):
 1. If app is not yet running: start app (dev server / Electron / etc.)
 2. Navigate to the screen related to the completed task
@@ -338,8 +345,12 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 | Missing Error Boundary | Route/page-level components (files under `pages/`, `routes/`, `views/`) without `ErrorBoundary` or `error.tsx` sibling | ⚠️ warning |
 | Unbatched state updates | Multiple sequential `setState(` / `set(` / `store.` calls within same function without `batch(` wrapper | ⚠️ warning |
 | Stub/empty implementation | Function bodies containing only `return null`, `() => null`, `return undefined`, `return <>`, `return <></>`, `// TODO`, `throw new Error('Not implemented')` | ⚠️ warning — hollow implementation |
+| SDK API contract gap | SDK function calls (e.g., `tool()`, `streamText()`, `fetch()`) where required callback/field is missing: `tool({...})` without `execute`, `streamText({...})` without error handler | ⚠️ HIGH — builds but silently fails at runtime |
+| Loose type bypass | Parameters typed as `Record<string, unknown>`, `any`, `object`, or `unknown` that are passed to external SDK functions — hides shape mismatches from the compiler | ⚠️ warning — type system cannot catch runtime errors |
 
 > **Stub detection rationale**: During rebuild, registering components with `render: () => null` or `return null` creates the illusion of "implementation complete" while delivering zero functionality. Each component/function must have a meaningful implementation — at minimum, rendering its key UI elements or performing its core logic. If a component is intentionally deferred, it should be explicitly marked as out-of-scope in spec.md, not silently stubbed.
+
+> **SDK API contract gap rationale**: Passing metadata-only objects (e.g., `{ type: "mcp", serverId: "xxx" }`) where the SDK expects callable objects (e.g., `tool({ execute: async () => {...} })`) causes silent failure — the build succeeds because loose types accept any shape, but the SDK ignores the object at runtime. When implementing SDK integrations, verify that all required fields (especially `execute`, `parameters`, `description` for tool definitions) are present and callable.
 
 **Result classification**: ⚠️ warning (NOT blocking). Violations are reported in the Review Display as a "Pattern Compliance" section. The agent MAY auto-fix simple violations before Review (e.g., wrapping a selector with `useShallow`, changing `useEffect` to `useLayoutEffect`). Stub violations SHOULD be flagged prominently — they indicate under-implementation, not a pattern issue.
 
@@ -532,6 +543,19 @@ You can open and edit any of these files directly, then select
 - **IPC Message Validity**: Prevent argument type/count mismatches in main↔renderer IPC calls
 - **Context Isolation**: Confirm renderer cannot directly access Node.js APIs
 - **IPC Error Handling**: Recovery strategy for IPC call failures (process crash, timeout)
+- **IPC Return Value Defense**: All IPC return values MUST use optional chaining (`result?.field`) and nullish coalescing (`?? fallback`). IPC serialization strips TypeScript type guarantees — `content: MCPToolResultContent[]` in the type definition does NOT guarantee `content` will exist at runtime. Apply: `(result?.content ?? [])` for arrays, `result?.nested?.field ?? default` for nested objects.
+
+### External SDK Type Trust Classification
+
+When implementing code that calls external SDK functions, classify each call by trust level and apply the corresponding defensive pattern:
+
+| Trust Level | What | Examples | Required Defense |
+|-------------|------|---------|-----------------|
+| **High** — Synchronous, pure functions | Return value matches type definition reliably | `nanoid()`, `z.object()`, `jsonSchema()` | Standard null checks |
+| **Medium** — Async functions, resolved values | Return usually matches types; edge cases under error/timeout | `generateText().text`, `fetch().json()`, `db.query()` | `?? fallback` on all fields; `try/catch` around call |
+| **Low** — Stream events, callbacks, experimental APIs | Type definitions may not reflect actual runtime values; timing-dependent | `fullStream` part events, `experimental_*` callbacks, WebSocket `onmessage` | **Mandatory**: debug log actual values before coding against them; never trust `.d.ts` alone; use runtime type guards (`typeof x === 'string'`) |
+
+> **Rationale**: F005 MCP tool integration — AI SDK v6's `.d.ts` declared `output` on tool-result stream events, but the actual runtime value was `undefined`. Trusting the type definition led to 5 fix iterations. A single debug log confirming `part.result === undefined` would have identified the root cause in one iteration. **Rule: Low-trust SDK calls → debug log first, code second.**
 
 ### Platform CSS Constraints
 
@@ -543,6 +567,18 @@ You can open and edit any of these files directly, then select
 - **Import Path Validation**: Verify correct paths when importing modules from other Features
 - **Interface Contract Compliance**: Confirm actual implementation of shared entities/APIs matches entity-registry/api-registry contracts
 - **Module Import Graph**: Prevent circular imports, check tree-shaking impact when using barrel exports
+
+### UI Interaction Surface Audit (UI Features)
+
+When implementing hover, click, or popup interactions, check the following before proceeding to the next task:
+
+- **Hover area scope**: Is the hover trigger area larger than the visual target? (e.g., entire row hover for a small button) → Narrow to the specific element, or use CSS `group-hover` on a tighter container
+- **Hover response timing**: Does hover trigger instantly on a high-traffic area (e.g., message list, scrollable container)? → Add CSS `transition-opacity` or debounce to prevent flicker during scroll
+- **Hover implementation method**: Is React state (`useState` + `onMouseEnter/Leave`) used purely for show/hide? → Prefer CSS-only (`group-hover:opacity-100`) to avoid unnecessary re-renders
+- **Popup occlusion**: Does the hover popup obscure adjacent interactive elements? → Review z-index and positioning
+- **Scroll-through interference**: Does scrolling through a list trigger hover effects on every item passed? → CSS transitions naturally handle this; React state hover does not
+
+> **Rationale**: F006 lesson — message-level `onMouseEnter` caused Copy buttons to flash on every message during scroll. CSS `group-hover` with `transition-opacity` resolved the issue with zero re-renders. Prefer CSS for pure visibility toggles; reserve React state for interactions that require data loading or complex logic.
 
 ### Data Persistence Safety
 
