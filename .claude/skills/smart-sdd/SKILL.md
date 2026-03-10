@@ -265,4 +265,3 @@ When creating `specs/history.md` for the first time, use this header:
 - Per-command injection details: [injection/{command}.md](reference/injection/) (constitution, specify, plan, tasks, analyze, implement, verify, parity, adopt-specify, adopt-plan, adopt-verify)
 - State file schema: [state-schema.md](reference/state-schema.md)
 - Git branch management: [branch-management.md](reference/branch-management.md)
-- Lessons learned: [lessons-learned.md](../../../lessons-learned.md) (project root — chronic failure patterns G1~G5 and past resolutions L1~L8)
