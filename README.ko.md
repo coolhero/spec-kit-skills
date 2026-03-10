@@ -1,6 +1,6 @@
 # spec-kit-skills
 
-**Repository**: https://github.com/coolhero/spec-kit-skills
+**Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
 [English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
 
