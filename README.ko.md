@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 16:48 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -638,7 +638,7 @@ specs/
 
 ### 아키텍처: 3축 도메인 합성
 
-도메인별 동작(SC 생성, 검증 전략, 정교화 프로브, 버그 방지)을 세 개의 독립 축으로 분해하여 중복 없이 합성합니다:
+도메인 동작(SC 생성, 검증, 프로브, 버그 방지)은 프로젝트 유형마다 다릅니다. REST API는 엔드포인트 상태 코드 검사가 필요하고, 데스크톱 앱은 IPC 경계 안전성 검사가 필요하며, 재구축 프로젝트는 동작 패리티 검증이 필요합니다. 모든 프로젝트에 모든 규칙을 로드하는 단일 파일 대신, 도메인 지식을 세 개의 독립 축으로 분해합니다:
 
 ```
 Interface (앱이 노출하는 것)        Concern (횡단 관심사)                Scenario (왜 만드는가)
@@ -650,8 +650,26 @@ Interface (앱이 노출하는 것)        Concern (횡단 관심사)           
                                    └── auth
 ```
 
-**Domain Profile** = 선택된 Interface + 선택된 Concern + Scenario. 예: `desktop-app = [gui] + [async-state, ipc] + rebuild`. 에이전트는 프로젝트에 관련된 모듈만 로드하여 컨텍스트 효율을 유지합니다.
+**Domain Profile** = 선택된 Interface + 선택된 Concern + Scenario. 예: `desktop-app = [gui] + [async-state, ipc] + rebuild`. 에이전트는 프로젝트에 관련된 모듈만 로드합니다 — API 전용 프로젝트에 GUI 테스트 규칙이 로드되지 않고, IPC가 없는 프로젝트에 IPC 경계 검사가 적용되지 않습니다.
 
 **모듈 로딩 순서**: `_core.md` (항상) → 활성 Interface → 활성 Concern → Scenario → 사용자 커스텀 (`domain-custom.md`).
 
-`--profile` (또는 하위 호환 `--domain`)로 프로필 선택. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md` 참고. 프로젝트별 커스터마이징은 `specs/reverse-spec/domain-custom.md`로 지원됩니다.
+#### 확장 방법
+
+각 모듈은 통일된 스키마(`S1`: SC 생성 규칙, `S5`: 정교화 프로브, `S7`: 버그 방지)를 따르는 독립 파일입니다. 새 모듈을 추가할 때 기존 파일을 수정할 필요가 없습니다 — 이미 활성화된 모듈과 자동으로 합성됩니다.
+
+**새 인터페이스 추가** (예: 프로젝트가 기본 제공되지 않는 gRPC를 사용하는 경우):
+1. `domains/interfaces/grpc.md` 생성 — SC 규칙("모든 RPC 메서드에 request/response proto shape 필수"), 프로브("스트리밍 vs 단방향?"), 버그 방지 규칙 추가
+2. sdd-state.md에 등록: `**Interfaces**: http-api, grpc`
+3. 에이전트가 `_core.md` + `http-api.md` + `grpc.md` + 활성 concern을 로드 — 모든 규칙이 자동 병합
+
+**새 관심사 추가** (예: 프로젝트에 캐싱 패턴 검사가 필요한 경우):
+1. `domains/concerns/caching.md` 생성 — SC 규칙("cache hit/miss/stale 생애주기"), 프로브("TTL? 무효화 전략?") 추가
+2. 활성 관심사에 추가: `**Concerns**: async-state, auth, caching`
+
+**프로젝트별 커스터마이징** — 스킬 파일을 수정하지 않고:
+1. 프로젝트 디렉토리에 `specs/reverse-spec/domain-custom.md` 생성
+2. 동일한 S1/S5/S7 스키마로 프로젝트 고유 규칙 추가 (예: "결제 엔드포인트에 멱등성 SC 필수")
+3. 이 파일은 가장 마지막에 최우선 순위로 로드되어 다른 모든 모듈을 확장
+
+새 모듈은 기존 모듈과 자유롭게 합성됩니다 — 중복 없이, 불필요한 규칙 없이. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md` 참고.

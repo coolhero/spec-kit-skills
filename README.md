@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 16:48 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -641,7 +641,7 @@ See [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd) for th
 
 ### Architecture: 3-Axis Domain Composition
 
-Domain-specific behavior (SC generation, verification strategy, elaboration probes, bug prevention) is decomposed into three independent axes that compose without duplication:
+Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
 
 ```
 Interface (what the app exposes)     Concern (cross-cutting patterns)     Scenario (why we're building)
@@ -653,10 +653,28 @@ Interface (what the app exposes)     Concern (cross-cutting patterns)     Scenar
                                      └── auth
 ```
 
-A **Domain Profile** = selected Interfaces + selected Concerns + Scenario. For example: `desktop-app = [gui] + [async-state, ipc] + rebuild`. The agent loads only the modules relevant to the project, keeping context efficient.
+A **Domain Profile** = selected Interfaces + selected Concerns + Scenario. For example: `desktop-app = [gui] + [async-state, ipc] + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, and a project without IPC never gets IPC boundary checks.
 
 **Module loading order**: `_core.md` (always) → each active Interface → each active Concern → Scenario → user custom (`domain-custom.md`).
 
-Use `--profile` (or `--domain` for backward compatibility) to select a profile. See `domains/_schema.md` for the module schema and `domains/_resolver.md` for the loading protocol. Project-level customization is supported via `specs/reverse-spec/domain-custom.md`.
+#### Why This Is Extensible
+
+Each module is a standalone file with a uniform schema (`S1`: SC generation rules, `S5`: elaboration probes, `S7`: bug prevention). Adding a new module doesn't require modifying any existing file — it automatically composes with whatever is already active.
+
+**Add a new interface** (e.g., your project uses gRPC, which isn't built-in):
+1. Create `domains/interfaces/grpc.md` — add SC rules ("every RPC method needs request/response proto shape"), probes ("streaming vs unary?"), and bug prevention rules
+2. List it in sdd-state.md: `**Interfaces**: http-api, grpc`
+3. The agent now loads `_core.md` + `http-api.md` + `grpc.md` + your concerns — all rules merge automatically
+
+**Add a new concern** (e.g., your project has caching patterns worth checking):
+1. Create `domains/concerns/caching.md` — add SC rules ("cache hit/miss/stale lifecycle"), probes ("TTL? Invalidation strategy?")
+2. Add to active concerns: `**Concerns**: async-state, auth, caching`
+
+**Customize per project** — without modifying skill files at all:
+1. Create `specs/reverse-spec/domain-custom.md` in your project directory
+2. Add project-specific rules using the same S1/S5/S7 schema (e.g., "payment endpoints require idempotency SC")
+3. This file loads last with highest priority, extending all other modules
+
+New modules compose freely with existing ones — no duplication, no unused rules. See `domains/_schema.md` for the module schema and `domains/_resolver.md` for the full loading protocol.
 
 
