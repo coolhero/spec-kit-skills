@@ -1400,3 +1400,19 @@ Analyzed v4 improvement document (F005 MCP tool integration case study, proposal
 | 7 | #18 Delegation Rules | Not adopted | Sub-agent internal judgment quality cannot be enforced by skill rules. Report format tags (#18 adopted) are the practical alternative |
 
 **Files**: implement.md (Auto-Fix Loop), async-state.md (S1), plan.md (UX Behavior Contract), verify-phases.md (Phase 2 Step 1b + report formats)
+
+---
+
+### F007 Post-mortem: Playwright MCP Runtime Failure Handling (2026-03-10)
+
+**Trigger**: F007 verify phase — Playwright MCP was properly configured with `--cdp-endpoint http://localhost:9222` and showed `Status: ✓ Connected`, but `browser_snapshot` failed with "Target page, context or browser has been closed". The agent bypassed the HARD STOP by using raw WebSocket CDP scripts, violating verify-phases.md protocol.
+
+**Root cause**: Pre-flight status table only had 3 states (active/configured/unavailable). "Tool exists but target lost" was not classified — it fell through to improper handling. No explicit rule prohibited workaround tools.
+
+| # | Decision | Detail | Rationale |
+|---|----------|--------|-----------|
+| 1 | Add 4th probe result row | "Target closed" runtime errors → `MCP_STATUS = configured` (not unavailable) | MCP IS installed, CDP IS configured. The app just needs to be (re)started. Treating it as `unavailable` triggers wrong diagnostic path |
+| 2 | Workaround Prohibition rule | Explicit ban on raw CDP/WebSocket/puppeteer as alternatives to Playwright MCP | Agent improvised a bypass that appeared to work but violated the verification contract. Must be explicitly forbidden |
+| 3 | Phase 3 probe table updated | 4 outcomes instead of 3 — "Target closed" mapped to Case B (agent starts app) | Same Case B logic applies: CDP is configured, app is not running, agent handles it |
+
+**Files**: verify-phases.md (Pre-flight status table, Workaround Prohibition, Phase 3 Step 3 probe table)

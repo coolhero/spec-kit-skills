@@ -161,7 +161,12 @@ If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight sec
 |---|---|---|
 | Tool exists and returns content (page snapshot) | ✅ Active + connected | `MCP_STATUS = active` |
 | Tool exists but fails with connection error (ECONNREFUSED) | ✅ Configured but app not running | `MCP_STATUS = configured` |
+| Tool exists but fails with runtime error ("Target page, context or browser has been closed", "Browser closed", etc.) | ⚠️ Connected but target lost | `MCP_STATUS = configured` |
 | Tool does not exist / "unknown tool" error | ❌ Not installed | `MCP_STATUS = unavailable` |
+
+> **Important**: "Target page, context or browser has been closed" means Playwright MCP IS installed and CDP IS configured, but the Electron app is not running or the CDP target was lost. This is `configured`, NOT `unavailable`. The agent will start the app in Phase 3 Step 3 (Case B).
+
+**⛔ Workaround Prohibition**: When Playwright MCP tools fail for ANY reason, do NOT use raw CDP WebSocket scripts, puppeteer, custom fetch-based CDP calls, or any other alternative browser automation as a workaround. Playwright MCP is the ONLY authorized UI verification tool. If it fails, follow the HARD STOP protocol below — do not improvise alternatives.
 
 **If `MCP_STATUS = unavailable`** — run CDP Endpoint Diagnostic before HARD STOP:
 
@@ -581,15 +586,16 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 - **Electron CDP Configuration Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
   Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
 
-  1. **Probe**: Call `browser_snapshot` to check current Playwright MCP configuration. There are THREE possible outcomes:
+  1. **Probe**: Call `browser_snapshot` to check current Playwright MCP configuration. There are FOUR possible outcomes:
 
      | Probe result | Meaning | Action |
      |---|---|---|
      | Snapshot shows Electron app content | CDP active + app already running | → Proceed directly to SC-level UI verification |
      | Snapshot shows a default new tab / Chrome start page | Standard mode (no `--cdp-endpoint` configured) | → **Case A**: CDP not configured — HARD STOP |
-     | Tool call fails / connection refused / empty result | CDP IS configured but app is NOT running on the CDP port | → **Case B**: CDP configured — agent will start the app |
+     | Tool call fails with ECONNREFUSED / connection refused | CDP IS configured but app is NOT running on the CDP port | → **Case B**: CDP configured — agent will start the app |
+     | Tool call fails with "Target page, context or browser has been closed" or similar runtime error | CDP IS configured, was connected, but target is lost (app crashed/closed) | → **Case B**: Same as above — agent will (re)start the app |
 
-     **CRITICAL**: Do NOT confuse Case B with "standard mode." When Playwright MCP has `--cdp-endpoint` configured but nothing is listening on that port, `browser_snapshot` will fail with a connection error (`ECONNREFUSED`). This means CDP IS set up correctly — the app just needs to be started.
+     **CRITICAL**: Do NOT confuse Case B with "standard mode." When Playwright MCP has `--cdp-endpoint` configured but nothing is listening on that port, `browser_snapshot` will fail with a connection error (`ECONNREFUSED`) or "Target closed" error. This means CDP IS set up correctly — the app just needs to be started. **Do NOT use raw CDP/WebSocket scripts as a workaround — follow the Case B protocol.**
 
   2. **Case A — CDP not configured (standard mode detected)**: This is a **MANDATORY HARD STOP**.
      This is the ONLY case that requires user action — the user must reconfigure Playwright MCP itself.
