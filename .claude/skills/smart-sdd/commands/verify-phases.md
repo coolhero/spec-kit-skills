@@ -73,7 +73,7 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 
 1. **Re-read this file** (commands/verify-phases.md) — MANDATORY
 2. **Re-read reference/injection/verify.md** — for Checkpoint/Review display format
-3. **Re-read reference/lessons-learned.md** — for known failure patterns
+3. **Re-read lessons-learned.md** (project root) — for known failure patterns
 4. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
 5. **Re-establish prerequisites**:
    - If Phase 3 pending and MCP needed → re-run Phase 0 (app start + CDP check)
