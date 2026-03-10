@@ -40,6 +40,17 @@
 **Countermeasures**: Verify Progress Checkpoint (sdd-state.md) + Resumption Protocol
 **Key insight**: All 66 countermeasures are built on the premise "agent reads skill files." G5 is the meta-problem that breaks this premise.
 
+## G6. Runtime Behavior Verification Gap
+
+**Problem**: verify does static checks (test/build/lint) + UI rendering confirmation (CDP snapshot), but does NOT verify actual runtime behavior (feature interactions, data flow, state changes)
+**Case**: F006 — SC verification covered 1/10 SCs (only SC-028 rendering). SCs requiring server connection, tool execution, enable/disable toggles were never runtime-tested. F001~F005 had the same pattern.
+**Root causes**:
+- verify-phases.md had no step for "run the app and test the feature works"
+- SC-level verification (Phase 3 Step 3) only covered SCs in the demo Coverage header — if coverage was low, most SCs got no runtime check
+- No defined boundary for what CDP can vs cannot automate (external deps, API keys, etc.)
+**Countermeasures**: SC Verification Matrix (classify ALL SCs from spec.md), verification boundary rules (CDP capabilities), coverage gate (warn if < 50%)
+**Coverage**: ~75% — external-dependency SCs still need manual verification
+
 ---
 
 ## Countermeasure Lineage
@@ -49,6 +60,7 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → S12~S15 (SBI Cross-Check, Stub Detection) → W1~W4 (Playwright Fallback, Pattern Scan)
   → W5~W6 (Chain Completeness, Enablement) → W8~W9 (API Matrix, Zero Gate)
   → W10 (UX Behavior Contract) → Toolchain Pre-flight → Verify Progress Checkpoint
+  → SC Verification Matrix (runtime coverage)
 ```
 
 ---

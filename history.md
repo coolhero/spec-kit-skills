@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-10] G6 — SC Verification Matrix: Runtime Behavior Verification
+
+F006 pipeline: verify did static checks + UI rendering confirmation, but never tested actual runtime behavior. SC-level verification (Phase 3 Step 3) only covered SCs mapped in the demo Coverage header — if coverage was low (F006: 1/10), most SCs got zero runtime testing.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | SC Verification Planning | Step 0 in Phase 3: classify ALL SCs from spec.md into `cdp-auto` / `test-covered` / `external-dep` / `manual` | Prevents SCs from being silently skipped — every SC has an explicit classification and skip reason |
+| 2 | Verification boundary | Define what Playwright CDP can/cannot automate (local UI ✅, external deps ❌, IPC ⚠️) | Gives agent clear rules for classification instead of ad-hoc judgment |
+| 3 | Drive Step 3 from SC matrix | SC-level UI verification covers ALL `cdp-auto` SCs, not just those in demo Coverage header | Closes the gap where low demo coverage = low runtime verification |
+| 4 | Coverage gate | Warn if effective coverage (cdp-auto + test-covered) / total < 50% | Makes low coverage visible — user can choose to expand verification or acknowledge |
+
+**Files**: verify-phases.md, injection/verify.md, lessons-learned.md, history.md
+
+---
+
 ## [2026-03-10] G5 — Verify Compaction-Safe Checkpoint + Lessons Learned
 
 F006 pipeline: verify lost all Phase references after context compaction, causing Playwright CDP UI verification (Phases 3/3b) to be entirely skipped. Root cause: all 66 countermeasures assume "agent reads skill files" — context compaction breaks this premise.
