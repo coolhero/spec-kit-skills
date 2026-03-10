@@ -57,6 +57,12 @@ Show the **actual verification checklist** so the user can see what will be chec
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
+  SC Verification Matrix ([N] SCs from spec.md):
+    cdp-auto: [N] SCs — [list SC-### to verify via CDP]
+    test-covered: [N] SCs — [list SC-### covered by Phase 1 tests]
+    external-dep: [N] SCs — [list SC-### + skip reason]
+    manual: [N] SCs
+    Planned coverage: [cdp-auto + test-covered]/[total] = [N]%
   - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
   - [ ] Demo script is NOT markdown and NOT a test-only script
   - [ ] Demo launches a real, working Feature environment (not just assertions)
@@ -136,6 +142,12 @@ After verification execution completes:
   - VERIFY_STEPS: [N]/[N] SC functional tests passed
     [⚠️ SC-003 wait-for timeout (if any)]
   - Visual fidelity: [match/differences found] (rebuild only)
+  - SC Verification Coverage: [verified]/[total] = [N]%
+    ✅ cdp-auto: [N] verified [⚠️ SC-### failed: reason (if any)]
+    ✅ test-covered: [N]
+    ⚠️ external-dep: [N] ([list SC + skip reason])
+    ⚠️ manual: [N]
+    [⚠️ Coverage < 50% — most SCs lack runtime verification (if applicable)]
 
 ── Phase 3b: Bug Prevention Verification ───────────
   - ✅/❌ Empty state smoke test: [result]

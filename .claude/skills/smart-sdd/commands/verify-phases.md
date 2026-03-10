@@ -392,10 +392,11 @@ If `plan.md` contains an `## API Compatibility Matrix` section with 2+ providers
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).
 > **quickstart.md reference**: If `specs/{NNN-feature}/quickstart.md` exists, use it as the authoritative source for how the Feature should be launched and verified. The demo script must follow quickstart.md's run instructions.
 
-**⚠️ Phase 3 has 6 mandatory steps + Phase 3b. Do NOT skip any step or jump directly to demo execution.**
+**⚠️ Phase 3 has 7 mandatory steps + Phase 3b. Do NOT skip any step or jump directly to demo execution.**
 
 ```
 Phase 3 Checklist (must complete ALL in order):
+  □ Step 0: SC Verification Planning (classify ALL SCs from spec.md)
   □ Step 1: Demo script exists and is executable
   □ Step 2: Demo launches the real Feature
   □ Step 3: UI Verification via Playwright MCP  ← MANDATORY, not optional
@@ -405,6 +406,52 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 6b: Execute VERIFY_STEPS (functional verification)
   □ Phase 3b: Bug Prevention Verification
 ```
+
+**Step 0 — SC Verification Planning** (classify ALL SCs — not just those in demo Coverage header):
+
+Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverage header. If coverage is low, most SCs get no runtime verification. This step ensures ALL SCs are classified and tracked.
+
+1. Read `SPEC_PATH/[NNN-feature]/spec.md` → extract ALL SC-### items
+2. For each SC, classify the verification method:
+
+| Category | Criteria | Where Verified |
+|----------|----------|---------------|
+| `cdp-auto` | UI interaction with no external dependency (built-in state, local data, static UI) | Step 3 — CDP interactive test |
+| `test-covered` | Behavior already verified by unit/integration tests in Phase 1 | Reference passing test name |
+| `external-dep` | Requires API key, external server, network service, or specific hardware | Skip with explicit reason |
+| `manual` | Requires visual/subjective judgment that automation cannot evaluate | Skip as manual-only |
+
+3. **Verification boundary** — what Playwright CDP can and cannot automate:
+   - ✅ CAN: Navigate pages, click buttons/links, fill forms, select options
+   - ✅ CAN: Check element visibility, text content, attributes, CSS classes
+   - ✅ CAN: Read console logs, detect JS errors, take screenshots
+   - ✅ CAN: Interact with local/built-in functionality (in-memory data, local storage, static UI)
+   - ⚠️ LIMITED: IPC calls (Electron main process) — verify indirectly via UI state changes after action
+   - ❌ CANNOT: Provide API keys or authentication credentials
+   - ❌ CANNOT: Start external server processes or connect to remote services
+   - ❌ CANNOT: Evaluate subjective quality (design aesthetics, UX feel)
+
+4. Write the SC Verification Matrix:
+   ```
+   SC Verification Matrix for [FID]:
+   | SC | Category | Planned Method | Skip Reason |
+   |----|----------|---------------|-------------|
+   | SC-022 | cdp-auto | Navigate settings → add server → verify status | — |
+   | SC-023 | external-dep | — | API key required for tool execution |
+   | SC-024 | cdp-auto | Enable built-in server → verify tool list loads | — |
+   | SC-028 | cdp-auto | Navigate settings → verify page renders | — |
+   | SC-031 | external-dep | — | Requires connected server with tools |
+   ```
+
+5. **Coverage assessment**:
+   - Auto-verifiable (`cdp-auto`): [N] SCs → will be verified in Step 3
+   - Test-covered: [N] SCs → already verified in Phase 1
+   - External-dep: [N] SCs → skipped with explicit reason
+   - Manual: [N] SCs → skipped
+   - **Effective coverage**: (cdp-auto + test-covered) / total = [N]%
+   - If effective coverage < 50%: display `⚠️ SC verification coverage is [N]% — most SCs cannot be automatically verified for this Feature`
+
+6. **`cdp-auto` SCs drive Step 3**: In Step 3 SC-level UI verification, verify ALL `cdp-auto` SCs — not just those in the demo Coverage header. SCs that appear in the SC Verification Matrix as `cdp-auto` but are missing from the demo Coverage header must still be tested.
 
 **Step 1 — Check demo script exists AND is a real demo (NOT markdown, NOT test-only)**:
 - Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
@@ -501,7 +548,10 @@ Phase 3 Checklist (must complete ALL in order):
        **If response is empty → re-ask** (per MANDATORY RULE 1)
 
   **SC-level UI Verification**:
-  1. Parse demo script Coverage header → extract FR-###/SC-### + UI Action list
+  1. Build the verification target list from TWO sources:
+     a. Parse demo script Coverage header → extract FR-###/SC-### + UI Action list
+     b. Include ALL `cdp-auto` SCs from Step 0's SC Verification Matrix that are NOT in the Coverage header
+     For (b), generate UI Action sequences based on the SC description and spec.md context
   2. Verify each SC-###:
      - ✅-marked SC: Execute UI Action sequence
        - `navigate /path` → move via Navigate capability
@@ -694,6 +744,29 @@ After demo `--ci` passes, check for a `# VERIFY_STEPS:` comment block in the dem
    - Display: `ℹ️ Functional verification via Playwright CLI (MCP unavailable — using generated test file)`
 5. If MCP unavailable AND no test file exists: skip with notice:
    `⚠️ Functional verification skipped — no MCP and no generated test file (demos/verify/F00N-name.spec.ts)`
+
+**SC Verification Coverage Summary** (after Steps 3 + 6b complete):
+
+Compile the final SC Verification Matrix by combining results from all verification sources:
+- Phase 1 tests → `test-covered` SCs
+- Step 3 SC-level UI verification → `cdp-auto` SCs (result: ✅/❌/⚠️)
+- Step 6b VERIFY_STEPS → functional SCs (result: ✅/❌/⚠️)
+- Step 0 classifications → `external-dep` / `manual` SCs (skip reason)
+
+Display:
+```
+📊 SC Verification Coverage for [FID]:
+  Total SCs: [N]
+  ✅ Verified (cdp-auto + test-covered): [N] ([%])
+  ⚠️ Skipped — external dependency: [N] ([list SC + reason])
+  ⚠️ Skipped — manual only: [N]
+  ❌ Failed: [N] ([list SC + failure])
+  Effective coverage: [verified / total] = [N]%
+```
+
+**Coverage gate**:
+- Effective coverage ≥ 50%: Proceed normally
+- Effective coverage < 50%: Display `⚠️ SC verification coverage is [N]% — most SCs lack runtime verification`. This is a WARNING, not a blocker — but it is prominently displayed in Review for user awareness. If `cdp-auto` SCs exist that were NOT verified (Step 3 skipped due to MCP unavailability), recommend installing MCP.
 
 ### Phase 3b: Bug Prevention Verification (B-4)
 
