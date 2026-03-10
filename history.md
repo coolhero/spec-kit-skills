@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-10] G7 — Integration Contracts: Cross-Feature Data Shape Verification
+
+F005↔F006 integration gap: F003's ParameterBuilder expected `assistant.mcpMode/mcpServers`, but F006's useMCPStore stored data differently. No bridge was designed (plan), built (implement), or verified (verify). Root cause: pipeline treats Features as isolated units with no data shape contract at boundaries.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Integration Contracts in plan.md | Table defining Provider Shape ↔ Consumer Shape ↔ Bridge per cross-Feature boundary | Makes shape expectations explicit — implement knows what bridge to build, verify knows what to check |
+| 2 | Integration Contract Data Shape Verification | Phase 2 Step 6: grep interface existence + check shape compatibility + verify bridge adapter | Catches missing bridges and shape mismatches before merge, at code level |
+| 3 | Plan Review Display | Integration Contracts section shown alongside existing Architecture/Data Model/API sections | User reviews shape contracts before approving plan |
+| 4 | Verify Checkpoint/Review Display | Integration contract results shown in Phase 2 section | User sees integration verification status before approving verify |
+
+**Files**: injection/plan.md, verify-phases.md, injection/verify.md, lessons-learned.md, history.md
+
+---
+
 ## [2026-03-10] G6 — SC Verification Matrix: Runtime Behavior Verification
 
 F006 pipeline: verify did static checks + UI rendering confirmation, but never tested actual runtime behavior. SC-level verification (Phase 3 Step 3) only covered SCs mapped in the demo Coverage header — if coverage was low (F006: 1/10), most SCs got zero runtime testing.

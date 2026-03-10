@@ -51,6 +51,17 @@
 **Countermeasures**: SC Verification Matrix (classify ALL SCs from spec.md), verification boundary rules (CDP capabilities), coverage gate (warn if < 50%)
 **Coverage**: ~75% — external-dependency SCs still need manual verification
 
+## G7. Cross-Feature Integration Contract Gap
+
+**Problem**: Pipeline treats each Feature as isolated unit — no mechanism to define or verify data shape contracts at Feature boundaries
+**Case**: F003 ParameterBuilder expects `assistant.mcpMode/mcpServers`, F006 useMCPStore stores differently — no bridge designed, implemented, or verified. 3-layer miss: spec/plan didn't define the contract, implement didn't build the bridge, verify didn't check shape compatibility.
+**Root causes**:
+- Functional Enablement Chain says "A enables B" but not "A provides {shape} and B expects {shape}"
+- Entity/API registries track schemas independently per Feature, no cross-Feature shape comparison
+- Enablement Interface Smoke Test checks existence (grep + curl), not data shape compatibility
+**Countermeasures**: Integration Contracts (plan.md section defining Provider/Consumer shapes + bridges), Integration Contract Data Shape Verification (verify Phase 2 Step 6)
+**Coverage**: ~80% — catches shape mismatches and missing bridges at plan+verify, but cannot catch all semantic compatibility issues
+
 ---
 
 ## Countermeasure Lineage
@@ -60,7 +71,7 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → S12~S15 (SBI Cross-Check, Stub Detection) → W1~W4 (Playwright Fallback, Pattern Scan)
   → W5~W6 (Chain Completeness, Enablement) → W8~W9 (API Matrix, Zero Gate)
   → W10 (UX Behavior Contract) → Toolchain Pre-flight → Verify Progress Checkpoint
-  → SC Verification Matrix (runtime coverage)
+  → SC Verification Matrix (runtime coverage) → Integration Contracts (cross-Feature shapes)
 ```
 
 ---
