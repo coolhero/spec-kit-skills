@@ -1,5 +1,7 @@
 # spec-kit-skills
 
+**Repository**: https://github.com/coolhero/spec-kit-skills
+
 [한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
