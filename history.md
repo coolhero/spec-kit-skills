@@ -13,10 +13,25 @@ F006 pipeline: verify lost all Phase references after context compaction, causin
 |---|----------|--------|-----------|
 | 1 | Verify Progress Checkpoint in sdd-state.md | Phase-by-phase status table (`⏳ pending` / `✅ complete` / etc.) with `⚠️ RESUME FROM` pointer | sdd-state.md is always read at session start; survives compaction unlike in-memory progress |
 | 2 | Resumption Protocol | Re-read verify-phases.md + injection/verify.md, continue from first pending Phase | Restores the procedural context that compaction destroyed |
-| 3 | Lessons Learned file | `reference/lessons-learned.md` documenting G1~G5 chronic problems + L1~L8 specific past lessons | Persistent reference for known failure patterns; read at verify start |
+| 3 | Lessons Learned file | `lessons-learned.md` (project root) documenting G1~G5 chronic problems + L1~L8 specific past lessons | Record-keeping only (like history.md) — NOT referenced by pipeline at runtime |
 | 4 | Lifecycle: create → update → delete | Verify Progress created at start, updated per Phase, deleted on completion | No stale state between Features; final result recorded in Notes as before |
 
-**Files**: state-schema.md, verify-phases.md, injection/verify.md, lessons-learned.md (new), README.md, README.ko.md, history.md
+**Files**: state-schema.md, verify-phases.md, injection/verify.md, lessons-learned.md (new, project root), README.md, README.ko.md, history.md
+
+---
+
+## [2026-03-10] Verify-time Change Recording — Implementation Gap Classification
+
+F006 pipeline: during verify, i18n keys were added to source — an implementation gap (missing behavior within existing FR/task scope), not a bug (wrong behavior). No formal process existed to classify and record such changes.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Extend Bug Fix Severity Rule | Add complementary "Verify-time Change Recording" section (not modifying the existing rule) | Bug Fix Severity Rule covers bugs; new section covers ALL source modifications including implementation gaps |
+| 2 | Three change types | Bug Fix (Minor), Implementation Gap, Design Change | Distinguishes "wrong behavior" from "absent behavior within scope" from "beyond scope" — each has different routing |
+| 3 | Recording requirement | All inline changes summarized in sdd-state.md Notes | Transparency + audit trail — prevents silent scope expansion during verify |
+| 4 | Review Display section | "Verify-time Changes" block in injection/verify.md Review | User sees what was modified before approving verify results |
+
+**Files**: verify-phases.md, injection/verify.md, history.md
 
 ---
 
