@@ -368,6 +368,7 @@ The UX Behavior Contract makes **expected temporal behavior** explicit — thing
 | Message sending | Send button disabled + spinner; input field disabled | Double-send if button not disabled; lost input if field clears prematurely | verify-state button#send disabled "true" |
 | API error during stream | Error toast appears; input re-enabled; partial response preserved | Silent failure = user thinks app frozen; lost partial response | verify-state .error-toast visible |
 | Long loading (>3s) | Skeleton/placeholder shown; cancel option available | Blank screen = user thinks app crashed | verify-state .skeleton visible |
+| Stream stale (no events for N seconds) | Timeout indicator shown; input re-enabled; retry option available | UI locked in "generating" state forever; user must reload app | verify-state button#send disabled "false" |
 | Component unmount during stream | Stream subscription cancelled; no state update after unmount | Memory leak; "setState on unmounted component" warning | — (code review) |
 ```
 

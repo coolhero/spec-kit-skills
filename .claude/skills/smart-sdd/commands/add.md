@@ -127,7 +127,7 @@ If the user selects "Review and clean up":
 
 > Conversational phase — no HARD STOP.
 > Uses [feature-elaboration-framework.md](../reference/feature-elaboration-framework.md) for definition quality evaluation.
-> Uses `domains/{domain}.md` § 5 for domain-specific elaboration probes.
+> Uses `domains/_core.md` § S5 + active interface/concern modules § S5 for domain-specific elaboration probes.
 
 ### 1a. Entry Detection + Auto Gap Suggestion
 
@@ -222,7 +222,7 @@ Determine entry type from the user's input and arguments:
 After initial gathering, evaluate the Feature definition against the **Feature Elaboration Framework**:
 
 1. **Load framework**: Read `reference/feature-elaboration-framework.md` for the six base perspectives
-2. **Load domain probes**: Read `domains/{domain}.md` § 5 for domain-specific probes (if present)
+2. **Load domain probes**: Read `domains/_core.md` § S5 + active interface/concern modules § S5 for domain-specific probes (aggregate all)
 3. **Assess coverage**: Score each perspective for the current definition:
    - **Covered**: Sufficient information to proceed
    - **Partial**: Some info, but key gaps remain

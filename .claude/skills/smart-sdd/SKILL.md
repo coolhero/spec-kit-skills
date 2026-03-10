@@ -149,7 +149,8 @@ $ARGUMENTS parsing rules:
   --source <path> → Original source path for parity check (only for parity command)
   --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify
   --all           → Process all eligible Features in batch mode (only for pipeline command). Default is single-Feature mode.
-  --domain <val>  → Project domain profile: "app" (default). Determines demo pattern, parity dimensions, and verify steps
+  --domain <val>  → Project domain profile: "app" (default). Backward-compatible alias for --profile
+  --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
 ```
 
 **BASE_PATH** determination:
@@ -176,14 +177,19 @@ Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skil
 
 ## Domain Profile
 
-The `--domain` argument selects the domain profile. Default: `app`.
+The `--profile` argument (or `--domain` for backward compatibility) selects the domain profile. Default: `app` (expands to `fullstack-web` profile).
 
-**Loading**: After argument parsing, read `domains/{domain}.md` for domain-specific behavior:
-- **Demo Pattern**: How to demo completed Features (used in verify Phase 3)
-- **Parity Dimensions**: What to compare in parity checks
-- **Verify Steps**: What verification steps to run (test, build, lint, etc.)
+**Loading**: After argument parsing, read `domains/_resolver.md` for the module resolution protocol. The resolver loads modules based on the Domain Profile stored in `sdd-state.md`:
 
-For reverse-spec domain profiles (analysis axes, registries, etc.), see `../reverse-spec/domains/{domain}.md`.
+1. `domains/_core.md` — Universal rules (always loaded)
+2. `domains/interfaces/{interface}.md` — For each active interface (http-api, gui, cli, data-io)
+3. `domains/concerns/{concern}.md` — For each active concern (async-state, ipc, external-sdk, i18n, realtime, auth)
+4. `domains/scenarios/{scenario}.md` — One scenario (greenfield, rebuild, incremental, adoption)
+5. User customization file (if specified in sdd-state.md `**Custom**` field)
+
+Loaded modules provide: **SC Generation Rules** (S1), **Parity Dimensions** (S2), **Verify Steps** (S3), **Elaboration Probes** (S5), **UI Testing** (S6), **Bug Prevention Rules** (S7).
+
+For reverse-spec domain profiles (analysis axes, detection signals), see `../reverse-spec/domains/_resolver.md`.
 
 ---
 
@@ -215,7 +221,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `reset` | `commands/reset.md` | Reset pipeline state (keep reverse-spec artifacts) |
 | `status` | `commands/status.md` | Check progress |
 
-For all commands: also read `domains/{domain}.md` for domain-specific behavior.
+For all commands: load domain modules per `sdd-state.md` Domain Profile (see `domains/_resolver.md`).
 For pipeline/step commands: also read `reference/injection/{command}.md` for per-command injection details (shared patterns in `reference/context-injection-rules.md`).
 For git branch operations: see `reference/branch-management.md`.
 

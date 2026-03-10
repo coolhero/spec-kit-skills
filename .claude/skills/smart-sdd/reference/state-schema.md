@@ -13,7 +13,11 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 **Project**: [Project name]
 **Origin**: [greenfield | rebuild | adoption]
-**Domain**: [app | data-science] ← domain profile used; default "app"
+**Domain Profile**: [profile-name or "custom"]
+**Interfaces**: [comma-separated list, e.g., http-api, gui]
+**Concerns**: [comma-separated list, e.g., async-state, auth, i18n]
+**Scenario**: [greenfield | rebuild | incremental | adoption]
+**Custom**: [path to domain-custom.md | "none"]
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
 **Scope**: [core | full]
 **Active Tiers**: [T1 | T1,T2 | T1,T2,T3] ← core scope only; omit this line for full scope
@@ -313,7 +317,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 2. Initialize all steps of all Features to `pending` (blank)
 3. Leave the Feature Mapping table empty; map the spec-kit Name and Branch when each Feature's specify step is completed (spec-kit creates the branch during specify)
 4. Initialize Constitution to `pending`
-5. Set Domain based on the `--domain` argument (default: `app`)
+5. Set Domain Profile based on the `--profile` argument (or `--domain` for backward compatibility). Resolve via `domains/_resolver.md`
 6. Set Origin based on how artifacts were generated:
    - `greenfield` — if initialized by `/smart-sdd init`
    - `rebuild` — if initialized from `/reverse-spec` artifacts for rebuild workflow (`/smart-sdd pipeline`)

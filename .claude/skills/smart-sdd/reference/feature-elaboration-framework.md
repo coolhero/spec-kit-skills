@@ -126,15 +126,16 @@ Scope boundaries.
 
 ## Domain-Specific Extension
 
-The six perspectives above are **domain-independent**. Each domain profile (`domains/{domain}.md`) may define additional elaboration probes in its **§ 5. Feature Elaboration Probes** section.
+The six perspectives above are **domain-independent**. Domain modules define additional elaboration probes in their **§ S5. Elaboration Probes** sections.
 
 Domain probes are NOT separate perspectives — they are **additional questions** within the existing six perspectives (typically Perspectives 2, 4, and 5). The agent should:
 
-1. Read `domains/{domain}.md` § 5 after loading this framework
-2. Merge domain probes into the relevant base perspectives
-3. Apply domain probes during the elaboration step alongside the base questions
+1. Read `domains/_core.md` § S5 for universal probes after loading this framework
+2. Read each active interface module § S5 and each active concern module § S5 for module-specific probes
+3. Merge all domain probes into the relevant base perspectives
+4. Apply domain probes during the elaboration step alongside the base questions
 
-If the domain profile has no § 5, use only the base six perspectives.
+If no active modules define § S5, use only the base six perspectives.
 
 ---
 

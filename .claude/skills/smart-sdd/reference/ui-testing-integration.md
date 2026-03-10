@@ -80,9 +80,9 @@ This section is informational when Playwright MCP is not available. When availab
 
 ### 2c. Domain Profile Hook
 
-**Where**: `domains/app.md` § 6
+**Where**: `domains/interfaces/gui.md` § S6
 
-The domain profile specifies which UI verification patterns apply:
+The domain profile specifies which UI verification patterns apply (only when `gui` is in active Interfaces):
 
 - **Has UI**: Full UI verification (navigate, screenshot, element checks)
 - **Backend/API**: Skip UI verification (API-only Features have no UI to check)
