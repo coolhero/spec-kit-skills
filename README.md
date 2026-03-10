@@ -2,6 +2,8 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
+**Repository**: https://github.com/coolhero/spec-kit-skills
+
 [한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 15:53 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
@@ -182,8 +184,7 @@ Each spec-kit command automatically receives relevant project context — you do
 
 **Preceding Feature results take priority**: If a dependent Feature's plan is already complete, the finalized `data-model.md` and `contracts/` are referenced instead of registry drafts.
 
-<details>
-<summary>Technical detail — injection sources per command</summary>
+#### Injection sources per command
 
 | Command | Injection Source |
 |---------|-----------------|
@@ -194,8 +195,6 @@ Each spec-kit command automatically receives relevant project context — you do
 | `analyze` | `spec.md` + `plan.md` + `tasks.md` |
 | `implement` | `tasks.md` + `plan.md` + `pre-context.md` |
 | `verify` | `pre-context.md` + registries + `plan.md` |
-
-</details>
 
 ## /reverse-spec — Detailed Workflow
 
@@ -240,8 +239,7 @@ Automatically extracts data models, API endpoints, business logic, inter-module 
 
 **Supported frameworks** (auto-detected): Django, FastAPI/SQLAlchemy, Express/Fastify, Spring, Next.js/Nuxt, Rails, Go (Gin/Echo), TypeORM/Prisma, JPA/Hibernate, Mongoose, and more.
 
-<details>
-<summary>Framework-specific scan targets</summary>
+#### Framework-specific scan targets
 
 **Data Model Extraction**:
 
@@ -266,8 +264,6 @@ Automatically extracts data models, API endpoints, business logic, inter-module 
 | Next.js/Nuxt | `pages/api/`, `app/api/` directories |
 | Rails | `config/routes.rb`, controllers |
 | Go (net/http, Gin, Echo) | Router registration, handler functions |
-
-</details>
 
 ### Phase 3 — Feature Classification & Importance Analysis
 
@@ -635,8 +631,7 @@ specs/
 
 See [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd) for the recommended `speckit-prompt.md` approach. For manual context injection, use the per-command table below:
 
-<details>
-<summary>Manual paste reference per command</summary>
+#### Manual paste reference per command
 
 | Command | What to Paste Before Invoking |
 |---------|------------------------------|
@@ -645,8 +640,6 @@ See [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd) for th
 | `/speckit-plan` | `pre-context.md` "For /speckit.plan" + registries |
 | `/speckit-tasks`, `/speckit-implement` | Check `pre-context.md` for Static Resources and Environment Variables |
 | `/speckit-analyze` | `pre-context.md` "For /speckit.analyze" + registries |
-
-</details>
 
 ### Architecture: 3-Axis Domain Composition
 
