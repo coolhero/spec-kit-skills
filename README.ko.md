@@ -622,20 +622,6 @@ specs/
 | 관계 | 독립 | spec-kit을 래핑 (대체하지 않음) |
 | 결합도 | spec-kit-skills 없이 동작 | spec-kit 필요 |
 
-### smart-sdd 없이 reverse-spec 아티펙트 사용
-
-권장하는 `speckit-prompt.md` 방식은 [smart-sdd 없이 spec-kit 사용하기](#smart-sdd-없이-spec-kit-사용하기)를 참고하세요. 수동으로 컨텍스트를 주입하려면 아래 테이블을 사용합니다:
-
-#### 명령별 수동 붙여넣기 참조
-
-| 커맨드 | 호출 전 붙여넣을 내용 |
-|--------|---------------------|
-| `/speckit-constitution` | `constitution-seed.md` 전체 |
-| `/speckit-specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` |
-| `/speckit-plan` | `pre-context.md` "For /speckit.plan" + 레지스트리 |
-| `/speckit-tasks`, `/speckit-implement` | `pre-context.md`의 Static Resources, Environment Variables 확인 |
-| `/speckit-analyze` | `pre-context.md` "For /speckit.analyze" + 레지스트리 |
-
 ### 아키텍처: 3축 도메인 합성
 
 도메인 동작(SC 생성, 검증, 프로브, 버그 방지)은 프로젝트 유형마다 다릅니다. REST API는 엔드포인트 상태 코드 검사가 필요하고, 데스크톱 앱은 IPC 경계 안전성 검사가 필요하며, 재구축 프로젝트는 동작 패리티 검증이 필요합니다. 모든 프로젝트에 모든 규칙을 로드하는 단일 파일 대신, 도메인 지식을 세 개의 독립 축으로 분해합니다:

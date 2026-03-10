@@ -625,20 +625,6 @@ specs/
 | Relationship | Independent | Wraps spec-kit (does not replace) |
 | Coupling | Works without spec-kit-skills | Requires spec-kit |
 
-### Using reverse-spec Artifacts without smart-sdd
-
-See [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd) for the recommended `speckit-prompt.md` approach. For manual context injection, use the per-command table below:
-
-#### Manual paste reference per command
-
-| Command | What to Paste Before Invoking |
-|---------|------------------------------|
-| `/speckit-constitution` | Full `constitution-seed.md` |
-| `/speckit-specify` | `pre-context.md` "For /speckit.specify" + `business-logic-map.md` |
-| `/speckit-plan` | `pre-context.md` "For /speckit.plan" + registries |
-| `/speckit-tasks`, `/speckit-implement` | Check `pre-context.md` for Static Resources and Environment Variables |
-| `/speckit-analyze` | `pre-context.md` "For /speckit.analyze" + registries |
-
 ### Architecture: 3-Axis Domain Composition
 
 Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
