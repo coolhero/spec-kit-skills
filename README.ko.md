@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 10:09 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 10:12 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -397,26 +397,26 @@ Phase 1~N: Feature별 (Release Group 순서):
 
 ### 4단계 검증
 
+merge 전에 verify가 잡아내는 것들:
+
+| 항목 | 방지하는 문제 |
+|------|-------------|
+| 테스트, 빌드, 린트 통과 | 깨진 코드가 main에 합쳐지는 것 |
+| Feature A↔B 데이터 형태 호환 확인 | 런타임 통합 실패 (예: Feature 간 필드명 불일치) |
+| 모든 시나리오(SC) 분류 | 조용히 테스트되지 않은 시나리오 — 검증된 것과 스킵 사유가 투명하게 보임 |
+| Playwright로 UI 실제 동작 확인 | "빌드는 통과하지만 버튼이 안 눌리는" 문제 |
+| verify 중 변경 사항 기록 | verify 중 숨겨진 소스 수정 — 모든 변경이 state에 투명하게 기록 |
+| 컨텍스트 압축 복구 | 긴 세션 중 에이전트가 verify 진행을 잊는 것 |
+
 ```
 Phase 1:  실행 검증 (테스트, 빌드, 린트) — 실패 시 차단
-          에코시스템별 린트 도구 감지 (미설치 시 자동 설치 제안)
 Phase 2:  교차 Feature 일관성 — 엔티티/API 호환, 인터랙션 체인,
           UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트,
           통합 계약 형태 검증 (Provider↔Consumer 형태 + 브리지)
-Phase 3:  Demo-Ready 검증 — 실패 시 차단
-          SC 검증 매트릭스: 전체 SC를 cdp-auto / test-covered /
-          external-dep / manual로 분류. 커버리지 < 50% 시 경고.
-          + VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축)
+Phase 3:  Demo-Ready — SC 검증 매트릭스 (커버리지 < 50% 시 경고),
+          VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축)
 Phase 3b: 버그 예방 — 빈 상태 스모크 테스트, 스모크 런치 기준
 Phase 4:  Global Evolution 갱신 (레지스트리, sdd-state)
-
-Verify-time Change Recording: verify 중 모든 소스 수정(에이전트 발견
-또는 유저 피드백)을 Bug Fix / Implementation Gap / Design Change로
-분류, sdd-state.md Notes에 의무 기록.
-
-Verify Progress Checkpoint: Phase별 진행 상태를 sdd-state.md에 기록,
-컨텍스트 압축에서 생존. Resumption Protocol이 verify-phases.md를
-다시 읽고 첫 번째 대기 Phase부터 이어서 실행.
 ```
 
 ### Feature 완료 후 처리

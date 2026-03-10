@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 10:09 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 10:12 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -400,26 +400,26 @@ Phase 1~N: Per Feature (in Release Group order):
 
 ### 4-Phase Verification
 
+What verify catches — before merge:
+
+| What | Prevents |
+|------|----------|
+| Tests, build, lint pass | Broken code reaching main |
+| Feature A↔B data shape compatible | Integration failures at runtime (e.g., wrong field names between Features) |
+| Every scenario (SC) classified | Silently untested scenarios — you see what's verified and what's skipped with reason |
+| UI actually works via Playwright | "Build passes but button does nothing" |
+| Verify-time changes recorded | Hidden modifications during verify — all changes transparent in state |
+| Context compaction recovery | Agent losing progress mid-verify after long sessions |
+
 ```
 Phase 1:  Execution (tests, build, lint) — BLOCKS on failure
-          Lint tool detection per ecosystem (auto-install offer if missing)
 Phase 2:  Cross-Feature Consistency — entity/API compat, interaction chains,
-          UX behavior contract, API compatibility matrix, enablement smoke test,
+          UX behavior contract, API compat matrix, enablement smoke test,
           integration contract shape verification (Provider↔Consumer + bridge)
-Phase 3:  Demo-Ready Verification — BLOCKS on failure
-          SC Verification Matrix: classify ALL SCs → cdp-auto / test-covered /
-          external-dep / manual. Coverage gate warns if < 50%.
-          + VERIFY_STEPS functional tests, visual fidelity (rebuild)
+Phase 3:  Demo-Ready — SC Verification Matrix (coverage gate if < 50%),
+          VERIFY_STEPS functional tests, visual fidelity (rebuild)
 Phase 3b: Bug Prevention — empty state smoke test, smoke launch criteria
 Phase 4:  Global Evolution Update (registries, sdd-state)
-
-Verify-time Change Recording: ALL source modifications during verify
-(agent-discovered or user-feedback) classified as Bug Fix / Implementation
-Gap / Design Change, with mandatory recording in sdd-state.md Notes.
-
-Verify Progress Checkpoint: Phase-by-phase status written to sdd-state.md,
-survives context compaction. Resumption Protocol re-reads verify-phases.md
-and continues from the first pending Phase.
 ```
 
 ### Post-Feature Processing
