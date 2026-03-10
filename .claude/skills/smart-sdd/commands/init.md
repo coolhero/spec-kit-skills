@@ -8,10 +8,76 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 
 ### Input Sources
 
-1. **PRD document** (`--prd path/to/prd.md`): Reads the PRD file and extracts project description and requirements as starting context for the interactive Q&A
-2. **Conversational input**: If no `--prd` is specified, gathers all information through interactive Q&A with the user
+1. **Idea string** (positional argument): `init "Build a task management app with Kanban boards"` — brief natural language description triggers Proposal Mode
+2. **PRD document** (`--prd path/to/prd.md`): Reads the PRD file and extracts project description and requirements. If the PRD is sufficiently detailed, triggers Proposal Mode
+3. **Conversational input**: If no idea string and no `--prd` is specified, gathers all information through interactive Q&A with the user (original flow)
 
-### Init Workflow
+### Mode Selection
+
+| Input | Mode | Description |
+|-------|------|-------------|
+| Idea string present | **Proposal Mode** | Signal Extraction → CI scoring → Proposal → auto-chain |
+| `--prd` with rich detail (CI ≥ 40%) | **Proposal Mode** | PRD signals → CI scoring → Proposal → auto-chain |
+| `--prd` with sparse detail (CI < 40%) | **Standard Mode** | Fall back to Phase 1 Q&A with PRD as seed |
+| No arguments | **Standard Mode** | Full interactive Phase 1 Q&A |
+
+### Proposal Mode
+
+> Activated when an idea string or rich PRD is provided. Streamlines greenfield setup by inferring project structure from user input.
+> Full CI specification: `reference/clarity-index.md`
+
+#### Proposal Step 1: Signal Extraction + CI Scoring
+
+1. **Parse input**: Extract keyword signals from the idea string or PRD text
+2. **S0 scan**: Read S0 Signal Keywords from all `domains/interfaces/*.md` and `domains/concerns/*.md` modules (see `domains/_resolver.md` § Greenfield Inference)
+3. **Match signals**: Map extracted keywords against S0 Primary/Secondary keywords
+4. **Score CI**: Calculate Clarity Index across 7 dimensions (see `reference/clarity-index.md` § 1)
+5. **Infer Domain Profile**: Build candidate Interfaces + Concerns from signal matches
+
+#### Proposal Step 2: Tier-Based Routing
+
+| CI Result | Action |
+|-----------|--------|
+| **Rich (≥ 70%)** | Skip to Proposal Step 3 — generate Proposal directly |
+| **Medium (40–69%)** | Ask 2–3 targeted questions for the lowest-confidence dimensions, re-score, then generate Proposal |
+| **Vague (15–39%)** | Ask a seed question to unlock the lowest-confidence dimension, re-score, route again |
+| **Empty (< 15%)** | Ask: "What are you building and why?" — re-score, route again |
+
+**Clarification questions**: Use the **S5 Elaboration Probes** from the inferred active modules. Pick probes from dimensions with confidence ≤ 1. Present as AskUserQuestion with concrete options (not open-ended). **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**Re-scoring**: After each clarification, re-calculate CI. If tier improves, route to the new tier's action. Maximum 3 clarification rounds — if CI is still < 40% after 3 rounds, generate Proposal anyway with explicit Open Questions section.
+
+#### Proposal Step 3: Generate Proposal (HARD STOP)
+
+Generate the Proposal document (format in `reference/clarity-index.md` § 7) containing:
+- **Overview**: 1–2 sentence summary
+- **Clarity Index**: Score breakdown per dimension
+- **Inferred Domain Profile**: Interfaces, Concerns, and rationale
+- **Proposed Features**: Extracted from signals + inferred from domain knowledge
+- **Quality Rules Activated**: S1/S7 rules from active modules
+- **Open Questions**: Any CI dimensions with confidence ≤ 1
+
+Display the Proposal and ask via AskUserQuestion:
+- "Approve and continue (Recommended)" — Proceed with Proposal
+- "Modify Proposal" — User adjusts specific sections
+- "Switch to standard init" — Fall back to full interactive Q&A
+
+**You MUST STOP and WAIT for the user's response. Do NOT proceed until the user explicitly approves.** **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+#### Proposal Step 4: Auto-Chain to Standard Flow
+
+After Proposal approval:
+1. **Pre-Phase**: Run Git Repository Setup (same as standard flow)
+2. **Skip Phase 1**: Project Definition is already captured in the Proposal
+3. **Phase 2**: Constitution Seed Definition — use Proposal's Domain Profile + tech stack to pre-fill recommended principles. Continue with standard Phase 2 flow (user selection + checkpoint)
+4. **Phase 3**: Artifact Generation — use Proposal data. Write CI fields to sdd-state.md (see `reference/state-schema.md`)
+5. **Phase 4**: Completion — if Proposal included Features, auto-chain to `add` with the Feature list pre-populated
+
+---
+
+### Standard Mode — Init Workflow
+
+> Activated when no idea string is provided and `--prd` is sparse or absent.
 
 #### Pre-Phase: Git Repository Setup
 

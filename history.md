@@ -5,6 +5,38 @@
 
 ---
 
+## [2026-03-11] Proposal Mode + Clarity Index (CI) — Streamlined Greenfield Entry
+
+Added Proposal Mode to `init` command and Clarity Index (CI) scoring system. Enhances the 3-axis domain composition with signal-based inference for greenfield projects.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Entry point for ideas | Extend `init` with positional idea string (not new command) | One entry point for all greenfield paths. `init "idea"` = Proposal Mode, `init --prd` = PRD mode, `init` = standard Q&A |
+| 2 | CI scoring model | 7 dimensions × confidence(0–3) × weights → percentage | Core Purpose and Key Capabilities weighted ×3 (most important for project viability), tech details weighted ×1 (can be inferred) |
+| 3 | CI tier thresholds | Rich ≥70%, Medium 40–69%, Vague 15–39%, Empty <15% | Rich means enough to generate a Proposal directly. Medium means 2–3 targeted questions suffice. Vague needs a seed question first |
+| 4 | S0 Signal Keywords | Optional section in domain modules (distributed vocabulary) | Each module declares its own activation signals. Adding a new module automatically extends the signal vocabulary |
+| 5 | 3-axis inference | Match signals → activate interfaces + concerns | "React dashboard with Stripe payments" → gui + http-api + external-sdk + auth (automatic) |
+| 6 | CI propagation into pipeline | Lower CI → more HARD STOPs and verification checks | Prevents shallow ideas from producing incomplete specs. Per-dimension low confidence triggers targeted checks |
+| 7 | CI never decreases | Monotonic improvement only | Each pipeline step can only refine understanding, never degrade it |
+| 8 | Clarification uses S5 probes | Reuse existing elaboration probes for CI questions | No new question content needed — domain modules already have the right questions |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `reference/clarity-index.md` | NEW — CI model, signal mapping, scoring rubric, Proposal format |
+| `domains/_schema.md` | Added S0 Signal Keywords section schema |
+| `domains/_resolver.md` | Added Greenfield Inference resolution path |
+| `domains/interfaces/*.md` (4 files) | Added S0 Signal Keywords |
+| `domains/concerns/*.md` (6 files) | Added S0 Signal Keywords |
+| `commands/init.md` | Added Proposal Mode (idea string → CI → Proposal → auto-chain) |
+| `reference/state-schema.md` | Added CI fields to sdd-state.md schema |
+| `commands/pipeline.md` | Added CI propagation check (Step 3a) |
+
+---
+
 ## [2026-03-10] G8-G10 — v4 Remaining Items: i18n, SDK Contract Gap, UI Interaction Audit
 
 Reviewed F006 v4 improvement document (16 items) against current codebase. Found 12/16 already addressed, 2 not addressed (#4 i18n, #7 UI interaction), 2 partially addressed (#6 SDK completeness, #16 SDK trust).

@@ -18,9 +18,18 @@
 
 ---
 
-## Section Schema (S1–S7)
+## Section Schema (S0–S7)
 
 Every module uses the same section numbering. Omit sections that don't apply to the module type.
+
+### S0. Signal Keywords (interfaces, concerns — optional)
+
+Keywords that indicate this module should be activated. Used by Clarity Index signal extraction during `init` Proposal Mode. See `reference/clarity-index.md` § 5.
+
+| Field | Description |
+|-------|-------------|
+| **Primary** | High-confidence keywords — strong indicator that this module is needed |
+| **Secondary** | Medium-confidence keywords — needs user confirmation |
 
 ### S1. SC Generation Rules (interfaces, concerns)
 
@@ -125,6 +134,7 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 ```
 
 **Merge rule**: Later modules extend earlier ones. For same-section content:
+- **S0 Signal Keywords**: Aggregated per-module (each module's keywords are independent; see `reference/clarity-index.md` § 5)
 - **S1 SC Rules**: Append (accumulate all rules)
 - **S2 Parity Dimensions**: Append (add module-specific dimensions)
 - **S3 Verify Steps**: Override only if module explicitly overrides (otherwise inherit _core)

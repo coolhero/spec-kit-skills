@@ -6,6 +6,15 @@
 
 ---
 
+## S0. Signal Keywords
+
+> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
+
+**Primary**: authentication, authorization, JWT, OAuth, session, login, signup, RBAC, role-based, permissions, access control, SSO, SAML, Passport.js, Auth0, Clerk, NextAuth
+**Secondary**: password reset, multi-factor, MFA, 2FA, token refresh, protected routes
+
+---
+
 ## S1. SC Generation Rules
 
 ### Required SC Patterns

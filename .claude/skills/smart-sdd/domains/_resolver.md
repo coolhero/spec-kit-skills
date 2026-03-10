@@ -89,3 +89,46 @@ When no Domain Profile exists yet (first-time setup):
 2. **User confirmation**: Present detected profile via AskUserQuestion
 3. **User can specify** `--profile` argument to override auto-detection
 4. Write Domain Profile to sdd-state.md
+
+---
+
+## Greenfield Inference (during init Proposal Mode)
+
+When `init` is invoked with an idea string or PRD (Proposal Mode), Domain Profile is inferred from user input before any sdd-state.md exists. This extends Profile Selection with signal-based inference.
+
+> Full specification: `reference/clarity-index.md`
+
+### Inference Steps
+
+```
+1. Extract signals from user input (idea string / PRD text)
+2. Read S0 Signal Keywords from ALL interface and concern modules
+3. Match signals against S0 keywords:
+   - Primary keyword match (≥ 1) → activate module
+   - Secondary keyword match only → flag for confirmation
+4. Build candidate Domain Profile:
+   - Interfaces: all activated interface modules
+   - Concerns: all activated concern modules
+   - Flagged: modules needing confirmation
+5. Calculate per-axis confidence (0–3)
+6. Write to Proposal (displayed for user approval at HARD STOP)
+```
+
+### Merge with Profile Selection
+
+- If user also passes `--profile`: profile takes precedence, inference results are used only to fill gaps
+- If no `--profile` and inference yields high confidence: present inferred profile directly
+- If inference yields low confidence: present as suggestions with "Other" option
+
+### S0 Aggregation
+
+During inference, the agent reads S0 sections from all modules to build the signal vocabulary:
+
+```
+domains/interfaces/gui.md       → S0.Primary: ["React", "Vue", ...]
+domains/interfaces/http-api.md  → S0.Primary: ["REST", "Express", ...]
+domains/concerns/auth.md        → S0.Primary: ["JWT", "OAuth", ...]
+...
+```
+
+This is a one-time scan at init start. Results are cached for the duration of the init command.

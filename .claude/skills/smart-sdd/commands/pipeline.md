@@ -270,6 +270,20 @@ If deferred Features exist (core scope only), list them:
 
 This step is informational only — no user confirmation required.
 
+**Step 3a — CI Propagation Check (greenfield only)**:
+
+Read `Clarity Index` from `sdd-state.md`. If CI is not `N/A`, apply verification intensity adjustments throughout the pipeline. See `reference/clarity-index.md` § 6 for the full propagation table.
+
+| CI at Pipeline Start | Impact |
+|---------------------|--------|
+| ≥ 70% | Standard pipeline — no additional checks |
+| 40–69% | specify: extra SC completeness check for low-CI dimensions. plan: Review emphasizes low-CI areas |
+| < 40% | specify: mandatory clarify sub-step. plan: HARD STOP for low-CI gap discussion. verify: Phase 3b adds empty-state checks |
+
+**Per-dimension low-confidence** (`CI Low-confidence` field): When specific dimensions have confidence ≤ 1, the agent applies targeted checks at the relevant pipeline step. For example, if "Target Users" is low-confidence, specify adds a "user role identification" prompt. See `reference/clarity-index.md` § 6 for the per-dimension table.
+
+This step is informational only — no user confirmation required.
+
 ### Step 3b — Foundation Verification Gate (first Feature only)
 
 > Runs ONCE before the first Feature enters the pipeline.

@@ -5,6 +5,15 @@
 
 ---
 
+## S0. Signal Keywords
+
+> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
+
+**Primary**: React, Vue, Svelte, Angular, Next.js, Nuxt, SvelteKit, Remix, Electron, Tauri, desktop app, web app, dashboard, frontend, UI, browser extension, Chrome extension, pages, components, widgets
+**Secondary**: responsive, dark mode, sidebar, layout, forms, drag-drop, modal, tooltip, toast, navigation, menu
+
+---
+
 ## S1. SC Generation Rules
 
 ### Required SC Patterns

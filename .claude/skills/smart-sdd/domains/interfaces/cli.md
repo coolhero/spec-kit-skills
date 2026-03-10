@@ -5,6 +5,15 @@
 
 ---
 
+## S0. Signal Keywords
+
+> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
+
+**Primary**: CLI, command line, terminal tool, shell script, flags, arguments, Commander, yargs, clap, Click, Cobra, subcommands
+**Secondary**: interactive prompt, progress bar, piping, stdin, stdout, REPL
+
+---
+
 ## S1. SC Generation Rules
 
 ### Required SC Patterns

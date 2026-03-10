@@ -19,6 +19,9 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 **Scenario**: [greenfield | rebuild | incremental | adoption]
 **Custom**: [path to domain-custom.md | "none"]
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
+**Clarity Index**: [XX% | "N/A" for rebuild/adoption]
+**CI Dimensions**: [Core:N, Cap:N, Type:N, Stack:N, Users:N, Scale:N, Constraints:N]
+**CI Low-confidence**: [comma-separated dimension names with score ≤ 1, or "none"]
 **Scope**: [core | full]
 **Active Tiers**: [T1 | T1,T2 | T1,T2,T3] ← core scope only; omit this line for full scope
 **Created**: [Initial creation date/time]
@@ -338,6 +341,10 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 10. Set initial Feature Status:
    - `core` → Features whose Tier is in Active Tiers → `pending` (blank), others → `deferred`
    - `full` → all Features → `pending` (no deferred Features, no Tier column in progress table)
+11. Set Clarity Index (greenfield only — from Proposal Mode):
+   - If init used Proposal Mode: write CI percentage, per-dimension scores, and low-confidence list
+   - If init used Standard Mode (full Q&A): set CI to `N/A` (user provided all info interactively)
+   - `rebuild` / `adoption`: always `N/A` (CI not applicable — project already exists)
 
 ---
 
@@ -469,3 +476,15 @@ Cross-Feature: [verification point count] checked, [issue count] issues
 - Append to Notes: `⚠️ LIMITED — [reason]` and/or `⚠️ DEMO-LIMITED — [reason]`
 - The overall verify status is `limited` (not `success`) — merge is allowed with a reminder
 - Example Notes: `Tests: 12/12 passed; Build: success; ⚠️ DEMO-LIMITED — No frontend; pure data layer library`
+
+### When Clarity Index Updates (greenfield only)
+
+> CI is set during init Proposal Mode and may improve as the pipeline progresses. CI never decreases.
+> Full specification: `reference/clarity-index.md` § 6.
+
+- After `init` Proposal Mode — initial scoring: write initial CI to header
+- After `init` Proposal Mode — after clarification: update CI with improved scores
+- After `add` — Features defined: update Key Capabilities dimension based on Feature count and specificity
+- After `specify` — spec.md generated: partial update (constraints/capabilities refined from spec details)
+- **CI never decreases**: Only dimensions that improve are updated; scores never drop
+- `rebuild` / `adoption` origins: CI remains `N/A` throughout (existing project, no inference needed)

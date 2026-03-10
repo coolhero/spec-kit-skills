@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 16:48 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-11 08:36 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -32,8 +32,10 @@ cd spec-kit-skills
 
 | Goal | Command |
 |------|---------|
+| New project from an idea | `/smart-sdd init "Build a task app with Kanban boards"` |
 | Rebuild existing code | `/reverse-spec ./path/to/source` |
-| New project | `/smart-sdd init` → `/smart-sdd add` |
+| New project (full Q&A) | `/smart-sdd init` → `/smart-sdd add` |
+| New project from PRD | `/smart-sdd init --prd design.md` |
 | Add Feature to existing project | `/smart-sdd add` |
 | Adopt SDD (keep existing code) | `/reverse-spec --adopt` → `/smart-sdd adopt` |
 | Check spec-kit compatibility | `/speckit-diff` |
@@ -102,7 +104,12 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 ## User Journeys
 
 ```
-── New Project ───────────────────────────────────────────────────
+── From an Idea (Proposal Mode) ──────────────────────────────────
+/smart-sdd init "Build a Chrome extension that summarizes web pages using AI"
+→ Signal Extraction → Clarity Index scoring → Proposal (1 approval)
+→ auto-chains to constitution + add + pipeline
+
+── New Project (Standard) ────────────────────────────────────────
 /smart-sdd init  →  /smart-sdd add  →  /smart-sdd pipeline
 (project setup)     (define Features)   (implement)
 
@@ -339,8 +346,9 @@ After running `/reverse-spec`, you can use plain spec-kit with the generated `sp
 
 ```bash
 # Greenfield
-/smart-sdd init                          # Project setup
-/smart-sdd init --prd path/to/prd.md     # PRD-based setup
+/smart-sdd init "Build a task app with Kanban boards"  # Proposal Mode (from idea)
+/smart-sdd init --prd path/to/prd.md     # PRD-based setup (Proposal Mode if PRD is rich)
+/smart-sdd init                          # Standard interactive setup
 
 # Add Features (universal)
 /smart-sdd add                           # Interactive definition
@@ -484,7 +492,23 @@ Shell scripts in `.claude/skills/smart-sdd/scripts/` let you inspect project pro
 
 ## End-to-End Workflow Examples
 
-### Scenario 1: Greenfield — New task management app
+### Scenario 1: Greenfield from an Idea (Proposal Mode)
+
+```
+1. /smart-sdd init "Build a task management app with Kanban boards and team workspaces"
+   +-- Signal Extraction: "task management" → Core Purpose, "Kanban boards" → gui,
+   |   "team workspaces" → auth + async-state
+   +-- Clarity Index: 58% (Medium tier) → ask 2 targeted questions
+   +-- Proposal: 5 Features, Domain Profile [gui, http-api] + [auth, async-state]
+   +-- User approves → auto-chain to constitution + add + pipeline
+
+2. /smart-sdd pipeline (auto-chained)
+   +-- Phase 0: Constitution finalized (principles inferred from Proposal)
+   +-- CI propagation: "Target Users" low-confidence → specify adds user role prompt
+   +-- F001-auth → F002-workspace → F003-task → F004-board → F005-notification
+```
+
+### Scenario 1b: Greenfield — Standard Q&A
 
 ```
 1. /smart-sdd init
@@ -663,4 +687,11 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 
 New modules compose freely with existing ones — no duplication, no unused rules. See `domains/_schema.md` for the module schema and `domains/_resolver.md` for the full loading protocol.
 
+#### Signal Keywords and Proposal Mode
+
+Each domain module declares **S0 Signal Keywords** — terms that indicate the module should be activated. When you start a project with an idea string (`init "Build a Chrome extension for..."`), the agent scans all S0 keywords to automatically infer your Domain Profile. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers `external-sdk` — all without manual configuration.
+
+This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). The CI drives agent behavior: high CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes.
+
+CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
 

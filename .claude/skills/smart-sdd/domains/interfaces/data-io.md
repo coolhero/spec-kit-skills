@@ -5,6 +5,15 @@
 
 ---
 
+## S0. Signal Keywords
+
+> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
+
+**Primary**: ETL, data pipeline, batch processing, stream processing, data transformation, Apache Kafka, Apache Spark, Airflow, Luigi, Prefect, dbt
+**Secondary**: CSV, Parquet, data lake, data warehouse, cron job, ingestion, aggregation
+
+---
+
 ## S1. SC Generation Rules
 
 ### Required SC Patterns

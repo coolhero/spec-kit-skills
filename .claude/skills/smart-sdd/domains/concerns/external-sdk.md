@@ -6,6 +6,15 @@
 
 ---
 
+## S0. Signal Keywords
+
+> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
+
+**Primary**: OpenAI, Anthropic, Stripe, AWS SDK, Google Cloud, Firebase, Twilio, SendGrid, third-party API, AI SDK, Vercel AI SDK, LangChain, payment SDK, cloud SDK
+**Secondary**: API key, SDK version, rate limit, quota, webhook callback, SDK wrapper
+
+---
+
 ## S1. SC Generation Rules
 
 ### Required SC Patterns
