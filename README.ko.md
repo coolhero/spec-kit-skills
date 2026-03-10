@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:35 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:59 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -406,6 +406,10 @@ Phase 3:  Demo-Ready 검증 — 실패 시 차단
           + VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축)
 Phase 3b: 버그 예방 — 빈 상태 스모크 테스트, 스모크 런치 기준
 Phase 4:  Global Evolution 갱신 (레지스트리, sdd-state)
+
+Verify Progress Checkpoint: Phase별 진행 상태를 sdd-state.md에 기록,
+컨텍스트 압축에서 생존. Resumption Protocol이 verify-phases.md를
+다시 읽고 첫 번째 대기 Phase부터 이어서 실행.
 ```
 
 ### Feature 완료 후 처리

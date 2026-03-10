@@ -156,6 +156,33 @@ Foundation Verified: [ISO date] | [PASS/WARN/FAIL] | [details summary]
 | specify | completed | 2024-01-18T09:00:00 | 2024-01-18T10:00:00 | 8 FRs, 12 SCs |
 | plan | in_progress | 2024-01-18T10:30:00 | | |
 
+### Verify Progress
+
+> Written by verify at start, updated after each Phase. Survives context compaction.
+> Deleted when verify completes (replaced by final result in Notes).
+
+Format (in Feature Detail Log, below the Step table):
+
+```
+#### Verify Progress
+| Phase | Status | Result |
+|-------|--------|--------|
+| Phase 0 | ✅ complete | App started, CDP active |
+| Phase 1 | ✅ complete | Tests 228/228, Build ✅, Lint ✅ |
+| Phase 2 | ✅ complete | SBI 30/30, Cross-feature ✅ |
+| Phase 3 | ⏳ pending | — |
+| Phase 3b | ⏳ pending | — |
+| Phase 4 | ⏳ pending | — |
+
+⚠️ RESUME FROM: Phase 3 — Read commands/verify-phases.md § Phase 3
+```
+
+**Status values**: `⏳ pending`, `🔄 in_progress`, `✅ complete`, `❌ failed`, `⏭️ skipped`
+
+**Lifecycle**: Created at verify start → Updated per Phase → Deleted at verify completion (success/failure recorded in Notes)
+
+**Purpose**: When context compaction occurs during verify, the agent loses in-memory progress tracking. On resumption, the agent reads sdd-state.md (which is always read at session start), finds the Verify Progress table, and resumes from the first pending Phase without re-running completed Phases.
+
 ---
 
 ## Feature Mapping

@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:35 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 08:59 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -409,6 +409,10 @@ Phase 3:  Demo-Ready Verification — BLOCKS on failure
           + VERIFY_STEPS functional tests, visual fidelity (rebuild)
 Phase 3b: Bug Prevention — empty state smoke test, smoke launch criteria
 Phase 4:  Global Evolution Update (registries, sdd-state)
+
+Verify Progress Checkpoint: Phase-by-phase status written to sdd-state.md,
+survives context compaction. Resumption Protocol re-reads verify-phases.md
+and continues from the first pending Phase.
 ```
 
 ### Post-Feature Processing

@@ -48,6 +48,46 @@ When verify discovers a bug (or the user provides feedback during Review), class
 
 ---
 
+### Verify Initialization — Compaction-Safe Checkpoint
+
+Before any Phase execution, write the Verify Progress table to sdd-state.md:
+
+1. Read sdd-state.md → Feature Detail Log for this Feature
+2. **Check for existing Verify Progress**:
+   - If exists with pending phases → **Resumption Protocol** (see below)
+   - If not exists → write fresh Verify Progress table with all phases as `⏳ pending`
+3. Set `⚠️ RESUME FROM: Phase 0` line
+
+**After each Phase completes**: Update the Phase's Status to `✅ complete` and write Result summary.
+Update `⚠️ RESUME FROM` to point to the next pending Phase.
+
+**On verify completion** (success or failure):
+- Delete the `#### Verify Progress` section from sdd-state.md
+- Write final result to Notes column as before
+
+---
+
+### Resumption Protocol — After Context Compaction
+
+If sdd-state.md contains `#### Verify Progress` with pending phases:
+
+1. **Re-read this file** (commands/verify-phases.md) — MANDATORY
+2. **Re-read reference/injection/verify.md** — for Checkpoint/Review display format
+3. **Re-read reference/lessons-learned.md** — for known failure patterns
+4. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
+5. **Re-establish prerequisites**:
+   - If Phase 3 pending and MCP needed → re-run Phase 0 (app start + CDP check)
+   - If Phase 1 already complete → do NOT re-run tests/build/lint
+6. **Continue from resume point** through remaining phases
+7. **Display resume notice**:
+   ```
+   🔄 Verify resumed from Phase [N] (context compaction detected)
+   Previously completed: Phase 0 ✅, Phase 1 ✅, Phase 2 ✅
+   Continuing: Phase 3, Phase 3b, Phase 4
+   ```
+
+---
+
 ### Phase 0: Runtime Environment Readiness (UI Features only)
 
 > Run BEFORE Pre-flight MCP check. Ensures the app can be reached by Playwright.

@@ -31,6 +31,8 @@
 
 ## Checkpoint Display Content
 
+**Before displaying Checkpoint**: Read sdd-state.md for this Feature's Verify Progress table. If a Verify Progress section exists with pending phases that should have been completed (i.e., an earlier Phase shows `⏳ pending` but later Phases show `✅ complete`), STOP and execute the skipped Phase first. If the Verify Progress shows a `⚠️ RESUME FROM` line, follow the Resumption Protocol in `commands/verify-phases.md` before continuing.
+
 Show the **actual verification checklist** so the user can see what will be checked:
 
 ```

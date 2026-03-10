@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-10] G5 — Verify Compaction-Safe Checkpoint + Lessons Learned
+
+F006 pipeline: verify lost all Phase references after context compaction, causing Playwright CDP UI verification (Phases 3/3b) to be entirely skipped. Root cause: all 66 countermeasures assume "agent reads skill files" — context compaction breaks this premise.
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Verify Progress Checkpoint in sdd-state.md | Phase-by-phase status table (`⏳ pending` / `✅ complete` / etc.) with `⚠️ RESUME FROM` pointer | sdd-state.md is always read at session start; survives compaction unlike in-memory progress |
+| 2 | Resumption Protocol | Re-read verify-phases.md + injection/verify.md, continue from first pending Phase | Restores the procedural context that compaction destroyed |
+| 3 | Lessons Learned file | `reference/lessons-learned.md` documenting G1~G5 chronic problems + L1~L8 specific past lessons | Persistent reference for known failure patterns; read at verify start |
+| 4 | Lifecycle: create → update → delete | Verify Progress created at start, updated per Phase, deleted on completion | No stale state between Features; final result recorded in Notes as before |
+
+**Files**: state-schema.md, verify-phases.md, injection/verify.md, lessons-learned.md (new), README.md, README.ko.md, history.md
+
+---
+
 ## [2026-03-10] spec-kit Standalone Prompt — speckit-prompt.md
 
 reverse-spec generates `speckit-prompt.md` for users who run spec-kit without smart-sdd. Provides the manual equivalent of smart-sdd's cross-Feature context injection.
