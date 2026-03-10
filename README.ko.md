@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 08:59 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-10 10:09 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -171,11 +171,11 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 |--------|----------|-----------|
 | `constitution` | `constitution-seed.md` | 전체 내용 (아키텍처 원칙, Best Practices, Global Evolution 운영 원칙) |
 | `specify` | `pre-context.md` + `business-logic-map.md` | 기능 요약, FR/SC 초안, 비즈니스 규칙, 엣지 케이스, 소스 참조 |
-| `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | 의존성 정보, 엔티티/API 스키마 초안 (또는 선행 Feature 확정 스키마) |
+| `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | 의존성 정보, 엔티티/API 스키마 초안 (또는 선행 Feature 확정 스키마), 통합 계약 (cross-Feature 데이터 형태 + 브리지) |
 | `tasks` | `plan.md` | plan 기반 자동 실행 |
 | `analyze` | `spec.md` + `plan.md` + `tasks.md` | 교차 산출물 일관성 분석 |
 | `implement` | `tasks.md` + `plan.md` + `pre-context.md` | 인터랙션 체인, UX 행동 계약, API 호환성 매트릭스, 환경 변수 검증, 네이밍 리매핑, 런타임 검증 + 수정 루프 |
-| `verify` | `pre-context.md` + registries + `plan.md` | 교차 Feature 엔티티/API 일관성, 인터랙션 체인 완전성, UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트, 영향 범위 |
+| `verify` | `pre-context.md` + registries + `plan.md` | 교차 Feature 엔티티/API 일관성, 인터랙션 체인 완전성, UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트, 통합 계약 형태 검증, SC 검증 매트릭스, 영향 범위 |
 
 **선행 Feature 결과 우선 적용**: 의존하는 선행 Feature의 plan이 완료되었으면, 레지스트리 초안 대신 확정된 `data-model.md`와 `contracts/`를 우선 참조합니다.
 
@@ -401,11 +401,18 @@ Phase 1~N: Feature별 (Release Group 순서):
 Phase 1:  실행 검증 (테스트, 빌드, 린트) — 실패 시 차단
           에코시스템별 린트 도구 감지 (미설치 시 자동 설치 제안)
 Phase 2:  교차 Feature 일관성 — 엔티티/API 호환, 인터랙션 체인,
-          UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트
+          UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트,
+          통합 계약 형태 검증 (Provider↔Consumer 형태 + 브리지)
 Phase 3:  Demo-Ready 검증 — 실패 시 차단
+          SC 검증 매트릭스: 전체 SC를 cdp-auto / test-covered /
+          external-dep / manual로 분류. 커버리지 < 50% 시 경고.
           + VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축)
 Phase 3b: 버그 예방 — 빈 상태 스모크 테스트, 스모크 런치 기준
 Phase 4:  Global Evolution 갱신 (레지스트리, sdd-state)
+
+Verify-time Change Recording: verify 중 모든 소스 수정(에이전트 발견
+또는 유저 피드백)을 Bug Fix / Implementation Gap / Design Change로
+분류, sdd-state.md Notes에 의무 기록.
 
 Verify Progress Checkpoint: Phase별 진행 상태를 sdd-state.md에 기록,
 컨텍스트 압축에서 생존. Resumption Protocol이 verify-phases.md를
