@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-coolhero%2Fspec--kit--skills-blue?logo=github)](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 10:12 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-10 10:21 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -166,19 +166,36 @@ All spec-kit command executions follow this 4-step protocol:
 | **Execute+Review** | Executes the corresponding spec-kit command and immediately presents the generated artifacts for review. **HARD STOP** — same rules as Checkpoint |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress in `sdd-state.md` |
 
-### Per-Command Context Injection
+### What Each Command Knows About Your Project
 
-| Command | Injection Source | Injected Content |
-|---------|-----------------|-----------------|
-| `constitution` | `constitution-seed.md` | Full content (architecture principles, Best Practices, Global Evolution operational principles) |
-| `specify` | `pre-context.md` + `business-logic-map.md` | Feature summary, FR/SC drafts, business rules, edge cases, source reference |
-| `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` | Dependency info, entity/API schema drafts (or finalized from preceding Features), integration contracts (cross-Feature data shape + bridge) |
-| `tasks` | `plan.md` | Automatic execution based on plan |
-| `analyze` | `spec.md` + `plan.md` + `tasks.md` | Cross-artifact consistency analysis |
-| `implement` | `tasks.md` + `plan.md` + `pre-context.md` | Interaction chains, UX behavior contract, API compatibility matrix, env var verification, naming remapping, runtime verification + fix loop |
-| `verify` | `pre-context.md` + registries + `plan.md` | Cross-Feature entity/API consistency, interaction chain completeness, UX behavior contract, API compatibility matrix, enablement smoke test, integration contract shape verification, SC verification matrix, impact scope |
+Each spec-kit command automatically receives relevant project context — you don't have to manually copy-paste anything between Features.
+
+| Command | What it automatically knows | Why it matters |
+|---------|---------------------------|---------------|
+| `constitution` | Architecture principles, Best Practices from analysis | Project-wide rules are consistent from the start |
+| `specify` | Feature summary, business rules, edge cases, source reference | Spec drafts are grounded in actual behavior, not guesses |
+| `plan` | Dependencies, entity/API schemas from other Features, integration contracts | Plans reference real data shapes, not assumptions about other Features |
+| `tasks` | The approved plan | Tasks are auto-generated from the plan |
+| `analyze` | Spec + plan + tasks cross-checked | Catches spec↔plan↔task inconsistencies before implementation |
+| `implement` | Tasks, interaction chains, UX behavior contract, API compatibility | Implementation follows verified contracts, runtime errors are caught immediately |
+| `verify` | All cross-Feature contracts, SC verification matrix, integration contracts | Nothing ships without checking it actually works with the rest of the project |
 
 **Preceding Feature results take priority**: If a dependent Feature's plan is already complete, the finalized `data-model.md` and `contracts/` are referenced instead of registry drafts.
+
+<details>
+<summary>Technical detail — injection sources per command</summary>
+
+| Command | Injection Source |
+|---------|-----------------|
+| `constitution` | `constitution-seed.md` |
+| `specify` | `pre-context.md` + `business-logic-map.md` |
+| `plan` | `pre-context.md` + `entity-registry.md` + `api-registry.md` |
+| `tasks` | `plan.md` |
+| `analyze` | `spec.md` + `plan.md` + `tasks.md` |
+| `implement` | `tasks.md` + `plan.md` + `pre-context.md` |
+| `verify` | `pre-context.md` + registries + `plan.md` |
+
+</details>
 
 ## /reverse-spec — Detailed Workflow
 
@@ -219,6 +236,13 @@ Run the original application and explore it interactively via Playwright MCP bef
 
 ### Phase 2 — Deep Analysis
 
+Automatically extracts data models, API endpoints, business logic, inter-module dependencies, Source Behavior Inventory, and UI Component Features from your codebase.
+
+**Supported frameworks** (auto-detected): Django, FastAPI/SQLAlchemy, Express/Fastify, Spring, Next.js/Nuxt, Rails, Go (Gin/Echo), TypeORM/Prisma, JPA/Hibernate, Mongoose, and more.
+
+<details>
+<summary>Framework-specific scan targets</summary>
+
 **Data Model Extraction**:
 
 | Technology | Scan Targets |
@@ -243,7 +267,7 @@ Run the original application and explore it interactively via Playwright MCP bef
 | Rails | `config/routes.rb`, controllers |
 | Go (net/http, Gin, Echo) | Router registration, handler functions |
 
-Also extracts: Business logic, Inter-module dependencies, Source Behavior Inventory, UI Component Features
+</details>
 
 ### Phase 3 — Feature Classification & Importance Analysis
 
@@ -382,7 +406,7 @@ Phase 6: Finalization         — Create artifacts, update roadmap/sdd-state
 
 ```
 Phase 0: Constitution Finalization
-Foundation Gate (first Feature only):
+Foundation Gate (first Feature only — validates project infrastructure once):
    - Build check (BLOCKING), Toolchain Pre-flight (lint/test availability),
      CSS theme, state management, IPC bridge, layout verification
    - Results cached in sdd-state.md — skipped for subsequent Features
@@ -422,15 +446,17 @@ Phase 3b: Bug Prevention — empty state smoke test, smoke launch criteria
 Phase 4:  Global Evolution Update (registries, sdd-state)
 ```
 
-### Post-Feature Processing
+### What Happens Automatically Between Steps
 
-| Timing | Processing |
-|--------|-----------|
-| After plan | Update entity-registry.md and api-registry.md |
-| After implement | Runtime Error Zero Gate — BLOCKS if console errors detected |
-| After implement | Impact analysis on subsequent Feature pre-contexts |
-| After verify | Record results in sdd-state.md, update roadmap.md status |
-| After verify | Merge Feature branch to main (HARD STOP) |
+After each pipeline step, smart-sdd performs safety checks and keeps global state in sync — you don't need to manually update anything.
+
+| When | What happens | Why |
+|------|-------------|-----|
+| After plan | Entity and API registries updated | Next Feature sees this Feature's data models |
+| After implement | Console error check — **BLOCKS** if errors found | Runtime bugs caught before verify |
+| After implement | Downstream Feature pre-contexts re-evaluated | Upcoming Features stay aligned with what actually got built |
+| After verify | Results recorded in sdd-state.md + roadmap.md | Progress dashboard stays current |
+| After verify | Merge prompt (**HARD STOP**) | You decide when code goes to main |
 
 ### Source Behavior Coverage (SBI)
 
@@ -450,17 +476,17 @@ F002-product    | T1   |   ✅    |  🔄  |       |         |           |      
 F003-order      | T2   |         |      |       |         |           |        |      | 🔒 deferred
 ```
 
-### Aggregation Scripts
+### Checking Project Status
 
-Located in `.claude/skills/smart-sdd/scripts/`. Designed for use within the smart-sdd pipeline context.
+Shell scripts in `.claude/skills/smart-sdd/scripts/` let you inspect project progress at any time:
 
-| Script | Purpose |
-|--------|---------|
-| `context-summary.sh` | Feature/Entity/API/DemoGroup summary |
-| `sbi-coverage.sh` | SBI coverage dashboard |
-| `demo-status.sh` | Demo Group progress |
-| `pipeline-status.sh` | Pipeline progress overview |
-| `validate.sh` | Cross-file consistency check |
+| What you want to know | Script |
+|----------------------|--------|
+| Overall pipeline progress | `pipeline-status.sh` |
+| Feature / Entity / API summary | `context-summary.sh` |
+| How much original behavior is covered | `sbi-coverage.sh` |
+| Demo group readiness | `demo-status.sh` |
+| Cross-file consistency | `validate.sh` |
 
 ## End-to-End Workflow Examples
 
@@ -553,7 +579,8 @@ ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-s
 | spec-kit Feature artifacts | `specs/{NNN-feature}/` |
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd state file | `specs/reverse-spec/sdd-state.md` |
-| Decision history | `specs/history.md` |
+| Decision history | `history.md` |
+| Failure patterns & countermeasures | `lessons-learned.md` |
 
 ### Feature Naming Convention
 
@@ -565,8 +592,9 @@ ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-s
 ### Artifact Structure
 
 ```
+history.md
+lessons-learned.md
 specs/
-├── history.md
 └── reverse-spec/
     ├── roadmap.md
     ├── constitution-seed.md
@@ -605,6 +633,11 @@ specs/
 
 ### Using reverse-spec Artifacts without smart-sdd
 
+See [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd) for the recommended `speckit-prompt.md` approach. For manual context injection, use the per-command table below:
+
+<details>
+<summary>Manual paste reference per command</summary>
+
 | Command | What to Paste Before Invoking |
 |---------|------------------------------|
 | `/speckit-constitution` | Full `constitution-seed.md` |
@@ -612,6 +645,8 @@ specs/
 | `/speckit-plan` | `pre-context.md` "For /speckit.plan" + registries |
 | `/speckit-tasks`, `/speckit-implement` | Check `pre-context.md` for Static Resources and Environment Variables |
 | `/speckit-analyze` | `pre-context.md` "For /speckit.analyze" + registries |
+
+</details>
 
 ### Domain Profiles
 

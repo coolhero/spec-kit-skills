@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-10] README User-Facing Meaning Review
+
+README was accurate but described mechanisms from an implementation perspective ("injection source: pre-context.md + entity-registry.md") rather than from a user perspective ("what does each command know about my project?"). Full review applied the user-facing meaning principle across 6 sections.
+
+| # | Section | Change |
+|---|---------|--------|
+| 1 | Per-Command Context Injection | Reframed as "What Each Command Knows About Your Project" — user-facing table + technical detail in collapsible |
+| 2 | Phase 2 Extraction Tables | Summarized as supported framework list + detail in collapsible |
+| 3 | Foundation Gate | Added "validates project infrastructure once" explanation |
+| 4 | Post-Feature Processing | Reframed as "What Happens Automatically Between Steps" with "Why" column |
+| 5 | Aggregation Scripts | Reframed as "Checking Project Status" — user question → script mapping |
+| 6 | "Using Artifacts without smart-sdd" | Consolidated duplicate: added speckit-prompt.md reference + collapsible manual table |
+| 7 | Path Convention + Artifact Structure | Fixed `specs/history.md` → `history.md`, added `lessons-learned.md` |
+
+**Files**: README.md, README.ko.md, history.md
+
+---
+
 ## [2026-03-10] G7 — Integration Contracts: Cross-Feature Data Shape Verification
 
 F005↔F006 integration gap: F003's ParameterBuilder expected `assistant.mcpMode/mcpServers`, but F006's useMCPStore stored data differently. No bridge was designed (plan), built (implement), or verified (verify). Root cause: pipeline treats Features as isolated units with no data shape contract at boundaries.
