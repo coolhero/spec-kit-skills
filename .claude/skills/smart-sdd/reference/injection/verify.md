@@ -54,6 +54,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] Enablement interfaces: [list each "Enables →" entry to verify]
   - [ ] Blocked-by prerequisites: [list each "Blocked by ←" status]
   - [ ] API compatibility matrix: [list each provider to verify — auth, endpoints, headers] (if plan.md has API Compat Matrix)
+  - [ ] Integration contracts: [list each cross-Feature boundary — interface, shapes, bridge] (if plan.md has Integration Contracts)
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
@@ -129,6 +130,8 @@ After verification execution completes:
     [⚠️ F001-shell not verified yet (if any)]
   - API compatibility matrix: [N]/[N] providers verified
     [⚠️ Provider X: auth method mismatch (if any)]
+  - Integration contracts: [N]/[N] boundaries verified
+    [⚠️ F003-chat-core: bridge adapter NOT FOUND — useMCPStore → assistant format (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
 [Only if Demo-Ready Delivery is in the constitution]

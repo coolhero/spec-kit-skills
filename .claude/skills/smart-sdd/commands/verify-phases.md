@@ -386,6 +386,44 @@ If `plan.md` contains an `## API Compatibility Matrix` section with 2+ providers
 3. Provider-specific mismatch → ⚠️ **HIGH warning** — will cause runtime auth/parsing failures
 4. **Skip if**: No API Compatibility Matrix in plan.md, or < 2 providers
 
+**Step 6 — Integration Contract Data Shape Verification** (if plan.md has Integration Contracts):
+
+> **Skip if**: No `## Integration Contracts` section in plan.md, or no Functional Enablement Chain entries.
+
+Verifies that the data shape contracts defined in plan.md are actually implemented with compatible types and that required bridges exist.
+
+1. Read `SPEC_PATH/[NNN-feature]/plan.md` → `## Integration Contracts` section
+2. For each row in the contracts table:
+   a. **Interface existence check**: Grep for the Interface (function/API/store method) in the Feature's code
+      - If not found → ❌ "Integration interface not implemented"
+   b. **Shape compatibility check**: Read the actual type/interface definition from source code
+      - Compare the implemented return type/parameter type against the documented Provider/Consumer Shape
+      - Check field names, nesting structure, and type compatibility
+      - If shapes are structurally incompatible → ❌ "Shape mismatch"
+   c. **Bridge implementation check** (if Bridge column specifies an adapter/transform):
+      - Grep for the bridge function/adapter in the Feature's code
+      - If Bridge is specified but code not found → ❌ "Bridge adapter NOT FOUND"
+      - If Bridge is `—` (shapes directly compatible): skip bridge check
+3. Report:
+   ```
+   🔗 Integration Contract Verification:
+     Provides → F005-chat: getActiveTools()
+       Interface: ✅ found in src/stores/mcp-store.ts
+       Shape: ✅ returns Tool[] matching consumer expectation
+     Consumes ← F003-chat-core: ParameterBuilder.build(assistant)
+       Interface: ✅ found in src/services/parameter-builder.ts
+       Consumer expects: {mcpMode, mcpServers}
+       Bridge: ❌ mapMCPStoreToAssistant() NOT FOUND
+       ⚠️ No adapter transforms useMCPStore state → assistant.mcpServers format
+   ```
+4. **Result classification**:
+   - Missing interface → ⚠️ **HIGH warning** (enablement interface not implemented)
+   - Shape mismatch → ⚠️ **HIGH warning** (will cause runtime TypeError or undefined access)
+   - Missing bridge → ⚠️ **HIGH warning** (data will not flow between Features)
+   - All checks pass → ✅ Integration contracts verified
+5. **If Integration Contracts section missing in plan.md** but Feature has Enablement Chain:
+   Display: `⚠️ Integration Contracts not defined in plan.md — cross-Feature data shape compatibility not verified. Consider running /smart-sdd plan [FID] to add contracts.`
+
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
 
 > **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.

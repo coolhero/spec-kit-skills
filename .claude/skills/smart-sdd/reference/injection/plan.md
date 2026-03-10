@@ -177,6 +177,45 @@ Without async-flow rows, the agent implements the handler but may skip: auto-scr
 4. **verify** → Tier 2 (State Change) and Tier 3 (Side Effect) verification uses Verify Method column
 5. **demo** → Coverage header includes `verify-state`/`verify-effect` from Verify Method
 
+## Integration Contract Verification (Features with cross-Feature dependencies)
+
+> **Skip for**: Features with no Functional Enablement Chain entries (no "Enables →" or "Blocked by ←" in pre-context).
+> Detected from: pre-context.md "Functional Enablement Chain" section.
+
+After `speckit-plan` completes, if the Feature has Functional Enablement Chain entries, check plan.md for an `## Integration Contracts` section. This section defines the **data shape contract** at each cross-Feature boundary — what one Feature provides and what the other expects.
+
+**Required format** (one row per integration point):
+
+```markdown
+## Integration Contracts
+
+| Direction | Target Feature | Interface | Provider Shape | Consumer Shape | Bridge |
+|-----------|---------------|-----------|---------------|---------------|--------|
+| Provides → | F005-chat | getActiveTools() | `Tool[]` `{name, description, inputSchema}` | — | — |
+| Consumes ← | F003-chat-core | ParameterBuilder.build(assistant) | — | `{mcpMode: string, mcpServers: MCPServer[]}` | adapter: mapMCPStoreToAssistant() |
+```
+
+**Column definitions**:
+- **Direction**: `Provides →` (this Feature outputs) or `Consumes ←` (this Feature inputs)
+- **Target Feature**: The other Feature at this integration boundary
+- **Interface**: The actual function, API, store method, or component prop that crosses the boundary
+- **Provider Shape**: The data structure the providing Feature outputs (type signature or field list)
+- **Consumer Shape**: The data structure the consuming Feature expects as input
+- **Bridge**: If Provider Shape ≠ Consumer Shape, the adapter/transform needed. `—` if shapes are directly compatible
+
+**Why this matters**: Without explicit shape contracts, integration mismatches (e.g., `mcpMode` vs `mcp.mode`, `Tool[]` vs `{tools: Tool[]}`) slip through spec/plan/tasks/implement and are only discovered at runtime. This section makes the contract explicit so implement can build the bridge and verify can check it.
+
+**If `## Integration Contracts` is missing from plan.md** (Feature with Enablement Chain):
+- Display in Review: `⚠️ Integration Contracts section missing — cross-Feature data shape contracts not defined.`
+- Display: `Risk: Shape mismatches between Features (e.g., different field names, nested vs flat) will only be caught at runtime.`
+- This is a **warning in Review** (not blocking), but strongly recommended before approval.
+
+**Downstream flow**:
+1. **plan.md** → Integration Contracts define shape expectations and required bridges
+2. **tasks.md** → Bridge adapter tasks generated when Provider Shape ≠ Consumer Shape
+3. **implement** → Bridge adapters implemented alongside Feature code
+4. **verify** → Phase 2 Step 4b validates shape compatibility and bridge existence
+
 ## API Compatibility Matrix Verification (Features with external API integration)
 
 > **Skip for**: Features with no external API calls, or single-provider integrations.
@@ -269,6 +308,13 @@ After `speckit-plan` completes:
  If section is missing from plan.md for an applicable Feature, display:
  "⚠️ UX Behavior Contract missing — temporal UX expectations not documented."
  If sync-only UI Feature or non-UI Feature: omit this section entirely.]
+
+── Integration Contracts (cross-Feature deps only) ─
+[If Feature has Functional Enablement Chain: show the contracts from plan.md.
+ Each row = one integration boundary with Provider/Consumer shapes and bridge.
+ If section is missing from plan.md for a Feature with Enablement Chain, display:
+ "⚠️ Integration Contracts missing — cross-Feature data shape contracts not defined."
+ If no Enablement Chain entries: omit this section entirely.]
 
 ── API Compatibility Matrix (multi-provider only) ─
 [If 2+ external API providers detected: show the matrix from plan.md.
