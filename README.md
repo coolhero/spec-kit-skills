@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 17:14 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 17:42 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -98,6 +98,71 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 |-------|---------|
 | `/speckit-diff` | Compares spec-kit versions, produces compatibility verdict + impact report |
 | `/case-study` | Generates metrics + qualitative observations report from execution artifacts |
+
+---
+
+## Architecture
+
+spec-kit-skills is a **harness for agentic coding** — a structural layer that constrains, guides, and verifies what an AI agent produces. Rather than hoping the agent writes correct code, the harness defines contracts the agent must satisfy, injects cross-Feature context the agent would otherwise lack, and verifies results against those contracts before anything merges. The architecture below shows how this harness is designed for extensibility across three independent dimensions.
+
+### 3-Axis Domain Composition
+
+Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
+
+```
+Interface (what the app exposes)     Concern (cross-cutting patterns)     Scenario (why we're building)
+├── http-api                         ├── async-state                      ├── greenfield
+├── gui                              ├── ipc                              ├── rebuild
+├── cli                              ├── external-sdk                     ├── incremental
+└── data-io                          ├── i18n                             └── adoption
+                                     ├── realtime
+                                     └── auth
+```
+
+A **Domain Profile** = selected Interfaces + selected Concerns + Scenario. For example: `desktop-app = [gui] + [async-state, ipc] + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, and a project without IPC never gets IPC boundary checks.
+
+**Module loading order**: `_core.md` (always) → each active Interface → each active Concern → Scenario → user custom (`domain-custom.md`).
+
+### Rebuild Configuration
+
+When rebuilding existing software (stack migration, framework upgrade, platform migration, etc.), reverse-spec Phase 0 collects four configuration parameters that influence pipeline behavior throughout the harness:
+
+| Parameter | What it controls | Example |
+|-----------|-----------------|---------|
+| Change scope | Elaboration probes, bug prevention rules | `framework` (Express → Fastify) |
+| Preservation level | SC depth requirements, verification strictness | `equivalent` (same data, format may differ) |
+| Source available | Side-by-side comparison strategy | `running` (original app accessible) |
+| Migration strategy | Regression gate scope, merge policy | `incremental` (Feature-by-Feature) |
+
+These are stored in `sdd-state.md` and automatically read by relevant pipeline steps — see `domains/scenarios/rebuild.md` for the full consumption matrix.
+
+### Extensibility
+
+Each module is a standalone file with a uniform schema (`S1`: SC generation rules, `S5`: elaboration probes, `S7`: bug prevention). Adding a new module doesn't require modifying any existing file — it automatically composes with whatever is already active.
+
+**Add a new interface** (e.g., your project uses gRPC, which isn't built-in):
+1. Create `domains/interfaces/grpc.md` — add SC rules ("every RPC method needs request/response proto shape"), probes ("streaming vs unary?"), and bug prevention rules
+2. List it in sdd-state.md: `**Interfaces**: http-api, grpc`
+3. The agent now loads `_core.md` + `http-api.md` + `grpc.md` + your concerns — all rules merge automatically
+
+**Add a new concern** (e.g., your project has caching patterns worth checking):
+1. Create `domains/concerns/caching.md` — add SC rules ("cache hit/miss/stale lifecycle"), probes ("TTL? Invalidation strategy?")
+2. Add to active concerns: `**Concerns**: async-state, auth, caching`
+
+**Customize per project** — without modifying skill files at all:
+1. Create `specs/reverse-spec/domain-custom.md` in your project directory
+2. Add project-specific rules using the same S1/S5/S7 schema (e.g., "payment endpoints require idempotency SC")
+3. This file loads last with highest priority, extending all other modules
+
+New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
+
+### Signal Keywords and Proposal Mode
+
+Each domain module declares **S0 Signal Keywords** — terms that indicate the module should be activated. When you start a project with an idea string (`init "Build a Chrome extension for..."`), the agent scans all S0 keywords to automatically infer your Domain Profile. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers `external-sdk` — all without manual configuration.
+
+This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). The CI drives agent behavior: high CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes.
+
+CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
 
 ---
 
@@ -386,7 +451,7 @@ After running `/reverse-spec`, you can use plain spec-kit with the generated `sp
 
 | Aspect | Greenfield | Incremental | Rebuild | Adoption |
 |--------|-----------|-------------|---------|----------|
-| Use case | New project | Add to existing | Re-implement | Document existing |
+| Use case | New project | Add to existing | Re-implement (stack migration, framework upgrade, etc.) | Document existing |
 | Entry point | `init` → `add` | `add` | `reverse-spec` → `pipeline` | `reverse-spec --adopt` → `adopt` |
 | Entity/API registries | Empty → grow | Already exist | Pre-populated | Pre-populated |
 | FR/SC drafts | Created from scratch | N/A | Extracted from code | Extracted from code |
@@ -655,50 +720,3 @@ specs/
 | Scope | Individual Feature consistency | Cross-Feature dependencies and evolution |
 | Relationship | Independent | Wraps spec-kit (does not replace) |
 | Coupling | Works without spec-kit-skills | Requires spec-kit |
-
-### Architecture: 3-Axis Domain Composition
-
-Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
-
-```
-Interface (what the app exposes)     Concern (cross-cutting patterns)     Scenario (why we're building)
-├── http-api                         ├── async-state                      ├── greenfield
-├── gui                              ├── ipc                              ├── rebuild
-├── cli                              ├── external-sdk                     ├── incremental
-└── data-io                          ├── i18n                             └── adoption
-                                     ├── realtime
-                                     └── auth
-```
-
-A **Domain Profile** = selected Interfaces + selected Concerns + Scenario. For example: `desktop-app = [gui] + [async-state, ipc] + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, and a project without IPC never gets IPC boundary checks.
-
-**Module loading order**: `_core.md` (always) → each active Interface → each active Concern → Scenario → user custom (`domain-custom.md`).
-
-#### Why This Is Extensible
-
-Each module is a standalone file with a uniform schema (`S1`: SC generation rules, `S5`: elaboration probes, `S7`: bug prevention). Adding a new module doesn't require modifying any existing file — it automatically composes with whatever is already active.
-
-**Add a new interface** (e.g., your project uses gRPC, which isn't built-in):
-1. Create `domains/interfaces/grpc.md` — add SC rules ("every RPC method needs request/response proto shape"), probes ("streaming vs unary?"), and bug prevention rules
-2. List it in sdd-state.md: `**Interfaces**: http-api, grpc`
-3. The agent now loads `_core.md` + `http-api.md` + `grpc.md` + your concerns — all rules merge automatically
-
-**Add a new concern** (e.g., your project has caching patterns worth checking):
-1. Create `domains/concerns/caching.md` — add SC rules ("cache hit/miss/stale lifecycle"), probes ("TTL? Invalidation strategy?")
-2. Add to active concerns: `**Concerns**: async-state, auth, caching`
-
-**Customize per project** — without modifying skill files at all:
-1. Create `specs/reverse-spec/domain-custom.md` in your project directory
-2. Add project-specific rules using the same S1/S5/S7 schema (e.g., "payment endpoints require idempotency SC")
-3. This file loads last with highest priority, extending all other modules
-
-New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
-
-#### Signal Keywords and Proposal Mode
-
-Each domain module declares **S0 Signal Keywords** — terms that indicate the module should be activated. When you start a project with an idea string (`init "Build a Chrome extension for..."`), the agent scans all S0 keywords to automatically infer your Domain Profile. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers `external-sdk` — all without manual configuration.
-
-This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). The CI drives agent behavior: high CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes.
-
-CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
-

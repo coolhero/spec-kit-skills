@@ -30,6 +30,22 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 ---
 
+## Rebuild Configuration (rebuild only)
+
+> Only present when Origin is `rebuild`. Omit this section for greenfield/adoption.
+> Set during reverse-spec Phase 0 (from `roadmap.md` Strategy line). Read by pipeline steps per `domains/scenarios/rebuild.md`.
+
+| Parameter | Value |
+|-----------|-------|
+| change_scope | [stack / platform / framework / language / architecture / vendor] |
+| preservation_level | [exact / equivalent / functional] |
+| source_available | [running / code-only / docs-only] |
+| migration_strategy | [big-bang / incremental / strangler-fig] |
+
+If this section is missing in a legacy sdd-state.md (created before this enhancement), the pipeline initialization step presents AskUserQuestion to collect missing values.
+
+---
+
 ## Environment Bootstrap (adoption only)
 
 > Only present when Origin is `adoption`. Omit this section for greenfield/rebuild.

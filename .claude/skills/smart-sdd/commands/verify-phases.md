@@ -604,6 +604,9 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
    ```
 5. **If any P1 behavior is uncovered**: Display a warning — `⚠️ [N] P1 source behaviors not covered by FR-###. These may represent missing functionality.`
    - This is a **warning, not a blocker** — the user may proceed but should consider whether the omission is intentional
+   - **Migration-strategy-aware coverage** (read `migration_strategy` from sdd-state.md Rebuild Configuration):
+     - `big-bang`: P1 coverage must be 100% across ALL Features before first merge. If any P1 is uncovered in ANY Feature, escalate to ⚠️ HIGH WARNING
+     - `incremental` / `strangler-fig`: P1 coverage required for current Feature only. Cross-Feature P1 coverage tracked but not blocking per-Feature
 6. If no Source Behavior Inventory exists (greenfield/add), skip this step
 
 **Step 3 — Interaction Chain Completeness** (UI Features with Interaction Chains in plan.md):
@@ -1067,7 +1070,10 @@ If `specs/reverse-spec/visual-references/manifest.md` exists AND this Feature co
    - `✅ Visual match` — layout structure and key elements consistent
    - `⚠️ Visual deviation` — describe specific differences (missing elements, layout shift, style mismatch, color/spacing drift)
    - `❌ Major regression` — screen fundamentally different or broken
-4. **Result**: ⚠️ warnings (NOT blocking) — deviations documented in Review
+4. **Result severity** varies by `preservation_level` (read from sdd-state.md Rebuild Configuration — see `domains/scenarios/rebuild.md` §S3):
+   - `exact`: Visual deviations are ⚠️ HIGH WARNING (pixel-level match expected)
+   - `equivalent`: Structural deviations are ⚠️ WARNING; minor spacing/color differences informational
+   - `functional`: Visual fidelity check is informational only (UI may be intentionally redesigned)
 5. User can acknowledge intentional deviations ("redesigned on purpose") vs. unintentional gaps during Review
 
 If visual references don't exist or no screens match this Feature: skip silently.
@@ -1214,16 +1220,22 @@ After executing each SC's verification, record the **Reached Depth** and compare
    **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 **Comparison procedure** (when both apps are running):
+
+Comparison criteria vary by `preservation_level` (read from sdd-state.md Rebuild Configuration — see `domains/scenarios/rebuild.md` §S3):
+- `exact`: Byte-level response comparison (API), pixel-level screenshot comparison (UI). Any deviation = ⚠️ WARNING
+- `equivalent`: Data shape and semantic comparison. Format differences (JSON key order, whitespace) ignored. Same data values required
+- `functional`: Goal-level comparison. Same user flow produces same outcome. UI appearance and API format may differ
+
 1. For each page/route in this Feature:
    a. Navigate to the page in the REBUILT app → Snapshot A
    b. Navigate to the equivalent page in the SOURCE app → Snapshot B (requires separate browser context or port)
-   c. Compare:
+   c. Compare (apply criteria above):
       - Layout structure: element positions, container hierarchy
       - Data presentation: same data shape displayed
       - Interaction behavior: same click targets produce same outcomes
 2. For API endpoints (if http-api interface):
    a. Send same request to both apps
-   b. Compare response status codes and body shapes
+   b. Compare response status codes and body shapes (apply criteria above)
 3. Report:
    ```
    📊 Source App Comparison for [FID]:

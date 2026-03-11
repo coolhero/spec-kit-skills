@@ -2,7 +2,7 @@
 
 **Source**: [Original source path]
 **Generated**: [DATE]
-**Strategy**: Scope: [core|full] | Stack: [same|new]
+**Strategy**: Scope: [core|full] | Stack: [same|new] | Change: [change_scope] | Preservation: [preservation_level] | Source: [source_available] | Migration: [migration_strategy]
 
 ---
 

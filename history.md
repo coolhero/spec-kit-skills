@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-11] Rebuild Scenario Enhancement + README Architecture Restructuring
+
+Rebuild.md's 4 configuration parameters (`change_scope`, `preservation_level`, `source_available`, `migration_strategy`) were mostly dead code — only `source_available` was actively consumed. Restructured rebuild.md with proper S1/S3/S5/S7 schema sections, added consumption points throughout the pipeline, and repositioned the Architecture section in README from the bottom Reference area to between Skills and User Journeys for visibility. Integrated "harness engineering for agentic coding" framing into Architecture introduction.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | change_scope grouping | 3 categories (code-level, platform-level, stack-level) | 6 individual values would cause over-fragmentation |
+| 2 | rebuild.md section numbering | S1/S3/S5/S7 schema compliance | Consistency with `_schema.md` pattern |
+| 3 | README Architecture position | After Skills, before User Journeys | Skills explains "what" → Architecture explains "how it's designed" → Journeys shows "how to use" |
+| 4 | Old Reference Architecture content | Moved to Architecture section (removed from Reference) | Eliminate duplication, improve visibility |
+| 5 | Rebuild Configuration | Architecture subsection + state-schema.md + roadmap-template.md | Single source in rebuild.md, cross-references elsewhere |
+| 6 | Harness engineering framing | Architecture section introduction | Natural positioning — explains the "why" before the "how" |
+
+### Files Changed
+
+- `domains/scenarios/rebuild.md` — Rewritten: S1 (SC Rules), S3 (Verify Steps), S5 (Elaboration Probes), S7 (Bug Prevention) + Configuration Parameters with Consumed By column
+- `reference/state-schema.md` — Added Rebuild Configuration section
+- `reverse-spec/templates/roadmap-template.md` — Extended Strategy line with 4 rebuild parameters
+- `commands/verify-phases.md` — Light-touch: migration_strategy coverage (Step 2), preservation_level visual fidelity (Step 3b), preservation_level comparison criteria (Step 3e)
+- `README.md` — Architecture section repositioned; Rebuild Configuration + harness engineering added
+- `README.ko.md` — Synced with README.md structural changes
+
+---
+
 ## [2026-03-11] Unified Reset Command — remove→reset Redesign
 
 User ran `/smart-sdd remove F007` intending to re-run F007's pipeline, but `remove` permanently deleted all traces. Root cause: command name mismatch — `remove` implies permanent deletion, but the user's intent was to reset progress for re-execution. Redesigned into a unified `reset` command with three modes.
