@@ -18,7 +18,9 @@ All modes preserve reverse-spec artifacts (roadmap, pre-context, registries) unl
    - FID(s) without `--delete` → **Per-Feature Reset** (Mode B)
    - No FID, no `--delete` → **Full Pipeline Reset** (Mode A)
    - `--delete` flag with FID(s) → **Permanent Delete** (Mode C)
+   - `--delete` without FID → error: `❌ --delete requires at least one Feature ID. Usage: reset --delete F007`
    - `--from [step]` → valid with Per-Feature mode only. Values: `specify` | `plan` | `tasks` | `implement` | `verify`
+   - `--from` combined with `--delete` → error: `❌ --from is not compatible with --delete. --delete permanently removes the Feature.`
    - `--all` → valid with Full Pipeline mode only (include logs)
 
 2. **Check BASE_PATH**: Verify `roadmap.md` exists at BASE_PATH. If not found:
@@ -297,7 +299,7 @@ If branch is merged to main → display warning (code remains in main).
 
 | --from | Action |
 |--------|--------|
-| `specify` through `implement` | `rm -f demos/F[NNN]-[name].*` and `rm -f demos/[FID]-[name].*` |
+| `specify` through `implement` | `rm -f demos/[FID]-[name].*` and `rm -f demos/F[NNN]-[name].*` |
 | `verify` | Keep demo files (just re-verify them) |
 
 #### B-4e. Mark dependent Features 🔀
@@ -421,23 +423,26 @@ Display for each target Feature:
 
 ### C-3. Execute Deletion
 
-Update artifacts in this order (based on [restructure-guide.md](../reference/restructure-guide.md) Artifact Update Checklist):
+Update artifacts in this order (based on [restructure-guide.md](../reference/restructure-guide.md) Artifact Update Checklist).
+
+> **Exception**: restructure-guide's "never auto-delete" policy for `specs/NNN-name/` directories and branches applies to restructure operations (split/merge/move) where the user may want to reference old artifacts. `--delete` is an explicit permanent removal with HARD STOP confirmation — deletion of all traces is intentional.
 
 1. **roadmap.md**: Remove from Feature Catalog, Dependency Graph (mermaid + table), Release Groups, Demo Groups
 2. **entity-registry.md**: Entities owned by this Feature →
    - Not referenced by other Features → remove entity row
    - Referenced by other Features → clear Owner column (set to `—`), display warning
 3. **api-registry.md**: Same logic as entity-registry
-4. **sdd-state.md**: Remove Feature Progress row, Feature Mapping row, Feature Detail Log section
+4. **business-logic-map.md** (if exists): Remove Feature-assigned business rules for this Feature
+5. **sdd-state.md**: Remove Feature Progress row, Feature Mapping row, Feature Detail Log section
    - SBI Coverage: Clear Feature column, set status → `unmapped`
    - Demo Group Progress: Remove this Feature from group members
    - Restructure Log: `| [date] | delete | [FID]-[name] | User requested via /smart-sdd reset --delete |`
-5. **Pre-context directory**: `rm -rf specs/reverse-spec/features/[FID]-[name]/`
-6. **Spec directory**: `rm -rf specs/[NNN]-[name]/`
-7. **Demo files**: `rm -f demos/[FID]-[name].*` and `rm -f demos/F[NNN]-[name].*`
-8. **Feature branch**: `git branch -D [NNN]-[name]` (skip silently if not found)
-9. **Dependent Features**: Mark `plan` step as 🔀, set status to `restructured`
-10. **history.md**:
+6. **Pre-context directory**: `rm -rf specs/reverse-spec/features/[FID]-[name]/`
+7. **Spec directory**: `rm -rf specs/[NNN]-[name]/`
+8. **Demo files**: `rm -f demos/[FID]-[name].*` and `rm -f demos/F[NNN]-[name].*`
+9. **Feature branch**: `git branch -D [NNN]-[name]` (skip silently if not found)
+10. **Dependent Features**: Mark `plan` step as 🔀, set status to `restructured`
+11. **history.md**:
     ```markdown
     ## [YYYY-MM-DD] /smart-sdd reset --delete
 
@@ -515,3 +520,10 @@ For multiple Features: `"chore: delete Features [FID1], [FID2]"`
 ### --from verify when verify hasn't run — Mode B
 - Set verify → ⬜ (it was already ⬜)
 - Display: "ℹ️ [FID] verify hasn't run yet. Use /smart-sdd pipeline [FID] --start verify to run it."
+
+### Multiple FIDs with --from when Features are at different steps — Mode B
+- `--from` applies uniformly to all specified FIDs
+- If a Feature hasn't reached the `--from` step yet: skip it with notice
+  - Example: `reset F007 F008 --from plan` but F008 is still at `pending` (specify not done)
+  - Display: "ℹ️ F008 hasn't reached plan step — skipped. Only F007 was reset."
+- Process each Feature independently based on its current progress

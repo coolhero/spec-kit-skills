@@ -154,7 +154,7 @@ $ARGUMENTS parsing rules:
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
   --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify
-  --all           → Process all eligible Features in batch mode (only for pipeline command). Default is single-Feature mode.
+  --all           → For pipeline: process all eligible Features in batch mode. For reset (no FID): include logs in reset. Not valid with other commands.
   --domain <val>  → Project domain profile: "app" (default). Backward-compatible alias for --profile
   --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
 ```
