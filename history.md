@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-11] Library Import Probe + CWD Fix for Playwright CLI
+
+Real-world failure in reverse-spec Phase 1.5: `ERR_MODULE_NOT_FOUND: Cannot find package 'playwright'` when library mode script ran from `/tmp/` instead of the project root. Root cause: pre-flight only checked `npx playwright --version` (binary exists) but library mode uses `require('playwright')` which depends on CWD having `node_modules/playwright`.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | No new classification level | Redefine "available" = binary + library importable | "binary-only" is a fixable misconfiguration, not a capability level. Adding `cli-runner` would touch 5+ consumer files for a transient state that auto-recovery resolves in seconds |
+| 2 | Two-phase CLI probe | Binary check + `node -e "require('playwright')"` from project root | npx and require() use different module resolution. Binary success does NOT guarantee library mode works |
+| 3 | Auto-recovery in probe | Install playwright if binary works but library fails | Recovery is fast (npm install) and deterministic. Avoids unnecessary HARD STOPs for a mechanical fix |
+| 4 | CWD anchor for all library mode scripts | `cd PROJECT_ROOT && node -e "..."` | require() resolves from CWD. Scripts in /tmp/ or non-project dirs will always fail |
+| 5 | Context-aware recovery | reverse-spec installs in output dir; smart-sdd installs in project root | Source project (reverse-spec) never has playwright; target project (smart-sdd) should have it |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `reference/runtime-verification.md` | §3a: two-phase CLI probe (binary + library import + recovery). §7: CWD requirement + anti-pattern warning |
+| `commands/verify-phases.md` | Pre-flight Step 2a: library import probe + auto-recovery for smart-sdd context |
+| `reverse-spec/commands/analyze.md` | Phase 1.5-0 Step 1: library probe + context-aware auto-install in output directory |
+| `reference/injection/implement.md` | CWD anchor (`cd PROJECT_ROOT &&`) for library mode invocations |
+| `PLAYWRIGHT-GUIDE.md` | "Verify Library Mode" section + "ERR_MODULE_NOT_FOUND" troubleshooting |
+
+---
+
 ## [2026-03-11] F007 Post-Mortem — Runtime Verification Architecture + Multi-Backend Detection
 
 Comprehensive verify improvements based on F007 post-mortem analysis. Core problem: verify checked code existence (grep) but didn't exercise runtime behavior. Five interrelated issues traced to this single architectural gap.

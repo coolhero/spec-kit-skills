@@ -21,6 +21,15 @@ npx playwright --version
 # Expected: Version 1.x.x
 ```
 
+### Verify Library Mode
+
+```bash
+node -e "require('playwright'); console.log('Library mode OK')"
+# Expected: Library mode OK
+```
+
+This confirms that `require('playwright')` works from the current directory — required for library mode scripts used during implement and verify phases. If this fails while `npx playwright --version` succeeds, see [Troubleshooting: ERR_MODULE_NOT_FOUND](#err_module_not_found-playwright) below.
+
 This single installation enables:
 - **Library mode** (`node -e "..."`) for implement-phase ad-hoc checks
 - **Test runner mode** (`npx playwright test`) for verify-phase SC verification
@@ -321,6 +330,28 @@ which npx
 **Fix**: Install Node.js via system PATH method:
 - [nodejs.org](https://nodejs.org/) → `/usr/local/bin`
 - Homebrew: `brew install node` → `/opt/homebrew/bin`
+
+### ERR_MODULE_NOT_FOUND: playwright
+
+**Symptom**: Library mode scripts (`node -e "const { chromium } = require('playwright'); ..."`) fail with:
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'playwright'
+```
+
+**Cause**: `require('playwright')` resolves from the script's working directory via Node.js module resolution, not from where the playwright binary is installed globally via npx. `npx playwright --version` can succeed while `require('playwright')` fails — they use different resolution mechanisms.
+
+| Scenario | Diagnosis | Fix |
+|----------|-----------|-----|
+| Script runs from `/tmp/` or non-project directory | CWD is not the project root | Run scripts from the project root: `cd /path/to/project && node -e "..."` |
+| Source project (reverse-spec) doesn't have playwright | Playwright is a dev tool, not a source project dependency | Install in the output directory: `npm i -D @playwright/test` |
+| Playwright removed after `npm ci` or `npm prune` | Clean install dropped devDependencies | Re-install: `npm i -D @playwright/test` |
+
+**Verification**: Check if library mode will work from a given directory:
+```bash
+cd /path/to/project && node -e "require('playwright'); console.log('OK')"
+```
+
+**Note**: The pre-flight probe checks both `npx playwright --version` (binary) AND `node -e "require('playwright')"` (library import) to ensure library mode scripts will work. If only the binary probe passes, the pre-flight attempts auto-recovery (install) before classifying CLI as unavailable.
 
 ---
 

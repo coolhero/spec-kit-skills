@@ -45,9 +45,24 @@ Maps each interface type (from sdd-state.md Domain Profile → Interfaces) to it
 Run these steps in order (CLI first, MCP second):
 
 ```
-1. Probe Playwright CLI:
-   - Run `npx playwright --version` (timeout 5s)
-   - Classify: available / unavailable
+1. Probe Playwright CLI (two-phase):
+   a. Binary probe: Run `npx playwright --version` (timeout 5s)
+      - If fails → PLAYWRIGHT_CLI = unavailable, skip to step 3
+   b. Library import probe: Run `cd PROJECT_ROOT && node -e "require('playwright')"` (timeout 5s)
+      (PROJECT_ROOT = the directory containing package.json and node_modules)
+      - If succeeds → PLAYWRIGHT_CLI = available
+      - If fails (ERR_MODULE_NOT_FOUND) → enter Recovery
+
+   Recovery (binary found, library not importable):
+   - reverse-spec context: Source project is NOT expected to have playwright.
+     → Auto-install in CWD (output directory): `npm i -D @playwright/test`
+     → Re-run library import probe from CWD
+     → success → PLAYWRIGHT_CLI = available; fail → PLAYWRIGHT_CLI = unavailable
+   - smart-sdd context: Target project SHOULD have playwright (installed during setup).
+     → Check package.json for `playwright` or `@playwright/test` in devDependencies
+     → If missing: `npm i -D @playwright/test` → re-probe
+     → If present but probe fails: CWD mismatch — ensure Bash CWD is project root
+     → success → PLAYWRIGHT_CLI = available; fail → PLAYWRIGHT_CLI = unavailable
 
 2. Check VERIFY_STEPS test file:
    - Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists
@@ -67,6 +82,8 @@ Run these steps in order (CLI first, MCP second):
 | unavailable | — | active | `mcp` | MCP as sole backend (interactive verification) |
 | unavailable | — | unavailable | `demo-only` | Only demo --ci health check available |
 | unavailable | — | unavailable | `build-only` | No runtime verification at all (if demo also missing) |
+
+> **"available" means**: `npx playwright --version` succeeds AND `node -e "require('playwright')"` succeeds from the project root. Both conditions must hold. The library import probe ensures that `node -e` scripts (used in implement and verify library mode) can actually load Playwright. If only the binary probe passes, the Recovery step attempts auto-install before classifying as unavailable.
 
 ### 3b. HTTP-API Backend Detection
 
@@ -227,6 +244,12 @@ Library mode is used during implement because it requires no pre-written test fi
 ### CLI Script Patterns (Library Mode)
 
 Agents execute these via Bash tool. Each pattern is self-contained and exits cleanly.
+
+**CWD Requirement**: All library mode scripts MUST be executed from the project root directory (where `package.json` and `node_modules/` reside). This ensures `require('playwright')` resolves correctly via Node.js module resolution.
+
+When invoking via Bash tool, always use: `cd PROJECT_ROOT && node -e "..."` (where `PROJECT_ROOT` is the absolute path to the project root, typically CWD or from sdd-state.md).
+
+**Anti-pattern**: NEVER write library mode scripts to temporary files in `/tmp/` and execute them from there. `require()` resolves modules from the script's working directory, not from where the playwright binary is installed globally. Running `node /tmp/my-script.mjs` will fail with `ERR_MODULE_NOT_FOUND` unless `/tmp/node_modules/playwright` exists.
 
 **Pattern 1: snapshot(url)** — accessibility tree capture:
 ```js

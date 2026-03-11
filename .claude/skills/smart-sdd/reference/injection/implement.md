@@ -296,7 +296,8 @@ After each task that creates/modifies UI files:
 
 **CLI mode** (primary — RUNTIME_BACKEND = cli):
 1. If app not running: start app (dev server or Electron via `_electron.launch()`)
-2. Run CLI library-mode snapshot: `node -e "const { chromium } = require('playwright'); ..."` targeting the relevant screen
+2. Run CLI library-mode snapshot from the project root: `cd PROJECT_ROOT && node -e "const { chromium } = require('playwright'); ..."` targeting the relevant screen
+   (PROJECT_ROOT = the directory containing package.json where playwright is installed. See [runtime-verification.md](../runtime-verification.md) §7 for CWD requirement and script patterns.)
 3. Check snapshot output for error indicators (error boundary text, blank page)
 4. **Success**: Proceed to next task
 5. **Failure**: Enter Auto-Fix Loop

@@ -323,10 +323,19 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 **Step 1 — Detect Playwright CLI**:
 
-Check if the Playwright CLI is available by running `npx playwright --version` (timeout 5s).
+a. Binary probe: Run `npx playwright --version` (timeout 5s).
+   - If the command fails (not found, timeout, or error) → set `playwright_cli = false`, skip to Step 1b (MCP)
+   - If the command succeeds → proceed to library import probe
 
-- If the command succeeds and returns a version string → set `playwright_cli = true`
-- If the command fails (not found, timeout, or error) → set `playwright_cli = false`
+b. Library import probe: Run `cd CWD && node -e "require('playwright')"` (timeout 5s).
+   (CWD = current working directory where artifacts are generated)
+   - If succeeds → set `playwright_cli = true`
+   - If fails (`ERR_MODULE_NOT_FOUND`):
+     This is expected for reverse-spec — the source project being analyzed typically does NOT have playwright as a dependency.
+     → Auto-install in the output directory: `npm i -D @playwright/test`
+     → Re-run library import probe
+     → If succeeds → set `playwright_cli = true`
+     → If still fails → set `playwright_cli = false`
 
 **Step 1b — Detect Playwright MCP**:
 

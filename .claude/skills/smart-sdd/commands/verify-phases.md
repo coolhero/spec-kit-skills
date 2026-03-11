@@ -167,9 +167,17 @@ If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight sec
 
 **Step 2a — GUI Backend Detection**:
 
-1. **Probe Playwright CLI** (primary): Run `npx playwright --version` (timeout 5s).
-   - Exit 0 → `PLAYWRIGHT_CLI = available`
-   - Command not found or non-zero exit → `PLAYWRIGHT_CLI = unavailable`
+1. **Probe Playwright CLI** (primary — two-phase):
+   a. Binary probe: Run `npx playwright --version` (timeout 5s).
+      - Command not found or non-zero exit → `PLAYWRIGHT_CLI = unavailable`, skip to step 3
+   b. Library import probe: Run `cd PROJECT_ROOT && node -e "require('playwright')"` (timeout 5s).
+      (PROJECT_ROOT = project root directory containing package.json)
+      - Exit 0 → `PLAYWRIGHT_CLI = available`
+      - `ERR_MODULE_NOT_FOUND` → enter Recovery:
+        - Check if `playwright` or `@playwright/test` is in package.json devDependencies
+        - If missing: Run `npm i -D @playwright/test` (auto-recovery), then re-probe
+        - If present but import fails: CWD mismatch — display `⚠️ Playwright binary found but library import failed from project root.` → `PLAYWRIGHT_CLI = unavailable`
+        - After recovery re-probe: success → `PLAYWRIGHT_CLI = available`; fail → `PLAYWRIGHT_CLI = unavailable`
 
 2. **Check VERIFY_STEPS test file**: Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists.
    - Exists → `VERIFY_TEST = exists`
