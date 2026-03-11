@@ -31,6 +31,18 @@ User ran `/smart-sdd remove F007` intending to re-run F007's pipeline, but `remo
 
 ---
 
+## [2026-03-11] README Update — Reset Command Documentation
+
+Updated both README.md and README.ko.md Management sections to document the three-mode reset command.
+
+| # | Change | Details |
+|---|--------|---------|
+| 1 | Per-Feature reset added | `reset F007`, `reset F007 --from plan` |
+| 2 | Full pipeline reset clarified | `reset` (comment changed from "Reset pipeline state" to "Full pipeline reset") |
+| 3 | Permanent deletion added | `reset --delete F007` |
+
+---
+
 ## [2026-03-11] F007 Post-Mortem — 5 Structural Improvements
 
 F007 Knowledge Base verify exposed 12 bugs, all discovered in verify (none in implement). Root causes: (A) implement had no E2E integration test — modules worked individually but were never connected end-to-end, (B) tasks had no integration wiring tasks — only module-level tasks, (C) verify inline-fixed 12 bugs without ever triggering regression, (D) cross-module API contracts (function names, argument formats) were never verified, (E) long debugging sessions lost SDD process rules to context compaction.

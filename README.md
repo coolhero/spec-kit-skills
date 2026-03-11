@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 11:09 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 17:14 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -373,7 +373,10 @@ After running `/reverse-spec`, you can use plain spec-kit with the generated `sp
 # Management
 /smart-sdd expand T2                     # Activate Tier 2 Features
 /smart-sdd expand full                   # Activate all remaining Features
-/smart-sdd reset                         # Reset pipeline state
+/smart-sdd reset F007                    # Reset Feature progress (re-run from specify)
+/smart-sdd reset F007 --from plan        # Reset from specific step (keep prior results)
+/smart-sdd reset                         # Full pipeline reset
+/smart-sdd reset --delete F007           # Permanently remove Feature
 /smart-sdd status                        # Progress overview
 /smart-sdd coverage                      # SBI coverage check
 /smart-sdd parity                        # Parity check vs original source
