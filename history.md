@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-03-11] User-Assisted SC Completion Gate (Step 3f)
+
+Real-world failure in F007 verify: agent classified SCs as `user-assisted` but skipped the cooperation block in Step 3d entirely, marking them as `⚠️` without ever presenting AskUserQuestion to the user. The `user-assisted` SCs subsection existed in Step 3d (with inline HARD STOP) but was treated as optional content among the auto-category subsections.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Separate gate step | New Step 3f as a mandatory gate before Step 4 | Per CLAUDE.md Rule 1 principle: agents ignore subsections within large steps. A separate, clearly labeled gate step forces entry and cannot be accidentally skipped as part of another step's flow |
+| 2 | BLOCKING semantics | Do NOT proceed to Step 4 until gate passes | Marking `user-assisted` SCs as ⚠️ without user consent is a protocol violation — the user chose `user-assisted` classification specifically because cooperation is expected |
+| 3 | Inline HARD STOP + re-ask | AskUserQuestion with "If response is empty → re-ask" in Step 3f body | Same principle as every other HARD STOP — agents skip reference-only rules |
+| 4 | external-dep re-classification check | Gate includes review of `external-dep` SCs for possible reclassification | Some `external-dep` SCs may actually be `user-assisted` (user CAN provide the dependency). Gate catches misclassification before finalization |
+| 5 | Coverage report includes user-assisted breakdown | Added verified/skipped split in SC Verification Coverage | Previously, user-assisted SCs had no separate line in the coverage report, making their disposition invisible in Review |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `commands/verify-phases.md` | New Step 3f — User-Assisted SC Completion Gate with inline HARD STOP. Step 0 coverage assessment references Step 3f. Step 7 rule updated. SC Verification Coverage report now includes user-assisted breakdown |
+| `reference/user-cooperation-protocol.md` | §4 cross-reference table: added Step 3f gate entry |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] Full File Review — Over-Fragmentation Consolidation
 
 Comprehensive file review identified 3 HIGH-severity duplications from incremental updates. Applied Single Source of Truth principle: detailed definitions stay in one canonical file, consumers cross-reference.

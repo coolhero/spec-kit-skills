@@ -153,6 +153,7 @@ All existing and new cooperation points, organized by pipeline stage. Each follo
 | CDP not configured (Case A) | `commands/verify-phases.md` Phase 3 Step 3 | Configuration | `browser_snapshot` returns default page |
 | Lint tool not found | `commands/verify-phases.md` Phase 1 Step 3b | Environment Setup | Lint command not found error |
 | User-assisted SCs | `commands/verify-phases.md` Phase 3 Step 3d | External Services | SC classified as `user-assisted` |
+| User-assisted SC gate | `commands/verify-phases.md` Phase 3 Step 3f | External Services | Unresolved `user-assisted` SCs before Step 4 (BLOCKING gate) |
 | Source app needed | `commands/verify-phases.md` Phase 3 Step 3e | Source App Access | Rebuild mode + `source_available: running` |
 | Runtime degradation recovery | `commands/verify-phases.md` Phase 3 Step 3 | Configuration | `⚠️ RUNTIME-DEGRADED` marker |
 

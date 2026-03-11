@@ -645,14 +645,14 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 
 6. **Coverage assessment**:
    - Auto-verifiable (`cdp-auto` + `api-auto` + `cli-auto` + `pipeline-auto`): [N] SCs → will be verified in Step 3/3d
-   - User-assisted: [N] SCs → will be verified in Step 3d after user cooperation
+   - User-assisted: [N] SCs → will be verified in Step 3d after user cooperation (gate enforced in Step 3f)
    - Test-covered: [N] SCs → already verified in Phase 1
    - External-dep: [N] SCs → skipped with explicit reason
    - Manual: [N] SCs → skipped
    - **Effective coverage**: (auto + user-assisted + test-covered) / total = [N]%
    - If effective coverage < 50%: display `⚠️ SC verification coverage is [N]% — most SCs cannot be automatically verified for this Feature`
 
-7. **Auto-category SCs drive Step 3/3d**: In Step 3 SC-level UI verification, verify ALL `cdp-auto` SCs — not just those in the demo Coverage header. In Step 3d Interactive Runtime Verification, verify ALL interface-appropriate auto SCs (`api-auto`, `cli-auto`, `pipeline-auto`) plus `user-assisted` SCs (after cooperation).
+7. **Auto-category SCs drive Step 3/3d/3f**: In Step 3 SC-level UI verification, verify ALL `cdp-auto` SCs — not just those in the demo Coverage header. In Step 3d Interactive Runtime Verification, verify ALL interface-appropriate auto SCs (`api-auto`, `cli-auto`, `pipeline-auto`) plus `user-assisted` SCs (after cooperation). **Step 3f is a mandatory gate** that blocks progression to Step 4 until all `user-assisted` SCs are resolved (verified or explicitly skipped by user via AskUserQuestion).
 
 **Step 1 — Check demo script exists AND is a real demo (NOT markdown, NOT test-only)**:
 - Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
@@ -997,6 +997,33 @@ If visual references don't exist or no screens match this Feature: skip silently
 
 **Note on dual-app management**: The agent manages both apps. Source app port must differ from rebuilt app port. If both are Electron, they need different CDP ports.
 
+**Step 3f — User-Assisted SC Completion Gate** (MANDATORY — cannot skip):
+
+> **Why this separate gate exists**: The `user-assisted` SCs block in Step 3d is a subsection among several auto-category subsections. Agents tend to process the auto categories and skip the user-assisted block entirely. This gate is a safety net that BLOCKS progression to Step 4 until user-assisted SCs are explicitly resolved.
+
+1. **Read SC Verification Matrix from Step 0**: Count SCs classified as `user-assisted`.
+2. **If count = 0**: No user-assisted SCs → proceed to Step 4.
+3. **If count > 0**: Check whether ALL user-assisted SCs have been resolved (verified ✅ or explicitly skipped via AskUserQuestion in Step 3d).
+4. **If any user-assisted SCs remain unresolved** (neither verified nor explicitly skipped by user choice):
+   - Batch ALL unresolved user-assisted SCs into one cooperation request:
+     ```
+     📋 User-Assisted Verification for [FID]:
+       SC-023: Requires OPENAI_API_KEY in .env
+       SC-031: Requires MCP server running on localhost:3001
+
+     These SCs can be verified if you provide the dependencies above.
+     Please prepare them, then confirm — or choose to skip.
+     ```
+   - **Use AskUserQuestion**:
+     - "Dependencies ready — proceed with verification"
+     - "Skip user-assisted SCs — record as ⚠️"
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+   - If "Dependencies ready": re-verify each dependency (probe API key presence, service endpoint) → run automated verification (same as auto categories)
+   - If "Skip": record each as `⚠️ user-assisted — skipped (user chose to skip)`
+5. **`external-dep` re-classification check**: Review `external-dep` SCs from Step 0. If any could realistically be provided by the user (API key the user likely has, local service the user can start), reclassify as `user-assisted` and include in the cooperation request above. See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3 for classification criteria.
+
+> **BLOCKING**: Do NOT proceed to Step 4 until this gate is passed. Marking `user-assisted` SCs as `⚠️` without presenting AskUserQuestion to the user is a protocol violation.
+
 **Step 4 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to what the user can try/see in the demo
   - Each FR/SC should be either ✅ (demonstrated) or ⬜ (not demoed with reason)
@@ -1119,7 +1146,9 @@ Display:
 ```
 📊 SC Verification Coverage for [FID]:
   Total SCs: [N]
-  ✅ Verified (cdp-auto + test-covered): [N] ([%])
+  ✅ Verified (auto + test-covered): [N] ([%])
+  ✅ Verified (user-assisted — after cooperation): [N] ([%])
+  ⚠️ Skipped — user-assisted (user chose to skip): [N] ([list SC])
   ⚠️ Skipped — external dependency: [N] ([list SC + reason])
   ⚠️ Skipped — manual only: [N]
   ❌ Failed: [N] ([list SC + failure])
