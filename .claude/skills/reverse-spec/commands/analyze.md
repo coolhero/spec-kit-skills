@@ -794,6 +794,23 @@ Key observations:
   - [Notable finding 2]
 ```
 
+**Step 2b — MCP Interactive Supplement** (CLI+MCP complementary mode):
+
+> **When**: `playwright_cli = true` AND `playwright_mcp = true` (MCP tools available in session).
+> **Skip if**: MCP unavailable, or CLI exploration already covered all screens comprehensively.
+
+After CLI automated exploration (Phase A-D), use MCP tools to supplement with interactive inspection:
+
+1. **Navigate to the app** via MCP (`browser_navigate` to the app URL)
+2. **Interactive exploration** for areas where CLI scripts were limited:
+   - Complex UI interactions that require multi-step state (drag-and-drop, hover menus, modals)
+   - Dynamic content that loads lazily or requires scroll-triggered rendering
+   - Real-time features (WebSocket updates, live search, auto-complete suggestions)
+3. **Browser console check**: Read MCP browser console for runtime errors not visible in CLI snapshots
+4. Record any additional findings in `runtime-exploration.md` under a `## MCP Supplement` section
+
+> **Note**: This step enriches CLI results, it does NOT replace them. CLI remains the primary data source for structured snapshots and screenshots. MCP adds interactive/real-time observations.
+
 **Step 3 — Dev server cleanup**:
 1. Terminate the dev server process
 2. If Docker Compose was started: leave services running (user may need them for `smart-sdd`)

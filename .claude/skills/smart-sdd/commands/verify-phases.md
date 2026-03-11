@@ -1055,13 +1055,13 @@ Before running the demo, **read the demo script source** and verify:
   - Process exit with non-zero code
 - **If runtime errors are detected**: The demo is considered **FAILED** even if the health check (HTTP 200) passed — a healthy port does not mean the application is functioning correctly (e.g., Vite dev server may respond while Electron main process has fatal errors)
 - Display each detected error with its source line for user review
-- **Browser console error scan (when runtime backend supports it)**: After demo --ci passes the stdout/stderr scan above, if `RUNTIME_BACKEND = mcp`:
+- **Browser console error scan (MCP supplement)**: After demo --ci passes the stdout/stderr scan above, if `PLAYWRIGHT_MCP` is `supplement` or `primary` (i.e., MCP tools available in session):
   1. Navigate to the app's main URL (from demo script's "Try it" output or health check URL)
   2. Wait 5 seconds for the page to stabilize
   3. Read browser Console logs for: `TypeError`, `ReferenceError`, `Maximum update depth exceeded`, `unhandled rejection`, infinite render warnings
   4. **If browser console errors detected**: Demo is FAILED even if health endpoint returned 200 and stdout was clean — these are client-side-only bugs (infinite re-renders, selector instability, DOM timing) that never appear in server output
   5. Display: `❌ Browser console errors detected: [N] errors — [first error message]`
-  6. If `RUNTIME_BACKEND ≠ mcp`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (Playwright MCP not active)`
+  6. If `PLAYWRIGHT_MCP = unavailable`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (Playwright MCP not available in this session)`
 
 **If any check fails**, display and BLOCK:
 ```

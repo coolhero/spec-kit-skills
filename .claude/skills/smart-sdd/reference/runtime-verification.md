@@ -1,8 +1,8 @@
 # Runtime Verification Strategy
 
 > Defines the extensible, interface-aware runtime verification architecture.
-> CLI is the primary browser backend. MCP is an optional accelerator.
-> Referenced by: `commands/verify-phases.md` (Pre-flight, Phase 3), `injection/implement.md` (runtime checks + implement-phase browser access), domain interface modules (S8).
+> CLI is the primary browser backend. MCP supplements CLI when available (CLI+MCP complementary mode).
+> Referenced by: `commands/verify-phases.md` (Pre-flight, Phase 3), `injection/implement.md` (runtime checks + implement-phase browser access), `reverse-spec/commands/analyze.md` (Phase 1.5), domain interface modules (S8).
 
 ---
 
@@ -68,20 +68,25 @@ Run these steps in order (CLI first, MCP second):
    - Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists
    - Classify: exists / missing
 
-3. Optionally probe Playwright MCP:
+3. Probe Playwright MCP (always, not optional):
    - Check if `browser_snapshot` tool exists in session tools
    - Classify: active / unavailable
+   - **Record as `PLAYWRIGHT_MCP` flag** — this is independent of RUNTIME_BACKEND
 ```
 
 **Result classification**:
 
-| CLI Status | Test File | MCP Status | RUNTIME_BACKEND | Notes |
-|-----------|-----------|------------|-----------------|-------|
-| available | exists | — | `cli` | Best: full verification via test files |
-| available | missing | — | `cli-limited` | Can generate test files; library mode available |
-| unavailable | — | active | `mcp` | MCP as sole backend (interactive verification) |
-| unavailable | — | unavailable | `demo-only` | Only demo --ci health check available |
-| unavailable | — | unavailable | `build-only` | No runtime verification at all (if demo also missing) |
+| CLI Status | Test File | MCP Status | RUNTIME_BACKEND | PLAYWRIGHT_MCP | Notes |
+|-----------|-----------|------------|-----------------|----------------|-------|
+| available | exists | active | `cli` | `supplement` | **Best: CLI automation + MCP supplement** |
+| available | exists | unavailable | `cli` | `unavailable` | CLI-only, full verification via test files |
+| available | missing | active | `cli-limited` | `supplement` | Library mode + MCP supplement |
+| available | missing | unavailable | `cli-limited` | `unavailable` | Library mode only |
+| unavailable | — | active | `mcp` | `primary` | MCP as sole backend |
+| unavailable | — | unavailable | `demo-only` | `unavailable` | Only demo --ci health check available |
+| unavailable | — | unavailable | `build-only` | `unavailable` | No runtime verification at all |
+
+**CLI+MCP complementary mode**: When CLI is primary AND MCP is available, the agent uses CLI for automated verification (headful scripts) and then uses MCP for supplementary tasks that benefit from a session-persistent browser (browser console monitoring, interactive debugging, real-time DOM inspection). This is the **default behavior** — MCP is always probed and used if available, not skipped when CLI exists.
 
 > **"available" means**: `npx playwright --version` succeeds AND `node -e "require('playwright')"` succeeds from the project root. Both conditions must hold. The library import probe ensures that `node -e` scripts (used in implement and verify library mode) can actually load Playwright. If only the binary probe passes, the Recovery step attempts auto-install before classifying as unavailable.
 
@@ -123,9 +128,10 @@ No HARD STOP, no session restart, no MCP dependency.
 
 | Condition | Message | Restart Needed? |
 |-----------|---------|----------------|
-| GUI + RUNTIME_BACKEND = `cli` | `ℹ️ Using Playwright CLI for runtime verification.` | ❌ No |
-| GUI + RUNTIME_BACKEND = `cli` + MCP also active | `ℹ️ Using Playwright CLI (primary). MCP also available as accelerator.` | ❌ No |
-| GUI + RUNTIME_BACKEND = `cli-limited` | `ℹ️ Using Playwright CLI (no test file yet — library mode available).` | ❌ No |
+| GUI + CLI + MCP | `ℹ️ CLI+MCP mode: Playwright CLI (primary) + MCP (supplement for console/interactive).` | ❌ No |
+| GUI + CLI only | `ℹ️ Using Playwright CLI for runtime verification. MCP not available — console scan will be skipped.` | ❌ No |
+| GUI + CLI-limited + MCP | `ℹ️ CLI-limited+MCP mode: library mode + MCP supplement.` | ❌ No |
+| GUI + CLI-limited only | `ℹ️ Using Playwright CLI (no test file yet — library mode available).` | ❌ No |
 | GUI + RUNTIME_BACKEND = `mcp` | `ℹ️ CLI not available. Using Playwright MCP for runtime verification.` | ❌ No |
 | GUI + RUNTIME_BACKEND = `demo-only` | `⚠️ No Playwright backend available. Runtime verification limited to demo --ci.` Offer: "Install Playwright CLI" / "Continue with demo-only" | ❌ No |
 | GUI + RUNTIME_BACKEND = `build-only` | `⚠️ No runtime verification backend available.` Offer: "Install Playwright CLI" / "Configure MCP and restart session" / "Continue build-only" | Only if user specifically chooses MCP |

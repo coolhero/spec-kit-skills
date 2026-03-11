@@ -5,6 +5,33 @@
 
 ---
 
+## [2026-03-11] CLI+MCP Complementary Mode — Playwright Architecture
+
+Changed Playwright architecture from mutually exclusive backend selection (CLI OR MCP) to complementary mode (CLI THEN MCP). Previously, `RUNTIME_BACKEND` chose one backend; now CLI always runs first (headful for user visibility) and MCP supplements when available for interactive inspection.
+
+User-driven: Playwright CLI ran but browser window was invisible (headless default). User requested headful default, then suggested always running MCP after CLI when available, rather than choosing one or the other.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | CLI headful default | `chromium.launch({ headless: false })` | User needs to see browser window during exploration/verification. CI may override |
+| 2 | Backend model | CLI+MCP complementary (not exclusive) | CLI handles automated test scripts; MCP adds interactive inspection (console, DOM, complex UI) |
+| 3 | New flag | `PLAYWRIGHT_MCP` (`supplement` / `primary` / `unavailable`) | Orthogonal to `RUNTIME_BACKEND` — MCP availability tracked independently, probed always (not optional) |
+| 4 | Browser console scan trigger | `PLAYWRIGHT_MCP available` (not `RUNTIME_BACKEND = mcp`) | Console scan should run whenever MCP is available, regardless of whether CLI is the primary backend |
+| 5 | analyze.md supplement | Step 2b — MCP Interactive Supplement after CLI exploration | Complex UI (drag-and-drop, modals, lazy loading) benefits from interactive MCP after automated CLI pass |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `reference/runtime-verification.md` | §3a classification table: added `PLAYWRIGHT_MCP` column. §4 session messages: CLI+MCP variants. All `chromium.launch()` → headful. Complementary mode paragraph |
+| `commands/verify-phases.md` | Browser console scan condition: `RUNTIME_BACKEND = mcp` → `PLAYWRIGHT_MCP` available |
+| `reverse-spec/commands/analyze.md` | Step 2b — MCP Interactive Supplement. `chromium.launch()` → headful |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] `/smart-sdd remove` Command
 
 New standalone command for removing specific Features. Previously required either `/smart-sdd add` pre-check (pending only) or manual restructure-guide.md checklist (in_progress/completed). Now unified into one command that works for any Feature status.
