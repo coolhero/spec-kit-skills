@@ -76,3 +76,20 @@ When this interface is active, enforce:
 - Platform CSS Rendering Constraints: see `injection/implement.md` § Bug Prevention B-3
 - UI Interaction Surface Audit: see `injection/implement.md` § Bug Prevention B-3
 - CSS Value Map Generation (rebuild mode): see `injection/implement.md` § CSS Value Map
+
+---
+
+## S8. Runtime Verification Strategy
+
+> Cross-references [reference/runtime-verification.md](../../reference/runtime-verification.md) § 6a.
+
+| Field | Value |
+|-------|-------|
+| **Start method** | Dev server (`npm run dev`, `vite`, etc.) or Electron app with CDP (`--remote-debugging-port=9222`) |
+| **Verify method** | Navigate pages + SC interaction verification + console error scan. Backend: Playwright MCP or Playwright CLI (see runtime-verification.md § 3 for detection) |
+| **Stop method** | Kill dev server process / close Electron app |
+| **SC classification extensions** | `cdp-auto` — UI interaction SCs automatable via browser automation |
+
+**GUI-specific verification steps**:
+- Step 3c Navigation Transition Sanity Check (verify-phases.md): compare shared layout elements across Feature page transitions
+- Step 3d Interactive Runtime Verification: group `cdp-auto` SCs by user flow → execute complete interaction sequences → verify state changes and side effects

@@ -47,3 +47,21 @@
 | **Command structure** | Subcommands? Global flags? Argument validation? |
 | **Output format** | JSON? Table? Plain text? Machine-readable option? |
 | **Configuration** | Config file? Environment variables? Defaults? |
+
+---
+
+## S8. Runtime Verification Strategy
+
+> Cross-references [reference/runtime-verification.md](../../reference/runtime-verification.md) § 6c.
+
+| Field | Value |
+|-------|-------|
+| **Start method** | N/A — CLI tools are per-invocation (no persistent process) |
+| **Verify method** | Execute CLI commands with test arguments → verify stdout/stderr content + exit codes. Backend: Process runner (shell execution) |
+| **Stop method** | N/A — each invocation terminates naturally |
+| **SC classification extensions** | `cli-auto` — CLI command SCs verifiable via process execution without external dependencies |
+
+**CLI-specific verification**:
+- Step 3d Interactive Runtime Verification: group `cli-auto` SCs by command → execute with test args → verify stdout/stderr/exit code
+- `--help` flag verification: every registered command produces usage text
+- Error scenario verification: invalid args → non-zero exit code + descriptive stderr

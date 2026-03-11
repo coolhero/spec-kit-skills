@@ -50,6 +50,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] API contract compatibility: [specific check]
   - [ ] Business rule consistency: [specific check]
   - [ ] Source behavior completeness: [P1: N behaviors, P2: N behaviors] (rebuild only)
+  - [ ] Data dependency verification: [list each "Blocked by ←" data source to probe at runtime] (Step 1c)
   - [ ] Interaction chain completeness: [list each chain to verify] (UI Features only)
   - [ ] UX behavior contract: [list each temporal scenario to verify] (async UI Features only)
   - [ ] Enablement interfaces: [list each "Enables →" entry to verify]
@@ -60,11 +61,16 @@ Show the **actual verification checklist** so the user can see what will be chec
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
   SC Verification Matrix ([N] SCs from spec.md):
-    cdp-auto: [N] SCs — [list SC-### to verify via CDP]
+    cdp-auto: [N] SCs — [list SC-### to verify via browser automation]
+    api-auto: [N] SCs — [list SC-### to verify via HTTP client] (if http-api interface)
+    cli-auto: [N] SCs — [list SC-### to verify via process execution] (if cli interface)
+    pipeline-auto: [N] SCs — [list SC-### to verify via pipeline runner] (if data-io interface)
     test-covered: [N] SCs — [list SC-### covered by Phase 1 tests]
+    user-assisted: [N] SCs — [list SC-### + what user must provide]
     external-dep: [N] SCs — [list SC-### + skip reason]
     manual: [N] SCs
-    Planned coverage: [cdp-auto + test-covered]/[total] = [N]%
+    Planned coverage: [auto + test-covered]/[total] = [N]%
+  Runtime backend: [RUNTIME_BACKEND value from Pre-flight]
   - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
   - [ ] Demo script is NOT markdown and NOT a test-only script
   - [ ] Demo launches a real, working Feature environment (not just assertions)
@@ -75,6 +81,9 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] Demo Components header comment with Category and Fate
   - [ ] Component markers (@demo-only / @demo-scaffold)
   - [ ] VERIFY_STEPS functional verification: [list each SC with VERIFY_STEPS block]
+  - [ ] Navigation transition sanity check: [layout consistency across Feature pages] (Step 3c, GUI only)
+  - [ ] Interactive runtime verification: [SCs to verify via RUNTIME_BACKEND] (Step 3d)
+  - [ ] Source app comparative verification: [side-by-side comparison] (Step 3e, rebuild only)
   - [ ] Visual fidelity check: [source screenshot vs current] (rebuild only)
 
 ── Phase 3b: Bug Prevention Verification ──────────
@@ -123,6 +132,8 @@ After verification execution completes:
   - ✅/❌ Business rule consistency: [result]
   - Source behavior coverage: P1 [N]/[N] ([%]), P2 [N]/[N] ([%])
     [⚠️ Uncovered P1: funcA, funcB (if any)]
+  - Data dependency verification: [N]/[N] data sources available at runtime (Step 1c)
+    [⚠️ Empty data: embedding model not running — SCs reclassified to user-assisted (if any)]
   - Interaction chains: [N]/[N] complete [⚠️ Broken: FR-015 DOM Effect missing (if any)]
   - UX behavior contract: [N]/[N] scenarios verified
     [⚠️ Missing: auto-scroll not implemented, cleanup on unmount missing (if any)]
@@ -146,10 +157,19 @@ After verification execution completes:
   - ✅/❌ Component markers present
   - VERIFY_STEPS: [N]/[N] SC functional tests passed
     [⚠️ SC-003 wait-for timeout (if any)]
+  - Navigation transitions: [✅ consistent / ⚠️ layout deviation found] (Step 3c, GUI only)
+  - Interactive runtime verification: [N]/[N] SCs verified via [RUNTIME_BACKEND] (Step 3d)
+    [⚠️ SC-### failed: reason (if any)]
+    [user-assisted: [N] SCs verified after user cooperation (if any)]
+  - Source app comparison: [match/deviations found] (Step 3e, rebuild only)
   - Visual fidelity: [match/differences found] (rebuild only)
   - SC Verification Coverage: [verified]/[total] = [N]%
     ✅ cdp-auto: [N] verified [⚠️ SC-### failed: reason (if any)]
+    ✅ api-auto: [N] verified (if http-api interface)
+    ✅ cli-auto: [N] verified (if cli interface)
+    ✅ pipeline-auto: [N] verified (if data-io interface)
     ✅ test-covered: [N]
+    ✅ user-assisted: [N] verified after cooperation
     ⚠️ external-dep: [N] ([list SC + skip reason])
     ⚠️ manual: [N]
     [⚠️ Coverage < 50% — most SCs lack runtime verification (if applicable)]

@@ -102,6 +102,17 @@ Pattern compliance rules and anti-patterns to check during implementation.
 | **Reference** | Cross-reference to injection file where the rule is enforced |
 | **Description** | What the rule checks |
 
+### S8. Runtime Verification Strategy (interfaces only)
+
+Interface-specific runtime verification configuration. Cross-references [reference/runtime-verification.md](../reference/runtime-verification.md).
+
+| Field | Description |
+|-------|-------------|
+| **Start method** | How to start the app/server/process for verification |
+| **Verify method** | How to verify runtime behavior (backend type + approach) |
+| **Stop method** | How to clean up after verification |
+| **SC classification extensions** | Interface-specific SC auto-categories (e.g., `api-auto` for http-api) |
+
 ---
 
 ## Profile Schema
@@ -140,3 +151,4 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 - **S3 Verify Steps**: Override only if module explicitly overrides (otherwise inherit _core)
 - **S5 Elaboration Probes**: Append (accumulate all probes)
 - **S7 Bug Prevention**: Append (accumulate all activation conditions)
+- **S8 Runtime Verification**: Per-interface (no merge — each interface has its own strategy)

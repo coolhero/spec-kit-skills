@@ -147,59 +147,115 @@ If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight sec
 
 ---
 
-### Pre-flight: MCP Availability Check
+### Pre-flight: Runtime Verification Backend Detection
 
-**Run this BEFORE Phase 1.** (After Phase 0 if applicable.) Determines whether UI verification is possible for Phase 3 Step 3.
+**Run this BEFORE Phase 1.** (After Phase 0 if applicable.) Determines which runtime verification backends are available for Phase 3.
 
-**Detection method** — check if Playwright MCP tools exist in the current session:
-1. Attempt to call `browser_snapshot` (the most reliable probe)
-2. Alternatively, check if any tool matching `browser_navigate` or `mcp__playwright__browser_snapshot` exists in your available tools
+> For the full backend registry, detection order, and interface mapping, see [reference/runtime-verification.md](../reference/runtime-verification.md).
+> For the user cooperation pattern used in HARD STOPs below, see [reference/user-cooperation-protocol.md](../reference/user-cooperation-protocol.md).
 
-**Result classification**:
+**Step 1 — Determine active interface** (from sdd-state.md Domain Profile → Interfaces):
+- If `gui` in interfaces → GUI detection path (Step 2a)
+- If `http-api` in interfaces → API detection path (Step 2b)
+- If `cli` in interfaces → CLI detection path (Step 2c)
+- If `data-io` in interfaces → Data-IO detection path (Step 2d)
+- Multiple interfaces → run ALL applicable detection paths
 
-| Probe result | MCP Status | Set variable |
-|---|---|---|
-| Tool exists and returns content (page snapshot) | ✅ Active + connected | `MCP_STATUS = active` |
-| Tool exists but fails with connection error (ECONNREFUSED) | ✅ Configured but app not running | `MCP_STATUS = configured` |
-| Tool exists but fails with runtime error ("Target page, context or browser has been closed", "Browser closed", etc.) | ⚠️ Connected but target lost | `MCP_STATUS = configured` |
-| Tool does not exist / "unknown tool" error | ❌ Not installed | `MCP_STATUS = unavailable` |
+**Step 2a — GUI Backend Detection**:
 
-> **Important**: "Target page, context or browser has been closed" means Playwright MCP IS installed and CDP IS configured, but the Electron app is not running or the CDP target was lost. This is `configured`, NOT `unavailable`. The agent will start the app in Phase 3 Step 3 (Case B).
+1. **Probe Playwright MCP**: Attempt to call `browser_snapshot` (the most reliable probe). Alternatively, check if any tool matching `browser_navigate` or `mcp__playwright__browser_snapshot` exists in your available tools.
 
-**⛔ Workaround Prohibition**: When Playwright MCP tools fail for ANY reason, do NOT use raw CDP WebSocket scripts, puppeteer, custom fetch-based CDP calls, or any other alternative browser automation as a workaround. Playwright MCP is the ONLY authorized UI verification tool. If it fails, follow the HARD STOP protocol below — do not improvise alternatives.
+   | Probe result | MCP Status |
+   |---|---|
+   | Tool exists and returns content (page snapshot) | `MCP_STATUS = active` |
+   | Tool exists but fails with connection error (ECONNREFUSED) | `MCP_STATUS = configured` |
+   | Tool exists but fails with runtime error ("Target page, context or browser has been closed", etc.) | `MCP_STATUS = configured` |
+   | Tool does not exist / "unknown tool" error | `MCP_STATUS = unavailable` |
 
-**If `MCP_STATUS = unavailable`** — run CDP Endpoint Diagnostic before HARD STOP:
+   > **Important**: "Target page, context or browser has been closed" means Playwright MCP IS installed and CDP IS configured, but the Electron app is not running or the CDP target was lost. This is `configured`, NOT `unavailable`. The agent will start the app in Phase 3 Step 3 (Case B).
+
+2. **Probe Playwright CLI**: Run `npx playwright --version` (timeout 5s).
+   - Exit 0 → `PLAYWRIGHT_CLI = available`
+   - Command not found or non-zero exit → `PLAYWRIGHT_CLI = unavailable`
+
+3. **Check VERIFY_STEPS test file**: Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists.
+   - Exists → `VERIFY_TEST = exists`
+   - Missing → `VERIFY_TEST = missing`
+
+4. **Classify RUNTIME_BACKEND**:
+
+   | MCP Status | CLI Status | Test File | RUNTIME_BACKEND |
+   |------------|-----------|-----------|-----------------|
+   | active or configured | — | — | `mcp` |
+   | unavailable | available | exists | `cli` |
+   | unavailable | available | missing | `cli-limited` |
+   | unavailable | unavailable | — | `demo-only` |
+
+   If demo script also doesn't exist → `RUNTIME_BACKEND = build-only`.
+
+**Step 2b — API Backend Detection**:
+HTTP client (curl) is always available. Set `RUNTIME_BACKEND = http-client` for this interface. No HARD STOP needed.
+
+**Step 2c — CLI Backend Detection**:
+Shell is always available. Set `RUNTIME_BACKEND = process-runner` for this interface. No HARD STOP needed.
+
+**Step 2d — Data-IO Backend Detection**:
+Shell is always available. Set `RUNTIME_BACKEND = pipeline-runner` for this interface. No HARD STOP needed.
+
+---
+
+**⛔ Workaround Prohibition** (clarified scope — see [runtime-verification.md](../reference/runtime-verification.md) §5):
+- **PROHIBITED**: Raw CDP WebSocket scripts, puppeteer, custom fetch-based CDP calls
+- **PERMITTED**: Playwright CLI (`npx playwright test`), HTTP client (curl/supertest), process execution, standard shell commands — these are first-class verification backends, not workarounds
+
+---
+
+**HARD STOP conditions for GUI interface**:
+
+**If `RUNTIME_BACKEND = mcp` or `cli` or `cli-limited`**: No HARD STOP. Display informational message:
+- `mcp`: `ℹ️ Runtime verification: Playwright MCP (active)`
+- `cli`: `ℹ️ Playwright MCP not available. Using Playwright CLI for runtime verification.`
+- `cli-limited`: `ℹ️ Playwright MCP not available. Using Playwright CLI (limited — no test file yet).`
+
+**If `RUNTIME_BACKEND = demo-only`**: Display warning, no HARD STOP:
+`⚠️ Neither Playwright MCP nor CLI available. Runtime verification limited to demo --ci.`
+
+**If `RUNTIME_BACKEND = build-only`** — run CDP Diagnostic (Electron only), then HARD STOP:
 
 **CDP Diagnostic** (Electron projects only — detected from constitution-seed.md or pre-context.md tech stack):
 1. Run `curl -s http://localhost:9222/json/version` (timeout 3s)
 2. **If curl succeeds** (returns JSON): CDP is active but Playwright tools are not loaded.
    - Diagnosis: `CDP endpoint is running at localhost:9222. Playwright MCP tools are not loaded in this session.`
    - Likely cause: Claude Code session was started before the app, or MCP is not configured with `--cdp-endpoint`.
-   - Solution: `Restart Claude Code session (the app is already running with CDP).`
 3. **If curl fails** (connection refused / timeout): CDP endpoint is not running.
    - Diagnosis: `CDP endpoint not running.`
-   - Solution: `Start the Electron app with --remote-debugging-port=9222, then restart Claude Code session.`
 
-**Non-Electron projects**: Skip CDP probe. Show standard install instructions.
+**Non-Electron projects**: Skip CDP probe.
 
 Display the diagnostic result (if applicable), then **HARD STOP**:
 ```
-⚠️ Playwright MCP is not installed. UI verification (Phase 3 Step 3) will be skipped.
+⚠️ No runtime verification backend available for GUI Features.
 
 [If Electron + CDP diagnostic ran]:
   📋 CDP Diagnostic: [diagnosis from above]
-  💡 Solution: [solution from above]
 
-Installation: claude mcp add playwright -- npx @playwright/mcp@latest
-For Electron apps: claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-See MCP-GUIDE.md for details.
+How to enable runtime verification:
+  Option 1 (Recommended): Install Playwright CLI
+    npm install -D @playwright/test && npx playwright install
+  Option 2: Configure Playwright MCP
+    claude mcp add playwright -- npx @playwright/mcp@latest
+    For Electron: claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
 ```
 **Use AskUserQuestion**:
-- "Restart session after setup" — user follows diagnostic instructions, restarts
-- "Continue without UI verification" — proceed, Phase 3 Step 3 will be skipped
+- "Install Playwright CLI now" — run `npm install -D @playwright/test && npx playwright install`, re-probe, set RUNTIME_BACKEND
+- "Configure MCP and restart session" — user follows MCP instructions, restarts
+- "Continue without UI verification" — proceed, Phase 3 Step 3 runtime verification will use demo --ci only
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-**Record the user's choice.** Phase 3 Step 3 will use this result — do NOT re-detect or re-ask.
+**For non-GUI interfaces**: No HARD STOP. Display:
+`ℹ️ Runtime verification: [backend name] for [interface type]`
+
+**Record the detection result.** Phase 3 will use `RUNTIME_BACKEND` — do NOT re-detect or re-ask.
 
 ---
 
@@ -316,6 +372,37 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
    ```
 5. Any flag → ⚠️ warning (NOT blocking). Helps reviewer spot gaps before Phase 3.
 6. **Skip if**: No data-model.md, no contracts/, or Feature has < 5 tasks (too small to drift)
+
+**Step 1c — Data Dependency Verification** (cross-Feature runtime data):
+
+> Addresses the case where a Feature depends on data from another Feature (e.g., AI model embeddings, shared database entries, cached state) and that data source is not available at verify time.
+> Beyond structural type compatibility (Step 1/Step 6) — checks runtime data availability.
+
+1. Read `pre-context.md` → "Functional Enablement Chain" → "Blocked by ←" entries. Identify each cross-Feature data dependency.
+2. For each data dependency:
+   a. **Structural check** (always — grep-based):
+      - Verify the data source exists in code (store, API endpoint, database table/model)
+      - Verify the data shape is compatible (per Step 6 Integration Contract verification)
+   b. **Runtime data check** (when `RUNTIME_BACKEND` is not `build-only`):
+      - Start app (reuse Phase 0 instance if running)
+      - Navigate to the screen/endpoint that consumes the data:
+        - For GUI: snapshot → check for data elements (list items, table rows, rendered content)
+        - For API: curl endpoint → verify response body is not empty/default
+        - For CLI: run command → verify output contains expected data
+      - **Empty data = WARNING** (not blocking):
+        `⚠️ Data dependency: [source Feature] → [this Feature] — runtime data is EMPTY. This may indicate [source Feature] model/service is not running or populated.`
+   c. **External model/service check** (if dependency involves AI models, external services):
+      - Probe the service endpoint (`curl` with timeout 5s)
+      - If unreachable: `⚠️ External dependency [service name] not reachable. SCs depending on it will be classified as user-assisted or external-dep.`
+3. Report:
+   ```
+   📊 Data Dependency Verification for [FID]:
+     F001-auth → session store: (code) ✅ (runtime) ✅ data present
+     F003-ai → embedding model: (code) ✅ (runtime) ❌ model not responding
+       ⚠️ SCs requiring embeddings reclassified to user-assisted
+   ```
+4. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Downstream impact: SCs whose data dependencies are unavailable are reclassified from auto categories to `user-assisted` or `external-dep` in the SC Verification Matrix.
+5. **Skip if**: No "Blocked by ←" entries in pre-context.md, or Feature has no cross-Feature dependencies.
 
 **Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `rebuild`):
 If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:
@@ -486,19 +573,23 @@ Verifies that the data shape contracts defined in plan.md are actually implement
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).
 > **quickstart.md reference**: If `specs/{NNN-feature}/quickstart.md` exists, use it as the authoritative source for how the Feature should be launched and verified. The demo script must follow quickstart.md's run instructions.
 
-**⚠️ Phase 3 has 7 mandatory steps + Phase 3b. Do NOT skip any step or jump directly to demo execution.**
+**⚠️ Phase 3 has 10 mandatory steps + Phase 3b. Do NOT skip any step or jump directly to demo execution.**
 
 ```
 Phase 3 Checklist (must complete ALL in order):
-  □ Step 0: SC Verification Planning (classify ALL SCs from spec.md)
+  □ Step 0: SC Verification Planning (classify ALL SCs from spec.md — extended categories)
   □ Step 1: Demo script exists and is executable
   □ Step 2: Demo launches the real Feature
-  □ Step 3: UI Verification via Playwright MCP  ← MANDATORY, not optional
+  □ Step 3: UI Verification via runtime backend  ← MANDATORY, not optional
+  □ Step 3b: Visual Fidelity Check (rebuild mode only)
+  □ Step 3c: Navigation Transition Sanity Check (GUI only)
+  □ Step 3d: Interactive Runtime Verification (all interfaces — core runtime check)
+  □ Step 3e: Source App Comparative Verification (rebuild mode only)
   □ Step 4: Coverage mapping and demo components
   □ Step 5: CI/Interactive path convergence
   □ Step 6: Execute demo --ci
   □ Step 6b: Execute VERIFY_STEPS (functional verification)
-  □ Phase 3b: Bug Prevention Verification
+  □ Phase 3b: Bug Prevention Verification (includes Empty State ≠ PASS)
 ```
 
 **Step 0 — SC Verification Planning** (classify ALL SCs — not just those in demo Coverage header):
@@ -510,12 +601,20 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 
 | Category | Criteria | Where Verified |
 |----------|----------|---------------|
-| `cdp-auto` | UI interaction with no external dependency (built-in state, local data, static UI) | Step 3 — CDP interactive test |
+| `cdp-auto` | UI interaction with no external dependency (GUI Features) | Step 3/3d — Playwright MCP or CLI |
+| `api-auto` | API endpoint test with no external dependency (http-api Features) | Step 3d — HTTP client |
+| `cli-auto` | CLI command test with no external dependency (cli Features) | Step 3d — Process runner |
+| `pipeline-auto` | Pipeline test with sample data (data-io Features) | Step 3d — Pipeline runner |
 | `test-covered` | Behavior already verified by unit/integration tests in Phase 1 | Reference passing test name |
-| `external-dep` | Requires API key, external server, network service, or specific hardware | Skip with explicit reason |
+| `user-assisted` | Automatable AFTER user provides a dependency (API key, local service, config) | Step 3d — after user cooperation (see [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3) |
+| `external-dep` | Truly inaccessible — production-only API, specific hardware, rate-limited service | Skip with explicit reason |
 | `manual` | Requires visual/subjective judgment that automation cannot evaluate | Skip as manual-only |
 
-3. **Verification boundary** — what Playwright CDP can and cannot automate:
+   > **`user-assisted` vs `external-dep`**: If the user CAN provide the dependency locally (API key in .env, start a local service, test credentials), classify as `user-assisted`. If truly inaccessible (production-only, hardware, rate-limited quota), classify as `external-dep`. See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3.
+
+3. **Verification boundary** — what each runtime backend can automate (see [runtime-verification.md](../reference/runtime-verification.md) §6 for full protocols):
+
+   **GUI (Playwright MCP/CLI)**:
    - ✅ CAN: Navigate pages, click buttons/links, fill forms, select options
    - ✅ CAN: Check element visibility, text content, attributes, CSS classes
    - ✅ CAN: Read console logs, detect JS errors, take screenshots
@@ -525,27 +624,49 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
    - ❌ CANNOT: Start external server processes or connect to remote services
    - ❌ CANNOT: Evaluate subjective quality (design aesthetics, UX feel)
 
+   **HTTP-API (curl/supertest)**:
+   - ✅ CAN: Send requests, verify status codes, check response body shape
+   - ✅ CAN: Test mutation side effects (POST then GET to verify)
+   - ✅ CAN: Test auth-protected endpoints (401 without auth, 200 with)
+   - ❌ CANNOT: Provide API keys or credentials for external services
+
+   **CLI (process runner)**:
+   - ✅ CAN: Execute commands, capture stdout/stderr/exit code
+   - ✅ CAN: Test error handling (invalid args → non-zero exit + helpful message)
+
+   **Data-IO (pipeline runner)**:
+   - ✅ CAN: Run pipeline with test data, compare output schema and values
+   - ✅ CAN: Verify no error logs during execution
+
 4. Write the SC Verification Matrix:
    ```
    SC Verification Matrix for [FID]:
    | SC | Category | Planned Method | Skip Reason |
    |----|----------|---------------|-------------|
    | SC-022 | cdp-auto | Navigate settings → add server → verify status | — |
-   | SC-023 | external-dep | — | API key required for tool execution |
+   | SC-023 | user-assisted | Navigate settings → test tool execution | Requires OPENAI_API_KEY in .env |
    | SC-024 | cdp-auto | Enable built-in server → verify tool list loads | — |
-   | SC-028 | cdp-auto | Navigate settings → verify page renders | — |
-   | SC-031 | external-dep | — | Requires connected server with tools |
+   | SC-028 | api-auto | GET /api/config → verify 200 + response shape | — |
+   | SC-031 | external-dep | — | Requires production MCP server (not locally available) |
    ```
 
-5. **Coverage assessment**:
-   - Auto-verifiable (`cdp-auto`): [N] SCs → will be verified in Step 3
+5. **SC Minimum Depth Rule**: After classification, check each auto-category SC (`cdp-auto`, `api-auto`, `cli-auto`, `pipeline-auto`) for verification depth:
+   - Tier 1 (Presence): Element/response exists — `verify .settings-panel visible`
+   - Tier 2 (State Change): Interaction produces expected state — `click toggle → verify-state .theme "dark"`
+   - Tier 3 (Side Effect): State change propagates downstream — `verify-effect body class "dark-mode"`
+
+   **Rule**: If an SC's planned verification is ONLY Tier 1 (presence), AND the SC description implies behavioral verification (contains "should change", "should update", "should display after", "should respond with"), flag: `⚠️ SC-### verification is presence-only but SC implies behavior — upgrading to Tier 2`. Agent SHOULD auto-upgrade flagged SCs to Tier 2 when the interaction is straightforward.
+
+6. **Coverage assessment**:
+   - Auto-verifiable (`cdp-auto` + `api-auto` + `cli-auto` + `pipeline-auto`): [N] SCs → will be verified in Step 3/3d
+   - User-assisted: [N] SCs → will be verified in Step 3d after user cooperation
    - Test-covered: [N] SCs → already verified in Phase 1
    - External-dep: [N] SCs → skipped with explicit reason
    - Manual: [N] SCs → skipped
-   - **Effective coverage**: (cdp-auto + test-covered) / total = [N]%
+   - **Effective coverage**: (auto + user-assisted + test-covered) / total = [N]%
    - If effective coverage < 50%: display `⚠️ SC verification coverage is [N]% — most SCs cannot be automatically verified for this Feature`
 
-6. **`cdp-auto` SCs drive Step 3**: In Step 3 SC-level UI verification, verify ALL `cdp-auto` SCs — not just those in the demo Coverage header. SCs that appear in the SC Verification Matrix as `cdp-auto` but are missing from the demo Coverage header must still be tested.
+7. **Auto-category SCs drive Step 3/3d**: In Step 3 SC-level UI verification, verify ALL `cdp-auto` SCs — not just those in the demo Coverage header. In Step 3d Interactive Runtime Verification, verify ALL interface-appropriate auto SCs (`api-auto`, `cli-auto`, `pipeline-auto`) plus `user-assisted` SCs (after cooperation).
 
 **Step 1 — Check demo script exists AND is a real demo (NOT markdown, NOT test-only)**:
 - Verify `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language) exists
@@ -565,23 +686,25 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 > **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down. Do NOT ask the user to start or restart the app manually. The agent starts the app itself (with CDP flags for Electron), runs all SC verifications, then shuts down the app when done.
 
 - **Runtime Degradation Flag Check**: Read sdd-state.md Feature Progress for this Feature. If Detail column shows `⚠️ RUNTIME-DEGRADED`:
-  - Display: `⚠️ This Feature was implemented without runtime verification (MCP was unavailable during implement). Runtime bugs (selector instability, layout timing, infinite re-renders) may exist undetected.`
-  - If `MCP_STATUS` is now `active` or `configured`: proceed with full UI verification (this is the **recovery path** — extra scrutiny)
-  - If `MCP_STATUS` is STILL `unavailable`: **BLOCKING HARD STOP** — this Feature has NEVER had any runtime verification. Use AskUserQuestion:
-    - "Install MCP and retry verify"
+  - Display: `⚠️ This Feature was implemented without runtime verification. Runtime bugs (selector instability, layout timing, infinite re-renders) may exist undetected.`
+  - If `RUNTIME_BACKEND` is now `mcp`, `cli`, or `cli-limited`: proceed with full UI verification (this is the **recovery path** — extra scrutiny)
+  - If `RUNTIME_BACKEND` is STILL `build-only`: **BLOCKING HARD STOP** — this Feature has NEVER had any runtime verification. Use AskUserQuestion:
+    - "Install Playwright CLI and retry verify"
     - "Acknowledge NO runtime verification" — requires reason via "Other" input. Sets verify to `limited` status with `⚠️ NEVER-RUNTIME-VERIFIED — [reason]`
   - **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-- **MCP Status Check**: Use the `MCP_STATUS` from the Pre-flight check (run before Phase 1).
-  - If `MCP_STATUS = unavailable` AND user chose "Continue without UI verification":
-    - **CLI Playwright fallback**: If `demos/verify/F00N-name.spec.ts` exists, run SC verification via CLI instead of skipping entirely:
+- **Runtime Backend Check**: Use the `RUNTIME_BACKEND` from the Pre-flight detection (run before Phase 1).
+  - If `RUNTIME_BACKEND = build-only` AND user chose "Continue without UI verification": skip to Step 4. Display: `⏭️ UI verification skipped (no runtime backend available — acknowledged in Pre-flight)`
+  - If `RUNTIME_BACKEND = demo-only`: skip to Step 6 (demo --ci only). Display: `⏭️ Interactive UI verification skipped — using demo --ci for runtime check.`
+  - If `RUNTIME_BACKEND = cli` or `cli-limited`:
+    - **Playwright CLI verification**: If `demos/verify/F00N-name.spec.ts` exists, run SC verification via CLI:
       1. Ensure app is running (from demo `--ci` or start it)
       2. Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=json`
       3. Map test results back to SC-### coverage (Tier 1/2/3 results reported normally)
-      4. Display: `ℹ️ SC verification via Playwright CLI (MCP unavailable — using generated test file)`
-    - If no test file exists: skip to Step 4. Display: `⏭️ UI verification skipped (Playwright MCP not available — acknowledged in Pre-flight)`
-  - If `MCP_STATUS = active` or `MCP_STATUS = configured` → proceed with Electron CDP check below
-  - **If Pre-flight was somehow skipped**: Call `browser_snapshot` NOW. If the tool does not exist, display the HARD STOP from Pre-flight and wait for user response. **Do NOT silently skip.**
+      4. Display: `ℹ️ SC verification via Playwright CLI`
+    - If no test file exists and `RUNTIME_BACKEND = cli-limited`: limited to demo --ci only for this Feature.
+  - If `RUNTIME_BACKEND = mcp` → proceed with Electron CDP check below (if Electron) or directly to SC verification (if web)
+  - **If Pre-flight was somehow skipped**: Call `browser_snapshot` NOW. If the tool does not exist, run `npx playwright --version` as fallback. If neither exists, display the HARD STOP from Pre-flight and wait for user response. **Do NOT silently skip.**
 
 - **Electron CDP Configuration Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
   Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
@@ -730,6 +853,156 @@ If `specs/reverse-spec/visual-references/manifest.md` exists AND this Feature co
 
 If visual references don't exist or no screens match this Feature: skip silently.
 
+**Step 3c — Navigation Transition Sanity Check** (GUI Features only):
+
+> Addresses the case where Feature B adds pages that share layout with Feature A, but the layout breaks on transition (e.g., header height changes, navigation shifts, content area cramped).
+
+**Skip if**: Non-GUI Feature, or this is the first Feature (no prior Feature to transition from), or `RUNTIME_BACKEND` is `build-only` or `demo-only`.
+
+1. **Identify transition points**:
+   a. Read this Feature's routes/pages from spec.md or plan.md
+   b. Read preceding Features' routes/pages from their demo scripts or spec.md
+   c. Identify shared layout elements (header, navigation, sidebar — from constitution-seed.md or plan.md layout section)
+
+2. **Execute transition verification** (when `RUNTIME_BACKEND` supports navigation — `mcp` or `cli`):
+   a. Navigate to a preceding Feature's page (e.g., F001's main route)
+   b. Snapshot: capture layout state (header height, nav width, content area dimensions)
+   c. Navigate to this Feature's page
+   d. Snapshot: capture layout state
+   e. Compare shared layout elements:
+      - Header: same height, same elements visible
+      - Navigation: same width, same items (plus this Feature's new items)
+      - Content area: proper dimensions within layout
+
+3. **Detect layout regressions**:
+   - Header height changed → `⚠️ Header layout inconsistent between [Feature A] and [Feature B] pages`
+   - Navigation shifted → `⚠️ Navigation layout changed on transition`
+   - Content area cramped/overflowing → `⚠️ Content area dimension mismatch`
+
+4. Report:
+   ```
+   🔗 Navigation Transition Check:
+     F001 /dashboard → F003 /settings: ✅ Layout consistent
+     F001 /dashboard → F003 /chat: ⚠️ Header height differs (48px → 64px)
+   ```
+
+5. **Result**: ⚠️ warnings (NOT blocking) — highlighted in Review.
+6. **Without runtime backend**: Skip with notice: `ℹ️ Navigation transition check requires runtime backend — skipped.`
+
+**Step 3d — Interactive Runtime Verification** (all interfaces):
+
+> The core fix for "verify checks code but doesn't run the app." Exercises the Feature's actual runtime behavior using the interface-appropriate backend from Pre-flight detection.
+> See [runtime-verification.md](../reference/runtime-verification.md) §6 for full per-interface protocol.
+
+**Skip if**: `RUNTIME_BACKEND = build-only` (no runtime verification possible).
+
+**GUI Features** (`RUNTIME_BACKEND = mcp` or `cli`):
+1. Group `cdp-auto` SCs from SC Verification Matrix by user flow (from spec.md FR grouping)
+2. Execute each flow as a complete interaction sequence:
+   - Navigate to starting page
+   - Perform user actions (click, fill, select) per SC definition
+   - Verify intermediate states (Tier 2: state changes)
+   - Verify end states (Tier 3: side effects, downstream propagation)
+   - Verify NO console errors occurred during the flow
+3. This extends Step 3 SC-level verification with flow-level verification — Step 3 verifies individual SCs, Step 3d verifies connected flows
+
+**HTTP-API Features** (`RUNTIME_BACKEND = http-client`):
+1. Group `api-auto` SCs by endpoint
+2. For each endpoint:
+   - Send request with test data (from demo fixtures or spec.md examples)
+   - Verify response status code matches SC expectation
+   - Verify response body shape (key fields present, correct types)
+   - For mutation endpoints: send mutation → verify response → send follow-up GET → verify side effect persists
+   - For auth-protected: verify 401 without auth, 200 with auth (if test credentials available)
+
+**CLI Features** (`RUNTIME_BACKEND = process-runner`):
+1. Group `cli-auto` SCs by command
+2. For each command:
+   - Execute with test arguments (from spec.md examples)
+   - Capture stdout, stderr, exit code
+   - Verify exit code matches expectation
+   - Verify stdout matches expected pattern (substring, regex, or JSON shape)
+   - Verify error handling (invalid args → non-zero exit + helpful message, not stack trace)
+
+**Data-IO Features** (`RUNTIME_BACKEND = pipeline-runner`):
+1. Group `pipeline-auto` SCs by pipeline stage
+2. For each stage:
+   - Prepare test input data (from demo fixtures)
+   - Execute pipeline
+   - Compare output: schema match, row/record counts, key value spot checks
+   - Verify no error logs during execution
+
+**`user-assisted` SCs** (all interfaces):
+> See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3.
+1. Before verifying `user-assisted` SCs, batch ALL user preparation requests into one prompt:
+   ```
+   📋 User-Assisted Verification for [FID]:
+     SC-023: Requires OPENAI_API_KEY in .env
+     SC-031: Requires MCP server running on localhost:3001
+
+   Please prepare these dependencies, then confirm.
+   ```
+2. **Use AskUserQuestion**:
+   - "Dependencies ready — proceed with verification"
+   - "Skip user-assisted SCs"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+3. If "Dependencies ready": re-verify each dependency (probe API key presence, service endpoint) → run automated verification (same as auto categories)
+4. If "Skip": record as `⚠️ user-assisted — skipped`
+
+**Result report** (appended to SC Verification report):
+```
+📊 Interactive Runtime Verification for [FID]:
+  Flow 1 (Settings → Theme): ✅ All 3 SCs passed (2 state changes, 1 side effect)
+  Flow 2 (Chat → Send): ⚠️ SC-025 timeout (loading state did not clear within 10s)
+  API /api/settings: ✅ GET 200, POST 200, invalid POST 422
+  user-assisted: 2/3 verified (1 skipped — external API unavailable)
+```
+
+**Step 3e — Source App Comparative Verification** (rebuild mode only):
+
+> In rebuild mode, compare the rebuilt app against the original running app for behavioral parity.
+> Only when Origin=`rebuild` AND `source_available: running` in sdd-state.md scenario config.
+> See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) § Source App Access.
+
+**Skip if**: Not rebuild mode, OR `source_available` is not `running`, OR Source Path is N/A.
+
+**Prerequisite**: Source app must be running. Detection:
+1. Read Source Path from sdd-state.md
+2. Probe source app (curl health endpoint or process check)
+3. If not running → User Cooperation Protocol:
+   ```
+   📋 Source App Comparison requires the original app running.
+   Source Path: [path]
+   Expected at: http://localhost:[port]
+   ```
+   **Use AskUserQuestion**:
+   - "Source app is running — proceed with comparison"
+   - "Skip source comparison"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+**Comparison procedure** (when both apps are running):
+1. For each page/route in this Feature:
+   a. Navigate to the page in the REBUILT app → Snapshot A
+   b. Navigate to the equivalent page in the SOURCE app → Snapshot B (requires separate browser context or port)
+   c. Compare:
+      - Layout structure: element positions, container hierarchy
+      - Data presentation: same data shape displayed
+      - Interaction behavior: same click targets produce same outcomes
+2. For API endpoints (if http-api interface):
+   a. Send same request to both apps
+   b. Compare response status codes and body shapes
+3. Report:
+   ```
+   📊 Source App Comparison for [FID]:
+     /settings page: ✅ Layout match, ✅ Data match
+     /chat page: ⚠️ Layout deviation — sidebar width differs (240px vs 200px)
+     GET /api/config: ✅ Response shape match
+   ```
+
+**Result**: ⚠️ warnings (NOT blocking). User can acknowledge intentional deviations during Review.
+
+**Note on dual-app management**: The agent manages both apps. Source app port must differ from rebuilt app port. If both are Electron, they need different CDP ports.
+
 **Step 4 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to what the user can try/see in the demo
   - Each FR/SC should be either ✅ (demonstrated) or ⬜ (not demoed with reason)
@@ -761,13 +1034,13 @@ Before running the demo, **read the demo script source** and verify:
   - Process exit with non-zero code
 - **If runtime errors are detected**: The demo is considered **FAILED** even if the health check (HTTP 200) passed — a healthy port does not mean the application is functioning correctly (e.g., Vite dev server may respond while Electron main process has fatal errors)
 - Display each detected error with its source line for user review
-- **Browser console error scan (when MCP available)**: After demo --ci passes the stdout/stderr scan above, if `MCP_STATUS = active`:
+- **Browser console error scan (when runtime backend supports it)**: After demo --ci passes the stdout/stderr scan above, if `RUNTIME_BACKEND = mcp`:
   1. Navigate to the app's main URL (from demo script's "Try it" output or health check URL)
   2. Wait 5 seconds for the page to stabilize
   3. Read browser Console logs for: `TypeError`, `ReferenceError`, `Maximum update depth exceeded`, `unhandled rejection`, infinite render warnings
   4. **If browser console errors detected**: Demo is FAILED even if health endpoint returned 200 and stdout was clean — these are client-side-only bugs (infinite re-renders, selector instability, DOM timing) that never appear in server output
   5. Display: `❌ Browser console errors detected: [N] errors — [first error message]`
-  6. If `MCP_STATUS ≠ active`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (MCP not active)`
+  6. If `RUNTIME_BACKEND ≠ mcp`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (Playwright MCP not active)`
 
 **If any check fails**, display and BLOCK:
 ```
@@ -798,12 +1071,12 @@ Please create a demo script at demos/F00N-name.sh that:
 - Update `demos/README.md` (Demo Hub) with the Feature's demo and what the user can experience:
   - `./demos/F00N-name.sh` — launches [brief description of the live demo experience]
 
-**Step 6b — Execute VERIFY_STEPS** (if MCP available and VERIFY_STEPS block exists):
+**Step 6b — Execute VERIFY_STEPS** (if runtime backend supports interactive verification and VERIFY_STEPS block exists):
 
 After demo `--ci` passes, check for a `# VERIFY_STEPS:` comment block in the demo script:
 
 1. Parse the demo script for a `# VERIFY_STEPS:` comment block (lines starting with `#   ` after `# VERIFY_STEPS:`)
-2. If block exists AND `MCP_STATUS` is `active` or `configured`:
+2. If block exists AND `RUNTIME_BACKEND` is `mcp`:
    - Keep the app running (from the demo `--ci --verify` invocation)
    - Execute each step via Playwright MCP using the same verbs as SC-level verification:
      - `navigate /path` → Navigate to URL
@@ -831,14 +1104,14 @@ After demo `--ci` passes, check for a `# VERIFY_STEPS:` comment block in the dem
      ```
    - `verify-state`/`verify-effect` failures → ⚠️ **warning** (NOT blocking)
 3. If VERIFY_STEPS block not found: `ℹ️ Functional verification not configured — VERIFY_STEPS block absent in demo script`
-4. If MCP unavailable BUT `demos/verify/F00N-name.spec.ts` (or `.spec.js`) exists:
+4. If `RUNTIME_BACKEND` is `cli` or `cli-limited` AND `demos/verify/F00N-name.spec.ts` (or `.spec.js`) exists:
    - Ensure app is running (from demo `--ci` execution in Step 6)
    - Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=list`
    - Parse test results (pass/fail per test case)
    - Report in same format as MCP-driven VERIFY_STEPS above
-   - Display: `ℹ️ Functional verification via Playwright CLI (MCP unavailable — using generated test file)`
-5. If MCP unavailable AND no test file exists: skip with notice:
-   `⚠️ Functional verification skipped — no MCP and no generated test file (demos/verify/F00N-name.spec.ts)`
+   - Display: `ℹ️ Functional verification via Playwright CLI`
+5. If `RUNTIME_BACKEND` is `demo-only` or `build-only` AND no test file exists: skip with notice:
+   `⚠️ Functional verification skipped — no runtime backend available and no test file (demos/verify/F00N-name.spec.ts)`
 
 **SC Verification Coverage Summary** (after Steps 3 + 6b complete):
 
@@ -868,12 +1141,24 @@ Display:
 > Additional checks to automatically verify basic stability of code written during implement.
 > Runs after Phase 3 Demo-Ready, before Phase 4 Update.
 
-**Empty State Smoke Test**:
+**Empty State Smoke Test** — "Empty State ≠ PASS":
+
+> Principle: A Feature that renders an empty state without errors is NOT automatically passing.
+> If the Feature is supposed to display data and the data area is empty with no intentional
+> empty-state message, that is an INCOMPLETE state, not a PASS.
+
 - Start app with all stores/state set to initial (empty) state
 - Confirm main screen renders without crashes (Error Boundary not triggered)
 - Confirm no critical JS errors in Console (TypeError, ReferenceError, etc.)
-- **When MCP available**: Auto-verify via Navigate → Snapshot
-- **Without MCP**: Substitute with build + server start success check
+- **When runtime backend supports navigation** (`RUNTIME_BACKEND = mcp`): Auto-verify via Navigate → Snapshot
+- **Without navigation capability**: Substitute with build + server start success check
+- **Data presence check** (NEW):
+  - Read spec.md FR-### to identify what data the Feature should display
+  - If the Feature manages/displays data (list, table, form with defaults):
+    - Check if the data area is populated OR shows an intentional empty state message
+    - "No items yet" / "Add your first..." / "No results" / placeholder text = ✅ intentional empty state
+    - Blank area with no content and no empty-state indicator = `⚠️ Empty State — data area has no content and no empty-state indicator. Possible missing data source or unimplemented empty state UI.`
+  - This check helps catch cross-Feature data dependency issues (e.g., Feature depends on AI model data that isn't populated)
 
 **Smoke Launch Criteria** (basic app stability):
 1. Process starts — no immediate exit with non-zero exit code

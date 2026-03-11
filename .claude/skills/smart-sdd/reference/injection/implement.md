@@ -239,6 +239,7 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
 
 > **Purpose**: Resolve G4 — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
 > **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [MCP-GUIDE.md](../../../../../MCP-GUIDE.md) for MCP Capability Map.
+> **Runtime backend architecture**: See [runtime-verification.md](../runtime-verification.md) for the full multi-backend detection protocol and interface-specific verification strategies.
 
 ### Per-Task Runtime Verification
 
@@ -264,12 +265,25 @@ After each task that creates/modifies UI files:
 5. **Success**: Proceed to next task (keep app running)
 6. **Failure**: Enter Auto-Fix Loop
 
-**Without MCP (Level 1 Degradation) — HARD STOP**:
+**Without MCP — Check Playwright CLI Before Degradation**:
+
+Before declaring Level 1 degradation, check if Playwright CLI is available:
+1. Run `npx playwright --version` → if available, use CLI for runtime checks (NOT degradation)
+2. If CLI also unavailable → declare Level 1 Degradation
+
+**If Playwright CLI available** (NOT degradation):
+- Use `npx playwright test` for runtime verification instead of MCP
+- Display: `ℹ️ Playwright MCP not available — using Playwright CLI for runtime verification.`
+- Proceed with normal Step 2 flow (navigate, snapshot, console check via CLI test)
+- Do NOT set `RUNTIME-DEGRADED` flag
+
+**If neither MCP nor CLI available — Level 1 Degradation (HARD STOP)**:
 
 At first task verification, display:
 ```
 ⚠️ Runtime Verification Degraded — Level 1 (build-only)
-  MCP not available. Runtime verification is limited to:
+  Neither Playwright MCP nor Playwright CLI available.
+  Runtime verification is limited to:
   ✅ Build gate (compile/transpile)
   ❌ Runtime rendering check — SKIPPED
   ❌ Console error scan — SKIPPED
@@ -280,8 +294,9 @@ At first task verification, display:
 ```
 
 Use AskUserQuestion (**HARD STOP**):
+- "Install Playwright CLI now (`npm i -D @playwright/test`)" — install, then retry
 - "Continue with Level 1 (build-only)" — proceed, but record `RUNTIME-DEGRADED` flag
-- "Install MCP and retry" — user installs MCP, restart implement verification
+- "Configure Playwright MCP and restart session" — for MCP-specific setup
 
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 

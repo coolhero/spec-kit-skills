@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-11 08:36 KST
+[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-11 09:30 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -430,7 +430,7 @@ merge 전에 verify가 잡아내는 것들:
 | 테스트, 빌드, 린트 통과 | 깨진 코드가 main에 합쳐지는 것 |
 | Feature A↔B 데이터 형태 호환 확인 | 런타임 통합 실패 (예: Feature 간 필드명 불일치) |
 | 모든 시나리오(SC) 분류 | 조용히 테스트되지 않은 시나리오 — 검증된 것과 스킵 사유가 투명하게 보임 |
-| Playwright로 UI 실제 동작 확인 | "빌드는 통과하지만 버튼이 안 눌리는" 문제 |
+| 런타임 동작 실제 확인 (다중 백엔드: Playwright, curl, CLI) | "빌드는 통과하지만 기능이 동작하지 않는" 문제 |
 | verify 중 변경 사항 기록 | verify 중 숨겨진 소스 수정 — 모든 변경이 state에 투명하게 기록 |
 | 컨텍스트 압축 복구 | 긴 세션 중 에이전트가 verify 진행을 잊는 것 |
 
@@ -440,8 +440,12 @@ Phase 2:  교차 Feature 일관성 — 엔티티/API 호환, 인터랙션 체인
           UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트,
           통합 계약 형태 검증 (Provider↔Consumer 형태 + 브리지)
 Phase 3:  Demo-Ready — SC 검증 매트릭스 (커버리지 < 50% 시 경고),
-          VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축)
-Phase 3b: 버그 예방 — 빈 상태 스모크 테스트, 스모크 런치 기준
+          VERIFY_STEPS 기능 테스트, 비주얼 충실도 (재구축),
+          내비게이션 전환 검사, 인터랙티브 런타임 검증
+          (인터페이스별: GUI는 Playwright, API는 curl, CLI는 shell),
+          소스 앱 비교 (재구축)
+Phase 3b: 버그 예방 — 빈 상태 스모크 테스트 (데이터 존재 확인),
+          스모크 런치 기준
 Phase 4:  Global Evolution 갱신 (레지스트리, sdd-state)
 ```
 
@@ -682,7 +686,7 @@ Interface (앱이 노출하는 것)        Concern (횡단 관심사)           
 2. 동일한 S1/S5/S7 스키마로 프로젝트 고유 규칙 추가 (예: "결제 엔드포인트에 멱등성 SC 필수")
 3. 이 파일은 가장 마지막에 최우선 순위로 로드되어 다른 모든 모듈을 확장
 
-새 모듈은 기존 모듈과 자유롭게 합성됩니다 — 중복 없이, 불필요한 규칙 없이. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md` 참고.
+새 모듈은 기존 모듈과 자유롭게 합성됩니다 — 중복 없이, 불필요한 규칙 없이. 각 인터페이스 모듈은 **S8 런타임 검증 전략**도 선언합니다 — 해당 인터페이스 타입을 런타임에서 어떻게 시작, 검증, 종료하는지 정의합니다. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md`, 다중 백엔드 런타임 검증 아키텍처는 `reference/runtime-verification.md` 참고.
 
 #### 신호 키워드와 Proposal Mode
 

@@ -5,6 +5,43 @@
 
 ---
 
+## [2026-03-11] F007 Post-Mortem — Runtime Verification Architecture + Multi-Backend Detection
+
+Comprehensive verify improvements based on F007 post-mortem analysis. Core problem: verify checked code existence (grep) but didn't exercise runtime behavior. Five interrelated issues traced to this single architectural gap.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Runtime backend abstraction | `RUNTIME_BACKEND` variable replacing `MCP_STATUS` | Interface-specific verification needs different tools — MCP/CLI for GUI, curl for API, shell for CLI/data-io |
+| 2 | Multi-backend detection | MCP probe → CLI probe → test file check → classify | Playwright MCP is unreliable (missing from session); CLI is stable fallback. Eliminates false "session restart needed" messages |
+| 3 | Interface-aware SC categories | Added `api-auto`, `cli-auto`, `pipeline-auto`, `user-assisted` | Previous classification only had `cdp-auto` for GUI. Non-GUI interfaces had no automated verification path |
+| 4 | `user-assisted` split from `external-dep` | SCs accessible with user help (API key, local model) are automatable after cooperation | Batched cooperation request prevents excessive HARD STOPs |
+| 5 | SC Minimum Depth Rule | Tier-1-only SCs implying behavior auto-upgraded to Tier 2 | Prevents "text present" passing for SCs that say "should change/update/display" |
+| 6 | Session restart messaging | Only when MCP specifically needed AND CLI also unavailable | Non-GUI interfaces never mention restart. CLI available = no restart needed |
+| 7 | Workaround prohibition clarified | Raw CDP/puppeteer still prohibited; CLI, curl, shell explicitly permitted | CLI is a first-class Playwright tool, not a workaround |
+| 8 | S8 Runtime Verification Strategy | New domain schema section — per-interface, no merge | Each interface declares its own start/verify/stop/SC-extension |
+| 9 | Data dependency verification | Step 1c — runtime probe for cross-feature data availability | Embedding model not running = empty results, but code structure was correct |
+| 10 | Navigation transition check | Step 3c — layout consistency across Feature pages | Header cramped when navigating between Features |
+| 11 | User Cooperation Protocol | Centralized 6-step pattern (DETECT → CLASSIFY → DIAGNOSE → REQUEST → VERIFY → RECORD) | Standardizes user assistance requests across 10+ pipeline locations |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `reference/runtime-verification.md` | NEW — Multi-backend architecture, detection protocol, per-interface verification |
+| `reference/user-cooperation-protocol.md` | NEW — Standardized user assistance pattern |
+| `commands/verify-phases.md` | MAJOR UPDATE — Pre-flight multi-backend, Steps 1c/3c/3d/3e, SC categories, MCP_STATUS→RUNTIME_BACKEND |
+| `domains/_schema.md` | Added S8 Runtime Verification Strategy section + merge rule |
+| `domains/interfaces/*.md` (4 files) | Added S8 sections with interface-specific verification strategies |
+| `reference/injection/implement.md` | CLI check before degradation, runtime-verification.md cross-reference |
+| `reference/injection/verify.md` | Checkpoint/Review display updates for new steps and SC categories |
+| `domains/scenarios/rebuild.md` | Source app runtime link to Step 3e |
+| `commands/pipeline.md` | Foundation Gate cooperation reference |
+| `lessons-learned.md` | Added G11 entry |
+
+---
+
 ## [2026-03-11] Proposal Mode + Clarity Index (CI) — Streamlined Greenfield Entry
 
 Added Proposal Mode to `init` command and Clarity Index (CI) scoring system. Enhances the 3-axis domain composition with signal-based inference for greenfield projects.

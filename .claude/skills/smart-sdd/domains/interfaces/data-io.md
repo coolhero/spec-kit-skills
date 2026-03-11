@@ -43,3 +43,20 @@
 | **Transformations** | What processing steps? Order? Dependencies? |
 | **Output** | Output format? Destination? Validation? |
 | **Error handling** | Partial failure strategy? Dead letter queue? Retry? |
+
+---
+
+## S8. Runtime Verification Strategy
+
+> Cross-references [reference/runtime-verification.md](../../reference/runtime-verification.md) § 6d.
+
+| Field | Value |
+|-------|-------|
+| **Start method** | Pipeline prerequisites setup (test data placement, dependency services) |
+| **Verify method** | Run pipeline with sample/test data → compare output against expected results. Backend: Pipeline runner (shell execution) |
+| **Stop method** | N/A — pipeline runs terminate naturally; clean up temp data |
+| **SC classification extensions** | `pipeline-auto` — pipeline SCs verifiable with sample test data without external dependencies |
+
+**Data-IO-specific verification**:
+- Step 3d Interactive Runtime Verification: group `pipeline-auto` SCs by pipeline stage → run with test data → compare output schema + row counts + checksums
+- Idempotency check: run pipeline twice with same input → verify identical output

@@ -289,7 +289,7 @@ This step is informational only — no user confirmation required.
 > Runs ONCE before the first Feature enters the pipeline.
 > **Skip for**: greenfield projects (no Foundation exists yet — nothing to validate), OR if `sdd-state.md` records `Foundation Verified: [date]` with no Foundation-affecting changes since.
 
-**Purpose**: Validate cross-cutting Foundation systems (CSS theme, state management patterns, IPC bridge, core layout) before Feature code builds on them. Common Foundation-level bugs include: CSS theme not loading, state selector instability, IPC bridge disconnection, layout patterns breaking. No amount of Feature-level testing catches a broken Foundation.
+**Purpose**: Validate cross-cutting Foundation systems (CSS theme, state management patterns, IPC bridge, core layout) before Feature code builds on them. Common Foundation-level bugs include: CSS theme not loading, state selector instability, IPC bridge disconnection, layout patterns breaking. No amount of Feature-level testing catches a broken Foundation. For user assistance patterns during Foundation setup, see [reference/user-cooperation-protocol.md](../reference/user-cooperation-protocol.md).
 
 **When to run**: Before the FIRST Feature's `specify` step. Also re-run if a preceding Feature modified Foundation files (detected via `git diff` on files outside `specs/`).
 

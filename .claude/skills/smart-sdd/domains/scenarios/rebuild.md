@@ -42,6 +42,7 @@
 - `source_available: running` -> side-by-side comparison
   - Same request -> compare responses (per preservation_level)
   - Same user flow -> compare outcomes
+  - **Runtime comparison**: verify Phase 3 Step 3e performs automated side-by-side comparison using the appropriate runtime backend. See [reference/runtime-verification.md](../../reference/runtime-verification.md) and [reference/user-cooperation-protocol.md](../../reference/user-cooperation-protocol.md) for source app startup cooperation flow.
 - `source_available: code-only` -> SBI-based verification
   - Each P1/P2 behavior has corresponding test in new system
 - `source_available: docs-only` -> SC-based verification only

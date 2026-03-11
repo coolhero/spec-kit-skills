@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-11 08:36 KST
+[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-11 09:30 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -433,7 +433,7 @@ What verify catches — before merge:
 | Tests, build, lint pass | Broken code reaching main |
 | Feature A↔B data shape compatible | Integration failures at runtime (e.g., wrong field names between Features) |
 | Every scenario (SC) classified | Silently untested scenarios — you see what's verified and what's skipped with reason |
-| UI actually works via Playwright | "Build passes but button does nothing" |
+| Runtime behavior actually works (multi-backend: Playwright, curl, CLI) | "Build passes but feature does nothing at runtime" |
 | Verify-time changes recorded | Hidden modifications during verify — all changes transparent in state |
 | Context compaction recovery | Agent losing progress mid-verify after long sessions |
 
@@ -443,8 +443,12 @@ Phase 2:  Cross-Feature Consistency — entity/API compat, interaction chains,
           UX behavior contract, API compat matrix, enablement smoke test,
           integration contract shape verification (Provider↔Consumer + bridge)
 Phase 3:  Demo-Ready — SC Verification Matrix (coverage gate if < 50%),
-          VERIFY_STEPS functional tests, visual fidelity (rebuild)
-Phase 3b: Bug Prevention — empty state smoke test, smoke launch criteria
+          VERIFY_STEPS functional tests, visual fidelity (rebuild),
+          navigation transition check, interactive runtime verification
+          (interface-aware: Playwright for GUI, curl for API, shell for CLI),
+          source app comparison (rebuild)
+Phase 3b: Bug Prevention — empty state smoke test (data presence check),
+          smoke launch criteria
 Phase 4:  Global Evolution Update (registries, sdd-state)
 ```
 
@@ -685,7 +689,7 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 2. Add project-specific rules using the same S1/S5/S7 schema (e.g., "payment endpoints require idempotency SC")
 3. This file loads last with highest priority, extending all other modules
 
-New modules compose freely with existing ones — no duplication, no unused rules. See `domains/_schema.md` for the module schema and `domains/_resolver.md` for the full loading protocol.
+New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
 
 #### Signal Keywords and Proposal Mode
 

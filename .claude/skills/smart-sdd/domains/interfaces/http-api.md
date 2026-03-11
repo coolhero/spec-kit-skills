@@ -57,3 +57,21 @@
 When this interface is active, enforce:
 - API Compatibility Matrix check: see `injection/implement.md` § API Compatibility Matrix Injection
 - Cross-Feature API contract consistency: see `injection/verify.md` § Phase 2
+
+---
+
+## S8. Runtime Verification Strategy
+
+> Cross-references [reference/runtime-verification.md](../../reference/runtime-verification.md) § 6b.
+
+| Field | Value |
+|-------|-------|
+| **Start method** | Server process (`npm start`, `uvicorn`, `rails server`, etc.) |
+| **Verify method** | Send HTTP requests to endpoints → verify status codes + response bodies + mutation side effects. Backend: HTTP client (`curl`, `supertest`, or language-native HTTP calls) |
+| **Stop method** | Kill server process |
+| **SC classification extensions** | `api-auto` — endpoint SCs verifiable via HTTP client without external dependencies |
+
+**HTTP-API-specific verification**:
+- Step 3d Interactive Runtime Verification: group `api-auto` SCs by endpoint → send requests → verify status + body + mutations
+- Auth-protected endpoints: test both authenticated and unauthenticated requests
+- Mutation endpoints: verify side effects (database state, event emission) after request

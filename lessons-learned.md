@@ -84,6 +84,19 @@
 **Countermeasures**: UI Interaction Surface Audit checklist in implement B-3 (hover area scope, response timing, CSS vs React state, scroll interference)
 **Coverage**: ~60% — checklist raises awareness but requires agent judgment; no automated detection
 
+## G11. Verify Checks Code Existence, Not Runtime Behavior
+
+**Problem**: verify passes when code structure is correct (grep finds the right patterns) but the Feature doesn't actually work at runtime
+**Case**: F007 — embedding model not running → search returns empty results, but verify passed because code for embedding/search was structurally present. Header layout cramped when navigating between Features, but verify only checked individual pages in isolation.
+**Root causes**:
+- verify had no step for "start the app and exercise the Feature's actual behavior"
+- Pre-flight only checked Playwright MCP — if unavailable, immediately recommended session restart even when Playwright CLI was available
+- SC classification had no interface-specific categories (only `cdp-auto` for GUI)
+- No cross-Feature navigation transition check
+- No runtime data dependency verification
+**Countermeasures**: Multi-backend detection protocol (MCP → CLI → demo-only → build-only), interface-aware SC categories (`api-auto`, `cli-auto`, `pipeline-auto`, `user-assisted`), Step 1c Data Dependency Verification, Step 3c Navigation Transition Sanity Check, Step 3d Interactive Runtime Verification, Step 3e Source App Comparative Verification, SC Minimum Depth Rule, Empty State ≠ PASS principle
+**Coverage**: ~85% — `external-dep` SCs still require manual verification; `user-assisted` SCs depend on user cooperation
+
 ---
 
 ## Countermeasure Lineage
@@ -96,6 +109,7 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → SC Verification Matrix (runtime coverage) → Integration Contracts (cross-Feature shapes)
   → i18n Coverage Lint (translation completeness) → SDK API Contract Gap + Type Trust Classification
   → UI Interaction Surface Audit (hover/click UX)
+  → Runtime Verification Architecture (multi-backend, interface-aware, data dependency)
 ```
 
 ---
