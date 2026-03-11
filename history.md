@@ -5,6 +5,34 @@
 
 ---
 
+## [2026-03-11] Full File Review — Over-Fragmentation Consolidation
+
+Comprehensive file review identified 3 HIGH-severity duplications from incremental updates. Applied Single Source of Truth principle: detailed definitions stay in one canonical file, consumers cross-reference.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Detection protocol consolidation | Canonical in runtime-verification.md §3a; verify-phases.md and analyze.md cross-reference | Same 2-phase probe was fully duplicated in 3 files — any change required 3 synced edits |
+| 2 | Classification table consolidation | Canonical in runtime-verification.md §3a; verify-phases.md references with summary | Identical 5-row table duplicated word-for-word in 2 files |
+| 3 | HARD STOP MCP option standardized | All 3 files use "Configure Playwright MCP" with cross-ref to §4 for restart rules | Was inconsistent: "Install MCP" / "Configure MCP" / "Configure MCP and restart session" |
+| 4 | Review Protocol formalized | Added over-fragmentation check (item #4) to CLAUDE.md Review Protocol | Prevents future incremental updates from re-introducing duplication |
+| 5 | CLAUDE.md Rule 7 updated | "Playwright Pre-flight" (was "Playwright MCP Pre-flight") | Rule text was outdated after CLI-primary architecture change |
+| 6 | reverse-spec _resolver.md connected | Linked to shared smart-sdd/_resolver.md (was broken reference) | Per convention: dead references → connect, not delete |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `CLAUDE.md` | Review Protocol #4 over-fragmentation check, Rule 7 wording update |
+| `commands/verify-phases.md` | Pre-flight Step 2a: ~40 lines → ~12 lines (cross-ref to runtime-verification.md §3a). HARD STOP MCP option standardized |
+| `reverse-spec/commands/analyze.md` | Phase 1.5-0 Step 1: ~15 lines → ~6 lines (cross-ref). HARD STOP MCP option standardized |
+| `reference/injection/implement.md` | HARD STOP MCP option standardized with cross-ref to §4 |
+| `reverse-spec/SKILL.md` | _resolver.md → cross-reference to shared smart-sdd/_resolver.md |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] Library Import Probe + CWD Fix for Playwright CLI
 
 Real-world failure in reverse-spec Phase 1.5: `ERR_MODULE_NOT_FOUND: Cannot find package 'playwright'` when library mode script ran from `/tmp/` instead of the project root. Root cause: pre-flight only checked `npx playwright --version` (binary exists) but library mode uses `require('playwright')` which depends on CWD having `node_modules/playwright`.

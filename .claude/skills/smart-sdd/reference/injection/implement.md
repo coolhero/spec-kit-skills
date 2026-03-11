@@ -342,7 +342,7 @@ At first task verification, display:
 Use AskUserQuestion (**HARD STOP**):
 - "Install Playwright CLI now (`npm i -D @playwright/test && npx playwright install`)" (Recommended) — install, then retry
 - "Continue with Level 1 (build-only)" — proceed, but record `RUNTIME-DEGRADED` flag
-- "Configure Playwright MCP and restart session" — for MCP-specific setup
+- "Configure Playwright MCP" — requires session restart for MCP tools (see [runtime-verification.md §4](../runtime-verification.md))
 
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 

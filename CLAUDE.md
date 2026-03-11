@@ -14,7 +14,7 @@
 
 6. **analyze.md — Feature ID Tier-first ordering**: Feature ID는 Tier 우선 전역 순서로 할당합니다 (T1 전체 → T2 전체 → T3 전체, 각 Tier 내에서는 RG 순서). RG 우선 순서로 되돌리지 마세요. T1만 활성화된 파이프라인에서 ID 갭이 발생합니다.
 
-7. **verify-phases.md — Playwright MCP Pre-flight**: verify Phase 1 시작 전 Playwright MCP 가용성 체크(active/configured/unavailable)를 반드시 수행합니다. 이 pre-flight를 제거하거나 건너뛰지 마세요. Electron 앱의 경우 CDP 사전 설정이 필요합니다.
+7. **verify-phases.md — Playwright Pre-flight**: verify Phase 1 시작 전 Playwright 가용성 체크(CLI probe → library import probe → MCP probe)를 반드시 수행합니다. 이 pre-flight를 제거하거나 건너뛰지 마세요. CLI가 primary이며, Electron 앱은 `_electron.launch()`로 직접 연결합니다.
 
 8. **pipeline.md — Execute+Review Continuity**: speckit-* 명령 실행 후 결과 요약만 표시하고 멈추지 마세요. Execute와 Review는 하나의 연속 동작입니다. `speckit-* 완료 → artifact 읽기 → Review 표시 → AskUserQuestion 호출`이 반드시 같은 응답에서 이루어져야 합니다. 컨텍스트 한계로 불가능한 경우에만 fallback 메시지(`💡 Type "continue" to review the results.`)를 표시합니다.
 
@@ -41,6 +41,12 @@
 
 ## Review Protocol
 
-전체 파일 검토 시에는 우선 전체적인 flow 상의 이상이 없는지, 불일치하는지를 검토하고,
-현재 활용되지 않는 부분은 원래 활용이 되야하는데 활용이 안되는건지 부터 검토하고 그 이후에 필요 없는 부분인지 검토해야하고
-공통화나 스크립트화를 통해 context 효율성을 검토한다.
+전체 파일 검토 시 아래 순서로 수행합니다:
+
+1. **Flow 일관성**: 전체적인 pipeline flow에 이상이 없는지, 파일 간 참조가 불일치하지 않는지 검토
+2. **미활용 부분 분류**: 현재 활용되지 않는 부분이 (a) 원래 활용되어야 하는데 누락된 것인지, (b) 진짜 불필요한 것인지 구분
+3. **공통화/스크립트화**: context 효율성을 위해 중복 패턴을 공통 reference로 추출할 수 있는지 검토
+4. **과세분화(over-fragmentation) 점검**: 반복 업데이트로 동일한 내용이 여러 파일에 과도하게 세분화되어 있지 않은지 확인. 동일 개념의 설명이 3곳 이상에서 반복되면 아래 기준으로 통합:
+   - **단일 출처 원칙(Single Source of Truth)**: 상세 정의는 하나의 reference 파일에, 나머지는 cross-reference(`See [file] §N`)로 대체
+   - **인라인 반복 허용 예외**: HARD STOP 재질문 텍스트(Do NOT Modify #1), CLAUDE.md Do NOT Modify 항목
+   - **판단 기준**: "이 내용이 바뀌면 몇 곳을 수정해야 하나?" — 3곳 이상이면 통합 대상

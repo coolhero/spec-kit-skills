@@ -323,19 +323,12 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 **Step 1 — Detect Playwright CLI**:
 
-a. Binary probe: Run `npx playwright --version` (timeout 5s).
-   - If the command fails (not found, timeout, or error) → set `playwright_cli = false`, skip to Step 1b (MCP)
-   - If the command succeeds → proceed to library import probe
+Execute the two-phase CLI probe from [runtime-verification.md §3a](../../../smart-sdd/reference/runtime-verification.md) (binary probe → library import probe → recovery).
 
-b. Library import probe: Run `cd CWD && node -e "require('playwright')"` (timeout 5s).
-   (CWD = current working directory where artifacts are generated)
-   - If succeeds → set `playwright_cli = true`
-   - If fails (`ERR_MODULE_NOT_FOUND`):
-     This is expected for reverse-spec — the source project being analyzed typically does NOT have playwright as a dependency.
-     → Auto-install in the output directory: `npm i -D @playwright/test`
-     → Re-run library import probe
-     → If succeeds → set `playwright_cli = true`
-     → If still fails → set `playwright_cli = false`
+- Success → set `playwright_cli = true`
+- Failure → set `playwright_cli = false`, skip to Step 1b (MCP)
+
+> **reverse-spec context**: The source project being analyzed typically does NOT have playwright as a dependency. The recovery step auto-installs `@playwright/test` in the output directory (CWD) — this is expected behavior, not an error.
 
 **Step 1b — Detect Playwright MCP**:
 
@@ -461,7 +454,7 @@ Installation guide: see PLAYWRIGHT-GUIDE.md (includes troubleshooting)
 ```
 Ask via AskUserQuestion:
 - **"Install Playwright CLI (Recommended)"** — install via `npm i -D @playwright/test && npx playwright install` and retry
-- **"Install Playwright MCP"** — user installs via `claude mcp add` and retries
+- **"Configure Playwright MCP"** — user installs via `claude mcp add` and restarts session (see [runtime-verification.md §4](../../../smart-sdd/reference/runtime-verification.md) for restart rules)
 - **"Skip — code analysis only"** — proceed directly to Phase 2
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If "Install Playwright CLI" is selected, run the installation command and retry detection from Step 1. If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright)` and proceed to Phase 2.

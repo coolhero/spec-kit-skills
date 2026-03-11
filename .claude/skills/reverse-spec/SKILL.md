@@ -56,7 +56,7 @@ $ARGUMENTS parsing rules:
 
 The `--profile` argument (or `--domain` for backward compatibility) selects the domain profile. Default: `app` (expands to `fullstack-web` profile).
 
-**Loading**: Read `domains/_resolver.md` before starting Phase 1. The resolver loads modules based on the detected or specified profile:
+**Loading**: Read [`domains/_resolver.md`](../../smart-sdd/domains/_resolver.md) (shared with smart-sdd) before starting Phase 1. The resolver loads modules based on the detected or specified profile:
 
 1. `domains/_core.md` — Universal analysis framework (always loaded)
 2. `domains/interfaces/{interface}.md` — For each active interface (http-api, gui, cli, data-io)

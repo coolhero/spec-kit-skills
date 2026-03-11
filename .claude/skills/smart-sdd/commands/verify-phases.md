@@ -167,44 +167,17 @@ If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight sec
 
 **Step 2a — GUI Backend Detection**:
 
-1. **Probe Playwright CLI** (primary — two-phase):
-   a. Binary probe: Run `npx playwright --version` (timeout 5s).
-      - Command not found or non-zero exit → `PLAYWRIGHT_CLI = unavailable`, skip to step 3
-   b. Library import probe: Run `cd PROJECT_ROOT && node -e "require('playwright')"` (timeout 5s).
-      (PROJECT_ROOT = project root directory containing package.json)
-      - Exit 0 → `PLAYWRIGHT_CLI = available`
-      - `ERR_MODULE_NOT_FOUND` → enter Recovery:
-        - Check if `playwright` or `@playwright/test` is in package.json devDependencies
-        - If missing: Run `npm i -D @playwright/test` (auto-recovery), then re-probe
-        - If present but import fails: CWD mismatch — display `⚠️ Playwright binary found but library import failed from project root.` → `PLAYWRIGHT_CLI = unavailable`
-        - After recovery re-probe: success → `PLAYWRIGHT_CLI = available`; fail → `PLAYWRIGHT_CLI = unavailable`
+Execute the full detection protocol defined in [runtime-verification.md §3a](../reference/runtime-verification.md):
 
-2. **Check VERIFY_STEPS test file**: Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists.
-   - Exists → `VERIFY_TEST = exists`
-   - Missing → `VERIFY_TEST = missing`
+1. **Probe Playwright CLI** (two-phase: binary + library import + recovery) → `PLAYWRIGHT_CLI = available / unavailable`
+2. **Check VERIFY_STEPS test file** (`demos/verify/F00N-name.spec.ts`) → `VERIFY_TEST = exists / missing`
+3. **Probe Playwright MCP** (optional) → `MCP_STATUS = active / configured / unavailable`
 
-3. **Probe Playwright MCP** (optional accelerator — only when CLI is unavailable or for MCP-specific features): Attempt to call `browser_snapshot` (the most reliable probe). Alternatively, check if any tool matching `browser_navigate` or `mcp__playwright__browser_snapshot` exists in your available tools.
+   > **MCP probe note**: "Target page, context or browser has been closed" = `configured`, NOT `unavailable`. MCP IS installed, CDP IS configured, but app is not running. Agent starts it in Phase 3 Step 3 (Case B).
 
-   | Probe result | MCP Status |
-   |---|---|
-   | Tool exists and returns content (page snapshot) | `MCP_STATUS = active` |
-   | Tool exists but fails with connection error (ECONNREFUSED) | `MCP_STATUS = configured` |
-   | Tool exists but fails with runtime error ("Target page, context or browser has been closed", etc.) | `MCP_STATUS = configured` |
-   | Tool does not exist / "unknown tool" error | `MCP_STATUS = unavailable` |
-
-   > **Important**: "Target page, context or browser has been closed" means Playwright MCP IS installed and CDP IS configured, but the Electron app is not running or the CDP target was lost. This is `configured`, NOT `unavailable`. The agent will start the app in Phase 3 Step 3 (Case B).
-
-4. **Classify RUNTIME_BACKEND**:
-
-   | CLI Status | Test File | MCP Status | RUNTIME_BACKEND | Notes |
-   |-----------|-----------|------------|-----------------|-------|
-   | available | exists | — | `cli` | Best: full verification via test files |
-   | available | missing | — | `cli-limited` | Can generate test files; library mode available |
-   | unavailable | — | active | `mcp` | MCP as sole backend |
-   | unavailable | — | unavailable | `demo-only` | Only demo --ci |
-   | unavailable | — | unavailable | `build-only` | No runtime verification |
-
-   If demo script also doesn't exist → `RUNTIME_BACKEND = build-only`.
+4. **Classify RUNTIME_BACKEND** per [runtime-verification.md §3a table](../reference/runtime-verification.md):
+   `cli` (best) → `cli-limited` → `mcp` → `demo-only` → `build-only` (worst).
+   If demo script also doesn't exist → `build-only`.
 
 **Step 2b — API Backend Detection**:
 HTTP client (curl) is always available. Set `RUNTIME_BACKEND = http-client` for this interface. No HARD STOP needed.
@@ -255,13 +228,13 @@ Display the diagnostic result (if applicable), then **HARD STOP**:
 How to enable runtime verification:
   Option 1 (Recommended): Install Playwright CLI
     npm install -D @playwright/test && npx playwright install
-  Option 2: Configure Playwright MCP (accelerator — no session restart needed if CLI is available)
+  Option 2: Configure Playwright MCP (requires session restart to load MCP tools)
     claude mcp add playwright -- npx @playwright/mcp@latest
     For Electron: claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
 ```
 **Use AskUserQuestion**:
 - "Install Playwright CLI now" (Recommended) — run `npm install -D @playwright/test && npx playwright install`, re-probe, set RUNTIME_BACKEND
-- "Configure Playwright MCP" — user follows MCP instructions. ONLY mention session restart if CLI is also unavailable; if CLI is available, MCP can be added without restart
+- "Configure Playwright MCP" — requires session restart for MCP tools (see [runtime-verification.md §4](../reference/runtime-verification.md))
 - "Continue without UI verification" — proceed, Phase 3 Step 3 runtime verification will use demo --ci only
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 
