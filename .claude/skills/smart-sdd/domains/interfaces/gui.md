@@ -59,14 +59,14 @@
 
 | Feature Type | UI Verification | Condition |
 |-------------|----------------|-----------|
-| Has UI (frontend/fullstack) | Demo URL navigation + Snapshot + element check | Playwright MCP available |
+| Has UI (frontend/fullstack) | Demo URL navigation + Snapshot + element check | Playwright CLI or MCP available |
 | Backend/API only | Skip (API health check only) | — |
 | CLI/Library | Skip | — |
 
-When Playwright MCP is available during `verify` Phase 3:
+When Playwright (CLI or MCP) is available during `verify` Phase 3:
 - Demo script starts the server -> Playwright navigates to demo URL -> verifies page loads and key elements exist
-- SC-level UI verification: Automatically execute UI Action sequences from Coverage header via MCP
-- If not available: HARD STOP — MCP install guide or UI verification Skip
+- SC-level UI verification: Automatically execute UI Action sequences from Coverage header via CLI test runner or MCP tools
+- If not available: HARD STOP — Playwright CLI install guide or UI verification Skip
 
 ---
 
@@ -85,9 +85,9 @@ When this interface is active, enforce:
 
 | Field | Value |
 |-------|-------|
-| **Start method** | Dev server (`npm run dev`, `vite`, etc.) or Electron app with CDP (`--remote-debugging-port=9222`) |
-| **Verify method** | Navigate pages + SC interaction verification + console error scan. Backend: Playwright MCP or Playwright CLI (see runtime-verification.md § 3 for detection) |
-| **Stop method** | Kill dev server process / close Electron app |
+| **Start method** | Dev server (`npm run dev`, `vite`, etc.) or Electron app via `_electron.launch()` (CLI) / CDP (MCP only) |
+| **Verify method** | Navigate pages + SC interaction verification + console error scan. Backend: Playwright CLI (primary) or Playwright MCP (accelerator). See runtime-verification.md § 3 for detection |
+| **Stop method** | Kill dev server process / `app.close()` (CLI Electron) / kill process (MCP) |
 | **SC classification extensions** | `cdp-auto` — UI interaction SCs automatable via browser automation |
 
 **GUI-specific verification steps**:

@@ -70,7 +70,7 @@ Show the **actual verification checklist** so the user can see what will be chec
     external-dep: [N] SCs — [list SC-### + skip reason]
     manual: [N] SCs
     Planned coverage: [auto + test-covered]/[total] = [N]%
-  Runtime backend: [RUNTIME_BACKEND value from Pre-flight]
+  Runtime backend: [RUNTIME_BACKEND value from Pre-flight] ([cli = standard / mcp = accelerator])
   - [ ] Executable demo script exists (demos/F00N-name.sh or .ts/.py/etc.)
   - [ ] Demo script is NOT markdown and NOT a test-only script
   - [ ] Demo launches a real, working Feature environment (not just assertions)

@@ -26,7 +26,7 @@
 
 ## Language
 
-- **All artifacts MUST be written in English.** This includes skill files (SKILL.md, commands/*.md, reference/*.md, domains/*.md, templates/*.md), TODO.md, history.md, MCP-GUIDE.md, and all other project files.
+- **All artifacts MUST be written in English.** This includes skill files (SKILL.md, commands/*.md, reference/*.md, domains/*.md, templates/*.md), TODO.md, history.md, PLAYWRIGHT-GUIDE.md, and all other project files.
 - **Exception**: `README.ko.md` is the only file written in Korean.
 - User-facing AskUserQuestion option labels may use Korean if contextually appropriate for Korean-speaking users, but the surrounding documentation and comments must be in English.
 

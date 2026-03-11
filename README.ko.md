@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [MCP 설정 가이드](MCP-GUIDE.md) | Last updated: 2026-03-11 09:30 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 11:09 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -17,7 +17,7 @@
 
 - [Claude Code](https://claude.ai/claude-code) CLI
 - [spec-kit](https://github.com/github/spec-kit) 스킬 (`/smart-sdd` 사용 시)
-- [Playwright MCP](https://github.com/microsoft/playwright-mcp) — `claude mcp add --scope user playwright -- npx @playwright/mcp@latest` — Electron CDP 설정은 [MCP 설정 가이드](MCP-GUIDE.md) 참고
+- [Playwright](https://playwright.dev) — `npm install -D @playwright/test && npx playwright install` (기본). 선택: [Playwright MCP](https://github.com/microsoft/playwright-mcp) 인터랙티브 가속 — [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) 참고
 
 ### 설치
 
@@ -233,7 +233,7 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 ### Phase 1.5 — 런타임 탐색 (선택)
 
-Playwright MCP를 통해 원본 앱을 실제로 실행하고 탐색. UI 레이아웃, 사용자 흐름, 실제 상태를 관찰. Electron 앱은 CDP 사전 설정 필요 — [MCP 설정 가이드](MCP-GUIDE.md) 참고.
+Playwright(CLI 기본, MCP 선택)를 통해 원본 앱을 실제로 실행하고 탐색. UI 레이아웃, 사용자 흐름, 실제 상태를 관찰. Electron 앱은 CLI의 `_electron.launch()` 사용 (CDP 불필요) — [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) 참고.
 
 ### Phase 2 — 심층 분석
 

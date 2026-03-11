@@ -28,17 +28,18 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 >
 > Tests belong in `verify` Phase 1. Demos show the **real thing running**. The user must be able to see, touch, and use the Feature.
 
-**Prerequisites**: [Playwright MCP](https://github.com/microsoft/playwright-mcp) must be installed and connected. Used for runtime verification (`implement`) and UI testing (`verify`). See [MCP-GUIDE.md](../../../MCP-GUIDE.md) for full setup.
+**Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).
 
 ```bash
-# Install (one-time) — Web apps
-claude mcp add --scope user playwright -- npx @playwright/mcp@latest
+# Primary (CLI — recommended)
+npm install -D @playwright/test
+npx playwright install
 
-# Install (one-time) — Electron apps with CDP
-claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
+# Optional (MCP accelerator — interactive sessions)
+claude mcp add --scope user playwright -- npx @playwright/mcp@latest
 ```
 
-**Electron CDP: start order matters** — the app must be running with `--remote-debugging-port=9222` BEFORE starting a Claude Code session. If the session was started before the app, restart the session. See MCP-GUIDE.md § "CDP 연결 순서" for details.
+**Electron**: CLI mode uses `_electron.launch()` (no CDP needed). MCP mode still requires CDP pre-configuration — see [PLAYWRIGHT-GUIDE.md](../../../PLAYWRIGHT-GUIDE.md). See [PLAYWRIGHT-GUIDE.md](../../../PLAYWRIGHT-GUIDE.md) for full setup.
 
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with four project modes:
 

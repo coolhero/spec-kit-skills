@@ -102,6 +102,41 @@ Before the first UI-related `speckit-implement` task (one-time):
 
 **MUST rule**: When implementing UI components, reference this mapping table for every CSS value. Do NOT invent "typical web app styles" or use generic defaults. Each CSS value from the original source has an explicit utility class target.
 
+## Source App Visual Reference (rebuild mode, GUI)
+
+> **Purpose**: During implement, the agent references the running source app for visual and structural context.
+> This resolves the gap where implement had code-level source reference but no runtime visual reference.
+> See [runtime-verification.md](../runtime-verification.md) §7 for CLI Script Patterns.
+
+### Protocol
+
+Before the first UI-related task (one-time setup):
+1. Read `sdd-state.md` Source Path and app start command
+2. Start the source app in background on its default port
+3. Capture CLI library-mode snapshots of key screens referenced in this Feature's pre-context.md
+4. Display: `📂 Source App Reference: [N] screens captured from [Source Path]`
+
+During each UI task:
+1. Before implementing: CLI snapshot of the source app's corresponding screen for reference
+2. After implementing + build pass:
+   a. Start the target app on a different port (source on default, target on +1000)
+   b. CLI snapshot of the target app's equivalent screen
+   c. Compare structural elements — report deviations: `⚠️ Visual deviation: [description]`
+   d. If CSS mismatch suspected: CLI css-extract on both apps for comparison
+3. After all tasks complete: Include comparison summary in Review Display
+
+### Dual-App Port Convention
+
+- **Source app**: project's default port (from package.json scripts or launch.json)
+- **Built app**: source port + 1000 (e.g., 3000 → 4000) or explicit override in sdd-state.md
+
+### Skip Conditions
+
+- Not rebuild mode (greenfield or add — no source app exists)
+- Non-GUI Feature (http-api, cli, data-io)
+- Source Path = N/A in sdd-state.md
+- Source app cannot be started (dependency issues) → log in sdd-state.md and continue code-only
+
 ## Static Resource Handling
 
 Before or during implementation, if the Feature's `pre-context.md` has a non-empty Static Resources section:
@@ -238,7 +273,7 @@ After `speckit-implement` completes, if the constitution includes "Demo-Ready De
 ## Runtime Verification + Fix Loop
 
 > **Purpose**: Resolve G4 — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
-> **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [MCP-GUIDE.md](../../../../../MCP-GUIDE.md) for MCP Capability Map.
+> **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [PLAYWRIGHT-GUIDE.md](../../../../../PLAYWRIGHT-GUIDE.md) for Runtime Capability Map.
 > **Runtime backend architecture**: See [runtime-verification.md](../runtime-verification.md) for the full multi-backend detection protocol and interface-specific verification strategies.
 
 ### Per-Task Runtime Verification
@@ -257,7 +292,16 @@ After each task that creates/modifies UI files:
 3. Missing key → auto-add to all locale files (copy from source locale, mark others with `[TRANSLATE]` or copy existing translation pattern)
 4. Display: `🌐 i18n: [N] keys checked, [N] added to [locale list]`
 
-**Step 2 — Runtime Check** (when MCP available):
+**Step 2 — Runtime Check** (when Playwright CLI or MCP available):
+
+**CLI mode** (primary — RUNTIME_BACKEND = cli):
+1. If app not running: start app (dev server or Electron via `_electron.launch()`)
+2. Run CLI library-mode snapshot: `node -e "const { chromium } = require('playwright'); ..."` targeting the relevant screen
+3. Check snapshot output for error indicators (error boundary text, blank page)
+4. **Success**: Proceed to next task
+5. **Failure**: Enter Auto-Fix Loop
+
+**MCP mode** (accelerator — RUNTIME_BACKEND = mcp):
 1. If app is not yet running: start app (dev server / Electron / etc.)
 2. Navigate to the screen related to the completed task
 3. Snapshot to confirm normal rendering (not an error screen)
@@ -265,24 +309,25 @@ After each task that creates/modifies UI files:
 5. **Success**: Proceed to next task (keep app running)
 6. **Failure**: Enter Auto-Fix Loop
 
-**Without MCP — Check Playwright CLI Before Degradation**:
+**Without Playwright CLI — Check MCP Before Degradation**:
 
-Before declaring Level 1 degradation, check if Playwright CLI is available:
-1. Run `npx playwright --version` → if available, use CLI for runtime checks (NOT degradation)
-2. If CLI also unavailable → declare Level 1 Degradation
+CLI is the expected backend (checked in pre-flight). If CLI is unavailable:
+1. Check if Playwright MCP is active in this session (`browser_snapshot` probe)
+2. If MCP active → use MCP for runtime checks (NOT degradation)
+3. If MCP also unavailable → declare Level 1 Degradation
 
-**If Playwright CLI available** (NOT degradation):
-- Use `npx playwright test` for runtime verification instead of MCP
-- Display: `ℹ️ Playwright MCP not available — using Playwright CLI for runtime verification.`
-- Proceed with normal Step 2 flow (navigate, snapshot, console check via CLI test)
+**If Playwright MCP available as fallback** (NOT degradation):
+- Use MCP tools for runtime verification instead of CLI
+- Display: `ℹ️ Playwright CLI not available — using Playwright MCP for runtime verification.`
+- Proceed with normal Step 2 flow (navigate, snapshot, console check via MCP)
 - Do NOT set `RUNTIME-DEGRADED` flag
 
-**If neither MCP nor CLI available — Level 1 Degradation (HARD STOP)**:
+**If neither CLI nor MCP available — Level 1 Degradation (HARD STOP)**:
 
 At first task verification, display:
 ```
 ⚠️ Runtime Verification Degraded — Level 1 (build-only)
-  Neither Playwright MCP nor Playwright CLI available.
+  Neither Playwright CLI nor Playwright MCP available.
   Runtime verification is limited to:
   ✅ Build gate (compile/transpile)
   ❌ Runtime rendering check — SKIPPED
@@ -294,7 +339,7 @@ At first task verification, display:
 ```
 
 Use AskUserQuestion (**HARD STOP**):
-- "Install Playwright CLI now (`npm i -D @playwright/test`)" — install, then retry
+- "Install Playwright CLI now (`npm i -D @playwright/test && npx playwright install`)" (Recommended) — install, then retry
 - "Continue with Level 1 (build-only)" — proceed, but record `RUNTIME-DEGRADED` flag
 - "Configure Playwright MCP and restart session" — for MCP-specific setup
 
@@ -468,25 +513,23 @@ You can fix manually or proceed to Review with this state.
 
 **Rationale**: CSS is context-dependent — `w-full` renders differently depending on parent `flex`, `overflow`, `position` chains. Tailwind utility class interactions are unpredictable from code alone. After 2 failed code-reasoning attempts, visual confirmation is more efficient than a third guess.
 
-## Playwright MCP Usage During Implement (when MCP available)
+## Playwright Usage During Implement (CLI Primary, MCP Optional)
 
-> Playwright is not just for verify. When MCP is available during implement,
-> use it proactively for visual confirmation.
+> During implement, use Playwright CLI library mode for runtime verification
+> and source app reference. MCP is an optional accelerator when active in session.
 
-### MUST (required)
-- Per-task runtime verification (Step 2 above) — navigate, snapshot, console check
-- Post-implement SC verification — verify all SCs render correctly
+### MUST (required when Playwright CLI available)
+- Per-task runtime verification (Step 2) — CLI snapshot + error check after each task
+- Post-implement SC verification — verify all SCs render correctly before Review
 
-### SHOULD (recommended)
-- After CSS/styling changes: take snapshot to confirm visual result
-- After layout changes: compare before/after snapshots
-- When implementing UI components: verify rendering matches visual-references (if available)
-- When fixing UI bugs: take snapshot BEFORE fix to diagnose, AFTER fix to confirm
+### SHOULD (recommended, rebuild mode)
+- Before first UI task: CLI snapshot of source app for visual reference
+- After CSS/styling changes: CLI css-extract to confirm computed values match source
+- After layout changes: CLI compare between source and built app
 
 ### MAY (optional)
-- Compare rebuilt UI with original source screenshots (visual-references/)
-- Test responsive layouts (resize viewport)
-- Test dark/light mode if applicable
+- Use MCP tools if active in session for faster iteration (interactive snapshot → click → re-snapshot loop)
+- Use CLI screenshot for visual-references/ comparison (rebuild exact mode)
 
 ## Injected Content
 

@@ -123,19 +123,23 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 - Build failure → BLOCK (same as Phase 1 build gate). Do NOT proceed to MCP check.
 - Display: `🔨 Building project for runtime verification...`
 
-**0-2. Start App with CDP** (Electron projects):
+**0-2. Start Electron App** (Electron projects):
 - Read build tool from pre-context/constitution tech stack
-- Start app with CDP: per MCP-GUIDE.md Electron build tool table
+- **Primary path (CLI backend)**: Use Playwright `_electron.launch()` API — no CDP needed. The Playwright test runner launches the Electron app directly via the `electron` binary path.
+  (e.g., `const app = await _electron.launch({ args: ['out/main/index.js'] })`)
+- **Alternative path (MCP backend)**: Start app with CDP: per PLAYWRIGHT-GUIDE.md Electron build tool table
   (e.g., `npx electron-vite preview -- --remote-debugging-port=9222` or `npx electron out/main/index.js --remote-debugging-port=9222`)
+  > **Note**: CDP configuration is only required when using Playwright MCP as the backend. CLI mode uses `_electron.launch()` which connects directly without CDP.
 - Record PID for cleanup after verify completes
-- Display: `🚀 Starting Electron app with CDP on port 9222...`
+- Display: `🚀 Starting Electron app...` (CLI mode) or `🚀 Starting Electron app with CDP on port 9222...` (MCP mode)
 
 **0-2 alt. Start Dev Server** (Web projects):
 - Start dev server (from `quickstart.md` or `launch.json`)
 - Wait for port readiness (poll health endpoint or port, max 30s)
 - Display: `🚀 Starting dev server...`
 
-**0-3. Verify CDP Connection** (Electron only):
+**0-3. Verify CDP Connection** (Electron only — MCP backend path):
+- Skip this step if `RUNTIME_BACKEND = cli` or `cli-limited` (CLI uses `_electron.launch()`, no CDP needed)
 - Run `curl -s http://localhost:9222/json/version`
 - Retry: 3 attempts, 3s interval
 - All fail → HARD STOP: `CDP connection failed after app start. Check app startup logs.`
@@ -163,7 +167,15 @@ If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight sec
 
 **Step 2a — GUI Backend Detection**:
 
-1. **Probe Playwright MCP**: Attempt to call `browser_snapshot` (the most reliable probe). Alternatively, check if any tool matching `browser_navigate` or `mcp__playwright__browser_snapshot` exists in your available tools.
+1. **Probe Playwright CLI** (primary): Run `npx playwright --version` (timeout 5s).
+   - Exit 0 → `PLAYWRIGHT_CLI = available`
+   - Command not found or non-zero exit → `PLAYWRIGHT_CLI = unavailable`
+
+2. **Check VERIFY_STEPS test file**: Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists.
+   - Exists → `VERIFY_TEST = exists`
+   - Missing → `VERIFY_TEST = missing`
+
+3. **Probe Playwright MCP** (optional accelerator — only when CLI is unavailable or for MCP-specific features): Attempt to call `browser_snapshot` (the most reliable probe). Alternatively, check if any tool matching `browser_navigate` or `mcp__playwright__browser_snapshot` exists in your available tools.
 
    | Probe result | MCP Status |
    |---|---|
@@ -174,22 +186,15 @@ If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight sec
 
    > **Important**: "Target page, context or browser has been closed" means Playwright MCP IS installed and CDP IS configured, but the Electron app is not running or the CDP target was lost. This is `configured`, NOT `unavailable`. The agent will start the app in Phase 3 Step 3 (Case B).
 
-2. **Probe Playwright CLI**: Run `npx playwright --version` (timeout 5s).
-   - Exit 0 → `PLAYWRIGHT_CLI = available`
-   - Command not found or non-zero exit → `PLAYWRIGHT_CLI = unavailable`
-
-3. **Check VERIFY_STEPS test file**: Check if `demos/verify/F00N-name.spec.ts` (or equivalent) exists.
-   - Exists → `VERIFY_TEST = exists`
-   - Missing → `VERIFY_TEST = missing`
-
 4. **Classify RUNTIME_BACKEND**:
 
-   | MCP Status | CLI Status | Test File | RUNTIME_BACKEND |
-   |------------|-----------|-----------|-----------------|
-   | active or configured | — | — | `mcp` |
-   | unavailable | available | exists | `cli` |
-   | unavailable | available | missing | `cli-limited` |
-   | unavailable | unavailable | — | `demo-only` |
+   | CLI Status | Test File | MCP Status | RUNTIME_BACKEND | Notes |
+   |-----------|-----------|------------|-----------------|-------|
+   | available | exists | — | `cli` | Best: full verification via test files |
+   | available | missing | — | `cli-limited` | Can generate test files; library mode available |
+   | unavailable | — | active | `mcp` | MCP as sole backend |
+   | unavailable | — | unavailable | `demo-only` | Only demo --ci |
+   | unavailable | — | unavailable | `build-only` | No runtime verification |
 
    If demo script also doesn't exist → `RUNTIME_BACKEND = build-only`.
 
@@ -212,10 +217,10 @@ Shell is always available. Set `RUNTIME_BACKEND = pipeline-runner` for this inte
 
 **HARD STOP conditions for GUI interface**:
 
-**If `RUNTIME_BACKEND = mcp` or `cli` or `cli-limited`**: No HARD STOP. Display informational message:
-- `mcp`: `ℹ️ Runtime verification: Playwright MCP (active)`
-- `cli`: `ℹ️ Playwright MCP not available. Using Playwright CLI for runtime verification.`
-- `cli-limited`: `ℹ️ Playwright MCP not available. Using Playwright CLI (limited — no test file yet).`
+**If `RUNTIME_BACKEND = cli` or `cli-limited` or `mcp`**: No HARD STOP. Display informational message:
+- `cli`: `ℹ️ Runtime verification: Playwright CLI (standard path)`
+- `cli-limited`: `ℹ️ Runtime verification: Playwright CLI (limited — no test file yet)`
+- `mcp`: `ℹ️ Runtime verification: Playwright MCP (accelerator mode)`
 
 **If `RUNTIME_BACKEND = demo-only`**: Display warning, no HARD STOP:
 `⚠️ Neither Playwright MCP nor CLI available. Runtime verification limited to demo --ci.`
@@ -226,7 +231,7 @@ Shell is always available. Set `RUNTIME_BACKEND = pipeline-runner` for this inte
 1. Run `curl -s http://localhost:9222/json/version` (timeout 3s)
 2. **If curl succeeds** (returns JSON): CDP is active but Playwright tools are not loaded.
    - Diagnosis: `CDP endpoint is running at localhost:9222. Playwright MCP tools are not loaded in this session.`
-   - Likely cause: Claude Code session was started before the app, or MCP is not configured with `--cdp-endpoint`.
+   - Likely cause: Claude Code session was started before the app, or MCP is not configured with `--cdp-endpoint`. If Playwright CLI is available, this is not blocking — CLI backend can be used without MCP.
 3. **If curl fails** (connection refused / timeout): CDP endpoint is not running.
    - Diagnosis: `CDP endpoint not running.`
 
@@ -242,13 +247,13 @@ Display the diagnostic result (if applicable), then **HARD STOP**:
 How to enable runtime verification:
   Option 1 (Recommended): Install Playwright CLI
     npm install -D @playwright/test && npx playwright install
-  Option 2: Configure Playwright MCP
+  Option 2: Configure Playwright MCP (accelerator — no session restart needed if CLI is available)
     claude mcp add playwright -- npx @playwright/mcp@latest
     For Electron: claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
 ```
 **Use AskUserQuestion**:
-- "Install Playwright CLI now" — run `npm install -D @playwright/test && npx playwright install`, re-probe, set RUNTIME_BACKEND
-- "Configure MCP and restart session" — user follows MCP instructions, restarts
+- "Install Playwright CLI now" (Recommended) — run `npm install -D @playwright/test && npx playwright install`, re-probe, set RUNTIME_BACKEND
+- "Configure Playwright MCP" — user follows MCP instructions. ONLY mention session restart if CLI is also unavailable; if CLI is available, MCP can be added without restart
 - "Continue without UI verification" — proceed, Phase 3 Step 3 runtime verification will use demo --ci only
 **If response is empty → re-ask** (per MANDATORY RULE 1)
 
@@ -580,7 +585,7 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 0: SC Verification Planning (classify ALL SCs from spec.md — extended categories)
   □ Step 1: Demo script exists and is executable
   □ Step 2: Demo launches the real Feature
-  □ Step 3: UI Verification via runtime backend  ← MANDATORY, not optional
+  □ Step 3: UI Verification via Playwright (CLI = standard, MCP = accelerator)  ← MANDATORY, not optional
   □ Step 3b: Visual Fidelity Check (rebuild mode only)
   □ Step 3c: Navigation Transition Sanity Check (GUI only)
   □ Step 3d: Interactive Runtime Verification (all interfaces — core runtime check)
@@ -682,7 +687,7 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 - The `--ci` flag must be supported for automated verification: runs setup + health check, then exits cleanly
 - **REJECT if**: the script has no interactive experience (i.e., only runs assertions and exits with no live Feature)
 
-**Step 3 — UI Verification via Playwright MCP** (MANDATORY — do NOT skip):
+**Step 3 — UI Verification via Playwright** (MANDATORY — do NOT skip):
 > **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down. Do NOT ask the user to start or restart the app manually. The agent starts the app itself (with CDP flags for Electron), runs all SC verifications, then shuts down the app when done.
 
 - **Runtime Degradation Flag Check**: Read sdd-state.md Feature Progress for this Feature. If Detail column shows `⚠️ RUNTIME-DEGRADED`:
@@ -697,17 +702,19 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
   - If `RUNTIME_BACKEND = build-only` AND user chose "Continue without UI verification": skip to Step 4. Display: `⏭️ UI verification skipped (no runtime backend available — acknowledged in Pre-flight)`
   - If `RUNTIME_BACKEND = demo-only`: skip to Step 6 (demo --ci only). Display: `⏭️ Interactive UI verification skipped — using demo --ci for runtime check.`
   - If `RUNTIME_BACKEND = cli` or `cli-limited`:
-    - **Playwright CLI verification**: If `demos/verify/F00N-name.spec.ts` exists, run SC verification via CLI:
+    - **Playwright CLI verification (standard path)**: If `demos/verify/F00N-name.spec.ts` exists, run SC verification via CLI:
       1. Ensure app is running (from demo `--ci` or start it)
-      2. Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=json`
-      3. Map test results back to SC-### coverage (Tier 1/2/3 results reported normally)
-      4. Display: `ℹ️ SC verification via Playwright CLI`
+      2. For Electron: use `_electron.launch()` in test files (no CDP needed)
+      3. Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=json`
+      4. Map test results back to SC-### coverage (Tier 1/2/3 results reported normally)
+      5. Display: `ℹ️ SC verification via Playwright CLI (standard path)`
     - If no test file exists and `RUNTIME_BACKEND = cli-limited`: limited to demo --ci only for this Feature.
-  - If `RUNTIME_BACKEND = mcp` → proceed with Electron CDP check below (if Electron) or directly to SC verification (if web)
+  - If `RUNTIME_BACKEND = mcp` → **MCP accelerator path**: proceed with Electron CDP check below (if Electron) or directly to SC verification (if web). MCP enables interactive, step-by-step verification without pre-written test files.
   - **If Pre-flight was somehow skipped**: Call `browser_snapshot` NOW. If the tool does not exist, run `npx playwright --version` as fallback. If neither exists, display the HARD STOP from Pre-flight and wait for user response. **Do NOT silently skip.**
 
-- **Electron CDP Configuration Check** (if project type is Electron — detected from `constitution-seed.md` or `pre-context.md` tech stack info):
-  Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright opens a separate Chromium browser and cannot interact with the Electron window.
+- **Electron CDP Configuration Check** (MCP backend only — if project type is Electron AND `RUNTIME_BACKEND = mcp`):
+  When using Playwright MCP as the backend, Electron apps require CDP (Chrome DevTools Protocol) for Playwright to connect. Standard Playwright MCP opens a separate Chromium browser and cannot interact with the Electron window.
+  > **Note**: This check is SKIPPED when `RUNTIME_BACKEND = cli` or `cli-limited`. CLI mode uses `_electron.launch()` which connects directly to the Electron process without CDP.
 
   1. **Probe**: Call `browser_snapshot` to check current Playwright MCP configuration. There are FOUR possible outcomes:
 
@@ -724,16 +731,21 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
      This is the ONLY case that requires user action — the user must reconfigure Playwright MCP itself.
      Display notice:
      ```
-     ⚠️ Electron apps require CDP mode for Playwright to connect.
+     ⚠️ Electron apps require CDP mode for Playwright MCP to connect.
         Playwright MCP is currently in standard browser mode.
 
-        CDP setup:
+        CDP setup (MCP mode):
         1. claude mcp remove playwright -s user
         2. claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
-        3. Restart Claude Code
+        3. Restart Claude Code (ONLY required for MCP — if Playwright CLI is available, consider switching to CLI backend instead)
+
+        Alternative — switch to CLI backend (no restart needed):
+        npm install -D @playwright/test && npx playwright install
+        CLI uses _electron.launch() and does not need CDP configuration.
      ```
      **Use AskUserQuestion** — this is NOT optional, NOT skippable:
-     - "Retry after CDP configuration" — user configures CDP, then re-run verify
+     - "Switch to Playwright CLI backend" (Recommended) — install CLI, re-probe, no restart needed
+     - "Retry after CDP configuration" — user configures CDP for MCP, then re-run verify. Session restart ONLY needed if user chose MCP AND CLI is not available
      - "Skip UI verification — health check only" — skip Playwright UI verification, proceed with demo script health check only
      **If response is empty → re-ask** (per MANDATORY RULE 1)
      **NEVER auto-skip this step.** The agent must wait for user's explicit choice.
@@ -747,11 +759,12 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 
   > **Tip**: If `/reverse-spec` was run with CDP for the same Electron stack, Playwright MCP is already in CDP mode.
 
-- **If MCP available** (and CDP check passed for Electron) — perform App Launch + SC-level UI verification:
+- **If MCP available** (MCP accelerator path — and CDP check passed for Electron) — perform App Launch + SC-level UI verification:
 
   **App Launch** (agent-managed — do NOT ask the user to start/restart the app):
+  > **Electron note**: `_electron.launch()` for CLI mode, CDP only for MCP mode.
   1. Detect the project's dev start command from `package.json` scripts or project config (e.g., `npx electron-vite dev`, `npm run dev`)
-  2. For Electron with CDP: Append `-- --remote-debugging-port=9222` to the start command
+  2. For Electron with CDP (MCP mode only): Append `-- --remote-debugging-port=9222` to the start command
   3. Start the app in background via Bash (e.g., `npx electron-vite dev -- --remote-debugging-port=9222 &`)
   4. Wait for the app to be ready: poll health endpoint or wait ~10 seconds
   5. Probe with `browser_snapshot` to confirm CDP connection:

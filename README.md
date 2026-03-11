@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [MCP Setup Guide](MCP-GUIDE.md) | Last updated: 2026-03-11 09:30 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 11:09 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -17,7 +17,7 @@
 
 - [Claude Code](https://claude.ai/claude-code) CLI
 - [spec-kit](https://github.com/github/spec-kit) skill (for `/smart-sdd`)
-- [Playwright MCP](https://github.com/microsoft/playwright-mcp) — `claude mcp add --scope user playwright -- npx @playwright/mcp@latest` — see [MCP Setup Guide](MCP-GUIDE.md) for Electron CDP setup
+- [Playwright](https://playwright.dev) — `npm install -D @playwright/test && npx playwright install` (primary). Optional: [Playwright MCP](https://github.com/microsoft/playwright-mcp) for interactive acceleration — see [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md)
 
 ### Installation
 
@@ -236,7 +236,7 @@ Two strategic questions determine the direction:
 
 ### Phase 1.5 — Runtime Exploration (Optional)
 
-Run the original application and explore it interactively via Playwright MCP before deep code analysis. Provides visual and behavioral context (UI layout, user flows, actual states). For Electron apps, requires CDP pre-setup — see [MCP Setup Guide](MCP-GUIDE.md).
+Run the original application and explore it interactively via Playwright (CLI primary, MCP optional) before deep code analysis. Provides visual and behavioral context (UI layout, user flows, actual states). For Electron apps, CLI uses `_electron.launch()` (no CDP needed) — see [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md).
 
 ### Phase 2 — Deep Analysis
 

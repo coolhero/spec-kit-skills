@@ -18,7 +18,7 @@ When `--skip-to` is provided, bypass all preceding phases with minimal defaults 
    - Dev server scripts (`dev`, `start`, `serve`, etc.)
    - Dependencies (for package manager detection)
    - `.env.example` existence
-4. **Jump to**: Phase 1.5 Step 0 (MCP Availability Check)
+4. **Jump to**: Phase 1.5 Step 0 (Playwright Availability Check)
 
 **`--skip-to 2`**: Auto-resolve Phase 0, execute full Phase 1, skip Phase 1.5, jump to Phase 2.
 **`--skip-to 3`**: Auto-resolve Phase 0, execute Phase 1+2, skip Phase 1.5, jump to Phase 3.
@@ -319,31 +319,40 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 >
 > **When to skip**: This phase is relevant only for **rebuild mode**. Skip entirely when `--adopt` is specified (adoption documents existing code in-place — no need to explore the app you're already running).
 
-### 1.5-0. MCP Availability Check + User Choice (HARD STOP)
+### 1.5-0. Playwright Availability Check + User Choice (HARD STOP)
 
-**Step 1 — Detect Playwright MCP**:
+**Step 1 — Detect Playwright CLI**:
+
+Check if the Playwright CLI is available by running `npx playwright --version` (timeout 5s).
+
+- If the command succeeds and returns a version string → set `playwright_cli = true`
+- If the command fails (not found, timeout, or error) → set `playwright_cli = false`
+
+**Step 1b — Detect Playwright MCP**:
 
 Check your available tools list. Playwright MCP is available if you have ANY tool whose name contains `browser_navigate` (e.g., `browser_navigate`, `mcp__playwright__browser_navigate`, or any MCP-prefixed variant). This is the **only** reliable detection method — do NOT read MCP config files (config locations vary by installation method and Claude Code version).
 
-Set `playwright_available = true` if such a tool exists, `false` otherwise.
+Set `playwright_mcp = true` if such a tool exists, `false` otherwise.
 
-**Step 1b — Electron apps: CDP connection probe** (skip if `playwright_available = false` or non-Electron):
+**Step 1c — Electron apps: connection mode** (skip if both `playwright_cli = false` AND `playwright_mcp = false`, or non-Electron):
 
-If the project was detected as an Electron app in Phase 1 AND `playwright_available = true`, probe the current browser state to determine if CDP is active:
+If the project was detected as an Electron app in Phase 1:
 
-1. Call `browser_snapshot` (accessibility tree snapshot, NOT screenshot)
-2. Examine the result:
-   - If the snapshot shows content matching the Electron app (app-specific UI, window title, menus) → set `electron_mode = cdp`
-   - If the snapshot shows an empty page, "about:blank", or a default browser new tab → set `electron_mode = cdp_not_configured`
-   - If the tool call fails with an error → set `playwright_available = false` (MCP server issue)
+- **If `playwright_cli = true`**: No CDP needed — `_electron.launch()` connects directly to the Electron process via IPC. Set `electron_mode = cli_direct`.
+- **If `playwright_cli = false` AND `playwright_mcp = true`**: Run existing CDP probe:
+  1. Call `browser_snapshot` (accessibility tree snapshot, NOT screenshot)
+  2. Examine the result:
+     - If the snapshot shows content matching the Electron app (app-specific UI, window title, menus) → set `electron_mode = cdp`
+     - If the snapshot shows an empty page, "about:blank", or a default browser new tab → set `electron_mode = cdp_not_configured`
+     - If the tool call fails with an error → set `playwright_mcp = false` (MCP server issue)
 
 **Step 2 — Present options based on detection result**:
 
-**If Playwright MCP is available AND non-Electron**:
+**If Playwright is available (either `playwright_cli = true` OR `playwright_mcp = true`) AND non-Electron**:
 ```
 🔍 Runtime Exploration Available
 
-Playwright MCP detected. You can run the original app and
+Playwright detected ([CLI / MCP / CLI + MCP]). You can run the original app and
 explore it via browser to capture UI/UX details.
 
 This step is optional — skipping it will not affect Phase 2 code analysis.
@@ -353,8 +362,19 @@ Ask via AskUserQuestion:
 - **"Run Runtime Exploration (Recommended)"** — launch app + browser exploration
 - **"Skip — code analysis only"** — proceed directly to Phase 2
 
-**If Playwright MCP is available AND Electron AND `electron_mode = cdp`**:
-(CDP already configured — standard flow)
+**If Playwright is available AND Electron AND `electron_mode = cli_direct`**:
+(CLI connects directly via `_electron.launch()` — no CDP needed)
+```
+🔍 Runtime Exploration Available
+
+Playwright CLI detected. Electron app will be connected directly via _electron.launch() — no CDP setup needed.
+```
+Ask via AskUserQuestion:
+- **"Run Runtime Exploration (Recommended)"** — launch Electron app + CLI direct exploration
+- **"Skip — code analysis only"** — proceed directly to Phase 2
+
+**If Playwright is available AND Electron AND `electron_mode = cdp`**:
+(MCP-only path with CDP already configured — standard flow)
 ```
 🔍 Runtime Exploration Available
 
@@ -365,67 +385,77 @@ Ask via AskUserQuestion:
 - **"Run Runtime Exploration (Recommended)"** — launch Electron app + CDP exploration
 - **"Skip — code analysis only"** — proceed directly to Phase 2
 
-**If Playwright MCP is available AND Electron AND `electron_mode = cdp_not_configured`**:
+**If Playwright is available AND Electron AND `electron_mode = cdp_not_configured`**:
+(MCP-only path, CDP not yet configured)
 ```
 🔍 Runtime Exploration — CDP Configuration Required
 
 Electron app detected, but Playwright MCP does not have a CDP endpoint configured.
-Runtime Exploration for Electron apps requires CDP pre-configuration.
+Runtime Exploration for Electron apps via MCP requires CDP pre-configuration.
 
-CDP pre-configuration (before session start):
+💡 Recommended: Install Playwright CLI instead — it connects to Electron directly
+   without CDP via _electron.launch():
+  npm i -D @playwright/test && npx playwright install
+
+Alternative — CDP pre-configuration (before session start):
   1. Run the Electron app with a CDP port:
      [build-tool-specific command] --remote-debugging-port=9222
   2. Register Playwright MCP in CDP mode:
      claude mcp add --scope user playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
   3. Restart Claude Code → re-run /reverse-spec
 
-Details: see MCP-GUIDE.md § CDP Pre-Configuration
+Details: see PLAYWRIGHT-GUIDE.md § CDP Pre-Configuration
 ```
 Ask via AskUserQuestion:
-- **"Skip — code analysis only (Recommended)"** — proceed directly to Phase 2 (code analysis alone is sufficient for Feature extraction without CDP)
+- **"Install Playwright CLI (Recommended)"** — install CLI (`npm i -D @playwright/test && npx playwright install`) and retry
+- **"Skip — code analysis only"** — proceed directly to Phase 2 (code analysis alone is sufficient for Feature extraction without CDP)
 - **"Configure CDP mode (requires Claude Code restart)"** — reconfigure MCP + restart
 
-If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP (run `claude mcp remove playwright` then `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`, preserving any `-e PATH=...` from the original config), display restart instructions, and record `Runtime Exploration: skipped (CDP reconfiguration — restart needed)`. Proceed to Phase 2.
+If "Install Playwright CLI" is selected: Run `npm i -D @playwright/test && npx playwright install`, then retry detection from Step 1. If "Configure CDP mode" is selected: Auto-reconfigure MCP for CDP (run `claude mcp remove playwright` then `claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222`, preserving any `-e PATH=...` from the original config), display restart instructions, and record `Runtime Exploration: skipped (CDP reconfiguration — restart needed)`. Proceed to Phase 2.
 
-**If Playwright MCP is NOT available**:
+**If Playwright is NOT available (both `playwright_cli = false` AND `playwright_mcp = false`)**:
 
 **CDP Endpoint Diagnostic** (Electron projects only — skip for non-Electron):
 Before showing the HARD STOP, run a quick diagnostic to provide specific guidance:
 1. Run `curl -s http://localhost:9222/json/version` (timeout 3s)
 2. **If curl succeeds** (returns JSON): CDP is active but Playwright tools are not loaded.
-   - Diagnosis: "CDP endpoint is running at localhost:9222. Playwright MCP tools are not loaded in this session. This typically means the Claude Code session was started before the app, or MCP is not configured with `--cdp-endpoint`."
-   - Solution: "Restart Claude Code session (the app is already running with CDP)."
+   - Diagnosis: "CDP endpoint is running at localhost:9222. Neither Playwright CLI nor MCP is available in this session."
+   - Solution: "Install Playwright CLI (`npm i -D @playwright/test && npx playwright install`) or restart Claude Code with MCP configured."
 3. **If curl fails** (connection refused / timeout): CDP endpoint is not running.
-   - Diagnosis: "CDP endpoint not running. The Electron app must be started with `--remote-debugging-port=9222` before Playwright can connect."
-   - Solution: "Start the app with CDP, then restart Claude Code session."
+   - Diagnosis: "CDP endpoint not running. The Electron app must be started with `--remote-debugging-port=9222` before Playwright MCP can connect (not needed for CLI)."
+   - Solution: "Install Playwright CLI (recommended — no CDP needed for Electron), or start the app with CDP and configure Playwright MCP."
 
 Display the diagnostic result (if applicable), then show the HARD STOP:
 
 ```
 🔍 Runtime Exploration
 
-Playwright MCP not detected.
-Runtime Exploration requires Playwright MCP.
+Playwright not detected (neither CLI nor MCP).
+Runtime Exploration requires Playwright.
 
 [If Electron + CDP diagnostic ran]:
   📋 CDP Diagnostic: [diagnosis from above]
   💡 Solution: [solution from above]
 
-Installation:
+Option 1 — Playwright CLI (Recommended):
+  npm i -D @playwright/test && npx playwright install
+
+Option 2 — Playwright MCP:
   claude mcp add playwright -- npx @playwright/mcp@latest
   → Restart Claude Code
 
-For Electron apps with CDP:
+For Electron apps with MCP (CDP required):
   claude mcp add playwright -- npx @playwright/mcp@latest --cdp-endpoint http://localhost:9222
   → Start app with --remote-debugging-port=9222 BEFORE starting Claude Code
 
-Installation guide: see MCP-GUIDE.md (includes troubleshooting)
+Installation guide: see PLAYWRIGHT-GUIDE.md (includes troubleshooting)
 ```
 Ask via AskUserQuestion:
-- **"Retry after installing Playwright MCP"** (Recommended) — user installs and retries
+- **"Install Playwright CLI (Recommended)"** — install via `npm i -D @playwright/test && npx playwright install` and retry
+- **"Install Playwright MCP"** — user installs via `claude mcp add` and retries
 - **"Skip — code analysis only"** — proceed directly to Phase 2
 
-**If response is empty → re-ask** (per MANDATORY RULE 1). If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright MCP)` and proceed to Phase 2.
+**If response is empty → re-ask** (per MANDATORY RULE 1). If "Install Playwright CLI" is selected, run the installation command and retry detection from Step 1. If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright)` and proceed to Phase 2.
 
 ### 1.5-1. Environment Assessment (Automated)
 
@@ -502,15 +532,19 @@ Execute auto-resolvable steps:
 ### 1.5-4. App Launch + Readiness Check
 
 > **CDP pre-setup (Electron `electron_mode = cdp`)**: If `electron_mode = cdp` was set in Step 1.5-0 (the browser_snapshot probe already showed Electron app content), the app is already running and CDP is connected. **Skip this entire section (1.5-4)** and proceed directly to 1.5-4b (App Initial Setup check) or 1.5-5 (Exploration).
+>
+> **CLI direct (Electron `electron_mode = cli_direct`)**: If `electron_mode = cli_direct` was set in Step 1.5-0 (Playwright CLI available), the Electron app will be launched directly via `_electron.launch()` in Phase 1.5-5. You still need to identify the start command and handle environment setup, but **skip Step 1b** (CDP launch command) as CDP is not needed.
 
 **Step 1 — Identify the start command**:
 Use the dev server command identified in 1.5-1.
 
 > **Multiple start commands**: If multiple dev-related scripts exist (e.g., `dev`, `dev:web`, `electron:dev`), ask the user which one to run via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-**Step 1b — Electron apps: CDP launch command** (skip for non-Electron, skip if `electron_mode = cdp`):
+**Step 1b — Electron apps: CDP launch command** (skip for non-Electron, skip if `electron_mode = cdp`, skip if `electron_mode = cli_direct`):
 
-Replace the start command with the CDP-enabled version. Do NOT run the original command — Playwright MCP needs CDP to connect to Electron.
+When `electron_mode = cli_direct` (Playwright CLI available), the app will be launched via `_electron.launch()` in the exploration step — no CDP flag is needed. Skip this step.
+
+Otherwise (MCP-only path), replace the start command with the CDP-enabled version. Do NOT run the original command — Playwright MCP needs CDP to connect to Electron.
 
 | Build Tool | CDP-Enabled Start Command |
 |-----------|--------------------------|
@@ -582,9 +616,51 @@ UI structure exploration is possible even without setup.
 
 > **Note**: If no initial setup needs are detected from the code, skip this step and proceed directly to 1.5-5.
 
-### 1.5-5. Runtime Exploration (Automated via Playwright MCP)
+### 1.5-5. Runtime Exploration (Automated via Playwright)
 
-With the app running, systematically explore using Playwright MCP:
+With the app running, systematically explore using the available Playwright method. The exploration method is selected based on the detection results from Step 1.5-0:
+
+---
+
+#### When Playwright CLI is primary (`playwright_cli = true`):
+
+Execute exploration via Playwright library mode (Node.js script):
+
+**Phase A — Initial Landing**:
+1. CLI library mode: `chromium.launch()` → `page.goto('http://localhost:[PORT]')` → `page.accessibility.snapshot()`
+   - For Electron apps: use `_electron.launch({ executablePath: '[electron-binary-path]' })` instead of `chromium.launch()`
+2. Parse the snapshot JSON for page structure (roles, names, values, children)
+3. Evaluate `page.evaluate(() => Array.from(document.querySelectorAll('script')).map(s => s.src))` → check for initial JS errors via console event listener
+
+**Phase B — Navigation Discovery**:
+1. From the accessibility tree snapshot, identify navigation elements (links, buttons with nav roles, elements with `role="navigation"`, `role="menubar"`, `role="tablist"`)
+2. Collect internal link URLs via `page.evaluate(() => Array.from(document.querySelectorAll('a[href]')).map(a => ({ href: a.href, text: a.textContent.trim() })))`
+3. Cross-reference with route definitions found in Phase 1 code scan (if available)
+
+**Phase C — Screen-by-Screen Survey** (budget: max 20 screens):
+For each discovered route (in navigation order):
+1. CLI library mode: `page.goto(route)` → `page.accessibility.snapshot()`
+2. Record per screen:
+   - **Route path** and page title/heading
+   - **Key UI elements**: buttons, forms, tables, lists, editors, charts (from accessibility tree roles)
+   - **Layout pattern**: sidebar+content, full-width, centered-form, split-pane, etc.
+   - **Data display type**: table, card grid, tree view, editor, empty state, etc.
+   - **Interactive elements**: form inputs, dropdowns, toggles, drag targets
+3. If console errors appear (via `page.on('console', ...)` listener) → record them (continue exploration)
+
+**Phase D — Key Flow Identification** (observation only):
+Based on screens discovered, identify apparent user flows:
+- Authentication flow (if login form exists)
+- CRUD patterns (list → detail → edit)
+- Wizard/multi-step flows
+- Settings/configuration pages
+- Record flows as route sequences, **without performing data entry or state-changing actions**
+
+---
+
+#### When Playwright MCP is available (`playwright_mcp = true`, `playwright_cli = false`):
+
+Execute exploration via Playwright MCP tools:
 
 **Phase A — Initial Landing**:
 1. `browser_navigate` → `http://localhost:[PORT]`
@@ -596,7 +672,7 @@ With the app running, systematically explore using Playwright MCP:
 2. Collect all internal navigation links (URL + text)
 3. Cross-reference with route definitions found in Phase 1 code scan (if available)
 
-**Phase C — Screen-by-Screen Survey**:
+**Phase C — Screen-by-Screen Survey** (budget: max 20 screens):
 For each discovered route (in navigation order):
 1. `browser_navigate` → target URL
 2. `browser_snapshot` → capture page structure
@@ -616,14 +692,16 @@ Based on screens discovered, identify apparent user flows:
 - Settings/configuration pages
 - Record flows as route sequences, **without performing data entry or state-changing actions**
 
-**Budget Control**:
+---
+
+**Budget Control** (applies to both CLI and MCP paths):
 - Maximum screens: 20 (if more routes exist, sample representative ones and note "N more similar pages")
 - Per-screen time: 10 seconds max
 - Total exploration budget: 5 minutes
 - Repeated layout patterns: sample 3, then note "N more with same pattern"
 
 **Crash Recovery**:
-When app process termination or MCP connection loss is detected during exploration:
+When app process termination or Playwright connection loss is detected during exploration:
 1. Preserve already collected screen data (immediately write explored screens to runtime-exploration.md)
 2. HARD STOP — **Use AskUserQuestion** with options:
    - "Restart app and continue exploration" — restart the app, skip already-explored screens, resume from remaining screens
@@ -723,13 +801,22 @@ Key observations:
 
 After runtime exploration, capture screenshots of key screens as **visual reference artifacts** for the rebuild pipeline. These screenshots serve as the target UI that the rebuilt app should match.
 
-**When to capture**: Always attempt when Playwright MCP is available AND app was explored in Step 3. Skip if exploration was skipped or MCP is unavailable.
+**When to capture**: Always attempt when Playwright is available (CLI or MCP) AND app was explored in Step 3. Skip if exploration was skipped or Playwright is unavailable.
 
 **Procedure**:
+
+When Playwright CLI is primary (`playwright_cli = true`):
+1. For each screen explored in Step 3 (from the navigation log):
+   - CLI library mode: `page.goto(route)` → `page.waitForTimeout(3000)` → `page.screenshot({ path: 'specs/reverse-spec/visual-references/{screen-name}.png', fullPage: true })`
+   - For Electron apps: use `_electron.launch()` → `firstWindow()` to obtain the page object
+2. Generate `specs/reverse-spec/visual-references/manifest.md` (same format as below)
+3. Display: `📸 Visual references captured: [N] screens → specs/reverse-spec/visual-references/`
+
+When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli = false`):
 1. For each screen explored in Step 3 (from the navigation log):
    - Navigate to the screen URL/route
    - Wait for content to stabilize (~3 seconds)
-   - Take a screenshot → save to `specs/reverse-spec/visual-references/{screen-name}.png`
+   - Take a screenshot via MCP → save to `specs/reverse-spec/visual-references/{screen-name}.png`
 2. Generate `specs/reverse-spec/visual-references/manifest.md`:
    ```markdown
    # Visual Reference Manifest
@@ -740,8 +827,8 @@ After runtime exploration, capture screenshots of key screens as **visual refere
    ```
 3. Display: `📸 Visual references captured: [N] screens → specs/reverse-spec/visual-references/`
 
-**When MCP unavailable or app cannot be launched**:
-- Display: `⚠️ Visual reference capture skipped (MCP/app not available). You can provide screenshots manually at: specs/reverse-spec/visual-references/`
+**When Playwright unavailable or app cannot be launched**:
+- Display: `⚠️ Visual reference capture skipped (Playwright/app not available). You can provide screenshots manually at: specs/reverse-spec/visual-references/`
 - Create the `visual-references/` directory and an empty `manifest.md` with the template header
 
 **Usage downstream**:
@@ -749,10 +836,18 @@ After runtime exploration, capture screenshots of key screens as **visual refere
 - `implement` step: References displayed during Review for visual fidelity awareness
 - `verify` step: Phase 3 Visual Fidelity Check compares rebuilt UI against reference screenshots
 
-**Step 4b — Style Token Extraction** (rebuild mode only, MCP available):
+**Step 4b — Style Token Extraction** (rebuild mode only, Playwright available):
 
 After visual reference screenshots, extract concrete CSS values from the running app for implementation-time reference. Code-reading alone cannot capture computed styles, and agents guessing colors/spacing leads to visual divergence.
 
+When Playwright CLI is primary (`playwright_cli = true`):
+1. Navigate to the app's main screen: `page.goto('http://localhost:[PORT]')`
+2. Use `page.evaluate()` to extract:
+   - CSS custom properties from `:root` (e.g., `--color-primary`, `--spacing-md`, `--font-family`)
+   - Computed styles from landmark elements: `header`, `nav`, `main`, `aside`, `footer` (background, color, padding, font)
+   - Body typography: `fontFamily`, `fontSize`, `lineHeight`, `color`, `backgroundColor`
+
+When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli = false`):
 1. Navigate to the app's main screen (or the most representative screen explored in Step 3)
 2. Use `browser_evaluate` to extract:
    - CSS custom properties from `:root` (e.g., `--color-primary`, `--spacing-md`, `--font-family`)

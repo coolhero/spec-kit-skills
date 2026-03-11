@@ -1485,3 +1485,46 @@ Analyzed v4 improvement document (F005 MCP tool integration case study, proposal
 | 3 | Phase 3 probe table updated | 4 outcomes instead of 3 — "Target closed" mapped to Case B (agent starts app) | Same Case B logic applies: CDP is configured, app is not running, agent handles it |
 
 **Files**: verify-phases.md (Pre-flight status table, Workaround Prohibition, Phase 3 Step 3 probe table)
+
+---
+
+## [2026-03-11] CLI-Primary Playwright Architecture + Implement-Phase Browser Access
+
+Flipped Playwright backend priority from MCP-primary to CLI-primary. Added implement-phase browser access for source app reference during coding. Renamed MCP-GUIDE.md → PLAYWRIGHT-GUIDE.md with full English rewrite.
+
+### Motivation
+
+Three problems drove this change:
+1. **MCP reliability** — Chronic session registration failures ("Playwright MCP 도구가 이 세션에서 없어서"). MCP tools load at session start; if misconfigured or timing wrong, entire session has no browser access.
+2. **Implement phase blindness** — Agent coded UI from spec.md text only. No visual reference to source app, no way to check if built UI renders correctly during coding. Errors discovered only at verify.
+3. **Electron complexity** — CDP port pre-configuration + session restart + mode switching. CLI's `_electron.launch()` eliminates all of this.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Backend priority flip | CLI primary (priority 1), MCP accelerator (priority 2) | CLI is session-independent, always available once installed. MCP depends on session registration timing |
+| 2 | Two CLI usage modes | Library mode (`node -e`) for implement; Test runner mode (`npx playwright test`) for verify | Implement needs ad-hoc quick checks; verify needs structured SC verification |
+| 3 | Implement-phase browser access | 4 CLI script patterns: snapshot, css-extract, element-check, compare | Agent can reference source app visually and verify built app rendering during implementation, not just at verify |
+| 4 | Electron simplification | `_electron.launch()` as primary (no CDP), MCP+CDP as legacy alternative | Direct Electron connection eliminates CDP port configuration and session restart requirements |
+| 5 | Session restart elimination | CLI available → NEVER recommend restart | Session restart was only needed because MCP required re-registration. CLI has no such dependency |
+| 6 | MCP-GUIDE.md → PLAYWRIGHT-GUIDE.md | Rename + full rewrite (Korean MCP-centric → English CLI-primary) | File name and content reflected MCP-only worldview; now covers both CLI and MCP with CLI as default |
+| 7 | Dual-app lifecycle (rebuild) | Source app (default port) + built app (+1000 port) run simultaneously during implement | Enables side-by-side comparison via CLI compare pattern without manual app switching |
+| 8 | Workaround prohibition update | Playwright library mode and `_electron.launch()` explicitly PERMITTED | These are first-class Playwright APIs, not workarounds. Needed explicit allowance after F007 prohibition rule |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `MCP-GUIDE.md` → `PLAYWRIGHT-GUIDE.md` | Renamed + major rewrite (~350 lines English CLI-primary, was 422 lines Korean MCP-centric) |
+| `reference/runtime-verification.md` | §1-6 CLI-first reorder + §7 new implement-phase browser access protocol (~90 lines) |
+| `reference/injection/implement.md` | Source App Visual Reference section, CLI primary runtime check, renamed Playwright section |
+| `commands/verify-phases.md` | Pre-flight CLI first, `_electron.launch()` primary, session restart scoped to MCP-only |
+| `reverse-spec/commands/analyze.md` | Phase 1.5 CLI primary detection and exploration, `_electron.launch()` for Electron |
+| `smart-sdd/SKILL.md` | Prerequisites: CLI primary, MCP optional |
+| `reverse-spec/SKILL.md` | Prerequisites: CLI primary, MCP optional |
+| `reference/ui-testing-integration.md` | "Playwright MCP" → "Playwright (CLI or MCP)" throughout |
+| `reference/injection/verify.md` | RUNTIME_BACKEND display format updated |
+| `domains/interfaces/gui.md` | S6/S8: CLI primary backend, `_electron.launch()` |
+| `README.md` + `README.ko.md` | Playwright Setup Guide link, CLI primary prerequisites |
+| `CLAUDE.md` | Language rule: MCP-GUIDE.md → PLAYWRIGHT-GUIDE.md |

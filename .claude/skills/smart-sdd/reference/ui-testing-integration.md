@@ -1,18 +1,24 @@
 # UI Testing Integration Guide
 
 > Reference: Browser automation integration for UI-heavy Features.
-> Applicable when Playwright MCP (or similar browser automation tool) is available in the Claude Code environment.
+> Applicable when Playwright (CLI or MCP) or similar browser automation tool is available in the Claude Code environment.
 > Referenced by: `domains/app.md` § 6, `commands/verify-phases.md` Phase 3.
 
 ---
 
 ## 1. Overview
 
-spec-kit-skills is designed to work with browser automation tools like **Playwright MCP** for UI testing, visual verification, and demo validation. This guide documents the integration points, current capabilities, and future roadmap.
+spec-kit-skills is designed to work with browser automation tools like **Playwright** (CLI or MCP) for UI testing, visual verification, and demo validation. This guide documents the integration points, current capabilities, and future roadmap.
 
-### What is Playwright MCP?
+### What is Playwright?
 
-Playwright MCP is a Model Context Protocol server that gives Claude Code the ability to control a browser — navigate pages, click elements, fill forms, take screenshots, and run visual assertions. When installed, it provides tools like `browser_navigate`, `browser_click`, `browser_screenshot`, etc.
+Playwright is a browser automation framework that can be used in multiple modes:
+
+- **CLI / Library mode**: Install via `npm install -D @playwright/test`. Write and run test scripts directly (`npx playwright test`). Best for headless CI pipelines and scripted verifications.
+- **Test Runner mode**: Playwright's built-in test runner with fixtures, assertions, and parallel execution. Ideal for structured test suites.
+- **MCP Server mode**: A Model Context Protocol server (`@playwright/mcp`) that gives Claude Code interactive browser control — navigate pages, click elements, fill forms, take screenshots. Provides tools like `browser_navigate`, `browser_click`, `browser_screenshot`, etc.
+
+All three modes share the same underlying browser engine. spec-kit-skills works with any of them — CLI mode is the default; MCP mode adds interactive tool-call capabilities when configured.
 
 ### App Session Management
 
@@ -44,7 +50,7 @@ reverse-spec         (not integrated)               UI SBI extraction
 
 ## 2. Phase A: Hook Points (Current)
 
-Phase A adds integration points to the existing workflow without changing core logic. These hooks are activated **only when Playwright MCP tools are available** in the Claude Code session.
+Phase A adds integration points to the existing workflow without changing core logic. These hooks are activated **only when Playwright (CLI or MCP) is available** in the Claude Code session.
 
 ### 2a. verify Phase 3 — Demo UI Validation
 
@@ -53,14 +59,14 @@ Phase A adds integration points to the existing workflow without changing core l
 When verifying a Feature's demo script:
 
 1. Demo script starts the server (existing behavior)
-2. **Hook**: If Playwright MCP is available, after the server starts:
+2. **Hook**: If Playwright is available, after the server starts:
    - Navigate to the demo URL (from the demo script's "Try it" output)
    - Take a screenshot to verify the page loads correctly
    - Check for critical UI elements (page title, navigation, key components)
    - Report: "UI verification: ✅ Page loads, [N] key elements found"
 3. Demo script continues with `--ci` health check (existing behavior)
 
-**This is additive** — if Playwright MCP is not available, the demo verification works exactly as before (health endpoint check only).
+**This is additive** — if Playwright is not available, the demo verification works exactly as before (health endpoint check only).
 
 ### 2b. Demo Script Enhancement
 
@@ -76,7 +82,7 @@ Demo scripts can include an optional `# Playwright` section in the header commen
 #   Verify: element [data-testid="create-button"] is clickable
 ```
 
-This section is informational when Playwright MCP is not available. When available, the verify Phase 3 hook reads these assertions and validates them.
+This section is informational when Playwright is not available. When available, the verify Phase 3 hook reads these assertions and validates them.
 
 ### 2c. Domain Profile Hook
 
@@ -94,13 +100,17 @@ The domain profile specifies which UI verification patterns apply (only when `gu
 
 ### Prerequisites
 
-1. **Install Playwright MCP** in your Claude Code environment:
+1. **Install Playwright CLI**:
    ```bash
-   # Add to your Claude Code MCP configuration
-   # See: https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-playwright
+   npm install -D @playwright/test && npx playwright install
    ```
 
-2. **Ensure demo scripts follow the standard**: Demo scripts must print "Try it" instructions with real URLs (see `reference/demo-standard.md`)
+2. **(Optional) Install Playwright MCP** for interactive tool calls:
+   ```bash
+   claude mcp add playwright -- npx @playwright/mcp@latest
+   ```
+
+3. **Ensure demo scripts follow the standard**: Demo scripts must print "Try it" instructions with real URLs (see `reference/demo-standard.md`)
 
 ### During verify
 
@@ -110,18 +120,18 @@ When you run `/smart-sdd verify F001`:
 2. Phase 2 (cross-Feature consistency) runs as usual
 3. Phase 3 (demo verification):
    - Demo script starts the server
-   - If Playwright MCP available → automated UI check against demo URLs
+   - If Playwright available → automated UI check against demo URLs
    - If not available → health endpoint check only (existing behavior)
 4. Phase 4 (global update) runs as usual
 
 ### What You Get
 
-With Playwright MCP enabled:
+With Playwright enabled:
 - **Automated visual smoke test**: Confirms the demo page actually renders, not just that the server responds
 - **Element presence check**: Verifies key UI components exist on the page
 - **Screenshot evidence**: Captures screenshots during verification for review
 
-Without Playwright MCP:
+Without Playwright:
 - Everything works as before — no degradation
 
 ---
@@ -130,7 +140,9 @@ Without Playwright MCP:
 
 ### Electron Apps Require CDP Mode
 
-Playwright MCP in standard mode opens a separate Chromium browser — it cannot interact with Electron app windows. Electron apps require CDP (Chrome DevTools Protocol):
+> **Note:** CDP is only required for MCP mode. CLI mode uses `_electron.launch()` which connects directly to Electron without CDP.
+
+Playwright MCP in standard mode opens a separate Chromium browser — it cannot interact with Electron app windows. Electron apps require CDP (Chrome DevTools Protocol) when using MCP mode:
 
 1. Start the Electron app with `--remote-debugging-port=9222`
 2. Configure Playwright MCP with `--cdp-endpoint http://localhost:9222`
@@ -138,14 +150,15 @@ Playwright MCP in standard mode opens a separate Chromium browser — it cannot 
 
 If `/reverse-spec` was run with CDP for the same Electron project, Playwright MCP may already be in CDP mode. Just start the new app on the same port.
 
-See [MCP-GUIDE.md](../../../../MCP-GUIDE.md) for detailed CDP setup instructions.
+See [PLAYWRIGHT-GUIDE.md](../../../../PLAYWRIGHT-GUIDE.md) for detailed CDP setup instructions.
 
-### Playwright MCP Not Detected
+### Playwright Not Detected
 
 If verify Phase 3 falls back to health-check-only mode:
-- Check that Playwright MCP server is running and connected
-- Verify MCP configuration in Claude Code settings
-- The hook checks for Playwright tool availability at runtime — no pre-configuration needed in smart-sdd
+- Check CLI installation first: `npx playwright --version`
+- If using MCP mode, check that Playwright MCP server is running and connected
+- Verify MCP configuration in Claude Code settings (if applicable)
+- The hook checks for Playwright availability at runtime — no pre-configuration needed in smart-sdd
 
 ### Demo URL Not Found
 
