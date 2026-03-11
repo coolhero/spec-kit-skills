@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--all] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|remove|reset|status"
+argument-hint: "<command> [feature-id] [--from path|step] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -87,9 +87,13 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd expand T2,T3                  # Activate Tier 2 and Tier 3 Features
 /smart-sdd expand full                   # Activate all remaining deferred Features
 
-# Reset pipeline state (start smart-sdd over from scratch)
-/smart-sdd reset                         # Reset pipeline, keep reverse-spec artifacts + logs
-/smart-sdd reset --all                   # Reset pipeline + reinitialize case-study-log + clean history.md
+# Reset (per-Feature or full pipeline)
+/smart-sdd reset F007                    # Reset F007 progress → re-run from specify
+/smart-sdd reset F007 --from plan        # Reset F007 from plan step (keep specify results)
+/smart-sdd reset F007 F008               # Reset multiple Features
+/smart-sdd reset                         # Full pipeline reset, keep reverse-spec artifacts + logs
+/smart-sdd reset --all                   # Full pipeline reset + reinitialize case-study-log + clean history.md
+/smart-sdd reset --delete F007           # Permanently remove Feature (delete all traces)
 
 # Status check
 /smart-sdd status                        # Check overall progress status
@@ -143,8 +147,9 @@ Parses `$ARGUMENTS` to extract command, feature-id, and options.
 ```
 $ARGUMENTS parsing rules:
   First token  → command (init | add | adopt | expand | pipeline | constitution | coverage | status | parity | reset)
-  Second token → feature-id (format: F001, optional for pipeline command — targets specific Feature)
-  --from <path>   → artifacts path (defaults to ./specs/reverse-spec/ if not specified)
+  Second token → feature-id (format: F001, optional for pipeline/reset — targets specific Feature)
+  --from <path|step> → artifacts path (for pipeline/init/adopt, defaults to ./specs/reverse-spec/) OR reset step name (for reset command: specify/plan/tasks/implement/verify)
+  --delete        → Permanent Feature deletion (only for reset command: reset --delete F007)
   --prd <path>    → Path to PRD document (for init and add commands)
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
@@ -219,8 +224,9 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
 | `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
 | `parity` | `commands/parity.md` | Check parity against original source |
-| `remove [FID...]` | `commands/remove.md` | Remove specific Feature(s) with dependency warning |
-| `reset` | `commands/reset.md` | Reset pipeline state (keep reverse-spec artifacts) |
+| `reset [FID] [--from step]` | `commands/reset.md` | Reset Feature progress for re-execution |
+| `reset` | `commands/reset.md` | Full pipeline reset (keep reverse-spec artifacts) |
+| `reset --delete [FID...]` | `commands/reset.md` | Permanently delete Feature(s) from project |
 | `status` | `commands/status.md` | Check progress |
 
 For all commands: load domain modules per `sdd-state.md` Domain Profile (see `domains/_resolver.md`).

@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-11] Unified Reset Command — remove→reset Redesign
+
+User ran `/smart-sdd remove F007` intending to re-run F007's pipeline, but `remove` permanently deleted all traces. Root cause: command name mismatch — `remove` implies permanent deletion, but the user's intent was to reset progress for re-execution. Redesigned into a unified `reset` command with three modes.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Command name | `reset` (unified, not separate `remove`) | `remove` caused accidental permanent deletion. Single entry point prevents confusion |
+| 2 | Per-Feature reset | `reset F007 [--from step]` | Primary use case: reset one Feature's progress so pipeline re-runs it. `--from` allows partial reset (e.g., keep specify, re-run from plan) |
+| 3 | Permanent deletion | `reset --delete F007` | Explicit `--delete` flag required for destructive action. Not the default behavior |
+| 4 | Full pipeline reset | `reset` (no FID) | Existing behavior preserved. `--all` flag for including logs |
+| 5 | Reverse-spec preservation | Always preserved (all modes) | User requirement: pre-context.md, roadmap, registries never deleted during reset. Only `--delete` removes pre-context |
+| 6 | Spec directory handling | Deleted on reset (re-created by pipeline) | Unlike restructure-guide's "never auto-delete" policy, reset is explicit user intent. Clean slate for re-execution |
+| 7 | remove.md disposition | Deleted (absorbed into reset.md Mode C) | Single source of truth. `--delete` flag routes to the same deletion logic |
+
+### Files Changed
+
+- `commands/reset.md` — Rewritten: 3 modes (Per-Feature, Full Pipeline, Permanent Delete)
+- `commands/remove.md` — Deleted (absorbed into reset.md)
+- `SKILL.md` — Updated command reference, argument parsing, usage section
+- `restructure-guide.md` — Updated cross-reference from `remove` to `reset --delete`
+- `add.md` — Updated cross-reference for in_progress/completed Features
+
+---
+
 ## [2026-03-11] F007 Post-Mortem — 5 Structural Improvements
 
 F007 Knowledge Base verify exposed 12 bugs, all discovered in verify (none in implement). Root causes: (A) implement had no E2E integration test — modules worked individually but were never connected end-to-end, (B) tasks had no integration wiring tasks — only module-level tasks, (C) verify inline-fixed 12 bugs without ever triggering regression, (D) cross-module API contracts (function names, argument formats) were never verified, (E) long debugging sessions lost SDD process rules to context compaction.

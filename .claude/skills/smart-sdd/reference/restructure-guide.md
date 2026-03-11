@@ -22,7 +22,7 @@ For **in-progress/completed Features**: more artifacts are affected — follow t
 | **merge** | Two or more → one | F004-cart + F005-wishlist → F004-shopping |
 | **move** | Move requirements/entities/APIs between Features | Move "guest checkout" from F003-order to F002-auth |
 | **reorder** | Change dependency relationships | F005 no longer depends on F003 |
-| **delete** | Remove a Feature entirely (or use `/smart-sdd remove [FID]`) | Remove F006-analytics |
+| **delete** | Remove a Feature entirely (use `/smart-sdd reset --delete [FID]`) | Remove F006-analytics |
 
 ## Feature ID Stability Policy
 
