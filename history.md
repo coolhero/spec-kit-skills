@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-03-11] Source Modification Gate + Post-Fix Runtime Verification
+
+Real F007 failure: agent discovered issues during verify (KB picker restructure + KnowledgeReference.name + CitationBlock) and fixed all 4 files inline without first classifying severity. The Bug Fix Severity Rule existed (lines 14-47) but was a reference section, not an enforced gate. Same structural pattern as the Step 3f problem — agents skip reference rules.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Enforcement mechanism | Source Modification Gate with mandatory visible output | Reference-only rules get skipped. Mandatory visible output (table of planned changes + classification) forces the agent to stop and evaluate before editing |
+| 2 | AGGREGATE file count | Count total unique files across ALL planned changes | Individual changes may seem Minor, but 4 "small" fixes across 4 files = Major-Implement. Agent must evaluate the aggregate, not each change in isolation |
+| 3 | Post-Fix Runtime Verification | MANDATORY after every inline fix | "Build passes + tests pass ≠ fix correct." Inline fixes must be runtime-verified against affected SCs at Required Depth. Catches incomplete wiring (service compiles but data doesn't flow) |
+| 4 | Scope escalation detection | If runtime re-verification fails → re-run gate with expanded scope | A fix that doesn't resolve the runtime issue likely means more files need changes, which may push aggregate to Major |
+| 5 | Inline reminders | Gate reminders at Phase 1 failure, Step 3d depth retry, Phase 3b→4 transition | Agents need inline triggers at the exact points where "fix it now" bias occurs |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `commands/verify-phases.md` | New "Source Modification Gate" section (mandatory pre-fix classification with visible output). Post-Fix Runtime Verification (step 8). Inline gate reminders at Phase 1, Step 3d, Phase 3b→4 transition |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] Verify Phase Hardening — SC Decomposition, Import Graph, Depth Enforcement
 
 Three verify-phases.md improvements based on real F007 test failure where `KnowledgeChatService` was implemented and tested but never imported by its consumer (`Inputbar.tsx`), and SC-007 (RAG chat integration) was classified entirely as `user-assisted`, skipping the auto-verifiable UI wiring portion.

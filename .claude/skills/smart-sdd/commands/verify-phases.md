@@ -73,6 +73,85 @@ All inline changes (Minor bug fixes + Implementation gap fills) must be summariz
 
 Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
 
+### Source Modification Gate (MANDATORY — enforced before ANY source file change)
+
+> **Why this gate exists**: The Bug Fix Severity Rule and Verify-time Change Classification above are reference rules. In practice, agents skip them due to "fix it now" bias — they discover an issue and immediately modify code without first evaluating severity. This gate is the enforcement mechanism that BLOCKS source modification until classification is completed and displayed.
+
+**RULE: Before editing ANY source file (`.ts`, `.tsx`, `.vue`, `.py`, `.go`, `.rs`, `.java`, `.jsx`, `.svelte`, etc.) during verify, the agent MUST execute this gate. No exceptions.**
+
+**Gate procedure**:
+
+1. **STOP** — do NOT open any source file for editing yet.
+
+2. **List ALL planned changes** in a visible table:
+   ```
+   🔍 Source Modification Gate — Pre-Fix Classification:
+   | # | File | What changes | Why |
+   |---|------|-------------|-----|
+   | 1 | tools/index.ts | KB picker popover structure | SC-007a: picker doesn't open |
+   | 2 | types/knowledge.ts | Add KnowledgeReference.name field | CitationBlock needs name for display |
+   | 3 | KnowledgeService.ts | getKnowledgeReferences() return shape | Include name in returned data |
+   | 4 | CitationBlock.tsx | Render name from reference | Display citation source name |
+   ```
+
+3. **Apply classification per change** (using Decision Flow above):
+   - Each row: Bug Fix / Implementation Gap / Design Change
+   - Each row: file count contribution
+
+4. **AGGREGATE file count check**: Count TOTAL unique files across ALL planned changes.
+   - Total ≤ 2 files, no API/interface change, no state restructure → **Minor/Gap — proceed inline**
+   - Total ≥ 3 files → **Major-Implement** (regardless of individual change sizes)
+   - ANY change involves API/contract change → **Major-Plan**
+   - ANY change involves state flow restructure or new module → **Major-Implement**
+   - ANY change adds behavior beyond existing FR/task scope → **Major-* regression**
+
+   > **Critical**: Do NOT evaluate each change in isolation. Evaluate the AGGREGATE. Four "small" changes across 4 files = Major-Implement, not four Minor fixes.
+
+5. **Display classification result**:
+   ```
+   ⚙️ Classification: [Minor — proceed inline] OR [🔴 Major-Implement — pipeline regression required]
+     Total files: [N]
+     API/interface change: [yes/no]
+     State restructure: [yes/no]
+   ```
+
+6. **If Minor/Gap** → Proceed with inline fixes. Record all changes in Notes. **Then execute Post-Fix Runtime Verification** (step 8 below).
+
+7. **If Major** → **HARD STOP**. Do NOT modify any source files. Trigger the "When any Major issue is found" flow (lines 31-38):
+   - Display `🔴 [Severity] issue detected — requires pipeline regression to [target stage]`
+   - **Use AskUserQuestion**:
+     - "Return to [target stage] with issue context"
+     - "Reclassify severity and fix now" — user overrides
+   - **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+8. **Post-Fix Runtime Verification** (MANDATORY after every inline fix):
+
+   > "Build passes + tests pass ≠ fix is correct." An inline fix during verify MUST be runtime-verified, not just statically validated. This catches the pattern where code compiles but the fix doesn't actually resolve the runtime issue (e.g., service exists but isn't wired in, type is correct but data doesn't flow).
+
+   After applying an inline fix (Minor bug fix or Gap fill):
+   1. **Build check**: Run build → confirm no errors introduced
+   2. **Test check**: Run tests → confirm no regressions
+   3. **Runtime verification of the specific fix**:
+      - Identify the SC(s) affected by the fix
+      - Re-run the affected SC verification using the appropriate backend (Playwright MCP/CLI, HTTP client, process runner)
+      - The fix is NOT complete until the affected SC passes at its Required Depth (from SC Verification Matrix)
+      - If runtime verification fails after the fix → the fix is insufficient. Re-evaluate: is this actually Minor, or has the scope grown to Major?
+   4. **Display result**:
+      ```
+      🔧 Post-Fix Verification:
+        Build: ✅ | Tests: ✅ | Runtime SC-022: ✅ Tier 2 reached
+        Fix confirmed — recording in Notes.
+      ```
+      OR:
+      ```
+      🔧 Post-Fix Verification:
+        Build: ✅ | Tests: ✅ | Runtime SC-022: ❌ still failing
+        ⚠️ Fix did not resolve runtime issue. Re-evaluating severity...
+      ```
+   5. If runtime re-verification fails AND investigation reveals more files need changes → **re-run the Source Modification Gate** with the expanded scope. The aggregate file count may now push the fix to Major.
+
+**This gate applies to ALL verify phases**: Phase 1 re-fixes, Phase 2 fixes, Phase 3 SC failure fixes, Phase 3b fixes, and post-Review user-requested fixes. There are NO exceptions.
+
 ---
 
 ### Verify Initialization — Compaction-Safe Checkpoint
@@ -319,6 +398,7 @@ Run each check and record results. **If any check fails, verification is BLOCKED
 
 Fix the failing checks before verification can continue.
 Verification is BLOCKED — merge will not be allowed until all checks pass.
+⚠️ Source Modification Gate applies — before fixing ANY source file, run the Pre-Fix Classification gate.
 ```
 
 **Use AskUserQuestion** with options:
@@ -1011,7 +1091,7 @@ After executing each SC's verification, record the **Reached Depth** and compare
 - If Reached Depth ≥ Required Depth → ✅ Depth satisfied
 - If Reached Depth < Required Depth → `⚠️ SC-### depth shortfall: required Tier [N] but only reached Tier [M]`
   - For behavioral SCs (Required Depth = Tier 2): This means the agent only confirmed element presence but did NOT verify the state change. **Agent MUST retry with a Tier 2 verification** (perform the action, check state mutation) before marking the SC as verified.
-  - If retry still cannot reach Required Depth (e.g., action triggers an error, state mutation path is broken): record as `⚠️ SC-### Tier 2 unreachable — [reason]` in the report. This is a strong indicator of a runtime bug.
+  - If retry still cannot reach Required Depth (e.g., action triggers an error, state mutation path is broken): record as `⚠️ SC-### Tier 2 unreachable — [reason]` in the report. This is a strong indicator of a runtime bug — **do NOT attempt to fix the code inline**. Record the failure and let it surface in Review. If a fix is needed, the Source Modification Gate applies (run Pre-Fix Classification before touching any source file).
 
 **Result report** (appended to SC Verification report):
 ```
@@ -1268,6 +1348,8 @@ Display:
 **Result classification**: ⚠️ warning (NOT blocking) — results included in Review
 
 ---
+
+> **⚠️ Source Modification Gate reminder** — Between Phase 3b and Phase 4 (Global Evolution Update), the pipeline displays Review results to the user. If the user requests fixes based on Review, or if the agent identifies issues to fix before committing results, the **Source Modification Gate MUST be executed** before touching ANY source file. This is the most common point where agents violate the Bug Fix Severity Rule — user feedback triggers a "fix it now" bias that bypasses severity classification. **STOP → List changes → Classify → Aggregate file count → If Major: HARD STOP regression, not inline fix.**
 
 ### Phase 4: Global Evolution Update
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found
