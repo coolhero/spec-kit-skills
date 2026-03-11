@@ -251,12 +251,14 @@ When invoking via Bash tool, always use: `cd PROJECT_ROOT && node -e "..."` (whe
 
 **Anti-pattern**: NEVER write library mode scripts to temporary files in `/tmp/` and execute them from there. `require()` resolves modules from the script's working directory, not from where the playwright binary is installed globally. Running `node /tmp/my-script.mjs` will fail with `ERR_MODULE_NOT_FOUND` unless `/tmp/node_modules/playwright` exists.
 
+**Headful by default**: All CLI patterns use `chromium.launch({ headless: false })` so the user can see the browser window during exploration and verification. This aids debugging and gives visual confidence that the right pages are being tested. For CI-only contexts where no display is available, the agent may switch to `headless: true`.
+
 **Pattern 1: snapshot(url)** — accessibility tree capture:
 ```js
 node -e "
 const { chromium } = require('playwright');
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ headless: false });
   const p = await b.newPage();
   await p.goto('URL');
   const snap = await p.accessibility.snapshot();
@@ -271,7 +273,7 @@ const { chromium } = require('playwright');
 node -e "
 const { chromium } = require('playwright');
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ headless: false });
   const p = await b.newPage();
   await p.goto('URL');
   const styles = await p.evaluate((s) => {
@@ -291,7 +293,7 @@ const { chromium } = require('playwright');
 node -e "
 const { chromium } = require('playwright');
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ headless: false });
   const p = await b.newPage();
   await p.goto('URL');
   const info = await p.evaluate((sel) => {
@@ -310,7 +312,7 @@ const { chromium } = require('playwright');
 node -e "
 const { chromium } = require('playwright');
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ headless: false });
   const p = await b.newPage();
   await p.goto('SOURCE_URL');
   const src = await p.accessibility.snapshot();

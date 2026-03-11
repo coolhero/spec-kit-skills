@@ -629,8 +629,9 @@ With the app running, systematically explore using the available Playwright meth
 Execute exploration via Playwright library mode (Node.js script):
 
 **Phase A — Initial Landing**:
-1. CLI library mode: `chromium.launch()` → `page.goto('http://localhost:[PORT]')` → `page.accessibility.snapshot()`
+1. CLI library mode: `chromium.launch({ headless: false })` → `page.goto('http://localhost:[PORT]')` → `page.accessibility.snapshot()`
    - For Electron apps: use `_electron.launch({ executablePath: '[electron-binary-path]' })` instead of `chromium.launch()`
+   - **Headful by default**: User sees the browser window during exploration (see runtime-verification.md §7)
 2. Parse the snapshot JSON for page structure (roles, names, values, children)
 3. Evaluate `page.evaluate(() => Array.from(document.querySelectorAll('script')).map(s => s.src))` → check for initial JS errors via console event listener
 
