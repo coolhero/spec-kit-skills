@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--all] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path] [--prd path] [--gap] [--source path] [--start step] [--all] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|remove|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -219,6 +219,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 | `expand` | `commands/expand.md` | Activate deferred Tiers (core scope) |
 | `coverage` | `commands/coverage.md` | SBI coverage check and gap resolution |
 | `parity` | `commands/parity.md` | Check parity against original source |
+| `remove [FID...]` | `commands/remove.md` | Remove specific Feature(s) with dependency warning |
 | `reset` | `commands/reset.md` | Reset pipeline state (keep reverse-spec artifacts) |
 | `status` | `commands/status.md` | Check progress |
 

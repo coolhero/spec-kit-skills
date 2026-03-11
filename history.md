@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-03-11] `/smart-sdd remove` Command
+
+New standalone command for removing specific Features. Previously required either `/smart-sdd add` pre-check (pending only) or manual restructure-guide.md checklist (in_progress/completed). Now unified into one command that works for any Feature status.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Command name | `remove` (not `clean`) | User preference — `clean` implies cache/temp cleanup, `remove` is clear deletion intent |
+| 2 | Dependency handling | Warn, not block | User requirement — downstream Features get 🔀 marking, user decides whether to proceed |
+| 3 | Source code handling | Warn only, don't auto-delete | Consistent with restructure-guide.md policy — code removal is user responsibility |
+| 4 | Spec directory handling | Delete (with HARD STOP confirmation) | Unlike restructure (split/merge) where preservation aids reference, `remove` is explicit deletion intent |
+| 5 | Multi-Feature support | `remove F007 F008` | Batch convenience |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `commands/remove.md` | New file — 5-step command (Parse → Impact Scan → Report HARD STOP → Execute → Commit) |
+| `SKILL.md` | argument-hint + Command Reference table: added `remove` |
+| `reference/restructure-guide.md` | Delete operation: cross-reference to `/smart-sdd remove` |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] User-Assisted SC Completion Gate (Step 3f)
 
 Real-world failure in F007 verify: agent classified SCs as `user-assisted` but skipped the cooperation block in Step 3d entirely, marking them as `⚠️` without ever presenting AskUserQuestion to the user. The `user-assisted` SCs subsection existed in Step 3d (with inline HARD STOP) but was treated as optional content among the auto-category subsections.
