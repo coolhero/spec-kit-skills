@@ -171,17 +171,17 @@ You can open and edit these files directly, then select
 ──────────────────────────────────────────────────
 ```
 
-For detailed per-command Review Display Content, see [context-injection-rules.md](reference/context-injection-rules.md).
+For detailed per-command Review Display Content, see [context-injection-rules.md](../reference/context-injection-rules.md).
 
 #### Step 3c. Ask for User Approval (HARD STOP)
 
 Use `ApprovalGate(type: review)` from Step 2 above. **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-**Per-command option overrides**: Some commands use context-specific options (e.g., Clarify: "Run clarify again", Analyze: outcome-dependent, Verify: pass/fail-specific). See [context-injection-rules.md](reference/context-injection-rules.md) for details.
+**Per-command option overrides**: Some commands use context-specific options (e.g., Clarify: "Run clarify again", Analyze: outcome-dependent, Verify: pass/fail-specific). See [context-injection-rules.md](../reference/context-injection-rules.md) for details.
 
 ### 4. Update — Global Evolution Layer Refresh
 
-Updates global artifacts to reflect the command execution results. For detailed update rules per step, see the Post-Step Update Rules in the corresponding [reference/injection/{command}.md](reference/injection/).
+Updates global artifacts to reflect the command execution results. For detailed update rules per step, see the Post-Step Update Rules in the corresponding [reference/injection/{command}.md](../reference/injection/).
 
 | Completed Step | Update Target | Content |
 |----------------|--------------|---------|
@@ -220,7 +220,7 @@ Before Feature processing, initialize the state and validate the source path.
 **Step 1 — State file initialization**:
 If `BASE_PATH/sdd-state.md` does not exist, create it:
 1. Read `BASE_PATH/roadmap.md` to extract the Feature list and Tiers
-2. Generate `sdd-state.md` following the [state-schema.md](reference/state-schema.md) format
+2. Generate `sdd-state.md` following the [state-schema.md](../reference/state-schema.md) format
 3. Set Origin based on the project type (`greenfield`, `rebuild`, or `adoption`)
 4. Set Source Path (see state-schema.md for rules per mode)
 
@@ -519,7 +519,7 @@ Read `BASE_PATH/constitution-seed.md`:
 
 #### Phase 0-2. Checkpoint (HARD STOP)
 
-Display the constitution-seed content per [injection/constitution.md → Checkpoint Display Content](reference/injection/constitution.md). Then follow **PROCEDURE CheckpointApproval** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
+Display the constitution-seed content per [injection/constitution.md → Checkpoint Display Content](../reference/injection/constitution.md). Then follow **PROCEDURE CheckpointApproval** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
 
 #### Phase 0-3. Execute + Review (HARD STOP)
 
@@ -528,7 +528,7 @@ Display the constitution-seed content per [injection/constitution.md → Checkpo
 1. Provide the constitution-seed content as context and execute `speckit-constitution`
 2. **In the SAME response** — ignore any "Suggested commit" or "Next step" output from speckit-constitution
 3. **In the SAME response** — read `.specify/memory/constitution.md` — the **entire file**
-4. Display the Review content per [injection/constitution.md → Review Display Content](reference/injection/constitution.md)
+4. Display the Review content per [injection/constitution.md → Review Display Content](../reference/injection/constitution.md)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
 6. Follow **PROCEDURE ReviewApproval** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
 

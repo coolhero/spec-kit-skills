@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 17:42 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 22:22 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -720,3 +720,105 @@ specs/
 | Scope | Individual Feature consistency | Cross-Feature dependencies and evolution |
 | Relationship | Independent | Wraps spec-kit (does not replace) |
 | Coupling | Works without spec-kit-skills | Requires spec-kit |
+
+---
+
+## File Map
+
+Complete list of all files in this repository grouped by skill.
+
+### Root
+
+| File | Description |
+|------|-------------|
+| `CLAUDE.md` | Project rules for Claude Code agents (immutable rules, conventions, review protocol) |
+| `README.md` | English documentation |
+| `README.ko.md` | Korean documentation |
+| `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for browser automation and Electron CDP configuration |
+| `TODO.md` | Project task tracker (all planned tasks completed as of 2026-03-08) |
+| `history.md` | Design decision history extracted from git history |
+| `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |
+| `uninstall.sh` | Uninstaller — removes symlinks from `~/.claude/skills/` |
+
+### reverse-spec (`.claude/skills/reverse-spec/`)
+
+| File | Description |
+|------|-------------|
+| `SKILL.md` | Skill router — entry point and mandatory rules for reverse-spec |
+| `commands/analyze.md` | Multi-phase workflow for analyzing source code and generating Global Evolution Layer artifacts |
+| `domains/_schema.md` | Domain profile schema template (Detection Signals, Analysis Axes, Feature Registry, etc.) |
+| `domains/app.md` | Application domain profile — detection and analysis behavior for backend/frontend/fullstack/mobile/library |
+| `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
+| `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
+| `templates/roadmap-template.md` | Template for project roadmap artifact |
+| `templates/constitution-seed-template.md` | Template for initial constitution document |
+| `templates/entity-registry-template.md` | Template for data entity registry |
+| `templates/api-registry-template.md` | Template for API endpoint registry |
+| `templates/business-logic-map-template.md` | Template for business rules documentation |
+| `templates/stack-migration-template.md` | Template for stack migration plan (rebuild + new stack) |
+| `templates/coverage-baseline-template.md` | Template for source coverage metrics baseline |
+| `templates/pre-context-template.md` | Template for per-Feature context extracted from runtime exploration |
+
+### smart-sdd (`.claude/skills/smart-sdd/`)
+
+| File | Description |
+|------|-------------|
+| **SKILL.md** | **Skill router — entry point, mandatory rules, command routing table** |
+| **Commands** | |
+| `commands/add.md` | 6-phase Feature definition process (document / conversational / gap-driven) |
+| `commands/adopt.md` | SDD adoption pipeline — wrap existing code with documentation without rewriting |
+| `commands/coverage.md` | SBI coverage checker — identify unmapped behaviors and resolve gaps |
+| `commands/expand.md` | Tier expansion — activate deferred Feature tiers for core-scope projects |
+| `commands/init.md` | Greenfield project initialization — project identity and development principles |
+| `commands/parity.md` | Source parity checker — compare original code vs implemented Features |
+| `commands/pipeline.md` | Pipeline executor — Common Protocol (Assemble → Checkpoint → Execute+Review → Update) |
+| `commands/reset.md` | Pipeline state reset — restore clean environment preserving reverse-spec artifacts |
+| `commands/status.md` | Status display — project progress from sdd-state.md |
+| `commands/verify-phases.md` | 4-phase verification workflow (Test/Build/Lint → Cross-Feature → Demo-Ready → Global Update) |
+| **Domains** | |
+| `domains/_schema.md` | Domain profile schema — demo patterns, parity dimensions, verification behavior |
+| `domains/app.md` | Application domain profile — demo patterns, lint detection rules, UI testing, bug prevention |
+| `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
+| **Reference** | |
+| `reference/branch-management.md` | Git branch workflow — Feature isolation and merge validation |
+| `reference/context-injection-rules.md` | Shared patterns — HARD STOP checkpoints, missing content handling, output suppression |
+| `reference/demo-standard.md` | Demo-ready delivery standard — script requirements, VERIFY_STEPS format, 3-tier UI actions |
+| `reference/feature-elaboration-framework.md` | 6-perspective Feature evaluation framework for gap identification |
+| `reference/restructure-guide.md` | Feature restructure checklist (split, merge, move, reorder, delete) |
+| `reference/state-schema.md` | `sdd-state.md` schema — Feature status, Toolchain, Demo Groups, Special Flags |
+| `reference/ui-testing-integration.md` | Playwright MCP integration guide for UI verification |
+| **Context Injection** | |
+| `reference/injection/adopt-plan.md` | Adopt plan step — document existing architecture as-is |
+| `reference/injection/adopt-specify.md` | Adopt specify step — SDD documentation wrapping of existing code |
+| `reference/injection/adopt-verify.md` | Adopt verify step — test failures as non-blocking pre-existing issues |
+| `reference/injection/analyze.md` | Analyze step — cross-artifact consistency verification before implement |
+| `reference/injection/constitution.md` | Constitution step — system principles and architectural decisions |
+| `reference/injection/implement.md` | Implement step — source injection, runtime verification, auto-fix loop, CSS value map |
+| `reference/injection/parity.md` | Parity command — multi-phase workflow for source comparison |
+| `reference/injection/plan.md` | Plan step — interaction chains, UX behavior contract, API compatibility matrix |
+| `reference/injection/specify.md` | Specify + clarify steps — requirements, SBI cross-check, edge case coverage |
+| `reference/injection/tasks.md` | Tasks step — 10 injection checks (demo, pattern audit, interaction chain, etc.) |
+| `reference/injection/verify.md` | Verify step — checkpoint/review display, pipeline regression handling |
+| **Scripts** | |
+| `scripts/context-summary.sh` | Dashboard — Feature/Entity/API/DemoGroup summary |
+| `scripts/demo-status.sh` | Dashboard — demo group progress |
+| `scripts/pipeline-status.sh` | Dashboard — pipeline progress overview |
+| `scripts/sbi-coverage.sh` | Dashboard — SBI coverage mapping |
+| `scripts/validate.sh` | Cross-file consistency validator (exit code indicates pass/fail) |
+
+### speckit-diff (`.claude/skills/speckit-diff/`)
+
+| File | Description |
+|------|-------------|
+| `SKILL.md` | Skill router — version compatibility analyzer entry point |
+| `commands/diff.md` | Multi-phase workflow — acquire spec-kit source, compare, generate compatibility verdict |
+| `reference/integration-surface.md` | Baseline reference — known spec-kit skills and structural signatures |
+
+### case-study (`.claude/skills/case-study/`)
+
+| File | Description |
+|------|-------------|
+| `SKILL.md` | Skill router — case study report generator entry point |
+| `commands/generate.md` | Report generation — extract metrics from artifacts, combine with observation log |
+| `reference/recording-protocol.md` | M1-M8 milestone recording protocol for automatic observation capture |
+| `templates/case-study-log-template.md` | Observation log template for chronological milestone entries |

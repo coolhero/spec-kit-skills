@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 17:42 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 22:22 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -718,3 +718,104 @@ specs/
 | 관계 | 독립 | spec-kit을 래핑 (대체하지 않음) |
 | 결합도 | spec-kit-skills 없이 동작 | spec-kit 필요 |
 
+---
+
+## 파일 맵
+
+이 저장소의 모든 파일을 스킬별로 그룹핑한 전체 목록입니다.
+
+### 루트
+
+| 파일 | 설명 |
+|------|------|
+| `CLAUDE.md` | Claude Code 에이전트용 프로젝트 규칙 (불변 규칙, 규약, 리뷰 프로토콜) |
+| `README.md` | 영문 문서 |
+| `README.ko.md` | 한국어 문서 |
+| `PLAYWRIGHT-GUIDE.md` | Playwright 설정 가이드 — 브라우저 자동화 및 Electron CDP 설정 |
+| `TODO.md` | 프로젝트 작업 추적기 (2026-03-08 기준 모든 계획 작업 완료) |
+| `history.md` | git 이력에서 추출한 설계 결정 이력 |
+| `install.sh` | 설치 스크립트 — `~/.claude/skills/`에 심링크 생성 |
+| `uninstall.sh` | 제거 스크립트 — `~/.claude/skills/`에서 심링크 제거 |
+
+### reverse-spec (`.claude/skills/reverse-spec/`)
+
+| 파일 | 설명 |
+|------|------|
+| `SKILL.md` | 스킬 라우터 — reverse-spec 진입점 및 필수 규칙 |
+| `commands/analyze.md` | 소스코드 분석 및 Global Evolution Layer 아티펙트 생성 다단계 워크플로우 |
+| `domains/_schema.md` | 도메인 프로필 스키마 템플릿 (Detection Signals, Analysis Axes, Feature Registry 등) |
+| `domains/app.md` | 애플리케이션 도메인 프로필 — backend/frontend/fullstack/mobile/library 감지 및 분석 |
+| `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
+| `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
+| `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
+| `templates/constitution-seed-template.md` | 초기 constitution 문서 템플릿 |
+| `templates/entity-registry-template.md` | 데이터 엔티티 레지스트리 템플릿 |
+| `templates/api-registry-template.md` | API 엔드포인트 레지스트리 템플릿 |
+| `templates/business-logic-map-template.md` | 비즈니스 규칙 문서 템플릿 |
+| `templates/stack-migration-template.md` | 스택 마이그레이션 계획 템플릿 (재구축 + 새 스택) |
+| `templates/coverage-baseline-template.md` | 소스 커버리지 메트릭 베이스라인 템플릿 |
+| `templates/pre-context-template.md` | 런타임 탐색에서 추출한 Feature별 컨텍스트 템플릿 |
+
+### smart-sdd (`.claude/skills/smart-sdd/`)
+
+| 파일 | 설명 |
+|------|------|
+| **SKILL.md** | **스킬 라우터 — 진입점, 필수 규칙, 커맨드 라우팅 테이블** |
+| **Commands** | |
+| `commands/add.md` | 6단계 Feature 정의 프로세스 (문서 / 대화 / 갭 기반) |
+| `commands/adopt.md` | SDD 도입 파이프라인 — 기존 코드를 재작성 없이 문서로 래핑 |
+| `commands/coverage.md` | SBI 커버리지 체커 — 미매핑 동작 식별 및 갭 해소 |
+| `commands/expand.md` | Tier 확장 — core scope 프로젝트에서 deferred Feature Tier 활성화 |
+| `commands/init.md` | 그린필드 프로젝트 초기화 — 프로젝트 아이덴티티 및 개발 원칙 |
+| `commands/parity.md` | 소스 패리티 체커 — 원본 코드 vs 구현 Feature 비교 |
+| `commands/pipeline.md` | 파이프라인 실행기 — Common Protocol (Assemble → Checkpoint → Execute+Review → Update) |
+| `commands/reset.md` | 파이프라인 상태 초기화 — reverse-spec 아티펙트 보존하며 클린 환경 복원 |
+| `commands/status.md` | 상태 표시 — sdd-state.md에서 프로젝트 진행 상태 읽기 |
+| `commands/verify-phases.md` | 4단계 검증 워크플로우 (Test/Build/Lint → 교차 Feature → Demo-Ready → Global Update) |
+| **Domains** | |
+| `domains/_schema.md` | 도메인 프로필 스키마 — 데모 패턴, 패리티 차원, 검증 동작 |
+| `domains/app.md` | 애플리케이션 도메인 프로필 — 데모 패턴, 린트 감지 규칙, UI 테스팅, 버그 방지 |
+| `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
+| **Reference** | |
+| `reference/branch-management.md` | Git 브랜치 워크플로우 — Feature 격리 및 머지 검증 |
+| `reference/context-injection-rules.md` | 공유 패턴 — HARD STOP 체크포인트, 누락 콘텐츠 처리, 출력 억제 |
+| `reference/demo-standard.md` | Demo-ready 딜리버리 표준 — 스크립트 요구사항, VERIFY_STEPS 형식, 3-tier UI 액션 |
+| `reference/feature-elaboration-framework.md` | 6 관점 Feature 평가 프레임워크 — 갭 식별용 |
+| `reference/restructure-guide.md` | Feature 구조 변경 체크리스트 (분할, 병합, 이동, 순서 변경, 삭제) |
+| `reference/state-schema.md` | `sdd-state.md` 스키마 — Feature 상태, Toolchain, Demo Groups, Special Flags |
+| `reference/ui-testing-integration.md` | Playwright MCP 통합 가이드 — UI 검증용 |
+| **Context Injection** | |
+| `reference/injection/adopt-plan.md` | Adopt plan 단계 — 기존 아키텍처를 있는 그대로 문서화 |
+| `reference/injection/adopt-specify.md` | Adopt specify 단계 — 기존 코드의 SDD 문서 래핑 |
+| `reference/injection/adopt-verify.md` | Adopt verify 단계 — 테스트 실패를 비차단 기존 이슈로 처리 |
+| `reference/injection/analyze.md` | Analyze 단계 — implement 전 교차 아티펙트 일관성 검증 |
+| `reference/injection/constitution.md` | Constitution 단계 — 시스템 원칙 및 아키텍처 결정 |
+| `reference/injection/implement.md` | Implement 단계 — 소스 주입, 런타임 검증, auto-fix 루프, CSS 값 맵 |
+| `reference/injection/parity.md` | Parity 커맨드 — 소스 비교를 위한 다단계 워크플로우 |
+| `reference/injection/plan.md` | Plan 단계 — 인터랙션 체인, UX 동작 계약, API 호환성 매트릭스 |
+| `reference/injection/specify.md` | Specify + clarify 단계 — 요구사항, SBI 교차 검증, 엣지 케이스 커버리지 |
+| `reference/injection/tasks.md` | Tasks 단계 — 10개 주입 검사 (데모, 패턴 감사, 인터랙션 체인 등) |
+| `reference/injection/verify.md` | Verify 단계 — 체크포인트/리뷰 표시, 파이프라인 회귀 처리 |
+| **Scripts** | |
+| `scripts/context-summary.sh` | 대시보드 — Feature/Entity/API/DemoGroup 요약 |
+| `scripts/demo-status.sh` | 대시보드 — 데모 그룹 진행 상태 |
+| `scripts/pipeline-status.sh` | 대시보드 — 파이프라인 진행 개요 |
+| `scripts/sbi-coverage.sh` | 대시보드 — SBI 커버리지 매핑 |
+| `scripts/validate.sh` | 교차 파일 일관성 검증기 (종료 코드로 pass/fail 표시) |
+
+### speckit-diff (`.claude/skills/speckit-diff/`)
+
+| 파일 | 설명 |
+|------|------|
+| `SKILL.md` | 스킬 라우터 — 버전 호환성 분석기 진입점 |
+| `commands/diff.md` | 다단계 워크플로우 — spec-kit 소스 획득, 비교, 호환성 판정 생성 |
+| `reference/integration-surface.md` | 베이스라인 참조 — 알려진 spec-kit 스킬 및 구조적 시그니처 |
+
+### case-study (`.claude/skills/case-study/`)
+
+| 파일 | 설명 |
+|------|------|
+| `SKILL.md` | 스킬 라우터 — 케이스 스터디 리포트 생성기 진입점 |
+| `commands/generate.md` | 리포트 생성 — 아티펙트에서 메트릭 추출, 관찰 로그와 결합 |
+| `reference/recording-protocol.md` | M1-M8 마일스톤 자동 관찰 기록 프로토콜 |
+| `templates/case-study-log-template.md` | 시간순 마일스톤 기록용 관찰 로그 템플릿 |

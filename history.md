@@ -464,6 +464,20 @@ reverse-spec generates `speckit-prompt.md` for users who run spec-kit without sm
 
 ---
 
+## [2026-03-11] Cross-reference Fix + CLAUDE.md Rule 4 Sync + README File Map
+
+Post-pull analysis (19 commits, 35 files, +2429/-549 lines) found 3 issues. Fixed all:
+
+| # | Issue | Fix | Severity |
+|---|-------|-----|----------|
+| 1 | 6 broken relative paths in pipeline.md | `reference/` → `../reference/` (lines 174, 180, 184, 223, 508, 517) | 🔴 CRITICAL |
+| 2 | CLAUDE.md Rule 4 said "Minor/Major" but verify-phases.md has 4-tier system | Updated to "4단계(Minor, Major-Implement, Major-Plan, Major-Spec)" | 🟡 MEDIUM |
+| 3 | README had no file inventory | Added complete File Map table to README.md and README.ko.md, added convention to CLAUDE.md | Enhancement |
+
+**Files**: pipeline.md, CLAUDE.md, README.md, README.ko.md
+
+---
+
 ## [2026-03-09] Toolchain Pre-flight: Lint Tool Detection at Foundation Gate
 
 ESLint not installed → verify Phase 1 "eslint: command not found" repeated at every Feature (F001, F004, F005). Root cause: no early detection of lint tool availability.
