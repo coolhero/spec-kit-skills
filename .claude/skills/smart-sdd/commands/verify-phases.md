@@ -390,6 +390,40 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
 4. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Downstream impact: SCs whose data dependencies are unavailable are reclassified from auto categories to `user-assisted` or `external-dep` in the SC Verification Matrix.
 5. **Skip if**: No "Blocked by ←" entries in pre-context.md, or Feature has no cross-Feature dependencies.
 
+**Step 1d — Service Integration Verification** (import graph check):
+
+> Catches "orphaned service" pattern: a service/module is implemented and tested in isolation but never imported by its runtime consumer. Phase 1 (test/build/lint) does not detect orphaned code — tests pass, build succeeds, lint is clean. This step verifies that new services are actually wired into the application.
+
+1. **Scope**: Use `git diff --name-only main...HEAD` to identify files created/modified by this Feature. Filter to service/module files (exclude tests, types, configs):
+   - Include: `*.service.ts`, `*.store.ts`, `*.composable.ts`, `*.hook.ts`, `*.provider.ts`, `*Service.ts`, `*Store.ts`, `*Repository.ts`, `*Manager.ts`, `*Helper.ts`, `*Util.ts`
+   - Include any file that exports a class or function with `Service`, `Store`, `Repository`, `Manager`, `Provider` in the name
+   - Exclude: `*.test.*`, `*.spec.*`, `*.d.ts`, `*.config.*`, `*.mock.*`
+
+2. **For each service/module file**, check import graph:
+   ```bash
+   # Find all non-test files that import this module
+   grep -r "import.*from.*[module-path]" src/ --include="*.ts" --include="*.tsx" --include="*.vue" --include="*.js" --include="*.jsx" \
+     | grep -v ".test." | grep -v ".spec." | grep -v "__tests__" | grep -v "__mocks__"
+   ```
+   - Count non-test consumers (files that import this module)
+
+3. **Classification**:
+   - **0 non-test consumers** → `⚠️ WARNING: Orphaned service — [ServiceName] has no runtime consumers`
+   - **0 non-test consumers AND plan.md lists this service as consumed by a component/route** → `⚠️ HIGH WARNING: [ServiceName] is planned as runtime dependency of [Consumer] but has 0 imports — likely missing wire-up`
+   - **≥1 non-test consumer** → ✅ Service is integrated
+
+4. Report:
+   ```
+   📊 Service Integration Verification for [FID]:
+     KnowledgeChatService: ⚠️ ORPHANED — 0 runtime imports (test-only: knowledge-chat.test.ts)
+       → Plan.md: consumed by InputBar.tsx (knowledge base picker)
+       → Suggested fix: import KnowledgeChatService in InputBar.tsx
+     AssistantStore: ✅ 3 runtime consumers (ChatPanel.tsx, InputBar.tsx, SettingsPanel.tsx)
+     ThemeService: ✅ 1 runtime consumer (App.tsx)
+   ```
+5. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Orphaned services are strong indicators of incomplete implementation wiring.
+6. **Skip if**: No new service/module files in Feature diff, or Feature is test-only/docs-only.
+
 **Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `rebuild`):
 If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:
 
@@ -598,6 +632,19 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 
    > **`user-assisted` vs `external-dep`**: If the user CAN provide the dependency locally (API key in .env, start a local service, test credentials), classify as `user-assisted`. If truly inaccessible (production-only, hardware, rate-limited quota), classify as `external-dep`. See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3.
 
+   > **SC Decomposition Rule**: When a single SC contains BOTH auto-verifiable steps AND user-dependent steps, SPLIT into sub-SCs at classification time:
+   > - `SC-NNNa` (auto category): The portion that can be verified without external dependencies (UI interaction, state mutation, local data)
+   > - `SC-NNNb` (`user-assisted`): The portion that requires user-provided dependency (API key, external service)
+   >
+   > **When to split**: SC description contains a multi-step flow where early steps are local (no external dependency) but later steps require an external service.
+   > **When NOT to split**: The external dependency is needed from the first step (e.g., "login via OAuth" — cannot start without OAuth provider).
+   >
+   > Example: SC-007 "Knowledge base search integrates into chat with citations"
+   > → SC-007a (`cdp-auto`): KB button click → picker opens → select KB → `assistant.knowledge_bases` updated in store
+   > → SC-007b (`user-assisted`): Chat with KB attached → RAG injection → citation block rendered (requires API key)
+   >
+   > Sub-SCs appear as separate rows in the SC Verification Matrix and are verified independently: SC-007a in Step 3/3d (auto), SC-007b in Step 3d (after user cooperation) + Step 3f gate.
+
 3. **Verification boundary** — what each runtime backend can automate (see [runtime-verification.md](../reference/runtime-verification.md) §6 for full protocols):
 
    **GUI (Playwright MCP/CLI)**:
@@ -624,24 +671,39 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
    - ✅ CAN: Run pipeline with test data, compare output schema and values
    - ✅ CAN: Verify no error logs during execution
 
-4. Write the SC Verification Matrix:
+4. Write the SC Verification Matrix (sub-SCs from Decomposition Rule appear as separate rows):
    ```
    SC Verification Matrix for [FID]:
    | SC | Category | Planned Method | Skip Reason |
    |----|----------|---------------|-------------|
    | SC-022 | cdp-auto | Navigate settings → add server → verify status | — |
-   | SC-023 | user-assisted | Navigate settings → test tool execution | Requires OPENAI_API_KEY in .env |
+   | SC-023a | cdp-auto | Navigate settings → open tool panel → verify tool list renders | — |
+   | SC-023b | user-assisted | Execute tool → verify response | Requires OPENAI_API_KEY in .env |
    | SC-024 | cdp-auto | Enable built-in server → verify tool list loads | — |
    | SC-028 | api-auto | GET /api/config → verify 200 + response shape | — |
    | SC-031 | external-dep | — | Requires production MCP server (not locally available) |
    ```
 
-5. **SC Minimum Depth Rule**: After classification, check each auto-category SC (`cdp-auto`, `api-auto`, `cli-auto`, `pipeline-auto`) for verification depth:
+5. **SC Minimum Depth Rule**: After classification, check each auto-category SC (`cdp-auto`, `api-auto`, `cli-auto`, `pipeline-auto`) for verification depth and assign a **Required Depth**:
    - Tier 1 (Presence): Element/response exists — `verify .settings-panel visible`
    - Tier 2 (State Change): Interaction produces expected state — `click toggle → verify-state .theme "dark"`
    - Tier 3 (Side Effect): State change propagates downstream — `verify-effect body class "dark-mode"`
 
-   **Rule**: If an SC's planned verification is ONLY Tier 1 (presence), AND the SC description implies behavioral verification (contains "should change", "should update", "should display after", "should respond with"), flag: `⚠️ SC-### verification is presence-only but SC implies behavior — upgrading to Tier 2`. Agent SHOULD auto-upgrade flagged SCs to Tier 2 when the interaction is straightforward.
+   **Depth Assignment Rules**:
+   - **Pure presence SC** (description uses "should be visible", "should exist", "should show", "should render"): Required Depth = Tier 1. Tier 1 is sufficient.
+   - **Behavioral SC** (description uses "should change", "should update", "should display after", "should respond with", "should save", "should select", "should toggle", "should open", "should close"): Required Depth = **Tier 2 MANDATORY**. Agent MUST plan verification that includes a state change, not just presence.
+   - **Flow SC** (description implies multi-step flow with downstream effects, e.g., "should update and reflect in..."): Required Depth = Tier 3 recommended, Tier 2 minimum.
+
+   If an SC's planned verification is ONLY Tier 1 (presence) but Required Depth is Tier 2: `⚠️ SC-### verification is presence-only but SC requires behavioral verification — upgrading to Tier 2`. Agent MUST auto-upgrade to Tier 2. Record the Required Depth in the SC Verification Matrix for enforcement in Step 3d.
+
+   Add `Required Depth` column to SC Verification Matrix:
+   ```
+   | SC | Category | Planned Method | Required Depth | Skip Reason |
+   |----|----------|---------------|----------------|-------------|
+   | SC-022 | cdp-auto | Navigate settings → add server → verify status | Tier 2 | — |
+   | SC-023a | cdp-auto | Navigate settings → open tool panel → verify list | Tier 2 | — |
+   | SC-024 | cdp-auto | Enable built-in server → verify tool list loads | Tier 1 | — |
+   ```
 
 6. **Coverage assessment**:
    - Auto-verifiable (`cdp-auto` + `api-auto` + `cli-auto` + `pipeline-auto`): [N] SCs → will be verified in Step 3/3d
@@ -943,13 +1005,27 @@ If visual references don't exist or no screens match this Feature: skip silently
 3. If "Dependencies ready": re-verify each dependency (probe API key presence, service endpoint) → run automated verification (same as auto categories)
 4. If "Skip": record as `⚠️ user-assisted — skipped`
 
+**Per-SC Depth Tracking** (MANDATORY — enforces SC Minimum Depth Rule from Step 0):
+
+After executing each SC's verification, record the **Reached Depth** and compare against the **Required Depth** from the SC Verification Matrix:
+- If Reached Depth ≥ Required Depth → ✅ Depth satisfied
+- If Reached Depth < Required Depth → `⚠️ SC-### depth shortfall: required Tier [N] but only reached Tier [M]`
+  - For behavioral SCs (Required Depth = Tier 2): This means the agent only confirmed element presence but did NOT verify the state change. **Agent MUST retry with a Tier 2 verification** (perform the action, check state mutation) before marking the SC as verified.
+  - If retry still cannot reach Required Depth (e.g., action triggers an error, state mutation path is broken): record as `⚠️ SC-### Tier 2 unreachable — [reason]` in the report. This is a strong indicator of a runtime bug.
+
 **Result report** (appended to SC Verification report):
 ```
 📊 Interactive Runtime Verification for [FID]:
   Flow 1 (Settings → Theme): ✅ All 3 SCs passed (2 state changes, 1 side effect)
+    SC-022: ✅ Tier 2 reached (required: Tier 2) — server added, status verified
+    SC-023a: ✅ Tier 2 reached (required: Tier 2) — tool panel opened, list rendered
+    SC-024: ✅ Tier 1 reached (required: Tier 1) — tool list visible
   Flow 2 (Chat → Send): ⚠️ SC-025 timeout (loading state did not clear within 10s)
+    SC-025: ⚠️ Tier 2 unreachable — timeout during state change verification
   API /api/settings: ✅ GET 200, POST 200, invalid POST 422
   user-assisted: 2/3 verified (1 skipped — external API unavailable)
+
+  Depth Compliance: 4/5 SCs met required depth (1 shortfall)
 ```
 
 **Step 3e — Source App Comparative Verification** (rebuild mode only):

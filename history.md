@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-11] Verify Phase Hardening — SC Decomposition, Import Graph, Depth Enforcement
+
+Three verify-phases.md improvements based on real F007 test failure where `KnowledgeChatService` was implemented and tested but never imported by its consumer (`Inputbar.tsx`), and SC-007 (RAG chat integration) was classified entirely as `user-assisted`, skipping the auto-verifiable UI wiring portion.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | SC Decomposition Rule | Split mixed SCs into sub-SCs at classification time (Step 0) | SC-007 contained both auto-verifiable (KB picker UI) and user-dependent (RAG chat) parts. Classifying entire SC as `user-assisted` lost the auto-verifiable portion |
+| 2 | Import Graph Verification | Phase 2 Step 1d (not Phase 1, not implement gate) | Orphaned services pass tests/build/lint (Phase 1). Phase 2 is "Behavior Completeness" — right home. Rejected S4 (implement gate) as redundant |
+| 3 | SC Minimum Depth enforcement | SHOULD → MUST for behavioral SCs, per-SC depth tracking in Step 3d | Step 0 rule existed but was not enforced. Agents did presence-only (Tier 1) verification for SCs that require state-change (Tier 2). Now tracked and retried |
+| 4 | S4 (implement Integration Checklist) | Rejected — redundant with S2 | Integration completeness is verify's role, not implement's. S2 in Phase 2 catches the same gap. Adding to implement blurs the boundary |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `commands/verify-phases.md` | Step 0: SC Decomposition Rule + SC Verification Matrix `Required Depth` column. Phase 2 Step 1d: Service Integration Verification. Step 3d: per-SC Depth Tracking with mandatory retry |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] CLI+MCP Complementary Mode — Playwright Architecture
 
 Changed Playwright architecture from mutually exclusive backend selection (CLI OR MCP) to complementary mode (CLI THEN MCP). Previously, `RUNTIME_BACKEND` chose one backend; now CLI always runs first (headful for user visibility) and MCP supplements when available for interactive inspection.
