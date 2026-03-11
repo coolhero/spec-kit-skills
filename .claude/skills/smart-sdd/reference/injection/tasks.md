@@ -71,6 +71,37 @@ Add this task now or add it during the "I've finished editing" step.
 ────────────────────────────────────────────────────
 ```
 
+**Integration wiring task injection check** (if Feature has cross-boundary data flow):
+
+Detect cross-boundary flow: scan plan.md / tasks.md / pre-context.md for patterns indicating multi-layer data flow:
+- Renderer → IPC → Main process (Electron/Tauri keywords: "ipcRenderer", "ipcMain", "invoke", "handle", "preload")
+- Frontend → Backend API (keywords: "fetch", "axios", "API call", "endpoint", "REST", "GraphQL")
+- Service → External API (keywords: "embeddings", "OpenAI", "external API", "third-party", "webhook")
+- File I/O across process boundaries (keywords: "file upload", "file picker", "drag and drop", "file processing")
+- Multi-stage pipeline (keywords: "pipeline", "processing chain", "transform", "loader → embedder → store")
+
+If cross-boundary flow detected, scan tasks.md for integration wiring tasks (keywords: "end-to-end", "e2e", "wire", "connect", "integration flow", "data flow", "full path", "pipeline test"). If **no integration wiring tasks are found**, append:
+
+```
+── ⚠️ Integration Wiring Task Missing ─────────────
+This Feature has cross-boundary data flow but tasks.md has no
+end-to-end wiring task. Module-level tasks build each component
+independently, but nobody verifies the full data path works together.
+
+Without an explicit wiring task, implement will produce modules that
+individually "work" but are never connected end-to-end. This was the
+root cause of 12 bugs in F007 Knowledge Base.
+
+Recommended tasks to add:
+  1. E2E data flow wiring: verify data passes through ALL layers
+     (e.g., file upload → processing → storage → retrieval → display)
+  2. API contract cross-check: verify function names, argument formats,
+     and return types match across module boundaries (caller ↔ callee)
+
+Add these tasks now or add them during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
 **Integration test task injection check** (only if Feature has UI components — detected from plan.md architecture or pre-context tech stack):
 After reading tasks.md, scan for integration/render test tasks (keywords: "render test", "integration test", "component test", "mount test", "smoke test", "rendering test"). If **no integration test tasks are found**, append:
 

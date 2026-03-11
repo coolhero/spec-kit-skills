@@ -444,6 +444,67 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 
 **Important**: Only scan for values that appear in css-value-map.md. Do NOT flag CSS values that are not in the map (they may be intentionally new or different).
 
+### E2E Integration Smoke Test (cross-boundary Features)
+
+> **Why**: Per-Task Runtime Verify checks each module independently. Post-Implement SC Verify checks each screen for console errors. But neither tests whether data flows through ALL layers end-to-end. F007 Knowledge Base had all modules "working" individually, but 12 bugs were found in verify because the full chain (file upload → parsing → embedding → vector store → search → chat injection → citation display) was never tested as one connected flow.
+
+**Skip if**: Feature has no cross-boundary data flow (single-layer Feature, UI-only, or simple CRUD with no processing pipeline).
+
+**Detect cross-boundary flow** (same criteria as tasks injection check):
+- Renderer → IPC → Main process (Electron/Tauri)
+- Frontend → Backend API (REST/GraphQL)
+- Service → External API (embeddings, search, webhooks)
+- File I/O across process boundaries
+- Multi-stage processing pipeline
+
+**When cross-boundary flow detected**:
+
+1. **Identify the primary E2E flow** from spec.md Success Criteria:
+   - Find the SC that describes the most complete user journey (e.g., "user uploads file → file is processed → content is searchable → results appear in chat")
+   - This SC defines the E2E test path
+
+2. **Execute the E2E flow** using the available runtime backend:
+   - **GUI (Playwright CLI/MCP)**: Navigate → perform user actions through the ENTIRE flow → verify end state
+   - **API (HTTP client)**: Send request at entry point → verify response includes data that traversed all layers
+   - **CLI (process runner)**: Execute command → verify output reflects full pipeline execution
+   - **If RUNTIME-DEGRADED**: Substitute with a grep-based seam check (step 3 below)
+
+3. **Seam check** (always runs, even with runtime available — supplements runtime test):
+   - Trace the data flow path from plan.md / Interaction Chains / spec.md
+   - For each seam (module boundary crossing), verify:
+     ```bash
+     # Seam 1: Renderer → IPC
+     grep -r "invoke.*channelName" src/renderer/ → must find caller
+     grep -r "handle.*channelName" src/main/ → must find handler
+
+     # Seam 2: IPC Handler → Service
+     grep -r "import.*ServiceName" src/main/ → must find import
+     grep -r "serviceName.methodName" src/main/ → must find call
+
+     # Seam 3: Service → External API
+     grep -r "fetch\|axios\|http" src/services/ServiceName → must find API call
+     ```
+   - Each seam has a caller AND a callee. If either is missing → `❌ Broken seam`
+
+4. **Report**:
+   ```
+   📊 E2E Integration Smoke Test for [FID]:
+     Primary flow: File upload → PDF parse → Embedding → Vector store → Search → Chat
+     Seam 1 (Renderer → IPC):     ✅ invoke('kb:addFile') ↔ handle('kb:addFile')
+     Seam 2 (IPC → KBService):    ✅ import KBService ↔ kbService.addFile()
+     Seam 3 (KBService → Loader):  ❌ BROKEN — KBService calls loadDocument() but Loader exports loadItem()
+     Seam 4 (Loader → Embeddings): ✅ import EmbeddingService ↔ embeddings.embed()
+     Seam 5 (Embeddings → API):    ⚠️ URL uses /embeddings but provider requires /v1/embeddings
+
+     Runtime E2E: ❌ Failed at Seam 3 — TypeError: loadDocument is not a function
+   ```
+
+5. **Result classification**:
+   - **Any broken seam** → `⚠️ HIGH WARNING` (NOT blocking — but prominently displayed in Review)
+   - **Runtime E2E failure** → `⚠️ HIGH WARNING` — strong indicator that implement is incomplete
+   - These warnings should drive the Review conversation: "These seams are broken. Should we return to implement to fix the integration?"
+   - **All seams connected + runtime passes** → `✅ E2E Integration: all seams verified`
+
 ### Auto-Fix Loop
 
 Attempt automatic fix when runtime verification fails:

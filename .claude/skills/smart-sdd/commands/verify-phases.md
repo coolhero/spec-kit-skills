@@ -150,25 +150,52 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
       ```
    5. If runtime re-verification fails AND investigation reveals more files need changes → **re-run the Source Modification Gate** with the expanded scope. The aggregate file count may now push the fix to Major.
 
+9. **Minor Fix Accumulator** (cross-gate tracking):
+
+   The Source Modification Gate evaluates each fix batch independently. But a pattern of repeated Minor fixes in the same area indicates a deeper structural issue that should be handled by implement, not verify.
+
+   **Rule**: Track all inline fixes applied during this verify session. If **3 or more Minor fixes** (bug fix or gap fill) accumulate in the **same module/component** (same directory or same logical boundary), auto-escalate to **Major-Implement**:
+   ```
+   🔴 Minor Fix Accumulator triggered:
+     Module: src/services/knowledge/
+     Fixes applied: 3 (Bug #1: loader path, Bug #4: PDF parser, Bug #5: pdf-parse API)
+     → Auto-escalated to Major-Implement — this module needs redesign in implement, not patchwork in verify.
+   ```
+   After auto-escalation → trigger the Major HARD STOP flow (step 7 above).
+
+   **Module boundary definition**: Files sharing the same parent directory OR the same service/component name (e.g., `KnowledgeService.ts`, `KnowledgeLoader.ts`, `KnowledgeStore.ts` = same `Knowledge` module even if in different directories).
+
 **This gate applies to ALL verify phases**: Phase 1 re-fixes, Phase 2 fixes, Phase 3 SC failure fixes, Phase 3b fixes, and post-Review user-requested fixes. There are NO exceptions.
 
 ---
 
 ### Verify Initialization — Compaction-Safe Checkpoint
 
-Before any Phase execution, write the Verify Progress table to sdd-state.md:
+Before any Phase execution, write the Verify Progress table AND Process Rules Checklist to sdd-state.md:
 
 1. Read sdd-state.md → Feature Detail Log for this Feature
 2. **Check for existing Verify Progress**:
    - If exists with pending phases → **Resumption Protocol** (see below)
    - If not exists → write fresh Verify Progress table with all phases as `⏳ pending`
 3. Set `⚠️ RESUME FROM: Phase 0` line
+4. **Write Process Rules Checklist** (survives context compaction — agent re-reads sdd-state.md after compaction):
+   ```
+   #### Verify Process Rules (re-read after compaction)
+   - [ ] Source Modification Gate: BEFORE editing ANY source file → list changes → classify → aggregate file count → if ≥3 files or API change → Major HARD STOP
+   - [ ] Minor Accumulator: 3+ Minor fixes in same module → auto-escalate to Major
+   - [ ] Post-Fix Runtime Verification: after inline fix → build + test + runtime SC re-verify at Required Depth
+   - [ ] SC Decomposition: mixed SCs → split into sub-SCs (auto + user-assisted)
+   - [ ] Per-SC Depth Tracking: record Reached Depth vs Required Depth for each SC
+   - [ ] Inline changes recording: all source modifications during verify → Notes column
+   ```
+   This checklist is written to sdd-state.md as plain text, ensuring it persists across context compaction boundaries. The Resumption Protocol (below) includes re-reading this checklist as step 1.
 
 **After each Phase completes**: Update the Phase's Status to `✅ complete` and write Result summary.
 Update `⚠️ RESUME FROM` to point to the next pending Phase.
 
 **On verify completion** (success or failure):
 - Delete the `#### Verify Progress` section from sdd-state.md
+- Delete the `#### Verify Process Rules` section from sdd-state.md
 - Write final result to Notes column as before
 
 ---
@@ -179,7 +206,8 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 
 1. **Re-read this file** (commands/verify-phases.md) — MANDATORY
 2. **Re-read reference/injection/verify.md** — for Checkpoint/Review display format
-3. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
+3. **Re-read `#### Verify Process Rules`** from sdd-state.md — MANDATORY. These rules survive compaction and MUST be followed for the remainder of the verify session. Pay special attention to the Source Modification Gate and Minor Accumulator.
+4. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
 5. **Re-establish prerequisites**:
    - If Phase 3 pending and MCP needed → re-run Phase 0 (app start + CDP check)
    - If Phase 1 already complete → do NOT re-run tests/build/lint
@@ -503,6 +531,61 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
    ```
 5. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Orphaned services are strong indicators of incomplete implementation wiring.
 6. **Skip if**: No new service/module files in Feature diff, or Feature is test-only/docs-only.
+
+**Step 1e — Cross-Module API Contract Verification** (intra-Feature boundary check):
+
+> Catches function name mismatches, argument format incompatibilities, and return type mismatches across module boundaries WITHIN the same Feature. Step 3 (Interaction Chain) checks handler names exist. Step 6 checks cross-Feature data shapes. Step 1d checks import existence. But NONE verify that the caller's arguments match the callee's parameters, or that the caller uses the correct function name.
+>
+> F007 bugs caught by this step: #2 (loadDocument vs loadItem), #8 (select({extensions}) vs select(filters, multiple)), #9 (webUtils.getPathForFile missing).
+
+1. **Identify API boundaries** in the Feature's code (use `git diff --name-only main...HEAD`):
+   - **IPC boundaries** (Electron/Tauri): `ipcRenderer.invoke('channel', args)` ↔ `ipcMain.handle('channel', (event, args) => ...)`
+   - **Preload bridge**: renderer calls via `window.api.method(args)` ↔ preload exposes `method: (args) => ipcRenderer.invoke(...)`
+   - **Service layer**: component imports `ServiceName` and calls `service.method(args)` ↔ service defines `method(params)`
+   - **External API**: service constructs URL and sends `fetch(url, {body})` ↔ API expects specific URL format and body schema
+
+2. **For each boundary**, verify contract compatibility:
+   ```
+   Caller side:                          Callee side:
+   ─────────────────────                  ─────────────────────
+   Function name match?                   Function/method name exists?
+   Argument count match?                  Parameter count matches?
+   Argument types compatible?             Parameter types expected?
+   Return value used correctly?           Return type documented/typed?
+   ```
+
+   **Verification method** (grep + AST-lite):
+   - Grep caller file for the call expression → extract function name + argument pattern
+   - Grep callee file for the function definition → extract parameter pattern
+   - Compare:
+     - Function name exact match (case-sensitive)
+     - Argument count: caller passes N args, callee expects M params → if N ≠ M: `❌ Argument count mismatch`
+     - Argument shape: if caller passes `{extensions: [...]}` but callee expects `(filters, multiple)` → `❌ Argument shape mismatch`
+
+3. **Report**:
+   ```
+   📊 Cross-Module API Contract Verification for [FID]:
+     Renderer → Preload (window.api):
+       selectFiles({extensions: ['.pdf']}) ↔ selectFiles(filters, multiple)
+       ❌ Argument shape mismatch — caller passes object, callee expects positional args
+     Preload → IPC Handler:
+       invoke('kb:loadDocument', path) ↔ handle('kb:loadItem', (event, path))
+       ❌ Channel name mismatch — 'kb:loadDocument' vs 'kb:loadItem'
+     KBService → EmbeddingService:
+       embed(text, model) ↔ embed(text, options)
+       ⚠️ Second argument shape may differ (string vs object)
+     EmbeddingService → External API:
+       POST /embeddings ↔ API expects /v1/embeddings
+       ❌ URL path mismatch
+   ```
+
+4. **Result classification**:
+   - Function/channel name mismatch → `❌ HIGH WARNING` — will cause runtime TypeError or "no handler" error
+   - Argument count/shape mismatch → `❌ HIGH WARNING` — will cause undefined parameters or wrong behavior
+   - URL path mismatch → `⚠️ WARNING` — will cause 404 at runtime
+   - All contracts match → `✅ API contracts verified`
+5. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Contract mismatches are strong indicators of integration bugs.
+6. **Skip if**: Feature has no cross-module boundaries (single-file Feature, pure UI component, or utility library).
 
 **Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `rebuild`):
 If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:

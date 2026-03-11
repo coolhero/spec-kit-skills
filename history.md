@@ -5,6 +5,48 @@
 
 ---
 
+## [2026-03-11] F007 Post-Mortem — 5 Structural Improvements
+
+F007 Knowledge Base verify exposed 12 bugs, all discovered in verify (none in implement). Root causes: (A) implement had no E2E integration test — modules worked individually but were never connected end-to-end, (B) tasks had no integration wiring tasks — only module-level tasks, (C) verify inline-fixed 12 bugs without ever triggering regression, (D) cross-module API contracts (function names, argument formats) were never verified, (E) long debugging sessions lost SDD process rules to context compaction.
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Integration Wiring Task check (S1) | tasks Review injection (injection/tasks.md) | Detect cross-boundary flow → warn if no E2E wiring task exists. Prevents module-only task generation. Separate from existing "Integration Test" check (testing vs building) |
+| 2 | Minor Accumulator (S2-acc) | Source Modification Gate step 9 | 3+ Minor fixes in same module → auto-escalate to Major. Prevents death-by-a-thousand-cuts patchwork |
+| 3 | E2E Integration Smoke Test (S3) | injection/implement.md, after CSS Value Map Compliance | Seam-based verification: trace data flow, verify each module boundary has caller+callee. Runtime E2E when available. Complements per-task runtime verify (module-level) |
+| 4 | Cross-Module API Contract (S4) | verify Phase 2 Step 1e | grep+AST-lite verification of function name match, argument count/shape compatibility, URL path correctness across intra-Feature boundaries |
+| 5 | Compaction-resilient Process Rules (S5) | Verify Initialization checkpoint → sdd-state.md | Write critical rules (Source Modification Gate, Accumulator, Depth Tracking) to sdd-state.md. Resumption Protocol re-reads on compaction recovery |
+
+### F007 Bug Coverage
+
+| Bug | Would be caught by |
+|-----|-------------------|
+| #1 6-tab IPC unconnected | S1 (wiring task) + S3 (seam check) |
+| #2 loadDocument vs loadItem | S4 (function name mismatch) |
+| #3 API URL /v1 missing | S3 (E2E runtime) + S4 (URL path) |
+| #4 PDF parser missing | S1 (pipeline task) + S3 (seam check) |
+| #5 pdf-parse v2 API | S3 (E2E runtime execution) |
+| #6 DOMMatrix Node.js | S3 (E2E runtime execution) |
+| #7 file path fallback | S3 (E2E) + S4 (API contract) |
+| #8 dialog argument mismatch | S4 (argument shape check) |
+| #9 Electron API unused | S4 (API contract) |
+| #10 threshold default | S3 (E2E runtime — irrelevant query test) |
+| #11 KB picker UX | Already addressed by SC Decomposition Rule |
+| #12 CitationBlock name | Already addressed by Import Graph + Depth Tracking |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `reference/injection/tasks.md` | Integration wiring task injection check (cross-boundary flow detection + warning) |
+| `reference/injection/implement.md` | E2E Integration Smoke Test section (seam-based + runtime verification) |
+| `commands/verify-phases.md` | Source Modification Gate: Minor Accumulator (step 9). Phase 2 Step 1e: Cross-Module API Contract Verification. Verify Initialization: Process Rules Checklist to sdd-state.md. Resumption Protocol: re-read process rules |
+| `history.md` | This decision record |
+
+---
+
 ## [2026-03-11] Source Modification Gate + Post-Fix Runtime Verification
 
 Real F007 failure: agent discovered issues during verify (KB picker restructure + KnowledgeReference.name + CitationBlock) and fixed all 4 files inline without first classifying severity. The Bug Fix Severity Rule existed (lines 14-47) but was a reference section, not an enforced gate. Same structural pattern as the Step 3f problem — agents skip reference rules.
