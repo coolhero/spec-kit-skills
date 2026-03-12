@@ -5,6 +5,41 @@
 
 ---
 
+## [2026-03-12] Cross-Feature Integration Wiring — Pipeline Quality Analysis
+
+Comprehensive pipeline quality analysis based on F007-knowledge implementation gaps. The document argued the pipeline lacks "where to connect" support — cross-referenced against codebase and found 7 of 9 proposed improvements already exist (Step 1d orphan detection, Step 1e API contract verification, tasks wiring injection, Integration Contracts, Visual Fidelity Check, etc.). Identified 2 genuine gaps and implemented them.
+
+### Gap Analysis
+
+| Proposal | Status | Action |
+|----------|--------|--------|
+| Wire task pattern | ✅ Already exists (tasks.md L74-103) | — |
+| Integration Wiring Check | ✅ Already exists (verify Step 1d) | — |
+| Cross-Module API Contract | ✅ Already exists (verify Step 1e) | — |
+| Integration Chain in plan | ✅ Already exists (plan.md Integration Contracts) | — |
+| Visual Reference Pipeline | ✅ Already exists (Visual Fidelity Check + preservation_level) | — |
+| FR Integration Target metadata | spec-kit CLI scope, not modifiable | — |
+| Plan Checkpoint BLOCKING on Integration Chain | Over-enforcement, warning level appropriate | — |
+| **Cross-Feature File Modification Audit** | ❌ Not implemented | **Added as verify Step 1f** |
+| **Cross-Feature Interaction Chain rows** | ❌ Not implemented | **Added to plan.md injection** |
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | verify Step 1f method | `git diff --name-only` + Integration Contracts `Consumes ←` cross-reference | Simple grep, complements Step 1d (import) + 1e (interface) with file-level check |
+| 2 | cross-feature row location | Interaction Chains table, `cross-feature:` prefix | Same downstream flow (tasks→implement→verify) as existing rows; no new artifact |
+| 3 | Missing cross-feature rows | Warning, not blocking | Integration Contracts already warn; this adds specificity |
+| 4 | reverse-spec Integration Flow Extraction | Not added | Code-level integration paths belong in plan, not reverse-spec (stack-independent) |
+| 5 | Existing Code Modification Protocol | Not added separately | Source Reference Injection covers rebuild; cross-feature rows cover add mode |
+
+### Files Changed
+
+- `commands/verify-phases.md` — Added Step 1f (Cross-Feature File Modification Audit) after Step 1e
+- `reference/injection/plan.md` — Added Cross-Feature Integration rows to Interaction Chains section
+
+---
+
 ## [2026-03-12] Verify Process Lifecycle Protocol — Comprehensive Gap Analysis
 
 Second round of verify gap analysis based on comprehensive review document covering 7 themes. Cross-referenced all 13 proposed improvements against codebase — found 5 already implemented, 2 partially implemented, 7 not implemented. Selected 3 high-value, generally applicable improvements (Group A) and deferred 4 items as over-specific or premature.

@@ -177,6 +177,27 @@ Without async-flow rows, the agent implements the handler but may skip: auto-scr
 4. **verify** → Tier 2 (State Change) and Tier 3 (Side Effect) verification uses Verify Method column
 5. **demo** → Coverage header includes `verify-state`/`verify-effect` from Verify Method
 
+**Cross-Feature Integration rows** (for Features that modify existing Feature code):
+
+When Integration Contracts (see below) contain `Consumes ←` entries that require modifying another Feature's source file, add `cross-feature` rows to the Interaction Chains table. These rows trace the data path from the existing Feature's entry point through the new integration code to the end result.
+
+```markdown
+| FR | User Action | Handler | Store Mutation | DOM Effect | Visual Result | Verify Method |
+|----|-------------|---------|---------------|------------|---------------|---------------|
+| FR-034 | cross-feature: Send message with KB | F005/Inputbar:handleSend() | knowledgePicker.selectedIds read | message.content modified with KB refs | Citation blocks in response | grep handleSend for knowledgePicker |
+| FR-027 | cross-feature: Render citation | F005/MessageContent:render() | — | CitationBlock component inserted | KB source shown in message | grep MessageContent for CitationBlock |
+```
+
+**Why cross-feature rows matter**: Without them, the agent creates new services and components (KnowledgeService, KnowledgePicker) that individually work, but never modifies the existing code (Inputbar.tsx handleSend(), MessageContent renderer) to actually use them. The `cross-feature` prefix signals that these chains require **modifying existing Feature files**, not creating new ones.
+
+**Downstream flow of cross-feature rows**:
+1. **tasks.md** → generates explicit "wire" tasks: "Modify F005/Inputbar.tsx:handleSend() to call getKnowledgeReferencesForMessage()" — with **existing file path** and **modification location** specified
+2. **implement** → agent reads the existing file first, then modifies at the specified location
+3. **verify** → Phase 2 Step 1f (Cross-Feature File Modification Audit) checks that the target files were actually modified in git diff
+
+**If Integration Contracts have `Consumes ←` entries but NO cross-feature Interaction Chain rows**:
+- Display in Review: `⚠️ Integration Contracts define cross-Feature dependencies but Interaction Chains have no cross-feature rows. Without explicit chains, implement will create isolated modules that are never wired into existing code.`
+
 ## Integration Contract Verification (Features with cross-Feature dependencies)
 
 > **Skip for**: Features with no Functional Enablement Chain entries (no "Enables →" or "Blocked by ←" in pre-context).

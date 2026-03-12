@@ -636,6 +636,31 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
 5. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Contract mismatches are strong indicators of integration bugs.
 6. **Skip if**: Feature has no cross-module boundaries (single-file Feature, pure UI component, or utility library).
 
+**Step 1f — Cross-Feature File Modification Audit** (Features with Integration Contracts):
+
+> Step 1d checks "is the new service imported?" and Step 1e checks "do caller/callee interfaces match?" — but NEITHER checks "did this Feature modify the existing Feature files it was supposed to modify?" A Feature that `Consumes ← F005-chat-ui: Inputbar toolbar` should have modified Inputbar.tsx, but if it only created new files without touching the existing code, Steps 1d/1e both pass while the integration is actually missing.
+
+1. **Read plan.md** `## Integration Contracts` → extract all `Consumes ←` entries. For each entry, identify the Target Feature and Interface.
+2. **Map Interface to source files**: From the Interface column (e.g., `Inputbar toolbar`, `MessageContent renderer`, `AppRouter routes`), identify the likely source file(s) in the target Feature's directory.
+3. **Check git diff**:
+   ```bash
+   git diff main...HEAD --name-only | grep -i "[target feature path or file pattern]"
+   ```
+4. **Classification**:
+   - Integration Contract target file IS in diff → `✅ Cross-Feature file modified`
+   - Integration Contract target file NOT in diff:
+     - `⚠️ WARNING: [FID] consumes [Target Feature]/[Interface] per Integration Contracts, but no files in [Target Feature path] were modified. This suggests the integration wiring may be missing — new code was created but not connected to the existing application.`
+5. **Report**:
+   ```
+   📊 Cross-Feature File Modification Audit for [FID]:
+     Consumes ← F005-chat-ui / Inputbar toolbar:
+       ⚠️ 0 files modified in pages/home/Inputbar/ — wiring likely missing
+     Consumes ← F003-ai-core / ParameterBuilder:
+       ✅ services/ParameterBuilder.ts modified (+12 lines)
+   ```
+6. **Result**: ⚠️ warnings (NOT blocking) — prominently displayed in Review. Combined with Step 1d (orphan detection) and Step 1e (contract mismatch), this provides a three-layer integration verification: import exists (1d) + interface matches (1e) + target file actually modified (1f).
+7. **Skip if**: No `## Integration Contracts` in plan.md, or no `Consumes ←` entries.
+
 **Step 2 — Source Behavior Completeness** (only for brownfield rebuild — Origin: `rebuild`):
 If `pre-context.md` contains a "Source Behavior Inventory" section, perform a per-Feature mini-parity check:
 
