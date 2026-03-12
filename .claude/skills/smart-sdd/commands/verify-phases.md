@@ -316,7 +316,7 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 2. Monitor stderr for ~10 seconds (stability window)
 3. **Active survival check**: After the stability window, verify `kill -0 $PID` succeeds. Some crashes (segfault, OOM kill, silent abort) produce no stderr output — the process simply disappears. Passive stderr scanning alone misses these.
 4. Scan stderr for crash patterns: `TypeError`, `ReferenceError`, `SyntaxError`, `Uncaught exception`, `Unhandled rejection`, `panic:`, `FATAL`, `segfault`, process exit with non-zero code
-5. Kill the dev process (cleanup). Add PID to the Verify PID Registry (see Process Lifecycle Protocol below).
+5. Kill the dev process (cleanup). Add PID to the Verify PID Registry (see Process Lifecycle Protocol above).
 6. **If process gone (kill -0 fails) OR crash pattern detected**: `⚠️ Dev mode startup crash — [error pattern or "process exited silently"]. Production build may mask initialization-order or environment-dependent bugs.`
    - Result: ⚠️ WARNING (NOT blocking) — included in Phase 3b Bug Prevention results
 7. **If process alive AND no crash patterns**: `✅ Dev mode startup stable`
