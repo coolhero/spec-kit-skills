@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-03-12] Full File Review — Flow Consistency and File Map Sync
+
+Comprehensive file review across 4 parallel agents (SKILL.md routing, domain system, verify-phases, scripts/README). Validated 98+ cross-file references in SKILL.md routing, 150+ in domain system, with zero broken domain links.
+
+### Issues Found and Fixed
+
+| Issue | Severity | Fix |
+|-------|----------|-----|
+| 3 broken relative links in reverse-spec (extra `../` level) | Medium | Fixed in SKILL.md, analyze.md |
+| Stability window mismatch (verify-phases said ~10s, demo-standard says 15s) | Low | Aligned to 15s with explicit reference |
+| 27+ files missing from README File Map | Low | Added all domain, profile, scenario, and reference files |
+| README.ko.md File Map out of sync | Low | Synced with README.md |
+
+### Files Changed
+
+- `reverse-spec/SKILL.md` — Fixed 1 broken relative link (`../../smart-sdd/` → `../smart-sdd/`)
+- `reverse-spec/commands/analyze.md` — Fixed 2 broken relative links (same pattern)
+- `commands/verify-phases.md` — Stability window 10s → 15s (3 probes × 5s per demo-standard.md)
+- `README.md` — Added lessons-learned.md, 12 reverse-spec domain files, 21 smart-sdd domain/profile/scenario/reference files, section headers (Domains, Templates)
+- `README.ko.md` — Synced all File Map additions (Korean translations)
+
+---
+
 ## [2026-03-12] Cross-Feature Integration Wiring — Pipeline Quality Analysis
 
 Comprehensive pipeline quality analysis based on F007-knowledge implementation gaps. The document argued the pipeline lacks "where to connect" support — cross-referenced against codebase and found 7 of 9 proposed improvements already exist (Step 1d orphan detection, Step 1e API contract verification, tasks wiring injection, Integration Contracts, Visual Fidelity Check, etc.). Identified 2 genuine gaps and implemented them.

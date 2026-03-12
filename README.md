@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 22:22 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-12 18:05 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -737,6 +737,7 @@ Complete list of all files in this repository grouped by skill.
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for browser automation and Electron CDP configuration |
 | `TODO.md` | Project task tracker (all planned tasks completed as of 2026-03-08) |
 | `history.md` | Design decision history extracted from git history |
+| `lessons-learned.md` | Failure patterns (G1–G11) and countermeasures from real pipeline executions |
 | `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |
 | `uninstall.sh` | Uninstaller — removes symlinks from `~/.claude/skills/` |
 
@@ -746,10 +747,23 @@ Complete list of all files in this repository grouped by skill.
 |------|-------------|
 | `SKILL.md` | Skill router — entry point and mandatory rules for reverse-spec |
 | `commands/analyze.md` | Multi-phase workflow for analyzing source code and generating Global Evolution Layer artifacts |
+| **Domains** | |
+| `domains/_core.md` | Universal analysis framework (R1–R6 analysis sections) |
 | `domains/_schema.md` | Domain profile schema template (Detection Signals, Analysis Axes, Feature Registry, etc.) |
 | `domains/app.md` | Application domain profile — detection and analysis behavior for backend/frontend/fullstack/mobile/library |
 | `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
+| `domains/interfaces/gui.md` | GUI interface — runtime exploration, visual behavior analysis |
+| `domains/interfaces/http-api.md` | HTTP API interface — endpoint discovery, request/response analysis |
+| `domains/interfaces/cli.md` | CLI interface — command parsing, argument analysis |
+| `domains/interfaces/data-io.md` | Data I/O interface — pipeline discovery, data flow analysis |
+| `domains/concerns/async-state.md` | Async state concern — loading/streaming/error state detection |
+| `domains/concerns/auth.md` | Authentication concern — auth flow detection |
+| `domains/concerns/external-sdk.md` | External SDK concern — third-party API integration detection |
+| `domains/concerns/i18n.md` | Internationalization concern — locale key detection |
+| `domains/concerns/ipc.md` | IPC concern — inter-process communication detection (Electron/Tauri) |
+| `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE detection |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
+| **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
 | `templates/constitution-seed-template.md` | Template for initial constitution document |
 | `templates/entity-registry-template.md` | Template for data entity registry |
@@ -758,6 +772,7 @@ Complete list of all files in this repository grouped by skill.
 | `templates/stack-migration-template.md` | Template for stack migration plan (rebuild + new stack) |
 | `templates/coverage-baseline-template.md` | Template for source coverage metrics baseline |
 | `templates/pre-context-template.md` | Template for per-Feature context extracted from runtime exploration |
+| `templates/speckit-prompt-template.md` | Standalone prompt template for using spec-kit without smart-sdd |
 
 ### smart-sdd (`.claude/skills/smart-sdd/`)
 
@@ -776,17 +791,40 @@ Complete list of all files in this repository grouped by skill.
 | `commands/status.md` | Status display — project progress from sdd-state.md |
 | `commands/verify-phases.md` | 4-phase verification workflow (Test/Build/Lint → Cross-Feature → Demo-Ready → Global Update) |
 | **Domains** | |
+| `domains/_core.md` | Universal rules (S1–S7) — demo-ready delivery, bug prevention index, conditional rules |
+| `domains/_resolver.md` | Profile resolution protocol — profile expansion, backward compatibility, module loading order |
 | `domains/_schema.md` | Domain profile schema — demo patterns, parity dimensions, verification behavior |
 | `domains/app.md` | Application domain profile — demo patterns, lint detection rules, UI testing, bug prevention |
 | `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
+| `domains/interfaces/gui.md` | GUI interface — CSS rendering bugs, UI interaction surface audit, visual fidelity |
+| `domains/interfaces/http-api.md` | HTTP API interface — API compatibility matrix, runtime verification |
+| `domains/interfaces/cli.md` | CLI interface — CLI verification, process-runner backend |
+| `domains/interfaces/data-io.md` | Data I/O interface — pipeline verification, data flow testing |
+| `domains/concerns/async-state.md` | Async state — loading/streaming patterns, UX behavior contract |
+| `domains/concerns/auth.md` | Authentication — auth flow patterns, session management |
+| `domains/concerns/external-sdk.md` | External SDK — type trust classification, API contract gap detection |
+| `domains/concerns/i18n.md` | Internationalization — completeness check, locale key coverage |
+| `domains/concerns/ipc.md` | IPC — boundary safety, return value defense (Electron/Tauri) |
+| `domains/concerns/realtime.md` | Realtime — WebSocket/SSE connection management |
+| `domains/profiles/fullstack-web.md` | Preset: [http-api, gui] + [async-state, auth, i18n] |
+| `domains/profiles/web-api.md` | Preset: [http-api] + [auth] |
+| `domains/profiles/desktop-app.md` | Preset: [gui] + [async-state, ipc] |
+| `domains/profiles/cli-tool.md` | Preset: [cli] |
+| `domains/scenarios/greenfield.md` | New project — no existing code, full pipeline from scratch |
+| `domains/scenarios/rebuild.md` | Rebuild — preservation_level, change_scope, migration_strategy parameters |
+| `domains/scenarios/incremental.md` | Incremental — add Features to existing SDD project |
+| `domains/scenarios/adoption.md` | Adoption — wrap existing code with SDD documentation |
 | **Reference** | |
 | `reference/branch-management.md` | Git branch workflow — Feature isolation and merge validation |
+| `reference/clarity-index.md` | Cross-reference clarity metrics and signal extraction |
 | `reference/context-injection-rules.md` | Shared patterns — HARD STOP checkpoints, missing content handling, output suppression |
 | `reference/demo-standard.md` | Demo-ready delivery standard — script requirements, VERIFY_STEPS format, 3-tier UI actions |
 | `reference/feature-elaboration-framework.md` | 6-perspective Feature evaluation framework for gap identification |
 | `reference/restructure-guide.md` | Feature restructure checklist (split, merge, move, reorder, delete) |
+| `reference/runtime-verification.md` | Runtime verification backend registry — Playwright CLI/MCP detection, backend classification |
 | `reference/state-schema.md` | `sdd-state.md` schema — Feature status, Toolchain, Demo Groups, Special Flags |
 | `reference/ui-testing-integration.md` | Playwright MCP integration guide for UI verification |
+| `reference/user-cooperation-protocol.md` | User assistance patterns for HARD STOP interactions |
 | **Context Injection** | |
 | `reference/injection/adopt-plan.md` | Adopt plan step — document existing architecture as-is |
 | `reference/injection/adopt-specify.md` | Adopt specify step — SDD documentation wrapping of existing code |

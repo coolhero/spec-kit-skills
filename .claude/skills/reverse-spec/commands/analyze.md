@@ -323,7 +323,7 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 **Step 1 — Detect Playwright CLI**:
 
-Execute the two-phase CLI probe from [runtime-verification.md §3a](../../../smart-sdd/reference/runtime-verification.md) (binary probe → library import probe → recovery).
+Execute the two-phase CLI probe from [runtime-verification.md §3a](../../smart-sdd/reference/runtime-verification.md) (binary probe → library import probe → recovery).
 
 - Success → set `playwright_cli = true`
 - Failure → set `playwright_cli = false`, skip to Step 1b (MCP)
@@ -454,7 +454,7 @@ Installation guide: see PLAYWRIGHT-GUIDE.md (includes troubleshooting)
 ```
 Ask via AskUserQuestion:
 - **"Install Playwright CLI (Recommended)"** — install via `npm i -D @playwright/test && npx playwright install` and retry
-- **"Configure Playwright MCP"** — user installs via `claude mcp add` and restarts session (see [runtime-verification.md §4](../../../smart-sdd/reference/runtime-verification.md) for restart rules)
+- **"Configure Playwright MCP"** — user installs via `claude mcp add` and restarts session (see [runtime-verification.md §4](../../smart-sdd/reference/runtime-verification.md) for restart rules)
 - **"Skip — code analysis only"** — proceed directly to Phase 2
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If "Install Playwright CLI" is selected, run the installation command and retry detection from Step 1. If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright)` and proceed to Phase 2.

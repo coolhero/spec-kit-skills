@@ -1368,7 +1368,7 @@ Before running the demo, **read the demo script source** and verify:
 
 **Step 6 — Execute the demo in CI mode (`--ci`)**:
 - Run `demos/F00N-name.sh --ci` and verify it completes without errors
-- The demo script's CI mode MUST include a **stability window** (~10 seconds) between the initial health check and exit — verify the script includes this (see demo-standard.md template)
+- The demo script's CI mode MUST include a **stability window** (15 seconds — 3 probes at 5s intervals per demo-standard.md) between the initial health check and exit — verify the script includes this (see demo-standard.md template)
 - If the demo script lacks a stability window (exits immediately after first health check), **WARN** and recommend updating the script to include one
 - Capture the demo output (stdout/stderr) for the Review display
 - **Runtime error scan (BLOCKING)**: After demo execution, scan the captured stdout/stderr for runtime error patterns:

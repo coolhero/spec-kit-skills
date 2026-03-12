@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-11 22:22 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-12 18:05 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -734,6 +734,7 @@ specs/
 | `PLAYWRIGHT-GUIDE.md` | Playwright 설정 가이드 — 브라우저 자동화 및 Electron CDP 설정 |
 | `TODO.md` | 프로젝트 작업 추적기 (2026-03-08 기준 모든 계획 작업 완료) |
 | `history.md` | git 이력에서 추출한 설계 결정 이력 |
+| `lessons-learned.md` | 실제 파이프라인 실행에서 발견된 실패 패턴(G1–G11)과 대응책 |
 | `install.sh` | 설치 스크립트 — `~/.claude/skills/`에 심링크 생성 |
 | `uninstall.sh` | 제거 스크립트 — `~/.claude/skills/`에서 심링크 제거 |
 
@@ -743,10 +744,23 @@ specs/
 |------|------|
 | `SKILL.md` | 스킬 라우터 — reverse-spec 진입점 및 필수 규칙 |
 | `commands/analyze.md` | 소스코드 분석 및 Global Evolution Layer 아티펙트 생성 다단계 워크플로우 |
+| **Domains** | |
+| `domains/_core.md` | 범용 분석 프레임워크 (R1–R6 분석 섹션) |
 | `domains/_schema.md` | 도메인 프로필 스키마 템플릿 (Detection Signals, Analysis Axes, Feature Registry 등) |
 | `domains/app.md` | 애플리케이션 도메인 프로필 — backend/frontend/fullstack/mobile/library 감지 및 분석 |
 | `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
+| `domains/interfaces/gui.md` | GUI 인터페이스 — 런타임 탐색, 시각적 동작 분석 |
+| `domains/interfaces/http-api.md` | HTTP API 인터페이스 — 엔드포인트 탐색, 요청/응답 분석 |
+| `domains/interfaces/cli.md` | CLI 인터페이스 — 커맨드 파싱, 인자 분석 |
+| `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 탐색, 데이터 플로우 분석 |
+| `domains/concerns/async-state.md` | Async state concern — 로딩/스트리밍/에러 상태 감지 |
+| `domains/concerns/auth.md` | Authentication concern — 인증 플로우 감지 |
+| `domains/concerns/external-sdk.md` | External SDK concern — 서드파티 API 통합 감지 |
+| `domains/concerns/i18n.md` | Internationalization concern — 로케일 키 감지 |
+| `domains/concerns/ipc.md` | IPC concern — 프로세스간 통신 감지 (Electron/Tauri) |
+| `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE 감지 |
 | `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
+| **Templates** | |
 | `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
 | `templates/constitution-seed-template.md` | 초기 constitution 문서 템플릿 |
 | `templates/entity-registry-template.md` | 데이터 엔티티 레지스트리 템플릿 |
@@ -755,6 +769,7 @@ specs/
 | `templates/stack-migration-template.md` | 스택 마이그레이션 계획 템플릿 (재구축 + 새 스택) |
 | `templates/coverage-baseline-template.md` | 소스 커버리지 메트릭 베이스라인 템플릿 |
 | `templates/pre-context-template.md` | 런타임 탐색에서 추출한 Feature별 컨텍스트 템플릿 |
+| `templates/speckit-prompt-template.md` | smart-sdd 없이 spec-kit 단독 사용을 위한 독립 프롬프트 템플릿 |
 
 ### smart-sdd (`.claude/skills/smart-sdd/`)
 
@@ -773,17 +788,40 @@ specs/
 | `commands/status.md` | 상태 표시 — sdd-state.md에서 프로젝트 진행 상태 읽기 |
 | `commands/verify-phases.md` | 4단계 검증 워크플로우 (Test/Build/Lint → 교차 Feature → Demo-Ready → Global Update) |
 | **Domains** | |
+| `domains/_core.md` | 범용 규칙 (S1–S7) — demo-ready 딜리버리, 버그 방지 인덱스, 조건부 규칙 |
+| `domains/_resolver.md` | 프로필 해석 프로토콜 — 프로필 확장, 하위 호환성, 모듈 로딩 순서 |
 | `domains/_schema.md` | 도메인 프로필 스키마 — 데모 패턴, 패리티 차원, 검증 동작 |
 | `domains/app.md` | 애플리케이션 도메인 프로필 — 데모 패턴, 린트 감지 규칙, UI 테스팅, 버그 방지 |
 | `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
+| `domains/interfaces/gui.md` | GUI 인터페이스 — CSS 렌더링 버그, UI 인터랙션 서피스 감사, 시각적 충실도 |
+| `domains/interfaces/http-api.md` | HTTP API 인터페이스 — API 호환성 매트릭스, 런타임 검증 |
+| `domains/interfaces/cli.md` | CLI 인터페이스 — CLI 검증, 프로세스 러너 백엔드 |
+| `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 검증, 데이터 플로우 테스팅 |
+| `domains/concerns/async-state.md` | Async state — 로딩/스트리밍 패턴, UX 동작 계약 |
+| `domains/concerns/auth.md` | Authentication — 인증 플로우 패턴, 세션 관리 |
+| `domains/concerns/external-sdk.md` | External SDK — 타입 신뢰 분류, API 계약 갭 감지 |
+| `domains/concerns/i18n.md` | Internationalization — 완성도 검사, 로케일 키 커버리지 |
+| `domains/concerns/ipc.md` | IPC — 경계 안전성, 반환값 방어 (Electron/Tauri) |
+| `domains/concerns/realtime.md` | Realtime — WebSocket/SSE 연결 관리 |
+| `domains/profiles/fullstack-web.md` | 프리셋: [http-api, gui] + [async-state, auth, i18n] |
+| `domains/profiles/web-api.md` | 프리셋: [http-api] + [auth] |
+| `domains/profiles/desktop-app.md` | 프리셋: [gui] + [async-state, ipc] |
+| `domains/profiles/cli-tool.md` | 프리셋: [cli] |
+| `domains/scenarios/greenfield.md` | 신규 프로젝트 — 기존 코드 없이 처음부터 파이프라인 실행 |
+| `domains/scenarios/rebuild.md` | 리빌드 — preservation_level, change_scope, migration_strategy 파라미터 |
+| `domains/scenarios/incremental.md` | 점진적 추가 — 기존 SDD 프로젝트에 Feature 추가 |
+| `domains/scenarios/adoption.md` | SDD 도입 — 기존 코드에 SDD 문서 래핑 |
 | **Reference** | |
 | `reference/branch-management.md` | Git 브랜치 워크플로우 — Feature 격리 및 머지 검증 |
+| `reference/clarity-index.md` | 교차 참조 명확성 메트릭 및 시그널 추출 |
 | `reference/context-injection-rules.md` | 공유 패턴 — HARD STOP 체크포인트, 누락 콘텐츠 처리, 출력 억제 |
 | `reference/demo-standard.md` | Demo-ready 딜리버리 표준 — 스크립트 요구사항, VERIFY_STEPS 형식, 3-tier UI 액션 |
 | `reference/feature-elaboration-framework.md` | 6 관점 Feature 평가 프레임워크 — 갭 식별용 |
 | `reference/restructure-guide.md` | Feature 구조 변경 체크리스트 (분할, 병합, 이동, 순서 변경, 삭제) |
+| `reference/runtime-verification.md` | 런타임 검증 백엔드 레지스트리 — Playwright CLI/MCP 감지, 백엔드 분류 |
 | `reference/state-schema.md` | `sdd-state.md` 스키마 — Feature 상태, Toolchain, Demo Groups, Special Flags |
 | `reference/ui-testing-integration.md` | Playwright MCP 통합 가이드 — UI 검증용 |
+| `reference/user-cooperation-protocol.md` | HARD STOP 인터랙션을 위한 사용자 협력 패턴 |
 | **Context Injection** | |
 | `reference/injection/adopt-plan.md` | Adopt plan 단계 — 기존 아키텍처를 있는 그대로 문서화 |
 | `reference/injection/adopt-specify.md` | Adopt specify 단계 — 기존 코드의 SDD 문서 래핑 |
