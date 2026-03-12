@@ -209,6 +209,7 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 3. **Re-read `#### Verify Process Rules`** from sdd-state.md — MANDATORY. These rules survive compaction and MUST be followed for the remainder of the verify session. Pay special attention to the Source Modification Gate and Minor Accumulator.
 4. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
 5. **Re-establish prerequisites**:
+   - Run Pre-flight Clean Slate (port check) — previous session's processes may be orphaned
    - If Phase 3 pending and MCP needed → re-run Phase 0 (app start + CDP check)
    - If Phase 1 already complete → do NOT re-run tests/build/lint
 6. **Continue from resume point** through remaining phases
@@ -218,6 +219,32 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
    Previously completed: Phase 0 ✅, Phase 1 ✅, Phase 2 ✅
    Continuing: Phase 3, Phase 3b, Phase 4
    ```
+
+---
+
+### Verify Process Lifecycle Protocol
+
+> Verify launches background processes (app servers, dev servers, Electron instances). Without lifecycle management, failed/aborted verifications leave orphan processes that block ports and corrupt subsequent runs. This protocol ensures deterministic cleanup regardless of how verify ends.
+
+**PID Registry**: Maintain an in-memory list of all PIDs started during this verify session. Every background process launch (Phase 0 app start, 0-2c dev probe, Phase 3 restarts) MUST record its PID.
+
+**Pre-flight Clean Slate** (runs once at verify start, before Phase 0):
+1. Read the project's expected ports from constitution/quickstart (e.g., 3000, 5173, 9222, 4173)
+2. Check for processes occupying those ports: `lsof -ti :PORT` (macOS/Linux)
+3. If processes found:
+   - Display: `⚠️ Port [PORT] occupied by PID [PID] ([process name]). Likely residue from a previous session.`
+   - Kill the occupying process: `kill $PID` (graceful), wait 2s, `kill -9 $PID` if still alive
+   - Display: `🧹 Cleaned up orphan process on port [PORT]`
+4. If no conflicts: `✅ All expected ports available`
+
+> **Why port-based, not PID-based**: PID files from previous sessions may be stale (PID recycled by OS). Port occupancy is the ground truth — if something is listening on the app's port, it must be cleared regardless of its origin.
+
+**Cleanup on exit** (runs when verify completes, fails, or is aborted):
+1. Iterate the PID registry in reverse order (LIFO — child processes first)
+2. For each PID: `kill $PID` (SIGTERM), wait 2s, `kill -9 $PID` (SIGKILL) if still alive
+3. Display: `🧹 Cleaned up [N] background processes`
+
+> **Abort scenario**: If verify is interrupted (context compaction, user abort, unrecoverable error), the cleanup may not execute in the same session. The Pre-flight Clean Slate at the start of the NEXT verify session catches these cases — this is why both entry and exit cleanup are needed.
 
 ---
 
@@ -237,12 +264,13 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 - **Alternative path (MCP backend)**: Start app with CDP: per PLAYWRIGHT-GUIDE.md Electron build tool table
   (e.g., `npx electron-vite preview -- --remote-debugging-port=9222` or `npx electron out/main/index.js --remote-debugging-port=9222`)
   > **Note**: CDP configuration is only required when using Playwright MCP as the backend. CLI mode uses `_electron.launch()` which connects directly without CDP.
-- Record PID for cleanup after verify completes
+- Record PID in the Verify PID Registry (see Process Lifecycle Protocol above)
 - Display: `🚀 Starting Electron app...` (CLI mode) or `🚀 Starting Electron app with CDP on port 9222...` (MCP mode)
 
 **0-2 alt. Start Dev Server** (Web projects):
 - Start dev server (from `quickstart.md` or `launch.json`)
 - Wait for port readiness (poll health endpoint or port, max 30s)
+- Record PID in the Verify PID Registry (see Process Lifecycle Protocol above)
 - Display: `🚀 Starting dev server...`
 
 **0-2c. Dev Mode Stability Probe** (GUI projects with distinct dev command):
@@ -254,14 +282,15 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 **Detection**: Read `package.json` scripts for a `dev` entry (or `start:dev`, `serve`, etc.). Compare with the production start command used in 0-2/0-2alt. If they invoke different tooling (e.g., `electron-vite dev` vs `electron-vite build && electron .`, or `vite dev` vs `vite build && vite preview`), proceed.
 
 **Procedure**:
-1. Run the dev command in background (e.g., `pnpm run dev &`)
+1. Run the dev command in background (e.g., `pnpm run dev &`). Record PID.
 2. Monitor stderr for ~10 seconds (stability window)
-3. Scan for crash patterns: `TypeError`, `ReferenceError`, `SyntaxError`, `Uncaught exception`, `Unhandled rejection`, `panic:`, `FATAL`, `segfault`, process exit with non-zero code
-4. Kill the dev process (cleanup)
-5. **If crash detected**: `⚠️ Dev mode startup crash — [error pattern]. Production build may mask initialization-order or environment-dependent bugs.`
+3. **Active survival check**: After the stability window, verify `kill -0 $PID` succeeds. Some crashes (segfault, OOM kill, silent abort) produce no stderr output — the process simply disappears. Passive stderr scanning alone misses these.
+4. Scan stderr for crash patterns: `TypeError`, `ReferenceError`, `SyntaxError`, `Uncaught exception`, `Unhandled rejection`, `panic:`, `FATAL`, `segfault`, process exit with non-zero code
+5. Kill the dev process (cleanup). Add PID to the Verify PID Registry (see Process Lifecycle Protocol below).
+6. **If process gone (kill -0 fails) OR crash pattern detected**: `⚠️ Dev mode startup crash — [error pattern or "process exited silently"]. Production build may mask initialization-order or environment-dependent bugs.`
    - Result: ⚠️ WARNING (NOT blocking) — included in Phase 3b Bug Prevention results
-6. **If clean**: `✅ Dev mode startup stable`
-7. Display result and continue to 0-3
+7. **If process alive AND no crash patterns**: `✅ Dev mode startup stable`
+8. Display result and continue to 0-3
 
 > **Note**: This probe tests startup stability only — it does NOT replace the full runtime verification in Phase 3, which uses the production build. The purpose is to surface environment-dependent crashes (module-scope side effects, lifecycle-dependent initialization, missing runtime prerequisites) that differ between dev and production code paths.
 
@@ -1473,3 +1502,5 @@ Display:
   - `success`: All phases passed normally
   - `limited`: User acknowledged limited verification in Phase 1 or Phase 3 (⚠️ marker). Merge is allowed with a reminder
   - `failure`: One or more phases failed without acknowledgment. Merge is blocked
+
+**Process cleanup**: After Phase 4 update completes (or if verify exits early due to failure/regression), execute the Verify Process Lifecycle Protocol cleanup — kill all PIDs in the registry. This applies regardless of verify outcome (success, limited, failure, regression).

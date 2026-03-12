@@ -5,6 +5,44 @@
 
 ---
 
+## [2026-03-12] Verify Process Lifecycle Protocol — Comprehensive Gap Analysis
+
+Second round of verify gap analysis based on comprehensive review document covering 7 themes. Cross-referenced all 13 proposed improvements against codebase — found 5 already implemented, 2 partially implemented, 7 not implemented. Selected 3 high-value, generally applicable improvements (Group A) and deferred 4 items as over-specific or premature.
+
+### Gap Analysis
+
+| Item | Status | Action |
+|------|--------|--------|
+| Step 5 CI/Interactive enforcement | ✅ Already implemented | — |
+| --ci requires app startup | ✅ Already implemented | — |
+| Demo task injection | ✅ Already implemented | — |
+| Module-scope Lifecycle Dependency | ✅ Already implemented (prior session) | — |
+| Phase-boundary cleanup | ⚠️ Post-verify only | Extended with Process Lifecycle Protocol |
+| 0-2c process survival check | ❌ Passive stderr only | Added active `kill -0 $PID` check |
+| Pre-flight orphan cleanup | ❌ Not implemented | Added port-based Pre-flight Clean Slate |
+| Verify Abort Protocol | ❌ No unified cleanup | Added PID Registry + exit cleanup |
+| Phase 3b multi-start test | ❌ Not implemented | Deferred (Electron-specific edge case) |
+| Step-level audit trail | ❌ Not implemented | Deferred (Phase-level recording sufficient) |
+| SC Matrix → smoke test auto-gen | ❌ Not implemented | Deferred (implementation complexity vs value) |
+| Demo task → verify-phases.md ref | ❌ Not implemented | Deferred (unnecessary coupling) |
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Orphan cleanup detection method | Port-based (`lsof -ti :PORT`) not PID-file-based | PID files from previous sessions may be stale; port occupancy is ground truth |
+| 2 | PID Registry scope | In-memory per verify session, not persistent file | Only current session PIDs are relevant; Pre-flight catches cross-session orphans |
+| 3 | Abort cleanup guarantee | Dual: exit cleanup (same session) + Pre-flight Clean Slate (next session) | Context compaction or crash may prevent same-session cleanup |
+| 4 | Active survival check placement | After stderr stability window, before cleanup | Catches silent exits (segfault, OOM) that produce no stderr output |
+| 5 | Deferred items | 4 items deferred | Over-specific (multi-start test), insufficient value/complexity ratio (audit trail, auto-gen), unnecessary coupling (task→verify ref) |
+
+### Files Changed
+
+- `commands/verify-phases.md` — Added Verify Process Lifecycle Protocol (PID Registry, Pre-flight Clean Slate, exit cleanup), enhanced 0-2c with active survival check, added PID registry references to 0-2/0-2alt, updated Resumption Protocol with clean slate step, added Phase 4 cleanup trigger
+- `domains/_core.md` — Updated B-4 index to include Process Lifecycle Protocol
+
+---
+
 ## [2026-03-12] Verify Gap Analysis — Dev/Production Code Path Divergence
 
 Runtime crash in angdu-studio (`TypeError: Object has been destroyed`) exposed a structural gap: verify only exercised the production build path, missing bugs that manifest only in dev mode due to different module loading order. Generalized the root cause into two improvements applicable to any project type.

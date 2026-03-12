@@ -150,7 +150,7 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 | **plan (B-1)** | Runtime Compatibility, State Management Anti-patterns, Async & Concurrency, Dependency Safety | `injection/plan.md` § Bug Prevention |
 | **analyze (B-2)** | Cross-Feature Data Flow, Nullable Field Tracking | `injection/analyze.md` § Bug Prevention |
 | **implement (B-3)** | See active interface/concern modules for applicable rules | `injection/implement.md` § Bug Prevention |
-| **verify (B-4)** | Dev Mode Stability Probe, Empty State Smoke Test, Smoke Launch Criteria | `verify-phases.md` § Phase 0-2c, Phase 3b |
+| **verify (B-4)** | Process Lifecycle Protocol, Dev Mode Stability Probe, Empty State Smoke Test, Smoke Launch Criteria | `verify-phases.md` § Process Lifecycle, Phase 0-2c, Phase 3b |
 
 ### Universal B-3 Rules (always active)
 
