@@ -245,6 +245,26 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 - Wait for port readiness (poll health endpoint or port, max 30s)
 - Display: `🚀 Starting dev server...`
 
+**0-2c. Dev Mode Stability Probe** (GUI projects with distinct dev command):
+
+> Production builds and dev mode follow different code paths — module bundling vs native ESM, static env injection vs runtime loading, pre-compiled vs HMR-driven. Bugs that only manifest under one path (e.g., module-scope side effects that depend on initialization order) are invisible if verify only exercises the other. This probe catches startup-time crashes in the path NOT covered by 0-2/0-2alt.
+
+**Skip if**: No dev command detected, or dev command is identical to the production start path already tested above.
+
+**Detection**: Read `package.json` scripts for a `dev` entry (or `start:dev`, `serve`, etc.). Compare with the production start command used in 0-2/0-2alt. If they invoke different tooling (e.g., `electron-vite dev` vs `electron-vite build && electron .`, or `vite dev` vs `vite build && vite preview`), proceed.
+
+**Procedure**:
+1. Run the dev command in background (e.g., `pnpm run dev &`)
+2. Monitor stderr for ~10 seconds (stability window)
+3. Scan for crash patterns: `TypeError`, `ReferenceError`, `SyntaxError`, `Uncaught exception`, `Unhandled rejection`, `panic:`, `FATAL`, `segfault`, process exit with non-zero code
+4. Kill the dev process (cleanup)
+5. **If crash detected**: `⚠️ Dev mode startup crash — [error pattern]. Production build may mask initialization-order or environment-dependent bugs.`
+   - Result: ⚠️ WARNING (NOT blocking) — included in Phase 3b Bug Prevention results
+6. **If clean**: `✅ Dev mode startup stable`
+7. Display result and continue to 0-3
+
+> **Note**: This probe tests startup stability only — it does NOT replace the full runtime verification in Phase 3, which uses the production build. The purpose is to surface environment-dependent crashes (module-scope side effects, lifecycle-dependent initialization, missing runtime prerequisites) that differ between dev and production code paths.
+
 **0-3. Verify CDP Connection** (Electron only — MCP backend path):
 - Skip this step if `RUNTIME_BACKEND = cli` or `cli-limited` (CLI uses `_electron.launch()`, no CDP needed)
 - Run `curl -s http://localhost:9222/json/version`

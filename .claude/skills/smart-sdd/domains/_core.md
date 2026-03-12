@@ -150,12 +150,13 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 | **plan (B-1)** | Runtime Compatibility, State Management Anti-patterns, Async & Concurrency, Dependency Safety | `injection/plan.md` § Bug Prevention |
 | **analyze (B-2)** | Cross-Feature Data Flow, Nullable Field Tracking | `injection/analyze.md` § Bug Prevention |
 | **implement (B-3)** | See active interface/concern modules for applicable rules | `injection/implement.md` § Bug Prevention |
-| **verify (B-4)** | Empty State Smoke Test, Smoke Launch Criteria | `verify-phases.md` § Phase 3b |
+| **verify (B-4)** | Dev Mode Stability Probe, Empty State Smoke Test, Smoke Launch Criteria | `verify-phases.md` § Phase 0-2c, Phase 3b |
 
 ### Universal B-3 Rules (always active)
 
 - **Cross-Feature Integration**: Data shape contracts between provider and consumer Features
 - **Data Persistence Safety**: Verify data survives restart, check storage paths
+- **Module-scope Lifecycle Dependency**: Code that executes at module import time must not depend on runtime lifecycle state (app ready, DOM ready, server initialized, config loaded). Common anti-pattern: `export const service = new Service()` where the constructor calls APIs that require prior initialization (e.g., filesystem paths, window dimensions, database connections, environment variables loaded at startup). These work when the module happens to load after initialization but crash when import order changes — which differs between dev mode (native ESM, HMR) and production builds (bundled, tree-shaken). Fix: lazy initialization (`getInstance()` pattern) or deferred setup (`init()` called explicitly after lifecycle gate). Detect during implement by scanning for `export const|let` combined with `new` + constructor side effects
 
 ### Conditional B-3 Rules (active only when corresponding module is loaded)
 

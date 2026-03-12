@@ -5,6 +5,35 @@
 
 ---
 
+## [2026-03-12] Verify Gap Analysis — Dev/Production Code Path Divergence
+
+Runtime crash in angdu-studio (`TypeError: Object has been destroyed`) exposed a structural gap: verify only exercised the production build path, missing bugs that manifest only in dev mode due to different module loading order. Generalized the root cause into two improvements applicable to any project type.
+
+### Gap Analysis
+
+| Gap | Root Cause | Generalized Principle |
+|-----|-----------|----------------------|
+| Dev mode untested | Verify runs production build only | Dev and production have different code paths (bundling, ESM vs CJS, HMR, init order) |
+| Module-scope side effects | Singleton constructor calls lifecycle-dependent API at import time | Any `export const x = new X()` with constructor depending on runtime state breaks when import order changes |
+| Mocked APIs in tests | Unit tests mock runtime APIs, hiding initialization order bugs | Tests that mock lifecycle APIs (filesystem, window, env) cannot detect real startup sequence issues |
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Dev Mode Stability Probe location | Phase 0-2c (after app startup, before pre-flight) | Complements production build startup (0-2/0-2alt); probe-and-kill, not persistent |
+| 2 | Probe scope | Any GUI project with distinct dev command, not Electron-only | Vite, Next.js, Tauri all have dev/prod path divergence |
+| 3 | Blocking behavior | ⚠️ WARNING, not blocking | Dev crash may not affect production; user decides in Review |
+| 4 | Module-scope Lifecycle rule location | `_core.md` Universal B-3 (not gui.md) | Pattern applies to any runtime (browser SSR, Node env loading, Electron lifecycle), not GUI-specific |
+| 5 | Demo --ci change | Not needed | Phase 0-2c covers the gap; existing demo-standard convergence rule already requires same startup commands |
+
+### Files Changed
+
+- `commands/verify-phases.md` — Added Phase 0-2c Dev Mode Stability Probe
+- `domains/_core.md` — Added Module-scope Lifecycle Dependency to Universal B-3 Rules; updated B-4 index to include Dev Mode Stability Probe
+
+---
+
 ## [2026-03-11] Rebuild Scenario Enhancement + README Architecture Restructuring
 
 Rebuild.md's 4 configuration parameters (`change_scope`, `preservation_level`, `source_available`, `migration_strategy`) were mostly dead code — only `source_available` was actively consumed. Restructured rebuild.md with proper S1/S3/S5/S7 schema sections, added consumption points throughout the pipeline, and repositioned the Architecture section in README from the bottom Reference area to between Skills and User Journeys for visibility. Integrated "harness engineering for agentic coding" framing into Architecture introduction.
