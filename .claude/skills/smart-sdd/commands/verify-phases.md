@@ -115,16 +115,36 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
      State restructure: [yes/no]
    ```
 
-6. **If Minor/Gap** → Proceed with inline fixes. Record all changes in Notes. **Then execute Post-Fix Runtime Verification** (step 8 below).
+6. **HARD STOP — User Approval Gate** (MANDATORY for ALL classifications, including Minor):
 
-7. **If Major** → **HARD STOP**. Do NOT modify any source files. Trigger the "When any Major issue is found" flow (lines 31-38):
+   > **Why Minor also requires approval**: The F007 pattern showed repeated Minor fixes accumulating into de facto Major rewrites without user awareness. By making ALL classifications visible and requiring approval, the user can detect when "Minor" fixes are actually a deeper problem before any files are touched.
+
+   Display the classification table from step 2 with the aggregate result from step 5, then:
+
+   **If Minor/Gap classification** — **Use AskUserQuestion**:
+   ```
+   🔍 Source Modification Gate — Approval Required:
+   [Classification table from step 2]
+
+   ⚙️ Aggregate: [Minor/Gap] — [N] files, no API change
+   ```
+   - "Approve — proceed with inline fix"
+   - "Reclassify as Major — pipeline regression"
+   - "Skip — do not modify source files"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+   **If Major classification** → Proceed directly to step 8 (Major HARD STOP) for pipeline regression routing.
+
+7. **If user approves Minor/Gap** → Proceed with inline fixes. Record all changes in Notes. **Then execute Post-Fix Runtime Verification** (step 9 below).
+
+8. **If Major** → **HARD STOP**. Do NOT modify any source files. Trigger the "When any Major issue is found" flow (lines 31-38):
    - Display `🔴 [Severity] issue detected — requires pipeline regression to [target stage]`
    - **Use AskUserQuestion**:
      - "Return to [target stage] with issue context"
      - "Reclassify severity and fix now" — user overrides
    - **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-8. **Post-Fix Runtime Verification** (MANDATORY after every inline fix):
+9. **Post-Fix Runtime Verification** (MANDATORY after every inline fix):
 
    > "Build passes + tests pass ≠ fix is correct." An inline fix during verify MUST be runtime-verified, not just statically validated. This catches the pattern where code compiles but the fix doesn't actually resolve the runtime issue (e.g., service exists but isn't wired in, type is correct but data doesn't flow).
 
@@ -150,7 +170,7 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
       ```
    5. If runtime re-verification fails AND investigation reveals more files need changes → **re-run the Source Modification Gate** with the expanded scope. The aggregate file count may now push the fix to Major.
 
-9. **Minor Fix Accumulator** (cross-gate tracking):
+10. **Minor Fix Accumulator** (cross-gate tracking):
 
    The Source Modification Gate evaluates each fix batch independently. But a pattern of repeated Minor fixes in the same area indicates a deeper structural issue that should be handled by implement, not verify.
 
@@ -161,7 +181,7 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
      Fixes applied: 3 (Bug #1: loader path, Bug #4: PDF parser, Bug #5: pdf-parse API)
      → Auto-escalated to Major-Implement — this module needs redesign in implement, not patchwork in verify.
    ```
-   After auto-escalation → trigger the Major HARD STOP flow (step 7 above).
+   After auto-escalation → trigger the Major HARD STOP flow (step 8 above).
 
    **Module boundary definition**: Files sharing the same parent directory OR the same service/component name (e.g., `KnowledgeService.ts`, `KnowledgeLoader.ts`, `KnowledgeStore.ts` = same `Knowledge` module even if in different directories).
 
@@ -181,8 +201,8 @@ Before any Phase execution, write the Verify Progress table AND Process Rules Ch
 4. **Write Process Rules Checklist** (survives context compaction — agent re-reads sdd-state.md after compaction):
    ```
    #### Verify Process Rules (re-read after compaction)
-   - [ ] Source Modification Gate: BEFORE editing ANY source file → list changes → classify → aggregate file count → if ≥3 files or API change → Major HARD STOP
-   - [ ] Minor Accumulator: 3+ Minor fixes in same module → auto-escalate to Major
+   - [ ] Source Modification Gate: BEFORE editing ANY source file → list changes → classify → aggregate → **HARD STOP AskUserQuestion for ALL classifications** (Minor AND Major) → user must approve before any edit
+   - [ ] Minor Accumulator: 3+ Minor fixes in same module → auto-escalate to Major. State persisted in `#### Minor Fix Accumulator` — re-read after compaction.
    - [ ] Post-Fix Runtime Verification: after inline fix → build + test + runtime SC re-verify at Required Depth
    - [ ] SC Decomposition: mixed SCs → split into sub-SCs (auto + user-assisted)
    - [ ] Per-SC Depth Tracking: record Reached Depth vs Required Depth for each SC
@@ -190,12 +210,21 @@ Before any Phase execution, write the Verify Progress table AND Process Rules Ch
    ```
    This checklist is written to sdd-state.md as plain text, ensuring it persists across context compaction boundaries. The Resumption Protocol (below) includes re-reading this checklist as step 1.
 
+5. **Write Minor Fix Accumulator state** (survives context compaction):
+   ```
+   #### Minor Fix Accumulator (re-read after compaction)
+   | Module | Fix Count | Fix Descriptions |
+   |--------|-----------|-----------------|
+   ```
+   Initially empty. Updated after each approved Minor fix with the module name, incremented count, and brief description. If count reaches 3 for any module, auto-escalate per step 10.
+
 **After each Phase completes**: Update the Phase's Status to `✅ complete` and write Result summary.
 Update `⚠️ RESUME FROM` to point to the next pending Phase.
 
 **On verify completion** (success or failure):
 - Delete the `#### Verify Progress` section from sdd-state.md
 - Delete the `#### Verify Process Rules` section from sdd-state.md
+- Delete the `#### Minor Fix Accumulator` section from sdd-state.md
 - Write final result to Notes column as before
 
 ---
@@ -207,13 +236,14 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 1. **Re-read this file** (commands/verify-phases.md) — MANDATORY
 2. **Re-read reference/injection/verify.md** — for Checkpoint/Review display format
 3. **Re-read `#### Verify Process Rules`** from sdd-state.md — MANDATORY. These rules survive compaction and MUST be followed for the remainder of the verify session. Pay special attention to the Source Modification Gate and Minor Accumulator.
-4. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
-5. **Re-establish prerequisites**:
+4. **Re-read `#### Minor Fix Accumulator`** from sdd-state.md — MANDATORY. Restore accumulator state. If any module already has 2 fixes, the NEXT Minor fix in that module triggers auto-escalation.
+5. **Identify resume point**: First phase with `⏳ pending` or `🔄 in_progress` status
+6. **Re-establish prerequisites**:
    - Run Pre-flight Clean Slate (port check) — previous session's processes may be orphaned
    - If Phase 3 pending and MCP needed → re-run Phase 0 (app start + CDP check)
    - If Phase 1 already complete → do NOT re-run tests/build/lint
-6. **Continue from resume point** through remaining phases
-7. **Display resume notice**:
+7. **Continue from resume point** through remaining phases
+8. **Display resume notice**:
    ```
    🔄 Verify resumed from Phase [N] (context compaction detected)
    Previously completed: Phase 0 ✅, Phase 1 ✅, Phase 2 ✅
@@ -500,6 +530,29 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 - Check the cross-verification points in the "For /speckit.analyze" section of `pre-context.md`
 - Analyze whether shared entities/APIs changed by this Feature affect other Features
 - Verify that entity-registry.md and api-registry.md match the actual implementation
+
+**Step 1a — Feature Contract Compliance Check** (skip if pre-context.md has no "Feature Contracts" section):
+
+1. **Guarantee verification**: For each Guarantee this Feature provides (C-[FID]-G## entries):
+   - Grep the Feature's code for the interface/function/API described in the Guarantee
+   - Verify the interface returns/provides what the Guarantee promises (type check, not runtime)
+   - If not implemented → `⚠️ Contract C-[FID]-G## not implemented — [Consumer Feature] depends on this`
+
+2. **Dependency status check**: For each Dependency this Feature requires (C-[FID]-D## entries):
+   - Check if the Provider Feature has verify status = `success` or `limited` in sdd-state.md
+   - If Provider NOT verified → `⚠️ Dependency C-[FID]-D## on [Provider Feature] — provider not yet verified`
+   - If Provider verified → check that the specific interface still exists in Provider's code (cross-reference)
+
+3. Report:
+   ```
+   📋 Feature Contract Compliance for [FID]:
+     Guarantees: [N]/[M] implemented
+       ⚠️ C-F007-G01: getKnowledgeReferences() not returning name field (F005-chat depends on this)
+     Dependencies: [N]/[M] providers verified
+       ✅ C-F007-D01: F001-auth verified, middleware available
+   ```
+
+4. **Result**: ⚠️ warnings (NOT blocking). Unimplemented Guarantees are strong indicators of downstream Feature failures and should be prioritized during Phase 3 runtime verification.
 
 **Step 1b — Plan Deviation Quick Check**:
 Lightweight sanity check to catch structural drift between plan artifacts and implementation:

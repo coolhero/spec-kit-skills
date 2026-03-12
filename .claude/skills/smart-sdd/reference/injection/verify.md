@@ -206,6 +206,9 @@ After verification execution completes:
   📄 demos/{FID}-{name}.sh  (fix demo issues, if applicable)
 If issues were found, you can fix them directly, then select
 "I've finished editing" to re-verify.
+
+⚠️ Source Modification Gate: ALL source modifications (Minor AND
+Major) require user approval via HARD STOP before any files are edited.
 ──────────────────────────────────────────────────
 ```
 

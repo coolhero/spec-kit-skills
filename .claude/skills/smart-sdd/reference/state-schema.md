@@ -206,6 +206,24 @@ Format (in Feature Detail Log, below the Step table):
 
 **Purpose**: When context compaction occurs during verify, the agent loses in-memory progress tracking. On resumption, the agent reads sdd-state.md (which is always read at session start), finds the Verify Progress table, and resumes from the first pending Phase without re-running completed Phases.
 
+### Minor Fix Accumulator
+
+> Tracks cumulative Minor fixes per module during verify. Persisted to survive context compaction.
+> Written after each approved Minor fix. Read by Resumption Protocol.
+> Deleted when verify completes (same lifecycle as Verify Progress).
+
+Format (in Feature Detail Log, below the Verify Process Rules):
+
+```
+#### Minor Fix Accumulator (re-read after compaction)
+| Module | Fix Count | Fix Descriptions |
+|--------|-----------|-----------------|
+| src/services/knowledge/ | 2 | Bug #1: loader path, Bug #4: PDF parser |
+```
+
+**Lifecycle**: Created at verify start (empty) → Updated after each approved Minor fix → Deleted at verify completion.
+**Escalation**: If any module's Fix Count reaches 3, auto-escalate to Major-Implement per Bug Fix Severity Rule.
+
 ---
 
 ## Feature Mapping

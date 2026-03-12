@@ -5,6 +5,55 @@
 
 ---
 
+## [2026-03-12] Verify Universal HARD STOP + Reverse-Spec Interaction Quality
+
+Two-pronged enhancement addressing F007 repeated iteration quality stagnation.
+
+### Area 1: Source Modification Gate → Universal HARD STOP
+
+Made ALL source modifications during verify (including Minor) require user approval via AskUserQuestion. Previously only Major classifications triggered HARD STOP — Minor fixes proceeded silently, enabling accumulation of undisclosed rewrites.
+
+| Change | Description |
+|--------|-------------|
+| Universal HARD STOP (step 6) | AskUserQuestion before ANY source edit — "Approve / Reclassify as Major / Skip" |
+| Minor Fix Accumulator persistence | Persisted in sdd-state.md → survives context compaction |
+| Resumption Protocol | Re-read Accumulator state after compaction |
+
+### Area 2: Reverse-Spec Interaction Quality
+
+Added behavioral contract extraction to reverse-spec analysis, addressing the root cause: insufficient inter-Feature interaction data flowing into specify/plan.
+
+| Change | Description |
+|--------|-------------|
+| Phase 3-1d Interaction Intensity Check | Cross-Feature interaction matrix with anomaly detection (over-coupled, orphan, hub) |
+| Feature Contracts in pre-context | Guarantees, Dependencies, Failure Modes — consumed by plan and verify |
+| Interaction Coverage in coverage-baseline | Measures relationship coverage, not just item mapping |
+| Cross-Feature Interaction Rules | Behavioral trigger-response chains in business-logic-map |
+| verify Step 1a Feature Contract Compliance | Verify Guarantees implemented + Dependencies available |
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Minor HARD STOP | AskUserQuestion after classification | User must see and approve before any edit |
+| 2 | Existing Major HARD STOP | Preserved as secondary gate | Different role: regression routing vs. edit approval |
+| 3 | Interaction Intensity | Informational, non-blocking | Auto merge/split too risky; user decides |
+| 4 | Feature Contracts | Inside pre-context (no new artifact) | Maintains existing pipeline flow |
+| 5 | Contract Compliance check | ⚠️ Warning, non-blocking | Backward compatible with projects without Contracts |
+
+### Files Changed
+
+- `smart-sdd/commands/verify-phases.md` — Universal HARD STOP (step 6), Accumulator persistence, Contract Compliance (Step 1a)
+- `smart-sdd/reference/state-schema.md` — Minor Fix Accumulator schema
+- `smart-sdd/reference/injection/verify.md` — Gate reminder update
+- `reverse-spec/commands/analyze.md` — Phase 3-1d + Phase 4-2 Contract reference
+- `reverse-spec/templates/pre-context-template.md` — Feature Contracts section
+- `reverse-spec/templates/coverage-baseline-template.md` — Interaction Coverage metrics
+- `reverse-spec/templates/business-logic-map-template.md` — Cross-Feature Interaction Rules
+- `reverse-spec/domains/_core.md` — R5 interaction intensity heuristic
+
+---
+
 ## [2026-03-12] Full File Review — Flow Consistency and File Map Sync
 
 Comprehensive file review across 4 parallel agents (SKILL.md routing, domain system, verify-phases, scripts/README). Validated 98+ cross-file references in SKILL.md routing, 150+ in domain system, with zero broken domain links.

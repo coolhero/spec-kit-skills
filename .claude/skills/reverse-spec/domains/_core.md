@@ -140,6 +140,7 @@ Identify logical functional units (Features) based on the Phase 2 analysis resul
 - **Service boundaries** (in the case of microservice architectures)
 - **Route groups** (based on API path prefixes)
 - **Entity clusters** (groups of closely related entities)
+- **Interaction intensity** (Phase 3-1d): Feature pairs with Interaction Score ≥ 10 should be reviewed for potential merger; Features with Score = 0 across all pairs should be reviewed for correct scoping
 
 Define the following for each Feature:
 - Feature name (concise English name)

@@ -76,6 +76,18 @@
 | XR-001 | All authenticated API endpoints must pass through Bearer token verification middleware | All | `[file]:[line]` |
 | XR-002 | When a user is deleted, related order data must be soft-deleted | F003-order | `[file]:[line]` |
 
+### Cross-Feature Interaction Rules
+
+> Behavioral dependencies between Features that go beyond entity/API data rules.
+> These capture "when Feature A does X, Feature B must do Y" relationships.
+> Populated from Phase 3-1d interaction analysis where shared business rules (weight 3) were detected.
+
+| Rule ID | Trigger Feature | Trigger Action | Affected Feature | Required Response | Failure Impact |
+|---------|----------------|----------------|-----------------|-------------------|----------------|
+| XIR-001 | [F00N-feature] | [User action or system event — e.g., "User account deleted"] | [F00N-feature] | [What the affected Feature must do — e.g., "Soft-delete associated order data"] | [What happens if response is missed — e.g., "Orphaned orders with invalid user references"] |
+
+> **How to use**: During `/speckit.specify`, ensure both the trigger Feature and affected Feature have FR-### entries covering this interaction. During `/smart-sdd verify`, check that the trigger-response chain actually works at runtime (Phase 2 Cross-Feature Consistency).
+
 ---
 
 <!-- Repeat the above format for each Feature -->

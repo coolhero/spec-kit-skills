@@ -258,6 +258,35 @@
 > For specify: Ensure SC-### cover the functional interfaces that downstream Features depend on.
 > For verify: Check that functional enablement interfaces actually work at runtime.
 
+### Feature Contracts
+
+> Explicit guarantees, dependencies, and failure modes for cross-Feature boundaries.
+> Populated during `/reverse-spec` Phase 4-2 from Phase 3-1d interaction analysis and Phase 2-3 cross-Feature rules.
+> Used by `/speckit.plan` to design integration points, and by `/smart-sdd verify` Phase 2 for contract compliance checking.
+
+#### Guarantees (what this Feature promises to consumers)
+
+| Contract ID | Consumer Feature | Guarantee | Verification Method |
+|------------|-----------------|-----------|-------------------|
+| C-[FID]-G01 | [F00N-feature] | [What this Feature guarantees — e.g., "Auth middleware returns valid User object on req.user for any authenticated request"] | [How to verify — e.g., "Unit test: middleware attaches user; Integration: downstream Feature receives user object"] |
+
+#### Dependencies (what this Feature requires from providers)
+
+| Contract ID | Provider Feature | Dependency | Failure Impact |
+|------------|-----------------|------------|----------------|
+| C-[FID]-D01 | [F00N-feature] | [What this Feature requires — e.g., "Database connection pool initialized before auth queries execute"] | [What breaks — e.g., "All auth operations fail with connection refused, blocking login/register"] |
+
+#### Failure Modes
+
+| Contract ID | Trigger | Symptom | Blast Radius |
+|------------|---------|---------|-------------|
+| C-[FID]-F01 | [C-[FID]-G01 violated: e.g., Auth middleware returns null user] | [Downstream Features receive undefined user, causing TypeError on user.id access] | [All Features depending on auth — F003, F005, F007] |
+
+> If this Feature has no cross-Feature contracts (standalone/utility), write "None — this Feature operates independently."
+> For specify: Ensure SC-### cover the Guarantee verification methods.
+> For plan: Design integration points that respect the Contract dependencies.
+> For verify: Phase 2 checks Contract compliance; Phase 3 verifies Guarantees at runtime.
+
 ### Related Entities (data-model.md draft)
 
 #### Owned Entities

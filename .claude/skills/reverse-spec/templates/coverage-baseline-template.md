@@ -22,6 +22,23 @@
 
 ---
 
+## Interaction Coverage
+
+> Measures how thoroughly cross-Feature interactions are documented and validated.
+> Unlike Surface Metrics (which measure "items mapped"), Interaction Coverage measures "relationships mapped."
+> Generated from Phase 3-1d Interaction Intensity data and Phase 4-2 Feature Contract population.
+
+| Metric | Total Pairs | Documented | Coverage | Notes |
+|--------|------------|------------|----------|-------|
+| Feature pairs with interactions | [N] | [M] | [%] | Pairs with Interaction Score > 0 from Phase 3-1d |
+| Feature Contracts defined | [N] | [M] | [%] | Guarantees + Dependencies documented in pre-context.md |
+| Cross-Feature business rules | [N] | [M] | [%] | Rules in business-logic-map.md Cross-Feature Rules sections |
+| Shared entity relationships | [N] | [M] | [%] | Entity ownership + reference pairs across Features |
+
+> **How to read**: "Total Pairs" is the number of cross-Feature relationships detected during analysis. "Documented" is the number with explicit documentation (Feature Contract, business rule entry, or entity relationship mapping). A gap indicates undocumented cross-Feature behavior that may cause integration issues during implementation.
+
+---
+
 ## Unmapped Items
 
 Items found in the original source that are not assigned to any Feature. Each item was classified by the user during Phase 4-3 of `/reverse-spec`.

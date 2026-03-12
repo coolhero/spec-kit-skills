@@ -1098,6 +1098,53 @@ The Demo Groups will be written to `roadmap.md` in Phase 4-1 and tracked in `sdd
 
 > **Note**: Infrastructure or cross-cutting Features (e.g., shared utilities, configuration) may not belong to any Demo Group. This is acceptable — they support other Features but don't represent user-facing scenarios.
 
+Then proceed to 3-1d.
+
+### 3-1d. Cross-Feature Interaction Intensity Check
+
+After Feature boundaries are finalized and Demo Groups defined, validate that boundaries correctly separate high-cohesion code and correctly identify cross-Feature interactions. This catches misdrawn boundaries where two "Features" are so tightly coupled they should be merged, or where interactions are unexpectedly complex.
+
+**Step 1 — Build Interaction Intensity Matrix**:
+
+Using Phase 2 inter-module dependency data (2-4), count interactions for each Feature pair:
+
+| Interaction Type | Weight | Detection Method |
+|-----------------|--------|-----------------|
+| Direct import (A imports B's module) | 1 | Phase 2-4 import graph |
+| Shared entity (A writes, B reads same entity) | 2 | Phase 2-1 entity ownership |
+| API call (A calls B's endpoint) | 2 | Phase 2-2 API cross-references |
+| Event coupling (A publishes, B subscribes) | 1 | Phase 2-4 event patterns |
+| Shared business rule (rule spans both Features) | 3 | Phase 2-3 cross-Feature rules |
+
+Calculate **Interaction Score** for each Feature pair: sum of (count × weight) for all interaction types.
+
+**Step 2 — Anomaly Detection**:
+
+| Anomaly | Threshold | Action |
+|---------|-----------|--------|
+| Over-coupled pair | Score ≥ 10 | Flag: "Consider merging [A] and [B] — interaction score [N] suggests tight coupling" |
+| Orphan Feature | Score = 0 with all Features | Flag: "Feature [X] has no interactions — verify it's correctly bounded" |
+| Hub Feature | Score ≥ 5 with 3+ Features | Flag: "Feature [Y] is a hub — verify its scope isn't too broad" |
+
+**Step 3 — Display and optional adjustment**:
+
+```
+📊 Cross-Feature Interaction Intensity:
+
+Top interactions:
+  F001-auth ↔ F003-chat: Score 8 (3 shared entities, 2 API calls, 1 shared rule)
+  F002-settings ↔ F005-ai: Score 12 ⚠️ OVER-COUPLED
+    → Consider merging, or define explicit Feature Contracts in pre-context
+
+Anomalies:
+  ⚠️ F002-settings ↔ F005-ai: Over-coupled (score 12)
+  ℹ️ F009-export: Low interaction (score 1 total) — verify boundary
+```
+
+If anomalies found, display them but do NOT auto-merge or auto-split. Proceed to 3-2. The user can revisit boundaries after seeing the full dependency graph.
+
+> **Note**: This check is informational, not blocking. It enriches the dependency graph (3-2) with interaction intensity data and helps the user validate boundary decisions. The interaction data also feeds into Phase 4-2 when populating Feature Contract sections in each pre-context.md.
+
 Then proceed to 3-2.
 
 ### 3-2. Dependency Graph Construction and Release Group Determination
@@ -1309,6 +1356,7 @@ Contents to include in each pre-context.md:
 - **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features
 - **For /speckit.specify**: Existing feature summary, existing user scenarios, draft requirements (FR-###), draft success criteria (SC-###), edge cases
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts (owned + referenced entities, provided + consumed APIs), technical decisions
+- **Feature Contracts** (populated from Phase 3-1d interaction data and Phase 2-3 cross-Feature rules): Explicit guarantees this Feature provides to consumers, dependencies it requires from providers, and failure modes when contracts are violated. See [pre-context-template.md](templates/pre-context-template.md) § Feature Contracts. If this Feature has no cross-Feature interactions (Interaction Score = 0), write "None — this Feature operates independently."
 - **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
 
 ### 4-3. Source Coverage Baseline (BLOCKING)
