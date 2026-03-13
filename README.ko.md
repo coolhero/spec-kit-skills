@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:21 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:35 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -267,6 +267,8 @@ verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 
 **소스 수정 게이트(Source Modification Gate)** — verify 중 모든 소스 편집은 코드 수정 *전에* 반드시 분류(Minor / Major-Implement / Major-Plan / Major-Spec)되어야 합니다. 분류 결과에 따라 수정이 인라인으로 이루어지거나 올바른 파이프라인 단계로 되돌아갑니다. Minor Fix 누적기가 Feature별 인라인 수정 횟수를 추적하며 — 3회에 도달하면 자동으로 Major로 에스컬레이션하여, 사소한 패치로 위장된 구조적 드리프트를 방지합니다.
 
 **컨텍스트 윈도우 관리** — 스킬 파일은 지연 로딩 단위로 분해됩니다: `SKILL.md`(항상 로드, ~60줄)가 `commands/{cmd}.md`(명령별 로드)로 라우팅하고, 이는 `injection/{cmd}.md`(파이프라인 단계별 로드)와 `domains/{module}.md`(프로젝트 프로필별 로드)를 참조합니다. 데스크톱 Electron 재구축은 ~3,200 토큰의 도메인 규칙을 로드하고, CLI 그린필드는 ~800 토큰만 로드합니다. 사용하지 않는 모듈은 컨텍스트에 진입하지 않습니다.
+
+**컨텍스트 버짓 프로토콜** — 파이프라인 단계의 조립된 주입 컨텍스트가 컨텍스트 윈도우 한계에 근접하면, 3단계 우선순위 시스템으로 트리아지합니다: **P1**(필수 주입 — spec.md, tasks.md, Pattern Constraints), **P2**(≤30%로 요약 가능 — business-logic-map, 참조 엔티티, 이전 Feature 결과), **P3**(생략 가능 — 네이밍 리매핑, CSS 값 맵, 비주얼 참조). 오버플로 프로토콜: P2 요약 → P3 생략 → 분할(병렬 태스크 배치 축소). 각 Checkpoint에 버짓 인디케이터를 표시하여 사용자가 어떤 컨텍스트가 축소되었는지 확인할 수 있습니다.
 
 ### 프로젝트 모드
 

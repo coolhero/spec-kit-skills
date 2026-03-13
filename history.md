@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-13] Full File Review + Cross-Reference Fixes + Context Budget README
+
+Full file inspection following CLAUDE.md Review Protocol (4-step: flow consistency, unused parts, commonization, over-fragmentation).
+
+### Issues Found & Fixed
+- **Broken reference**: SKILL.md line 198 pointed to `../reverse-spec/domains/_resolver.md` (file does not exist) → Fixed to `../reverse-spec/domains/_core.md` and `_schema.md`
+- **Over-fragmentation**: `reverse-spec/domains/_core.md` R7 duplicated Foundation Detection table from `_foundation-core.md` F0 → Replaced inline table with cross-reference per Single Source of Truth principle
+- **README gap**: Context Budget Protocol not reflected in README → Added to Session Resilience section (both EN/KO)
+
+### Review Results (11 checks passed, 2 fixed)
+All other cross-references verified: injection files (11), profiles (4), foundations (10), references (11), templates (9). T0 handling, cycle detection, retry policy, pre-resumption validation all confirmed present. File Map complete.
+
+### Files Changed (5 files)
+- `.claude/skills/smart-sdd/SKILL.md` — Fix broken reverse-spec reference
+- `.claude/skills/reverse-spec/domains/_core.md` — R7 de-duplicated (cross-ref to F0)
+- `README.md` — Context Budget Protocol in Session Resilience, timestamp
+- `README.ko.md` — Korean sync, timestamp
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] Context Budget Protocol + Domain Resolution Worked Example
 
 Expert analysis (8.2/10) identified two addressable weaknesses:

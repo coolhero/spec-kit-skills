@@ -192,21 +192,11 @@ Examples:
 
 ## R7. Foundation Detection Heuristics
 
-Framework identification from tech stack (feeds into `analyze.md` Phase 1-2b):
+Framework identification from tech stack (feeds into `analyze.md` Phase 1-2b).
 
-| Framework | Detection Rule |
-|-----------|---------------|
-| Electron | `electron` in package.json dependencies + `main` field pointing to .js |
-| Tauri | `tauri.conf.json` present OR `Cargo.toml` with `tauri` dependency |
-| Express | `express` in dependencies + `app.listen()` or `createServer` pattern |
-| Next.js | `next` in dependencies + `next.config.*` file |
-| Vite + React | `vite` + `react` in dependencies, NO `next` |
-| NestJS | `@nestjs/core` in dependencies |
-| FastAPI | `fastapi` in pyproject.toml or requirements.txt |
-| React Native | `react-native` in dependencies |
-| Flutter | `pubspec.yaml` with `flutter` SDK dependency |
+> **Single Source of Truth**: Full detection signals (per-framework config files, import patterns, directory structures) are defined in `domains/foundations/_foundation-core.md` § F0. Do not duplicate the table here — always reference F0 for detection rules.
 
-See `domains/foundations/_foundation-core.md` § F0 for full detection signals.
+When multiple frameworks are detected, record all (comma-separated). If none match, record `Framework: custom`.
 
 ---
 
