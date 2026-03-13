@@ -151,6 +151,14 @@ wait || true
   - **Tier 3 — Side Effect**: `verify-effect target-selector property "expected"` — confirm downstream DOM propagation on a DIFFERENT element (e.g., `verify-effect body style.fontSize "18px"`, `verify-effect .toast visible`)
   - Full sequence example: `navigate /settings → click button#theme-toggle → verify-state html class "dark" → verify-effect body style.backgroundColor "#1a1a2e"`
   - Actions use CSS selectors or element identifiers. This enables `verify` Phase 3 Step 3 to parse and replay these actions via MCP. Tier 2/3 verbs are parsed from the Interaction Chains table's Verify Method column (see plan.md)
+  - **Interactive verification verbs** (for micro-interaction patterns from Interaction Behavior Inventory):
+    - `hover selector` — move cursor over element for tooltips, hover menus, hover effects
+    - `press-key "shortcut"` — press keyboard shortcut (e.g., `press-key "Control+s"`, `press-key "Escape"`)
+    - `drag-to source-selector target-selector` — drag element from source to target for drag-and-drop, reorder
+    - `focus selector` — focus element for focus ring, focus trap, tab order verification
+    - `verify-tooltip selector "expected-text"` — hover over element, wait 1s, verify tooltip/popover text
+    - `right-click selector` — right-click for context menu verification
+    - `verify-animation selector property` — check computed style change after interaction for CSS transition/animation verification
   - **Temporal verification verbs** (for async UX flows from UX Behavior Contract):
     - `wait-for selector visible [timeout]` — wait until element appears (default timeout 10s). For loading states, streaming indicators
     - `wait-for selector gone [timeout]` — wait until element disappears. For loading→complete transitions
@@ -178,6 +186,18 @@ wait || true
   #   wait-for .spinner gone 15
   #   verify-scroll .chat-area "bottom"
   #   verify-state button#send disabled "false"
+  #
+  # Micro-interaction verification (from Interaction Behavior Inventory):
+  #   hover .settings-icon
+  #   verify-tooltip .settings-icon "Settings"
+  #   press-key "Control+k"
+  #   verify .command-palette visible
+  #   press-key "Escape"
+  #   focus input#search
+  #   right-click .file-item
+  #   verify .context-menu visible
+  #   drag-to .sortable-item-1 .sortable-item-3
+  #   verify-animation .sortable-list transition
   ```
   Uses the same verb syntax as SC→UI Action format (including `verify-state`/`verify-effect` from Interaction Chains).
   The `--verify` flag causes CI mode to keep the app running for Playwright verification instead of exiting immediately.
@@ -195,6 +215,13 @@ wait || true
   - `wait-for selector textContent "pattern" [timeout]` → `await expect(page.locator('selector')).toHaveText(pattern, { timeout })`
   - `verify-scroll selector "bottom"` → `await page.evaluate(s => { const el = document.querySelector(s); return el.scrollTop + el.clientHeight >= el.scrollHeight - 5; }, 'selector')` + assert true
   - `trigger selector event` → `await page.locator('selector').dispatchEvent('event')`
+  - `hover selector` → `await page.locator('selector').hover()`
+  - `press-key "shortcut"` → `await page.keyboard.press('shortcut')`
+  - `drag-to source-selector target-selector` → `await page.locator('source-selector').dragTo(page.locator('target-selector'))`
+  - `focus selector` → `await page.locator('selector').focus()`
+  - `verify-tooltip selector "expected-text"` → `await page.locator('selector').hover()` + `await expect(page.getByRole('tooltip')).toHaveText('expected-text')`
+  - `right-click selector` → `await page.locator('selector').click({ button: 'right' })`
+  - `verify-animation selector property` → compare `getComputedStyle` before/after interaction + assert change
   This enables `--ci --verify` to run via CLI Playwright (no MCP needed):
   ```bash
   npx playwright test demos/verify/F00N-name.spec.ts --reporter=list 2>&1

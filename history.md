@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-03-13] Post-Pull Review — 10 Commits Cross-Reference Check
+
+Pulled 10 commits (36 files, +2739 lines). Full review per CLAUDE.md Review Protocol across 10 check categories.
+
+| # | Check | Result |
+|---|-------|--------|
+| 1 | Foundation file references (resolver, init, analyze) | ✅ All paths correct |
+| 2 | All 10 Foundation files exist on disk | ✅ Verified |
+| 3 | SKILL.md _core vs _resolver reference change | ✅ Both files coexist correctly |
+| 4 | "acceptance criteria" → "success criteria" terminology | ✅ Complete migration |
+| 5 | Pipeline.md new sections (Context Budget, Retry, Cycle Detection, Smoke Launch, Parallel Agent) | ✅ All positioned correctly |
+| 6 | verify-phases.md new sections (Regression limit, Pre-Resumption, Code-Level Cross-Ref, new verbs, cli-limited) | ⚠️ 7 new VERIFY_STEPS verbs missing from demo-standard.md (fixed) |
+| 7 | state-schema.md (State Validation, Foundation Decisions, Schema Version 2.0) | ✅ All consuming files consistent |
+| 8 | Context Budget Protocol P1 sections vs injection Read Targets | ✅ Aligned |
+| 9 | README File Map sync (10 new Foundation files + lessons-learned.md) | ✅ Both READMEs in sync |
+| 10 | gui.md micro-interaction extraction vs verify-phases.md | ✅ 7 categories aligned |
+
+**Fix**: Added 7 interactive VERIFY_STEPS verbs (hover, press-key, drag-to, focus, verify-tooltip, right-click, verify-animation) to demo-standard.md — SC→UI Action format, VERIFY_STEPS block example, and test file conversion.
+
+**Files**: demo-standard.md (1 fix), history.md
+
+---
+
 ## [2026-03-13] SKF-001~006: Implement + Verify Gap Fixes from angdu-studio F001
 
 Skill Feedback from angdu-studio rebuild (F001-app-shell). 6 SKF items grouped into 3 root causes, fixed with generalized (not project-specific) rules.
