@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-13] README Reliability Mechanisms + File Map Corrections
+
+Post expert analysis (8.2/10) identified key architectural innovations not yet documented in README, plus stale File Map item counts from pre-review state.
+
+### README Architecture Additions
+- **Session Resilience & Agent Governance** section added — documents three reliability mechanisms:
+  - Compaction-Resilient State (verify progress survives context window compaction via sdd-state.md)
+  - Source Modification Gate (mandatory classification before edits + Minor Fix Accumulator auto-escalation at 3 fixes)
+  - Context Window Management (lazy-loading decomposition: SKILL.md → commands → injection → domains)
+- File Map TODO scaffold item counts corrected: FastAPI 49→41, React Native 55→50, Flutter 59→50
+
+### Files Changed (3 files)
+- `README.md` — Session Resilience section, File Map fixes, timestamp
+- `README.ko.md` — Korean sync, File Map fixes, timestamp
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] Expert Review Fixes + README Architecture Enhancement
 
 Post-implementation expert review identified 14 issues across Foundation files, reverse-spec integration, and smart-sdd integration.

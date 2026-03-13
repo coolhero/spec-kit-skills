@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:05 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:21 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -257,6 +257,16 @@ specify → plan → tasks → implement → verify → merge
 ```
 
 Verify discovers bugs and classifies them into 4 severity levels. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step.
+
+### Session Resilience & Agent Governance
+
+Long pipeline sessions face two systemic risks: **context window loss** (agent forgets progress mid-session) and **uncontrolled edits** (agent patches code without classification). The system addresses both:
+
+**Compaction-Resilient State** — Verify progress, process rules, and minor fix accumulators are written to `sdd-state.md` at every phase boundary. When the context window compacts mid-verify, the Resumption Protocol reads the persisted state and resumes from the exact phase — no repeated work, no lost classifications. This makes multi-hour pipeline sessions survivable.
+
+**Source Modification Gate** — During verify, every source edit must be classified (Minor / Major-Implement / Major-Plan / Major-Spec) *before* any code is touched. The classification determines whether the fix happens inline or routes back to the correct pipeline stage. A Minor Fix Accumulator tracks inline fixes per Feature — if the count reaches 3, the system auto-escalates to Major, preventing structural drift disguised as minor patches.
+
+**Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
 
 ### Project Modes
 
@@ -903,9 +913,9 @@ Complete list of all files in this repository grouped by skill.
 | `domains/foundations/nextjs.md` | Next.js Foundation — 44 items, 13 categories |
 | `domains/foundations/vite-react.md` | Vite + React Foundation — 43 items, 12 categories |
 | `domains/foundations/nestjs.md` | NestJS Foundation — TODO scaffold (51 items, 13 categories) |
-| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO scaffold (49 items, 12 categories) |
-| `domains/foundations/react-native.md` | React Native Foundation — TODO scaffold (55 items, 14 categories) |
-| `domains/foundations/flutter.md` | Flutter Foundation — TODO scaffold (59 items, 14 categories) |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO scaffold (41 items, 12 categories) |
+| `domains/foundations/react-native.md` | React Native Foundation — TODO scaffold (50 items, 14 categories) |
+| `domains/foundations/flutter.md` | Flutter Foundation — TODO scaffold (50 items, 14 categories) |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |

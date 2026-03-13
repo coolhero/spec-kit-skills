@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:05 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:21 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -257,6 +257,16 @@ specify → plan → tasks → implement → verify → merge
 ```
 
 verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 이슈만 인라인으로 수정하고, Major 이슈는 해당 파이프라인 단계로 되돌립니다.
+
+### 세션 복원력 & 에이전트 거버넌스
+
+장시간 파이프라인 세션은 두 가지 구조적 위험에 직면합니다: **컨텍스트 윈도우 손실**(에이전트가 세션 중간에 진행 상황을 잊음)과 **비제어 편집**(에이전트가 분류 없이 코드를 패치함). 시스템은 두 문제를 모두 해결합니다:
+
+**압축 복원 가능 상태(Compaction-Resilient State)** — Verify 진행 상황, 프로세스 규칙, Minor Fix 누적기가 모든 Phase 경계에서 `sdd-state.md`에 기록됩니다. verify 도중 컨텍스트 윈도우가 압축되면, 재개 프로토콜이 저장된 상태를 읽고 정확한 Phase부터 재개합니다 — 반복 작업 없이, 분류 손실 없이. 이를 통해 수 시간에 걸친 파이프라인 세션이 생존 가능합니다.
+
+**소스 수정 게이트(Source Modification Gate)** — verify 중 모든 소스 편집은 코드 수정 *전에* 반드시 분류(Minor / Major-Implement / Major-Plan / Major-Spec)되어야 합니다. 분류 결과에 따라 수정이 인라인으로 이루어지거나 올바른 파이프라인 단계로 되돌아갑니다. Minor Fix 누적기가 Feature별 인라인 수정 횟수를 추적하며 — 3회에 도달하면 자동으로 Major로 에스컬레이션하여, 사소한 패치로 위장된 구조적 드리프트를 방지합니다.
+
+**컨텍스트 윈도우 관리** — 스킬 파일은 지연 로딩 단위로 분해됩니다: `SKILL.md`(항상 로드, ~60줄)가 `commands/{cmd}.md`(명령별 로드)로 라우팅하고, 이는 `injection/{cmd}.md`(파이프라인 단계별 로드)와 `domains/{module}.md`(프로젝트 프로필별 로드)를 참조합니다. 데스크톱 Electron 재구축은 ~3,200 토큰의 도메인 규칙을 로드하고, CLI 그린필드는 ~800 토큰만 로드합니다. 사용하지 않는 모듈은 컨텍스트에 진입하지 않습니다.
 
 ### 프로젝트 모드
 
@@ -900,9 +910,9 @@ specs/
 | `domains/foundations/nextjs.md` | Next.js Foundation — 44개 항목, 13개 카테고리 |
 | `domains/foundations/vite-react.md` | Vite + React Foundation — 43개 항목, 12개 카테고리 |
 | `domains/foundations/nestjs.md` | NestJS Foundation — TODO 스캐폴드 (51개 항목, 13개 카테고리) |
-| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO 스캐폴드 (49개 항목, 12개 카테고리) |
-| `domains/foundations/react-native.md` | React Native Foundation — TODO 스캐폴드 (55개 항목, 14개 카테고리) |
-| `domains/foundations/flutter.md` | Flutter Foundation — TODO 스캐폴드 (59개 항목, 14개 카테고리) |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO 스캐폴드 (41개 항목, 12개 카테고리) |
+| `domains/foundations/react-native.md` | React Native Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
+| `domains/foundations/flutter.md` | Flutter Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
 | `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
 | **Templates** | |
 | `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
