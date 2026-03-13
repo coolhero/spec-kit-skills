@@ -61,6 +61,52 @@ Once loaded, the merged domain profile is used for the entire command session. N
 
 ---
 
+## Worked Example: `desktop-app` Rebuild with Electron
+
+Traces the full resolution chain for a project with:
+- **Domain Profile**: `desktop-app` | **Origin**: `rebuild` | **Framework**: `electron` | **Custom**: `none`
+
+### Step 1 → 2: Profile Expansion
+
+`domains/profiles/desktop-app.md` expands to:
+- **Interfaces**: `[gui]`
+- **Concerns**: `[async-state, ipc]`
+- **Scenario**: Origin `rebuild` → `scenarios/rebuild.md`
+
+### Step 2b: Foundation
+
+Framework `electron` → Load:
+- `../../reverse-spec/domains/foundations/electron.md` § F2 (58 items across 13 categories)
+- `../../reverse-spec/domains/foundations/_foundation-core.md` § F3 (T0 grouping rules)
+
+### Step 3: Module Loading (5 files)
+
+| # | File Loaded | S-Sections Contributed |
+|---|-------------|----------------------|
+| 1 | `domains/_core.md` | S1 base SC rules, S2 base parity, S3 verify steps (test/build/lint/demo), S5 universal probes (auth/CRUD/validation/pagination/file + middleware + concurrency/cache/observability), S7 base B-1/B-2/B-3 |
+| 2 | `domains/interfaces/gui.md` | S1 +UI interaction SCs, S2 +UI component/layout parity, S5 +routing/UI completeness/responsive probes, S6 UI testing (new), S7 +CSS rendering/UI surface audit, S8 runtime verification strategy (new) |
+| 3 | `domains/concerns/async-state.md` | S1 +state transition/async flow SCs, S5 +state library/async pattern/subscription probes, S7 +selector instability/unbatched updates/UX behavior contract |
+| 4 | `domains/concerns/ipc.md` | S1 +IPC call/process lifecycle SCs, S5 +IPC channel/error/security probes, S7 +IPC boundary safety/return value defense |
+| 5 | `domains/scenarios/rebuild.md` | S1 +preservation SCs, S3 extends (migration regression gate) + S3d Foundation Compliance, S5 +source comparison/preservation probes, S7 +migration-specific rules |
+
+### Step 4: Merged Result
+
+After merge, the cached profile contains:
+
+| S-Section | Sources (merge order) |
+|-----------|----------------------|
+| **S1** SC Rules | _core → gui → async-state → ipc → rebuild (appended) |
+| **S2** Parity | _core structural+logic → gui +UI component/layout (appended) |
+| **S3** Verify | _core test/build/lint/demo → rebuild migration gate + S3d Foundation (extended) |
+| **S5** Probes | _core 5 perspectives → gui routing/UI → async-state state/async → ipc channels/security → rebuild source/preservation (appended) |
+| **S6** UI Testing | gui only (new section) |
+| **S7** Bug Prevention | _core B-3 base → gui CSS/UI audit → async-state selector/unbatched → ipc boundary/return → rebuild migration (appended) |
+| **S8** Runtime | gui only (new section) |
+
+**Total reads at session start**: 5 domain modules + 2 Foundation files = 7 file reads, then cached.
+
+---
+
 ## Backward Compatibility
 
 ### Legacy `**Domain**: app` format

@@ -5,6 +5,38 @@
 
 ---
 
+## [2026-03-13] Context Budget Protocol + Domain Resolution Worked Example
+
+Expert analysis (8.2/10) identified two addressable weaknesses:
+1. No protocol for context overflow — what to do when assembled injection exceeds context window
+2. No concrete trace showing how domain module resolution works end-to-end
+
+### Context Budget Protocol (context-injection-rules.md)
+- 3-tier priority system: P1 (must-inject), P2 (summarizable), P3 (skip-safe)
+- Per-command P1 section table — single source of truth for "what must never be trimmed"
+- 3-step overflow protocol: Summarize P2 → Skip P3 → Split if still over
+- Size heuristics table for triggering budget triage (no exact token counting)
+- Checkpoint budget indicator: `📊 Context: {P1}/{total} must-inject | {N} summarized | {M} skipped`
+
+### Domain Resolution Worked Example (_resolver.md)
+- Full `desktop-app` rebuild + Electron trace through all 4 resolution steps
+- Profile expansion: `desktop-app` → gui + async-state + ipc + rebuild scenario
+- Foundation resolution: electron.md (58 items) + _foundation-core.md (T0 rules)
+- Module loading table: 5 files with per-module S-section contributions
+- Merged result table: 7 S-sections with source attribution
+
+### Design Principle Compliance
+- **Single Source of Truth**: Budget priority definitions live ONLY in context-injection-rules.md; per-command injection files are NOT modified (they define WHAT to inject; the budget defines WHEN to trim)
+- **No over-fragmentation**: Worked example in _resolver.md (where resolution protocol lives), not split across separate file
+- **English only**: Both additions in English per CLAUDE.md Language rules
+
+### Files Changed (2 files + bookkeeping)
+- `.claude/skills/smart-sdd/reference/context-injection-rules.md` — Context Budget Protocol section
+- `.claude/skills/smart-sdd/domains/_resolver.md` — Worked Example section
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] README Reliability Mechanisms + File Map Corrections
 
 Post expert analysis (8.2/10) identified key architectural innovations not yet documented in README, plus stale File Map item counts from pre-review state.
