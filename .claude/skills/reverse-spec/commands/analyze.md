@@ -913,7 +913,40 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    - Display: `⚠️ Style token extraction skipped — [reason]. You can add tokens manually.`
    - Create an empty `style-tokens.md` with the template header only
 
-**Step 5 — Proceed to Phase 2**:
+**Step 5 — Runtime Default Verification** (rebuild mode, if Playwright was available):
+
+> **Purpose**: Verify that settings/configuration defaults extracted from code analysis match the app's actual runtime state. Static code analysis can misidentify defaults (e.g., reading a `'left'` sidebar constant while the app's runtime default is `'top'` tab mode). Runtime values take precedence.
+
+1. **Identify settings-related SBI entries**: From `runtime-exploration.md` and code analysis, list SBI entries that involve:
+   - Layout modes (sidebar position, panel arrangement, tab vs. sidebar)
+   - Theme defaults (dark/light mode)
+   - UI configuration (visible items, default selections, window dimensions)
+   - Feature toggles (enabled/disabled by default)
+
+2. **Verify against runtime state**: If the source app is still running (or can be relaunched), use Playwright to check:
+   - Read DOM attributes that reflect settings (e.g., `navbar-position`, `data-theme`, `class` on root elements)
+   - Check computed layout (element positions, visibility of sidebars/panels/tabs)
+   - Read application state if accessible (e.g., Zustand/Redux store via `window.__STORE__` or `evaluate()`)
+
+3. **Compare and reconcile**:
+   - If runtime value matches code analysis → ✅ Confirmed
+   - If runtime value differs from code analysis → ⚠️ **Update the SBI entry and observations to use the runtime value**
+   - Display discrepancies:
+     ```
+     🔍 Runtime Default Verification:
+       ✅ theme: 'dark' (matches code analysis)
+       ⚠️ navbarPosition: runtime='top', code analysis='left' → CORRECTED to 'top'
+       ✅ sidebarWidth: 260px (matches code analysis)
+     ```
+
+4. **Update artifacts**: If any corrections were made:
+   - Update `runtime-exploration.md` with corrected defaults
+   - Add note: `⚠️ Corrected from code analysis — runtime verification showed different default`
+
+5. **If Playwright was not available or app cannot be relaunched**: Skip this step and display:
+   `ℹ️ Runtime Default Verification skipped — Playwright not available. Settings defaults are from code analysis only (may differ from actual runtime).`
+
+**Step 6 — Proceed to Phase 2**:
 Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Style tokens (if extracted) are saved in `specs/reverse-spec/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md):

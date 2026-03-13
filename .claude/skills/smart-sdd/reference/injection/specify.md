@@ -140,6 +140,16 @@ Feature: [FID] - [Feature Name]
     These interfaces are what downstream Features need to work at runtime.
 [If section empty, absent, or "None": skip this block entirely]
 
+── Runtime-Verified Defaults ──────────────────────
+[If rebuild mode AND Feature involves settings/modes/configuration
+ AND runtime-exploration.md has relevant default values:]
+  ⚠️ The following defaults were verified by running the source app (reverse-spec Phase 1.5):
+    • navbarPosition: 'top' (code analysis had 'left' — CORRECTED)
+    • theme: 'dark'
+    • sidebarWidth: 260px
+  Use these runtime-verified values in FR/SC, NOT code analysis values.
+[If not rebuild mode, or Feature has no settings/modes: skip this block entirely]
+
 ──────────────────────────────────────────────────
 Review the above content. You can:
   - Approve as-is to proceed with speckit-specify
@@ -157,8 +167,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 2. **Platform Constraint FR Verification** (if applicable — pre-context has Platform Constraints)
 3. **Edge Case Coverage Check** (if applicable — pre-context has Edge Cases)
 4. **Multi-Provider API Detection** (if applicable — 2+ external API providers in FR-###)
-5. **Assemble Review Display** (include any ⚠️ warnings from steps 1-4)
-6. **HARD STOP** (ReviewApproval)
+5. **Runtime Default Coverage Check** (if applicable — rebuild mode + Feature has settings/mode/configuration)
+6. **Assemble Review Display** (include any ⚠️ warnings from steps 1-5)
+7. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -250,6 +261,36 @@ If spec.md FR-### descriptions mention 2+ external API providers:
 4. **Warning (NOT blocking)** — included in Review Display.
 
 **Skip if**: < 2 providers detected, or Feature does not call external APIs.
+
+### Runtime Default Coverage Check (rebuild mode)
+
+> **Purpose**: Ensure that settings/mode/configuration Features specify the correct runtime defaults. Code analysis can misidentify defaults (e.g., a constant `'left'` in code while the app actually defaults to `'top'` mode at runtime). Runtime-verified defaults from reverse-spec Phase 1.5 Step 5 take precedence over code analysis.
+
+If this Feature involves settings, modes, layout positions, or configuration that affects UI behavior:
+
+1. **Check `runtime-exploration.md`** for runtime-verified defaults relevant to this Feature:
+   - Layout modes (sidebar position, panel arrangement, tab mode vs sidebar mode)
+   - Theme defaults (dark/light)
+   - UI configuration defaults (default visible items, default selections)
+
+2. **Cross-check spec.md FR/SC against runtime defaults**:
+   - If FR/SC reference a default value → verify it matches runtime-verified value
+   - If runtime-exploration.md has a `⚠️ Corrected from code analysis` note for any setting relevant to this Feature → **ensure spec.md uses the corrected runtime value**
+
+3. **If mismatch found**, append to Review Display:
+   ```
+   ── ⚠️ Runtime Default Mismatch ──────────────────
+   FR-003 specifies navbarPosition default as 'left', but runtime
+   verification (reverse-spec Phase 1.5) confirmed the default is 'top'.
+
+   ⚠️ Using the wrong default will cause the entire Feature's UI to be
+   built around the wrong layout mode. Update FR/SC to use runtime value.
+   ────────────────────────────────────────────────────
+   ```
+
+4. **Warning (NOT blocking)** — included in Review Display.
+
+**Skip if**: Not rebuild mode, or Feature does not involve settings/modes/configuration.
 
 ### Review Display Content
 

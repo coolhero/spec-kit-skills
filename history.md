@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-14] SKF-013: Runtime Default Verification — prevent code analysis vs runtime mismatch
+
+Skill Feedback from angdu-studio F002-navigation. Critical severity — `navbarPosition` code analysis said `'left'` but runtime default was `'top'`, causing entire Feature to be built with wrong layout.
+
+### Root Cause: No runtime verification of settings defaults in reverse-spec
+- **Problem**: SBI extraction relied on static code analysis. A `'left'` constant was found in code, but the app's actual default mode at runtime was `'top'` (tab mode). This propagated through specify → plan → tasks → implement, resulting in a completely wrong layout
+- **Fix 1** (`reverse-spec/analyze.md` Phase 1.5 Step 5): "Runtime Default Verification" — after visual reference capture, identify settings-related SBI entries, verify against actual DOM attributes/app state via Playwright, correct any mismatches with runtime values taking precedence
+- **Fix 2** (`smart-sdd/injection/specify.md`): Added "Runtime Default Coverage Check" as verification step #5, plus "Runtime-Verified Defaults" block in Checkpoint Display. For rebuild mode Features with settings/modes, cross-checks spec FR/SC against runtime-exploration.md values, warns on mismatch
+
+### Design decisions
+- **Runtime values take precedence**: When code analysis and runtime differ, runtime wins
+- **Non-blocking warning**: Mismatch appears in Review Display but doesn't block pipeline
+- **Graceful degradation**: If Playwright unavailable, skip with informational message (code analysis used as fallback)
+- **Reverse-spec + smart-sdd both modified**: Prevention (reverse-spec) + detection (smart-sdd specify)
+
+### Files Changed (2 skill files + 1 feedback file)
+- `reverse-spec/commands/analyze.md` — Phase 1.5 Step 5: Runtime Default Verification
+- `smart-sdd/reference/injection/specify.md` — Runtime Default Coverage Check + Checkpoint Display block
+- `angdu-studio/skill-feedback.md` — SKF-013 marked as ✅ Reflected
+
+---
+
 ## [2026-03-14] SKF-012: Dependency Stub Registry — cross-Feature stub tracking mechanism
 
 Skill Feedback from angdu-studio F002-navigation. Stubs/placeholders created due to future Feature dependencies had no tracking or auto-injection mechanism — only TODO comments in code.
