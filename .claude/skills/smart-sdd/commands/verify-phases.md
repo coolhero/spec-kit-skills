@@ -1633,3 +1633,27 @@ Display:
   - `failure`: One or more phases failed without acknowledgment. Merge is blocked
 
 **Process cleanup**: After Phase 4 update completes (or if verify exits early due to failure/regression), execute the Verify Process Lifecycle Protocol cleanup — kill all PIDs in the registry. This applies regardless of verify outcome (success, limited, failure, regression).
+
+---
+
+### Phase 5: Integration Demo Trigger (HARD STOP — conditional)
+
+> This phase runs only when all Phases 0-4 complete with `success` or `limited` status. For detailed post-step update procedures (registry updates, SBI coverage, merge workflow), see [injection/verify.md](../reference/injection/verify.md) § Post-Step Update Rules.
+
+After the Feature passes verification, check whether it completes a Demo Group:
+
+1. Read `sdd-state.md` Demo Group Progress section
+2. Identify which Demo Group(s) contain this Feature
+3. For each group: check if all other Features are already `completed` or `adopted`
+4. If this Feature is the **last pending Feature** in a Demo Group:
+   - Run `scripts/demo-status.sh <project-root>` to confirm group completion status
+   - **HARD STOP** — Use AskUserQuestion:
+     ```
+     🎯 All Features in [DG-0N: Scenario] are now verified!
+     Run Integration Demo to verify the end-to-end scenario?
+     ```
+     Options: "Run Integration Demo", "Defer Integration Demo"
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+   - If "Run Integration Demo": execute per [demo-standard.md § 7](../reference/demo-standard.md)
+   - If "Defer": record `⏳ deferred` in Demo Group Progress and continue to merge
+5. If this Feature does NOT complete any Demo Group: skip this phase entirely

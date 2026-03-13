@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-13] Full Project Review + Integration Demo Trigger Fix
+
+Full file analysis per CLAUDE.md Review Protocol (4-step: flow consistency, unused parts, commonization, over-fragmentation). Also verified SKF-001~006 reflection quality and evaluated 2 minor issues.
+
+### Review Results
+- **4 skills analyzed** (reverse-spec: 36 files, smart-sdd: 55 files, speckit-diff: 3 files, case-study: 4 files) + 9 root files
+- **SKF-001~006**: ALL PASS — all 6 feedback items properly reflected in pipeline.md and verify-phases.md
+- **Cross-references**: All valid across all skills, no broken links or orphaned files
+- **Over-fragmentation**: None found; HARD STOP inline repetition is intentional per CLAUDE.md #1
+
+### Issues Found & Decisions
+1. **_foundation-core.md F6 Status Table outdated** (tauri=Implemented but table says TODO scaffold) → **LEAVE AS-IS**: Table is purely informational/documentation, not used at runtime. Actual files work correctly regardless of table status.
+2. **demo-status.sh not referenced in verify-phases.md** → **FIX**: Integration Demo Trigger and `scripts/demo-status.sh` call only existed in `reference/injection/verify.md` (supplementary). An agent following verify-phases.md (the primary execution guide) would miss it. Added Phase 5: Integration Demo Trigger section with explicit HARD STOP.
+
+### Files Changed (2 files)
+- `smart-sdd/commands/verify-phases.md` — Added Phase 5: Integration Demo Trigger (HARD STOP, demo-status.sh reference, demo-standard.md cross-ref)
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] Post-Pull Review — 10 Commits Cross-Reference Check
 
 Pulled 10 commits (36 files, +2739 lines). Full review per CLAUDE.md Review Protocol across 10 check categories.
