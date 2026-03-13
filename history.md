@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-14] SKF-014: Pipeline Error Propagation Prevention — Source App Comparison MANDATORY for rebuild+GUI
+
+Skill Feedback from angdu-studio F002-navigation deep analysis. SKF-013 root cause analysis revealed the wrong default propagated through all 6 pipeline stages uncaught. Two additional fixes beyond SKF-013.
+
+### Root Cause: No independent verification checkpoint in the pipeline
+- **Problem**: Pipeline operates on "trust previous stage output" principle. Wrong `navbarPosition='left'` from reverse-spec propagated through specify→plan→tasks→implement→verify. No stage independently verified against the running source app
+- **Fix 1** (already in SKF-013): reverse-spec Phase 1.5 Step 5 Runtime Default Verification
+- **Fix 2** (`verify-phases.md` Step 3e): Source App Comparison upgraded from "⚠️ NOT blocking" to "BLOCKING for rebuild+GUI". Layout structure deviations are Critical severity. Agent must attempt to start source app, not just ask user
+- **Fix 3** (`pipeline.md`): Error Propagation Warning at pipeline top — explicit statement that early-stage errors cascade, and settings/modes/defaults require runtime verification
+
+### Design decision: Two-checkpoint strategy
+- **Checkpoint 1 (prevention)**: reverse-spec Phase 1.5 — catch wrong defaults before they enter the pipeline
+- **Checkpoint 2 (detection)**: verify Phase 3e — catch any remaining mismatches after implementation
+- Both checkpoints = makes 6-stage error propagation impossible
+
+### Files Changed (2 skill files + 1 feedback file)
+- `smart-sdd/commands/verify-phases.md` — Step 3e: MANDATORY gate for rebuild+GUI, BLOCKING result for layout deviations
+- `smart-sdd/commands/pipeline.md` — Error Propagation Warning
+- `angdu-studio/skill-feedback.md` — SKF-014 marked as ✅ Reflected
+
+---
+
 ## [2026-03-14] SKF-013: Runtime Default Verification — prevent code analysis vs runtime mismatch
 
 Skill Feedback from angdu-studio F002-navigation. Critical severity — `navbarPosition` code analysis said `'left'` but runtime default was `'top'`, causing entire Feature to be built with wrong layout.

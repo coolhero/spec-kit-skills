@@ -1394,20 +1394,26 @@ After executing each SC's verification, record the **Reached Depth** and compare
 > Only when Origin=`rebuild` AND `source_available: running` in sdd-state.md scenario config.
 > See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) § Source App Access.
 
-**Skip if**: Not rebuild mode, OR `source_available` is not `running`, OR Source Path is N/A.
+**Skip conditions**:
+- Not rebuild mode, OR Source Path is N/A → skip entirely
+- `source_available` is not `running` AND source app cannot be started by the agent → skip with explicit reason
+
+> **🚫 MANDATORY for rebuild + GUI**: When Origin=`rebuild` AND `gui` is in active Interfaces, source app comparison is BLOCKING, not optional. The agent MUST attempt to start and compare against the source app. Skipping is only permitted when the source app genuinely cannot be built/launched (missing dependencies, broken build), and the skip reason must be displayed with a HARD STOP for user acknowledgment. Without source comparison, errors like wrong layout mode defaults propagate undetected through the entire pipeline (see SKF-014).
 
 **Prerequisite**: Source app must be running. Detection:
 1. Read Source Path from sdd-state.md
 2. Probe source app (curl health endpoint or process check)
-3. If not running → User Cooperation Protocol:
+3. If not running → **attempt to start** the source app (read package.json scripts, try `npm run dev` or equivalent)
+4. If start attempt fails → User Cooperation Protocol:
    ```
    📋 Source App Comparison requires the original app running.
    Source Path: [path]
    Expected at: http://localhost:[port]
+   Start attempt failed: [reason]
    ```
    **Use AskUserQuestion**:
    - "Source app is running — proceed with comparison"
-   - "Skip source comparison"
+   - "Skip source comparison — acknowledge risk" (rebuild+GUI: display `⚠️ Skipping source comparison for rebuild GUI Feature. Layout/default mismatches may go undetected.`)
    **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 **Comparison procedure** (when both apps are running):
@@ -1435,7 +1441,10 @@ Comparison criteria vary by `preservation_level` (read from sdd-state.md Rebuild
      GET /api/config: ✅ Response shape match
    ```
 
-**Result**: ⚠️ warnings (NOT blocking). User can acknowledge intentional deviations during Review.
+**Result**:
+- **rebuild + GUI**: ⚠️ BLOCKING if layout structure deviations detected. The user must explicitly acknowledge each deviation before proceeding. Layout mode mismatches (e.g., sidebar vs tab mode) are Critical — cannot be acknowledged as "intentional" without justification.
+- **rebuild + non-GUI**: ⚠️ warnings (NOT blocking). User can acknowledge intentional deviations during Review.
+- **non-rebuild**: N/A (this step is rebuild-only).
 
 **Note on dual-app management**: The agent manages both apps. Source app port must differ from rebuilt app port. If both are Electron, they need different CDP ports.
 

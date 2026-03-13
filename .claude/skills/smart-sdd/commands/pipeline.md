@@ -4,6 +4,8 @@
 > For per-command context injection details, read `reference/injection/{command}.md` (shared patterns in `reference/context-injection-rules.md`).
 > For git branch operations, also read `reference/branch-management.md`.
 
+> **⚠️ Error Propagation Warning**: Each pipeline stage trusts the output of the previous stage. An error in an early stage (reverse-spec, specify) propagates through the entire pipeline — plan, tasks, implement, and verify all build on the flawed assumption. Settings, modes, and defaults that can only be confirmed at runtime MUST NOT be finalized from code analysis alone — runtime verification is required (see `reverse-spec/analyze.md` Phase 1.5 Step 5, `injection/specify.md` § Runtime Default Coverage Check). The two critical verification checkpoints are: **(1)** reverse-spec Phase 1.5 (runtime default verification before analysis), **(2)** verify Phase 3e (source app comparison — BLOCKING for rebuild+GUI).
+
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
 **All spec-kit command executions follow this 4-step protocol. Each step MUST be executed in order. No step may be skipped. In particular, Execute (Step 3) includes a mandatory Review HARD STOP — the spec-kit command runs, then the Review is presented, all in one continuous action.**
