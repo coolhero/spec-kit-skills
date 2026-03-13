@@ -45,7 +45,7 @@ Unlike standard specify, adopt-specify reads the **actual source files** listed 
   - Format: `FR-001: [description] [source: B001]`
 - **Source code reference**: Actual source files from Source Reference — the agent reads these to extract precise behavior
 - **Draft requirements (FR-###)**: Draft from pre-context, but refined with actual source reading
-- **Draft acceptance criteria (SC-###)**: Derived from actual code behavior, not aspirational targets
+- **Draft success criteria (SC-###)**: Derived from actual code behavior, not aspirational targets
 - **Business rules**: From business-logic-map.md (if exists)
 - **UI component features**: If present — ensure each UI feature maps to an FR-###
 - **Edge cases**: Observed edge case handling in the existing code
@@ -82,7 +82,7 @@ Mode: ADOPTION — Extracting existing behavior as SDD requirements
   FR-001: ... [source: B001]
   FR-002: ... [source: B002]
 
-── Draft Acceptance Criteria ────────────────────
+── Draft Success Criteria ──────────────────────
 [List each SC-### draft]
 
 ── Source Files ─────────────────────────────────

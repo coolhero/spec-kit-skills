@@ -38,7 +38,7 @@ reverse-spec generated the following Global Evolution Layer artifacts in `specs/
 | Artifact | Section to Read | Purpose |
 |----------|----------------|---------|
 | `constitution-seed.md` | Entire file | Project-wide constraints and architecture principles |
-| `features/F00N-name/pre-context.md` | "For /speckit.specify" | Draft requirements (FR-###), acceptance criteria (SC-###), edge cases |
+| `features/F00N-name/pre-context.md` | "For /speckit.specify" | Draft requirements (FR-###), success criteria (SC-###), edge cases |
 | `features/F00N-name/pre-context.md` | "Source Behavior Inventory" | P1/P2 behaviors that MUST map to requirements (rebuild/adoption) |
 | `entity-registry.md` | Entities related to this Feature | Shared entity definitions to reference in requirements |
 | `api-registry.md` | APIs related to this Feature | API contracts to reference in requirements |

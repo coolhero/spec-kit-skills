@@ -3,7 +3,7 @@
 **Source**: [Original source path]
 **Generated**: [DATE]
 
-> Used as a preliminary reference when writing acceptance criteria during spec-kit /speckit.specify.
+> Used as a preliminary reference when writing success criteria during spec-kit /speckit.specify.
 > When writing specs for each Feature, verify that all business rules documented here are
 > fully reflected in Requirements and Success Criteria.
 

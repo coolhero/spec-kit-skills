@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-13] Terminology Unification — "Acceptance Criteria" → "Success Criteria"
+
+spec-kit defines SC-### as **Success Criterion** (`## Success Criteria` section in spec.md). However, spec-kit-skills used "Acceptance Criteria" and "Success Criteria" interchangeably across 12 occurrences in 9 files — including one line that used both terms simultaneously (`Draft acceptance criteria (SC-###): Draft Success Criteria / Acceptance Scenario`).
+
+### Changes
+Unified all 12 occurrences of "acceptance criteria" → "success criteria" to match spec-kit's canonical terminology.
+
+### Files Changed (9 files)
+- `smart-sdd/reference/injection/specify.md` — 4 occurrences (L48, L88, L73, L253)
+- `smart-sdd/reference/injection/adopt-specify.md` — 2 occurrences (L48, L85)
+- `smart-sdd/reference/context-injection-rules.md` — 1 occurrence (L62)
+- `smart-sdd/commands/verify-phases.md` — 1 occurrence (L23)
+- `reverse-spec/templates/pre-context-template.md` — 1 occurrence (L256)
+- `reverse-spec/templates/business-logic-map-template.md` — 1 occurrence (L6)
+- `reverse-spec/templates/speckit-prompt-template.md` — 1 occurrence (L41)
+- `reverse-spec/reference/speckit-compatibility.md` — 1 occurrence (L48)
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] Full File Review + Cross-Reference Fixes + Context Budget README
 
 Full file inspection following CLAUDE.md Review Protocol (4-step: flow consistency, unused parts, commonization, over-fragmentation).

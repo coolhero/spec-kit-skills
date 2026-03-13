@@ -253,7 +253,7 @@
 - **FR-002**: [Functional requirement extracted from existing code]
 - **FR-003**: [Functional requirement extracted from existing code]
 
-### Draft Acceptance Criteria (spec.md Success Criteria section)
+### Draft Success Criteria
 
 - **SC-001**: [Success criterion extracted from existing code. In measurable form]
 - **SC-002**: [Success criterion extracted from existing code]

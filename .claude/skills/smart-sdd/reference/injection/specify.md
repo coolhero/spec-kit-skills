@@ -45,7 +45,7 @@ To resolve file paths at runtime:
 
 - **Feature summary**: Feature description and scope from pre-context
 - **Draft requirements (FR-###)**: Draft Functional Requirements extracted from pre-context
-- **Draft acceptance criteria (SC-###)**: Draft Success Criteria / Acceptance Scenario extracted from pre-context. For UI Features, SCs should include verifiable UI actions where possible (e.g., "User enters credentials in login form and clicks Submit → dashboard screen is displayed"). These SC descriptions are converted to automated verification actions in the demo script's Coverage header
+- **Draft success criteria (SC-###)**: Draft Success Criteria extracted from pre-context. For UI Features, SCs should include verifiable UI actions where possible (e.g., "User enters credentials in login form and clicks Submit → dashboard screen is displayed"). These SC descriptions are converted to automated verification actions in the demo script's Coverage header
 - **Source behavior inventory**: If present, the function-level behavior list with priorities — remind that each P1/P2 behavior should map to at least one FR-###. This prevents functionality loss during rebuild. **NEW entries** (Origin=`new`): Treat as new requirements to be specified, not as coverage of existing code. They should still map to FR-### but do not represent original source behaviors
 - **UI component features**: If present, the third-party UI library capabilities — remind that each UI feature should map to an FR-###. These features (toolbar items, editing modes, plugins) are invisible to function-level analysis
 - **Interaction behavior inventory**: If present, the micro-interaction patterns from pre-context (hover behaviors, keyboard shortcuts, animations, focus management, drag-and-drop, context menus, scroll behaviors) — remind that each P1/P2 interaction should map to an FR-### or be captured as a verifiable SC. For **greenfield/add** projects without a pre-existing inventory: prompt the user to define key micro-interactions during specify (e.g., "Should this Feature have keyboard shortcuts? Tooltips on action buttons? Drag-and-drop reordering?") and record defined interactions as new FR-### entries. SC descriptions should include interaction verbs (e.g., "User hovers over settings icon → tooltip 'Settings' appears", "User presses Ctrl+K → command palette opens")
@@ -70,7 +70,7 @@ When a completed preceding Feature exists and the current Feature depends on it:
 
 ### Checkpoint Display Content
 
-Show the **actual content** that will be injected, so the user can review requirements, acceptance criteria, and business rules before spec creation:
+Show the **actual content** that will be injected, so the user can review requirements, success criteria, and business rules before spec creation:
 
 ```
 📋 Context for Specify execution:
@@ -85,7 +85,7 @@ Feature: [FID] - [Feature Name]
   FR-001: ...
   FR-002: ...
 
-── Draft Acceptance Criteria ─────────────────────
+── Draft Success Criteria ───────────────────────
 [List each SC-### with its full description]
   SC-001: ...
   SC-002: ...
@@ -250,7 +250,7 @@ After `speckit-specify` completes and post-execution checks above have run:
 
 **Files to read**:
 1. `specs/{NNN-feature}/spec.md` — Read the **entire file** and extract FR-###, SC-###, scope sections
-2. `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Draft Requirements" and "Draft Acceptance Criteria" sections (for diff comparison)
+2. `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Draft Requirements" and "Draft Success Criteria" sections (for diff comparison)
 
 **Display format**:
 ```

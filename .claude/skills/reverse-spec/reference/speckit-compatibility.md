@@ -45,7 +45,7 @@ For each Feature:
   2. Run /speckit.specify:
      - Refer to the "For /speckit.specify" section in pre-context.md
      - Read the original files from Source Reference to review existing implementation
-     - Use the draft requirements (FR-###) and draft acceptance criteria (SC-###)
+     - Use the draft requirements (FR-###) and draft success criteria (SC-###)
   3. Run /speckit.plan:
      - Refer to the "For /speckit.plan" section in pre-context.md
      - Check related entity schemas in entity-registry.md

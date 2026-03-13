@@ -20,7 +20,7 @@ When verify discovers a bug (or the user provides feedback during Review), class
 | **Minor** | Missing import, typo, null check, off-by-one, missing CSS class, simple config fix | ✅ Fix inline during verify — commit as `fix:` |
 | **Major-Implement** | Frozen object pattern change, missing component, state flow restructuring, new module needed | ❌ Return to **implement** — re-run affected tasks with issue context |
 | **Major-Plan** | Wrong architecture pattern, missing data model field, API contract mismatch, component structure redesign needed | ❌ Return to **plan** — re-run speckit-plan with updated constraints |
-| **Major-Spec** | Missing functional requirement, wrong acceptance criteria, scope gap, requirement misinterpretation | ❌ Return to **specify** — re-run speckit-specify with corrected requirements |
+| **Major-Spec** | Missing functional requirement, wrong success criteria, scope gap, requirement misinterpretation | ❌ Return to **specify** — re-run speckit-specify with corrected requirements |
 
 **How to classify**:
 - **Minor**: Fix touches ≤2 files, no API/interface change, no architectural reasoning needed
