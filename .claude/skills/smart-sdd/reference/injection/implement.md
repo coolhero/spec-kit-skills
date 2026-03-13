@@ -30,6 +30,16 @@ Display before each task: `📋 Pattern Constraints (from plan.md): [constraint 
 
 This prevents the scenario where parallel agents independently generate code with inconsistent patterns (e.g., one agent uses stable selectors while another creates new arrays per selector call).
 
+## Parallel Agent File Ownership Injection
+
+When the implement Checkpoint plan includes parallel agents, inject the file ownership partition into each agent's prompt:
+
+1. **Per-agent scope**: Each agent receives ONLY its assigned file list — no visibility into other agents' files
+2. **Shared file exclusion**: Explicitly state which files are reserved for post-agent integration (e.g., "Do NOT create or modify [entry-point]. The main agent will integrate your exports after completion")
+3. **Export convention**: Each agent must export its public API from a barrel file or explicit export list, enabling the main agent to integrate without reading all agent code
+
+See `commands/pipeline.md` § Parallel Agent File Ownership for the full protocol.
+
 ## Interaction Chains Injection (UI Features)
 
 If plan.md contains an `## Interaction Chains` section, inject the relevant chain rows for each task. When a task implements a handler (e.g., `onThemeChange`), the agent MUST also implement the full chain: Store Mutation → DOM Effect → Visual Result — not just the handler function.

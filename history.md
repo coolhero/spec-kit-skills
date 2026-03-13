@@ -30,6 +30,12 @@ Skill Feedback from angdu-studio rebuild (F001-app-shell). 6 SKF items grouped i
 - `smart-sdd/commands/verify-phases.md` — cli-limited ad-hoc exploration, Cross-Reference Rule, pre-flight message
 - `history.md` — this entry
 
+### Follow-up: Cross-Reference Consistency Fixes
+Post-review audit found 3 stale/missing cross-references after the SKF fixes:
+1. pipeline.md implement summary line didn't reflect new gates (Smoke Launch, parallel file ownership) → updated
+2. injection/implement.md had no Parallel Agent File Ownership section → added, with cross-ref to pipeline.md
+3. Implement Checkpoint Display clarified sequential-mode behavior (parallel plan omitted if sequential)
+
 ---
 
 ## [2026-03-13] Terminology Unification — "Acceptance Criteria" → "Success Criteria"

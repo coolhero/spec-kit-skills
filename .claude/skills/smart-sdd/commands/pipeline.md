@@ -664,7 +664,7 @@ Executes the following steps **strictly in order** for each Feature.
 2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
 3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP) → Update
 4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
-5. implement  → Env check(STOP if missing) → Checkpoint(STOP, B-3 remind) → speckit-implement + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Demo-Ready Delivery → Review(STOP)
+5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → Demo-Ready Delivery → Review(STOP)
 6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → SC UI Verify → Phase 3b (B-4) → Review(STOP) → Update
 7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
@@ -755,6 +755,8 @@ The implement Checkpoint MUST show the following before user approval:
 - **File plan**: List of files to create/modify (derived from tasks.md), grouped by module/layer
 - **Parallel execution plan** (if using background agents): Which agent handles which files, and which files are reserved for post-agent integration
 - **Dependency install plan**: Packages to be added
+
+If tasks are executed sequentially (default), the parallel execution plan is omitted.
 
 #### Post-Implement Smoke Launch
 
