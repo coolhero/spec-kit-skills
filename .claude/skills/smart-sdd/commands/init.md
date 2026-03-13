@@ -123,6 +123,40 @@ Check if `case-study-log.md` exists at project root:
    - Target architecture type (monolithic, microservice, etc.)
    - Tech stack (language, framework, DB, testing framework)
 
+#### Step 3b. Framework Selection & Foundation Decisions
+
+1. **Auto-detect framework** from project files using detection heuristics
+   (See `../../reverse-spec/domains/_core.md` § R7 for detection signals)
+
+2. **Confirm with user via AskUserQuestion**:
+   - Detected: "{framework}" — Is this correct?
+   - Options: "Confirm {framework}", "Select different framework", "Custom (no Foundation)"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+3. **Load Foundation checklist** from `../../reverse-spec/domains/foundations/{framework}.md`
+   - If Foundation file exists (Case A): Load full F2 items
+   - If no Foundation file (Case B): Load universal categories from `_foundation-core.md` § F1 and present generic probes
+   - If "Custom" selected (Case D): Skip Foundation entirely, record `Framework: custom`
+
+4. **Present Critical items via AskUserQuestion** (grouped by category):
+   - For each Foundation category with Critical items:
+     - Show item name, description, decision type + available options
+     - User selects/confirms each decision
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+5. **Record in sdd-state.md**:
+   - `**Framework**:` field in header section
+   - `## Foundation Decisions` section with decided items table
+
+6. **Generate T0 Feature candidates** from Foundation categories:
+   - Each Foundation category with >= 1 Critical item requiring code → T0 Feature candidate
+   - Apply T0 Feature Grouping rules from `_foundation-core.md` § F3
+   - Present candidates to user via AskUserQuestion for selection
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+   - Selected candidates become T0 Features in the roadmap
+
+> Note: If `Framework: custom` or `Framework: none`, this entire step is skipped.
+
 #### Phase 2: Constitution Seed Definition
 
 1. **Present the 6 Best Practices** with descriptions:

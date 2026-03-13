@@ -57,6 +57,23 @@ Show the **actual verification checklist** so the user can see what will be chec
   - [ ] Blocked-by prerequisites: [list each "Blocked by ←" status]
   - [ ] API compatibility matrix: [list each provider to verify — auth, endpoints, headers] (if plan.md has API Compat Matrix)
   - [ ] Integration contracts: [list each cross-Feature boundary — interface, shapes, bridge] (if plan.md has Integration Contracts)
+  - [ ] Foundation regression: [check Foundation decisions not overridden] (all Features)
+
+── Micro-Interaction Completeness (frontend/fullstack) ─
+  - If Interaction Behavior Inventory exists in pre-context: cross-reference P1/P2 interactions against implemented code
+  - Check: Are tooltip components rendered? Are keyboard shortcuts registered? Are CSS transitions/animations present? Are focus traps working? Are drag-and-drop handlers wired?
+  - Use the extended verify vocabulary (hover, press-key, drag-to, focus, verify-tooltip, right-click, verify-animation) in SC verification
+  - Missing P1 interactions: classify as Major-Implement (interaction contract broken)
+  - Missing P2 interactions: classify as Minor (can fix inline, ≤2 files)
+  - If no Interaction Behavior Inventory exists: skip this check
+
+── Foundation Regression Check ───────────────────
+  (All Features, not just T0):
+  - Check: Does this Feature's implementation break any Foundation decision?
+  - For T0 Features: verify Foundation items in this category are correctly implemented
+  - For T1+ Features: verify Foundation constraints are respected (not overridden)
+  - Foundation regressions are classified as Major-Implement (not Minor)
+  - If no Foundation decisions apply: skip this section
 
 ── Phase 3: Demo-Ready Verification ──────────────
 [Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]

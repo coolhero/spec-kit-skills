@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-12 18:27 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 09:42 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -163,6 +163,95 @@ Interface (앱이 노출하는 것)        Concern (횡단 관심사)           
 이 추론은 **Clarity Index (CI)**로 채점됩니다 — 7개 차원(목적, 기능, 유형, 스택, 사용자, 규모, 제약조건)에 걸쳐 아이디어의 구체성을 측정하는 백분율입니다. CI는 에이전트 행동을 결정합니다: 높은 CI(70%+)는 명확화를 건너뛰고 Proposal을 바로 생성하고, 낮은 CI는 활성 모듈의 S5 정교화 프로브를 사용하여 타겟 질문을 합니다.
 
 CI는 파이프라인으로 전파됩니다 — 초기 CI가 낮을수록 specify와 plan에서 더 많은 검증 체크포인트가 적용되어, 모호한 아이디어가 불완전한 스펙을 생성하지 않도록 합니다. 전체 모델은 `reference/clarity-index.md` 참고.
+
+### 플랫폼 파운데이션
+
+특정 프레임워크(Electron, Express, Next.js 등)로 구축하는 프로젝트에는 비즈니스 Feature 이전에 확립해야 할 인프라 결정이 있습니다 — 싱글 인스턴스 잠금, IPC 아키텍처, 미들웨어 체인, 렌더링 전략 등. 플랫폼 파운데이션 레이어는 이러한 결정을 명시적으로 캡처합니다:
+
+```
+Profile (desktop-app, web-api, fullstack-web, cli-tool)
+   │
+   ├── Interface 모듈 (gui, http-api, cli, data-io)
+   ├── Concern 모듈 (auth, async-state, ipc, i18n, realtime, external-sdk)
+   ├── Scenario (greenfield, rebuild, incremental, adoption)
+   ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)   ← NEW
+   └── Custom (프로젝트별 오버라이드)
+```
+
+**Foundation 파일**(`reverse-spec/domains/foundations/`)은 프레임워크별 인프라 결정의 포괄적 체크리스트를 제공합니다. 각 항목은 우선순위(Critical / Important / Optional)로 분류되고 카테고리(Window Management, Security, IPC, Middleware, Routing 등)로 그룹핑됩니다.
+
+**재구축 모드** (`/reverse-spec`): 기존 코드에서 Foundation 결정을 추출하여 pre-context에 문서화합니다.
+**그린필드 모드** (`/smart-sdd init`): Critical Foundation 항목을 사용자에게 제시하여 파이프라인 시작 전에 명시적 결정을 받습니다.
+
+Foundation 레이어는 프레임워크 마이그레이션(예: Express → NestJS)을 4단계 분류 시스템으로 지원합니다: carry-over, equivalent, irrelevant, new — 스택 변경 시 인프라 결정을 보존합니다.
+
+전체 프로토콜, 케이스 매트릭스, 교차 프레임워크 이전 맵은 `domains/foundations/_foundation-core.md` 참고.
+
+### Tier 시스템
+
+Feature는 처리 순서를 결정하는 Tier로 조직됩니다:
+
+| Tier | 목적 | 처리 시점 |
+|------|------|----------|
+| **T0** | **플랫폼 파운데이션** — 인프라 결정 (프레임워크 고유) | 가장 먼저 (비즈니스 Feature 이전) |
+| **T1** | 필수 — 시스템이 이것 없이는 기능할 수 없음 | T0 이후 |
+| **T2** | 권장 — 핵심 사용자 경험 완성 | T1 이후 |
+| **T3** | 선택 — 보조적, 관리 도구, 편의 기능 | T2 이후 |
+
+T0 Feature는 코드가 필요한 Critical 항목이 있는 Foundation 카테고리에서 자동 생성됩니다. T1이 시작되기 전에 완료되어야 하며, Foundation Gate가 이를 강제합니다.
+
+### 데이터 흐름
+
+```
+1. 분석 (reverse-spec 또는 init):
+   소스 코드 → 기술 스택 감지 → 프레임워크 식별 →
+   Foundation 추출 → Feature 추출 →
+   Global Evolution 아티펙트 (roadmap, 레지스트리, pre-context)
+
+2. 개발 (smart-sdd pipeline):
+   각 Feature별 (T0 → T1 → T2 → T3):
+   컨텍스트 조립 → 체크포인트 (HARD STOP) →
+   spec-kit 실행 → 검토 (HARD STOP) → 상태 갱신
+
+3. 검증 (verify phases):
+   빌드 → 테스트 → 린트 → 교차 Feature 일관성 →
+   런타임 SC 검증 → Demo-Ready 확인 → Foundation 준수성
+```
+
+### Feature 생명주기
+
+```
+specify → plan → tasks → implement → verify → merge
+   │                                    │
+   │  ◄──── Major-Spec ───────────────┤
+   │  ◄──── Major-Plan ───────────────┤
+   │  ◄──── Major-Implement ──────────┤
+   │                                    │
+   └── Minor Fix (인라인, ≤2 파일) ─────┘
+```
+
+verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 이슈만 인라인으로 수정하고, Major 이슈는 해당 파이프라인 단계로 되돌립니다.
+
+### 프로젝트 모드
+
+| 모드 | 진입점 | 사용 사례 |
+|------|--------|----------|
+| 그린필드 | `/smart-sdd init` → `add` → `pipeline` | 처음부터 새 프로젝트 |
+| 점진적 추가 | `/smart-sdd add` → `pipeline` | 기존 smart-sdd 프로젝트에 Feature 추가 |
+| 재구축 | `/reverse-spec` → `/smart-sdd pipeline` | 기존 코드베이스를 SDD로 재구축 |
+| 도입 | `/reverse-spec --adopt` → `/smart-sdd adopt` | 기존 코드에 SDD 문서 래핑 |
+
+### 주요 아티펙트
+
+| 아티펙트 | 위치 | 목적 |
+|----------|------|------|
+| Roadmap | `specs/reverse-spec/roadmap.md` | Feature 카탈로그, 의존성 그래프, 릴리스 그룹 |
+| Entity Registry | `specs/reverse-spec/entity-registry.md` | 공유 데이터 모델 정의 |
+| API Registry | `specs/reverse-spec/api-registry.md` | API 계약 명세 |
+| Business Logic Map | `specs/reverse-spec/business-logic-map.md` | 교차 Feature 비즈니스 규칙 |
+| Pre-context | `specs/reverse-spec/features/F00N-*/pre-context.md` | Feature별 spec-kit 컨텍스트 |
+| Constitution | `.specify/memory/constitution.md` | 프로젝트 전역 원칙 및 Best Practices |
+| State | `specs/reverse-spec/sdd-state.md` | 파이프라인 진행, 툴체인, Foundation 결정 |
 
 ---
 
@@ -745,11 +834,11 @@ specs/
 | `SKILL.md` | 스킬 라우터 — reverse-spec 진입점 및 필수 규칙 |
 | `commands/analyze.md` | 소스코드 분석 및 Global Evolution Layer 아티펙트 생성 다단계 워크플로우 |
 | **Domains** | |
-| `domains/_core.md` | 범용 분석 프레임워크 (R1–R6 분석 섹션) |
+| `domains/_core.md` | 범용 분석 프레임워크 (R1–R7 분석 섹션, Foundation Detection Heuristics 포함) |
 | `domains/_schema.md` | 도메인 프로필 스키마 템플릿 (Detection Signals, Analysis Axes, Feature Registry 등) |
 | `domains/app.md` | 애플리케이션 도메인 프로필 — backend/frontend/fullstack/mobile/library 감지 및 분석 |
 | `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
-| `domains/interfaces/gui.md` | GUI 인터페이스 — 런타임 탐색, 시각적 동작 분석 |
+| `domains/interfaces/gui.md` | GUI 인터페이스 — R3 UI 컴포넌트 추출, R4 마이크로 인터랙션 패턴 추출 (호버, 키보드, 애니메이션, DnD, 포커스, 컨텍스트 메뉴, 스크롤) |
 | `domains/interfaces/http-api.md` | HTTP API 인터페이스 — 엔드포인트 탐색, 요청/응답 분석 |
 | `domains/interfaces/cli.md` | CLI 인터페이스 — 커맨드 파싱, 인자 분석 |
 | `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 탐색, 데이터 플로우 분석 |
@@ -759,6 +848,17 @@ specs/
 | `domains/concerns/i18n.md` | Internationalization concern — 로케일 키 감지 |
 | `domains/concerns/ipc.md` | IPC concern — 프로세스간 통신 감지 (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE 감지 |
+| **Foundations** | |
+| `domains/foundations/_foundation-core.md` | Foundation 해석 프로토콜 — 감지 신호, 카테고리 분류, 케이스 매트릭스, T0 그룹핑, 교차 프레임워크 이전 맵 |
+| `domains/foundations/electron.md` | Electron Foundation — 58개 항목, 13개 카테고리 (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
+| `domains/foundations/tauri.md` | Tauri Foundation — 44개 항목, 12개 카테고리 |
+| `domains/foundations/express.md` | Express.js Foundation — 43개 항목, 12개 카테고리 |
+| `domains/foundations/nextjs.md` | Next.js Foundation — 44개 항목, 13개 카테고리 |
+| `domains/foundations/vite-react.md` | Vite + React Foundation — 43개 항목, 12개 카테고리 |
+| `domains/foundations/nestjs.md` | NestJS Foundation — TODO 스캐폴드 (51개 항목, 13개 카테고리) |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO 스캐폴드 (49개 항목, 12개 카테고리) |
+| `domains/foundations/react-native.md` | React Native Foundation — TODO 스캐폴드 (55개 항목, 14개 카테고리) |
+| `domains/foundations/flutter.md` | Flutter Foundation — TODO 스캐폴드 (59개 항목, 14개 카테고리) |
 | `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
 | **Templates** | |
 | `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
@@ -793,7 +893,7 @@ specs/
 | `domains/_schema.md` | 도메인 프로필 스키마 — 데모 패턴, 패리티 차원, 검증 동작 |
 | `domains/app.md` | 애플리케이션 도메인 프로필 — 데모 패턴, 린트 감지 규칙, UI 테스팅, 버그 방지 |
 | `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
-| `domains/interfaces/gui.md` | GUI 인터페이스 — CSS 렌더링 버그, UI 인터랙션 서피스 감사, 시각적 충실도 |
+| `domains/interfaces/gui.md` | GUI 인터페이스 — CSS 렌더링 버그, UI 인터랙션 서피스 감사, 시각적 충실도, 마이크로 인터랙션 검증 |
 | `domains/interfaces/http-api.md` | HTTP API 인터페이스 — API 호환성 매트릭스, 런타임 검증 |
 | `domains/interfaces/cli.md` | CLI 인터페이스 — CLI 검증, 프로세스 러너 백엔드 |
 | `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 검증, 데이터 플로우 테스팅 |

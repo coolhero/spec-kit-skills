@@ -29,6 +29,15 @@ Look for the Domain Profile fields in `sdd-state.md` header:
   - `adoption` → `scenarios/adoption.md`
   - If Origin is `rebuild` or `greenfield` and project already has Features: `scenarios/incremental.md` for subsequent additions
 
+### Step 2b. Resolve Foundation
+
+1. Read `**Framework**` from sdd-state.md header
+2. If framework is "custom" or "none" → skip Foundation loading
+3. For each framework (comma-separated):
+   - Load `../../reverse-spec/domains/foundations/{framework}.md` § F2 (items only)
+   - Load `../../reverse-spec/domains/foundations/_foundation-core.md` § F3 (T0 rules)
+4. Cache Foundation items for session
+
 ### Step 3. Load Modules in Order
 
 ```
