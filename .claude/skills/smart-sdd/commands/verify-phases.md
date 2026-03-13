@@ -918,6 +918,15 @@ Verifies that the data shape contracts defined in plan.md are actually implement
 
 **⚠️ Phase 3 has 10 mandatory steps + Phase 3b. Do NOT skip any step or jump directly to demo execution.**
 
+> **🚫 GUI MANDATORY PLAYWRIGHT GATE** (enforced at Phase 3 entry):
+> When `gui` is in the active Interfaces AND `RUNTIME_BACKEND` is not `build-only`:
+> 1. **Playwright runtime verification CANNOT be skipped.** Static checks (build, tsc, lint) alone are NEVER sufficient for GUI Features. Playwright SC verification is equal in priority to build/lint/tsc — not optional.
+> 2. **If Playwright is not installed**: Attempt installation (`npx playwright install chromium`). If installation fails, display HARD STOP with failure reason and ask user for resolution — do NOT silently skip.
+> 3. **SC Verification Matrix MUST be displayed** before any Step 3+ execution begins. If the `cdp-auto` SC list is empty for a GUI Feature, the agent MUST explain why no SCs are automatable — an empty list without explanation is a verification failure.
+> 4. **Post-gate announcement** (display after gate passes):
+>    `🔒 Playwright Gate: PASSED — [N] cdp-auto SCs will be verified via Playwright [CLI|MCP]`
+>    If Playwright unavailable after install attempt: `🔒 Playwright Gate: BLOCKED — [reason]. HARD STOP required.`
+
 ```
 Phase 3 Checklist (must complete ALL in order):
   □ Step 0: SC Verification Planning (classify ALL SCs from spec.md — extended categories)
@@ -994,7 +1003,8 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
    - ✅ CAN: Run pipeline with test data, compare output schema and values
    - ✅ CAN: Verify no error logs during execution
 
-4. Write the SC Verification Matrix (sub-SCs from Decomposition Rule appear as separate rows):
+4. Write the SC Verification Matrix (sub-SCs from Decomposition Rule appear as separate rows).
+   **This matrix MUST be displayed in the verify output.** Do NOT proceed to Step 1+ without showing this matrix.
    ```
    SC Verification Matrix for [FID]:
    | SC | Category | Planned Method | Skip Reason |
@@ -1006,6 +1016,8 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
    | SC-028 | api-auto | GET /api/config → verify 200 + response shape | — |
    | SC-031 | external-dep | — | Requires production MCP server (not locally available) |
    ```
+
+   > **GUI Feature empty-list guard**: If `gui` is an active interface but the matrix contains ZERO `cdp-auto` rows, the agent MUST explain why no SCs are automatable via Playwright. A GUI Feature with no `cdp-auto` SCs is almost always a classification error — re-examine each SC for UI-automatable portions before concluding the list is genuinely empty.
 
 5. **SC Minimum Depth Rule**: After classification, check each auto-category SC (`cdp-auto`, `api-auto`, `cli-auto`, `pipeline-auto`) for verification depth and assign a **Required Depth**:
    - Tier 1 (Presence): Element/response exists — `verify .settings-panel visible`

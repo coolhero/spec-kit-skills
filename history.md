@@ -5,6 +5,34 @@
 
 ---
 
+## [2026-03-14] SKF-010 + SKF-011: Layout Structure Analysis + GUI Mandatory Playwright Gate
+
+Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) implement phase rebuilt layout without matching source app code-level structure, (2) verify phase skipped Playwright runtime verification despite GUI Feature.
+
+### Root Cause 1: No code-level layout structure analysis (SKF-010)
+- **Problem**: Visual references (screenshots) can look identical between different DOM structures (flex-row vs flex-column). The existing "Source App Visual Reference" rule focused on pixel-level screenshots but had no code-level layout analysis step
+- **Fix**: Added "Layout Structure Analysis" subsection to `injection/implement.md` — before first UI task, read source app's root layout code and document: root container direction, container nesting hierarchy, height/width strategy, platform-specific offsets, persistent element placement
+- **Placement**: Between "Dual-App Port Convention" and "Visual References Fallback" (one-time analysis, runs before any UI task)
+
+### Root Cause 2: Playwright verification skippable for GUI Features (SKF-011)
+- **Problem**: Phase 3 Step 3 said "MANDATORY — do NOT skip" but agent still skipped it for F002. The rule was strong text but lacked an enforceable gate mechanism. Result: layout structure differences, drag region omission, etc. not caught until user manually tested
+- **Fix 1**: Added "🚫 GUI MANDATORY PLAYWRIGHT GATE" blockquote at Phase 3 entry in `verify-phases.md` — 4-point gate: cannot skip, must attempt install, SC matrix must be displayed, post-gate announcement required
+- **Fix 2**: Added "GUI Feature empty-list guard" to Step 0 SC Verification Matrix — if `gui` is active but zero `cdp-auto` rows exist, agent must explain why (almost always a classification error)
+- **Fix 3**: Added emphasis in `gui.md` S6 — "Static checks alone are NEVER sufficient for GUI Features. Playwright SC verification is equal in priority to build/lint/tsc"
+
+### Cross-reference check
+- `verify-phases.md` Pre-flight (Phase 1): Already checks Playwright availability — the new gate enforces that availability translates to actual execution
+- `gui.md` S8 Runtime Verification Strategy: Already references Playwright — the new S6 emphasis adds the "mandatory, not optional" framing
+- `injection/implement.md` Visual References Fallback (SKF-008): Screenshot-based. The new Layout Structure Analysis is code-based — complementary, not overlapping
+
+### Files Changed (3 skill files + 1 feedback file)
+- `smart-sdd/reference/injection/implement.md` — Layout Structure Analysis subsection
+- `smart-sdd/commands/verify-phases.md` — GUI MANDATORY PLAYWRIGHT GATE + SC matrix empty-list guard
+- `smart-sdd/domains/interfaces/gui.md` — S6 Playwright mandatory emphasis
+- `angdu-studio/skill-feedback.md` — SKF-010, SKF-011 marked as ✅ Reflected
+
+---
+
 ## [2026-03-14] SKF-008 + SKF-009: Visual Reference Fallback + Interaction Surface Preservation
 
 Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) visual references not consulted during implement, (2) F001's interaction surfaces removed when F002 replaced App.tsx.

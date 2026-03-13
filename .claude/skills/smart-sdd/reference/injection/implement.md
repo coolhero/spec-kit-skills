@@ -140,6 +140,28 @@ During each UI task:
 - **Source app**: project's default port (from package.json scripts or launch.json)
 - **Built app**: source port + 1000 (e.g., 3000 → 4000) or explicit override in sdd-state.md
 
+### Layout Structure Analysis (rebuild mode, GUI — one-time before first UI task)
+
+> Visual reference (screenshots) catches surface-level differences but misses DOM hierarchy divergence. This step ensures the **code-level layout structure** matches the source app.
+
+Before the first UI-related task, read the source app's root layout code (from Source Reference files) and document:
+
+1. **Root container direction**: `flex-direction: row` vs `column`, `grid-template` layout
+2. **Container nesting hierarchy**: Which components are siblings vs parent-child (e.g., Sidebar alongside Content vs Sidebar inside a wrapper)
+3. **Height/width strategy**: `100vh`, `calc(100vh - Npx)`, `flex: 1`, or CSS environment variables (`env(titlebar-area-height)`)
+4. **Platform-specific offsets**: Mac titlebar area, Electron `frame: false` adjustments, fullscreen handling
+5. **Persistent element placement**: Where are WindowControls, Navbar, Titlebar placed — globally (outside router) vs per-page (inside route components)
+
+Record the analysis in a brief comment block at the top of the Feature's main layout file (e.g., `Router.tsx`, `Layout.tsx`):
+```
+// Layout Structure (from source analysis):
+// Root: flex-row | Sidebar: full-height (100vh) | Content: flex-1
+// WindowControls: inside per-page Navbar (not global)
+// Mac: sidebar margin-top: env(titlebar-area-height)
+```
+
+**Why code-level, not just visual**: Screenshots look identical between `flex-row` (Sidebar + Content side-by-side) and `flex-column` (Titlebar + row) — both produce a sidebar layout. But the underlying structure determines how future Features (tab mode, multi-window, fullscreen) integrate. Getting this wrong at F002 forces a structural rewrite later.
+
 ### Visual References Fallback (rebuild mode, when source app cannot start)
 
 Even when the source app cannot be launched (dependency issues, missing env, etc.), if `specs/reverse-spec/visual-references/` directory exists with screenshots:

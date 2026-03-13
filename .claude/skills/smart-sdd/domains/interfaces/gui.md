@@ -63,10 +63,12 @@
 | Backend/API only | Skip (API health check only) | — |
 | CLI/Library | Skip | — |
 
+**🚫 GUI Features require Playwright runtime verification.** Static checks (build, tsc, lint) alone are NEVER sufficient to complete verify for a GUI Feature. Playwright SC verification is equal in priority to build/lint/tsc — not optional. See `verify-phases.md` § Phase 3 "GUI MANDATORY PLAYWRIGHT GATE" for enforcement details.
+
 When Playwright (CLI or MCP) is available during `verify` Phase 3:
 - Demo script starts the server -> Playwright navigates to demo URL -> verifies page loads and key elements exist
 - SC-level UI verification: Automatically execute UI Action sequences from Coverage header via CLI test runner or MCP tools
-- If not available: HARD STOP — Playwright CLI install guide or UI verification Skip
+- If not available: Attempt installation (`npx playwright install chromium`). If installation fails: HARD STOP — display failure reason and ask user for resolution. Do NOT silently skip.
 
 ---
 
