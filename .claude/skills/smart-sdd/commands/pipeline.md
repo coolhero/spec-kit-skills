@@ -740,6 +740,37 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 
 > **Security rule**: NEVER read actual values from `.env`. Only check for the **presence** of variable names.
 
+#### Parallel Agent File Ownership (implement step)
+
+When using background agents (Agent tool) to parallelize implement tasks:
+
+1. **File scope separation**: Before dispatching agents, partition the task list so each agent's files **do not overlap**. Display the partition in the Checkpoint for user review
+2. **Shared entry point reservation**: Files that multiple tasks naturally touch (e.g., app entry point, router config, IPC registry, dependency injection root) are **not assigned to any parallel agent**. The main agent writes these files after all parallel agents complete, integrating their outputs
+3. **Conflict detection**: After all agents complete, run `git diff --name-only` per agent. If any file appears in multiple agents' diffs → the main agent must manually reconcile before proceeding
+4. **Sequential fallback**: If clean file separation is not feasible (too many shared files), execute tasks sequentially instead of in parallel. Note: sequential is the default — parallel is an optimization, not a requirement
+
+#### Implement Checkpoint Display
+
+The implement Checkpoint MUST show the following before user approval:
+- **File plan**: List of files to create/modify (derived from tasks.md), grouped by module/layer
+- **Parallel execution plan** (if using background agents): Which agent handles which files, and which files are reserved for post-agent integration
+- **Dependency install plan**: Packages to be added
+
+#### Post-Implement Smoke Launch
+
+After build succeeds and before proceeding to the Review step, perform a **smoke launch** to catch build-pass-but-runtime-crash issues:
+
+1. **Start the app** using the project's standard launch command (dev or preview mode)
+2. **Wait 5 seconds** — if the process exits with a non-zero code or stderr contains crash indicators (uncaught exception, segfault, FATAL), the smoke launch fails
+3. **For GUI projects**: Confirm the main window is not blank — if Playwright CLI is available, take a single snapshot to verify basic UI elements rendered
+4. **GUI operability check**: If the Feature includes user-facing UI, verify basic operability:
+   - Can the user perform the fundamental interactions the Feature provides? (e.g., window control, navigation, settings access)
+   - If the UI is a placeholder with no interactive elements → this is a smoke launch failure
+5. **Shut down** the app after the check
+6. **On failure**: Fix the issue immediately within the implement step (no Source Modification Gate needed — this is pre-verify). Re-run the smoke launch after fixing
+
+> This overlaps with verify Phase 0's Dev Mode Stability Probe but catches issues earlier, avoiding the verify → regression → re-implement cycle.
+
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.

@@ -5,6 +5,33 @@
 
 ---
 
+## [2026-03-13] SKF-001~006: Implement + Verify Gap Fixes from angdu-studio F001
+
+Skill Feedback from angdu-studio rebuild (F001-app-shell). 6 SKF items grouped into 3 root causes, fixed with generalized (not project-specific) rules.
+
+### Root Cause 1: Parallel Agent Coordination (SKF-001, 003)
+- **Problem**: Parallel background agents modified the same files (index.ts, ipc.ts), causing conflicts
+- **Fix**: Added Parallel Agent File Ownership Protocol to pipeline.md — file scope separation, shared entry point reservation, conflict detection, sequential fallback
+- **Fix**: Implement Checkpoint now displays file plan + parallel execution plan for user review
+
+### Root Cause 2: No Runtime Gate in Implement (SKF-002, 004)
+- **Problem**: Build passed but app crashed at runtime. Renderer was a blank page with no interactive UI
+- **Fix**: Added Post-Implement Smoke Launch to pipeline.md — 5-second crash check, GUI snapshot, operability check
+- **Rationale**: Overlaps with verify Phase 0 but catching issues in implement avoids the verify → regression → re-implement cycle
+
+### Root Cause 3: cli-limited Misinterpreted as "No Runtime" (SKF-005, 006)
+- **Problem**: cli-limited was treated as "code-level only." SC verification only checked function existence (Tier 1), missed target mismatches
+- **Fix**: Redefined cli-limited in verify-phases.md — ad-hoc runtime exploration using inline Playwright API calls
+- **Fix**: Added Code-Level Cross-Reference Rule — behavioral SCs must verify action target matches actual source
+- **Fix**: Updated pre-flight message to "ad-hoc — no test file, will use inline exploration"
+
+### Files Changed (3 files)
+- `smart-sdd/commands/pipeline.md` — Parallel Agent File Ownership, Implement Checkpoint Display, Post-Implement Smoke Launch
+- `smart-sdd/commands/verify-phases.md` — cli-limited ad-hoc exploration, Cross-Reference Rule, pre-flight message
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] Terminology Unification — "Acceptance Criteria" → "Success Criteria"
 
 spec-kit defines SC-### as **Success Criterion** (`## Success Criteria` section in spec.md). However, spec-kit-skills used "Acceptance Criteria" and "Success Criteria" interchangeably across 12 occurrences in 9 files — including one line that used both terms simultaneously (`Draft acceptance criteria (SC-###): Draft Success Criteria / Acceptance Scenario`).

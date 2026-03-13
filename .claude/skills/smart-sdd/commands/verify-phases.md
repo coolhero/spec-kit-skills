@@ -415,7 +415,7 @@ Shell is always available. Set `RUNTIME_BACKEND = pipeline-runner` for this inte
 
 **If `RUNTIME_BACKEND = cli` or `cli-limited` or `mcp`**: No HARD STOP. Display informational message:
 - `cli`: `ℹ️ Runtime verification: Playwright CLI (standard path)`
-- `cli-limited`: `ℹ️ Runtime verification: Playwright CLI (limited — no test file yet)`
+- `cli-limited`: `ℹ️ Runtime verification: Playwright CLI (ad-hoc — no test file, will use inline exploration)`
 - `mcp`: `ℹ️ Runtime verification: Playwright MCP (accelerator mode)`
 
 **If `RUNTIME_BACKEND = demo-only`**: Display warning, no HARD STOP:
@@ -1018,6 +1018,14 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 
    If an SC's planned verification is ONLY Tier 1 (presence) but Required Depth is Tier 2: `⚠️ SC-### verification is presence-only but SC requires behavioral verification — upgrading to Tier 2`. Agent MUST auto-upgrade to Tier 2. Record the Required Depth in the SC Verification Matrix for enforcement in Step 3d.
 
+   **Code-Level Cross-Reference Rule** (applies when runtime verification is unavailable and code-level grep is the fallback):
+   Verifying "function X exists" (Tier 1) is insufficient for behavioral SCs. When verifying "A changes B" at code level:
+   - Identify A's **action target** (what DOM element / data store / file does it operate on?)
+   - Identify B's **actual source** (where does the initial state come from?)
+   - Confirm A's target and B's source reference the **same entity** (same selector, same variable, same file path)
+   - If they reference different entities → flag as `⚠️ SC-### target mismatch: A operates on [X] but B reads from [Y]`
+   - Example: a toggle function modifies `documentElement.classList` but CSS variables are scoped to `body.dark` → mismatch
+
    Add `Required Depth` column to SC Verification Matrix:
    ```
    | SC | Category | Planned Method | Required Depth | Skip Reason |
@@ -1073,7 +1081,14 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
       3. Run: `npx playwright test demos/verify/F00N-name.spec.ts --reporter=json`
       4. Map test results back to SC-### coverage (Tier 1/2/3 results reported normally)
       5. Display: `ℹ️ SC verification via Playwright CLI (standard path)`
-    - If no test file exists and `RUNTIME_BACKEND = cli-limited`: limited to demo --ci only for this Feature.
+    - If no test file exists and `RUNTIME_BACKEND = cli-limited`: **ad-hoc runtime exploration** — cli-limited means Playwright CLI is available but no pre-written test file exists. This is NOT "no runtime access." The agent performs inline SC verification:
+      1. Launch the app programmatically (Electron: `_electron.launch()`, Web: start dev server)
+      2. Take a baseline snapshot — confirm main UI renders (not blank/crash)
+      3. For each auto-category SC in the SC Verification Matrix, execute the planned verification inline (navigate, click, verify state change) using Playwright API calls
+      4. Respect the SC Minimum Depth Rule — behavioral SCs require Tier 2 (state change), not just Tier 1 (presence)
+      5. Shut down the app after all SCs are checked
+      6. Display results in the same SC-### matrix format as the standard path
+      7. If ad-hoc exploration is not feasible (e.g., app requires external services to render): fall back to demo --ci only, with explicit note of which SCs could not be runtime-verified
   - If `RUNTIME_BACKEND = mcp` → **MCP accelerator path**: proceed with Electron CDP check below (if Electron) or directly to SC verification (if web). MCP enables interactive, step-by-step verification without pre-written test files.
   - **If Pre-flight was somehow skipped**: Call `browser_snapshot` NOW. If the tool does not exist, run `npx playwright --version` as fallback. If neither exists, display the HARD STOP from Pre-flight and wait for user response. **Do NOT silently skip.**
 
