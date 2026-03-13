@@ -18,6 +18,18 @@
 - Also references actual implementation results from preceding Features (under `specs/`) if available
 - **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See [`reference/context-injection-rules.md`](../reference/context-injection-rules.md) § Missing/Sparse Content Handling for details.
 
+**Context Budget Estimation** (for projects with 10+ Features):
+Before reading files, estimate the total context volume of Read Targets:
+1. Count the number of Read Target files and their approximate sizes (pre-context: ~200 lines, spec: ~100 lines, plan: ~150 lines, registries: varies)
+2. If estimated total exceeds **2000 lines** (roughly 40% of typical context budget after system instructions):
+   - Apply **progressive summarization**:
+     a. **Current Feature**: Read full content (no compression)
+     b. **Direct dependencies** (Features in the Dependency Graph): Read full spec.md + plan.md summary (FR-### list + architecture section only, skip detailed descriptions)
+     c. **Indirect dependencies** (Features referenced by direct dependencies): Read spec.md FR-### IDs only (one-line per FR, no descriptions)
+     d. **Unrelated preceding Features**: Skip entirely (their registries entries are sufficient)
+   - Display in Checkpoint: `📊 Context budget: [N] lines assembled ([M] lines compressed via progressive summarization)`
+3. If estimated total is under 2000 lines: Read full content as normal
+
 ### 2. Checkpoint — User Confirmation
 
 Presents the assembled context to the user with **actual content**, not just counts. The user must be able to review what will be injected and make informed decisions.
@@ -95,6 +107,17 @@ If the spec-kit command fails (error, crash, partial output):
 3. If "Retry": Re-run the Execute step
 4. If "Abort step": Record failure in sdd-state.md, do NOT proceed to Review
 5. If "Troubleshoot": Help the user diagnose and fix the issue, then offer to retry
+
+### Error Retry Policy
+
+When a pipeline step fails (build, test, lint, spec-kit command):
+- Max 3 retries per step per Feature
+- After 3 failures: HARD STOP
+  **Use AskUserQuestion**: "Step {step} failed 3 times for {Feature}. How to proceed?"
+  - Options: "Abort pipeline", "Skip this step", "Troubleshoot"
+  **If response is empty → re-ask** (per MANDATORY RULE 1)
+- Retry count tracked per-session (not persisted)
+- Each retry must attempt a DIFFERENT fix (no identical re-run)
 
 **⚠️ CRITICAL — SUPPRESS spec-kit output**: spec-kit commands print their own next-step messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
 
@@ -340,6 +363,26 @@ This step is informational only — no user confirmation required.
    **Record** in `sdd-state.md` → `## Toolchain` section (see `reference/state-schema.md`).
    This cached result is read by verify Phase 1 to skip unavailable tools without re-discovering.
 
+   After toolchain checks, if Framework ≠ "custom"/"none":
+
+   4. **Platform Foundation Status Check**:
+      - Read sdd-state.md § Foundation Decisions § T0 Features
+      - If T0 Features exist and any have status ≠ "completed"/"skipped":
+        Foundation Status: PENDING
+      - If no T0 Features exist:
+        Foundation Status: N/A (no Foundation Features defined)
+      - If all T0 completed:
+        Foundation Status: READY
+
+   5. **Display**: Add Foundation Status to existing Foundation Verified line:
+      `Foundation Verified: {date} | {toolchain status} | Platform: {Foundation Status}`
+
+   6. **Gating rule**:
+      - Foundation Status PENDING + processing T1+ Feature → BLOCK
+        "T0 Foundation Features must complete before T1. Process T0 first."
+      - Foundation Status N/A → PASS (no Foundation Features, proceed)
+      - Foundation Status READY → PASS
+
 2. **Generate Foundation test file** (`tests/foundation.spec.ts` or equivalent):
    Based on constitution tech stack, generate a Playwright test file for applicable checks:
    ```typescript
@@ -390,6 +433,19 @@ Foundation status: PASS (1 warning)
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 **On subsequent Features**: Skip if `Foundation Verified` exists in `sdd-state.md` AND no Foundation-affecting changes since last verification. Foundation-affecting changes = modifications to files outside `specs/` (theme config, store definitions, layout components, IPC handlers, build config).
+
+### Step 3c — Dependency Cycle Detection
+
+1. Read roadmap.md Dependency Graph
+2. Run topological sort (Kahn's algorithm conceptual):
+   - For each Feature, collect its dependencies
+   - Detect cycles: if a Feature appears in its own transitive dependency chain → CYCLE
+3. If cycle detected:
+   Display: "Dependency cycle detected: F001 → F003 → F005 → F001"
+   **Use AskUserQuestion**: "How to resolve this cycle?"
+   - Options: "Break cycle by removing dependency", "Abort pipeline"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+4. Store validated processing order for Feature iteration
 
 ### Step 4 — Feature Selection
 
@@ -581,6 +637,12 @@ Check if `case-study-log.md` exists at project root:
 ### Phase 1~N: Process Features
 
 Processes the Feature(s) selected in Step 4 (Feature Selection). In single-Feature mode (default), only ONE Feature is processed. In batch mode (`--all`), Features are processed in Release Group order.
+
+**Feature processing order**: T0 → T1 → T2 → T3
+- **T0 (Foundation)**: Infrastructure Features from Foundation categories (BST, SEC, framework-specific)
+- **T0 Features MUST complete before T1 begins** — they establish the platform infrastructure that T1+ Features depend on
+- **Within T0**: order by Foundation category dependency (BST first, then SEC, then framework-specific)
+- T1/T2/T3 ordering follows existing Tier-based rules (see analyze.md § Feature ID Tier-first ordering)
 
 **Feature processing rules**:
 - **Core scope**: Only active-Tier Features are processed. Deferred Features are skipped.

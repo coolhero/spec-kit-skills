@@ -6,6 +6,24 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 
 ---
 
+### State Validation (run at pipeline start)
+
+Before reading sdd-state.md, validate:
+1. File exists and is valid markdown
+2. **State Schema Version** field present (missing = v1.0 legacy)
+3. Required header fields present: Project, Origin, Domain Profile
+4. Feature Progress table has correct column count (9 columns)
+5. All Feature IDs in progress table match Feature Mapping table
+6. No duplicate Feature IDs
+
+If validation fails:
+- Display specific errors
+- **Use AskUserQuestion**: "State file has issues: {error}. How to proceed?"
+  - Options: "Auto-repair", "Manual fix", "Abort"
+- **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+---
+
 ## File Structure
 
 ```markdown
@@ -27,6 +45,8 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 **Created**: [Initial creation date/time]
 **Last Updated**: [Last updated date/time]
 **Constitution Version**: [Version]
+**State Schema Version**: 2.0
+**Framework**: electron | tauri | express | nestjs | fastapi | nextjs | vite-react | react-native | flutter | custom | none
 
 ---
 
@@ -43,6 +63,21 @@ This document defines the format of the `sdd-state.md` file. smart-sdd automatic
 | migration_strategy | [big-bang / incremental / strangler-fig] |
 
 If this section is missing in a legacy sdd-state.md (created before this enhancement), the pipeline initialization step presents AskUserQuestion to collect missing values.
+
+---
+
+### Foundation Decisions
+
+**Framework**: {name}
+
+#### Decided
+| ID | Item | Decision | Date |
+
+#### Deferred
+| ID | Item | Reason |
+
+#### T0 Features
+| Feature ID | Foundation Category | Status |
 
 ---
 

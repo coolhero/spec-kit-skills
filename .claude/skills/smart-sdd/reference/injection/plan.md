@@ -65,6 +65,12 @@ Reference the actual implementation results of dependent preceding Features:
 - **Technical decisions**: Draft technical decisions from pre-context
 - **Preceding Feature actual results**: Reference data-model and contracts from Features that have already completed plan
 - **Naming remapping**: If Naming Remapping section exists in pre-context, remind that entity names, API names, and technical terms should use the new identifiers
+- **Interaction behavior inventory**: If present in pre-context, inject micro-interaction patterns relevant to this Feature — hover behaviors (tooltip components needed), keyboard shortcuts (shortcut framework choice), animations (animation library decision), drag-and-drop (DnD library selection), focus management (focus trap approach). These inform **architectural decisions**: which interaction libraries to adopt, whether to build a shared tooltip/shortcut/animation system, component prop design for interaction states. For **greenfield/add**: if the user defined interactions during specify, plan should account for them in component structure
+- **Foundation Technical Constraints** (from sdd-state.md § Foundation Decisions):
+  - Decided items that affect architectural choices (e.g., IPC pattern → component communication)
+  - T0 Feature dependencies: which Foundation Features must be completed first
+  - For T0 Features: Foundation file § F4 grouping as implementation scope reference
+  - **If Foundation Decisions section is empty or absent**: Skip Foundation injection, note "No Foundation decisions — framework-agnostic mode"
 
 ## Checkpoint Display Content
 

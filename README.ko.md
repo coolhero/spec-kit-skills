@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-12 18:27 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:35 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -105,6 +105,20 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 spec-kit-skills는 **에이전트 코딩을 위한 하네스(harness)** 입니다 — AI 에이전트가 생성하는 결과물을 제약하고, 안내하고, 검증하는 구조적 레이어입니다. 에이전트가 올바른 코드를 작성하기를 기대하는 대신, 하네스가 에이전트가 충족해야 할 계약을 정의하고, 에이전트가 달리 알 수 없는 교차 Feature 컨텍스트를 주입하며, 머지 전에 계약 위반 여부를 검증합니다. 아래 아키텍처는 이 하네스가 세 가지 독립된 차원에서 어떻게 확장 가능하게 설계되어 있는지 보여줍니다.
 
+### 설계 철학
+
+다섯 가지 원칙이 spec-kit-skills의 모든 설계 결정을 형성합니다:
+
+1. **기대 대신 계약** — 에이전트가 올바른 코드를 작성하기를 바라는 대신, 하네스가 명시적 계약(Success Criteria, Source Behavior Inventory, Foundation Decisions)을 정의합니다. 검증은 이 계약에 대해 실행되며, 막연한 "올바름" 개념에 대해 실행되지 않습니다.
+
+2. **교차 Feature 컨텍스트 주입** — Feature F003을 작업하는 에이전트는 F001에서 무엇을 결정했는지 기억하지 못합니다. Global Evolution Layer(roadmap, 레지스트리, constitution)가 교차 Feature 지식을 캡처하고 각 파이프라인 단계에 관련 부분집합을 주입합니다. 에이전트는 필요한 것만 정확히 봅니다 — 참조해야 할 엔티티 스키마, 준수해야 할 API 계약, 따라야 할 Foundation 결정.
+
+3. **합성 가능한 도메인 지식** — 프로젝트 유형은 크게 다릅니다(REST API vs 데스크톱 앱 vs 모바일). 하나의 거대한 규칙 세트 대신, 도메인 지식을 독립 모듈(Interface × Concern × Scenario × Foundation)로 분해하여 자유롭게 합성합니다. 데스크톱 재구축은 `gui + ipc + rebuild + electron`을 로드하고, 그린필드 API는 `http-api + auth + greenfield + express`를 로드합니다. 불필요한 규칙 없고, 누락된 컨텍스트 없습니다.
+
+4. **비가역적 경계에서의 인간 체크포인트** — 파이프라인은 연구, 컨텍스트 조립, 코드 생성을 자율적으로 처리합니다. 하지만 spec-kit 명령 실행 전(비가역적 아티팩트 생성)과 결과 수용 전(다운스트림 Feature에 반영됨)에 HARD STOP이 인간 검토를 강제합니다. 에이전트가 무거운 작업을 하되 인간이 결정을 통제하는 신뢰-검증 루프를 만듭니다.
+
+5. **점진적 세부 캡처** — 분석은 넓은 범위에서 시작(기술 스택, 프로젝트 구조)하여 점점 세밀한 수준으로 진행합니다(함수 시그니처 → UI 컴포넌트 기능 → 마이크로 인터랙션 → 툴팁과 hover 효과). 각 수준은 다음 수준에 피드되므로, 상위 수준의 컨텍스트 없이는 어떤 것도 분석되지 않습니다.
+
 ### 3축 도메인 합성
 
 도메인 동작(SC 생성, 검증, 프로브, 버그 방지)은 프로젝트 유형마다 다릅니다. REST API는 엔드포인트 상태 코드 검사가 필요하고, 데스크톱 앱은 IPC 경계 안전성 검사가 필요하며, 재구축 프로젝트는 동작 패리티 검증이 필요합니다. 모든 프로젝트에 모든 규칙을 로드하는 단일 파일 대신, 도메인 지식을 세 개의 독립 축으로 분해합니다:
@@ -156,6 +170,18 @@ Interface (앱이 노출하는 것)        Concern (횡단 관심사)           
 
 새 모듈은 기존 모듈과 자유롭게 합성됩니다 — 중복 없이, 불필요한 규칙 없이. 각 인터페이스 모듈은 **S8 런타임 검증 전략**도 선언합니다 — 해당 인터페이스 타입을 런타임에서 어떻게 시작, 검증, 종료하는지 정의합니다. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md`, 다중 백엔드 런타임 검증 아키텍처는 `reference/runtime-verification.md` 참고.
 
+**새 Foundation 추가** (예: 팀이 기본 Foundation 파일이 없는 Remix를 사용하는 경우):
+1. `_foundation-core.md`의 F0-F4 형식에 따라 `reverse-spec/domains/foundations/remix.md` 생성
+2. 감지 신호(F0), 카테고리(F1), 항목(F2), 추출 규칙(F3), T0 그룹핑(F4) 정의
+3. 시스템이 F0 신호를 통해 자동으로 Remix를 감지하고 전체 Foundation 흐름을 로드
+4. 커스텀 Foundation 파일 없이도 동작 — Case B(범용 카테고리 + 에이전트 프로브)로 폴백
+
+**워크플로우 적응** — 모든 체크포인트와 게이트를 조정할 수 있습니다:
+- **Scope**: `core` 스코프는 T1만 활성화(가장 빠른 경로); `full`은 모두 처리
+- **Preservation**: `equivalent`는 동작 패리티 요구; `similar`는 외관적 차이 허용
+- **파이프라인 단계**: sdd-state.md 플래그를 통해 특정 spec-kit 단계 건너뛰기
+- **심각도 임계값**: `domain-custom.md`를 통해 어떤 verify 버그가 루프백 vs 인라인 수정할지 조정
+
 ### 신호 키워드와 Proposal Mode
 
 각 도메인 모듈은 **S0 신호 키워드**를 선언합니다 — 해당 모듈이 활성화되어야 함을 나타내는 용어들입니다. 아이디어 문자열로 프로젝트를 시작하면 (`init "AI로 웹 페이지를 요약하는 Chrome 확장 프로그램"`), 에이전트가 모든 S0 키워드를 스캔하여 Domain Profile을 자동으로 추론합니다. "React"는 `gui`를, "REST API"는 `http-api`를, "OpenAI"는 `external-sdk`를 트리거합니다 — 수동 설정 없이 자동으로.
@@ -163,6 +189,125 @@ Interface (앱이 노출하는 것)        Concern (횡단 관심사)           
 이 추론은 **Clarity Index (CI)**로 채점됩니다 — 7개 차원(목적, 기능, 유형, 스택, 사용자, 규모, 제약조건)에 걸쳐 아이디어의 구체성을 측정하는 백분율입니다. CI는 에이전트 행동을 결정합니다: 높은 CI(70%+)는 명확화를 건너뛰고 Proposal을 바로 생성하고, 낮은 CI는 활성 모듈의 S5 정교화 프로브를 사용하여 타겟 질문을 합니다.
 
 CI는 파이프라인으로 전파됩니다 — 초기 CI가 낮을수록 specify와 plan에서 더 많은 검증 체크포인트가 적용되어, 모호한 아이디어가 불완전한 스펙을 생성하지 않도록 합니다. 전체 모델은 `reference/clarity-index.md` 참고.
+
+### 플랫폼 파운데이션
+
+특정 프레임워크(Electron, Express, Next.js 등)로 구축하는 프로젝트에는 비즈니스 Feature 이전에 확립해야 할 인프라 결정이 있습니다 — 싱글 인스턴스 잠금, IPC 아키텍처, 미들웨어 체인, 렌더링 전략 등. 플랫폼 파운데이션 레이어는 이러한 결정을 명시적으로 캡처합니다:
+
+```
+Profile (desktop-app, web-api, fullstack-web, cli-tool)
+   │
+   ├── Interface 모듈 (gui, http-api, cli, data-io)
+   ├── Concern 모듈 (auth, async-state, ipc, i18n, realtime, external-sdk)
+   ├── Scenario (greenfield, rebuild, incremental, adoption)
+   ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)   ← NEW
+   └── Custom (프로젝트별 오버라이드)
+```
+
+**Foundation 파일**(`reverse-spec/domains/foundations/`)은 프레임워크별 인프라 결정의 포괄적 체크리스트를 제공합니다. 각 항목은 우선순위(Critical / Important / Optional)로 분류되고 카테고리(Window Management, Security, IPC, Middleware, Routing 등)로 그룹핑됩니다.
+
+**재구축 모드** (`/reverse-spec`): 기존 코드에서 Foundation 결정을 추출하여 pre-context에 문서화합니다.
+**그린필드 모드** (`/smart-sdd init`): Critical Foundation 항목을 사용자에게 제시하여 파이프라인 시작 전에 명시적 결정을 받습니다.
+
+Foundation 레이어는 프레임워크 마이그레이션(예: Express → NestJS)을 4단계 분류 시스템으로 지원합니다: carry-over, equivalent, irrelevant, new — 스택 변경 시 인프라 결정을 보존합니다.
+
+전체 프로토콜, 케이스 매트릭스, 교차 프레임워크 이전 맵은 `domains/foundations/_foundation-core.md` 참고.
+
+### Tier 시스템
+
+Feature는 처리 순서를 결정하는 Tier로 조직됩니다:
+
+| Tier | 목적 | 처리 시점 |
+|------|------|----------|
+| **T0** | **플랫폼 파운데이션** — 인프라 결정 (프레임워크 고유) | 가장 먼저 (비즈니스 Feature 이전) |
+| **T1** | 필수 — 시스템이 이것 없이는 기능할 수 없음 | T0 이후 |
+| **T2** | 권장 — 핵심 사용자 경험 완성 | T1 이후 |
+| **T3** | 선택 — 보조적, 관리 도구, 편의 기능 | T2 이후 |
+
+T0 Feature는 코드가 필요한 Critical 항목이 있는 Foundation 카테고리에서 자동 생성됩니다. T1이 시작되기 전에 완료되어야 하며, Foundation Gate가 이를 강제합니다.
+
+### 데이터 흐름
+
+```
+1. 분석 (reverse-spec 또는 init):
+   소스 코드 → 기술 스택 감지 → 프레임워크 식별 →
+   Foundation 추출 → Feature 추출 →
+   Global Evolution 아티펙트 (roadmap, 레지스트리, pre-context)
+
+2. 개발 (smart-sdd pipeline):
+   각 Feature별 (T0 → T1 → T2 → T3):
+   컨텍스트 조립 → 체크포인트 (HARD STOP) →
+   spec-kit 실행 → 검토 (HARD STOP) → 상태 갱신
+
+3. 검증 (verify phases):
+   빌드 → 테스트 → 린트 → 교차 Feature 일관성 →
+   런타임 SC 검증 → Demo-Ready 확인 → Foundation 준수성
+```
+
+### Feature 생명주기
+
+```
+specify → plan → tasks → implement → verify → merge
+   │                                    │
+   │  ◄──── Major-Spec ───────────────┤
+   │  ◄──── Major-Plan ───────────────┤
+   │  ◄──── Major-Implement ──────────┤
+   │                                    │
+   └── Minor Fix (인라인, ≤2 파일) ─────┘
+```
+
+verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 이슈만 인라인으로 수정하고, Major 이슈는 해당 파이프라인 단계로 되돌립니다.
+
+### 세션 복원력 & 에이전트 거버넌스
+
+장시간 파이프라인 세션은 두 가지 구조적 위험에 직면합니다: **컨텍스트 윈도우 손실**(에이전트가 세션 중간에 진행 상황을 잊음)과 **비제어 편집**(에이전트가 분류 없이 코드를 패치함). 시스템은 두 문제를 모두 해결합니다:
+
+**압축 복원 가능 상태(Compaction-Resilient State)** — Verify 진행 상황, 프로세스 규칙, Minor Fix 누적기가 모든 Phase 경계에서 `sdd-state.md`에 기록됩니다. verify 도중 컨텍스트 윈도우가 압축되면, 재개 프로토콜이 저장된 상태를 읽고 정확한 Phase부터 재개합니다 — 반복 작업 없이, 분류 손실 없이. 이를 통해 수 시간에 걸친 파이프라인 세션이 생존 가능합니다.
+
+**소스 수정 게이트(Source Modification Gate)** — verify 중 모든 소스 편집은 코드 수정 *전에* 반드시 분류(Minor / Major-Implement / Major-Plan / Major-Spec)되어야 합니다. 분류 결과에 따라 수정이 인라인으로 이루어지거나 올바른 파이프라인 단계로 되돌아갑니다. Minor Fix 누적기가 Feature별 인라인 수정 횟수를 추적하며 — 3회에 도달하면 자동으로 Major로 에스컬레이션하여, 사소한 패치로 위장된 구조적 드리프트를 방지합니다.
+
+**컨텍스트 윈도우 관리** — 스킬 파일은 지연 로딩 단위로 분해됩니다: `SKILL.md`(항상 로드, ~60줄)가 `commands/{cmd}.md`(명령별 로드)로 라우팅하고, 이는 `injection/{cmd}.md`(파이프라인 단계별 로드)와 `domains/{module}.md`(프로젝트 프로필별 로드)를 참조합니다. 데스크톱 Electron 재구축은 ~3,200 토큰의 도메인 규칙을 로드하고, CLI 그린필드는 ~800 토큰만 로드합니다. 사용하지 않는 모듈은 컨텍스트에 진입하지 않습니다.
+
+**컨텍스트 버짓 프로토콜** — 파이프라인 단계의 조립된 주입 컨텍스트가 컨텍스트 윈도우 한계에 근접하면, 3단계 우선순위 시스템으로 트리아지합니다: **P1**(필수 주입 — spec.md, tasks.md, Pattern Constraints), **P2**(≤30%로 요약 가능 — business-logic-map, 참조 엔티티, 이전 Feature 결과), **P3**(생략 가능 — 네이밍 리매핑, CSS 값 맵, 비주얼 참조). 오버플로 프로토콜: P2 요약 → P3 생략 → 분할(병렬 태스크 배치 축소). 각 Checkpoint에 버짓 인디케이터를 표시하여 사용자가 어떤 컨텍스트가 축소되었는지 확인할 수 있습니다.
+
+### 프로젝트 모드
+
+| 모드 | 진입점 | 사용 사례 |
+|------|--------|----------|
+| 그린필드 | `/smart-sdd init` → `add` → `pipeline` | 처음부터 새 프로젝트 |
+| 점진적 추가 | `/smart-sdd add` → `pipeline` | 기존 smart-sdd 프로젝트에 Feature 추가 |
+| 재구축 | `/reverse-spec` → `/smart-sdd pipeline` | 기존 코드베이스를 SDD로 재구축 |
+| 도입 | `/reverse-spec --adopt` → `/smart-sdd adopt` | 기존 코드에 SDD 문서 래핑 |
+
+### 주요 아티펙트
+
+| 아티펙트 | 위치 | 목적 |
+|----------|------|------|
+| Roadmap | `specs/reverse-spec/roadmap.md` | Feature 카탈로그, 의존성 그래프, 릴리스 그룹 |
+| Entity Registry | `specs/reverse-spec/entity-registry.md` | 공유 데이터 모델 정의 |
+| API Registry | `specs/reverse-spec/api-registry.md` | API 계약 명세 |
+| Business Logic Map | `specs/reverse-spec/business-logic-map.md` | 교차 Feature 비즈니스 규칙 |
+| Pre-context | `specs/reverse-spec/features/F00N-*/pre-context.md` | Feature별 spec-kit 컨텍스트 |
+| Constitution | `.specify/memory/constitution.md` | 프로젝트 전역 원칙 및 Best Practices |
+| State | `specs/reverse-spec/sdd-state.md` | 파이프라인 진행, 툴체인, Foundation 결정 |
+
+### 프로젝트에 맞게 적용하기
+
+기본값에서 시작하여 점진적으로 커스터마이즈할 수 있도록 설계되었습니다:
+
+**레벨 0 — 기본 설정**: 커스터마이징 없이 `/smart-sdd init` 또는 `/reverse-spec` 실행. 에이전트가 프로필, 프레임워크, 인터페이스, 관심사를 자동 감지합니다. 대부분의 프로젝트에서 즉시 작동합니다.
+
+**레벨 1 — 도메인 프로필 조정**: `sdd-state.md`를 편집하여 활성 Interface와 Concern을 추가/제거합니다. `auth`를 로드하면 인증 관련 SC 규칙이 추가되고, `i18n`을 제거하면 국제화 검사를 건너뜁니다.
+
+**레벨 2 — 프로젝트 고유 규칙**: 프로젝트에 `specs/reverse-spec/domain-custom.md`를 생성합니다. 동일한 S1/S5/S7 스키마로 규칙을 추가합니다 (예: "모든 결제 엔드포인트에 멱등성 SC 필수", "다크 모드 verify에서 반드시 테스트"). 이 파일은 최우선 순위로 마지막에 로드됩니다 — 스킬 파일 수정 불필요.
+
+**레벨 3 — 새 도메인 모듈**: 커스텀 Interface 또는 Concern 파일을 생성합니다 (예: `domains/interfaces/grpc.md`, `domains/concerns/caching.md`). 모듈 형식은 `domains/_schema.md` 참고. 기본 제공 모듈과 자동으로 합성됩니다.
+
+**레벨 4 — 새 Foundation 체크리스트**: 아직 지원되지 않는 프레임워크용 `reverse-spec/domains/foundations/{framework}.md`를 생성합니다. 없어도 정상 동작하지만(Case B: 범용 카테고리 + 에이전트 프로브), 전용 체크리스트가 있으면 누락이 없습니다.
+
+**레벨 5 — 파이프라인 동작 수정**: 참조 파일을 통해 verify 심각도 임계값, 파이프라인 단계 순서, HARD STOP 동작, 컨텍스트 주입 규칙을 오버라이드합니다. 자동화 속도와 검토 철저함 사이의 균형을 고급 사용자가 조정할 수 있습니다.
+
+모든 커스터마이징 레벨은 하위 호환 — 레벨 2 프로젝트는 스킬 파일이 업데이트되어도 깨지지 않습니다. `domain-custom.md`가 스킬 저장소가 아닌 사용자 프로젝트 디렉토리에 있기 때문입니다.
 
 ---
 
@@ -745,11 +890,11 @@ specs/
 | `SKILL.md` | 스킬 라우터 — reverse-spec 진입점 및 필수 규칙 |
 | `commands/analyze.md` | 소스코드 분석 및 Global Evolution Layer 아티펙트 생성 다단계 워크플로우 |
 | **Domains** | |
-| `domains/_core.md` | 범용 분석 프레임워크 (R1–R6 분석 섹션) |
+| `domains/_core.md` | 범용 분석 프레임워크 (R1–R7 분석 섹션, Foundation Detection Heuristics 포함) |
 | `domains/_schema.md` | 도메인 프로필 스키마 템플릿 (Detection Signals, Analysis Axes, Feature Registry 등) |
 | `domains/app.md` | 애플리케이션 도메인 프로필 — backend/frontend/fullstack/mobile/library 감지 및 분석 |
 | `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
-| `domains/interfaces/gui.md` | GUI 인터페이스 — 런타임 탐색, 시각적 동작 분석 |
+| `domains/interfaces/gui.md` | GUI 인터페이스 — R3 UI 컴포넌트 추출, R4 마이크로 인터랙션 패턴 추출 (호버, 키보드, 애니메이션, DnD, 포커스, 컨텍스트 메뉴, 스크롤) |
 | `domains/interfaces/http-api.md` | HTTP API 인터페이스 — 엔드포인트 탐색, 요청/응답 분석 |
 | `domains/interfaces/cli.md` | CLI 인터페이스 — 커맨드 파싱, 인자 분석 |
 | `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 탐색, 데이터 플로우 분석 |
@@ -759,6 +904,17 @@ specs/
 | `domains/concerns/i18n.md` | Internationalization concern — 로케일 키 감지 |
 | `domains/concerns/ipc.md` | IPC concern — 프로세스간 통신 감지 (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE 감지 |
+| **Foundations** | |
+| `domains/foundations/_foundation-core.md` | Foundation 해석 프로토콜 — 감지 신호, 카테고리 분류, 케이스 매트릭스, T0 그룹핑, 교차 프레임워크 이전 맵 |
+| `domains/foundations/electron.md` | Electron Foundation — 58개 항목, 13개 카테고리 (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
+| `domains/foundations/tauri.md` | Tauri Foundation — 44개 항목, 12개 카테고리 |
+| `domains/foundations/express.md` | Express.js Foundation — 43개 항목, 12개 카테고리 |
+| `domains/foundations/nextjs.md` | Next.js Foundation — 44개 항목, 13개 카테고리 |
+| `domains/foundations/vite-react.md` | Vite + React Foundation — 43개 항목, 12개 카테고리 |
+| `domains/foundations/nestjs.md` | NestJS Foundation — TODO 스캐폴드 (51개 항목, 13개 카테고리) |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO 스캐폴드 (41개 항목, 12개 카테고리) |
+| `domains/foundations/react-native.md` | React Native Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
+| `domains/foundations/flutter.md` | Flutter Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
 | `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
 | **Templates** | |
 | `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
@@ -793,7 +949,7 @@ specs/
 | `domains/_schema.md` | 도메인 프로필 스키마 — 데모 패턴, 패리티 차원, 검증 동작 |
 | `domains/app.md` | 애플리케이션 도메인 프로필 — 데모 패턴, 린트 감지 규칙, UI 테스팅, 버그 방지 |
 | `domains/data-science.md` | 데이터 사이언스 도메인 프로필 템플릿 (미구현 — 의도적 TODO 스캐폴딩) |
-| `domains/interfaces/gui.md` | GUI 인터페이스 — CSS 렌더링 버그, UI 인터랙션 서피스 감사, 시각적 충실도 |
+| `domains/interfaces/gui.md` | GUI 인터페이스 — CSS 렌더링 버그, UI 인터랙션 서피스 감사, 시각적 충실도, 마이크로 인터랙션 검증 |
 | `domains/interfaces/http-api.md` | HTTP API 인터페이스 — API 호환성 매트릭스, 런타임 검증 |
 | `domains/interfaces/cli.md` | CLI 인터페이스 — CLI 검증, 프로세스 러너 백엔드 |
 | `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 검증, 데이터 플로우 테스팅 |

@@ -188,6 +188,17 @@ Identify the overall structure and tech stack of the target directory.
 ### 1-2. Tech Stack Detection
 Read configuration files to identify the tech stack. See `domains/_core.md` § R3 (Tech Stack Detection) for the detection-target-to-file mapping.
 
+### 1-2b. Framework Identification
+
+From Phase 1-2 tech stack results, identify the primary framework(s):
+
+1. Match detected tech against Foundation Detection Signals
+   (See `domains/foundations/_foundation-core.md` § F0)
+2. Record: `Framework: {name}` (comma-separated if multiple, e.g., `electron`, `express,nextjs`)
+3. If no match: `Framework: custom` (no Foundation loaded)
+
+This determination feeds into Phase 2-8 (Foundation Decision Extraction) and into `smart-sdd init` Step 3b for greenfield projects.
+
 ### 1-3. Project Type Classification
 Classify the project type based on the collected information. Use the project types defined in `domains/_core.md` § R2 (Project Type Classification).
 
@@ -965,7 +976,163 @@ Third-party UI libraries provide user-facing capabilities through **configuratio
 
 This inventory feeds into each Feature's `pre-context.md` → "UI Component Features" section (Phase 4-2) and is compared during `/smart-sdd parity` → UI Feature Parity.
 
-Upon completing Phase 2, report a summary of the number of entities, APIs, business rules, environment variables, source behaviors, and UI component features discovered.
+### 2-7b. UI Micro-Interaction Pattern Extraction (Frontend/Fullstack Projects Only)
+
+> Skip this step entirely for backend-only, library, or CLI projects.
+> This step captures interaction-level behaviors (tooltips, hover states, keyboard shortcuts, animations, drag-and-drop, focus management, context menus) that are invisible to both function-level analysis (Phase 2-6) and library-level analysis (Phase 2-7). These behaviors are often implemented via CSS pseudo-classes, event listeners, or small utility components.
+
+See `domains/interfaces/gui.md` § R4 (Micro-Interaction Pattern Extraction) for detection heuristics and extraction rules.
+
+**Two-pronged approach**: Source code analysis (always) + Optional runtime probing (when Playwright is available).
+
+#### A. Source Code Analysis (always executed)
+
+Scan the project's source files for micro-interaction patterns in 7 categories:
+
+**1. Hover Behaviors**:
+- CSS: grep for `:hover` pseudo-class rules → record which elements have hover styles and what changes (color, background, opacity, transform, box-shadow)
+- React/Vue: grep for `onMouseEnter`, `onMouseLeave`, `onMouseOver`, `@mouseenter`, `@mouseleave` → record handler target and behavior
+- Tooltip components: grep for tooltip-related patterns:
+  - Library usage: `<Tooltip`, `<Tippy`, `data-tooltip`, `data-tip`, `v-tooltip`
+  - HTML native: `title=` attribute on interactive elements
+  - Custom: components named `*Tooltip*`, `*Popover*`, `*HoverCard*`
+- Record: `{ element, trigger, behavior, content (for tooltips), delay (if specified) }`
+
+**2. Keyboard Shortcuts**:
+- Event listeners: grep for `addEventListener('keydown')`, `addEventListener('keyup')`, `addEventListener('keypress')`
+- React/Vue: grep for `onKeyDown`, `onKeyUp`, `@keydown`, `@keyup`
+- Library usage: grep for keyboard shortcut libraries (hotkeys-js, mousetrap, react-hotkeys-hook, tinykeys, @mantine/hooks useHotkeys)
+- Global shortcuts: grep for `Mod+`, `Ctrl+`, `Meta+`, `Alt+`, `Shift+` key combinations in string literals
+- Record: `{ shortcut, scope (global/component), action, modifier keys }`
+
+**3. Animations & Transitions**:
+- CSS transitions: grep for `transition:` and `transition-*:` properties → record which properties animate, duration, easing
+- CSS animations: grep for `animation:`, `animation-name:`, `@keyframes` → record animation names, duration, iteration
+- JS animations: grep for `requestAnimationFrame`, `.animate()`, animation libraries (framer-motion, react-spring, GSAP, anime.js, motion)
+- Tailwind: grep for `animate-`, `transition-`, `duration-`, `ease-` utility classes
+- Record: `{ element/selector, type (transition/animation/JS), properties, duration, trigger }`
+
+**4. Focus Management**:
+- Focus styles: grep for `:focus`, `:focus-visible`, `:focus-within` CSS rules
+- Focus control: grep for `.focus()`, `autoFocus`, `tabIndex`, `tabindex`
+- Focus trapping: grep for focus trap libraries (focus-trap-react, @headlessui, react-focus-lock) or custom `keydown` handlers checking `Tab` key
+- Skip links: grep for "skip to content", "skip navigation" patterns
+- Record: `{ element, focus-style, focus-control (auto/programmatic/trapped), tab-order }`
+
+**5. Drag-and-Drop**:
+- Library detection: grep for drag-and-drop libraries (dnd-kit, react-beautiful-dnd, react-dnd, SortableJS, @hello-pangea/dnd, vuedraggable)
+- Native HTML5: grep for `draggable=`, `onDragStart`, `onDragOver`, `onDrop`, `ondragstart`, `ondragover`, `ondrop`
+- Custom: grep for `mousedown`+`mousemove`+`mouseup` handler patterns on the same element
+- Record: `{ source-element, drop-targets, behavior (reorder/transfer/sort), feedback (placeholder/preview/ghost) }`
+
+**6. Context Menus & Right-click**:
+- grep for `onContextMenu`, `addEventListener('contextmenu')`, `@contextmenu`
+- grep for context menu components or libraries (react-contexify, @radix-ui/context-menu)
+- Record: `{ trigger-element, menu-items, behavior }`
+
+**7. Scroll Behaviors**:
+- Scroll events: grep for `onScroll`, `addEventListener('scroll')`, `@scroll`
+- Scroll control: grep for `scrollIntoView`, `scrollTo`, `scrollTop`, `scroll-behavior: smooth`
+- Infinite scroll: grep for `IntersectionObserver`, infinite scroll libraries
+- Sticky elements: grep for `position: sticky`, `position: fixed` with scroll-dependent logic
+- Scroll snap: grep for `scroll-snap-type`, `scroll-snap-align`
+- Record: `{ element, behavior (infinite-scroll/scroll-snap/sticky/smooth-scroll), trigger }`
+
+#### B. Runtime Probing (optional, when Playwright available)
+
+> **When**: `playwright_cli = true` OR `playwright_mcp = true`, AND app was explored in Phase 1.5.
+> **Skip if**: No Playwright available, or Phase 1.5 runtime exploration was skipped.
+> **Budget**: Max 3 minutes, max 10 elements per category.
+
+After source code extraction, selectively probe runtime to confirm key findings:
+
+1. **Tooltip verification** (from source analysis results):
+   - Hover over elements identified as having tooltips → wait 1s → snapshot → check for new tooltip element
+   - Record: actual tooltip text content, position, delay
+
+2. **Keyboard shortcut testing** (from source analysis results):
+   - For each identified shortcut: press key combination → observe result
+   - Record: confirmed working / not triggered / unexpected behavior
+
+3. **Animation observation**:
+   - Navigate between screens → observe if transitions occur
+   - Interact with elements that have CSS transitions → observe visual changes
+   - Record: confirmed animations, approximate timing
+
+> **Note**: Runtime probing ENRICHES source analysis — it does not replace it. Source code analysis captures the full inventory; runtime probing adds confirmation and actual behavior details (tooltip text, animation timing, etc.).
+
+#### C. Output
+
+Write findings to `specs/reverse-spec/micro-interactions.md`.
+
+**ID Format**: Use category-prefixed sequential IDs — `H001`/`H002` for Hover, `K001` for Keyboard, `A001` for Animation, `F001` for Focus, `D001` for Drag-and-Drop, `C001` for Context Menu, `S001` for Scroll. These IDs carry into per-Feature `pre-context.md` Interaction Behavior Inventory tables.
+
+```markdown
+# Micro-Interaction Inventory
+
+> Generated by `/reverse-spec` Phase 2-7b — [ISO timestamp]
+> Source analysis: [N] patterns detected across [M] files
+> Runtime probing: [confirmed/skipped]
+
+## Hover Behaviors
+| ID | Element/Component | Trigger | Behavior | Content | Source File |
+|----|-------------------|---------|----------|---------|-------------|
+
+## Keyboard Shortcuts
+| ID | Shortcut | Scope | Action | Source File |
+|----|----------|-------|--------|-------------|
+
+## Animations & Transitions
+| ID | Element/Selector | Type | Properties | Duration | Trigger | Source File |
+|----|------------------|------|------------|----------|---------|-------------|
+
+## Focus Management
+| ID | Element | Focus Style | Control | Tab Order | Source File |
+|----|---------|-------------|---------|-----------|-------------|
+
+## Drag-and-Drop
+| ID | Source Element | Drop Targets | Behavior | Feedback | Source File |
+|----|---------------|--------------|----------|----------|-------------|
+
+## Context Menus
+| ID | Trigger Element | Menu Items | Source File |
+|----|-----------------|------------|-------------|
+
+## Scroll Behaviors
+| ID | Element | Behavior | Trigger | Source File |
+|----|---------|----------|---------|-------------|
+```
+
+This inventory feeds into each Feature's `pre-context.md` → "Interaction Behavior Inventory" section (Phase 4-2) and is used by `/smart-sdd verify` for micro-interaction completeness checking.
+
+### 2-8. Foundation Decision Extraction
+
+For each identified framework (from Phase 1-2b):
+
+1. Load `domains/foundations/{framework}.md`
+   - If Foundation file exists (Case A): Load full F2 items
+   - If no Foundation file but framework known (Case B): Load universal categories from `domains/foundations/_foundation-core.md` § F1
+   - If framework is `custom` (Case D): Skip this step entirely
+
+2. For each Foundation item marked **Critical** or **Important**:
+   - Apply F3 Extraction Rules to determine current decision in code
+   - Record: `decided` / `not-configured` / `ambiguous`
+
+3. Output: Foundation Decision Table per framework
+
+| ID | Item | Detected Value | Confidence | Source File |
+|----|------|---------------|------------|-------------|
+
+4. Flag `ambiguous` items for user clarification during `smart-sdd init` Step 3b or `smart-sdd pipeline` pre-phase review
+
+**Foundation Migration** (rebuild with framework change only):
+If `change_scope = "framework"` or `"stack"`, apply the Migration Protocol from `domains/foundations/_foundation-core.md` § F5:
+- Load OLD framework Foundation from extracted code decisions
+- Load NEW framework Foundation from target framework file
+- Classify each item: carry-over / equivalent / irrelevant / new
+- Output: Foundation Migration Table (see § F5 for format)
+
+Upon completing Phase 2, report a summary of the number of entities, APIs, business rules, environment variables, source behaviors, UI component features, and Foundation decisions discovered.
 
 ---
 
@@ -1351,6 +1518,9 @@ Contents to include in each pre-context.md:
 
   > **SBI Per-Feature Filtering**: Filter only behaviors belonging to this Feature's source files from the Phase 2-6 global SBI. B### IDs are assigned sequentially and uniquely across the entire project in Feature ID order.
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects
+- **Interaction Behavior Inventory** (frontend/fullstack projects only): Micro-interaction patterns from Phase 2-7b (hover behaviors, keyboard shortcuts, animations, focus management, drag-and-drop, context menus, scroll behaviors), filtered to this Feature's associated components and screens. Omit for backend-only projects
+- **Foundation Decisions** (if Framework ≠ "custom"): From Phase 2-8 extraction results, populate the Foundation Decisions section (Critical, Important, Undecided tables) with items relevant to this Feature's domain. For T0 Features (F000-*): include all items from their owning Foundation categories. For T1+ Features: include only Foundation decisions that constrain this Feature
+- **Foundation Dependencies**: For each Feature, classify its relationship to Foundation categories — `owns` (T0 only), `consumes` (T1+ uses Foundation decisions as constraints), `extends` (rare, adds to Foundation). Skip if Framework is "custom" or "none"
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
 - **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features
@@ -1376,6 +1546,7 @@ Parse the original source (target directory) and compare against the generated a
 | DB models/entities | Parse model/entity definitions (Phase 2-1 patterns) | Count entries in entity-registry.md | Entity name matching |
 | Source behaviors | Count exported functions/methods (Phase 2-6) | Count entries in all pre-context.md Source Behavior Inventory tables | Function name matching |
 | UI component features | Count library features (Phase 2-7, if applicable) | Count entries in all pre-context.md UI Component Features tables | Feature name matching |
+| Micro-interaction inventory | Count patterns (Phase 2-7b, if applicable) | Count entries in all pre-context.md Interaction Behavior Inventory tables | Feature + screen matching |
 | Test files | Glob test file patterns (`**/*test*`, `**/*spec*`, `**/__tests__/**`) | Count test files listed in pre-context.md Source Reference | File path matching |
 | Business rules | Count rules identified in Phase 2-3 | Count entries in business-logic-map.md | Rule ID matching |
 

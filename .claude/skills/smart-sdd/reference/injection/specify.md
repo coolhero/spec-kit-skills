@@ -48,11 +48,18 @@ To resolve file paths at runtime:
 - **Draft acceptance criteria (SC-###)**: Draft Success Criteria / Acceptance Scenario extracted from pre-context. For UI Features, SCs should include verifiable UI actions where possible (e.g., "User enters credentials in login form and clicks Submit → dashboard screen is displayed"). These SC descriptions are converted to automated verification actions in the demo script's Coverage header
 - **Source behavior inventory**: If present, the function-level behavior list with priorities — remind that each P1/P2 behavior should map to at least one FR-###. This prevents functionality loss during rebuild. **NEW entries** (Origin=`new`): Treat as new requirements to be specified, not as coverage of existing code. They should still map to FR-### but do not represent original source behaviors
 - **UI component features**: If present, the third-party UI library capabilities — remind that each UI feature should map to an FR-###. These features (toolbar items, editing modes, plugins) are invisible to function-level analysis
+- **Interaction behavior inventory**: If present, the micro-interaction patterns from pre-context (hover behaviors, keyboard shortcuts, animations, focus management, drag-and-drop, context menus, scroll behaviors) — remind that each P1/P2 interaction should map to an FR-### or be captured as a verifiable SC. For **greenfield/add** projects without a pre-existing inventory: prompt the user to define key micro-interactions during specify (e.g., "Should this Feature have keyboard shortcuts? Tooltips on action buttons? Drag-and-drop reordering?") and record defined interactions as new FR-### entries. SC descriptions should include interaction verbs (e.g., "User hovers over settings icon → tooltip 'Settings' appears", "User presses Ctrl+K → command palette opens")
 - **Runtime exploration observations**: If present, the per-screen UI observations from Phase 1.5 runtime exploration — observed UI layouts inform FR descriptions, observed user flows inform SC scenarios, observed errors inform edge case SCs. If the section says "Skipped", note it and proceed without runtime context
 - **Business rules**: List of rules for the Feature from business-logic-map (skipped if business-logic-map.md does not exist)
 - **Edge cases**: Edge cases found in pre-context and business-logic-map
 - **Original source reference**: File list from Source Reference (skipped if Source Reference is N/A)
 - **Naming remapping**: If Naming Remapping section exists in pre-context, remind that requirements and descriptions should use the new identifiers (e.g., "AngduProvider" not "CherryProvider")
+- **Foundation Decisions** (from sdd-state.md § Foundation Decisions):
+  - Framework: {name}
+  - Critical decisions relevant to this Feature's domain
+  - For T0 Features: full Foundation category items as requirements source
+  - For T1+ Features: only Foundation decisions that constrain this Feature
+  - **If Foundation Decisions section is empty or absent**: Skip Foundation injection, note "No Foundation decisions — framework-agnostic mode"
 
 ### Preceding Feature Result Reference
 

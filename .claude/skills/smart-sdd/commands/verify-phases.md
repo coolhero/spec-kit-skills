@@ -44,6 +44,17 @@ When verify discovers a bug (or the user provides feedback during Review), class
 4. Display: `↩️ Returning to [stage] for [FID]. Verify results preserved as regression context.`
 5. Resume pipeline from the selected stage — all subsequent steps (specify → plan → tasks → implement → verify) re-execute
 
+**Regression depth limit**:
+Track regression count per Feature in the Feature Detail Log. Each `↩️ REGRESSION` entry increments the counter.
+- After **2 regressions** for the same Feature (regardless of severity target): HARD STOP
+  **Use AskUserQuestion**: "Feature [FID] has regressed 2 times. How to proceed?"
+  - "Continue with 3rd regression" — allow one more attempt
+  - "Abort Feature — mark as blocked" — set status to `blocked`, move to next Feature
+  - "Manual review — pause pipeline" — pause for user investigation
+  **If response is empty → re-ask** (per MANDATORY RULE 1)
+- After **3 regressions**: Force block. Set status to `blocked`, display: `🚫 Feature [FID] blocked after 3 regressions. Manual intervention required.`
+- Regression counter is tracked per-Feature, not per-session (persisted in sdd-state.md Feature Detail Log by counting `↩️ REGRESSION` entries)
+
 **Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt. Additionally, user feedback during verify Review often identifies issues that are not bugs but rather spec-level or plan-level problems. Without structured regression routing, these fixes happen ad-hoc, outside the pipeline's quality gates.
 
 ### Verify-time Change Recording — All Source Modifications
@@ -226,6 +237,24 @@ Update `⚠️ RESUME FROM` to point to the next pending Phase.
 - Delete the `#### Verify Process Rules` section from sdd-state.md
 - Delete the `#### Minor Fix Accumulator` section from sdd-state.md
 - Write final result to Notes column as before
+
+---
+
+### Pre-Resumption Validation (run before Resumption Protocol)
+
+Before resuming verify from saved state:
+1. **sdd-state.md readable**: File exists, markdown parses, State Schema Version present
+2. **Verify Progress table exists**: Feature Detail Log has `### Verify Progress` for current Feature
+3. **Process Rules Checklist exists**: `#### Verify Process Rules` section present
+4. **Minor Fix Accumulator exists**: `#### Minor Fix Accumulator` section present (may be empty)
+5. **Phase status consistency**: No phase marked `🔄 in_progress` (should have been saved as `⏳ pending` or `✅`)
+
+If ANY check fails:
+- Display: "Verify state integrity issue: {specific problem}"
+- **Use AskUserQuestion**: "Verify state has issues. How to proceed?"
+  - Options: "Reset verify from Phase 0", "Attempt auto-repair", "Abort verify"
+- **If response is empty → re-ask** (per MANDATORY RULE 1)
+- Auto-repair: re-create missing sections with `⏳ pending` status
 
 ---
 
@@ -1130,6 +1159,13 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
        - `wait-for selector textContent "pattern" [timeout]` → wait until element text matches (use Playwright `toHaveText` or MCP text poll)
        - `verify-scroll selector "bottom"` → evaluate `scrollTop + clientHeight >= scrollHeight - 5` via JavaScript execution
        - `trigger selector event` → dispatch event via JavaScript execution
+       - `hover selector` → move cursor over element via Playwright `hover()` — for tooltips, hover menus, hover effects
+       - `press-key "shortcut"` → press keyboard shortcut via Playwright `keyboard.press()` — e.g., `press-key "Control+s"`, `press-key "Escape"`
+       - `drag-to source-selector target-selector` → drag element from source to target via Playwright `dragTo()` — for drag-and-drop, reorder
+       - `focus selector` → focus element via Playwright `focus()` — for focus ring, focus trap, tab order verification
+       - `verify-tooltip selector "expected-text"` → hover over element, wait 1s, verify tooltip/popover text content appears
+       - `right-click selector` → right-click via Playwright `click({ button: 'right' })` — for context menu verification
+       - `verify-animation selector property` → check computed style change after interaction — for CSS transition/animation verification (compare before/after values)
      - ⬜-marked SC: Skip (record reason)
   3. Collect JS errors from Console logs (TypeError, ReferenceError, etc.)
   4. Detect page load failures

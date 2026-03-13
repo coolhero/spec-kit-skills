@@ -124,6 +124,59 @@
 > **New Stack migration note** (if applicable): For each library, suggest equivalent options in the new stack.
 > **How to use**: During `/speckit.specify`, ensure each UI feature maps to an FR-###. During `/speckit.plan`, decide on the library/approach. During `/smart-sdd parity`, compare against this list.
 
+### Interaction Behavior Inventory
+
+> **Only present for frontend/fullstack projects** with interactive UI behaviors.
+> Lists micro-interaction patterns (hover effects, tooltips, keyboard shortcuts, animations, drag-and-drop, focus management, context menus, scroll behaviors) extracted from source code analysis and runtime probing.
+> These behaviors are invisible to function-level analysis (Source Behavior Inventory) and library-level analysis (UI Component Features).
+> Omit this section for backend-only, library, or CLI projects.
+
+#### Hover Behaviors
+
+| ID | Element/Component | Trigger | Behavior | Content | Source File |
+|----|-------------------|---------|----------|---------|-------------|
+| `[H001]` | `[.button-primary]` | `[mouseenter]` | `[opacity change + tooltip]` | `[Tooltip: "Save document"]` | `[src/components/Button.tsx]` |
+
+#### Keyboard Shortcuts
+
+| ID | Shortcut | Scope | Action | Source File |
+|----|----------|-------|--------|-------------|
+| `[K001]` | `[Ctrl+S]` | `[global]` | `[Save current document]` | `[src/hooks/useKeyboard.ts]` |
+
+#### Animations & Transitions
+
+| ID | Element/Selector | Type | Properties | Duration | Trigger | Source File |
+|----|------------------|------|------------|----------|---------|-------------|
+| `[A001]` | `[.modal-overlay]` | `[transition]` | `[opacity]` | `[200ms ease-out]` | `[mount/unmount]` | `[src/components/Modal.tsx]` |
+
+#### Focus Management
+
+| ID | Element | Focus Style | Control | Tab Order | Source File |
+|----|---------|-------------|---------|-----------|-------------|
+| `[F001]` | `[.modal-dialog]` | `[ring-2 ring-blue-500]` | `[trapped]` | `[custom]` | `[src/components/Modal.tsx]` |
+
+#### Drag-and-Drop
+
+| ID | Source Element | Drop Targets | Behavior | Feedback | Source File |
+|----|---------------|--------------|----------|----------|-------------|
+| `[D001]` | `[.task-card]` | `[.column-container]` | `[reorder]` | `[placeholder]` | `[src/components/KanbanBoard.tsx]` |
+
+#### Context Menus
+
+| ID | Trigger Element | Menu Items | Source File |
+|----|-----------------|------------|-------------|
+| `[C001]` | `[.file-item]` | `[Open, Rename, Delete, Properties]` | `[src/components/FileList.tsx]` |
+
+#### Scroll Behaviors
+
+| ID | Element | Behavior | Trigger | Source File |
+|----|---------|----------|---------|-------------|
+| `[S001]` | `[.message-list]` | `[infinite-scroll]` | `[IntersectionObserver at bottom]` | `[src/components/ChatView.tsx]` |
+
+> **Priority**: P1 = core interaction (must reproduce), P2 = enhancement (should reproduce), P3 = polish (can defer).
+> **How to use**: During `/speckit.specify`, ensure each P1/P2 interaction maps to an FR-### or is noted as a non-functional requirement in SCs. During `/speckit.plan`, design components to support these interactions. During `/smart-sdd verify`, check interaction completeness.
+> If this Feature has no micro-interactions (e.g., backend processing, data-only Feature), write "N/A — no interactive UI in this Feature".
+
 ### Naming Remapping
 
 > **Only present when the project identity changed** (Phase 0 Question 3). Omit this section entirely if the project name is unchanged.
@@ -237,6 +290,45 @@
 | CSP strict mode | F001-shell | `Content-Security-Policy: script-src 'self'` | Cannot use inline scripts or eval() |
 
 > If no platform constraints from preceding Features, write "None".
+
+### Foundation Decisions
+
+> Framework-specific infrastructure decisions extracted during Phase 2-8 or recorded during smart-sdd init Step 3b.
+> These decisions are **constraints** — implementations must conform, not override.
+> Omit this section if `Framework: custom` or `Framework: none`.
+
+**Framework**: {name}
+
+#### Critical Decisions
+
+| ID | Item | Decision | Confidence | Source |
+|----|------|----------|------------|--------|
+
+#### Important Decisions
+
+| ID | Item | Decision | Confidence | Source |
+|----|------|----------|------------|--------|
+
+#### Undecided / Ambiguous
+
+| ID | Item | Notes |
+|----|------|-------|
+
+> If no Foundation decisions apply (framework-agnostic project), write "No Foundation decisions — framework-agnostic mode."
+
+### Foundation Dependencies
+
+> How this Feature relates to Foundation decisions.
+
+| Foundation Category | Dependency Type | Notes |
+|---------------------|----------------|-------|
+
+> Dependency Types:
+> - **owns**: This Feature IS the Foundation for this category (T0 only)
+> - **consumes**: This Feature USES Foundation decisions as constraints (T1+)
+> - **extends**: This Feature adds to Foundation capabilities (rare, needs justification)
+>
+> If no Foundation dependencies, write "None — this Feature has no Foundation dependencies."
 
 ### Functional Enablement Chain
 

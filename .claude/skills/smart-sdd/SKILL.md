@@ -195,7 +195,7 @@ The `--profile` argument (or `--domain` for backward compatibility) selects the 
 
 Loaded modules provide: **SC Generation Rules** (S1), **Parity Dimensions** (S2), **Verify Steps** (S3), **Elaboration Probes** (S5), **UI Testing** (S6), **Bug Prevention Rules** (S7).
 
-For reverse-spec domain profiles (analysis axes, detection signals), see `../reverse-spec/domains/_resolver.md`.
+For reverse-spec domain modules (analysis axes, detection signals), see `../reverse-spec/domains/_core.md` and `../reverse-spec/domains/_schema.md`.
 
 ---
 

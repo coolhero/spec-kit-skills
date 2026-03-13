@@ -48,6 +48,15 @@
 
 ### [Core Scope] Feature Catalog by Tier
 
+#### Tier 0 — Platform Foundation
+> Framework infrastructure decisions that must be established before business Features. Auto-generated from Foundation categories when a framework is detected. See `domains/foundations/_foundation-core.md` § F3 for grouping rules.
+
+| ID | Feature | Foundation Categories | Description |
+|----|---------|----------------------|-------------|
+| F000 | [foundation-slug] | [CAT1 + CAT2] | [Foundation scope description] |
+
+> **Note**: T0 Features use `F000-{slug}` prefix. All T0 Features must complete before T1 begins. If no framework detected or Framework = "custom", omit this section.
+
 #### Tier 1 — Essential
 > Foundation of the project. The system cannot function without these.
 

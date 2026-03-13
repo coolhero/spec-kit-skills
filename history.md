@@ -5,6 +5,255 @@
 
 ---
 
+## [2026-03-13] Full File Review + Cross-Reference Fixes + Context Budget README
+
+Full file inspection following CLAUDE.md Review Protocol (4-step: flow consistency, unused parts, commonization, over-fragmentation).
+
+### Issues Found & Fixed
+- **Broken reference**: SKILL.md line 198 pointed to `../reverse-spec/domains/_resolver.md` (file does not exist) → Fixed to `../reverse-spec/domains/_core.md` and `_schema.md`
+- **Over-fragmentation**: `reverse-spec/domains/_core.md` R7 duplicated Foundation Detection table from `_foundation-core.md` F0 → Replaced inline table with cross-reference per Single Source of Truth principle
+- **README gap**: Context Budget Protocol not reflected in README → Added to Session Resilience section (both EN/KO)
+
+### Review Results (11 checks passed, 2 fixed)
+All other cross-references verified: injection files (11), profiles (4), foundations (10), references (11), templates (9). T0 handling, cycle detection, retry policy, pre-resumption validation all confirmed present. File Map complete.
+
+### Files Changed (5 files)
+- `.claude/skills/smart-sdd/SKILL.md` — Fix broken reverse-spec reference
+- `.claude/skills/reverse-spec/domains/_core.md` — R7 de-duplicated (cross-ref to F0)
+- `README.md` — Context Budget Protocol in Session Resilience, timestamp
+- `README.ko.md` — Korean sync, timestamp
+- `history.md` — this entry
+
+---
+
+## [2026-03-13] Context Budget Protocol + Domain Resolution Worked Example
+
+Expert analysis (8.2/10) identified two addressable weaknesses:
+1. No protocol for context overflow — what to do when assembled injection exceeds context window
+2. No concrete trace showing how domain module resolution works end-to-end
+
+### Context Budget Protocol (context-injection-rules.md)
+- 3-tier priority system: P1 (must-inject), P2 (summarizable), P3 (skip-safe)
+- Per-command P1 section table — single source of truth for "what must never be trimmed"
+- 3-step overflow protocol: Summarize P2 → Skip P3 → Split if still over
+- Size heuristics table for triggering budget triage (no exact token counting)
+- Checkpoint budget indicator: `📊 Context: {P1}/{total} must-inject | {N} summarized | {M} skipped`
+
+### Domain Resolution Worked Example (_resolver.md)
+- Full `desktop-app` rebuild + Electron trace through all 4 resolution steps
+- Profile expansion: `desktop-app` → gui + async-state + ipc + rebuild scenario
+- Foundation resolution: electron.md (58 items) + _foundation-core.md (T0 rules)
+- Module loading table: 5 files with per-module S-section contributions
+- Merged result table: 7 S-sections with source attribution
+
+### Design Principle Compliance
+- **Single Source of Truth**: Budget priority definitions live ONLY in context-injection-rules.md; per-command injection files are NOT modified (they define WHAT to inject; the budget defines WHEN to trim)
+- **No over-fragmentation**: Worked example in _resolver.md (where resolution protocol lives), not split across separate file
+- **English only**: Both additions in English per CLAUDE.md Language rules
+
+### Files Changed (2 files + bookkeeping)
+- `.claude/skills/smart-sdd/reference/context-injection-rules.md` — Context Budget Protocol section
+- `.claude/skills/smart-sdd/domains/_resolver.md` — Worked Example section
+- `history.md` — this entry
+
+---
+
+## [2026-03-13] README Reliability Mechanisms + File Map Corrections
+
+Post expert analysis (8.2/10) identified key architectural innovations not yet documented in README, plus stale File Map item counts from pre-review state.
+
+### README Architecture Additions
+- **Session Resilience & Agent Governance** section added — documents three reliability mechanisms:
+  - Compaction-Resilient State (verify progress survives context window compaction via sdd-state.md)
+  - Source Modification Gate (mandatory classification before edits + Minor Fix Accumulator auto-escalation at 3 fixes)
+  - Context Window Management (lazy-loading decomposition: SKILL.md → commands → injection → domains)
+- File Map TODO scaffold item counts corrected: FastAPI 49→41, React Native 55→50, Flutter 59→50
+
+### Files Changed (3 files)
+- `README.md` — Session Resilience section, File Map fixes, timestamp
+- `README.ko.md` — Korean sync, File Map fixes, timestamp
+- `history.md` — this entry
+
+---
+
+## [2026-03-13] Expert Review Fixes + README Architecture Enhancement
+
+Post-implementation expert review identified 14 issues across Foundation files, reverse-spec integration, and smart-sdd integration.
+
+### Fixes Applied
+- **Critical**: Electron item count note (63 rows, 58 unique decisions with 5 cross-refs), Express category count (12→13), TODO scaffold F1 sums corrected (FastAPI 49→41, React Native 55→50, Flutter 59→50)
+- **Significant**: Phase 4-2 Foundation distribution (added Foundation Decisions + Foundation Dependencies to pre-context distribution), roadmap-template T0 tier section added, STR/DTA categories added to _foundation-core.md F1 taxonomy
+- **Minor**: Phase reference fix (2-4→2-8), dangling Phase 5 reference removed, verify-phases heading mismatch fixed, micro-interaction ID format specified, Express DXP description corrected, Electron ENV cross-ref annotations added
+
+### README Architecture Enhancement
+- Added "Design Philosophy" section: 5 principles (contracts over hope, cross-Feature context injection, composable domain knowledge, human checkpoints at irreversible boundaries, progressive detail capture)
+- Added "Adapting to Your Project" section: 6 progressive customization levels (Level 0 defaults → Level 5 pipeline behavior modification)
+- Enhanced "Extensibility" section: added Foundation creation and workflow adaptation examples
+- All changes synced to README.ko.md (Korean)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Electron cross-refs vs dedup | Keep 63 rows, annotate cross-refs | Different extraction axes need separate entries; "see also" links prevent agent confusion |
+| Foundation distribution in Phase 4-2 | Explicit addition to enumeration | Without explicit instruction, agent may skip Foundation data when populating pre-context |
+| T0 in roadmap template | New section before T1 | Template must mirror actual pipeline ordering; Foundation Features need a home in roadmap.md |
+
+### Files Changed (16 files)
+- `reverse-spec/domains/foundations/electron.md` — cross-ref annotations, item count note
+- `reverse-spec/domains/foundations/_foundation-core.md` — F1 STR/DTA, F6 table corrected
+- `reverse-spec/domains/foundations/express.md` — DXP description
+- `reverse-spec/domains/foundations/fastapi.md` — TODO comment fix
+- `reverse-spec/domains/foundations/react-native.md` — TODO comment fix
+- `reverse-spec/domains/foundations/flutter.md` — TODO comment fix
+- `reverse-spec/commands/analyze.md` — Phase ref, Foundation distribution, ID format
+- `reverse-spec/templates/roadmap-template.md` — T0 tier section
+- `smart-sdd/commands/verify-phases.md` — heading mismatch
+- `README.md` — Design Philosophy, Adapting to Your Project, timestamp
+- `README.ko.md` — Korean sync, timestamp
+- `history.md` — this entry
+
+---
+
+## [2026-03-13] Micro-Interaction Layer + Expert Analysis Improvements
+
+Added comprehensive micro-interaction detection and verification across the full pipeline, plus expert-recommended robustness improvements.
+
+### 1. Micro-Interaction Detection (reverse-spec)
+
+- **Phase 2-7b**: New source code analysis phase extracting 7 categories of micro-interactions: hover behaviors (tooltips, CSS :hover), keyboard shortcuts, animations/transitions, focus management, drag-and-drop, context menus, scroll behaviors
+- **Two-pronged approach**: Source code analysis (always, via grep patterns for event listeners, CSS pseudo-classes, tooltip components, keyboard libraries) + optional runtime probing (Playwright, when available)
+- **gui.md R4**: New analysis axis with detection heuristics tables per interaction category, covering 40+ signal patterns across React/Vue/CSS/HTML5/library ecosystems
+- **micro-interactions.md**: New artifact output with structured tables per category
+- **Priority classification**: P1 (core — must reproduce), P2 (enhancement — should reproduce), P3 (polish — can defer)
+
+### 2. Micro-Interaction in Smart-SDD Pipeline (all stages)
+
+- **specify**: Injects interaction inventory; for greenfield/add, prompts user to define interactions (tooltips, shortcuts, drag-and-drop) during specify → FR-### entries with interaction verbs in SCs
+- **plan**: Injects interactions for architectural decisions (tooltip component library, shortcut framework, animation library, DnD library, focus trap approach)
+- **implement**: Injects concrete interaction implementation tasks (tooltip rendering, shortcut registration, CSS transitions, DnD handler wiring)
+- **verify**: Extended vocabulary with 7 new verbs (`hover`, `press-key`, `drag-to`, `focus`, `verify-tooltip`, `right-click`, `verify-animation`); micro-interaction completeness check (P1 missing = Major-Implement, P2 missing = Minor)
+- **add.md**: Interaction Behavior Inventory section in pre-context generation (rebuild: filter from micro-interactions.md; greenfield: "define during specify")
+- **pre-context-template.md**: New "Interaction Behavior Inventory" section with 7 structured sub-tables
+- **context-injection-rules.md**: Graceful degradation for missing micro-interaction data
+
+### 3. Expert Analysis Improvements
+
+- **Regression depth limit** (verify-phases.md): Per-Feature regression counter. HARD STOP after 2 regressions (options: continue/abort/pause). Force block after 3. Counter persisted via Feature Detail Log `↩️ REGRESSION` entries
+- **Context budget estimation** (pipeline.md Assemble step): For 10+ Feature projects, estimates total context volume before reading. If >2000 lines: progressive summarization (full for current Feature, summary for direct deps, IDs only for indirect deps, skip unrelated)
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Micro-interaction approach | Source analysis + optional runtime probing | Source code captures the full inventory (event listeners, CSS, components); runtime confirms behavior details (tooltip text, timing) |
+| 2 | Detection scope | 7 categories, 40+ signal patterns | Covers the full spectrum from CSS :hover to JS keyboard handlers to DnD libraries |
+| 3 | Pipeline integration depth | All 4 stages (specify → plan → implement → verify) | User's feedback: micro-interactions should be active throughout, not just analysis |
+| 4 | Greenfield micro-interaction definition | Prompt during specify, not init | Init handles project setup; specify is where behavioral requirements are defined |
+| 5 | Regression depth limit | 2 warnings + 3 force block | Prevents infinite regression loops; 2 attempts should be sufficient for legitimate issues |
+| 6 | Context budget threshold | 2000 lines (~40% of context) | Leaves 60% for system instructions + command execution + agent reasoning |
+| 7 | Progressive summarization levels | 4 tiers (full / summary / IDs / skip) | Maximizes information density while staying within budget |
+
+### Files Changed (13 files)
+
+| File | Change |
+|------|--------|
+| `reverse-spec/commands/analyze.md` | Phase 2-7b + Phase 4-2 distribution + cross-check |
+| `reverse-spec/domains/interfaces/gui.md` | R4 micro-interaction extraction |
+| `reverse-spec/templates/pre-context-template.md` | Interaction Behavior Inventory section |
+| `smart-sdd/commands/verify-phases.md` | 7 new verbs + regression depth limit |
+| `smart-sdd/commands/pipeline.md` | Context budget estimation |
+| `smart-sdd/commands/add.md` | Interaction Behavior Inventory in pre-context |
+| `smart-sdd/reference/injection/specify.md` | Micro-interaction context + greenfield prompts |
+| `smart-sdd/reference/injection/plan.md` | Micro-interaction architecture |
+| `smart-sdd/reference/injection/implement.md` | Micro-interaction implementation reference |
+| `smart-sdd/reference/injection/verify.md` | Micro-interaction completeness check |
+| `smart-sdd/reference/context-injection-rules.md` | Graceful degradation for micro-interactions |
+| `history.md` | This entry |
+
+---
+
+## [2026-03-13] Platform Foundation Layer + Architecture Documentation
+
+Added framework-specific infrastructure decision management across the entire pipeline. Projects on specific frameworks (Electron, Express, Next.js, etc.) now have explicit Foundation checklists, T0 tier processing, and cross-framework migration support.
+
+### Area 1: Foundation Reference Files (10 new files)
+
+| File | Content |
+|------|---------|
+| `foundations/_foundation-core.md` | Resolution protocol (F0–F6), case matrix (A/B/C/D), T0 grouping rules, cross-framework carry-over map |
+| `foundations/electron.md` | 58 items, 13 categories (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
+| `foundations/tauri.md` | 44 items, 12 categories |
+| `foundations/express.md` | 43 items, 12 categories |
+| `foundations/nextjs.md` | 44 items, 13 categories |
+| `foundations/vite-react.md` | 43 items, 12 categories |
+| `foundations/nestjs.md` | TODO scaffold (51 items) |
+| `foundations/fastapi.md` | TODO scaffold (49 items) |
+| `foundations/react-native.md` | TODO scaffold (55 items) |
+| `foundations/flutter.md` | TODO scaffold (59 items) |
+
+### Area 2: reverse-spec Integration
+
+| Change | Description |
+|--------|-------------|
+| Phase 1-2b Framework Identification | Detect framework from tech stack, record in analysis |
+| Phase 2-8 Foundation Decision Extraction | Extract Foundation decisions from existing code with migration protocol for rebuild framework changes |
+| pre-context Foundation Decisions section | Critical/Important/Undecided tables per Feature |
+| pre-context Foundation Dependencies section | owns/consumes/extends dependency types |
+| R7 Foundation Detection Heuristics | Framework identification rules in `_core.md` |
+
+### Area 3: smart-sdd Integration
+
+| Change | Description |
+|--------|-------------|
+| init.md Step 3b | Framework Selection & Foundation Decisions (auto-detect, present Critical items, record in state) |
+| state-schema.md | State Schema Version 2.0, Framework field, Foundation Decisions section, State Validation procedure |
+| _resolver.md Step 2b | Resolve Foundation — load Foundation file based on Framework field |
+| _core.md S3d | Foundation Compliance verification for T0 Features |
+| pipeline.md T0 ordering | T0 → T1 → T2 → T3 processing order with Foundation Gate |
+| pipeline.md Cycle Detection | Kahn's algorithm in Pre-Phase to prevent dependency deadlock |
+| pipeline.md Retry Policy | Max 3 retries per step per Feature, each attempt must differ |
+| verify-phases.md Pre-Resumption | 5-point integrity check before verify resume |
+
+### Area 4: Pipeline-wide Integration
+
+| Change | Description |
+|--------|-------------|
+| injection/specify.md | Foundation Decisions context for specify |
+| injection/plan.md | Foundation Technical Constraints for plan |
+| injection/implement.md | Foundation Implementation Reference for implement |
+| injection/verify.md | Foundation Regression Check for verify |
+| add.md Phase 3d | T0 tier handling for Foundation Features |
+| context-injection-rules.md | Foundation graceful degradation in Missing Content table |
+
+### Area 5: Architecture Documentation
+
+| Change | Description |
+|--------|-------------|
+| README.md | Platform Foundation, Tier System, Data Flow, Feature Lifecycle, Project Modes, Key Artifacts subsections + Foundation files in File Map |
+| README.ko.md | Same sections in Korean + Foundation files in File Map |
+
+### Design Decisions
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Foundation files location | `reverse-spec/domains/foundations/` only | Analysis-reference; smart-sdd reads via resolver. Avoids duplication |
+| 2 | T0 tier | Above T1 | Natural extension of T1/T2/T3 hierarchy |
+| 3 | T0 granularity | Per Foundation category | 58 individual items as Features would be unworkable |
+| 4 | TODO scaffold format | Header + category list + TODO comment | Consistent with data-science.md precedent |
+| 5 | Foundation Migration | 4 classifications | carry-over/equivalent/irrelevant/new preserves decisions across stack changes |
+| 6 | State Schema Versioning | v2.0 with validation | Prevents corruption cascades; enables future schema evolution |
+| 7 | Dependency Cycle Detection | Kahn's algorithm | Prevents pipeline deadlock for 50+ Feature projects |
+| 8 | Retry Limits | Max 3 per step | Prevents infinite retry loops |
+| 9 | Unmatched framework | Generic Foundation (Case B) | Universal categories + agent probes better than skipping entirely |
+
+### Files Changed (34 files)
+
+- **10 new**: `foundations/_foundation-core.md`, `foundations/electron.md`, `foundations/tauri.md`, `foundations/express.md`, `foundations/nextjs.md`, `foundations/vite-react.md`, `foundations/nestjs.md`, `foundations/fastapi.md`, `foundations/react-native.md`, `foundations/flutter.md`
+- **reverse-spec**: `commands/analyze.md`, `templates/pre-context-template.md`, `domains/_core.md`
+- **smart-sdd**: `commands/init.md`, `commands/pipeline.md`, `commands/add.md`, `commands/verify-phases.md`, `domains/_resolver.md`, `domains/_core.md`, `reference/state-schema.md`, `reference/context-injection-rules.md`, `reference/injection/specify.md`, `reference/injection/plan.md`, `reference/injection/implement.md`, `reference/injection/verify.md`
+- **docs**: `README.md`, `README.ko.md`, `history.md`
+
+---
+
 ## [2026-03-12] Post-Pull Review — 5 Commits Cross-Reference Check
 
 Pulled 5 commits (14 files, +548/-19 lines). Full review per CLAUDE.md Review Protocol: flow consistency, cross-references, unused parts, over-fragmentation.

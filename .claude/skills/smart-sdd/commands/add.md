@@ -457,8 +457,17 @@ If the project uses `core` scope (read from `sdd-state.md`):
 - Propose Tier classification for each new Feature
 - Default: Tier 2 (added Features are typically enhancements)
 - If the user describes it as critical: propose Tier 1
+- **Foundation Features**: If Feature is auto-generated from Foundation category → Tier: T0
+  - T0 Features are NOT subject to normal Scope filtering (always active)
+  - T0 Features appear BEFORE T1 in roadmap Feature Catalog
+  - Feature ID format for T0: F000-{category} (e.g., F000-window-management)
 
-If `full` scope: skip Tier assignment.
+If `full` scope: skip Tier assignment (but T0 assignment still applies for Foundation Features).
+
+**Overlap Check with Foundation awareness**:
+- T0 Foundation Features do NOT overlap with each other (different categories)
+- T1+ Features that touch Foundation items → flag dependency on T0 Feature
+- If T0 Feature for that category doesn't exist → suggest creating it
 
 ### 3e. Feature ID Assignment
 
@@ -631,6 +640,9 @@ Update `specs/add-draft.md` with Demo Group assignment.
    - Source Behavior Inventory:
      - **If SBI entries selected in Phase 4**: Include selected entries (with B### IDs and Origin), plus generate FR draft entries for each mapped behavior
      - **If no SBI (greenfield)**: "N/A — no source to inventory"
+   - Interaction Behavior Inventory:
+     - **If rebuild/adoption with micro-interactions.md**: Filter interactions to this Feature's screens/components, include in pre-context
+     - **If greenfield/add**: "N/A — define during specify" (specify injection will prompt user to define interactions)
    - For /speckit.specify:
      - **With SBI mapping**: Feature description + dependency summary + FR drafts derived from SBI behaviors
      - **Without SBI**: Feature description + dependency summary only (no FR/SC drafts)

@@ -600,6 +600,11 @@ You can fix manually or proceed to Review with this state.
 - Naming remapping context from pre-context.md (if applicable) — displays old → new identifier mapping before execution
 - If Demo-Ready Delivery is active: demo surface implementation + executable demo script creation (`demos/F00N-name.sh`)
 - **Runtime verification**: Per-task build gate + runtime check (when MCP available), post-implement full SC verification
+- **Interaction behavior inventory**: If present in pre-context, inject micro-interaction patterns for this Feature — hover behaviors (tooltip rendering), keyboard shortcuts (shortcut registration), animations (CSS transitions / animation triggers), drag-and-drop (DnD handler wiring), focus management (focus trap activation), context menus (right-click handler registration), scroll behaviors (scroll position save/restore). Each interaction maps to concrete implementation tasks: component props for interaction states, event listener setup, CSS classes for transitions. For **greenfield/add**: implement interactions defined during specify as FR-### entries
+- **Foundation Implementation Reference** (from sdd-state.md § Foundation Decisions):
+  - Decided items with concrete values (e.g., "electron-store" for storage, "invoke-handle" for IPC)
+  - These decisions are CONSTRAINTS — implementation must conform, not choose differently
+  - **If Foundation Decisions section is empty or absent**: Skip Foundation injection
 
 ## Checkpoint
 

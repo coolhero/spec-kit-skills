@@ -190,5 +190,15 @@ Examples:
 
 ---
 
+## R7. Foundation Detection Heuristics
+
+Framework identification from tech stack (feeds into `analyze.md` Phase 1-2b).
+
+> **Single Source of Truth**: Full detection signals (per-framework config files, import patterns, directory structures) are defined in `domains/foundations/_foundation-core.md` § F0. Do not duplicate the table here — always reference F0 for detection rules.
+
+When multiple frameworks are detected, record all (comma-separated). If none match, record `Framework: custom`.
+
+---
+
 ## S1-S7. (smart-sdd execution-time concerns)
 > Demo Pattern, Parity Dimensions, Verify Steps, and other execution-time sections are defined in `../../smart-sdd/domains/_core.md`.

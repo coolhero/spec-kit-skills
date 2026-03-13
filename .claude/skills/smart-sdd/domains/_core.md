@@ -103,6 +103,13 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 - Status recorded as `limited` instead of `success`
 - Merge step accepts `limited` status with warning
 
+**S3d. Foundation Compliance** (T0 Features only):
+- For each decided Foundation item with `Priority: Critical`:
+  - Verify implementation matches recorded decision
+  - Check: config file value, code pattern, dependency presence
+- Result: PASS (all match) / WARN (minor drift) / FAIL (critical mismatch)
+- FAIL → Source Modification Gate applies
+
 ---
 
 ## S5. Feature Elaboration Probes (Universal)

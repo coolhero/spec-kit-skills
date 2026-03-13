@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-12 18:27 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:35 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -105,6 +105,20 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 spec-kit-skills is a **harness for agentic coding** — a structural layer that constrains, guides, and verifies what an AI agent produces. Rather than hoping the agent writes correct code, the harness defines contracts the agent must satisfy, injects cross-Feature context the agent would otherwise lack, and verifies results against those contracts before anything merges. The architecture below shows how this harness is designed for extensibility across three independent dimensions.
 
+### Design Philosophy
+
+Five principles shape every design decision in spec-kit-skills:
+
+1. **Contracts over hope** — Instead of hoping an agent writes correct code, the harness defines explicit contracts (Success Criteria, Source Behavior Inventory, Foundation Decisions) that the agent must satisfy. Verification runs against these contracts, not against vague notions of "correct."
+
+2. **Cross-Feature context injection** — An agent working on Feature F003 has no memory of what it decided for F001. The Global Evolution Layer (roadmap, registries, constitution) captures cross-Feature knowledge and injects the relevant subset into each pipeline step. The agent sees exactly what it needs — entity schemas it must reference, API contracts it must respect, Foundation decisions it must obey.
+
+3. **Composable domain knowledge** — Project types differ wildly (REST API vs desktop app vs mobile). Rather than one monolithic ruleset, domain knowledge decomposes into independent modules (Interfaces × Concerns × Scenarios × Foundations) that compose freely. A desktop rebuild project loads `gui + ipc + rebuild + electron`; a greenfield API loads `http-api + auth + greenfield + express`. No unused rules, no missing context.
+
+4. **Human checkpoints at irreversible boundaries** — The pipeline flows autonomously through research, context assembly, and code generation. But before spec-kit commands execute (irreversible artifact creation) and before results are accepted (they feed into downstream Features), HARD STOPs force human review. This creates a trust-but-verify loop where the agent does the heavy lifting but humans gate the decisions.
+
+5. **Progressive detail capture** — Analysis starts broad (tech stack, project structure) and progressively drills into finer detail (function signatures → UI component features → micro-interactions → tooltips and hover effects). Each level feeds the next, so nothing is analyzed without context from the level above.
+
 ### 3-Axis Domain Composition
 
 Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
@@ -156,6 +170,18 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 
 New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
 
+**Add a new Foundation** (e.g., your team uses Remix, which has no built-in Foundation file):
+1. Create `reverse-spec/domains/foundations/remix.md` following the F0-F4 format in `_foundation-core.md`
+2. Define detection signals (F0), categories (F1), items (F2), extraction rules (F3), T0 grouping (F4)
+3. The system detects Remix automatically via F0 signals and loads the full Foundation flow
+4. Without a custom Foundation file, the system still works — it falls back to Case B (universal categories + agent probes)
+
+**Adapt to your workflow** — every checkpoint and gate can be tuned:
+- **Scope**: `core` scope activates T1 only (fastest path); `full` processes everything
+- **Preservation**: `equivalent` requires behavioral parity; `similar` allows cosmetic differences
+- **Pipeline steps**: Skip specific spec-kit steps via sdd-state.md flags
+- **Severity thresholds**: Adjust which verify bugs loop back vs fix inline via `domain-custom.md`
+
 ### Signal Keywords and Proposal Mode
 
 Each domain module declares **S0 Signal Keywords** — terms that indicate the module should be activated. When you start a project with an idea string (`init "Build a Chrome extension for..."`), the agent scans all S0 keywords to automatically infer your Domain Profile. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers `external-sdk` — all without manual configuration.
@@ -163,6 +189,125 @@ Each domain module declares **S0 Signal Keywords** — terms that indicate the m
 This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). The CI drives agent behavior: high CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes.
 
 CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
+
+### Platform Foundation
+
+Projects built on specific frameworks (Electron, Express, Next.js, etc.) have infrastructure decisions that must be established before any business Feature — single-instance lock, IPC architecture, middleware chain, rendering strategy. The Platform Foundation layer captures these decisions explicitly:
+
+```
+Profile (desktop-app, web-api, fullstack-web, cli-tool)
+   │
+   ├── Interface modules (gui, http-api, cli, data-io)
+   ├── Concern modules (auth, async-state, ipc, i18n, realtime, external-sdk)
+   ├── Scenario (greenfield, rebuild, incremental, adoption)
+   ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)   ← NEW
+   └── Custom (project-specific overrides)
+```
+
+**Foundation files** in `reverse-spec/domains/foundations/` provide exhaustive checklists of infrastructure decisions per framework. Each item is classified by priority (Critical / Important / Optional) and grouped into categories (Window Management, Security, IPC, Middleware, Routing, etc.).
+
+**In rebuild mode** (`/reverse-spec`): Foundation decisions are extracted from existing code and documented in pre-context.
+**In greenfield mode** (`/smart-sdd init`): Critical Foundation items are presented to the user for explicit decisions before pipeline begins.
+
+The Foundation layer supports framework migration (e.g., Express → NestJS) with a 4-classification system: carry-over, equivalent, irrelevant, new — preserving infrastructure decisions across stack changes.
+
+See `domains/foundations/_foundation-core.md` for the full protocol, case matrix, and cross-framework carry-over map.
+
+### Tier System
+
+Features are organized into tiers that determine processing order:
+
+| Tier | Purpose | When Processed |
+|------|---------|----------------|
+| **T0** | **Platform Foundation** — infrastructure decisions (framework-specific) | First (before business Features) |
+| **T1** | Essential — system cannot function without | After T0 |
+| **T2** | Recommended — completes core user experience | After T1 |
+| **T3** | Optional — supplementary, admin, convenience | After T2 |
+
+T0 Features are auto-generated from Foundation categories with Critical items requiring code. They must complete before T1 begins — a Foundation Gate enforces this.
+
+### Data Flow
+
+```
+1. Analysis (reverse-spec or init):
+   Source Code → Tech Stack Detection → Framework Identification →
+   Foundation Extraction → Feature Extraction →
+   Global Evolution Artifacts (roadmap, registries, pre-contexts)
+
+2. Development (smart-sdd pipeline):
+   For each Feature (T0 → T1 → T2 → T3):
+   Assemble Context → Checkpoint (HARD STOP) →
+   Execute spec-kit → Review (HARD STOP) → Update State
+
+3. Verification (verify phases):
+   Build → Test → Lint → Cross-Feature Consistency →
+   Runtime SC Verification → Demo-Ready Check → Foundation Compliance
+```
+
+### Feature Lifecycle
+
+```
+specify → plan → tasks → implement → verify → merge
+   │                                    │
+   │  ◄──── Major-Spec ───────────────┤
+   │  ◄──── Major-Plan ───────────────┤
+   │  ◄──── Major-Implement ──────────┤
+   │                                    │
+   └── Minor Fix (inline, ≤2 files) ───┘
+```
+
+Verify discovers bugs and classifies them into 4 severity levels. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step.
+
+### Session Resilience & Agent Governance
+
+Long pipeline sessions face two systemic risks: **context window loss** (agent forgets progress mid-session) and **uncontrolled edits** (agent patches code without classification). The system addresses both:
+
+**Compaction-Resilient State** — Verify progress, process rules, and minor fix accumulators are written to `sdd-state.md` at every phase boundary. When the context window compacts mid-verify, the Resumption Protocol reads the persisted state and resumes from the exact phase — no repeated work, no lost classifications. This makes multi-hour pipeline sessions survivable.
+
+**Source Modification Gate** — During verify, every source edit must be classified (Minor / Major-Implement / Major-Plan / Major-Spec) *before* any code is touched. The classification determines whether the fix happens inline or routes back to the correct pipeline stage. A Minor Fix Accumulator tracks inline fixes per Feature — if the count reaches 3, the system auto-escalates to Major, preventing structural drift disguised as minor patches.
+
+**Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
+
+**Context Budget Protocol** — When assembled injection context for a pipeline step approaches the context window limit, sections are triaged via a 3-tier priority system: **P1** (must-inject — spec.md, tasks.md, Pattern Constraints), **P2** (summarizable to ≤30% — business-logic-map, referenced entities, preceding Feature results), **P3** (skip-safe — naming remapping, CSS value map, visual references). The overflow protocol: Summarize P2 → Skip P3 → Split (reduce parallel task batches). Each Checkpoint displays a budget indicator so the user sees what context was trimmed.
+
+### Project Modes
+
+| Mode | Entry Point | Use Case |
+|------|-------------|----------|
+| Greenfield | `/smart-sdd init` → `add` → `pipeline` | New project from scratch |
+| Incremental | `/smart-sdd add` → `pipeline` | Add features to existing smart-sdd project |
+| Rebuild | `/reverse-spec` → `/smart-sdd pipeline` | Rebuild existing codebase with SDD |
+| Adoption | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs |
+
+### Key Artifacts
+
+| Artifact | Location | Purpose |
+|----------|----------|---------|
+| Roadmap | `specs/reverse-spec/roadmap.md` | Feature catalog, dependency graph, release groups |
+| Entity Registry | `specs/reverse-spec/entity-registry.md` | Shared data model definitions |
+| API Registry | `specs/reverse-spec/api-registry.md` | API contract specifications |
+| Business Logic Map | `specs/reverse-spec/business-logic-map.md` | Cross-Feature business rules |
+| Pre-context | `specs/reverse-spec/features/F00N-*/pre-context.md` | Per-Feature context for spec-kit |
+| Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
+| State | `specs/reverse-spec/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
+
+### Adapting to Your Project
+
+The system is designed so you can start with defaults and progressively customize:
+
+**Level 0 — Out of the box**: Run `/smart-sdd init` or `/reverse-spec` with no customization. The agent auto-detects your profile, framework, interfaces, and concerns. Works for most projects immediately.
+
+**Level 1 — Domain profile tuning**: Edit `sdd-state.md` to add/remove active Interfaces and Concerns. Loading `auth` adds authentication-specific SC rules; removing `i18n` skips internationalization checks.
+
+**Level 2 — Project-specific rules**: Create `specs/reverse-spec/domain-custom.md` in your project. Add rules using the same S1/S5/S7 schema (e.g., "all payment endpoints require idempotency SC", "dark mode must be tested in verify"). This file loads last with highest priority — no skill files modified.
+
+**Level 3 — New domain modules**: Create custom Interface or Concern files (e.g., `domains/interfaces/grpc.md`, `domains/concerns/caching.md`). Follow `domains/_schema.md` for the module format. Your modules compose automatically with built-in ones.
+
+**Level 4 — New Foundation checklists**: Create `reverse-spec/domains/foundations/{framework}.md` for frameworks not yet covered. The system gracefully degrades without it (Case B: universal categories + agent probes), but a dedicated checklist ensures nothing is missed.
+
+**Level 5 — Pipeline behavior modification**: Override verify severity thresholds, pipeline step ordering, HARD STOP behavior, and context injection rules through the reference files. Advanced users can tune the balance between automation speed and review thoroughness.
+
+Every customization level is backward-compatible — a Level 2 project doesn't break if the skill files update, because `domain-custom.md` lives in the user's project directory, not in the skills repo.
 
 ---
 
@@ -748,11 +893,11 @@ Complete list of all files in this repository grouped by skill.
 | `SKILL.md` | Skill router — entry point and mandatory rules for reverse-spec |
 | `commands/analyze.md` | Multi-phase workflow for analyzing source code and generating Global Evolution Layer artifacts |
 | **Domains** | |
-| `domains/_core.md` | Universal analysis framework (R1–R6 analysis sections) |
+| `domains/_core.md` | Universal analysis framework (R1–R7 analysis sections, including Foundation Detection Heuristics) |
 | `domains/_schema.md` | Domain profile schema template (Detection Signals, Analysis Axes, Feature Registry, etc.) |
 | `domains/app.md` | Application domain profile — detection and analysis behavior for backend/frontend/fullstack/mobile/library |
 | `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
-| `domains/interfaces/gui.md` | GUI interface — runtime exploration, visual behavior analysis |
+| `domains/interfaces/gui.md` | GUI interface — R3 UI component extraction, R4 micro-interaction pattern extraction (hover, keyboard, animation, DnD, focus, context menu, scroll) |
 | `domains/interfaces/http-api.md` | HTTP API interface — endpoint discovery, request/response analysis |
 | `domains/interfaces/cli.md` | CLI interface — command parsing, argument analysis |
 | `domains/interfaces/data-io.md` | Data I/O interface — pipeline discovery, data flow analysis |
@@ -762,6 +907,17 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/i18n.md` | Internationalization concern — locale key detection |
 | `domains/concerns/ipc.md` | IPC concern — inter-process communication detection (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE detection |
+| **Foundations** | |
+| `domains/foundations/_foundation-core.md` | Foundation resolution protocol — detection signals, category taxonomy, case matrix, T0 grouping, cross-framework carry-over map |
+| `domains/foundations/electron.md` | Electron Foundation — 58 items, 13 categories (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
+| `domains/foundations/tauri.md` | Tauri Foundation — 44 items, 12 categories |
+| `domains/foundations/express.md` | Express.js Foundation — 43 items, 12 categories |
+| `domains/foundations/nextjs.md` | Next.js Foundation — 44 items, 13 categories |
+| `domains/foundations/vite-react.md` | Vite + React Foundation — 43 items, 12 categories |
+| `domains/foundations/nestjs.md` | NestJS Foundation — TODO scaffold (51 items, 13 categories) |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO scaffold (41 items, 12 categories) |
+| `domains/foundations/react-native.md` | React Native Foundation — TODO scaffold (50 items, 14 categories) |
+| `domains/foundations/flutter.md` | Flutter Foundation — TODO scaffold (50 items, 14 categories) |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -796,7 +952,7 @@ Complete list of all files in this repository grouped by skill.
 | `domains/_schema.md` | Domain profile schema — demo patterns, parity dimensions, verification behavior |
 | `domains/app.md` | Application domain profile — demo patterns, lint detection rules, UI testing, bug prevention |
 | `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
-| `domains/interfaces/gui.md` | GUI interface — CSS rendering bugs, UI interaction surface audit, visual fidelity |
+| `domains/interfaces/gui.md` | GUI interface — CSS rendering bugs, UI interaction surface audit, visual fidelity, micro-interaction verification |
 | `domains/interfaces/http-api.md` | HTTP API interface — API compatibility matrix, runtime verification |
 | `domains/interfaces/cli.md` | CLI interface — CLI verification, process-runner backend |
 | `domains/interfaces/data-io.md` | Data I/O interface — pipeline verification, data flow testing |
