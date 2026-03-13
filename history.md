@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-03-14] SKF-008 + SKF-009: Visual Reference Fallback + Interaction Surface Preservation
+
+Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) visual references not consulted during implement, (2) F001's interaction surfaces removed when F002 replaced App.tsx.
+
+### Root Cause 1: Visual References Fallback missing (SKF-008)
+- **Problem**: Source App Visual Reference section had no fallback for when the source app can't start. `visual-references/` directory with screenshots existed but was not consulted
+- **Fix**: Added "Visual References Fallback" subsection — when source app can't start but `visual-references/` exists, agent MUST read and reference screenshots. Made the last Skip Condition point to the fallback instead of "continue code-only"
+- **Fix**: Added Checkpoint notification line: `📂 Visual References: [N] screenshots available`
+
+### Root Cause 2: No Interaction Surface Preservation rule (SKF-009)
+- **Problem**: F002 replaced F001's App.tsx (Titlebar with drag region, window controls, theme toggle) with a Router layout that lacked these surfaces. No rule existed to check for surface preservation
+- **Fix**: Added "Interaction Surface Preservation" rule in B-3 Bug Prevention Checks, between Cross-Feature Integration and UI Interaction Surface Audit
+- **Content**: enumerate surfaces before modifying → verify preservation after → report removals → fail runtime check if critical surface missing
+- **Fix**: Added Checkpoint notification line: `⚠️ Interaction Surface Check: [component] from [previous FID] will be modified`
+
+### Cross-reference check
+- `verify-phases.md` Step 3b (Visual Fidelity Check): Already covers visual reference comparison at verify time — no change needed. The new fallback addresses the implement-time gap
+- `verify-phases.md` Step 3c (Navigation Transition Sanity): Post-verify detection. The new Interaction Surface Preservation rule is a pre-implement prevention — complementary, not overlapping
+
+### Files Changed (1 skill file + 1 feedback file)
+- `smart-sdd/reference/injection/implement.md` — Visual References Fallback, Checkpoint notifications, Interaction Surface Preservation
+- `angdu-studio/skill-feedback.md` — SKF-008, SKF-009 marked as ✅ Reflected
+
+---
+
 ## [2026-03-14] SKF-007: Demo-Ready Delivery condition expansion
 
 Skill Feedback from angdu-studio F002-navigation. Demo scripts were not generated because the condition only checked constitution, missing the established demo pattern from F001.

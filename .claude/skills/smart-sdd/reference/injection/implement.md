@@ -140,12 +140,22 @@ During each UI task:
 - **Source app**: project's default port (from package.json scripts or launch.json)
 - **Built app**: source port + 1000 (e.g., 3000 → 4000) or explicit override in sdd-state.md
 
+### Visual References Fallback (rebuild mode, when source app cannot start)
+
+Even when the source app cannot be launched (dependency issues, missing env, etc.), if `specs/reverse-spec/visual-references/` directory exists with screenshots:
+1. Read `specs/reverse-spec/visual-references/manifest.md` to identify screens relevant to this Feature
+2. Read each screenshot file referenced in the manifest for the Feature's screens
+3. Use these as the visual reference instead of live source app snapshots
+4. Display: `📂 Visual References (static): [N] screenshots loaded from visual-references/`
+
+This is NOT optional — if visual-references/ exists in a rebuild project, the agent MUST consult it before implementing UI. Skipping visual references leads to layout divergence from the original app.
+
 ### Skip Conditions
 
 - Not rebuild mode (greenfield or add — no source app exists)
 - Non-GUI Feature (http-api, cli, data-io)
 - Source Path = N/A in sdd-state.md
-- Source app cannot be started (dependency issues) → log in sdd-state.md and continue code-only
+- Source app cannot be started (dependency issues) → use Visual References Fallback above, then continue code-only
 
 ## Static Resource Handling
 
@@ -624,6 +634,10 @@ Only a simplified checkpoint is displayed:
 speckit-implement will be executed based on tasks.md. Do you want to proceed?
 ```
 
+**Additional Checkpoint lines** (append when applicable):
+- **Visual references** (rebuild mode + GUI + `visual-references/` exists): `📂 Visual References: [N] screenshots available — will reference during UI tasks`
+- **Interaction surface preservation** (when this Feature modifies/replaces UI components from completed Features): `⚠️ Interaction Surface Check: [component] from [previous FID] will be modified — preserving [N] interaction surfaces`
+
 ## Review Display Content
 
 > **⚠️ SUPPRESS spec-kit output**: `speckit-implement` prints navigation messages like "Suggested commit: ..." — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the Review Display below. If context limit prevents continuing, show instead: `✅ speckit-implement executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
@@ -719,6 +733,24 @@ When implementing code that calls external SDK functions, classify each call by 
 - **Import Path Validation**: Verify correct paths when importing modules from other Features
 - **Interface Contract Compliance**: Confirm actual implementation of shared entities/APIs matches entity-registry/api-registry contracts
 - **Module Import Graph**: Prevent circular imports, check tree-shaking impact when using barrel exports
+
+### Interaction Surface Preservation (UI Features — when modifying/replacing previous Feature components)
+
+When a task modifies or replaces a UI component created by a **previously completed Feature** (e.g., replacing App.tsx, restructuring layout, swapping navigation):
+
+1. **Enumerate existing interaction surfaces**: Before modifying, list all user-facing interactions the component provides:
+   - Window drag regions (`-webkit-app-region: drag`)
+   - Window controls (minimize, maximize, close buttons)
+   - Theme toggle / settings access
+   - Keyboard shortcuts registered in the component
+   - Focus management (focus traps, tab order)
+   - Navigation elements (sidebar, breadcrumbs, tabs)
+2. **Verify preservation in the new implementation**: After modifying, confirm each surface still exists — either in the same component or explicitly relocated to another
+3. **Report any removals**: If an interaction surface is intentionally removed, display:
+   `⚠️ Interaction surface removed: [surface] from [previous FID] — [reason]`
+4. **Fail the per-task runtime check** if a critical surface is missing (drag region, window controls) — same treatment as GUI Operability Check in Smoke Launch
+
+> **Rationale**: When Feature N+1 restructures Feature N's entry component (e.g., replacing App.tsx with a Router layout), it can silently remove interaction surfaces that users rely on (window dragging, theme toggle, window controls). The agent sees the NEW structure as complete but doesn't realize the OLD structure provided essential interactions. Enumerating surfaces before replacement prevents this class of regression.
 
 ### UI Interaction Surface Audit (UI Features)
 
