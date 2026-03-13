@@ -50,6 +50,7 @@ Identify the primary framework(s) from project files:
 | NAT | Native Integration | Menus, tray, notifications, drag-drop, clipboard, shortcuts, file dialogs |
 | UPD | Auto-update | Update mechanism, server, UX (silent/prompt/forced), signing |
 | DLK | Deep Linking & File Associations | Protocol handler, custom schemes, file type registration |
+| STR | Storage | Persistent storage, session management, proxy settings |
 
 ### Server-specific Categories (Express, NestJS, FastAPI)
 
@@ -70,6 +71,7 @@ Identify the primary framework(s) from project files:
 | STM | State Management | Client state library, server state/data fetching, form handling |
 | STY | Styling | CSS strategy, component library, theme configuration |
 | SEO | SEO & Metadata | Metadata strategy, sitemap, robots.txt, Open Graph |
+| DTA | Data & Assets | Static assets, data fetching, image optimization, bundling strategy |
 
 ### Mobile-specific Categories (React Native, Flutter)
 
@@ -276,10 +278,10 @@ Each framework Foundation file in this directory follows the structure defined i
 |------|-----------|-------|-----------|--------|
 | `electron.md` | Electron | 58 | 13 | Implemented |
 | `tauri.md` | Tauri | 44 | 12 | Implemented |
-| `express.md` | Express.js | 43 | 12 | Implemented |
+| `express.md` | Express.js | 43 | 13 | Implemented |
 | `nextjs.md` | Next.js | 44 | 13 | Implemented |
 | `vite-react.md` | Vite + React | 43 | 12 | Implemented |
 | `nestjs.md` | NestJS | 51 | 13 | TODO scaffold |
-| `fastapi.md` | FastAPI | 49 | 12 | TODO scaffold |
-| `react-native.md` | React Native | 55 | 14 | TODO scaffold |
-| `flutter.md` | Flutter | 59 | 14 | TODO scaffold |
+| `fastapi.md` | FastAPI | 41 | 12 | TODO scaffold |
+| `react-native.md` | React Native | 50 | 14 | TODO scaffold |
+| `flutter.md` | Flutter | 50 | 14 | TODO scaffold |

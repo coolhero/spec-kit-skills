@@ -26,7 +26,9 @@
 | ERR | Error Handling | 1 | Crash reporting endpoint |
 | BST | App Bootstrap | 2 | App lifecycle events, background/foreground behavior |
 | DXP | Developer Experience | 3 | Dev tools policy, webview vs BrowserView, native addons |
-| ENV | Environment Config | 3 | GPU acceleration, spell checker, accessibility |
+| ENV | Environment Config | 3 | GPU acceleration, spell checker, accessibility (cross-refs WIN/NAT) |
+
+> **Item count note**: F2 contains 63 rows total. 5 items in BST/DXP/ENV are cross-references to overlapping items in WIN/SEC/NAT (marked with "see also"). Unique decisions = **58**.
 
 ---
 
@@ -154,11 +156,13 @@
 
 ### ENV: Environment Config
 
+> Items in this category are intentionally scoped to app-level runtime configuration that overlaps with WIN/NAT categories. They provide a separate extraction axis for config-centric analysis.
+
 | ID | Item | Description | Decision Type | Priority |
 |----|------|-------------|--------------|----------|
-| EL-ENV-01 | GPU acceleration toggle | Whether to enable/disable hardware GPU acceleration | binary | Optional |
-| EL-ENV-02 | Spell checker config | Built-in spell checker configuration | binary | Optional |
-| EL-ENV-03 | Accessibility config | Accessibility feature configuration (ARIA, keyboard nav) | binary | Optional |
+| EL-ENV-01 | GPU acceleration toggle | Whether to enable/disable hardware GPU acceleration (see also WIN-09) | binary | Optional |
+| EL-ENV-02 | Spell checker config | Built-in spell checker configuration (see also NAT-09) | binary | Optional |
+| EL-ENV-03 | Accessibility config | Accessibility feature configuration (ARIA, keyboard nav) (see also NAT-12) | binary | Optional |
 
 ---
 

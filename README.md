@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 09:42 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:05 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -105,6 +105,20 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 spec-kit-skills is a **harness for agentic coding** — a structural layer that constrains, guides, and verifies what an AI agent produces. Rather than hoping the agent writes correct code, the harness defines contracts the agent must satisfy, injects cross-Feature context the agent would otherwise lack, and verifies results against those contracts before anything merges. The architecture below shows how this harness is designed for extensibility across three independent dimensions.
 
+### Design Philosophy
+
+Five principles shape every design decision in spec-kit-skills:
+
+1. **Contracts over hope** — Instead of hoping an agent writes correct code, the harness defines explicit contracts (Success Criteria, Source Behavior Inventory, Foundation Decisions) that the agent must satisfy. Verification runs against these contracts, not against vague notions of "correct."
+
+2. **Cross-Feature context injection** — An agent working on Feature F003 has no memory of what it decided for F001. The Global Evolution Layer (roadmap, registries, constitution) captures cross-Feature knowledge and injects the relevant subset into each pipeline step. The agent sees exactly what it needs — entity schemas it must reference, API contracts it must respect, Foundation decisions it must obey.
+
+3. **Composable domain knowledge** — Project types differ wildly (REST API vs desktop app vs mobile). Rather than one monolithic ruleset, domain knowledge decomposes into independent modules (Interfaces × Concerns × Scenarios × Foundations) that compose freely. A desktop rebuild project loads `gui + ipc + rebuild + electron`; a greenfield API loads `http-api + auth + greenfield + express`. No unused rules, no missing context.
+
+4. **Human checkpoints at irreversible boundaries** — The pipeline flows autonomously through research, context assembly, and code generation. But before spec-kit commands execute (irreversible artifact creation) and before results are accepted (they feed into downstream Features), HARD STOPs force human review. This creates a trust-but-verify loop where the agent does the heavy lifting but humans gate the decisions.
+
+5. **Progressive detail capture** — Analysis starts broad (tech stack, project structure) and progressively drills into finer detail (function signatures → UI component features → micro-interactions → tooltips and hover effects). Each level feeds the next, so nothing is analyzed without context from the level above.
+
 ### 3-Axis Domain Composition
 
 Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
@@ -155,6 +169,18 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 3. This file loads last with highest priority, extending all other modules
 
 New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
+
+**Add a new Foundation** (e.g., your team uses Remix, which has no built-in Foundation file):
+1. Create `reverse-spec/domains/foundations/remix.md` following the F0-F4 format in `_foundation-core.md`
+2. Define detection signals (F0), categories (F1), items (F2), extraction rules (F3), T0 grouping (F4)
+3. The system detects Remix automatically via F0 signals and loads the full Foundation flow
+4. Without a custom Foundation file, the system still works — it falls back to Case B (universal categories + agent probes)
+
+**Adapt to your workflow** — every checkpoint and gate can be tuned:
+- **Scope**: `core` scope activates T1 only (fastest path); `full` processes everything
+- **Preservation**: `equivalent` requires behavioral parity; `similar` allows cosmetic differences
+- **Pipeline steps**: Skip specific spec-kit steps via sdd-state.md flags
+- **Severity thresholds**: Adjust which verify bugs loop back vs fix inline via `domain-custom.md`
 
 ### Signal Keywords and Proposal Mode
 
@@ -252,6 +278,24 @@ Verify discovers bugs and classifies them into 4 severity levels. Only Minor iss
 | Pre-context | `specs/reverse-spec/features/F00N-*/pre-context.md` | Per-Feature context for spec-kit |
 | Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
 | State | `specs/reverse-spec/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
+
+### Adapting to Your Project
+
+The system is designed so you can start with defaults and progressively customize:
+
+**Level 0 — Out of the box**: Run `/smart-sdd init` or `/reverse-spec` with no customization. The agent auto-detects your profile, framework, interfaces, and concerns. Works for most projects immediately.
+
+**Level 1 — Domain profile tuning**: Edit `sdd-state.md` to add/remove active Interfaces and Concerns. Loading `auth` adds authentication-specific SC rules; removing `i18n` skips internationalization checks.
+
+**Level 2 — Project-specific rules**: Create `specs/reverse-spec/domain-custom.md` in your project. Add rules using the same S1/S5/S7 schema (e.g., "all payment endpoints require idempotency SC", "dark mode must be tested in verify"). This file loads last with highest priority — no skill files modified.
+
+**Level 3 — New domain modules**: Create custom Interface or Concern files (e.g., `domains/interfaces/grpc.md`, `domains/concerns/caching.md`). Follow `domains/_schema.md` for the module format. Your modules compose automatically with built-in ones.
+
+**Level 4 — New Foundation checklists**: Create `reverse-spec/domains/foundations/{framework}.md` for frameworks not yet covered. The system gracefully degrades without it (Case B: universal categories + agent probes), but a dedicated checklist ensures nothing is missed.
+
+**Level 5 — Pipeline behavior modification**: Override verify severity thresholds, pipeline step ordering, HARD STOP behavior, and context injection rules through the reference files. Advanced users can tune the balance between automation speed and review thoroughness.
+
+Every customization level is backward-compatible — a Level 2 project doesn't break if the skill files update, because `domain-custom.md` lives in the user's project directory, not in the skills repo.
 
 ---
 

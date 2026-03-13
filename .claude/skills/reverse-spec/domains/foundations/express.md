@@ -26,7 +26,7 @@
 | TST | Testing | 2 | Testing setup, linting/formatting |
 | BLD | Build & Deploy | 3 | Static files, file uploads, HTTPS/TLS |
 | ENV | Environment Config | 3 | Environment config, response caching, timeout handling |
-| DXP | Developer Experience | 5 | Express version, session management, request validation, static files, timeout |
+| DXP | Developer Experience | 5 | Express version, session management, Helmet config, rate limit config, WebSocket |
 
 ---
 

@@ -5,6 +5,43 @@
 
 ---
 
+## [2026-03-13] Expert Review Fixes + README Architecture Enhancement
+
+Post-implementation expert review identified 14 issues across Foundation files, reverse-spec integration, and smart-sdd integration.
+
+### Fixes Applied
+- **Critical**: Electron item count note (63 rows, 58 unique decisions with 5 cross-refs), Express category count (12→13), TODO scaffold F1 sums corrected (FastAPI 49→41, React Native 55→50, Flutter 59→50)
+- **Significant**: Phase 4-2 Foundation distribution (added Foundation Decisions + Foundation Dependencies to pre-context distribution), roadmap-template T0 tier section added, STR/DTA categories added to _foundation-core.md F1 taxonomy
+- **Minor**: Phase reference fix (2-4→2-8), dangling Phase 5 reference removed, verify-phases heading mismatch fixed, micro-interaction ID format specified, Express DXP description corrected, Electron ENV cross-ref annotations added
+
+### README Architecture Enhancement
+- Added "Design Philosophy" section: 5 principles (contracts over hope, cross-Feature context injection, composable domain knowledge, human checkpoints at irreversible boundaries, progressive detail capture)
+- Added "Adapting to Your Project" section: 6 progressive customization levels (Level 0 defaults → Level 5 pipeline behavior modification)
+- Enhanced "Extensibility" section: added Foundation creation and workflow adaptation examples
+- All changes synced to README.ko.md (Korean)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Electron cross-refs vs dedup | Keep 63 rows, annotate cross-refs | Different extraction axes need separate entries; "see also" links prevent agent confusion |
+| Foundation distribution in Phase 4-2 | Explicit addition to enumeration | Without explicit instruction, agent may skip Foundation data when populating pre-context |
+| T0 in roadmap template | New section before T1 | Template must mirror actual pipeline ordering; Foundation Features need a home in roadmap.md |
+
+### Files Changed (16 files)
+- `reverse-spec/domains/foundations/electron.md` — cross-ref annotations, item count note
+- `reverse-spec/domains/foundations/_foundation-core.md` — F1 STR/DTA, F6 table corrected
+- `reverse-spec/domains/foundations/express.md` — DXP description
+- `reverse-spec/domains/foundations/fastapi.md` — TODO comment fix
+- `reverse-spec/domains/foundations/react-native.md` — TODO comment fix
+- `reverse-spec/domains/foundations/flutter.md` — TODO comment fix
+- `reverse-spec/commands/analyze.md` — Phase ref, Foundation distribution, ID format
+- `reverse-spec/templates/roadmap-template.md` — T0 tier section
+- `smart-sdd/commands/verify-phases.md` — heading mismatch
+- `README.md` — Design Philosophy, Adapting to Your Project, timestamp
+- `README.ko.md` — Korean sync, timestamp
+- `history.md` — this entry
+
+---
+
 ## [2026-03-13] Micro-Interaction Layer + Expert Analysis Improvements
 
 Added comprehensive micro-interaction detection and verification across the full pipeline, plus expert-recommended robustness improvements.

@@ -245,7 +245,7 @@ Update `⚠️ RESUME FROM` to point to the next pending Phase.
 Before resuming verify from saved state:
 1. **sdd-state.md readable**: File exists, markdown parses, State Schema Version present
 2. **Verify Progress table exists**: Feature Detail Log has `### Verify Progress` for current Feature
-3. **Process Rules Checklist exists**: `#### Process Rules Checklist` section present
+3. **Process Rules Checklist exists**: `#### Verify Process Rules` section present
 4. **Minor Fix Accumulator exists**: `#### Minor Fix Accumulator` section present (may be empty)
 5. **Phase status consistency**: No phase marked `🔄 in_progress` (should have been saved as `⏳ pending` or `✅`)
 

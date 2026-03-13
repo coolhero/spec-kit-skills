@@ -29,7 +29,7 @@
 | BLD | Build & Deploy | 4 | Code generation, JSON serialization, Freezed, web/desktop support |
 | ENV | Environment Config | 5 | Flavor config, flavor assets, localization, minimum platform versions, package management |
 
-<!-- TODO: Full itemization — 59 items across 14 categories -->
+<!-- TODO: Full itemization — 50 items across 14 categories -->
 <!-- See _foundation-core.md for Foundation file format specification -->
 <!-- Refer to research data for complete Flutter Foundation item enumeration -->
 <!-- Note: Requires future `mobile-app` profile to be fully functional -->

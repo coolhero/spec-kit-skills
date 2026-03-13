@@ -197,7 +197,7 @@ From Phase 1-2 tech stack results, identify the primary framework(s):
 2. Record: `Framework: {name}` (comma-separated if multiple, e.g., `electron`, `express,nextjs`)
 3. If no match: `Framework: custom` (no Foundation loaded)
 
-This determination feeds into Phase 2-4 (Foundation Decision Extraction) and into `smart-sdd init` Step 3b for greenfield projects.
+This determination feeds into Phase 2-8 (Foundation Decision Extraction) and into `smart-sdd init` Step 3b for greenfield projects.
 
 ### 1-3. Project Type Classification
 Classify the project type based on the collected information. Use the project types defined in `domains/_core.md` § R2 (Project Type Classification).
@@ -1063,7 +1063,9 @@ After source code extraction, selectively probe runtime to confirm key findings:
 
 #### C. Output
 
-Write findings to `specs/reverse-spec/micro-interactions.md`:
+Write findings to `specs/reverse-spec/micro-interactions.md`.
+
+**ID Format**: Use category-prefixed sequential IDs — `H001`/`H002` for Hover, `K001` for Keyboard, `A001` for Animation, `F001` for Focus, `D001` for Drag-and-Drop, `C001` for Context Menu, `S001` for Scroll. These IDs carry into per-Feature `pre-context.md` Interaction Behavior Inventory tables.
 
 ```markdown
 # Micro-Interaction Inventory
@@ -1121,7 +1123,7 @@ For each identified framework (from Phase 1-2b):
 | ID | Item | Detected Value | Confidence | Source File |
 |----|------|---------------|------------|-------------|
 
-4. Flag `ambiguous` items for user clarification in Phase 5 review
+4. Flag `ambiguous` items for user clarification during `smart-sdd init` Step 3b or `smart-sdd pipeline` pre-phase review
 
 **Foundation Migration** (rebuild with framework change only):
 If `change_scope = "framework"` or `"stack"`, apply the Migration Protocol from `domains/foundations/_foundation-core.md` § F5:
@@ -1517,6 +1519,8 @@ Contents to include in each pre-context.md:
   > **SBI Per-Feature Filtering**: Filter only behaviors belonging to this Feature's source files from the Phase 2-6 global SBI. B### IDs are assigned sequentially and uniquely across the entire project in Feature ID order.
 - **UI Component Features** (frontend/fullstack projects only): Third-party UI library capabilities from Phase 2-7, filtered to this Feature's associated components. Each entry: component name, library, feature, category. Omit for backend-only projects
 - **Interaction Behavior Inventory** (frontend/fullstack projects only): Micro-interaction patterns from Phase 2-7b (hover behaviors, keyboard shortcuts, animations, focus management, drag-and-drop, context menus, scroll behaviors), filtered to this Feature's associated components and screens. Omit for backend-only projects
+- **Foundation Decisions** (if Framework ≠ "custom"): From Phase 2-8 extraction results, populate the Foundation Decisions section (Critical, Important, Undecided tables) with items relevant to this Feature's domain. For T0 Features (F000-*): include all items from their owning Foundation categories. For T1+ Features: include only Foundation decisions that constrain this Feature
+- **Foundation Dependencies**: For each Feature, classify its relationship to Foundation categories — `owns` (T0 only), `consumes` (T1+ uses Foundation decisions as constraints), `extends` (rare, adds to Foundation). Skip if Framework is "custom" or "none"
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
 - **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features

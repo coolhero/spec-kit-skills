@@ -27,6 +27,6 @@
 | BLD | Build & Deploy | 3 | HTTPS/TLS, GZip compression, rate limiting |
 | ENV | Environment Config | 4 | Settings management, settings validation, Pydantic model strategy, environment config |
 
-<!-- TODO: Full itemization — 49 items across 12 categories -->
+<!-- TODO: Full itemization — 41 items across 12 categories -->
 <!-- See _foundation-core.md for Foundation file format specification -->
 <!-- Refer to research data for complete FastAPI Foundation item enumeration -->

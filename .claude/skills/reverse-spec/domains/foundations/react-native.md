@@ -29,7 +29,7 @@
 | DXP | Developer Experience | 7 | Navigation structure, deep linking, splash screen, app icon, safe area, orientation, animations |
 | ENV | Environment Config | 5 | Native module linking, adaptive icon, edge-to-edge, WebSocket, monorepo |
 
-<!-- TODO: Full itemization — 55 items across 14 categories -->
+<!-- TODO: Full itemization — 50 items across 14 categories -->
 <!-- See _foundation-core.md for Foundation file format specification -->
 <!-- Refer to research data for complete React Native Foundation item enumeration -->
 <!-- Note: Requires future `mobile-app` profile to be fully functional -->
