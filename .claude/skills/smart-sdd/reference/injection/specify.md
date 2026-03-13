@@ -125,6 +125,13 @@ Feature: [FID] - [Feature Name]
 ── Preceding Feature References ──────────────────
 [If applicable: what was referenced from preceding Features]
 
+── Dependency Stubs Targeting This Feature ────────
+[If preceding Features have stubs.md entries where Dependent Feature = current FID]
+  From [FID]-[name] stubs.md:
+    • [File:Line] — [Current (Stub)] → [Target (Real)]
+  ⚠️ This Feature should resolve these stubs. Ensure requirements/SCs cover the target behavior.
+[If no preceding stubs target this Feature: skip this block entirely]
+
 ── Functional Enablement Chain ─────────────────
 [If present in pre-context — show enablement/blocking relationships]
   Enables → F005-chat: Provider settings panel works

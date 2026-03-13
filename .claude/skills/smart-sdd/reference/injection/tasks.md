@@ -11,6 +11,7 @@
 |------|---------|-----------|
 | `SPEC_PATH/[NNN-feature]/plan.md` | Entire file | Current Feature |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** — for Source Complexity Annotation. Resolve file paths per `injection/specify.md` Source Reference Path Resolution rules |
+| Preceding Features' `SPEC_PATH/[NNN-feature]/stubs.md` | Rows where Dependent Feature = current FID | **If exists** — stubs that this Feature should resolve (see `context-injection-rules.md` § Dependency Stub Resolution Injection) |
 
 ## Injected Content
 
@@ -231,6 +232,27 @@ Add this task now or during the "I've finished editing" step.
 ────────────────────────────────────────────────────
 ```
 
+**Stub resolution task injection check** (if preceding Features have `stubs.md` entries targeting the current FID — see `context-injection-rules.md` § Dependency Stub Resolution Injection):
+After reading tasks.md, if any preceding Feature's `stubs.md` contains rows where `Dependent Feature` = current FID, scan tasks.md for stub resolution tasks (keywords: the stub's file name, "replace stub", "replace placeholder", "replace hardcoded", the previous FID like "F002"). If **no stub resolution tasks are found**, append:
+
+```
+── ⚠️ Stub Resolution Tasks Missing ────────────────
+Preceding Features have [N] stubs depending on this Feature:
+  From [FID]-[name]:
+    • [File:Line] — [Current (Stub)] → [Target (Real)]
+    • [File:Line] — [Current (Stub)] → [Target (Real)]
+
+But tasks.md has no tasks to resolve these stubs. Without explicit
+tasks, the stubs will remain as hardcoded/placeholder code even after
+this Feature is implemented.
+
+Recommended: add a task per stub (or group related stubs into one task):
+  1. Replace [stub description] in [file] with real [Feature] implementation
+
+Add these tasks now or add them during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
 **Feature size warning** (always checked):
 After reading tasks.md, count the total number of tasks. Also read plan.md to estimate file count from architecture/phases:
 
@@ -303,6 +325,11 @@ These are recommendations, not blockers. Proceed if the Feature is inherently la
 ── ⚠️ SDK Migration Tasks Missing ────────────────
 [Only if plan.md mentions SDK version upgrade AND tasks.md has
  no SDK migration verification task]
+
+── ⚠️ Stub Resolution Tasks Missing ────────────────
+[Only if preceding Features have stubs.md entries targeting this FID
+ AND tasks.md has no stub resolution tasks (keywords: stub file name,
+ "replace stub", "replace placeholder", "replace hardcoded", previous FID)]
 
 ── ⚠️ Feature Size Warning ───────────────────────
 [Only if task count > 100 OR estimated file count > 50]

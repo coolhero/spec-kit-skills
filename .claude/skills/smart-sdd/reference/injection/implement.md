@@ -801,4 +801,32 @@ When implementing hover, click, or popup interactions, check the following befor
    - If the entity/API drafts in the "For /speckit.plan" section differ from the actual implementation, update them
    - Report the changes to the user
 
+2. **Dependency Stub Registry** — generate `SPEC_PATH/[NNN-feature]/stubs.md`:
+   After all tasks are implemented, scan the codebase for stub/placeholder implementations created due to dependency on future Features. Generate `stubs.md` only if stubs exist.
+
+   **Detection method** (apply ALL):
+   - Scan `tasks.md` for tasks explicitly marked as partial/stub due to future Feature dependency
+   - Search implemented files for `TODO` comments referencing other Feature IDs (e.g., `// TODO: F003`, `// TODO: Read from settings store (F003-settings)`)
+   - Check for hardcoded values that should come from a not-yet-implemented Feature's store/API/config
+
+   **stubs.md format**:
+   ```markdown
+   # Dependency Stub Registry — [FID]-[name]
+
+   > Stub/placeholder implementations that depend on future Features.
+   > Auto-generated at implement completion. Consumed by dependent Features' pipeline.
+
+   | # | File:Line | Dependent Feature | Current (Stub) | Target (Real) | TODO Marker |
+   |---|-----------|-------------------|----------------|---------------|-------------|
+   | 1 | src/components/Sidebar.tsx:54 | F003-settings | `DEFAULT_VISIBLE_ICONS` hardcoded array | Read from settings store | `// TODO: F003` |
+   | 2 | src/components/PinnedApps.tsx:12 | F008-mcp | Empty stub component returning `null` | Render pinned MCP apps | `// TODO: F008` |
+   ```
+
+   **Rules**:
+   - Each row must have a specific `File:Line` location (not just a file name)
+   - `Dependent Feature` must reference an actual FID from the roadmap
+   - If no stubs are found, do NOT create an empty `stubs.md` — skip this step entirely
+   - Display summary: `📋 Dependency Stubs: [N] stubs registered in stubs.md (dependencies: [FID list])`
+   - If zero stubs: `📋 Dependency Stubs: None — no future-Feature dependencies detected`
+
 > **Note**: Feature Progress Status remains `in_progress` after implement. Status transitions to `completed` only after all steps including merge are ✅ (per state-schema.md).

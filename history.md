@@ -5,6 +5,35 @@
 
 ---
 
+## [2026-03-14] SKF-012: Dependency Stub Registry — cross-Feature stub tracking mechanism
+
+Skill Feedback from angdu-studio F002-navigation. Stubs/placeholders created due to future Feature dependencies had no tracking or auto-injection mechanism — only TODO comments in code.
+
+### Root Cause: No structured tracking for cross-Feature stub dependencies
+- **Problem**: F002 created multiple stubs (hardcoded sidebar icons → F003, empty Pinned Apps → F008, etc.) tracked only by inline TODO comments. When F003/F008 enter the pipeline, there's no mechanism to surface these stubs as tasks to resolve
+- **Fix**: Full lifecycle Dependency Stub Registry:
+  1. **Generate** (`injection/implement.md` § Post-Step Update #2): After implement, scan for stubs referencing future FIDs → generate `specs/{NNN-feature}/stubs.md`
+  2. **Shared injection rule** (`context-injection-rules.md` § Dependency Stub Resolution Injection): When Feature N enters pipeline, scan all preceding stubs.md for rows targeting FID=N
+  3. **Inject into specify/plan/tasks**: Show stubs at checkpoint, include in plan architecture input, warn if no resolution tasks generated
+  4. **Verify completeness** (`injection/verify.md` § Post-Step Update #4): Check if preceding stubs were resolved after this Feature completes
+
+### Design decisions
+- **Non-blocking at verify**: Unresolved stubs produce a warning, not a verify failure
+- **Single Source of Truth**: stubs.md format in `injection/implement.md`, injection pattern in `context-injection-rules.md`
+- **No stubs = no file**: stubs.md only generated when stubs exist
+
+### Files Changed (7 skill files + 1 feedback file)
+- `smart-sdd/reference/injection/implement.md` — Post-Step Update #2: Dependency Stub Registry generation
+- `smart-sdd/commands/pipeline.md` — Brief mention after implement completion
+- `smart-sdd/reference/context-injection-rules.md` — Dependency Stub Resolution Injection shared pattern
+- `smart-sdd/reference/injection/specify.md` — Checkpoint Display: stubs block
+- `smart-sdd/reference/injection/plan.md` — Injected Content: stubs bullet
+- `smart-sdd/reference/injection/tasks.md` — Read Targets + task injection check + display format
+- `smart-sdd/reference/injection/verify.md` — Post-Step Update #4: Stub Resolution Completeness Check
+- `angdu-studio/skill-feedback.md` — SKF-012 marked as ✅ Reflected
+
+---
+
 ## [2026-03-14] SKF-010 + SKF-011: Layout Structure Analysis + GUI Mandatory Playwright Gate
 
 Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) implement phase rebuilt layout without matching source app code-level structure, (2) verify phase skipped Playwright runtime verification despite GUI Feature.

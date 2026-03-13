@@ -281,7 +281,19 @@ Major) require user approval via HARD STOP before any files are edited.
      ```
      ⚠️ P1 SBI coverage is [X]% — some core behaviors are still unmapped.
      ```
-4. **Demo Group Progress Update**:
+4. **Stub Resolution Completeness Check**:
+   - Scan all preceding Features' `SPEC_PATH/[NNN-feature]/stubs.md` for rows where `Dependent Feature` = current FID
+   - For each matching stub, check if the stub location (`File:Line`) has been modified — compare the current code against the `Current (Stub)` description
+   - Report results:
+     - Resolved: `✅ Stub resolved: [File:Line] — [previous FID] stub replaced with real implementation`
+     - Unresolved: `⚠️ Stub NOT resolved: [File:Line] — [Current (Stub)] still present (expected: [Target (Real)])`
+   - If any stubs are unresolved and the Feature's spec/tasks included resolving them, flag as a verification gap (non-blocking — display warning, do not fail verify):
+     ```
+     ⚠️ [N] dependency stubs from preceding Features remain unresolved.
+     These may need to be addressed in a follow-up task or the next Feature.
+     ```
+   - If no preceding stubs target this Feature: skip this check silently
+5. **Demo Group Progress Update**:
    - Check if this Feature belongs to any Demo Group in `sdd-state.md`
    - Update the Completed count for that group
    - Run `scripts/demo-status.sh <project-root>` to display current group status

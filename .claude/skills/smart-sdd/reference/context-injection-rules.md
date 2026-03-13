@@ -41,6 +41,23 @@ The following patterns apply to ALL commands:
 
 **BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
 **SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
+
+---
+
+## Dependency Stub Resolution Injection
+
+When a Feature enters the pipeline (specify, plan, or tasks step), scan **all preceding Features' `stubs.md`** for stubs that depend on the current Feature:
+
+1. **Scan**: For each preceding Feature that has `SPEC_PATH/[NNN-feature]/stubs.md`, read the file and filter rows where `Dependent Feature` matches the current FID
+2. **Inject**: If matching stubs are found, inject them into the current Feature's context assembly (see per-command injection files for exact placement):
+   - `injection/specify.md` — Checkpoint Display: show stubs in a dedicated block so the user sees them before spec review
+   - `injection/plan.md` — Injected Content: include stubs as architectural input so plan accounts for stub resolution
+   - `injection/tasks.md` — Review Display: warn if no stub resolution tasks are generated
+3. **No matches**: If no preceding Features have stubs depending on the current FID, skip injection silently (no message needed)
+
+> **Stub file format and generation rules**: See `injection/implement.md` § Post-Step Update Rules #2 (Dependency Stub Registry).
+> **Stub completeness verification at verify time**: See `injection/verify.md` § Post-Step Update Rules (Stub Resolution Completeness Check).
+
 ---
 
 ## Missing/Sparse Content Handling

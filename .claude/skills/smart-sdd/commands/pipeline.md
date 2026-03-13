@@ -775,6 +775,8 @@ After build succeeds and before proceeding to the Review step, perform a **smoke
 
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
 
+📋 **Dependency Stub Registry**: After implement completion, generate `specs/{NNN-feature}/stubs.md` if any stub/placeholder implementations depend on future Features. See `injection/implement.md` § Post-Step Update Rules #2 for format and detection rules. These stubs are auto-injected into the dependent Feature's pipeline context.
+
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.
 
 📝 **Decision History Recording — Feature Implementation** (after merge):
