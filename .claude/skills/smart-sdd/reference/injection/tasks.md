@@ -34,7 +34,7 @@ After `speckit-tasks` completes:
 **Files to read**:
 1. `specs/{NNN-feature}/tasks.md` — Read the **entire file** and extract the task list
 
-**Demo task injection check** (only if VI. Demo-Ready Delivery is in the constitution; see [demo-standard.md](../demo-standard.md) for full demo requirements):
+**Demo task injection check** (if VI. Demo-Ready Delivery is in the constitution OR `demos/` already contains Feature demo scripts; see [demo-standard.md](../demo-standard.md) for full demo requirements):
 After reading tasks.md, scan the task list for demo-related tasks (keywords: "demo", "demo script", "demo data", "demo route", "demo page", "demo fixture", "demos/"). If **no demo tasks are found**, append a warning block to the Review display:
 
 ```

@@ -233,9 +233,9 @@ When the Feature's `pre-context.md` contains a "Naming Remapping" section (indic
 
 **Greenfield/incremental projects**: No Naming Remapping section exists. Skip entirely.
 
-## Demo-Ready Delivery (only if VI. Demo-Ready Delivery is in the constitution)
+## Demo-Ready Delivery (if VI. Demo-Ready Delivery is in the constitution OR `demos/` already contains Feature demo scripts)
 
-After `speckit-implement` completes, if the constitution includes "Demo-Ready Delivery":
+After `speckit-implement` completes, if Demo-Ready Delivery is **active** (constitution includes "Demo-Ready Delivery", OR `demos/` directory already contains demo scripts from previous pipeline runs — indicating the project has an established demo pattern):
 
 1. **Clean up obsolete demo-only components from previous Features**:
    - Check `demos/` directory for demo scripts of **already completed** Features

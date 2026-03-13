@@ -906,12 +906,13 @@ Verifies that the data shape contracts defined in plan.md are actually implement
 5. **If Integration Contracts section missing in plan.md** but Feature has Enablement Chain:
    Display: `⚠️ Integration Contracts not defined in plan.md — cross-Feature data shape compatibility not verified. Consider running /smart-sdd plan [FID] to add contracts.`
 
-### Phase 3: Demo-Ready Verification (BLOCKING — only if VI. Demo-Ready Delivery is in the constitution)
+### Phase 3: Demo-Ready Verification (BLOCKING — only if Demo-Ready Delivery is active)
 
 > **Interface conditional**: Phase 3 UI verification only executes when `gui` is in the active Interfaces (from sdd-state.md Domain Profile).
 > For pure API/CLI/data-io projects, skip Phase 3 entirely and proceed to Phase 3b.
 
-> **If VI. Demo-Ready Delivery is NOT in the constitution**: Skip this phase entirely.
+> **Demo-Ready Delivery is active** when: VI. Demo-Ready Delivery is in the constitution, OR `demos/` directory already contains Feature demo scripts from previous pipeline runs.
+> **If Demo-Ready Delivery is NOT active**: Skip this phase entirely.
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).
 > **quickstart.md reference**: If `specs/{NNN-feature}/quickstart.md` exists, use it as the authoritative source for how the Feature should be launched and verified. The demo script must follow quickstart.md's run instructions.
 

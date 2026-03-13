@@ -76,7 +76,7 @@ Show the **actual verification checklist** so the user can see what will be chec
   - If no Foundation decisions apply: skip this section
 
 ── Phase 3: Demo-Ready Verification ──────────────
-[Only if VI. Demo-Ready Delivery is in the constitution. Omit this section otherwise.]
+[Only if Demo-Ready Delivery is active (constitution OR existing demos/). Omit this section otherwise.]
   SC Verification Matrix ([N] SCs from spec.md):
     cdp-auto: [N] SCs — [list SC-### to verify via browser automation]
     api-auto: [N] SCs — [list SC-### to verify via HTTP client] (if http-api interface)
@@ -164,7 +164,7 @@ After verification execution completes:
     [⚠️ F003-chat-core: bridge adapter NOT FOUND — useMCPStore → assistant format (if any)]
 
 ── Phase 3: Demo-Ready Verification ───────────────
-[Only if Demo-Ready Delivery is in the constitution]
+[Only if Demo-Ready Delivery is active (constitution OR existing demos/)]
   - ✅/❌ Executable demo script exists (demos/F00N-name.sh)
   - ✅/❌ Demo script launches a real Feature environment (not test-only)
   - ✅/❌ Demo prints concrete "Try it" instructions for the user (≥ 2)

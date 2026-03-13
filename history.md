@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-03-14] SKF-007: Demo-Ready Delivery condition expansion
+
+Skill Feedback from angdu-studio F002-navigation. Demo scripts were not generated because the condition only checked constitution, missing the established demo pattern from F001.
+
+### Root Cause: Constitution-only gating ignores project demo history
+- **Problem**: Demo-Ready Delivery was gated exclusively by "VI. Demo-Ready Delivery in constitution". If a project had no such constitution principle but already had `demos/F001-*.sh` from a previous Feature, the agent skipped demo creation for subsequent Features.
+- **Fix**: Expanded the condition across 4 files to: "constitution includes Demo-Ready Delivery **OR** `demos/` directory already contains Feature demo scripts from previous pipeline runs"
+- **Rationale**: If a project has established a demo pattern (regardless of constitution), maintaining that pattern is expected behavior. This avoids user surprise when demos suddenly stop appearing.
+
+### Files Changed (4 skill files + 1 feedback file)
+- `smart-sdd/reference/injection/implement.md` — L236: section header + L238: gating condition expanded
+- `smart-sdd/reference/injection/tasks.md` — L37: task injection check condition expanded
+- `smart-sdd/commands/verify-phases.md` — L909-915: Phase 3 header + skip condition expanded with inline definition
+- `smart-sdd/reference/injection/verify.md` — L79 + L167: checkpoint/review display condition expanded
+- `angdu-studio/skill-feedback.md` — SKF-007 marked as ✅ Reflected
+
+### Cross-reference check
+- `pipeline.md` L667: flow summary mentions "Demo-Ready Delivery" as a step name (not a gated condition) — no change needed
+- `injection/implement.md` L611,637,665,672: use shorthand "if Demo-Ready Delivery active" — automatically covered by the expanded primary definition at L236
+- `injection/tasks.md` L267: uses shorthand "if Demo-Ready Delivery active" — automatically covered
+- `injection/verify.md` L79,167: updated to "(constitution OR existing demos/)" shorthand
+
+---
+
 ## [2026-03-13] Full Project Review + Integration Demo Trigger Fix
 
 Full file analysis per CLAUDE.md Review Protocol (4-step: flow consistency, unused parts, commonization, over-fragmentation). Also verified SKF-001~006 reflection quality and evaluated 2 minor issues.
