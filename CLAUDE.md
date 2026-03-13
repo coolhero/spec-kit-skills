@@ -45,6 +45,18 @@
 - 파일 추가/삭제/이동 시 반드시 테이블을 업데이트합니다.
 - 테이블은 스킬별로 그룹핑하고, 루트 파일은 별도로 정리합니다.
 
+## Skill Feedback Intake
+
+- 피드백 소스: `/Users/coolhero/Develop/angdu-studio/skill-feedback.md`
+- 사용자가 "skill-feedback 확인해줘"라고 하면 위 파일을 읽고 각 SKF 항목을 처리
+- 처리 절차:
+  1. `skill-feedback.md` 읽기
+  2. 각 항목의 **Skill Trace** → 해당 skill 파일 열기
+  3. **Category**별 수정 방향에 따라 수정안 제시
+  4. 사용자 승인 후 수정 반영
+  5. 수정 완료된 항목은 `history.md`에 기록
+- 수정 시 CLAUDE.md **Do NOT Modify** 항목을 반드시 확인 — 해당 영역이면 사용자에게 알리고 진행 여부 확인
+
 ## Review Protocol
 
 전체 파일 검토 시 아래 순서로 수행합니다:
