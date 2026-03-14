@@ -760,19 +760,20 @@ When implementing code that calls external SDK functions, classify each call by 
 
 When a task modifies or replaces a UI component created by a **previously completed Feature** (e.g., replacing App.tsx, restructuring layout, swapping navigation):
 
-1. **Enumerate existing interaction surfaces**: Before modifying, list all user-facing interactions the component provides:
+1. **Read previous Features' Interaction Surface Inventories**: Before modifying, read `SPEC_PATH/[NNN-feature]/interaction-surfaces.md` from all preceding Features. This provides the definitive list of surfaces to preserve (do NOT rely on ad-hoc enumeration alone — the inventory is the authoritative source)
+2. **Enumerate existing interaction surfaces** (supplement inventory with inspection): List all user-facing interactions the component provides:
    - Window drag regions (`-webkit-app-region: drag`)
    - Window controls (minimize, maximize, close buttons)
    - Theme toggle / settings access
    - Keyboard shortcuts registered in the component
    - Focus management (focus traps, tab order)
    - Navigation elements (sidebar, breadcrumbs, tabs)
-2. **Verify preservation in the new implementation**: After modifying, confirm each surface still exists — either in the same component or explicitly relocated to another
-3. **Report any removals**: If an interaction surface is intentionally removed, display:
+3. **Verify preservation in the new implementation**: After modifying, confirm each surface from the inventory still exists — either in the same component or explicitly relocated to another
+4. **Report any removals**: If an interaction surface is intentionally removed, display:
    `⚠️ Interaction surface removed: [surface] from [previous FID] — [reason]`
-4. **Fail the per-task runtime check** if a critical surface is missing (drag region, window controls) — same treatment as GUI Operability Check in Smoke Launch
+5. **Fail the per-task runtime check** if a critical surface is missing (drag region, window controls) — same treatment as GUI Operability Check in Smoke Launch
 
-> **Rationale**: When Feature N+1 restructures Feature N's entry component (e.g., replacing App.tsx with a Router layout), it can silently remove interaction surfaces that users rely on (window dragging, theme toggle, window controls). The agent sees the NEW structure as complete but doesn't realize the OLD structure provided essential interactions. Enumerating surfaces before replacement prevents this class of regression.
+> **Rationale**: When Feature N+1 restructures Feature N's entry component (e.g., replacing App.tsx with a Router layout), it can silently remove interaction surfaces that users rely on (window dragging, theme toggle, window controls). The agent sees the NEW structure as complete but doesn't realize the OLD structure provided essential interactions. The Interaction Surface Inventory provides a concrete checklist for preservation.
 
 ### UI Interaction Surface Audit (UI Features)
 
@@ -828,5 +829,35 @@ When implementing hover, click, or popup interactions, check the following befor
    - If no stubs are found, do NOT create an empty `stubs.md` — skip this step entirely
    - Display summary: `📋 Dependency Stubs: [N] stubs registered in stubs.md (dependencies: [FID list])`
    - If zero stubs: `📋 Dependency Stubs: None — no future-Feature dependencies detected`
+
+3. **Interaction Surface Inventory** (GUI Features only) — generate `SPEC_PATH/[NNN-feature]/interaction-surfaces.md`:
+   After all tasks are implemented, scan the Feature's UI components and record all user-facing interaction surfaces.
+
+   **interaction-surfaces.md format**:
+   ```markdown
+   # Interaction Surface Inventory — [FID]-[name]
+
+   > User-facing interaction surfaces provided by this Feature.
+   > Auto-generated at implement completion. Consumed by subsequent Features' pipeline.
+
+   | # | Surface | Type | Component:Line | Size/Area | Criticality |
+   |---|---------|------|----------------|-----------|-------------|
+   | 1 | Titlebar drag region | Drag Region | Titlebar.tsx:12 | 100% × 36px | Critical |
+   | 2 | Window controls | Buttons | WindowControls.tsx:8 | 3 × 46px | Critical |
+   | 3 | Theme toggle | Button | Titlebar.tsx:24 | 1 × 36px | High |
+   | 4 | Sidebar navigation | Navigation | Sidebar.tsx:15 | 260px × 100% | High |
+   | 5 | Keyboard: Ctrl+, | Shortcut | App.tsx:42 | N/A | Medium |
+   ```
+
+   **Criticality levels**:
+   - **Critical**: Removal breaks platform functionality (drag regions, window controls). Must ALWAYS be preserved.
+   - **High**: Removal significantly degrades UX (navigation, theme toggle, primary actions). Preservation expected unless explicitly redesigned.
+   - **Medium**: Removal may be acceptable with justification (keyboard shortcuts, secondary actions).
+
+   **Rules**:
+   - Only generate for GUI Features (skip for API/CLI/data-io)
+   - Include specific `Component:Line` location for each surface
+   - If this Feature modified a previous Feature's surfaces, update the previous Feature's inventory file too (append `Relocated to: [new-component]` note)
+   - Display summary: `🎯 Interaction Surfaces: [N] surfaces inventoried ([C] critical, [H] high, [M] medium)`
 
 > **Note**: Feature Progress Status remains `in_progress` after implement. Status transitions to `completed` only after all steps including merge are ✅ (per state-schema.md).

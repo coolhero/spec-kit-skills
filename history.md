@@ -5,6 +5,35 @@
 
 ---
 
+## [2026-03-14] SKF-015 + SKF-016: Cross-Stage Validation Gates + Interaction Surface Inventory
+
+SKF-015: Structural analysis of SKF-001~014 patterns revealing the pipeline's single-direction trust model as root cause. SKF-016: The Interaction Surface Preservation rule (SKF-009) lacked a concrete artifact for agents to reference.
+
+### SKF-015: Cross-Stage Validation Gates
+- **Problem**: Pipeline stages trust previous output without independent re-validation. 11 of 14 SKF items traced back to this trust model failure
+- **Fix**: Added `## Cross-Stage Validation Gates (rebuild + GUI)` section to `pipeline.md` — 3 gates as circuit breakers:
+  - Gate 1 (specify entry): Runtime default re-verification
+  - Gate 2 (implement entry): Interaction Surface Inventory + layout structure analysis
+  - Gate 3 (verify Phase 3e): Source app comparison MANDATORY
+- **Design decision**: Consolidation section with cross-references, not rule duplication. Individual rules already exist in SKF-009/010/013/014 — this section frames them as a unified pattern
+
+### SKF-016: Interaction Surface Inventory
+- **Problem**: SKF-009's "enumerate surfaces before modifying" rule relied on ad-hoc inspection. Agent had no concrete checklist of what surfaces existed, leading to repeated omissions (drag region lost twice)
+- **Fix**: Full lifecycle Interaction Surface Inventory:
+  1. **Generate** (`injection/implement.md` Post-Step Update #3): Create `specs/{NNN-feature}/interaction-surfaces.md` with Surface, Type, Component:Line, Size, Criticality
+  2. **Inject** (`injection/plan.md`): Include inventory in plan architecture input when Feature modifies shared components
+  3. **Preserve** (`injection/implement.md` § Interaction Surface Preservation): Read inventory as authoritative source before modifying components
+  4. **Verify** (`injection/verify.md` Post-Step Update #5): Playwright runtime verification of each Critical/High surface. Missing Critical = blocking failure
+
+### Files Changed (4 skill files + 1 feedback file)
+- `smart-sdd/commands/pipeline.md` — Cross-Stage Validation Gates section
+- `smart-sdd/reference/injection/implement.md` — Interaction Surface Inventory generation + Preservation reads inventory
+- `smart-sdd/reference/injection/plan.md` — Inject inventory as architectural input
+- `smart-sdd/reference/injection/verify.md` — Interaction Surface Inventory Verification step
+- `angdu-studio/skill-feedback.md` — SKF-015, SKF-016 marked as ✅ Reflected
+
+---
+
 ## [2026-03-14] SKF-014: Pipeline Error Propagation Prevention — Source App Comparison MANDATORY for rebuild+GUI
 
 Skill Feedback from angdu-studio F002-navigation deep analysis. SKF-013 root cause analysis revealed the wrong default propagated through all 6 pipeline stages uncaught. Two additional fixes beyond SKF-013.

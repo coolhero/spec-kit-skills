@@ -4,7 +4,19 @@
 > For per-command context injection details, read `reference/injection/{command}.md` (shared patterns in `reference/context-injection-rules.md`).
 > For git branch operations, also read `reference/branch-management.md`.
 
-> **⚠️ Error Propagation Warning**: Each pipeline stage trusts the output of the previous stage. An error in an early stage (reverse-spec, specify) propagates through the entire pipeline — plan, tasks, implement, and verify all build on the flawed assumption. Settings, modes, and defaults that can only be confirmed at runtime MUST NOT be finalized from code analysis alone — runtime verification is required (see `reverse-spec/analyze.md` Phase 1.5 Step 5, `injection/specify.md` § Runtime Default Coverage Check). The two critical verification checkpoints are: **(1)** reverse-spec Phase 1.5 (runtime default verification before analysis), **(2)** verify Phase 3e (source app comparison — BLOCKING for rebuild+GUI).
+> **⚠️ Error Propagation Warning**: Each pipeline stage trusts the output of the previous stage. An error in an early stage (reverse-spec, specify) propagates through the entire pipeline — plan, tasks, implement, and verify all build on the flawed assumption. Settings, modes, and defaults that can only be confirmed at runtime MUST NOT be finalized from code analysis alone — runtime verification is required.
+
+### Cross-Stage Validation Gates (rebuild + GUI)
+
+The pipeline is single-direction (reverse-spec → specify → plan → tasks → implement → verify), meaning early-stage errors cascade unchecked. These 3 gates act as **circuit breakers** that independently re-validate critical assumptions:
+
+| Gate | When | What | Reference |
+|------|------|------|-----------|
+| **Gate 1** | specify entry | Re-verify settings/mode runtime defaults against source app. Catch mismatches before they enter the spec. | `reverse-spec/analyze.md` Phase 1.5 Step 5 + `injection/specify.md` § Runtime Default Coverage Check |
+| **Gate 2** | implement entry | Read previous Features' Interaction Surface Inventory. Analyze source app layout structure (DOM hierarchy, flex direction). Display in Pre-Implement Checkpoint. | `injection/implement.md` § Layout Structure Analysis + § Interaction Surface Preservation |
+| **Gate 3** | verify Phase 3e | Run source app + rebuilt app side-by-side comparison. **BLOCKING** for rebuild+GUI — skip only when source app genuinely cannot build/launch. | `verify-phases.md` § Step 3e Source App Comparative Verification |
+
+> These gates are NOT optional for rebuild+GUI projects. Without them, a single incorrect assumption (e.g., wrong layout mode default) can propagate through all 6 stages undetected (ref: SKF-013/014 incident).
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 

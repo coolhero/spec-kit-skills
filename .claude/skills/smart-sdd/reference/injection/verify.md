@@ -293,7 +293,23 @@ Major) require user approval via HARD STOP before any files are edited.
      These may need to be addressed in a follow-up task or the next Feature.
      ```
    - If no preceding stubs target this Feature: skip this check silently
-5. **Demo Group Progress Update**:
+5. **Interaction Surface Inventory Verification** (GUI Features only):
+   - Read `SPEC_PATH/[NNN-feature]/interaction-surfaces.md` for the current Feature (generated at implement completion)
+   - If Playwright was available during Phase 3, verify each Critical/High surface exists at runtime:
+     - **Drag regions**: Check element with `-webkit-app-region: drag` exists and has expected dimensions
+     - **Window controls**: Check minimize/maximize/close buttons are visible and clickable
+     - **Navigation elements**: Check sidebar/tabs/breadcrumbs are present and functional
+     - **Theme toggle**: Check toggle button exists and cycles themes
+   - Report results:
+     ```
+     🎯 Interaction Surface Verification:
+       ✅ Titlebar drag region: visible, 100% × 36px
+       ✅ Window controls: 3 buttons visible
+       ⚠️ Theme toggle: NOT FOUND at expected location (Titlebar.tsx)
+     ```
+   - If any Critical surface is missing: flag as a **blocking** verification failure (same severity as build failure)
+   - If no `interaction-surfaces.md` exists: skip this check silently
+6. **Demo Group Progress Update**:
    - Check if this Feature belongs to any Demo Group in `sdd-state.md`
    - Update the Completed count for that group
    - Run `scripts/demo-status.sh <project-root>` to display current group status
