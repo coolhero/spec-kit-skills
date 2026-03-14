@@ -110,6 +110,8 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → i18n Coverage Lint (translation completeness) → SDK API Contract Gap + Type Trust Classification
   → UI Interaction Surface Audit (hover/click UX)
   → Runtime Verification Architecture (multi-backend, interface-aware, data dependency)
+  → BLOCKING Gates (output file verification > MANDATORY keyword)
+  → Pre-context Completeness Verification (template checklist enforcement)
 ```
 
 ---
@@ -160,3 +162,23 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
 **Situation**: Bug prevention rules and lessons referenced specific Feature cases (e.g., "F005 Zustand selector instability", "F006 AI SDK v6 tool() requires execute callback", "F006 hover flicker on message scroll"). These are useful for case-study context but make rules appear narrowly applicable.
 **Resolution**: Generalized to universal patterns: "State selector instability: creating new object/array references per render", "SDK function expects callable/executable object but receives metadata-only object", "Hover/click interaction applied to overly broad container causes re-renders during scroll". Specific case histories preserved in history.md.
 **Lesson**: Bug prevention rules should describe the *pattern*, not the *instance*. Specific cases belong in decision history, not in operational rules that the agent evaluates on every run.
+
+### L10. MANDATORY ≠ Enforced — BLOCKING Gates Required
+**Situation**: Runtime Default Verification was marked MANDATORY with "You MUST NOT skip it." Agent skipped it anyway — twice (before and after the fix). The MANDATORY keyword was treated as "important but situational."
+**Resolution**: Added a BLOCKING gate at Phase 2 entry that verifies the output file contains the expected section (`## Runtime Default Verification` in `runtime-exploration.md`). Missing section → re-execute the step. Same pattern as SBI Numbering Verification (which worked on first attempt).
+**Lesson**: "MANDATORY" is a request. "BLOCKING gate that checks the output file" is enforcement. Agents comply with verifiable constraints (file section exists? Y/N), not with behavioral directives ("you must do X"). Design enforcement as downstream output verification, not upstream instruction emphasis.
+
+### L11. Bullet List Content Requirements → Post-Generation Completeness Check
+**Situation**: analyze.md Phase 4-2 listed 14 required sections for each pre-context.md in a bullet list. Agent generated pre-contexts with only 6 of 14 sections — selectively ignoring sections it deemed "not needed" (Runtime Exploration, UI Component Features, Interaction Behavior, Static Resources, Environment Variables, Feature Contracts, etc.).
+**Resolution**: Added Pre-context Completeness Verification — a 14-row checklist table (MANDATORY + BLOCKING) that runs after all pre-contexts are generated. Each section must exist or have an explicit empty value ("None", "Skipped — [reason]", "N/A — backend-only").
+**Lesson**: Content requirements in prose/bullet lists are suggestions to agents. Enforceable requirements need a structured checklist with a verification step. The pattern: define expected sections in a table → generate → verify table against output → block if incomplete.
+
+### L12. "Update" ≠ "Write to File" — Ambiguous Verbs
+**Situation**: SBI Numbering Verification Step 5 said "Update Demo Group SBI ranges." Agent calculated the ranges, displayed them in the verification output, but did NOT write them to roadmap.md. The verb "Update" was interpreted as "calculate and show."
+**Resolution**: Changed to explicit language: "**Write these ranges into roadmap.md** by adding a `| **SBI Coverage** | B###–B### |` row. This is a file modification, not just a display."
+**Lesson**: When you need the agent to modify a file, say "Write X into [filename]" or "Add X to [filename]." Never use ambiguous verbs like "Update," "Reflect," or "Record" without specifying the target file and the exact content format.
+
+### L13. Fix Verification Requires Re-execution, Not Just Code Review
+**Situation**: Applied Fix 1-4 to analyze.md rules. Assumed the fixes were sufficient based on code review. After re-running reverse-spec, found Fix 1-3 worked perfectly but Fix 4 failed completely — the MANDATORY keyword was simply ignored.
+**Resolution**: Established a feedback loop: apply fix → re-run the pipeline → analyze output → identify remaining failures → apply stronger fix. Needed two rounds to get Runtime Default Verification right (1st: MANDATORY keyword, 2nd: BLOCKING gate).
+**Lesson**: Rule changes cannot be validated by reading the rule. They can only be validated by observing agent behavior under the rule. Every fix must be followed by a re-execution to verify the fix actually changed agent behavior.
