@@ -950,7 +950,20 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
 6. **If Playwright was not available or app cannot be relaunched**: Skip this step and display:
    `ℹ️ Runtime Default Verification skipped — Playwright not available. Settings defaults are from code analysis only (may differ from actual runtime).`
 
-**Step 6 — Proceed to Phase 2**:
+**Step 6 — Proceed to Phase 2** (BLOCKING gate):
+
+**Pre-flight check before proceeding:**
+If Playwright was successfully used in any of Steps 1-4 above, verify that `runtime-exploration.md` contains a `## Runtime Default Verification` section. If the section is missing, you MUST go back and execute Step 5 NOW — do NOT proceed to Phase 2 without it. This is a BLOCKING gate.
+
+```
+✅ Phase 1.5 Pre-flight: Runtime Default Verification section found in runtime-exploration.md
+```
+or
+```
+❌ Phase 1.5 Pre-flight FAILED: Playwright was used but Runtime Default Verification section is missing
+   → Executing Step 5 now...
+```
+
 Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Style tokens (if extracted) are saved in `specs/reverse-spec/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
@@ -1570,7 +1583,7 @@ After generating ALL pre-context.md files, perform this verification before proc
 2. **Check contiguity**: Verify that each Feature's first B### = previous Feature's last B### + 1. No gaps allowed
 3. **Check uniqueness**: Verify no B### appears in more than one Feature
 4. **Check total**: Sum all per-Feature counts. This is the authoritative total SBI count for coverage-baseline.md
-5. **Update Demo Group SBI ranges**: For each Demo Group in roadmap.md, calculate the SBI Coverage by collecting the B### ranges from its constituent Features. Use union notation for non-contiguous ranges (e.g., `B018–B030, B244–B276`)
+5. **Update Demo Group SBI ranges in roadmap.md**: For each Demo Group in roadmap.md, calculate the SBI Coverage by collecting the B### ranges from its constituent Features. Use union notation for non-contiguous ranges (e.g., `B018–B030, B244–B276`). **Write these ranges into roadmap.md** by adding a `| **SBI Coverage** | B###–B### |` row to each Demo Group's table. This is a file modification, not just a display — the ranges must be persisted in roadmap.md for downstream use.
 
 Display verification result:
 ```
@@ -1590,7 +1603,7 @@ If any check fails, fix the numbering BEFORE proceeding:
   → Fix: Renumber F004+ to close gaps, renumber F007+ to start after F006 ends
 ```
 
-Contents to include in each pre-context.md:
+Contents to include in each pre-context.md (see [pre-context-template.md](templates/pre-context-template.md) for exact section structure):
 - **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Read `specs/reverse-spec/runtime-exploration.md` and distribute observations to each Feature based on route-to-Feature mapping. For each Feature: extract the `## Screen:` sections whose routes belong to this Feature, include associated user flows and runtime behavior from those screen blocks, and add relevant App-Wide Observations. If Phase 1.5 was skipped or the file does not exist, write "Skipped — [reason]"
 
   **Route-to-Feature Mapping Algorithm**:
@@ -1599,7 +1612,7 @@ Contents to include in each pre-context.md:
   3. Mapping: route → page component file → Feature that owns the file (Phase 3-1 boundary)
   4. Shared routes: included in primary owner Feature, referenced in other Features
   5. Unmappable routes: recorded in App-Wide Observations
-- **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy. Include a **Rebuild Target** column set to `[TBD]` for all files — this column will be populated during `/speckit.plan` when the target architecture is decided
+- **Source Reference**: List of related original files (relative paths) + reference guide by stack strategy. Include a **Rebuild Target** column set to `[TBD]` for all files — this column will be populated during `/speckit.plan` when the target architecture is decided. Use 3-column format: `File Path | Role | Rebuild Target`
 - **Source Behavior Inventory**: Phase 2-6 SBI entries filtered to this Feature (see `domains/_core.md` § R3 (Source Behavior Inventory) for format)
 
   > **SBI Per-Feature Filtering**: Filter only behaviors belonging to this Feature's source files from the Phase 2-6 global SBI. B### IDs are assigned sequentially and uniquely across the entire project in Feature ID order.
@@ -1608,12 +1621,52 @@ Contents to include in each pre-context.md:
 - **Foundation Decisions** (if Framework ≠ "custom"): From Phase 2-8 extraction results, populate the Foundation Decisions section (Critical, Important, Undecided tables) with items relevant to this Feature's domain. For T0 Features (F000-*): include all items from their owning Foundation categories. For T1+ Features: include only Foundation decisions that constrain this Feature
 - **Foundation Dependencies**: For each Feature, classify its relationship to Foundation categories — `owns` (T0 only), `consumes` (T1+ uses Foundation decisions as constraints), `extends` (rare, adds to Foundation). Skip if Framework is "custom" or "none"
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
-- **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files
-- **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features
+- **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files. If none, write "None"
+- **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features. If none, write "None"
 - **For /speckit.specify**: Existing feature summary, existing user scenarios, draft requirements (FR-###), draft success criteria (SC-###), edge cases
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts (owned + referenced entities, provided + consumed APIs), technical decisions
 - **Feature Contracts** (populated from Phase 3-1d interaction data and Phase 2-3 cross-Feature rules): Explicit guarantees this Feature provides to consumers, dependencies it requires from providers, and failure modes when contracts are violated. See [pre-context-template.md](templates/pre-context-template.md) § Feature Contracts. If this Feature has no cross-Feature interactions (Interaction Score = 0), write "None — this Feature operates independently."
 - **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
+
+#### Pre-context Completeness Verification (MANDATORY — after all pre-contexts are generated)
+
+After generating ALL pre-context.md files (and after SBI Numbering Verification above), verify that each pre-context contains the required sections from the template. This step is **BLOCKING** — do NOT proceed to Phase 4-3 if required sections are missing.
+
+For each pre-context.md, check the following sections exist:
+
+| # | Section | Required? | Empty Value |
+|---|---------|-----------|-------------|
+| 1 | Runtime Exploration Results | Yes (rebuild + Phase 1.5 done) | "Skipped — [reason]" |
+| 2 | Source Reference (3 columns: File Path, Role, Rebuild Target) | Always | — |
+| 3 | Source Behavior Inventory (SBI table) | Always | — |
+| 4 | UI Component Features | Frontend/fullstack only | "N/A — no UI components" or "N/A — backend-only" |
+| 5 | Interaction Behavior Inventory | Frontend/fullstack only | "N/A — no interactive UI in this Feature" |
+| 6 | Foundation Decisions | If Framework ≠ "custom" | "N/A — custom framework" or "No Foundation decisions" |
+| 7 | Foundation Dependencies | If Framework ≠ "custom" | "None — this Feature has no Foundation dependencies." |
+| 8 | Naming Remapping | If project name changed | "None — no original project name references" |
+| 9 | Static Resources | Always | "None" |
+| 10 | Environment Variables | Always | "None" |
+| 11 | Feature Contracts | Always | "None — this Feature operates independently." |
+| 12 | For /speckit.specify | Always | — |
+| 13 | For /speckit.plan | Always | — |
+| 14 | For /speckit.analyze | Always | — |
+
+Display verification result:
+```
+✅ Pre-context Completeness Verification:
+  F001-shell:     14/14 sections ✓
+  F002-i18n-theme: 14/14 sections ✓
+  ...
+  All [N] pre-contexts complete.
+```
+
+If any section is missing, add it BEFORE proceeding:
+```
+❌ Pre-context Completeness FAILED:
+  F003-providers: missing Runtime Exploration Results, Static Resources
+  F007-files: missing Interaction Behavior Inventory
+  → Adding missing sections now...
+```
 
 ### 4-3. Source Coverage Baseline (BLOCKING)
 

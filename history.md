@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-14] Reverse-spec output quality enforcement: BLOCKING gates + completeness verification
+
+Second-round quality analysis of cherry-studio reverse-spec output (post-Fix 1-4). Fix 1-3 fully reflected; Fix 4 (Runtime Default Verification) still skipped despite MANDATORY keyword. Additionally found pre-context sections wholesale omitted and DG SBI ranges not persisted.
+
+### Root Causes Identified (4 issues from 2nd analysis)
+1. MANDATORY keyword alone insufficient — agent skips Step 5 because no downstream check verifies execution (RC-1)
+2. Pre-context content requirements buried in bullet list without post-generation verification (RC-2/RC-4)
+3. DG SBI ranges "Update" ambiguous — agent displayed but didn't write to roadmap.md (RC-3)
+
+### Fixes Applied (all in analyze.md)
+- **RC-1 — Step 6 BLOCKING gate**: Added pre-flight check before proceeding to Phase 2. If Playwright was used, `runtime-exploration.md` MUST contain `## Runtime Default Verification` section. Missing → re-execute Step 5. This is a BLOCKING gate, not just a MANDATORY request
+- **RC-3 — DG SBI ranges explicit write**: Changed "Update Demo Group SBI ranges" to explicitly require writing `| **SBI Coverage** | B###–B### |` rows into roadmap.md. Emphasized "This is a file modification, not just a display"
+- **RC-2/RC-4 — Pre-context Completeness Verification (MANDATORY, BLOCKING)**: Added 14-section checklist verification after SBI Numbering Verification. Each pre-context must contain all required sections from template. Missing sections → fix before proceeding to Phase 4-3. Includes Foundation Decisions/Dependencies, Static Resources, Environment Variables, Feature Contracts, and Runtime Exploration Results
+
+### Design Decision
+- Pattern: MANDATORY keyword alone is insufficient for agent compliance. BLOCKING **gates** (downstream verification that checks the output file) are needed to enforce execution. Applied same pattern as SBI Numbering Verification (which worked) to Runtime Default Verification and Pre-context Completeness
+
+### Files Changed (1 file)
+- `reverse-spec/commands/analyze.md` — 3 fixes across Phase 1.5 Step 6, Phase 4-2 SBI Verification Step 5, Phase 4-2 Pre-context Completeness Verification
+
+---
+
 ## [2026-03-14] Reverse-spec quality prevention: SBI integrity + coverage verification
 
 Quality analysis of cherry-studio reverse-spec output revealed 7 issues traceable to 5 root causes in analyze.md rules. Fixed the rules to prevent recurrence.
