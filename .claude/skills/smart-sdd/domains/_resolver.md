@@ -38,14 +38,28 @@ Look for the Domain Profile fields in `sdd-state.md` header:
    - Load `../../reverse-spec/domains/foundations/_foundation-core.md` § F3 (T0 rules)
 4. Cache Foundation items for session
 
+### Step 2c. Resolve Archetype
+
+1. Read `**Archetype**` from sdd-state.md header (comma-separated list or `"none"`)
+2. If `"none"` or field is missing → skip archetype loading
+3. For each archetype name:
+   - Load `domains/archetypes/{name}.md`
+   - Validate: file must have at least A0 and A1 sections
+4. Multiple archetypes are allowed (comma-separated) — merge by append
+
+**When Archetype field is missing** (backward compatibility):
+- Treat as `"none"` — no archetypes loaded
+- Do NOT write the field retroactively (only set during init/pipeline Phase 0)
+
 ### Step 3. Load Modules in Order
 
 ```
 1. domains/_core.md                              (ALWAYS — universal rules)
 2. domains/interfaces/{interface}.md              (for EACH listed interface)
 3. domains/concerns/{concern}.md                  (for EACH listed concern)
-4. domains/scenarios/{scenario}.md                (ONE scenario)
-5. {Custom path}/domain-custom.md                 (if specified and file exists)
+4. domains/archetypes/{archetype}.md              (for EACH listed archetype)
+5. domains/scenarios/{scenario}.md                (ONE scenario)
+6. {Custom path}/domain-custom.md                 (if specified and file exists)
 ```
 
 **Merge rule**: Later modules extend earlier ones. For same-section content:
@@ -64,7 +78,7 @@ Once loaded, the merged domain profile is used for the entire command session. N
 ## Worked Example: `desktop-app` Rebuild with Electron
 
 Traces the full resolution chain for a project with:
-- **Domain Profile**: `desktop-app` | **Origin**: `rebuild` | **Framework**: `electron` | **Custom**: `none`
+- **Domain Profile**: `desktop-app` | **Origin**: `rebuild` | **Framework**: `electron` | **Archetype**: `ai-assistant` | **Custom**: `none`
 
 ### Step 1 → 2: Profile Expansion
 
@@ -79,31 +93,41 @@ Framework `electron` → Load:
 - `../../reverse-spec/domains/foundations/electron.md` § F2 (58 items across 13 categories)
 - `../../reverse-spec/domains/foundations/_foundation-core.md` § F3 (T0 grouping rules)
 
-### Step 3: Module Loading (5 files)
+### Step 2c: Archetype
 
-| # | File Loaded | S-Sections Contributed |
+Archetype `ai-assistant` → Load:
+- `domains/archetypes/ai-assistant.md` (A0–A4: Streaming-First, Model Agnosticism, etc.)
+
+### Step 3: Module Loading (6 files)
+
+| # | File Loaded | Sections Contributed |
 |---|-------------|----------------------|
 | 1 | `domains/_core.md` | S1 base SC rules, S2 base parity, S3 verify steps (test/build/lint/demo), S5 universal probes (auth/CRUD/validation/pagination/file + middleware + concurrency/cache/observability), S7 base B-1/B-2/B-3 |
 | 2 | `domains/interfaces/gui.md` | S1 +UI interaction SCs, S2 +UI component/layout parity, S5 +routing/UI completeness/responsive probes, S6 UI testing (new), S7 +CSS rendering/UI surface audit, S8 runtime verification strategy (new) |
 | 3 | `domains/concerns/async-state.md` | S1 +state transition/async flow SCs, S5 +state library/async pattern/subscription probes, S7 +selector instability/unbatched updates/UX behavior contract |
 | 4 | `domains/concerns/ipc.md` | S1 +IPC call/process lifecycle SCs, S5 +IPC channel/error/security probes, S7 +IPC boundary safety/return value defense |
-| 5 | `domains/scenarios/rebuild.md` | S1 +preservation SCs, S3 extends (migration regression gate) + S3d Foundation Compliance, S5 +source comparison/preservation probes, S7 +migration-specific rules |
+| 5 | `domains/archetypes/ai-assistant.md` | A1 philosophy principles (Streaming-First, Model Agnosticism, etc.), A2 +AI-specific SC rules, A3 +model/streaming/prompt probes, A4 constitution principles |
+| 6 | `domains/scenarios/rebuild.md` | S1 +preservation SCs, S3 extends (migration regression gate) + S3d Foundation Compliance, S5 +source comparison/preservation probes, S7 +migration-specific rules |
 
 ### Step 4: Merged Result
 
 After merge, the cached profile contains:
 
-| S-Section | Sources (merge order) |
-|-----------|----------------------|
+| Section | Sources (merge order) |
+|---------|----------------------|
 | **S1** SC Rules | _core → gui → async-state → ipc → rebuild (appended) |
 | **S2** Parity | _core structural+logic → gui +UI component/layout (appended) |
 | **S3** Verify | _core test/build/lint/demo → rebuild migration gate + S3d Foundation (extended) |
-| **S5** Probes | _core 5 perspectives → gui routing/UI → async-state state/async → ipc channels/security → rebuild source/preservation (appended) |
+| **S5** Probes | _core 5 perspectives → gui routing/UI → async-state state/async → ipc channels/security → ai-assistant model/streaming/prompt → rebuild source/preservation (appended) |
 | **S6** UI Testing | gui only (new section) |
 | **S7** Bug Prevention | _core B-3 base → gui CSS/UI audit → async-state selector/unbatched → ipc boundary/return → rebuild migration (appended) |
 | **S8** Runtime | gui only (new section) |
+| **A1** Philosophy | ai-assistant (Streaming-First, Model Agnosticism, Offline Resilience, Token Awareness, Prompt Versioning) |
+| **A2** SC Extensions | ai-assistant (AI-specific SC rules — appended to S1) |
+| **A3** Probes | ai-assistant (model/streaming/prompt probes — appended to S5) |
+| **A4** Constitution | ai-assistant (AI-specific constitution principles) |
 
-**Total reads at session start**: 5 domain modules + 2 Foundation files = 7 file reads, then cached.
+**Total reads at session start**: 6 domain modules + 2 Foundation files = 8 file reads, then cached.
 
 ---
 
@@ -177,7 +201,7 @@ When `init` is invoked with an idea string or PRD (Proposal Mode), Domain Profil
 
 ### S0 Aggregation
 
-During inference, the agent reads S0 sections from all modules to build the signal vocabulary:
+During inference, the agent reads S0 sections from all interface and concern modules to build the signal vocabulary:
 
 ```
 domains/interfaces/gui.md       → S0.Primary: ["React", "Vue", ...]
@@ -186,4 +210,18 @@ domains/concerns/auth.md        → S0.Primary: ["JWT", "OAuth", ...]
 ...
 ```
 
-This is a one-time scan at init start. Results are cached for the duration of the init command.
+### A0 Aggregation
+
+Alongside S0, the agent reads A0 sections from all archetype modules:
+
+```
+domains/archetypes/ai-assistant.md  → A0.Primary: ["LLM", "openai", "langchain", ...]
+domains/archetypes/public-api.md    → A0.Primary: ["OpenAPI", "rate-limit", ...]
+domains/archetypes/microservice.md  → A0.Primary: ["gRPC", "docker-compose", ...]
+```
+
+Archetype inference runs in parallel with S0 inference. Results are merged into the Proposal:
+- **Inferred Archetype**: matched archetype name(s) or `"none"` if no A0 keywords match
+- Archetype is inferred separately from profile — a `web-api` profile may or may not have a `public-api` archetype
+
+Both S0 and A0 are one-time scans at init start. Results are cached for the duration of the init command.

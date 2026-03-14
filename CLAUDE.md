@@ -57,6 +57,13 @@
   5. 수정 완료된 항목은 `history.md`에 기록
 - 수정 시 CLAUDE.md **Do NOT Modify** 항목을 반드시 확인 — 해당 영역이면 사용자에게 알리고 진행 여부 확인
 
+## Documentation Writing Guidelines
+
+- **README.md / README.ko.md**: High-level design direction. Users should understand the overall architecture and design philosophy at a glance. Keep explanations concise with visual diagrams where possible. Avoid duplicating detailed extension procedures.
+- **ARCHITECTURE-EXTENSIBILITY.md**: Detailed extensibility specifics. Step-by-step guides for adding new modules, sophistication levels, concrete examples. This is the deep-dive reference for contributors and advanced users.
+- **Linking**: README must link to ARCHITECTURE-EXTENSIBILITY.md for detailed extensibility content. Use the pattern: "For step-by-step extension guides, see [ARCHITECTURE-EXTENSIBILITY.md](ARCHITECTURE-EXTENSIBILITY.md)".
+- **Single Source of Truth**: Detailed extension procedures live only in ARCHITECTURE-EXTENSIBILITY.md. README provides overview + link. Module section schemas live in `_schema.md` files; ARCHITECTURE-EXTENSIBILITY.md references them, not duplicates them.
+
 ## Review Protocol
 
 전체 파일 검토 시 아래 순서로 수행합니다:

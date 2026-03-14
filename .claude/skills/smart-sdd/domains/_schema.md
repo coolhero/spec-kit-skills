@@ -12,6 +12,7 @@
 |------|----------|---------|
 | **Interface** | `interfaces/{name}.md` | What the app exposes (http-api, gui, cli, data-io) |
 | **Concern** | `concerns/{name}.md` | Internal cross-cutting patterns (async-state, ipc, external-sdk, i18n, realtime, auth) |
+| **Archetype** | `archetypes/{name}.md` | Application-domain philosophical principles and pipeline behavior (ai-assistant, public-api, microservice) |
 | **Scenario** | `scenarios/{name}.md` | Why we're building (greenfield, rebuild, incremental, adoption) |
 | **Profile** | `profiles/{name}.md` | Preset composition of interfaces + concerns (~10 line manifest) |
 | **Core** | `_core.md` | Universal rules loaded for ALL projects |
@@ -115,6 +116,58 @@ Interface-specific runtime verification configuration. Cross-references [referen
 
 ---
 
+## Archetype Section Schema (A0–A4)
+
+Archetype modules use a separate section numbering (A-prefix) to avoid collision with S0–S8. Archetypes define application-domain philosophy — principles that transcend framework and interface choices. While an Interface says _what_ the app exposes and a Concern says _how_ it handles cross-cutting patterns, an Archetype says _why_ certain architectural decisions matter for this domain.
+
+### A0. Signal Keywords (archetypes)
+
+Keywords that indicate this archetype should be activated. Used by Clarity Index signal extraction during `init` Proposal Mode alongside S0 keywords. See `reference/clarity-index.md` § 5.
+
+| Field | Description |
+|-------|-------------|
+| **Primary** | High-confidence keywords — strong indicator that this archetype applies |
+| **Secondary** | Medium-confidence keywords — needs user confirmation |
+
+### A1. Philosophy Principles (archetypes)
+
+Core architectural principles this archetype embodies. These are domain-specific guiding principles that inform every architectural decision in the project.
+
+| Field | Description |
+|-------|-------------|
+| **Principle name** | Short identifier (e.g., "Streaming-First", "Contract Stability") |
+| **Description** | What the principle means in practice |
+| **Implication** | How this affects SC generation, implementation, and verification |
+
+### A2. SC Generation Extensions (archetypes)
+
+Archetype-specific Success Criteria patterns that augment S1 rules from interfaces/concerns.
+
+| Field | Description |
+|-------|-------------|
+| **Required SC patterns** | Domain-specific SC requirements (e.g., "AI SCs must specify token budget") |
+| **Anti-patterns** | Domain-specific vague SC formulations to reject |
+
+### A3. Elaboration Probes (archetypes)
+
+Domain-specific questions asked during the `add` command's consultation phase, extending S5 probes.
+
+| Field | Description |
+|-------|-------------|
+| **Sub-domain** | Category within the archetype's domain |
+| **Probe questions** | Archetype-specific elaboration questions |
+
+### A4. Constitution Injection (archetypes)
+
+Principles to inject into the constitution-seed during reverse-spec analysis and into the constitution during smart-sdd pipeline Phase 0.
+
+| Field | Description |
+|-------|-------------|
+| **Principle** | Constitution-level principle statement |
+| **Rationale** | Why this principle is critical for this archetype |
+
+---
+
 ## Profile Schema
 
 Profiles are pure manifests (~10 lines) that compose interfaces and concerns:
@@ -140,8 +193,9 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 1. _core.md                              (ALWAYS — universal rules)
 2. interfaces/{interface}.md             (for EACH listed interface)
 3. concerns/{concern}.md                 (for EACH listed concern)
-4. scenarios/{scenario}.md               (ONE scenario)
-5. {Custom path}/domain-custom.md        (if specified and file exists)
+4. archetypes/{archetype}.md             (for EACH listed archetype)
+5. scenarios/{scenario}.md               (ONE scenario)
+6. {Custom path}/domain-custom.md        (if specified and file exists)
 ```
 
 **Merge rule**: Later modules extend earlier ones. For same-section content:
@@ -152,3 +206,8 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 - **S5 Elaboration Probes**: Append (accumulate all probes)
 - **S7 Bug Prevention**: Append (accumulate all activation conditions)
 - **S8 Runtime Verification**: Per-interface (no merge — each interface has its own strategy)
+- **A0 Signal Keywords**: Aggregated per-archetype (each archetype's keywords are independent; see `reference/clarity-index.md` § 5)
+- **A1 Philosophy Principles**: Append (accumulate from all active archetypes)
+- **A2 SC Generation Extensions**: Append (add archetype-specific SC rules to S1)
+- **A3 Elaboration Probes**: Append (add archetype-specific probes to S5)
+- **A4 Constitution Injection**: Append (accumulate all archetype constitution principles)

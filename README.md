@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-13 10:35 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 08:21 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -113,29 +113,38 @@ Five principles shape every design decision in spec-kit-skills:
 
 2. **Cross-Feature context injection** — An agent working on Feature F003 has no memory of what it decided for F001. The Global Evolution Layer (roadmap, registries, constitution) captures cross-Feature knowledge and injects the relevant subset into each pipeline step. The agent sees exactly what it needs — entity schemas it must reference, API contracts it must respect, Foundation decisions it must obey.
 
-3. **Composable domain knowledge** — Project types differ wildly (REST API vs desktop app vs mobile). Rather than one monolithic ruleset, domain knowledge decomposes into independent modules (Interfaces × Concerns × Scenarios × Foundations) that compose freely. A desktop rebuild project loads `gui + ipc + rebuild + electron`; a greenfield API loads `http-api + auth + greenfield + express`. No unused rules, no missing context.
+3. **Composable domain knowledge** — Project types differ wildly (REST API vs desktop app vs AI assistant). Rather than one monolithic ruleset, domain knowledge decomposes into independent modules along 4 axes (Interface × Concern × Archetype × Scenario) plus a Foundation layer, composing freely. A desktop AI rebuild project loads `gui + ipc + async-state + ai-assistant + rebuild + electron`; a greenfield public API loads `http-api + auth + public-api + greenfield + express`. No unused rules, no missing context.
 
 4. **Human checkpoints at irreversible boundaries** — The pipeline flows autonomously through research, context assembly, and code generation. But before spec-kit commands execute (irreversible artifact creation) and before results are accepted (they feed into downstream Features), HARD STOPs force human review. This creates a trust-but-verify loop where the agent does the heavy lifting but humans gate the decisions.
 
 5. **Progressive detail capture** — Analysis starts broad (tech stack, project structure) and progressively drills into finer detail (function signatures → UI component features → micro-interactions → tooltips and hover effects). Each level feeds the next, so nothing is analyzed without context from the level above.
 
-### 3-Axis Domain Composition
+### 4-Axis Domain Composition
 
-Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into three independent axes:
+Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification; an AI assistant needs streaming-first principles. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into **four independent axes**:
 
 ```
-Interface (what the app exposes)     Concern (cross-cutting patterns)     Scenario (why we're building)
-├── http-api                         ├── async-state                      ├── greenfield
-├── gui                              ├── ipc                              ├── rebuild
-├── cli                              ├── external-sdk                     ├── incremental
-└── data-io                          ├── i18n                             └── adoption
-                                     ├── realtime
-                                     └── auth
+Interface                    Concern                      Archetype                    Scenario
+(what the app exposes)       (cross-cutting patterns)     (domain philosophy)          (why we're building)
+├── http-api                 ├── async-state              ├── ai-assistant             ├── greenfield
+├── gui                      ├── ipc                      ├── public-api               ├── rebuild
+├── cli                      ├── external-sdk             └── microservice             ├── incremental
+└── data-io                  ├── i18n                                                  └── adoption
+                             ├── realtime
+                             └── auth
 ```
 
-A **Domain Profile** = selected Interfaces + selected Concerns + Scenario. For example: `desktop-app = [gui] + [async-state, ipc] + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, and a project without IPC never gets IPC boundary checks.
+Each axis answers a different question:
+- **Interface**: _What surface_ does the app expose? (HTTP endpoints, GUI windows, CLI commands)
+- **Concern**: _What internal patterns_ cut across Features? (Auth flows, state management, IPC)
+- **Archetype**: _What domain philosophy_ guides architectural decisions? (Streaming-first for AI, contract stability for public APIs)
+- **Scenario**: _Why_ is this project being built? (New from scratch, rebuilding existing, adopting existing code)
 
-**Module loading order**: `_core.md` (always) → each active Interface → each active Concern → Scenario → user custom (`domain-custom.md`).
+A **Domain Profile** = selected Interfaces + selected Concerns + Archetype + Scenario. For example: `desktop-app + [gui] + [async-state, ipc] + ai-assistant + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, an AI project gets streaming verification that a CRUD app doesn't need.
+
+**Module loading order**: `_core.md` (always) → each active Interface → each active Concern → each active Archetype → Scenario → user custom (`domain-custom.md`).
+
+> **Why Archetype?** The original 3-Axis model covered _what_ the app exposes (Interface), _how_ it handles cross-cutting patterns (Concern), and _why_ it's being built (Scenario). But it lacked structured guidance for **domain-specific philosophy** — principles like "Streaming-First" for AI apps or "Contract Stability" for public APIs were generated ad-hoc. Archetype modules make these principles **structured, reusable, and extensible**.
 
 ### Rebuild Configuration
 
@@ -170,11 +179,18 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 
 New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
 
+**Add a new archetype** (e.g., your project is a SaaS platform with multi-tenancy patterns):
+1. Create `domains/archetypes/saas-platform.md` in both skills — define A0 signal keywords ("multi-tenant", "subscription"), A1 philosophy principles ("Tenant Isolation", "Subscription Lifecycle"), and A2-A4 sections for SC rules, probes, and constitution injection
+2. Set in sdd-state.md: `**Archetype**: saas-platform`
+3. The agent now loads archetype-specific principles that guide every pipeline step — SCs require tenant isolation, probes ask about subscription billing, constitution gets multi-tenancy rules
+
 **Add a new Foundation** (e.g., your team uses Remix, which has no built-in Foundation file):
-1. Create `reverse-spec/domains/foundations/remix.md` following the F0-F4 format in `_foundation-core.md`
-2. Define detection signals (F0), categories (F1), items (F2), extraction rules (F3), T0 grouping (F4)
+1. Create `reverse-spec/domains/foundations/remix.md` following the F0-F7 format in `_foundation-core.md`
+2. Define detection signals (F0), categories (F1), items (F2), extraction rules (F3), T0 grouping (F4), and optionally F7 philosophy
 3. The system detects Remix automatically via F0 signals and loads the full Foundation flow
 4. Without a custom Foundation file, the system still works — it falls back to Case B (universal categories + agent probes)
+
+For detailed step-by-step extension guides (adding interfaces, concerns, archetypes, foundations, profiles, scenarios) and the 5-level sophistication model, see [ARCHITECTURE-EXTENSIBILITY.md](ARCHITECTURE-EXTENSIBILITY.md).
 
 **Adapt to your workflow** — every checkpoint and gate can be tuned:
 - **Scope**: `core` scope activates T1 only (fastest path); `full` processes everything
@@ -184,7 +200,7 @@ New modules compose freely with existing ones — no duplication, no unused rule
 
 ### Signal Keywords and Proposal Mode
 
-Each domain module declares **S0 Signal Keywords** — terms that indicate the module should be activated. When you start a project with an idea string (`init "Build a Chrome extension for..."`), the agent scans all S0 keywords to automatically infer your Domain Profile. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers `external-sdk` — all without manual configuration.
+Each domain module declares **S0 Signal Keywords** (interfaces/concerns) or **A0 Signal Keywords** (archetypes) — terms that indicate the module should be activated. When you start a project with an idea string (`init "Build an AI chat assistant with..."`), the agent scans all S0 and A0 keywords to automatically infer your Domain Profile and Archetype. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers both `external-sdk` concern and `ai-assistant` archetype — all without manual configuration.
 
 This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). The CI drives agent behavior: high CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes.
 
@@ -199,10 +215,14 @@ Profile (desktop-app, web-api, fullstack-web, cli-tool)
    │
    ├── Interface modules (gui, http-api, cli, data-io)
    ├── Concern modules (auth, async-state, ipc, i18n, realtime, external-sdk)
+   ├── Archetype modules (ai-assistant, public-api, microservice)
    ├── Scenario (greenfield, rebuild, incremental, adoption)
-   ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)   ← NEW
+   ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
+   │     └── F7 Philosophy: framework-specific guiding principles (distinct from F0–F6 checklists)
    └── Custom (project-specific overrides)
 ```
+
+Foundation files now include an optional **F7 Philosophy** section that captures framework-endorsed principles (e.g., Electron's "Process Crash Isolation", Express's "Middleware Composition"). F7 is distinct from F0–F6 operational checklists — it defines _why_ certain patterns are preferred, not _what_ to configure.
 
 **Foundation files** in `reverse-spec/domains/foundations/` provide exhaustive checklists of infrastructure decisions per framework. Each item is classified by priority (Critical / Important / Optional) and grouped into categories (Window Management, Security, IPC, Middleware, Routing, etc.).
 
@@ -876,6 +896,7 @@ Complete list of all files in this repository grouped by skill.
 
 | File | Description |
 |------|-------------|
+| `ARCHITECTURE-EXTENSIBILITY.md` | Detailed architecture extensibility guide — module system, adding interfaces/concerns/archetypes/foundations, sophistication levels |
 | `CLAUDE.md` | Project rules for Claude Code agents (immutable rules, conventions, review protocol) |
 | `README.md` | English documentation |
 | `README.ko.md` | Korean documentation |
@@ -907,6 +928,10 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/i18n.md` | Internationalization concern — locale key detection |
 | `domains/concerns/ipc.md` | IPC concern — inter-process communication detection (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE detection |
+| **Archetypes** | |
+| `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0 signal keywords (LLM SDKs, streaming), A1 philosophy extraction (Streaming-First, Model Agnosticism, Token Awareness) |
+| `domains/archetypes/public-api.md` | Public API archetype — A0 signal keywords (OpenAPI, rate limiting), A1 philosophy extraction (Contract Stability, Rate Limit Transparency) |
+| `domains/archetypes/microservice.md` | Microservice archetype — A0 signal keywords (gRPC, Docker), A1 philosophy extraction (Service Autonomy, Failure Isolation) |
 | **Foundations** | |
 | `domains/foundations/_foundation-core.md` | Foundation resolution protocol — detection signals, category taxonomy, case matrix, T0 grouping, cross-framework carry-over map |
 | `domains/foundations/electron.md` | Electron Foundation — 58 items, 13 categories (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
@@ -962,6 +987,9 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/i18n.md` | Internationalization — completeness check, locale key coverage |
 | `domains/concerns/ipc.md` | IPC — boundary safety, return value defense (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime — WebSocket/SSE connection management |
+| `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0–A4: signal keywords, philosophy (Streaming-First, Model Agnosticism), SC extensions, probes, constitution injection |
+| `domains/archetypes/public-api.md` | Public API archetype — A0–A4: signal keywords, philosophy (Contract Stability, Rate Limit Transparency), SC extensions, probes, constitution injection |
+| `domains/archetypes/microservice.md` | Microservice archetype — A0–A4: signal keywords, philosophy (Service Autonomy, Failure Isolation), SC extensions, probes, constitution injection |
 | `domains/profiles/fullstack-web.md` | Preset: [http-api, gui] + [async-state, auth, i18n] |
 | `domains/profiles/web-api.md` | Preset: [http-api] + [auth] |
 | `domains/profiles/desktop-app.md` | Preset: [gui] + [async-state, ipc] |

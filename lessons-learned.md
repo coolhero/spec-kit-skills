@@ -97,6 +97,20 @@
 **Countermeasures**: Multi-backend detection protocol (MCP → CLI → demo-only → build-only), interface-aware SC categories (`api-auto`, `cli-auto`, `pipeline-auto`, `user-assisted`), Step 1c Data Dependency Verification, Step 3c Navigation Transition Sanity Check, Step 3d Interactive Runtime Verification, Step 3e Source App Comparative Verification, SC Minimum Depth Rule, Empty State ≠ PASS principle
 **Coverage**: ~85% — `external-dep` SCs still require manual verification; `user-assisted` SCs depend on user cooperation
 
+## G12. Ad-hoc Domain Philosophy in Constitution
+
+**Problem**: Domain-specific philosophical principles (e.g., "Streaming-First" for AI apps, "Contract Stability" for public APIs) were generated ad-hoc in constitution-seed without structured guidance — quality and consistency varied by session
+**Case**: angdu-studio constitution-seed produced "AI Desktop App Domain" principles (Streaming-First, Model Agnosticism, Offline Resilience, Token Awareness) correctly, but these emerged from the agent's general knowledge, not from a structured extraction module. Different sessions could produce different principles for the same archetype.
+**Countermeasures**: Archetype modules (A0–A4) provide structured signal detection, philosophy extraction, SC generation extensions, elaboration probes, and constitution injection per application domain
+**Coverage**: ~90% — structured extraction ensures consistent principles; novel domains without archetype modules still rely on agent ad-hoc generation
+
+## G13. Framework Philosophy vs Operational Checklists
+
+**Problem**: Foundation files (F0–F6) mixed operational configuration decisions with philosophical principles — "what to configure" and "why certain patterns are preferred" were conflated in the same checklist
+**Case**: Express's "everything is middleware" and Electron's "main process must survive renderer crashes" are philosophical principles that guide all architectural decisions, not just individual configuration items. Mixing them with checklist items (e.g., "CORS policy: config") diluted their importance.
+**Countermeasures**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists. F7 defines _why_ patterns are preferred; F0–F6 define _what_ to configure.
+**Coverage**: ~85% — F7 is optional per Foundation, so frameworks without F7 still lack explicit philosophy separation
+
 ---
 
 ## Countermeasure Lineage

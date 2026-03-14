@@ -274,14 +274,41 @@ Applied during reverse-spec `analyze.md` Phase 2-4 when `change_scope = "framewo
 
 Each framework Foundation file in this directory follows the structure defined in the plan:
 
-| File | Framework | Items | Categories | Status |
-|------|-----------|-------|-----------|--------|
-| `electron.md` | Electron | 58 | 13 | Implemented |
-| `tauri.md` | Tauri | 44 | 12 | Implemented |
-| `express.md` | Express.js | 43 | 13 | Implemented |
-| `nextjs.md` | Next.js | 44 | 13 | Implemented |
-| `vite-react.md` | Vite + React | 43 | 12 | Implemented |
-| `nestjs.md` | NestJS | 51 | 13 | TODO scaffold |
-| `fastapi.md` | FastAPI | 41 | 12 | TODO scaffold |
-| `react-native.md` | React Native | 50 | 14 | TODO scaffold |
-| `flutter.md` | Flutter | 50 | 14 | TODO scaffold |
+| File | Framework | Items | Categories | F7 Philosophy | Status |
+|------|-----------|-------|-----------|---------------|--------|
+| `electron.md` | Electron | 58 | 13 | ✅ | Implemented |
+| `tauri.md` | Tauri | 44 | 12 | — | Implemented |
+| `express.md` | Express.js | 43 | 13 | ✅ | Implemented |
+| `nextjs.md` | Next.js | 44 | 13 | — | Implemented |
+| `vite-react.md` | Vite + React | 43 | 12 | — | Implemented |
+| `nestjs.md` | NestJS | 51 | 13 | — | TODO scaffold |
+| `fastapi.md` | FastAPI | 41 | 12 | — | TODO scaffold |
+| `react-native.md` | React Native | 50 | 14 | — | TODO scaffold |
+| `flutter.md` | Flutter | 50 | 14 | — | TODO scaffold |
+
+---
+
+## F7. Framework Philosophy
+
+Optional section in each Foundation file. Defines the philosophical principles that the framework ecosystem advocates — the **opinions** and **values** that should guide architectural decisions when using this framework.
+
+F7 is distinct from F0–F6: while F0–F6 capture **operational decisions** (what to configure, how to structure), F7 captures **guiding principles** (why certain patterns are preferred). F7 principles inform constitution-seed generation and serve as architectural guardrails during the SDD pipeline.
+
+### Schema
+
+| Field | Description |
+|-------|-------------|
+| **Principle name** | Short identifier (e.g., "Process Isolation", "Middleware Composition") |
+| **Description** | What the principle means in practice |
+| **Implication** | How this affects architectural decisions in projects using this framework |
+
+### When to Add F7
+
+- Add F7 when the framework has strong, opinionated principles that should guide project architecture
+- Skip F7 for frameworks that are intentionally un-opinionated (e.g., Express is minimal but has clear conventions → F7 is warranted)
+- Skip F7 for TODO scaffold files — add F7 when the Foundation is fully implemented
+
+### Usage
+
+- **reverse-spec**: F7 principles are extracted alongside F2 items and included in the constitution-seed § "Extracted Architecture Principles"
+- **smart-sdd**: F7 principles are referenced during `specify` and `plan` steps to validate architectural decisions against framework conventions

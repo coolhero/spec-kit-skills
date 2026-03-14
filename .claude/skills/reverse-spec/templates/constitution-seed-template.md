@@ -103,6 +103,40 @@ Quality (No tests→Characterization Tests, Complex state→State Diagrams, Exte
 
 ---
 
+## Archetype-Specific Principles
+
+> Include this section only if an archetype was detected during Phase 3-1e.
+> If no archetype detected, omit this entire section.
+> For each detected archetype, include a subsection with principles from the archetype module's A1 section.
+
+<!-- Example for ai-assistant archetype:
+### AI Assistant Domain
+- **Streaming-First**: Responses should stream to the user as they are generated
+  - **Observed Trait**: [Evidence from source analysis — e.g., "SSE endpoints in /api/chat/stream"]
+  - **Implication**: [How this affects the redevelopment — e.g., "Maintain streaming architecture; do not regress to batch responses"]
+
+### Public API Domain
+- **Contract Stability**: Published API contracts are promises to consumers
+  - **Observed Trait**: [Evidence — e.g., "URL versioning with /v1/ and /v2/ prefixes"]
+  - **Implication**: [How this affects the redevelopment]
+-->
+
+---
+
+## Framework Philosophy
+
+> Include this section only if the loaded Foundation file has an F7 section.
+> These are framework-endorsed principles that should guide architectural decisions.
+> If no F7 section exists in the Foundation, omit this section entirely.
+
+<!-- Example for Electron:
+### Electron Framework Principles
+- **Process Crash Isolation**: Main process must survive renderer crashes
+- **Secure by Default**: Context isolation + sandbox enabled
+-->
+
+---
+
 ## Recommended Development Principles (Best Practices)
 
 > Standard principles for redevelopment. Modify/supplement as needed for your project.

@@ -173,3 +173,14 @@
 | F000-process-health | PRC + HLT | 6 |
 | F000-logging-testing | LOG + TST | 5 |
 | F000-build-devexp | BLD + DXP | 8 |
+
+---
+
+## F7. Framework Philosophy
+
+| Principle | Description | Implication |
+|-----------|-------------|-------------|
+| **Middleware Composition** | Everything in Express is middleware — request processing is an explicit, ordered pipeline | Middleware registration order is a first-class architectural decision; every cross-cutting concern (auth, logging, rate limiting, error handling) is a middleware; the pipeline must be documented and intentional |
+| **Minimal Core** | Express provides routing and middleware — everything else is a deliberate choice | There is no "default" ORM, validator, or template engine; every dependency is an explicit architectural decision that must be justified and documented |
+| **Error-First Conventions** | Error handling follows Node.js error-first conventions — centralized error middleware is the catch-all | Error middleware (4 params) must be the last middleware registered; domain errors must be converted to HTTP errors in a single, centralized location; async errors must be properly caught and forwarded |
+| **Stateless Requests** | Each request is independent — server-side state requires explicit external stores | Session data goes to Redis/DB, not in-memory; no request-scoped global state; horizontal scaling is possible without sticky sessions |

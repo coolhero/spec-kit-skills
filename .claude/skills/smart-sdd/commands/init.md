@@ -53,6 +53,7 @@ Generate the Proposal document (format in `reference/clarity-index.md` § 7) con
 - **Overview**: 1–2 sentence summary
 - **Clarity Index**: Score breakdown per dimension
 - **Inferred Domain Profile**: Interfaces, Concerns, and rationale
+- **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § A0 Aggregation)
 - **Proposed Features**: Extracted from signals + inferred from domain knowledge
 - **Quality Rules Activated**: S1/S7 rules from active modules
 - **Open Questions**: Any CI dimensions with confidence ≤ 1

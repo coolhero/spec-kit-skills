@@ -12,6 +12,7 @@
 |------|----------|---------|
 | **Interface** | `interfaces/{name}.md` | Interface-specific extraction axes (http-api, gui, cli, data-io) |
 | **Concern** | `concerns/{name}.md` | Concern-specific detection signals (async-state, ipc, external-sdk, i18n, realtime, auth) |
+| **Archetype** | `archetypes/{name}.md` | Application-domain philosophy and extraction axes (ai-assistant, public-api, microservice) |
 | **Core** | `_core.md` | Universal analysis framework loaded for ALL projects |
 
 ---
@@ -68,6 +69,32 @@ Importance analysis criteria for Phase 3-3 (core scope only). Each axis evaluate
 
 ---
 
+## Archetype Section Schema (A0–A1)
+
+Archetype modules use a separate section numbering (A-prefix) to avoid collision with R1–R6.
+
+### A0. Signal Keywords (archetypes)
+
+File/library/code patterns that indicate this archetype is relevant to the project. Used for auto-detection during analysis.
+
+| Field | Description |
+|-------|-------------|
+| **Libraries** | Package dependencies, SDKs, frameworks specific to this domain |
+| **Code patterns** | Import patterns, API usage, architectural markers |
+| **Config files** | Configuration files, directory structures indicative of this archetype |
+
+### A1. Analysis Axes — Philosophy Extraction (archetypes)
+
+Domain-specific philosophical principles to extract during Phase 2 Deep Analysis. For each detected archetype pattern, extract guiding principles that inform architectural decisions.
+
+| Field | Description |
+|-------|-------------|
+| **Principle name** | Short identifier for the architectural principle |
+| **Extraction targets** | Where to look in the code for evidence of this principle |
+| **Output format** | How extracted principles should be recorded in constitution-seed |
+
+---
+
 ## Loading Order
 
 Modules are loaded in this order during reverse-spec execution:
@@ -76,8 +103,11 @@ Modules are loaded in this order during reverse-spec execution:
 1. _core.md                              (ALWAYS — universal analysis framework)
 2. interfaces/{interface}.md             (for EACH detected/specified interface)
 3. concerns/{concern}.md                 (for EACH detected/specified concern)
+4. archetypes/{archetype}.md             (for EACH detected/specified archetype)
 ```
 
 **Merge rule**: Later modules extend earlier ones:
 - **R1 Detection Signals**: Append (accumulate from all modules)
 - **R3 Analysis Axes**: Append (add module-specific extraction targets to _core axes)
+- **A0 Signal Keywords**: Aggregated per-archetype (each archetype's keywords are independent)
+- **A1 Philosophy Extraction**: Append (accumulate from all active archetypes)

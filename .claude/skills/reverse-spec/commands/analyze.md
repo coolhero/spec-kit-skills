@@ -1362,6 +1362,27 @@ If anomalies found, display them but do NOT auto-merge or auto-split. Proceed to
 
 > **Note**: This check is informational, not blocking. It enriches the dependency graph (3-2) with interaction intensity data and helps the user validate boundary decisions. The interaction data also feeds into Phase 4-2 when populating Feature Contract sections in each pre-context.md.
 
+Then proceed to 3-1e.
+
+### 3-1e. Archetype Detection
+
+Scan the project for archetype signals using A0 keywords from all archetype modules (`domains/archetypes/*.md`).
+
+**Steps**:
+1. Read A0 Signal Keywords from each archetype module (ai-assistant, public-api, microservice)
+2. Match against:
+   - Package dependencies (from Phase 1 extraction)
+   - Code patterns observed during Phase 2 deep analysis
+   - Config files and directory structures
+3. If a primary keyword matches ≥ 1 signal → record the archetype as **detected**
+4. If only secondary keywords match → record as **candidate** (for user confirmation)
+
+**Output**: Record detected/candidate archetypes in analysis notes. This data feeds into:
+- Phase 4-1: constitution-seed generation (archetype-specific principles)
+- smart-sdd pipeline: sdd-state.md Archetype field
+
+**No HARD STOP** — archetype detection is informational. Display detected archetypes in the Phase 3 summary.
+
 Then proceed to 3-2.
 
 ### 3-2. Dependency Graph Construction and Release Group Determination
@@ -1502,6 +1523,8 @@ Generate the following files in order. Each file follows the template structure 
    - **Recommended Development Principles (Best Practices)**: Test-First, Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Demo-Ready Delivery
    - **Global Evolution Layer Operational Principles**: Rules for maintaining cross-Feature context
    - **Project-Specific Recommended Principles**: Based on the domain, architecture patterns, and technical traits observed in Phase 1~3, recommend additional constitution principles tailored to this project. Use the recommendation categories in the template (domain-driven, architecture-driven, scale-driven, quality-driven) as a guide. Each recommendation must cite a specific observed trait from the source analysis as evidence.
+   - **Archetype-Specific Principles** (if archetype detected in Phase 3-1e): Read A1 Philosophy Extraction results from the matched archetype module(s) in `domains/archetypes/`. Include the extracted principles as a named subsection (e.g., "AI Assistant Domain", "Public API Domain"). Each principle must cite the extraction evidence from the source analysis. If no archetype was detected, omit this section entirely.
+   - **Framework Philosophy** (if Foundation has F7 section): Include F7 principles from the loaded Foundation file(s) as architectural guardrails. These complement Extracted Architecture Principles with framework-endorsed conventions.
 
 6. **`specs/reverse-spec/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations

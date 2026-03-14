@@ -18,6 +18,8 @@ All content from constitution-seed.md is provided as context when executing `spe
 - Extracted architecture principles
 - Extracted technical constraints
 - Extracted coding conventions
+- Archetype-specific principles (if archetype detected — from A4 Constitution Injection sections)
+- Framework philosophy (if Foundation F7 section exists)
 - Recommended development principles (Best Practices)
 - Global Evolution Layer operational principles
 
@@ -58,6 +60,14 @@ Show the **actual content** of constitution-seed.md so the user can review and m
 
 ── Coding Conventions ────────────────────────────
 [List each convention]
+
+── Archetype-Specific Principles ──────────────────
+[If archetype detected: show principles from the archetype's A4 section]
+[If no archetype: omit this block]
+
+── Framework Philosophy ───────────────────────────
+[If Foundation F7 exists: show F7 principles]
+[If no F7: omit this block]
 
 ── Best Practices ────────────────────────────────
 [Show the 6 best practices with their descriptions]

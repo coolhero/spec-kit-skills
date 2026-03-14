@@ -1,0 +1,27 @@
+# Archetype: ai-assistant (reverse-spec)
+
+> AI-powered assistant application analysis. Loaded when project uses LLM APIs, streaming patterns, or prompt management.
+> Module type: archetype (reverse-spec analysis)
+
+---
+
+## A0. Signal Keywords
+
+- **Libraries**: `openai`, `anthropic`, `@anthropic-ai/sdk`, `langchain`, `llamaindex`, `llama-index`, `huggingface`, `transformers`, `ollama`, `ai` (Vercel AI SDK)
+- **Code patterns**: `stream()`, `ReadableStream`, `SSE`, `text/event-stream`, token counting, `ChatCompletion`, `messages.create`, embedding generation, vector store queries
+- **Config files**: `.env` with `*_API_KEY` for LLM providers, `prompts/` directory, model configuration files, RAG pipeline configs
+
+---
+
+## A1. Analysis Axes — Philosophy Extraction
+
+For each detected AI assistant pattern, extract:
+
+| Principle | Extraction Targets | Output Format |
+|-----------|--------------------|---------------|
+| **Streaming-First** | Response delivery pattern (streaming vs batch), SSE/WebSocket usage, chunk handling | Whether streaming is primary UX pattern; how partial responses are displayed |
+| **Model Agnosticism** | Provider abstraction layers, model switching capability, provider-specific vs generic SDK usage | Degree of provider coupling; abstraction layer presence |
+| **Offline Resilience** | Fallback behavior when API is unavailable, cached responses, graceful degradation | Offline strategy (cache/queue/error) |
+| **Token Awareness** | Token counting, context window management, conversation truncation strategy, cost tracking | Token budget strategy; context window policy |
+| **Prompt Versioning** | Prompt storage (inline vs file vs DB), prompt template patterns, A/B testing, version history | Prompt management maturity level |
+| **RAG Pipeline** | Document ingestion, embedding generation, vector store usage, retrieval strategy | RAG architecture if present; retrieval patterns |

@@ -604,6 +604,17 @@ Display the constitution-seed content per [injection/constitution.md → Checkpo
 
 Constitution is the most critical artifact — it governs all subsequent Features.
 
+#### Phase 0-3b. Archetype Detection from Constitution-Seed
+
+After reading the constitution-seed content (Phase 0-1), check for archetype-specific principles:
+1. Scan constitution-seed for archetype-indicative sections (e.g., "AI Assistant Domain", "Public API Domain", "Microservice Domain")
+2. If detected and sdd-state.md `**Archetype**` is `"none"` or missing:
+   - Update sdd-state.md Archetype field with the detected archetype name(s)
+   - Display: `🔍 Archetype detected from constitution-seed: {archetype-name}`
+3. If sdd-state.md already has a non-"none" Archetype value: no change needed (already set during init or manually)
+
+This step ensures rebuild/adoption workflows (which skip init) still get archetype information from reverse-spec analysis.
+
 #### Phase 0-4. Update
 
 Record the constitution completion in `sdd-state.md`:

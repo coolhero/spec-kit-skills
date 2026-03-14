@@ -199,3 +199,15 @@ How to determine each Foundation decision from existing Electron source code:
 | F000-build-deploy | BLD | 8 |
 | F000-error-logging-storage | ERR + LOG + STR | 6 |
 | F000-devexp-env | DXP + ENV | 6 |
+
+---
+
+## F7. Framework Philosophy
+
+| Principle | Description | Implication |
+|-----------|-------------|-------------|
+| **Process Crash Isolation** | The main process must survive renderer process crashes — a crashed renderer should be recoverable without restarting the entire application | Renderer crash handlers are mandatory; critical state must be persisted outside renderer processes; main process should never hold state that only exists in a renderer |
+| **Memory Budget Discipline** | Each BrowserWindow creates a full Chromium process — memory usage scales linearly with window count | Window count should be minimized; heavy computation offloaded to utility processes or worker threads; memory monitoring is a first-class architectural concern |
+| **Native Feel** | Desktop applications should feel like native apps, not web pages in a frame — native menus, keyboard shortcuts, drag-and-drop, system tray integration | UI must follow platform conventions (title bar, context menus, shortcuts); web-only patterns (hover tooltips on mobile-first designs, browser-style navigation) are anti-patterns |
+| **Secure by Default** | Context isolation and sandbox must be enabled; `nodeIntegration` in renderer is a security vulnerability | All renderer-to-main communication goes through `contextBridge`/`preload`; never expose Node.js APIs directly to renderer; CSP headers configured for all web content |
+| **Auto-Update as First-Class** | Update mechanism must be designed from day one — retrofitting auto-update into a shipped app is error-prone and disruptive | Auto-update infrastructure (signing, update server, UX flow) is part of the initial architecture, not a post-launch feature |

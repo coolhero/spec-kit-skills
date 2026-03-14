@@ -34,6 +34,7 @@ If validation fails:
 **Domain Profile**: [profile-name or "custom"]
 **Interfaces**: [comma-separated list, e.g., http-api, gui]
 **Concerns**: [comma-separated list, e.g., async-state, auth, i18n]
+**Archetype**: [comma-separated list, e.g., ai-assistant, public-api | "none"]
 **Scenario**: [greenfield | rebuild | incremental | adoption]
 **Custom**: [path to domain-custom.md | "none"]
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
@@ -390,6 +391,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 3. Leave the Feature Mapping table empty; map the spec-kit Name and Branch when each Feature's specify step is completed (spec-kit creates the branch during specify)
 4. Initialize Constitution to `pending`
 5. Set Domain Profile based on the `--profile` argument (or `--domain` for backward compatibility). Resolve via `domains/_resolver.md`
+5b. Set Archetype from Proposal inference (A0 keyword matching) or user selection during init. Default `"none"` if no archetype is detected or selected. For rebuild/adoption: archetype may be auto-detected from constitution-seed during pipeline Phase 0
 6. Set Origin based on how artifacts were generated:
    - `greenfield` — if initialized by `/smart-sdd init`
    - `rebuild` — if initialized from `/reverse-spec` artifacts for rebuild workflow (`/smart-sdd pipeline`)

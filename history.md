@@ -5,6 +5,52 @@
 
 ---
 
+## [2026-03-15] 4-Axis Domain Composition: Archetype modules + Foundation F7 Philosophy
+
+Expanded the domain composition model from 3 axes (Interface × Concern × Scenario) to 4 axes (Interface × Concern × Archetype × Scenario) by introducing Archetype modules for application-domain philosophical principles (e.g., AI assistant's "Streaming-First", Public API's "Contract Stability"). Also added Foundation F7 Philosophy sections for framework-specific guiding principles (distinct from F0–F6 operational checklists).
+
+### Motivation
+- Domain-specific philosophy (e.g., "Streaming-First" for AI apps) was generated ad-hoc in constitution-seed without structured guidance
+- Framework philosophy (e.g., Express's "Middleware Composition") was not distinguished from operational checklists
+- The angdu-studio constitution-seed showed these principles emerge naturally — they needed a structured home
+
+### Changes (24 files: 7 new, 17 modified)
+
+**Schema & Core (4 files)**:
+- `reverse-spec/domains/_schema.md` — Added Archetype module type, A0-A1 section schema, updated loading order to 4 items
+- `smart-sdd/domains/_schema.md` — Added Archetype module type, A0-A4 section schema, updated loading order to 6 items
+- `smart-sdd/domains/_resolver.md` — Added Step 2c (Resolve Archetype), updated worked example, A0 Aggregation
+- `smart-sdd/reference/state-schema.md` — Added Archetype field (optional, default "none")
+
+**Archetype Modules (6 new files)**:
+- `reverse-spec/domains/archetypes/{ai-assistant,public-api,microservice}.md` — A0 signal keywords + A1 philosophy extraction
+- `smart-sdd/domains/archetypes/{ai-assistant,public-api,microservice}.md` — Full A0-A4: signal keywords, philosophy principles, SC extensions, elaboration probes, constitution injection
+
+**Foundation F7 (3 files)**:
+- `foundations/_foundation-core.md` — Added F7 schema definition, updated F6 table
+- `foundations/electron.md` — F7: Process Crash Isolation, Memory Budget Discipline, Native Feel, Secure by Default, Auto-Update as First-Class
+- `foundations/express.md` — F7: Middleware Composition, Minimal Core, Error-First Conventions, Stateless Requests
+
+**Pipeline Integration (5 files)**:
+- `analyze.md` — Phase 3-1e archetype detection, Phase 4-1 archetype/F7 principles in constitution-seed
+- `constitution-seed-template.md` — Archetype-Specific Principles + Framework Philosophy sections
+- `init.md` — Inferred Archetype in Proposal output
+- `pipeline.md` — Phase 0-3b archetype detection from constitution-seed
+- `injection/constitution.md` — Archetype display in injection/checkpoint
+
+**Documentation (4 files)**:
+- `ARCHITECTURE-EXTENSIBILITY.md` (NEW) — Detailed extensibility guide: module system, adding modules, sophistication levels
+- `CLAUDE.md` — Documentation Writing Guidelines section
+- `README.md` / `README.ko.md` — 4-Axis rename, archetype docs, F7 mention, file map updates
+
+### Design Decisions
+- Archetype field is optional (default "none") — full backward compatibility
+- A-prefix section numbering (A0-A4) avoids collision with R1-R6 and S0-S8
+- F7 is optional per Foundation — only add when framework has strong opinionated principles
+- 3 initial archetypes (ai-assistant, public-api, microservice) — e-commerce excluded due to region-specific patterns
+
+---
+
 ## [2026-03-14] Reverse-spec output quality enforcement: BLOCKING gates + completeness verification
 
 Second-round quality analysis of cherry-studio reverse-spec output (post-Fix 1-4). Fix 1-3 fully reflected; Fix 4 (Runtime Default Verification) still skipped despite MANDATORY keyword. Additionally found pre-context sections wholesale omitted and DG SBI ranges not persisted.
