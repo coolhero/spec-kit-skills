@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-14] Flow Review: context-injection-rules.md reachability fix
+
+Post-SKF batch (SKF-010~016) full project flow verification following CLAUDE.md Review Protocol (4-step: flow consistency → unused parts → commonization → over-fragmentation).
+
+### Review Results
+- **Step 1 (Flow Consistency)**: ALL PASS — all cross-references valid
+- **Step 2 (Unused Parts)**: 1 ISSUE found — `context-injection-rules.md` not explicitly required reading in pipeline.md Step 1 Assemble. SKF-012's Dependency Stub Resolution Injection scanning protocol was only reachable if agent happened to read the shared file
+- **Step 3 (Commonization)**: PASS — no new opportunities
+- **Step 4 (Over-fragmentation)**: PASS — Demo-Ready (8 files) follows inline repetition exception, Dependency Stubs (7 files) has dual SSOT (format in implement.md, injection protocol in context-injection-rules.md), Interaction Surface (3 files) properly SSOT'd
+
+### Fix Applied
+- `pipeline.md` Step 1 Assemble: Explicitly requires reading `context-injection-rules.md` alongside per-command `injection/{command}.md` files. Added "both MUST be read" with rationale explaining per-command vs shared pattern split.
+
+### Files Changed (1 file)
+- `smart-sdd/commands/pipeline.md` — Step 1 Assemble explicit context-injection-rules.md reading requirement
+
+---
+
 ## [2026-03-14] SKF-015 + SKF-016: Cross-Stage Validation Gates + Interaction Surface Inventory
 
 SKF-015: Structural analysis of SKF-001~014 patterns revealing the pipeline's single-direction trust model as root cause. SKF-016: The Interaction Surface Preservation rule (SKF-009) lacked a concrete artifact for agents to reference.

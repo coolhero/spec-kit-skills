@@ -28,9 +28,9 @@ The pipeline is single-direction (reverse-spec → specify → plan → tasks �
 ### 1. Assemble — Context Assembly
 
 - Reads the files/sections required for the given command from BASE_PATH
-- Filters and assembles the necessary information per command according to [`reference/injection/{command}.md`](../reference/injection/)
+- Filters and assembles the necessary information per command according to [`reference/injection/{command}.md`](../reference/injection/) **AND** shared cross-command patterns in [`reference/context-injection-rules.md`](../reference/context-injection-rules.md) (both MUST be read — per-command files contain step-specific rules, context-injection-rules contains shared patterns like Dependency Stub Resolution Injection that span multiple commands)
 - Also references actual implementation results from preceding Features (under `specs/`) if available
-- **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See [`reference/context-injection-rules.md`](../reference/context-injection-rules.md) § Missing/Sparse Content Handling for details.
+- **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See `context-injection-rules.md` § Missing/Sparse Content Handling for details.
 
 **Context Budget Estimation** (for projects with 10+ Features):
 Before reading files, estimate the total context volume of Read Targets:
