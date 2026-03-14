@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-14] Reverse-spec quality prevention: SBI integrity + coverage verification
+
+Quality analysis of cherry-studio reverse-spec output revealed 7 issues traceable to 5 root causes in analyze.md rules. Fixed the rules to prevent recurrence.
+
+### Root Causes Identified (from output quality analysis)
+1. SBI B### numbering collisions across Features (no post-verification step existed)
+2. Mixed SBI formats — heading vs table (format not enforced inline)
+3. Coverage-baseline total mismatch (no cross-verification against actual SBI count)
+4. Runtime Default Verification skipped despite Playwright availability (not MANDATORY)
+5. DG SBI ranges manually calculated (error-prone)
+
+### Fixes Applied (all in analyze.md)
+- **Fix 1 — SBI Numbering Verification (MANDATORY + BLOCKING)**: Added post-generation verification step in Phase 4-2 — builds global SBI map, checks contiguity/uniqueness/total, auto-updates DG SBI ranges. Blocks Phase 4-3 if any check fails
+- **Fix 2 — SBI Table Format (MANDATORY)**: Inlined exact table format from pre-context-template.md into B### ID Assignment Rules. Added rules 3 (contiguous) and 6 (global-only) with explicit INVALID examples
+- **Fix 3 — Coverage-baseline Cross-Verification**: Added MANDATORY verification in Phase 4-3 Step 4 — Surface Metrics SBI total must equal SBI Numbering Verification authoritative total. Per-Feature ranges copied directly from verification output
+- **Fix 4 — Runtime Default Verification MANDATORY**: Changed from optional ("if Playwright was available") to MANDATORY when Playwright was used in Steps 1-4. Added required recording section in runtime-exploration.md to make execution auditable
+
+### Files Changed (1 file)
+- `reverse-spec/commands/analyze.md` — 4 fixes across Phase 1.5 Step 5, Phase 4-2, Phase 4-3 Step 4
+
+---
+
 ## [2026-03-14] Flow Review: context-injection-rules.md reachability fix
 
 Post-SKF batch (SKF-010~016) full project flow verification following CLAUDE.md Review Protocol (4-step: flow consistency → unused parts → commonization → over-fragmentation).

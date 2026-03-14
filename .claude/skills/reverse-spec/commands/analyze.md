@@ -913,9 +913,11 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    - Display: `⚠️ Style token extraction skipped — [reason]. You can add tokens manually.`
    - Create an empty `style-tokens.md` with the template header only
 
-**Step 5 — Runtime Default Verification** (rebuild mode, if Playwright was available):
+**Step 5 — Runtime Default Verification** (MANDATORY when Playwright was used in Steps 1-4):
 
 > **Purpose**: Verify that settings/configuration defaults extracted from code analysis match the app's actual runtime state. Static code analysis can misidentify defaults (e.g., reading a `'left'` sidebar constant while the app's runtime default is `'top'` tab mode). Runtime values take precedence.
+
+> ⚠️ **This step is MANDATORY if Playwright was successfully used in any of Steps 1-4 above.** You MUST NOT skip it when Playwright is available. If you performed runtime exploration with Playwright, you MUST also perform runtime default verification.
 
 1. **Identify settings-related SBI entries**: From `runtime-exploration.md` and code analysis, list SBI entries that involve:
    - Layout modes (sidebar position, panel arrangement, tab vs. sidebar)
@@ -943,7 +945,9 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    - Update `runtime-exploration.md` with corrected defaults
    - Add note: `⚠️ Corrected from code analysis — runtime verification showed different default`
 
-5. **If Playwright was not available or app cannot be relaunched**: Skip this step and display:
+5. **Record in runtime-exploration.md**: Append a `## Runtime Default Verification` section to `runtime-exploration.md` with the full verification results table. This section MUST exist when Playwright was used — its absence indicates the step was skipped.
+
+6. **If Playwright was not available or app cannot be relaunched**: Skip this step and display:
    `ℹ️ Runtime Default Verification skipped — Playwright not available. Settings defaults are from code analysis only (may differ from actual runtime).`
 
 **Step 6 — Proceed to Phase 2**:
@@ -1526,15 +1530,64 @@ When populating the Source Behavior Inventory (SBI) table in each pre-context.md
 
 1. **Sequential numbering**: B001, B002, B003, ... across the entire project (not per-Feature)
 2. **Feature order**: Assign IDs following Feature ID order — F001's SBI entries get the lowest B### numbers, then F002's entries continue from where F001 left off, and so on
-3. **Within a Feature**: Order entries by Priority (P1 first, then P2, then P3), then alphabetically by function name within the same priority
-4. **Uniqueness**: Each B### ID is unique project-wide. If F001 has entries B001–B010, F002 starts at B011
-5. **Demo Group SBI**: After assigning all B### IDs, update each Demo Group definition in roadmap.md with the SBI Coverage field listing the B### ranges from its constituent Features
+3. **Contiguous — no gaps**: B### numbering MUST be contiguous across Features. If F001 ends at B017, F002 MUST start at B018. No gaps allowed (e.g., F001 ending at B017 and F002 starting at B031 = INVALID)
+4. **Within a Feature**: Order entries by Priority (P1 first, then P2, then P3), then alphabetically by function name within the same priority
+5. **Uniqueness**: Each B### ID is unique project-wide. If F001 has entries B001–B010, F002 starts at B011
+6. **Global numbering only**: B### IDs are ALWAYS global. Do NOT use Feature-local numbering (e.g., every Feature starting from B001 = INVALID). Each Feature's first B### = previous Feature's last B### + 1
 
 Example:
 ```
 F001-auth (10 entries): B001–B010
 F002-product (8 entries): B011–B018
 F003-order (12 entries): B019–B030
+Total: 30 entries, B001–B030 (contiguous, no gaps)
+```
+
+#### SBI Table Format (MANDATORY)
+
+All pre-context.md SBI tables MUST use this exact table format (from [pre-context-template.md](templates/pre-context-template.md)):
+
+```markdown
+| ID | Source File | Function/Method | Behavior Description | Priority | Origin |
+|----|-------------|----------------|---------------------|----------|--------|
+| B001 | `src/path/service.ts` | `functionName()` | One-line behavior description | P1 | extracted |
+```
+
+- **ID**: B### (globally unique, assigned per rules above)
+- **Source File**: Relative path to source file (relative to target directory)
+- **Function/Method**: Exported function or public method name
+- **Behavior Description**: One-line description of what the function does
+- **Priority**: P1 (core) / P2 (important) / P3 (nice-to-have)
+- **Origin**: `extracted` (from source) or `new` (added during /smart-sdd)
+
+Do NOT use heading format (`### B001 — Title`), alternate column orders, or omit columns. Every Feature MUST use the same table format.
+
+#### SBI Numbering Verification (MANDATORY — after all pre-contexts are generated)
+
+After generating ALL pre-context.md files, perform this verification before proceeding to Phase 4-3. This step is **BLOCKING** — do NOT proceed if any check fails.
+
+1. **Build the global SBI map**: For each Feature (F001, F002, ..., F00N), read its pre-context.md SBI table and record: Feature ID, first B###, last B###, count
+2. **Check contiguity**: Verify that each Feature's first B### = previous Feature's last B### + 1. No gaps allowed
+3. **Check uniqueness**: Verify no B### appears in more than one Feature
+4. **Check total**: Sum all per-Feature counts. This is the authoritative total SBI count for coverage-baseline.md
+5. **Update Demo Group SBI ranges**: For each Demo Group in roadmap.md, calculate the SBI Coverage by collecting the B### ranges from its constituent Features. Use union notation for non-contiguous ranges (e.g., `B018–B030, B244–B276`)
+
+Display verification result:
+```
+✅ SBI Numbering Verification:
+  F001-auth:     B001–B010 (10)
+  F002-product:  B011–B018 (8)
+  F003-order:    B019–B030 (12)
+  Total: 30 SBI items, B001–B030 (contiguous, no gaps, no collisions)
+  Demo Groups: DG-01 B001–B018, DG-02 B011–B030
+```
+
+If any check fails, fix the numbering BEFORE proceeding:
+```
+❌ SBI Numbering Verification FAILED:
+  Gap detected: F003 ends at B048, F004 starts at B076 (missing B049–B075)
+  Collision detected: F006 B176 and F007 B176 both exist
+  → Fix: Renumber F004+ to close gaps, renumber F007+ to start after F006 ends
 ```
 
 Contents to include in each pre-context.md:
@@ -1670,6 +1723,23 @@ Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-
 - Record all unmapped items with their user-assigned classifications from Step 3
 - Record all intentional exclusions with their reasons and descriptions
 - Add coverage notes from the classification process
+
+**Cross-Verification (MANDATORY)**: After generating coverage-baseline.md, verify data consistency:
+
+1. **SBI total consistency**: The "Source behaviors" count in Surface Metrics MUST equal the authoritative total from [SBI Numbering Verification](#sbi-numbering-verification-mandatory--after-all-pre-contexts-are-generated) (Phase 4-2). If they differ, use the SBI Numbering Verification total (it counts actual B### entries).
+2. **Per-Feature SBI ranges**: The Per-Feature Coverage table's SBI ranges MUST match the ranges displayed in the SBI Numbering Verification output. Copy them directly — do not recalculate manually.
+3. **Display verification**:
+   ```
+   ✅ Coverage-Baseline Cross-Verification:
+     Surface Metrics SBI total: [N] = SBI Numbering Verification total: [N] ✓
+     Per-Feature ranges match SBI Verification output ✓
+   ```
+   If mismatch:
+   ```
+   ❌ Coverage-Baseline Mismatch:
+     Surface Metrics says [X] but SBI Verification counted [Y]
+     → Correcting to [Y]
+   ```
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M4.
 
