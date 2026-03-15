@@ -118,6 +118,23 @@
 **Countermeasures**: Philosophy-aware report generation — §4.2 Architecture Philosophy (principle tables with Constitution Status), §4.3 Principle-to-Decision Mapping (decision → principle correlation), §8 Philosophy Assessment (principle application coverage + gaps + module feedback). M6 milestone enhanced with Philosophy Adherence subsection for per-Feature principle tracking.
 **Coverage**: ~75% — depends on M6 Philosophy Adherence data being recorded; implicit principle adherence (followed but not recorded) creates coverage gaps
 
+## G15. Skill Tool Return Overrides Pipeline Instructions
+
+**Problem**: Agent treats spec-kit Skill tool return value as "final response to show user" — bypasses all post-execution steps (output suppression, artifact read, Review display, HARD STOP)
+**Case**: angdu-studio constitution — `speckit-constitution` returned, agent showed "Constitution finalized" + "Suggested commit" (raw output), then jumped directly to "F001-app-shell pipeline" without reading `.specify/memory/constitution.md`, displaying Review format, or calling AskUserQuestion. Both Pattern A (stop) and Pattern B (skip) observed in different runs.
+**Root cause**: The default agent behavior for any tool call is: execute tool → show result to user → stop or continue. Pipeline instructions saying "suppress tool output and do X instead" are in pipeline.md (loaded on-demand), but by the time the Skill tool returns, the agent's working memory is dominated by the tool output. The pipeline suppression rules have already been pushed down in context priority.
+**Countermeasures**: MANDATORY RULE 3 in SKILL.md (always-loaded, 5-step protocol: SUPPRESS → READ → DISPLAY → ASK → FALLBACK), inline reminders at each Execute+Review point in pipeline.md, CLAUDE.md Review Protocol #5 (pattern verification during file review)
+**Coverage**: ~uncertain — this is a model-level behavioral tendency, not a rule enforcement gap. SKILL.md placement is the strongest possible mitigation, but the underlying behavior (tool output = user response) cannot be structurally prevented.
+**Key insight**: Unlike G1-G14 where the fix is "add a verification gate," this problem has no verification gate solution — the failure happens *between* tool execution and the next instruction read. The only defense is placing suppression rules at the highest-priority context level (SKILL.md).
+
+## G16. CWD vs Target Directory Path Ambiguity
+
+**Problem**: Instructions using `{target-directory}` are ambiguous — "target" can mean "the source being analyzed" (reverse-spec target) or "the project being built" (build target). Agent picks whichever interpretation fits the immediate context.
+**Case**: reverse-spec analyze.md Phase 0 Step 4 said "Write `case-study-log.md` to `{target-directory}`." Agent interpreted target-directory as the source code being analyzed (cherry-studio), not the CWD project being built (angdu-studio). File was written to the wrong location.
+**Countermeasures**: Replaced all ambiguous path references with explicit `./case-study-log.md (CWD root)` + added ⚠️ Path warning block explaining CWD vs target distinction
+**Coverage**: ~95% — explicit "CWD root" annotation eliminates ambiguity for known cases; new file creation instructions must be reviewed for the same pattern
+**Key insight**: In reverse-spec, the agent operates across two directories (source = read-only, CWD = write target). Any path instruction that doesn't specify which directory is a bug waiting to happen.
+
 ---
 
 ## Countermeasure Lineage
@@ -133,6 +150,10 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → Runtime Verification Architecture (multi-backend, interface-aware, data dependency)
   → BLOCKING Gates (output file verification > MANDATORY keyword)
   → Pre-context Completeness Verification (template checklist enforcement)
+  → MANDATORY RULE 3 (Skill tool output suppression + Review gate — SKILL.md level)
+  → Standalone section separation (instruction visibility > checklist piggyback)
+  → Dependency Interpretation Rules (implementation ordering ≠ runtime coupling)
+  → Explicit CWD path annotations (CWD vs target-directory disambiguation)
 ```
 
 ---
@@ -203,3 +224,18 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
 **Situation**: Applied Fix 1-4 to analyze.md rules. Assumed the fixes were sufficient based on code review. After re-running reverse-spec, found Fix 1-3 worked perfectly but Fix 4 failed completely — the MANDATORY keyword was simply ignored.
 **Resolution**: Established a feedback loop: apply fix → re-run the pipeline → analyze output → identify remaining failures → apply stronger fix. Needed two rounds to get Runtime Default Verification right (1st: MANDATORY keyword, 2nd: BLOCKING gate).
 **Lesson**: Rule changes cannot be validated by reading the rule. They can only be validated by observing agent behavior under the rule. Every fix must be followed by a re-execution to verify the fix actually changed agent behavior.
+
+### L14. Skill Tool Return Treated as User Response
+**Situation**: `speckit-constitution` completed. Agent showed raw output ("Constitution finalized", "Suggested commit") and jumped to F001 pipeline — skipping artifact read, Review display, and HARD STOP AskUserQuestion. In a separate run, agent showed raw `speckit-specify` output ("Ready for /speckit.clarify or /speckit.plan") and stopped without Review or "continue" fallback.
+**Resolution**: Added MANDATORY RULE 3 to SKILL.md (always-loaded context). Defined 5-step post-execution protocol (SUPPRESS → READ → DISPLAY → ASK → FALLBACK). Documented Pattern A (Stop) and Pattern B (Skip) as distinct violations.
+**Lesson**: Pipeline instructions in on-demand files (pipeline.md) lose priority against the agent's default tool-use behavior. Critical behavioral rules must live in SKILL.md — the only file guaranteed to be in context when the violation occurs. This is the same principle as L1 (inline repetition), elevated to file-level: put the rule where it will be read at the moment it matters.
+
+### L15. Instruction Buried in Unrelated Checklist
+**Situation**: Demo Group SBI range calculation was step 5 of a 5-step "SBI Numbering Verification" checklist. Agent completed steps 1-4 (numbering checks) and stopped, treating step 5 (Demo Group SBI calculation) as optional or irrelevant since it wasn't about "numbering verification."
+**Resolution**: Separated Demo Group SBI into its own `#### Demo Group SBI Coverage Ranges (MANDATORY — BLOCKING)` section with dedicated heading, algorithm, display format, and anti-TBD warning.
+**Lesson**: Agents interpret checklist items through the lens of the checklist title. An item that doesn't match the title's semantic scope will be skipped even if it's marked MANDATORY. Fix: give distinct tasks their own section headings, don't piggyback on existing checklists.
+
+### L16. Runtime Coupling ≠ Implementation Dependency (SKF-018)
+**Situation**: reverse-spec placed F008 (Data & Storage) before F001 (Electron Shell) in the dependency graph because "Shell imports DB at startup → Shell depends on DB." This caused smart-sdd to select F008 as the first Feature instead of F001.
+**Resolution**: Added 3 Dependency Interpretation Rules to analyze.md Phase 3-2: (1) Bootstrap Feature always RG-1 first, (2) Foundation sanity check with AskUserQuestion, (3) "Could I write A without B's code?" test. Added post-sort validation.
+**Lesson**: "A's code imports B at runtime" ≠ "A cannot be implemented without B." Feature dependency is about implementation ordering ("I need B's code to exist before I can write A"), not runtime initialization sequence. The test: "If B's code didn't exist at all, could I still write A from scratch?" If yes, A does not depend on B.
