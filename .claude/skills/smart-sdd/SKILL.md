@@ -27,6 +27,19 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > - ❌ WRONG: Showing demo steps as text in the chat instead of writing a script file
 >
 > Tests belong in `verify` Phase 1. Demos show the **real thing running**. The user must be able to see, touch, and use the Feature.
+>
+> **Rule 3: spec-kit Output Suppression + Review Gate**
+> After ANY spec-kit command completes (`speckit-constitution`, `speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-analyze`, `speckit-implement`):
+> 1. **SUPPRESS** spec-kit's raw output. Never show "Suggested commit", "Ready for /speckit.*", "Constitution finalized", "Done", or any navigation messages to the user.
+> 2. **READ** the generated artifact file(s) per `reference/injection/{command}.md`.
+> 3. **DISPLAY** the Review format per `reference/injection/{command}.md`.
+> 4. **CALL AskUserQuestion** for ReviewApproval (HARD STOP). Do NOT proceed until the user approves.
+> 5. **If context limit prevents steps 2-4**: Show `✅ [command] executed. 💡 Type "continue" to review the results.`
+>
+> Two common violations:
+> - ❌ **Pattern A (Stop)**: Show raw output and stop — user sees spec-kit output but no Review, no way forward
+> - ❌ **Pattern B (Skip)**: Show raw output and jump to next step — user loses Review approval, HARD STOP bypassed
+> Both are wrong. Steps 1-4 are mandatory. The Review HARD STOP cannot be skipped even to maintain "continuity".
 
 **Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).
 

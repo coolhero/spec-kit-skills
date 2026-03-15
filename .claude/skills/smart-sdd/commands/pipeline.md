@@ -133,7 +133,7 @@ When a pipeline step fails (build, test, lint, spec-kit command):
 - Retry count tracked per-session (not persisted)
 - Each retry must attempt a DIFFERENT fix (no identical re-run)
 
-**⚠️ CRITICAL — SUPPRESS spec-kit output**: spec-kit commands print their own next-step messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
+**⚠️ CRITICAL — SUPPRESS spec-kit output (see MANDATORY RULE 3 in SKILL.md)**: spec-kit commands print their own next-step messages. **IGNORE ALL of them.** Do NOT relay them to the user. smart-sdd controls the workflow.
 
 Suppress these patterns (non-exhaustive):
 - "Ready for /speckit.clarify or /speckit.plan"
@@ -593,14 +593,17 @@ Display the constitution-seed content per [injection/constitution.md → Checkpo
 
 #### Phase 0-3. Execute + Review (HARD STOP)
 
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-constitution` returns, do NOT show its raw output ("Constitution finalized", "Suggested commit", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Skipping this HARD STOP to "proceed to Phase 1" is a violation — NOT continuity. See SKILL.md Rule 3.
+
 **This is ONE continuous step — ALL of the following (1-7) MUST happen in the SAME response. Do NOT generate a separate response after step 1.**
 
 1. Provide the constitution-seed content as context and execute `speckit-constitution`
-2. **In the SAME response** — ignore any "Suggested commit" or "Next step" output from speckit-constitution
+2. **In the SAME response** — SUPPRESS any "Suggested commit", "Constitution finalized", "Next step", or navigation output from speckit-constitution. Do NOT show these to the user.
 3. **In the SAME response** — read `.specify/memory/constitution.md` — the **entire file**
 4. Display the Review content per [injection/constitution.md → Review Display Content](../reference/injection/constitution.md)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
 6. Follow **PROCEDURE ReviewApproval** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
+7. **If context limit prevents steps 3-6**: Show `✅ speckit-constitution executed. 💡 Type "continue" to review the results.` — Do NOT skip to Phase 1.
 
 Constitution is the most critical artifact — it governs all subsequent Features.
 

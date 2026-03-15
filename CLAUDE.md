@@ -16,9 +16,12 @@
 
 7. **verify-phases.md — Playwright Pre-flight**: verify Phase 1 시작 전 Playwright 가용성 체크(CLI probe → library import probe → MCP probe)를 반드시 수행합니다. 이 pre-flight를 제거하거나 건너뛰지 마세요. CLI가 primary이며, Electron 앱은 `_electron.launch()`로 직접 연결합니다.
 
-8. **pipeline.md — Execute+Review Continuity**: speckit-* 명령 실행 후 결과 요약만 표시하고 멈추지 마세요. Execute와 Review는 하나의 연속 동작입니다. `speckit-* 완료 → artifact 읽기 → Review 표시 → AskUserQuestion 호출`이 반드시 같은 응답에서 이루어져야 합니다. 컨텍스트 한계로 불가능한 경우에만 fallback 메시지(`💡 Type "continue" to review the results.`)를 표시합니다.
+8. **pipeline.md — Execute+Review Continuity**: speckit-* 명령 실행 후 결과 요약만 표시하고 멈추지 마세요. Execute와 Review는 하나의 연속 동작입니다. `speckit-* 완료 → spec-kit raw output 억제 → artifact 읽기 → Review 표시 → AskUserQuestion 호출`이 반드시 같은 응답에서 이루어져야 합니다. 컨텍스트 한계로 불가능한 경우에만 fallback 메시지(`💡 Type "continue" to review the results.`)를 표시합니다.
+   - **위반 패턴 A (멈춤)**: spec-kit raw output 표시 후 멈춤 → 사용자가 Review를 볼 수 없고, 다음 단계로 진행 불가
+   - **위반 패턴 B (건너뜀)**: spec-kit raw output 표시 후 Review/HARD STOP을 건너뛰고 다음 step으로 바로 진행 → 사용자가 산출물 승인 기회를 잃음
+   - 두 패턴 모두 금지. Review HARD STOP은 생략 불가. SKILL.md MANDATORY RULE 3 참조.
 
-9. **pipeline.md — Inter-step Continuity**: Feature 내 step 간 전환(예: plan Update → tasks Checkpoint)은 자동으로 이어져야 합니다. step 완료 후 "completed" 메시지만 표시하고 멈추지 마세요. 멈출 수 있는 유일한 지점은 HARD STOP(사용자 승인 대기), BLOCK 조건, Feature 완료, 복구 불가 에러뿐입니다.
+9. **pipeline.md — Inter-step Continuity**: Feature 내 step 간 전환(예: plan Update → tasks Checkpoint)은 자동으로 이어져야 합니다. step 완료 후 "completed" 메시지만 표시하고 멈추지 마세요. 멈출 수 있는 유일한 지점은 HARD STOP(사용자 승인 대기), BLOCK 조건, Feature 완료, 복구 불가 에러뿐입니다. **HARD STOP 없이 다음 step으로 건너뛰는 것은 "continuity"가 아니라 "HARD STOP 위반"입니다.**
 
 ## Design Principles
 
@@ -75,3 +78,8 @@
    - **단일 출처 원칙(Single Source of Truth)**: 상세 정의는 하나의 reference 파일에, 나머지는 cross-reference(`See [file] §N`)로 대체
    - **인라인 반복 허용 예외**: HARD STOP 재질문 텍스트(Do NOT Modify #1), CLAUDE.md Do NOT Modify 항목
    - **판단 기준**: "이 내용이 바뀌면 몇 곳을 수정해야 하나?" — 3곳 이상이면 통합 대상
+5. **HARD STOP + Execute+Review 패턴 검증**: pipeline.md, verify-phases.md, adopt.md 등에서 speckit-* 명령 실행 지점을 모두 확인하고, 각 지점에 아래 3가지가 갖춰져 있는지 검토:
+   - (a) spec-kit raw output 억제 지시 ("Suppress", "Do NOT show")
+   - (b) artifact 읽기 + Review 표시 + AskUserQuestion 호출 (HARD STOP)
+   - (c) 컨텍스트 한계 시 fallback 메시지 (`💡 Type "continue"`)
+   - 누락 시 해당 지점에 인라인으로 추가 (reference 파일 참조만으로는 에이전트가 무시하는 경향 — Do NOT Modify #1과 같은 이유)

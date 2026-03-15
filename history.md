@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-15] MANDATORY RULE 3: spec-kit Output Suppression + Review Gate
+
+Added MANDATORY RULE 3 to smart-sdd SKILL.md to prevent the agent from showing spec-kit's raw output and skipping the Review HARD STOP. This is the most persistent failure pattern in the pipeline.
+
+### Changes
+
+**smart-sdd/SKILL.md**:
+- Added MANDATORY RULE 3 with 5-step protocol: SUPPRESS → READ → DISPLAY → ASK → FALLBACK
+- Documented two violation patterns: Pattern A (Stop) and Pattern B (Skip)
+
+**pipeline.md Phase 0-3**:
+- Added inline ⚠️ MANDATORY RULE 3 REMINDER before the Execute+Review steps
+- Added step 7 (fallback message) to the Phase 0-3 step list
+- Strengthened step 2 wording: "SUPPRESS" instead of "ignore"
+- Added MANDATORY RULE 3 cross-reference to Common Protocol suppression rule
+
+**CLAUDE.md**:
+- Rule #8: Added two violation patterns (A: Stop, B: Skip) with descriptions and SKILL.md cross-reference
+- Rule #9: Added clarification that skipping HARD STOP to "continue" is a violation, not continuity
+- Review Protocol #5: Added HARD STOP + Execute+Review pattern verification as a review step
+
+### Rationale
+During Angdu Studio pipeline run, `speckit-constitution` completed and the agent showed "Constitution finalized" + "Suggested commit" (raw spec-kit output), then jumped directly to "F001-app-shell pipeline" without reading the artifact, displaying Review, or calling AskUserQuestion. Root cause: instructions were only in pipeline.md (loaded on-demand), not in SKILL.md (always loaded). The agent's default behavior is to treat Skill tool return values as "results to show the user", overriding the buried suppression instructions.
+
+---
+
 ## [2026-03-15] reverse-spec Post-Run Bug Fixes (case-study-log path + Demo Group SBI)
 
 Fixed two bugs discovered during the second Cherry Studio reverse-spec run.
