@@ -5,6 +5,51 @@
 
 ---
 
+## [2026-03-15] reverse-spec Completeness Improvements (SKF-018 + Cherry Studio Findings)
+
+Strengthened analyze.md to close 7 gaps found during Cherry Studio reverse-spec run. Target: raise output completeness from ~60% to near 100%.
+
+### Changes
+
+**Phase 3-2 — Dependency Graph (SKF-018)**:
+- Added "Dependency Interpretation Rules (MANDATORY)" block with 3 rules
+- Rule 1: App Shell/Bootstrap always RG-1 first with zero dependencies
+- Rule 2: Foundation Feature sanity check with AskUserQuestion confirmation
+- Rule 3: "Could I write A without B's code?" test for each dependency edge
+- Post-sort validation step added to Release Group Determination
+
+**Phase 3-1e — Archetype Evidence Extraction**:
+- Mandated evidence extraction format (Observed Trait + Implication) per A1 principle during archetype detection
+- Principles without evidence recorded as "Not implemented in source" (not silently omitted)
+
+**Phase 4-1 — Constitution-Seed Strengthening**:
+- F7 Framework Philosophy: single-line suggestion → MANDATORY 4-step protocol with exact table format
+- Archetype-Specific Principles: single-line mention → MANDATORY format spec prohibiting simple numbered lists
+
+**Phase 4-2 — Pre-Context Completeness Gate**:
+- Added "Per-Feature Pre-Context Generation Protocol (MANDATORY)" before existing verification
+- Lists commonly skipped sections with explicit handling rules
+- Added completeness score (14/14) and template cross-check
+
+**Phase 2-7b — micro-interactions.md Generation Gate**:
+- Added MANDATORY gate: file must be written even if no patterns found
+- Existence verification before Phase 2-8
+
+**Phase 4-1 — speckit-prompt.md**:
+- Added MANDATORY keyword and all dynamic field names
+- Post-generation placeholder verification
+
+**Phase 1.5-5 — Visual Reference Manifest Verification**:
+- Added post-capture manifest vs .png file list cross-check
+
+**Phase 4-2 — Demo Group SBI Ranges**:
+- Strengthened to MANDATORY + BLOCKING with read-back verification display
+
+### Rationale
+Cherry Studio output: SBI/Entity/API excellent, but F7 missing from constitution-seed, archetype principles without evidence, pre-context 30-40% filled, dependency graph confused runtime coupling with implementation ordering (SKF-018). Root cause across all issues: instructions used soft language without MANDATORY gates or format specifications.
+
+---
+
 ## [2026-03-15] SKF-017: Electron CDP Connection Timing Guidance
 
 Added Electron CDP 3-phase polling guidance to `reverse-spec/analyze.md` Phase 1.5-4, based on field experience with Cherry Studio (electron-vite).

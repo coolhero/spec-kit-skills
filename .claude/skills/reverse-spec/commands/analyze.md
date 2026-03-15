@@ -874,6 +874,13 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    ```
 3. Display: `📸 Visual references captured: [N] screens → specs/reverse-spec/visual-references/`
 
+**Manifest Verification (after capture)**:
+After generating `manifest.md`, verify completeness:
+1. List all `.png` files in `specs/reverse-spec/visual-references/`
+2. Check each `.png` file has a corresponding row in `manifest.md`
+3. If any file is missing from the manifest, add it with inferred screen name and `[TBD]` elements
+4. Display: `✅ Manifest verified: [N] screenshots, [N] manifest entries (matched)`
+
 **When Playwright unavailable or app cannot be launched**:
 - Display: `⚠️ Visual reference capture skipped (Playwright/app not available). You can provide screenshots manually at: specs/reverse-spec/visual-references/`
 - Create the `visual-references/` directory and an empty `manifest.md` with the template header
@@ -1171,6 +1178,15 @@ Write findings to `specs/reverse-spec/micro-interactions.md`.
 
 This inventory feeds into each Feature's `pre-context.md` → "Interaction Behavior Inventory" section (Phase 4-2) and is used by `/smart-sdd verify` for micro-interaction completeness checking.
 
+**micro-interactions.md Generation Gate (MANDATORY for frontend/fullstack projects)**:
+
+After completing source code analysis (Part A) and optional runtime probing (Part B):
+1. `specs/reverse-spec/micro-interactions.md` MUST be written, even if no patterns were detected. If no patterns found, write the template header with empty tables and note: "No micro-interaction patterns detected in source analysis."
+2. Verify the file exists before proceeding to Phase 2-8.
+3. If this step was skipped (e.g., backend-only project), record: `micro-interactions.md: skipped (backend-only project)` in Phase 2 summary.
+
+This file is a required input for Phase 4-2 (Interaction Behavior Inventory section of each pre-context.md). Its absence causes the Interaction Behavior Inventory section to be silently omitted.
+
 ### 2-8. Foundation Decision Extraction
 
 For each identified framework (from Phase 1-2b):
@@ -1393,12 +1409,34 @@ Scan the project for archetype signals using A0 keywords from all archetype modu
 3. If a primary keyword matches ≥ 1 signal → record the archetype as **detected**
 4. If only secondary keywords match → record as **candidate** (for user confirmation)
 
-**Output**: Record detected/candidate archetypes in analysis notes. This data feeds into:
-- Phase 4-1: constitution-seed generation (archetype-specific principles)
+**Output**: Record detected/candidate archetypes in analysis notes.
+
+**Archetype Evidence Extraction (MANDATORY when archetype detected)**:
+
+When an archetype is detected (not just candidate), extract evidence from the source analysis for each A1 principle. This evidence is REQUIRED by Phase 4-1 for the constitution-seed "Archetype-Specific Principles" section.
+
+For each detected archetype, read its `domains/archetypes/{archetype}.md` § A1 table and extract evidence:
+
+```
+Archetype: [name]
+Principles with Evidence:
+  1. [Principle name]:
+     - Observed Trait: [Concrete evidence from code — e.g., "SSE endpoints in src/api/chat/stream.ts, ReadableStream usage in 12 files"]
+     - Implication: [How this affects rebuild — e.g., "Streaming architecture must be preserved; batch response pattern would be a regression"]
+  2. [Principle name]:
+     - Observed Trait: [...]
+     - Implication: [...]
+```
+
+- For EACH A1 principle: cite at least ONE concrete code-level observation from Phase 2 analysis.
+- If a principle has NO evidence in the codebase (e.g., "Prompt Versioning" principle but prompts are hardcoded), record: `Observed Trait: "Not implemented in source — [why]"` and `Implication: "Consider introducing as improvement"`. Do NOT silently omit the principle.
+
+This data feeds into:
+- Phase 4-1: constitution-seed generation (archetype-specific principles with evidence)
 - smart-sdd pipeline: sdd-state.md Archetype field
 - case-study-log.md: Update `**Archetype**:` header field with detected archetype name(s) (e.g., `ai-assistant`). If no archetype detected, leave as `none`.
 
-**No HARD STOP** — archetype detection is informational. Display detected archetypes in the Phase 3 summary.
+**No HARD STOP** — archetype detection is informational. Display detected archetypes and evidence summary in the Phase 3 summary.
 
 Then proceed to 3-2.
 
@@ -1419,11 +1457,39 @@ Derive inter-Feature dependencies:
 
 Record dependency directions and types, and visualize them as a Mermaid diagram.
 
+**Dependency Interpretation Rules (MANDATORY)**:
+
+Feature dependency means **implementation dependency**: "Must Feature B be IMPLEMENTED AND COMPLETED first for Feature A to be implementable?" This is NOT the same as runtime import relationships.
+
+| Correct (Implementation Dependency) | Incorrect (Runtime Coupling) |
+|--------------------------------------|-------------------------------|
+| "Chat UI needs Shell window to render in" | "Shell imports DB module at startup" |
+| "Settings UI needs Navigation to have routes" | "Data layer initializes before renderer" |
+| "Knowledge Base needs Model management for embeddings" | "IPC channels import from shared constants" |
+
+**Rule 1 — App Shell/Bootstrap Always RG-1 First**: The Feature containing the app entry point, window creation, or process bootstrap MUST be placed in Release Group 1 with zero incoming Feature dependencies, unless there is an explicit, justified reason to override. If the topological sort places the Bootstrap Feature after another Feature, this is almost certainly a runtime-coupling confusion — review and correct.
+
+**Rule 2 — Foundation Feature Sanity Check**: If ANY Feature classified in RG-1 (Foundation) has incoming dependencies from other Features, display a warning and ask the user for confirmation:
+```
+⚠️ Foundation Feature Sanity Check:
+  [Feature] is in RG-1 (Foundation) but depends on: [dependency list]
+  Foundation Features typically have ZERO incoming dependencies.
+  Are these implementation dependencies (Feature cannot be coded without them)
+  or runtime coupling (code imports that don't affect implementation order)?
+```
+Ask via AskUserQuestion. **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**Rule 3 — Dependency Direction Test**: For each candidate dependency edge A → B (A depends on B), apply this test:
+  "If Feature B's source code artifacts did not exist at all, could I still write Feature A's code from scratch (with stubs/interfaces for B)?"
+  - **YES** → This is runtime coupling, NOT an implementation dependency. Do NOT add this edge.
+  - **NO** → This is a genuine implementation dependency. Add the edge.
+
 **Release Group Determination**:
 Group Features into Release Groups based on dependency layers:
 1. **Release 1 (Foundation)**: Features with no dependencies (or only external dependencies)
 2. **Release 2+**: Features whose dependencies are all satisfied by preceding Release Groups
 3. Within each Release Group, order Features by topological sort (most independent first)
+4. **Post-sort validation**: After topological sort, verify that the App Shell/Bootstrap Feature (if identified) is in Release Group 1 with no predecessors. If not, re-examine the dependency edges per the Dependency Interpretation Rules above.
 
 > **Do NOT assign Feature IDs yet.** Use temporary labels (feature names only) until Phase 3-3 (Tier classification) is complete. IDs will be assigned after Release Groups and Tiers are both determined.
 
@@ -1540,8 +1606,41 @@ Generate the following files in order. Each file follows the template structure 
    - **Recommended Development Principles (Best Practices)**: Test-First, Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Demo-Ready Delivery
    - **Global Evolution Layer Operational Principles**: Rules for maintaining cross-Feature context
    - **Project-Specific Recommended Principles**: Based on the domain, architecture patterns, and technical traits observed in Phase 1~3, recommend additional constitution principles tailored to this project. Use the recommendation categories in the template (domain-driven, architecture-driven, scale-driven, quality-driven) as a guide. Each recommendation must cite a specific observed trait from the source analysis as evidence.
-   - **Archetype-Specific Principles** (if archetype detected in Phase 3-1e): Read A1 Philosophy Extraction results from the matched archetype module(s) in `domains/archetypes/`. Include the extracted principles as a named subsection (e.g., "AI Assistant Domain", "Public API Domain"). Each principle must cite the extraction evidence from the source analysis. If no archetype was detected, omit this section entirely.
-   - **Framework Philosophy** (if Foundation has F7 section): Include F7 principles from the loaded Foundation file(s) as architectural guardrails. These complement Extracted Architecture Principles with framework-endorsed conventions.
+   - **Archetype-Specific Principles (MANDATORY when archetype detected in Phase 3-1e)**:
+     1. Read the archetype evidence extracted in Phase 3-1e (the "Archetype Evidence Extraction" output).
+     2. For each detected archetype, create a subsection using this exact format:
+        ```markdown
+        ## Archetype-Specific Principles
+
+        ### [Archetype Display Name] Domain
+
+        - **[Principle Name]**: [One-line description of the principle]
+          - **Observed Trait**: [Concrete evidence from source code — e.g., "SSE endpoints in src/api/chat/stream.ts, ReadableStream usage across 12 provider files"]
+          - **Implication**: [How this affects the rebuild — e.g., "Streaming architecture is core UX; batch responses would be a regression"]
+
+        - **[Principle Name]**: [One-line description]
+          - **Observed Trait**: [Evidence from code]
+          - **Implication**: [Rebuild impact]
+        ```
+     3. Do NOT use a simple numbered list of principles. Each principle MUST have the `**Observed Trait**` + `**Implication**` sub-items.
+     4. If Phase 3-1e recorded "Not implemented in source" for a principle, include it with that note — do NOT silently omit it.
+     5. If no archetype was detected, omit this entire section.
+   - **Framework Philosophy (MANDATORY when Foundation has F7 section)**:
+     1. Check: Does the loaded Foundation file (`domains/foundations/{framework}.md`) contain a `## F7. Framework Philosophy` section?
+        - **If YES**: This section is **MANDATORY** in the constitution-seed. You MUST NOT skip it.
+        - **If NO** (or no Foundation file loaded): Omit this section entirely.
+     2. When F7 exists, create a `## Framework Philosophy` section in constitution-seed.md:
+        ```markdown
+        ## Framework Philosophy
+
+        > Framework-endorsed architectural guardrails. Source: domains/foundations/{framework}.md § F7
+
+        | Principle | Description | Implication |
+        |-----------|-------------|-------------|
+        | **[Principle name]** | [Description from F7 table] | [Implication from F7 table] |
+        ```
+     3. Copy ALL rows from the Foundation F7 table — do NOT summarize, abbreviate, or omit any principle.
+     4. Place this section AFTER "Archetype-Specific Principles" (or after "Project-Specific Recommended Principles" if no archetype was detected).
 
 6. **`specs/reverse-spec/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations
@@ -1561,11 +1660,19 @@ Generate the following files in order. Each file follows the template structure 
      OAUTH_CLIENT_ID=your-oauth-client-id
      ```
 
-8. **`specs/reverse-spec/speckit-prompt.md`** — See [speckit-prompt-template.md](templates/speckit-prompt-template.md)
+8. **`specs/reverse-spec/speckit-prompt.md` (MANDATORY)** — See [speckit-prompt-template.md](templates/speckit-prompt-template.md)
    - Standalone prompt for using spec-kit without smart-sdd
    - Per-command context guide: which artifacts to read before each spec-kit command (specify, plan, implement, verify)
    - Cross-Feature awareness rules
-   - Fill dynamic fields: PROJECT_NAME, scope, stack, Feature count/Tier breakdown, Feature catalog table (from roadmap.md)
+   - Fill ALL dynamic fields from the template:
+     - `[PROJECT_NAME]`: from Phase 0
+     - `[ORIGINAL_SOURCE_PATH]`: target directory absolute path
+     - `[SCOPE]`, `[STACK_STRATEGY]`: from Phase 0 decisions
+     - `[FEATURE_COUNT]`, `[TIER_BREAKDOWN]`: from Phase 3 classification
+     - `[DETECTED_STACK]`: from Phase 1-2 tech stack detection
+     - `[RG_COUNT]`: number of Release Groups from Phase 3-2
+     - Feature Catalog table: copied from roadmap.md
+   - **Verification**: After generating, check that NO placeholder tokens remain (no `[PROJECT_NAME]`, `[SCOPE]`, etc. in the output file). All brackets must be replaced with actual values.
 
 ### 4-2. Feature-Level Deliverables
 
@@ -1623,7 +1730,20 @@ After generating ALL pre-context.md files, perform this verification before proc
 2. **Check contiguity**: Verify that each Feature's first B### = previous Feature's last B### + 1. No gaps allowed
 3. **Check uniqueness**: Verify no B### appears in more than one Feature
 4. **Check total**: Sum all per-Feature counts. This is the authoritative total SBI count for coverage-baseline.md
-5. **Update Demo Group SBI ranges in roadmap.md**: For each Demo Group in roadmap.md, calculate the SBI Coverage by collecting the B### ranges from its constituent Features. Use union notation for non-contiguous ranges (e.g., `B018–B030, B244–B276`). **Write these ranges into roadmap.md** by adding a `| **SBI Coverage** | B###–B### |` row to each Demo Group's table. This is a file modification, not just a display — the ranges must be persisted in roadmap.md for downstream use.
+5. **Update Demo Group SBI ranges in roadmap.md (MANDATORY — BLOCKING)**:
+   For each Demo Group defined in roadmap.md:
+   a. Collect the B### ranges from ALL constituent Features in the group
+   b. Calculate the union SBI Coverage using union notation for non-contiguous ranges (e.g., `B018–B030, B244–B276`)
+   c. **Write** these ranges into roadmap.md by updating each Demo Group's section to include: `- **SBI Coverage**: B###–B###`
+   d. This is a file modification, not just a display — the ranges MUST be persisted in roadmap.md.
+
+   **Verification**: After writing, re-read each Demo Group section in roadmap.md and confirm the SBI Coverage line is present with valid B### ranges. Display:
+   ```
+   ✅ Demo Group SBI Ranges:
+     DG-01: B001–B018 (written to roadmap.md)
+     DG-02: B011–B030 (written to roadmap.md)
+   ```
+   If any Demo Group is missing its SBI Coverage line, add it NOW before proceeding.
 
 Display verification result:
 ```
@@ -1668,6 +1788,24 @@ Contents to include in each pre-context.md (see [pre-context-template.md](templa
 - **Feature Contracts** (populated from Phase 3-1d interaction data and Phase 2-3 cross-Feature rules): Explicit guarantees this Feature provides to consumers, dependencies it requires from providers, and failure modes when contracts are violated. See [pre-context-template.md](templates/pre-context-template.md) § Feature Contracts. If this Feature has no cross-Feature interactions (Interaction Score = 0), write "None — this Feature operates independently."
 - **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
 
+#### Per-Feature Pre-Context Generation Protocol (MANDATORY)
+
+When generating each Feature's pre-context.md, process the template sections **in order** and apply this protocol for EACH section:
+
+1. **Check applicability**: Is this section applicable to this Feature? (See the "Required?" column in the Completeness Verification table below)
+2. **If applicable**: Populate with data from the corresponding Phase 2/3 analysis. If the Phase analysis produced no data for this section, write the Empty Value from the table (e.g., "None", "N/A — backend-only").
+3. **If not applicable**: Write the Empty Value explicitly. Do NOT omit the section heading.
+4. **Never skip a section silently**: Every section heading from the template MUST appear in the generated pre-context.md, even if its content is "None" or "N/A".
+
+The following sections are **commonly skipped by mistake** — pay special attention:
+- **Runtime Exploration Results**: Must appear even if Phase 1.5 was skipped (write "Skipped — [reason]")
+- **UI Component Features**: Must appear for frontend projects even if no 3rd-party UI features detected (write "None — no third-party UI component features detected")
+- **Interaction Behavior Inventory**: Must appear for frontend projects (populate from `micro-interactions.md`; write "N/A — no interactive UI in this Feature" if truly none)
+- **Foundation Decisions**: Must appear when Framework is not "custom" (write "No Foundation decisions apply to this Feature" if none relevant)
+- **Foundation Dependencies**: Must appear when Framework is not "custom"
+- **Static Resources**: Write "None" if no resources — do NOT omit the section
+- **Environment Variables**: Write "None" if no variables — do NOT omit the section
+
 #### Pre-context Completeness Verification (MANDATORY — after all pre-contexts are generated)
 
 After generating ALL pre-context.md files (and after SBI Numbering Verification above), verify that each pre-context contains the required sections from the template. This step is **BLOCKING** — do NOT proceed to Phase 4-3 if required sections are missing.
@@ -1700,11 +1838,15 @@ Display verification result:
   All [N] pre-contexts complete.
 ```
 
+**Completeness Score**: Each pre-context must score 14/14 sections (or the applicable subset for backend-only projects). Display the score per Feature. If ANY Feature scores below its required count, the verification FAILS.
+
+**Cross-check against template**: For each pre-context, verify that the section headings match those in [pre-context-template.md](templates/pre-context-template.md). Missing headings = missing sections, even if content exists elsewhere in the file under a different heading.
+
 If any section is missing, add it BEFORE proceeding:
 ```
 ❌ Pre-context Completeness FAILED:
-  F003-providers: missing Runtime Exploration Results, Static Resources
-  F007-files: missing Interaction Behavior Inventory
+  F003-providers: 12/14 — missing Runtime Exploration Results, Static Resources
+  F007-files: 13/14 — missing Interaction Behavior Inventory
   → Adding missing sections now...
 ```
 
