@@ -58,11 +58,13 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 
 **If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 **Step 4 — Auto-initialize case study logging**:
-Check if `case-study-log.md` exists at the target directory root:
-- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `{target-directory}/case-study-log.md`. Populate header fields: `**Archetype**: none`, `**Framework**: none` (these will be updated in-place after Phase 1-2b framework detection and Phase 3-1e archetype detection). Display: `📝 Case study log initialized: case-study-log.md`
+Check if `case-study-log.md` exists at **CWD root** (the project being built, NOT the target/source directory being analyzed):
+- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `./case-study-log.md` (CWD root). Populate header fields: `**Archetype**: none`, `**Framework**: none` (these will be updated in-place after Phase 1-2b framework detection and Phase 3-1e archetype detection). Display: `📝 Case study log initialized: ./case-study-log.md`
 - **If already exists**: Skip silently (user may have manually initialized earlier)
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.
+> ⚠️ **Path warning**: The case-study-log.md MUST be at CWD root (`./case-study-log.md`), NOT inside the target directory or `specs/reverse-spec/`. The target directory is the source code being analyzed (read-only). All outputs go to CWD.
+
+📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.
 
 ---
 
@@ -199,7 +201,7 @@ From Phase 1-2 tech stack results, identify the primary framework(s):
 
 This determination feeds into Phase 2-8 (Foundation Decision Extraction) and into `smart-sdd init` Step 3b for greenfield projects.
 
-Also update `case-study-log.md` header `**Framework**:` field with the detected framework name(s) (e.g., `electron`). If no match (`custom`), leave as `none`.
+Also update `./case-study-log.md` (CWD root) header `**Framework**:` field with the detected framework name(s) (e.g., `electron`). If no match (`custom`), leave as `none`.
 
 ### 1-3. Project Type Classification
 Classify the project type based on the collected information. Use the project types defined in `domains/_core.md` § R2 (Project Type Classification).
@@ -231,7 +233,7 @@ Exclude: `node_modules/`, build output (`dist/`, `build/`), generated files, tes
 
 Upon completing Phase 1, report a summary of the detected tech stack, project structure, and static resource inventory to the user.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M2.
+📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M2.
 
 ### 1-6. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
 
@@ -989,7 +991,7 @@ or
 
 Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Style tokens (if extracted) are saved in `specs/reverse-spec/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
+📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
 ```
 ### M1.5 — Runtime Exploration
 - **Timestamp**: [ISO timestamp]
@@ -1434,7 +1436,7 @@ Principles with Evidence:
 This data feeds into:
 - Phase 4-1: constitution-seed generation (archetype-specific principles with evidence)
 - smart-sdd pipeline: sdd-state.md Archetype field
-- case-study-log.md: Update `**Archetype**:` header field with detected archetype name(s) (e.g., `ai-assistant`). If no archetype detected, leave as `none`.
+- `./case-study-log.md` (CWD root): Update `**Archetype**:` header field with detected archetype name(s) (e.g., `ai-assistant`). If no archetype detected, leave as `none`.
 
 **No HARD STOP** — archetype detection is informational. Display detected archetypes and evidence summary in the Phase 3 summary.
 
@@ -1572,7 +1574,7 @@ After Phase 3 is complete (granularity selected, dependencies mapped, Tier class
 
 Record each user modification to the AI's Tier proposals (e.g., "Moved Search from T2 → T1"). If scope is `full`, omit the Tier Adjustments row.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M3.
+📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M3.
 
 ---
 
@@ -1730,20 +1732,6 @@ After generating ALL pre-context.md files, perform this verification before proc
 2. **Check contiguity**: Verify that each Feature's first B### = previous Feature's last B### + 1. No gaps allowed
 3. **Check uniqueness**: Verify no B### appears in more than one Feature
 4. **Check total**: Sum all per-Feature counts. This is the authoritative total SBI count for coverage-baseline.md
-5. **Update Demo Group SBI ranges in roadmap.md (MANDATORY — BLOCKING)**:
-   For each Demo Group defined in roadmap.md:
-   a. Collect the B### ranges from ALL constituent Features in the group
-   b. Calculate the union SBI Coverage using union notation for non-contiguous ranges (e.g., `B018–B030, B244–B276`)
-   c. **Write** these ranges into roadmap.md by updating each Demo Group's section to include: `- **SBI Coverage**: B###–B###`
-   d. This is a file modification, not just a display — the ranges MUST be persisted in roadmap.md.
-
-   **Verification**: After writing, re-read each Demo Group section in roadmap.md and confirm the SBI Coverage line is present with valid B### ranges. Display:
-   ```
-   ✅ Demo Group SBI Ranges:
-     DG-01: B001–B018 (written to roadmap.md)
-     DG-02: B011–B030 (written to roadmap.md)
-   ```
-   If any Demo Group is missing its SBI Coverage line, add it NOW before proceeding.
 
 Display verification result:
 ```
@@ -1752,7 +1740,6 @@ Display verification result:
   F002-product:  B011–B018 (8)
   F003-order:    B019–B030 (12)
   Total: 30 SBI items, B001–B030 (contiguous, no gaps, no collisions)
-  Demo Groups: DG-01 B001–B018, DG-02 B011–B030
 ```
 
 If any check fails, fix the numbering BEFORE proceeding:
@@ -1762,6 +1749,29 @@ If any check fails, fix the numbering BEFORE proceeding:
   Collision detected: F006 B176 and F007 B176 both exist
   → Fix: Renumber F004+ to close gaps, renumber F007+ to start after F006 ends
 ```
+
+#### Demo Group SBI Coverage Ranges (MANDATORY — BLOCKING)
+
+After SBI Numbering Verification passes, calculate the SBI coverage ranges for each Demo Group defined in Phase 3-1c. This data is required for `roadmap.md` → Demo Groups section.
+
+**Calculation algorithm**:
+1. For each Demo Group (DG-01, DG-02, ...), read its constituent Feature list (from Phase 3-1c)
+2. For each constituent Feature, look up its SBI range from the SBI Numbering Verification result above
+3. Combine: Demo Group SBI Coverage = union of all constituent Features' SBI ranges
+4. Write ranges using comma-separated B###–B### notation (e.g., `B001–B055, B081–B160`)
+
+**Display result**:
+```
+✅ Demo Group SBI Coverage:
+  DG-01 (Basic Chat):     F001+F002+F004+F005 → B001–B055, B081–B160
+  DG-02 (Knowledge RAG):  F004+F005+F006      → B081–B195
+  DG-03 (Multi-Tool):     F003+F007+F008+F009 → B056–B080, B196–B290
+  DG-04 (External API):   F004+F005+F010      → B081–B160, B291–B330
+```
+
+> ⚠️ **Do NOT write "TBD" or defer this calculation.** All data is available from SBI Numbering Verification + Phase 3-1c Demo Group definitions. If you cannot calculate the ranges, it means a prior step produced incomplete data — go back and fix it before proceeding.
+
+These SBI Coverage values MUST be included when writing the Demo Groups section in `roadmap.md` (Phase 4-1). The `**SBI Coverage**` field in each Demo Group entry uses the ranges calculated here.
 
 Contents to include in each pre-context.md (see [pre-context-template.md](templates/pre-context-template.md) for exact section structure):
 - **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Read `specs/reverse-spec/runtime-exploration.md` and distribute observations to each Feature based on route-to-Feature mapping. For each Feature: extract the `## Screen:` sections whose routes belong to this Feature, include associated user flows and runtime behavior from those screen blocks, and add relevant App-Wide Observations. If Phase 1.5 was skipped or the file does not exist, write "Skipped — [reason]"
@@ -1976,7 +1986,7 @@ Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-
      → Correcting to [Y]
    ```
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M4.
+📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M4.
 
 ### 4-4. Completion Report
 

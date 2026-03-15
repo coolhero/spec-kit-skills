@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-03-15] reverse-spec Post-Run Bug Fixes (case-study-log path + Demo Group SBI)
+
+Fixed two bugs discovered during the second Cherry Studio reverse-spec run.
+
+### Changes
+
+**case-study-log.md Path Bug**:
+- Phase 0 Step 4 wrote `case-study-log.md` to `{target-directory}` (the source code being analyzed) instead of CWD (the project being built)
+- Fixed all references to `./case-study-log.md (CWD root)` with explicit path warning block
+- Updated all 5 milestone recording references across Phase 0/3/4 via replace_all
+
+**Demo Group SBI Coverage Ranges**:
+- Despite MANDATORY + BLOCKING instruction in SBI Numbering Verification step 5, the agent still wrote "TBD" for SBI Coverage in roadmap.md Demo Groups
+- Root cause: instruction was buried as step 5 in a 5-step verification list — agent treated the whole block as "numbering verification" and skipped the unrelated SBI range calculation
+- Fix: Separated Demo Group SBI into its own standalone `#### Demo Group SBI Coverage Ranges (MANDATORY — BLOCKING)` section with:
+  - Explicit 4-step calculation algorithm
+  - Display format showing Feature→range mapping
+  - Warning: "Do NOT write TBD or defer this calculation"
+  - Cross-reference to roadmap.md Phase 4-1 Demo Groups section
+
+### Rationale
+Both bugs have the same root cause pattern: instructions that are technically present but not structurally prominent enough for the agent to follow. The case-study-log bug used `{target-directory}` which is ambiguous (target of the build vs target of the analysis). The Demo Group SBI bug buried a distinct calculation inside an unrelated verification checklist.
+
+---
+
 ## [2026-03-15] reverse-spec Completeness Improvements (SKF-018 + Cherry Studio Findings)
 
 Strengthened analyze.md to close 7 gaps found during Cherry Studio reverse-spec run. Target: raise output completeness from ~60% to near 100%.
