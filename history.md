@@ -5,6 +5,60 @@
 
 ---
 
+## [2026-03-15] Tech-stack agnostic generalization + SKF-019 native dependency check
+
+Comprehensive review identified 40+ points across pipeline.md, implement.md, and verify-phases.md where general rules were locked to specific technologies (JS/TS, React, Electron, Tailwind, npm). Instead of adding multi-language examples everywhere (which would bloat files), applied a lightweight strategy:
+
+### Approach
+1. **General rules describe intent** — "verify theme system is active", not "inspect `document.documentElement` computed styles"
+2. **Tech-specific code blocks get explicit labels** — "Example (Tailwind CSS):", "Example (Electron/Node.js):"
+3. **Adaptation notes at section entry points** — "Adapt file extensions and patterns to the project's tech stack"
+4. **Single-incident references removed** — F007 bug numbers → generic pattern descriptions; SKF-013/014 ref → removed
+
+### Files changed
+
+**pipeline.md** (Foundation Gate):
+- Checklist: CSS Theme → Theme/Styling, `getState()` → generic state init, IPC Bridge (Electron) → IPC / Cross-boundary
+- Test code block: labeled "Example (Web/Electron + Playwright)" with "adapt to your stack" note
+- Test runner: `@playwright/test` in devDependencies → project's test runner
+- Result display + foundation-affecting files: generalized terminology
+- Gate 2: `DOM hierarchy, flex direction` → `component hierarchy, layout direction, sizing strategy`
+- Removed `(ref: SKF-013/014 incident)` from Cross-Stage Validation Gates
+- Parallel agent shared files: `IPC registry` → `service registry`
+
+**implement.md**:
+- Added Step 1b: Native/compiled dependency compatibility check (SKF-019)
+- Pattern Compliance Scan: moved "illustrative" disclaimer before table
+- E2E Seam Check / Report: labeled as "Example (Electron/Node.js)"
+- Hover advice: React `useState` + Tailwind `group-hover` → framework-agnostic principle
+- CSS Value Map: labeled "Example (Tailwind CSS)"
+- IPC Defense: generalized from JS/TS operators to defensive access patterns
+- SDK trust table: prefixed examples with "e.g.,"
+- Dependency Pre-flight display: generic placeholders instead of React packages
+- UI component library check: generic library paths/commands
+- Playwright dependency check / install: language-agnostic
+
+**verify-phases.md** (16 edits):
+- F007 references (2 locations) → generic pattern descriptions
+- Source Modification Gate / Minor Fix Accumulator / Module boundary: generic names
+- i18n detection, service file detection, import graph: tech-stack adaptation notes
+- Lifecycle cleanup hooks: multi-framework examples
+- UX Contract report: framework-agnostic language
+- Browser console errors: framework-specific loop warnings
+- Cross-module contract / Feature Contract reports: labeled as examples
+- Preload bridge: added "(Electron only)" scope
+- Dev Mode detection: multi-stack config reference
+- Runtime error patterns: JS/Node.js-centric note + other language examples
+- Source app start command: generic detection
+
+| Choice | Rationale |
+|--------|-----------|
+| Adaptation notes (not multi-language rewrite) | Lightweight, maintainable, doesn't bloat files |
+| Labels on existing examples (not replacement) | Existing examples are valuable for the most common case (JS/TS) |
+| SKF-019 as generic Step 1b (not Electron-specific) | Same pattern applies to any native/compiled dependency |
+
+---
+
 ## [2026-03-15] Smoke Launch failure escalation + implement completion gate
 
 Reinforced the Post-Implement Smoke Launch section in pipeline.md. Previously, step 6 ("On failure: Fix the issue immediately") was too vague — the agent could mark implement ✅ and frame the failure as "verify is blocked," which is incorrect. Smoke Launch is part of implement, so its failure means implement is NOT complete.

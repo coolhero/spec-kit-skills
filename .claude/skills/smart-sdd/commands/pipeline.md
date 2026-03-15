@@ -13,10 +13,10 @@ The pipeline is single-direction (reverse-spec → specify → plan → tasks �
 | Gate | When | What | Reference |
 |------|------|------|-----------|
 | **Gate 1** | specify entry | Re-verify settings/mode runtime defaults against source app. Catch mismatches before they enter the spec. | `reverse-spec/analyze.md` Phase 1.5 Step 5 + `injection/specify.md` § Runtime Default Coverage Check |
-| **Gate 2** | implement entry | Read previous Features' Interaction Surface Inventory. Analyze source app layout structure (DOM hierarchy, flex direction). Display in Pre-Implement Checkpoint. | `injection/implement.md` § Layout Structure Analysis + § Interaction Surface Preservation |
+| **Gate 2** | implement entry | Read previous Features' Interaction Surface Inventory. Analyze source app layout structure (component hierarchy, layout direction, sizing strategy). Display in Pre-Implement Checkpoint. | `injection/implement.md` § Layout Structure Analysis + § Interaction Surface Preservation |
 | **Gate 3** | verify Phase 3e | Run source app + rebuilt app side-by-side comparison. **BLOCKING** for rebuild+GUI — skip only when source app genuinely cannot build/launch. | `verify-phases.md` § Step 3e Source App Comparative Verification |
 
-> These gates are NOT optional for rebuild+GUI projects. Without them, a single incorrect assumption (e.g., wrong layout mode default) can propagate through all 6 stages undetected (ref: SKF-013/014 incident).
+> These gates are NOT optional for rebuild+GUI projects. Without them, a single incorrect assumption (e.g., wrong layout mode default) can propagate through all 6 stages undetected.
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
@@ -335,11 +335,11 @@ This step is informational only — no user confirmation required.
 | Category | Check | Method | Blocking? |
 |----------|-------|--------|-----------|
 | **Build** | Clean build succeeds | Run build command → exit 0 | ❌ **BLOCKING** |
-| **CSS Theme** | Theme variables load at runtime | Start app → inspect `document.documentElement` computed styles for CSS custom properties | ⚠️ warning |
-| **CSS Theme** | Theme switching works (if applicable) | Toggle theme → verify body class or CSS variable change | ⚠️ warning |
-| **State Management** | Store initialization succeeds | Import store → call `getState()` → verify non-null | ⚠️ warning |
-| **State Management** | Selector stability | Call selector twice → verify referential equality (no new object per call) | ⚠️ warning |
-| **IPC Bridge** (Electron) | Main↔Renderer communication | Send test IPC message → verify response | ⚠️ warning |
+| **Theme/Styling** | Theme tokens load at runtime | Start app → verify theme system is active (check for expected visual tokens/variables) | ⚠️ warning |
+| **Theme/Styling** | Theme switching works (if applicable) | Toggle theme → verify visual change | ⚠️ warning |
+| **State Management** | Store/state initialization succeeds | Initialize state system → verify non-null/non-error | ⚠️ warning |
+| **State Management** | State access stability | Access the same state twice → verify consistent results (no unintended re-creation) | ⚠️ warning |
+| **IPC / Cross-boundary** | Inter-process communication works (if applicable) | Send test message across boundary → verify response | ⚠️ warning |
 | **Layout** | Core layout renders without error | Navigate to base route → snapshot → no error screen | ⚠️ warning |
 | **Toolchain** | Lint/Test/Build tools available | Detect per `domains/_core.md` § S3b → verify executable | ⚠️ warning |
 
@@ -354,13 +354,13 @@ This step is informational only — no user confirmation required.
       Verify it is executable.
    3. **Build detection**: Record the build command already verified in Step 1.
 
-   **Result display**:
+   **Result display** (example — adapt tool names to project stack):
    ```
    🔧 Toolchain Pre-flight:
-     Build: ✅ npm run build
-     Test:  ✅ npm test
-     Lint:  ⚠️ eslint — configured (.eslintrc.json found) but NOT installed
-            💡 Install: npm install --save-dev eslint
+     Build: ✅ {build command}
+     Test:  ✅ {test command}
+     Lint:  ⚠️ {lint tool} — configured but NOT installed
+            💡 Install: {install command}
    ```
 
    **Classification**:
@@ -397,46 +397,48 @@ This step is informational only — no user confirmation required.
       - Foundation Status N/A → PASS (no Foundation Features, proceed)
       - Foundation Status READY → PASS
 
-2. **Generate Foundation test file** (`tests/foundation.spec.ts` or equivalent):
-   Based on constitution tech stack, generate a Playwright test file for applicable checks:
-   ```typescript
-   // Auto-generated Foundation verification
-   import { test, expect } from '@playwright/test';
-   test('CSS theme variables load', async ({ page }) => {
-     await page.goto('http://localhost:PORT/');
-     const bgColor = await page.evaluate(() =>
-       getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
-     );
-     expect(bgColor).not.toBe('');
-   });
-   test('Core layout renders without error', async ({ page }) => {
-     await page.goto('http://localhost:PORT/');
-     const errors: string[] = [];
-     page.on('pageerror', e => errors.push(e.message));
-     await page.waitForTimeout(3000);
-     expect(errors.filter(e => /TypeError|ReferenceError|SyntaxError/.test(e))).toHaveLength(0);
-   });
-   ```
-   Generate additional tests based on the Foundation Checklist above (State Management, IPC Bridge, etc.).
-   Replace `PORT` with the actual dev server port from constitution/package.json.
+2. **Generate Foundation test file** (e.g., `tests/foundation.spec.ts` or equivalent for the project's test framework):
+   Based on constitution tech stack, generate tests for each applicable Checklist category. Each test should verify the **intent** described in the Checklist, using the project's actual APIs and framework conventions.
+
+   > **Example (Web/Electron + Playwright)** — adapt to your stack:
+   > ```typescript
+   > import { test, expect } from '@playwright/test';
+   > test('Theme tokens load at runtime', async ({ page }) => {
+   >   await page.goto('http://localhost:PORT/');
+   >   const token = await page.evaluate(() =>
+   >     getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
+   >   );
+   >   expect(token).not.toBe('');
+   > });
+   > test('Core layout renders without error', async ({ page }) => {
+   >   await page.goto('http://localhost:PORT/');
+   >   const errors: string[] = [];
+   >   page.on('pageerror', e => errors.push(e.message));
+   >   await page.waitForTimeout(3000);
+   >   expect(errors).toHaveLength(0);
+   > });
+   > ```
+
+   Generate additional tests for other Checklist categories (State Management, IPC/Cross-boundary, etc.) using the same pattern: start app → exercise the system → assert no errors.
+
 3. **Run Foundation tests** (3-tier fallback):
-   a. If `@playwright/test` is in devDependencies: start app in background → run `npx playwright test tests/foundation.spec.ts --reporter=list` → parse results → map to Checklist
-   b. Else if MCP available: start app → run applicable checks via MCP (existing behavior)
+   a. If the project's test runner is available (e.g., `@playwright/test`, `pytest`, `go test`): start app → run tests → parse results → map to Checklist
+   b. Else if MCP available: start app → run applicable checks via MCP
    c. Else: build-only mode. Display:
-      `⚠️ Foundation verification limited to build check. Install @playwright/test OR configure Playwright MCP for runtime checks.`
+      `⚠️ Foundation verification limited to build check. Install the project's test framework OR configure Playwright MCP for runtime checks.`
 4. **Foundation test file is committed** — becomes a regression test for all subsequent Features. Re-run on subsequent Features only if Foundation-affecting files changed.
 
-**Result display**:
+**Result display** (adapt category names and details to project stack):
 ```
 🏗️ Foundation Verification:
   ✅ Build: clean build succeeded
-  🔧 Toolchain: Build ✅, Test ✅, Lint [✅ available / ⚠️ not installed / ℹ️ not configured]
-  ✅ CSS Theme: custom properties loaded (--bg-primary, --text-primary, ...)
-  ⚠️ State Management: selector stability NOT verified (no stores defined yet)
-  ⏭️ IPC Bridge: skipped (not Electron)
-  ✅ Layout: base route renders without error
+  🔧 Toolchain: Build ✅, Test ✅, Lint [✅ / ⚠️ / ℹ️]
+  [✅/⚠️/⏭️] Theme/Styling: {result}
+  [✅/⚠️/⏭️] State Management: {result}
+  [✅/⚠️/⏭️] IPC / Cross-boundary: {result or "skipped (not applicable)"}
+  [✅/⚠️/⏭️] Layout: {result}
 
-Foundation status: PASS (1 warning)
+Foundation status: PASS (N warnings)
 ```
 
 **Record** in `sdd-state.md`: `Foundation Verified: [date] | [PASS/WARN/FAIL] | [details]`
@@ -446,7 +448,7 @@ Foundation status: PASS (1 warning)
   - "Override and proceed" — requires reason via "Other" input. Records `⚠️ FOUNDATION-OVERRIDE — [reason]`
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-**On subsequent Features**: Skip if `Foundation Verified` exists in `sdd-state.md` AND no Foundation-affecting changes since last verification. Foundation-affecting changes = modifications to files outside `specs/` (theme config, store definitions, layout components, IPC handlers, build config).
+**On subsequent Features**: Skip if `Foundation Verified` exists in `sdd-state.md` AND no Foundation-affecting changes since last verification. Foundation-affecting changes = modifications to files outside `specs/` that touch cross-cutting systems (styling/theme config, state management definitions, layout/navigation components, inter-process communication handlers, build config — varies by stack).
 
 ### Step 3c — Dependency Cycle Detection
 
@@ -773,7 +775,7 @@ Display: "✅ All required environment variables for [FID]-[name] are set." and 
 When using background agents (Agent tool) to parallelize implement tasks:
 
 1. **File scope separation**: Before dispatching agents, partition the task list so each agent's files **do not overlap**. Display the partition in the Checkpoint for user review
-2. **Shared entry point reservation**: Files that multiple tasks naturally touch (e.g., app entry point, router config, IPC registry, dependency injection root) are **not assigned to any parallel agent**. The main agent writes these files after all parallel agents complete, integrating their outputs
+2. **Shared entry point reservation**: Files that multiple tasks naturally touch (e.g., app entry point, router/navigation config, service registry, dependency injection root) are **not assigned to any parallel agent**. The main agent writes these files after all parallel agents complete, integrating their outputs
 3. **Conflict detection**: After all agents complete, run `git diff --name-only` per agent. If any file appears in multiple agents' diffs → the main agent must manually reconcile before proceeding
 4. **Sequential fallback**: If clean file separation is not feasible (too many shared files), execute tasks sequentially instead of in parallel. Note: sequential is the default — parallel is an optimization, not a requirement
 

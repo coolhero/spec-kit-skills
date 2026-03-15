@@ -99,6 +99,7 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
    🔍 Source Modification Gate — Pre-Fix Classification:
    | # | File | What changes | Why |
    |---|------|-------------|-----|
+   Example:
    | 1 | tools/index.ts | KB picker popover structure | SC-007a: picker doesn't open |
    | 2 | types/knowledge.ts | Add KnowledgeReference.name field | CitationBlock needs name for display |
    | 3 | KnowledgeService.ts | getKnowledgeReferences() return shape | Include name in returned data |
@@ -128,7 +129,7 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
 
 6. **HARD STOP — User Approval Gate** (MANDATORY for ALL classifications, including Minor):
 
-   > **Why Minor also requires approval**: The F007 pattern showed repeated Minor fixes accumulating into de facto Major rewrites without user awareness. By making ALL classifications visible and requiring approval, the user can detect when "Minor" fixes are actually a deeper problem before any files are touched.
+   > **Why Minor also requires approval**: A known failure pattern involves repeated Minor fixes accumulating into de facto Major rewrites without user awareness. By making ALL classifications visible and requiring approval, the user can detect when "Minor" fixes are actually a deeper problem before any files are touched.
 
    Display the classification table from step 2 with the aggregate result from step 5, then:
 
@@ -188,13 +189,13 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
    **Rule**: Track all inline fixes applied during this verify session. If **3 or more Minor fixes** (bug fix or gap fill) accumulate in the **same module/component** (same directory or same logical boundary), auto-escalate to **Major-Implement**:
    ```
    🔴 Minor Fix Accumulator triggered:
-     Module: src/services/knowledge/
-     Fixes applied: 3 (Bug #1: loader path, Bug #4: PDF parser, Bug #5: pdf-parse API)
+     Module: src/services/{module}/
+     Fixes applied: 3 (Bug #1: path resolution, Bug #4: parser config, Bug #5: API format)
      → Auto-escalated to Major-Implement — this module needs redesign in implement, not patchwork in verify.
    ```
    After auto-escalation → trigger the Major HARD STOP flow (step 8 above).
 
-   **Module boundary definition**: Files sharing the same parent directory OR the same service/component name (e.g., `KnowledgeService.ts`, `KnowledgeLoader.ts`, `KnowledgeStore.ts` = same `Knowledge` module even if in different directories).
+   **Module boundary definition**: Files sharing the same parent directory OR the same service/component name (e.g., `UserService.ts`, `UserLoader.ts`, `UserStore.ts` = same `User` module even if in different directories).
 
 **This gate applies to ALL verify phases**: Phase 1 re-fixes, Phase 2 fixes, Phase 3 SC failure fixes, Phase 3b fixes, and post-Review user-requested fixes. There are NO exceptions.
 
@@ -338,7 +339,7 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 
 **Skip if**: No dev command detected, or dev command is identical to the production start path already tested above.
 
-**Detection**: Read `package.json` scripts for a `dev` entry (or `start:dev`, `serve`, etc.). Compare with the production start command used in 0-2/0-2alt. If they invoke different tooling (e.g., `electron-vite dev` vs `electron-vite build && electron .`, or `vite dev` vs `vite build && vite preview`), proceed.
+**Detection**: Read the project's script configuration (e.g., `package.json` scripts, `Makefile`, `pyproject.toml`) for a `dev` entry (or `start:dev`, `serve`, etc.). Compare with the production start command used in 0-2/0-2alt. If they invoke different tooling (e.g., `electron-vite dev` vs `electron-vite build && electron .`, or `vite dev` vs `vite build && vite preview`), proceed.
 
 **Procedure**:
 1. Run the dev command in background (e.g., `pnpm run dev &`). Record PID.
@@ -496,6 +497,8 @@ Run each check and record results. **If any check fails, verification is BLOCKED
 
    Detect i18n framework: search for `i18next`, `react-intl`, `vue-i18n`, `@angular/localize`, `gettext` in config/package files. If none found → skip entirely.
 
+   > Adapt file extensions and translation call patterns to the project's tech stack.
+
    **Step 4a — Collect used keys**: Grep source files (`src/**/*.{ts,tsx,js,jsx,vue,svelte}`) for translation call patterns:
    - `t('key')`, `t("key")`, `$t('key')`, `i18n.t('key')`, `useTranslation` + `t('key')`
    - Extract the key strings into a deduplicated list
@@ -573,6 +576,7 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
    - If Provider verified → check that the specific interface still exists in Provider's code (cross-reference)
 
 3. Report:
+   Example:
    ```
    📋 Feature Contract Compliance for [FID]:
      Guarantees: [N]/[M] implemented
@@ -634,11 +638,13 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
 > Catches "orphaned service" pattern: a service/module is implemented and tested in isolation but never imported by its runtime consumer. Phase 1 (test/build/lint) does not detect orphaned code — tests pass, build succeeds, lint is clean. This step verifies that new services are actually wired into the application.
 
 1. **Scope**: Use `git diff --name-only main...HEAD` to identify files created/modified by this Feature. Filter to service/module files (exclude tests, types, configs):
+   > The patterns below are for JS/TS projects. Adapt file extensions and naming conventions to the project's language.
    - Include: `*.service.ts`, `*.store.ts`, `*.composable.ts`, `*.hook.ts`, `*.provider.ts`, `*Service.ts`, `*Store.ts`, `*Repository.ts`, `*Manager.ts`, `*Helper.ts`, `*Util.ts`
    - Include any file that exports a class or function with `Service`, `Store`, `Repository`, `Manager`, `Provider` in the name
    - Exclude: `*.test.*`, `*.spec.*`, `*.d.ts`, `*.config.*`, `*.mock.*`
 
 2. **For each service/module file**, check import graph:
+   Example (JS/TS):
    ```bash
    # Find all non-test files that import this module
    grep -r "import.*from.*[module-path]" src/ --include="*.ts" --include="*.tsx" --include="*.vue" --include="*.js" --include="*.jsx" \
@@ -667,11 +673,11 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
 
 > Catches function name mismatches, argument format incompatibilities, and return type mismatches across module boundaries WITHIN the same Feature. Step 3 (Interaction Chain) checks handler names exist. Step 6 checks cross-Feature data shapes. Step 1d checks import existence. But NONE verify that the caller's arguments match the callee's parameters, or that the caller uses the correct function name.
 >
-> F007 bugs caught by this step: #2 (loadDocument vs loadItem), #8 (select({extensions}) vs select(filters, multiple)), #9 (webUtils.getPathForFile missing).
+> Common bugs caught: mismatched function names across module boundaries, incompatible argument shapes, missing platform API calls.
 
 1. **Identify API boundaries** in the Feature's code (use `git diff --name-only main...HEAD`):
    - **IPC boundaries** (Electron/Tauri): `ipcRenderer.invoke('channel', args)` ↔ `ipcMain.handle('channel', (event, args) => ...)`
-   - **Preload bridge**: renderer calls via `window.api.method(args)` ↔ preload exposes `method: (args) => ipcRenderer.invoke(...)`
+   - **Preload bridge** (Electron only): renderer calls via `window.api.method(args)` ↔ preload exposes `method: (args) => ipcRenderer.invoke(...)`
    - **Service layer**: component imports `ServiceName` and calls `service.method(args)` ↔ service defines `method(params)`
    - **External API**: service constructs URL and sends `fetch(url, {body})` ↔ API expects specific URL format and body schema
 
@@ -694,6 +700,7 @@ Lightweight sanity check to catch structural drift between plan artifacts and im
      - Argument shape: if caller passes `{extensions: [...]}` but callee expects `(filters, multiple)` → `❌ Argument shape mismatch`
 
 3. **Report**:
+   Example (Electron + AI project):
    ```
    📊 Cross-Module API Contract Verification for [FID]:
      Renderer → Preload (window.api):
@@ -798,7 +805,7 @@ If `plan.md` contains a `## UX Behavior Contract` section:
      - Scroll behavior: grep for `scrollTop`, `scrollIntoView`, `scrollTo` in Feature's UI files
      - Loading states: grep for loading/spinner state management
      - Error recovery: grep for error state + input re-enable pattern
-     - Cleanup on unmount: grep for cleanup in `useEffect` return / `onUnmounted` / `componentWillUnmount`
+     - Cleanup on unmount: grep for lifecycle cleanup patterns appropriate to the framework (e.g., React `useEffect` return, Vue `onUnmounted`, Svelte `onDestroy`, Angular `ngOnDestroy`)
    - **Runtime check** (if MCP or Playwright CLI available):
      - Execute the Verify Method from the contract row (same verb syntax as Interaction Chains)
 3. Report (each check tagged `(code)` or `(runtime)` to distinguish verification depth):
@@ -807,8 +814,8 @@ If `plan.md` contains a `## UX Behavior Contract` section:
      Streaming auto-scroll:  (code) ✅ scrollIntoView found | (runtime) ✅ verify-scroll passed
      Loading state:          (code) ✅ isLoading state found | (runtime) ✅ wait-for .spinner passed
      Error recovery:         (code) ✅ error handler found   | (runtime) ⬜ requires API error — skip
-     Cleanup on unmount:     (code) ❌ no cleanup in useEffect return
-       ⚠️ Missing cleanup may cause memory leak or "setState on unmounted component" warning
+     Cleanup on unmount:     (code) ❌ no cleanup in lifecycle hook
+       ⚠️ Missing cleanup may cause memory leak or "state update on unmounted component" warning
    ```
 4. Missing implementations → ⚠️ warning (NOT blocking) — but highlighted in Review
 5. **Skip if**: No UX Behavior Contract in plan.md, or Feature is backend-only / sync-only UI
@@ -1403,7 +1410,7 @@ After executing each SC's verification, record the **Reached Depth** and compare
 **Prerequisite**: Source app must be running. Detection:
 1. Read Source Path from sdd-state.md
 2. Probe source app (curl health endpoint or process check)
-3. If not running → **attempt to start** the source app (read package.json scripts, try `npm run dev` or equivalent)
+3. If not running → **attempt to start** the source app (read the project's script configuration, try the detected dev start command)
 4. If start attempt fails → User Cooperation Protocol:
    ```
    📋 Source App Comparison requires the original app running.
@@ -1504,12 +1511,13 @@ Before running the demo, **read the demo script source** and verify:
   - `No handler registered`, `ECONNREFUSED`, `ENOENT` (service initialization failures)
   - `panic:`, `FATAL`, `segfault` (system-level crashes)
   - Process exit with non-zero code
+  > These patterns are JS/Node.js-centric. For other languages, scan for equivalent error indicators (e.g., Python `Traceback`, Go `goroutine panic`, Rust `thread panicked`).
 - **If runtime errors are detected**: The demo is considered **FAILED** even if the health check (HTTP 200) passed — a healthy port does not mean the application is functioning correctly (e.g., Vite dev server may respond while Electron main process has fatal errors)
 - Display each detected error with its source line for user review
 - **Browser console error scan (MCP supplement)**: After demo --ci passes the stdout/stderr scan above, if `PLAYWRIGHT_MCP` is `supplement` or `primary` (i.e., MCP tools available in session):
   1. Navigate to the app's main URL (from demo script's "Try it" output or health check URL)
   2. Wait 5 seconds for the page to stabilize
-  3. Read browser Console logs for: `TypeError`, `ReferenceError`, `Maximum update depth exceeded`, `unhandled rejection`, infinite render warnings
+  3. Read browser Console logs for: `TypeError`, `ReferenceError`, framework-specific infinite loop warnings (e.g., React `Maximum update depth exceeded`), `unhandled rejection`, infinite render warnings
   4. **If browser console errors detected**: Demo is FAILED even if health endpoint returned 200 and stdout was clean — these are client-side-only bugs (infinite re-renders, selector instability, DOM timing) that never appear in server output
   5. Display: `❌ Browser console errors detected: [N] errors — [first error message]`
   6. If `PLAYWRIGHT_MCP = unavailable`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (Playwright MCP not available in this session)`

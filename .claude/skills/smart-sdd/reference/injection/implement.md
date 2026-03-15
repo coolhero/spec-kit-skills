@@ -96,6 +96,8 @@ Before the first UI-related `speckit-implement` task (one-time):
 > Auto-generated from style-tokens.md + utility framework config.
 > MUST be referenced during UI implementation — do NOT guess styles.
 
+Example (Tailwind CSS):
+
 | Category | Original Value | CSS Property | Utility Class | Note |
 |----------|---------------|-------------|---------------|------|
 | Color | #1e1e2e | background-color | bg-[#1e1e2e] | Header background |
@@ -225,22 +227,37 @@ Before implementation, if the Feature's `pre-context.md` has a non-empty Environ
 4. Display result:
    ```
    📦 Dependency Pre-flight for [FID]:
-     ✅ react, zustand, electron — installed
-     ❌ @radix-ui/react-dialog — NOT in package.json
-     ❌ lucide-react — NOT in package.json
+     ✅ {existing-dep-1}, {existing-dep-2} — installed
+     ❌ {missing-dep} — NOT in dependency manifest
    ```
 5. If any missing: use AskUserQuestion (**HARD STOP**):
-   - "Install missing dependencies" — run the appropriate install command (e.g., `npm install @radix-ui/react-dialog lucide-react`)
+   - "Install missing dependencies" — run the appropriate install command for the project's package manager
    - "Skip — I'll install manually"
    **If response is empty → re-ask** (per MANDATORY RULE 1)
    If "Install missing dependencies": execute the install command, then re-check to verify installation succeeded.
 
+**Step 1b — Native/compiled dependency compatibility check**:
+> Runs only when Step 1 identified dependencies that require native compilation (C/C++ addons, Rust FFI, Python C extensions, etc.).
+
+1. For each native dependency, verify build compatibility with the project's runtime:
+   - Can the module build against the current runtime version? (e.g., Electron's V8 headers, Python's C API version)
+   - Are prebuild binaries available for the target platform, or will it require local compilation?
+   - Are build toolchain prerequisites met? (compiler version, system headers, build tools)
+2. **Quick smoke test**: Attempt to install and import the native dependency in isolation. If the build fails at this stage, it will fail during implement — catch it now.
+3. **On failure**: Use AskUserQuestion (**HARD STOP**):
+   - "Switch to alternative dependency" — identify a compatible alternative (e.g., WASM-based or pure-language equivalent)
+   - "Attempt build fix" — try platform-appropriate rebuild tools
+   - "Proceed and handle at Smoke Launch" — record `⚠️ NATIVE-DEP-RISK` in sdd-state.md
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+> **Why here, not at plan**: Plan chooses dependencies based on functionality and architecture fit. Build compatibility depends on the specific machine/toolchain and is best verified at implement time when the actual build environment is available.
+
 **Step 2 — UI component library check** (only if project uses component libraries like shadcn/ui, Headless UI, etc.):
 1. Read `specs/{NNN-feature}/plan.md` → extract mentioned UI components (Button, Dialog, Select, Tabs, etc.)
-2. Check if those components exist in the project (e.g., `components/ui/button.tsx` for shadcn/ui)
+2. Check if those components exist in the library's component directory
 3. If missing: display which components need to be added
 4. Use AskUserQuestion (**HARD STOP**):
-   - "Add missing components" — run the library's add command (e.g., `npx shadcn@latest add dialog tabs select`)
+   - "Add missing components" — run the library's add/install command
    - "Skip — I'll add manually"
    **If response is empty → re-ask** (per MANDATORY RULE 1)
    If "Add missing components": execute the add commands, then verify the component files were created.
@@ -309,7 +326,7 @@ After `speckit-implement` completes, if Demo-Ready Delivery is **active** (const
    - Generate `demos/verify/F00N-name.spec.ts` with the converted assertions
    - Display: `📋 Generated verify test: demos/verify/F00N-name.spec.ts ([N] assertions)`
    - **Skip if**: No VERIFY_STEPS block in demo script, or project has no Playwright dependency
-   - **Playwright dependency check**: If `@playwright/test` is not in devDependencies, display:
+   - **Playwright dependency check**: If the project's Playwright package is not installed (e.g., `@playwright/test` for JS/TS, `playwright` for Python), display:
      `ℹ️ Playwright not installed — VERIFY_STEPS test file not generated. Add @playwright/test to use CLI verification fallback.`
 
 ## Runtime Verification + Fix Loop
@@ -382,7 +399,7 @@ At first task verification, display:
 ```
 
 Use AskUserQuestion (**HARD STOP**):
-- "Install Playwright CLI now (`npm i -D @playwright/test && npx playwright install`)" (Recommended) — install, then retry
+- "Install Playwright CLI now" (Recommended) — run the appropriate install command for the project's package manager, then retry
 - "Continue with Level 1 (build-only)" — proceed, but record `RUNTIME-DEGRADED` flag
 - "Configure Playwright MCP" — requires session restart for MCP tools (see [runtime-verification.md §4](../runtime-verification.md))
 
@@ -439,7 +456,9 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
   - `console.log` statements in non-test files (should be removed or replaced with proper logging)
 - Display: `🔍 Enhanced pattern scan (RUNTIME-DEGRADED — static analysis is primary verification)`
 
-**Scan rules** (derived from plan.md Pattern Constraints — examples below are illustrative; actual patterns depend on the project's stack):
+**Scan rules** (derived from plan.md Pattern Constraints):
+
+> **Note**: The patterns below use React/JS examples for illustration. Derive actual search patterns from the project's specific framework and state management library.
 
 | Pattern Constraint | Grep/Search Pattern | Severity |
 |---|---|---|
@@ -456,11 +475,6 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 > **SDK API contract gap rationale**: Passing metadata-only objects (e.g., `{ type: "mcp", serverId: "xxx" }`) where the SDK expects callable objects (e.g., `tool({ execute: async () => {...} })`) causes silent failure — the build succeeds because loose types accept any shape, but the SDK ignores the object at runtime. When implementing SDK integrations, verify that all required fields (especially `execute`, `parameters`, `description` for tool definitions) are present and callable.
 
 **Result classification**: ⚠️ warning (NOT blocking). Violations are reported in the Review Display as a "Pattern Compliance" section. The agent MAY auto-fix simple violations before Review (e.g., wrapping a selector with `useShallow`, changing `useEffect` to `useLayoutEffect`). Stub violations SHOULD be flagged prominently — they indicate under-implementation, not a pattern issue.
-
-**Important**: The grep patterns above are illustrative. Derive actual search patterns from:
-1. The project's specific state management library
-2. The project's specific framework
-3. The Pattern Constraints section in plan.md
 
 ### CSS Value Map Compliance Scan (rebuild mode with utility CSS)
 
@@ -514,6 +528,8 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 3. **Seam check** (always runs, even with runtime available — supplements runtime test):
    - Trace the data flow path from plan.md / Interaction Chains / spec.md
    - For each seam (module boundary crossing), verify:
+
+     Example (Electron/Node.js):
      ```bash
      # Seam 1: Renderer → IPC
      grep -r "invoke.*channelName" src/renderer/ → must find caller
@@ -529,6 +545,8 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
    - Each seam has a caller AND a callee. If either is missing → `❌ Broken seam`
 
 4. **Report**:
+
+   Example:
    ```
    📊 E2E Integration Smoke Test for [FID]:
      Primary flow: File upload → PDF parse → Embedding → Vector store → Search → Chat
@@ -732,7 +750,7 @@ You can open and edit any of these files directly, then select
 - **IPC Message Validity**: Prevent argument type/count mismatches in main↔renderer IPC calls
 - **Context Isolation**: Confirm renderer cannot directly access Node.js APIs
 - **IPC Error Handling**: Recovery strategy for IPC call failures (process crash, timeout)
-- **IPC Return Value Defense**: All IPC return values MUST use optional chaining (`result?.field`) and nullish coalescing (`?? fallback`). IPC serialization strips TypeScript type guarantees — `content: MCPToolResultContent[]` in the type definition does NOT guarantee `content` will exist at runtime. Apply: `(result?.content ?? [])` for arrays, `result?.nested?.field ?? default` for nested objects.
+- **IPC Return Value Defense**: All IPC return values MUST use defensive access patterns (e.g., optional chaining, null checks, default values). IPC serialization strips type guarantees — typed definitions do NOT guarantee fields will exist at runtime. Apply defensive patterns for arrays (e.g., `result?.content ?? []`), nested objects (e.g., `result?.nested?.field ?? default`), and primitives.
 
 ### External SDK Type Trust Classification
 
@@ -740,9 +758,9 @@ When implementing code that calls external SDK functions, classify each call by 
 
 | Trust Level | What | Examples | Required Defense |
 |-------------|------|---------|-----------------|
-| **High** — Synchronous, pure functions | Return value matches type definition reliably | `nanoid()`, `z.object()`, `jsonSchema()` | Standard null checks |
-| **Medium** — Async functions, resolved values | Return usually matches types; edge cases under error/timeout | `generateText().text`, `fetch().json()`, `db.query()` | `?? fallback` on all fields; `try/catch` around call |
-| **Low** — Stream events, callbacks, experimental APIs | Type definitions may not reflect actual runtime values; timing-dependent | `fullStream` part events, `experimental_*` callbacks, WebSocket `onmessage` | **Mandatory**: debug log actual values before coding against them; never trust `.d.ts` alone; use runtime type guards (`typeof x === 'string'`) |
+| **High** — Synchronous, pure functions | Return value matches type definition reliably | e.g., `nanoid()`, `z.object()`, `jsonSchema()` | Standard null checks |
+| **Medium** — Async functions, resolved values | Return usually matches types; edge cases under error/timeout | e.g., `generateText().text`, `fetch().json()`, `db.query()` | `?? fallback` on all fields; `try/catch` around call |
+| **Low** — Stream events, callbacks, experimental APIs | Type definitions may not reflect actual runtime values; timing-dependent | e.g., `fullStream` part events, `experimental_*` callbacks, WebSocket `onmessage` | **Mandatory**: debug log actual values before coding against them; never trust `.d.ts` alone; use runtime type guards (`typeof x === 'string'`) |
 
 > **Rationale**: SDK type definitions may declare fields that don't exist at runtime (e.g., `.d.ts` declares `output` on stream events, but actual value is `undefined`). Trusting type definitions alone without runtime verification leads to multiple fix iterations. A single debug log confirming the actual runtime value identifies the root cause immediately. **Rule: Low-trust SDK calls → debug log first, code second.**
 
@@ -782,11 +800,11 @@ When implementing hover, click, or popup interactions, check the following befor
 
 - **Hover area scope**: Is the hover trigger area larger than the visual target? (e.g., entire row hover for a small button) → Narrow to the specific element, or use CSS `group-hover` on a tighter container
 - **Hover response timing**: Does hover trigger instantly on a high-traffic area (e.g., message list, scrollable container)? → Add CSS `transition-opacity` or debounce to prevent flicker during scroll
-- **Hover implementation method**: Is React state (`useState` + `onMouseEnter/Leave`) used purely for show/hide? → Prefer CSS-only (`group-hover:opacity-100`) to avoid unnecessary re-renders
+- **Hover implementation method**: Is framework state used purely for show/hide? → Prefer CSS-only (`:hover` pseudo-class, CSS transitions) to avoid unnecessary re-renders
 - **Popup occlusion**: Does the hover popup obscure adjacent interactive elements? → Review z-index and positioning
-- **Scroll-through interference**: Does scrolling through a list trigger hover effects on every item passed? → CSS transitions naturally handle this; React state hover does not
+- **Scroll-through interference**: Does scrolling through a list trigger hover effects on every item passed? → CSS transitions naturally handle this; framework state hover does not
 
-> **Rationale**: Applying hover/click handlers (e.g., `onMouseEnter/Leave`) to items in a scrollable list causes UI flicker as the cursor passes through each item during scroll. CSS-only solutions (`group-hover` with `transition-opacity`) resolve this with zero re-renders. Prefer CSS for pure visibility toggles; reserve React state for interactions that require data loading or complex logic.
+> **Rationale**: Applying hover/click handlers (e.g., `onMouseEnter/Leave`) to items in a scrollable list causes UI flicker as the cursor passes through each item during scroll. CSS-only solutions (`:hover` pseudo-classes with `transition-opacity`) resolve this with zero re-renders. Prefer CSS for pure visibility toggles; reserve framework state for interactions that require data loading or complex logic.
 
 ### Data Persistence Safety
 
