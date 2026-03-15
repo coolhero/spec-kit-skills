@@ -33,7 +33,7 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 
 **Trigger**: After case-study-log initialization, before `/reverse-spec` Phase 0.
 
-**What to record**: Project name/stack (first impression), approximate scale, structure type, **what the system does** (business purpose), anticipated challenges.
+**What to record**: Project name/stack (first impression), approximate scale, structure type, **what the system does** (business purpose), archetype signals (preliminary), framework detection, anticipated challenges.
 
 > **IMPORTANT**: Always record what the system does from a user's perspective — not just the tech stack. This feeds directly into the Case Study's Executive Summary and Project Background sections. Without this, the report is metric-heavy but lacks the "what was built" narrative.
 
@@ -44,6 +44,8 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 - Project: {name}, Tech stack: {first impression}, Scale: {N} files, Structure: {type}
 - What it does: {1-2 sentence description of what the system does from a user's perspective — e.g., "AI-powered desktop chat application supporting multiple LLM providers with conversation management, knowledge base, and plugin system"}
 - Mode: {rebuild/adoption} {original-name} → {new-name} (or "greenfield")
+- Archetype signals: {preliminary — e.g., "LLM SDK detected (openai), likely ai-assistant" | "No archetype signals observed"}
+- Framework: {e.g., "Electron" | "Express + React" | "Not yet determined"}
 ### Anticipated Challenges
 - {e.g., "tightly coupled modules", "no tests"}
 ```
@@ -89,15 +91,19 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 
 **Trigger**: After `/reverse-spec` Phase 4, before 4-4 Completion Report.
 
-**What to record**: Artifact completeness, SBI coverage baseline, coverage gaps.
+**What to record**: Artifact completeness, SBI coverage baseline, coverage gaps, archetype detection results, framework philosophy extraction.
 
 ```markdown
 ## [YYYY-MM-DD] M4 — Artifact Generation Complete
 **Context**: After Phase 4 — pre-context generation, coverage baseline
 ### Observations
 - Artifacts: {key deliverables}, SBI coverage: {N}/{total} mapped
+- Archetype detected: {archetype name(s) or "none"}, Principles extracted: {N}
+- Framework philosophy: {framework name}, F7 principles: {N} (or "N/A — no F7 section")
 ### Challenges
 - {Unmapped items, coverage gaps, or "None"}
+### Key Decisions
+- {Architecture philosophy observations — e.g., "Streaming-First principle strongly evidenced across 12 files", or "None"}
 ```
 
 ---
@@ -106,15 +112,17 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 
 **Trigger**: After `/smart-sdd` constitution finalization (Phase 0-4 Update).
 
-**What to record**: Constitution version, top principles, modifications from seed.
+**What to record**: Constitution version, top principles, archetype/F7 principles adopted, modifications from seed.
 
 ```markdown
 ## [YYYY-MM-DD] M5 — Constitution Finalized
 **Context**: After constitution finalization (v{version})
 ### Observations
 - Constitution version: {version}, Key principles: {top 3-5 summarized}
+- Archetype principles adopted: {list principle names from Archetype-Specific Principles section, or "N/A — no archetype"}
+- Framework philosophy adopted: {list F7 principle names from Framework Philosophy section, or "N/A — no F7"}
 ### Key Decisions
-- {Modifications from constitution-seed, or "Accepted as-is"}
+- {Modifications from constitution-seed — specifically note any archetype/F7 principles that were rejected or modified, and why. Or "Accepted as-is"}
 ```
 
 ---
@@ -123,7 +131,7 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 
 **Trigger**: After each Feature's merge step (repeatable per Feature).
 
-**What to record**: **What the Feature delivers** (user-facing capability), FR/SC/task counts, verify results, implementation difficulties, architecture decisions. Use `M6 — Feature [FID]-[name]` (or `(adopted)` for adoption).
+**What to record**: **What the Feature delivers** (user-facing capability), FR/SC/task counts, verify results, implementation difficulties, architecture decisions, **philosophy adherence** (which principles guided implementation). Use `M6 — Feature [FID]-[name]` (or `(adopted)` for adoption).
 
 ```markdown
 ## [YYYY-MM-DD] M6 — Feature {FID}-{name}
@@ -131,11 +139,17 @@ Every entry follows this structure. Append to `case-study-log.md` chronologicall
 ### Observations
 - Delivers: {what the user can now do — e.g., "Users can now register, login, and manage their accounts via OAuth or email/password"}
 - FR: {N}, SC: {N}, Tasks: {N}, Test/Build: {results}
+### Philosophy Adherence
+- {Principle name}: {how this Feature applied or was constrained by the principle — e.g., "Streaming-First: Implemented SSE streaming for chat responses (FR-003, FR-004)"}
+- {Principle name}: {e.g., "Secure by Default: Context isolation enforced in preload script (FR-001)"}
+- {or "N/A — no applicable archetype/F7 principles for this Feature"}
 ### Challenges
 - {Spec ambiguities, implementation difficulties, or "None"}
 ### Key Decisions
-- {Architecture choices, or "None"}
+- {Architecture choices driven by principles, or "None"}
 ```
+
+> **Composing Philosophy Adherence**: Read the project's constitution (`.specify/memory/constitution.md`) for active archetype/F7 principles. Reference the Feature's spec.md and implementation decisions from history.md to identify which principles were applied during this Feature's pipeline. Not every Feature will have applicable principles — record "N/A" when none apply.
 
 For adoption, replace Observations with: `FR: {N} extracted, SC: {N} documented, Pre-existing issues: {status}, SBI mapping: {quality}`.
 

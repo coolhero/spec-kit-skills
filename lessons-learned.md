@@ -111,6 +111,13 @@
 **Countermeasures**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists. F7 defines _why_ patterns are preferred; F0–F6 define _what_ to configure.
 **Coverage**: ~85% — F7 is optional per Foundation, so frameworks without F7 still lack explicit philosophy separation
 
+## G14. Metrics-Only Reports Miss the "Why"
+
+**Problem**: Case study reports focused on quantitative metrics (FR/SC/Task counts, coverage %, parity %) but failed to explain *why* architectural decisions were made — the philosophy behind the decisions was invisible
+**Case**: angdu-studio case study would show "Provider abstraction layer" as a decision but not trace it to the "Model Agnosticism" archetype principle that motivated it. The report told *what* was built but not *why* it was designed that way.
+**Countermeasures**: Philosophy-aware report generation — §4.2 Architecture Philosophy (principle tables with Constitution Status), §4.3 Principle-to-Decision Mapping (decision → principle correlation), §8 Philosophy Assessment (principle application coverage + gaps + module feedback). M6 milestone enhanced with Philosophy Adherence subsection for per-Feature principle tracking.
+**Coverage**: ~75% — depends on M6 Philosophy Adherence data being recorded; implicit principle adherence (followed but not recorded) creates coverage gaps
+
 ---
 
 ## Countermeasure Lineage

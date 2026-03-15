@@ -802,7 +802,7 @@ After build succeeds and before proceeding to the Review step, perform a **smoke
 
 📋 **Dependency Stub Registry**: After implement completion, generate `specs/{NNN-feature}/stubs.md` if any stub/placeholder implementations depend on future Features. See `injection/implement.md` § Post-Step Update Rules #2 for format and detection rules. These stubs are auto-injected into the dependent Feature's pipeline context.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6.
+📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6. When composing the `### Philosophy Adherence` subsection: read the project's constitution (`.specify/memory/constitution.md`) for active archetype/F7 principles, and reference the Feature's `spec.md` and implementation decisions from `history.md` to identify which principles were applied during this Feature's pipeline. If no archetype/F7 principles are active, record "N/A".
 
 📝 **Decision History Recording — Feature Implementation** (after merge):
 If there were notable decisions during this Feature's pipeline (specify → verify), **append** to `specs/history.md`:

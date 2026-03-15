@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:25 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:45 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -96,7 +96,9 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 | 스킬 | 목적 |
 |------|------|
-| `/case-study` | 실행 아티펙트에서 메트릭 + 정성적 관찰 보고서 생성 |
+| `/case-study` | 실행 아티펙트에서 메트릭 + 아키텍처 철학 기반 분석 보고서 생성 |
+
+> **철학 기반 보고서**: 케이스 스터디 보고서는 단순히 *무엇*이 만들어졌는지만 보여주지 않습니다 — 각 아키텍처 결정이 *왜* 내려졌는지를 추적합니다. Archetype 원칙(예: AI 어시스턴트의 "Streaming-First")이나 프레임워크 철학(예: Electron의 "Secure by Default")이 활성화되면, 보고서는 의사결정을 그 근거가 된 원칙으로 역추적하고, 각 Feature에 걸쳐 원칙이 실제로 적용되었는지 평가하며, 채택했으나 구현 중 참조되지 않은 원칙의 갭을 식별합니다. 이 피드백 루프는 도메인 모듈의 지속적 개선에 기여합니다.
 
 ---
 
@@ -1027,6 +1029,6 @@ specs/
 | 파일 | 설명 |
 |------|------|
 | `SKILL.md` | 스킬 라우터 — 케이스 스터디 리포트 생성기 진입점 |
-| `commands/generate.md` | 리포트 생성 — 아티펙트에서 메트릭 추출, 관찰 로그와 결합 |
-| `reference/recording-protocol.md` | M1-M8 마일스톤 자동 관찰 기록 프로토콜 |
+| `commands/generate.md` | 리포트 생성 — 메트릭 + 철학 데이터 추출, 아키텍처 철학 기반 분석 |
+| `reference/recording-protocol.md` | M1-M8 마일스톤 기록 프로토콜 + 철학 준수 추적 |
 | `templates/case-study-log-template.md` | 시간순 마일스톤 기록용 관찰 로그 템플릿 |

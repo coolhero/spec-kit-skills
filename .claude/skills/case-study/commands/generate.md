@@ -127,8 +127,46 @@ Parse milestone entries (M1-M8):
 
 ### 3-10. From case-study-log.md header
 - Extract `**Domain**:` field (e.g., `app`, `data-science`)
-- Fallback: read domain from sdd-state.md if not in log header
+- Extract `**Archetype**:` field (e.g., `ai-assistant`, `public-api`, `microservice`, or `none`)
+- Extract `**Framework**:` field (e.g., `electron`, `express`, or `none`)
+- Fallback: read domain/archetype from sdd-state.md if not in log header; framework from constitution-seed.md
 - Use in Section 1 Executive Summary
+
+### 3-11. From constitution-seed.md — Philosophy Data (if exists)
+
+Parse philosophy sections from constitution-seed.md:
+
+**Archetype-Specific Principles** (section header: `## Archetype-Specific Principles`):
+- Archetype name (subsection header, e.g., "### AI Assistant Domain")
+- Per-principle: Name (bold text), Observed Trait, Implication
+
+**Framework Philosophy** (section header: `## Framework Philosophy`):
+- Framework name (subsection header, e.g., "### Electron Framework Principles")
+- Per-principle: Name (bold text), Description, Implication (if present)
+
+**Extracted Architecture Principles** (section header: `## Extracted Architecture Principles`):
+- Per-principle: Name, Rule, Rationale/Evidence
+
+If constitution-seed.md is missing or does not contain these sections, these fields are empty — corresponding report subsections will be omitted (graceful degradation).
+
+### 3-12. From case-study-log.md — Philosophy Adherence Data (if exists)
+
+Parse philosophy-related data from milestone entries:
+
+**From M6 entries** — `### Philosophy Adherence` subsections:
+- Per-Feature: list of `{Principle name}: {Application description}`
+- Aggregate: count of Features per principle, total principle applications across all Features
+
+**From M4 entry** — Archetype/F7 detection results:
+- Archetype detected (name(s) or "none"), principle count
+- Framework philosophy (name), F7 principle count
+
+**From M5 entry** — Constitution adoption data:
+- Archetype principles adopted (list)
+- Framework philosophy adopted (list)
+- Principles modified from seed (list with change descriptions)
+
+If no M4/M5/M6 Philosophy Adherence entries exist, skip — philosophy report subsections will be omitted.
 
 ---
 
@@ -158,8 +196,8 @@ Auto-generated from aggregated metrics + qualitative context:
 
 ## {Section 1 Header}
 
-**Project**: {name} | **Domain**: {domain} | **Origin**: {greenfield/rebuild/adoption}
-**Scope**: {core/full} | **Stack**: {same/new} | **Features**: {total count} ({completed+adopted}/{total})
+**Project**: {name} | **Domain**: {domain} | **Archetype**: {archetype or "—"} | **Framework**: {framework or "—"}
+**Origin**: {greenfield/rebuild/adoption} | **Scope**: {core/full} | **Stack**: {same/new} | **Features**: {total count} ({completed+adopted}/{total})
 ```
 
 **System Overview** (from M1 "What it does" + roadmap.md Project Overview):
@@ -185,6 +223,8 @@ Auto-generated from aggregated metrics + qualitative context:
 | SBI coverage | {P1: X/Y (Z%), P2: X/Y (Z%), or "N/A"} |
 | Demo Groups | {completed}/{total} groups ({ready} ready for demo) |
 | Parity (structural/logic) | {%/% from parity log, or "N/A"} |
+| Archetype principles | {N adopted / N total, or "—"} |
+| Framework (F7) principles | {N adopted / N total, or "—"} |
 ```
 
 ### Section 2 — Project Background
@@ -228,13 +268,75 @@ Auto-generated from aggregated metrics + qualitative context:
 
 ### Section 4 — Architecture & Strategy
 
+Structured in 3 subsections. §4.2 and §4.3 only appear when philosophy data is available from constitution-seed.md and/or case-study-log.md milestones; if no philosophy data exists, Section 4 contains only §4.1 (identical to the previous behavior).
+
+#### §4.1 Strategic Decisions
+
 - From history.md: strategy decisions (scope, stack, identity) — with rationale from the Rationale column
 - From history.md: stack migration choices — per-category Original → Chosen with reasons (if new stack)
 - From history.md: architecture decisions — granularity, tier adjustments, Demo Group definitions with rationale
 - From history.md: constitution decisions — version, key modifications
-- From constitution-seed.md: key principles (list top 5-7 principles)
+- From constitution-seed.md: key principles (list top 5-7 extracted architecture principles)
 - From stack-migration.md (if present): migration strategy, per-category decisions, dependency chain analysis
 - From case-study-log.md M3/M5 entries (if exist): qualitative observations
+
+#### §4.2 Architecture Philosophy (conditional — only if philosophy data exists)
+
+> Sources: constitution-seed.md (Steps 3-11), M4 entry (Step 3-12), M5 entry (Step 3-12).
+> Omit this entire subsection if constitution-seed.md lacks both `## Archetype-Specific Principles` and `## Framework Philosophy` sections.
+
+**Domain Philosophy** (if archetype detected — from Archetype-Specific Principles section):
+
+```markdown
+#### Domain Philosophy — {Archetype Name}
+
+| Principle | Observed Trait | Constitution Status |
+|-----------|---------------|-------------------|
+| {name} | {observed trait summary} | ✅ Adopted |
+| {name} | {observed trait summary} | ✅ Adopted (modified) |
+| {name} | {observed trait summary} | ❌ Rejected |
+```
+
+**Constitution Status** values — determined by comparing constitution-seed.md principles against the finalized `.specify/memory/constitution.md` content (if available) or M5 adoption data:
+- `✅ Adopted` — principle appears in finalized constitution unchanged
+- `✅ Adopted (modified)` — principle appears with modifications (note from M5)
+- `❌ Rejected` — principle was in seed but removed during finalization (note from M5)
+- `⚠️ Added` — not in seed but added during constitution finalization
+
+**Framework Philosophy** (if F7 principles exist — from Framework Philosophy section):
+
+```markdown
+#### Framework Philosophy — {Framework Name}
+
+| Principle | Description | Constitution Status |
+|-----------|-------------|-------------------|
+| {name} | {description} | ✅ Adopted |
+| {name} | {description} | ✅ Adopted |
+```
+
+Same status determination as Domain Philosophy.
+
+#### §4.3 Principle-to-Decision Mapping (conditional — only if both §4.1 decisions and §4.2 principles exist)
+
+> Correlates architecture decisions from history.md to the principles that motivated them.
+> Source: history.md Architecture Decisions + constitution principles from §4.2.
+
+```markdown
+#### Principle-to-Decision Mapping
+
+| Decision | Driving Principle | Source | Rationale |
+|----------|-------------------|--------|-----------|
+| {decision from history.md} | {principle name} | Archetype / F7 / Extracted | {rationale from history.md} |
+| {decision} | {principle name} | Archetype | {rationale} |
+| {decision} | — | Engineering judgment | {rationale} |
+```
+
+For each significant architecture decision in history.md:
+1. Check if the decision's rationale references or aligns with a known principle from §4.2
+2. If yes: map to that principle with source (Archetype, F7, or Extracted)
+3. If no clear principle alignment: mark as "Engineering judgment"
+
+This mapping shows how architecture philosophy translated into concrete implementation decisions.
 
 ### Section 5 — Pipeline Execution
 
@@ -300,6 +402,32 @@ Auto-generated from aggregated metrics + qualitative context:
 - Registry growth pattern (entities/APIs added over time from Global Evolution Log)
 - Average FR/SC per Feature
 - Key decisions from history.md that had the most impact on the final architecture
+
+**Architecture Philosophy Assessment** (conditional — only if M6 Philosophy Adherence data exists from Step 3-12):
+
+> This subsection evaluates how effectively the adopted architecture philosophy guided implementation decisions. Omit entirely if no M6 Philosophy Adherence entries exist.
+
+**Principle Application Coverage**:
+
+```markdown
+#### Philosophy Assessment
+
+| Principle | Source | Features Applied | Examples |
+|-----------|--------|-----------------|----------|
+| {name} | Archetype | {N}/{total completed} ({FID list}) | {brief example from M6 adherence} |
+| {name} | F7 | {N}/{total completed} ({FID list}) | {brief example} |
+| {name} | Extracted | {N}/{total completed} ({FID list}) | {brief example} |
+```
+
+**Principle Gaps** (auto-detected):
+- List principles from the constitution that were never referenced in any M6 Philosophy Adherence entry
+- Annotate each gap: "Aspirational — may not have been applicable to implemented Features" or "Implicit — likely followed but not explicitly recorded"
+
+**Module Feedback** (auto-generated suggestions for domain module improvement):
+- If archetype was active and some principles had zero Feature applications: "Consider whether `{principle}` should be refined or marked optional for `{archetype}` projects"
+- If all F7 principles were applied across Features: "F7 principles for `{framework}` provided effective architectural guidance across the project"
+- If no archetype was active but domain-specific decisions were frequent in history.md: "This project's decision patterns suggest a potential new archetype module for `{inferred domain pattern}`"
+- If some principles were modified during constitution finalization (from M5): note which modifications proved effective based on Feature outcomes
 
 ---
 

@@ -5,6 +5,33 @@
 
 ---
 
+## [2026-03-15] Case-Study Enhancement: Architecture Philosophy Integration
+
+Enhanced the case-study skill to capture and communicate architecture philosophy (Archetype principles + Foundation F7 Philosophy) throughout the Case Study report. Transforms the report from a metrics-focused execution log into a philosophy-aware narrative that explains *why* architectural decisions were made.
+
+### Changes
+
+**Data Capture Layer** (Phase 1):
+- `case-study-log-template.md`: Added `Archetype` and `Framework` header fields
+- `recording-protocol.md`: Enhanced M1 (archetype signals, framework), M4 (archetype/F7 detection results), M5 (archetype/F7 adoption tracking), M6 (Philosophy Adherence subsection)
+
+**Report Generation** (Phase 2):
+- `generate.md`: Added Steps 3-11/3-12 (philosophy data extraction from constitution-seed.md and case-study-log.md)
+- Section 1: Archetype/Framework in metadata + Key Metrics
+- Section 4: Restructured into §4.1 Strategic Decisions, §4.2 Architecture Philosophy (principle tables with Constitution Status), §4.3 Principle-to-Decision Mapping
+- Section 8: Added Architecture Philosophy Assessment (Principle Application Coverage, Principle Gaps, Module Feedback)
+
+**Cross-Skill Triggers** (Phase 3):
+- `reverse-spec/analyze.md`: case-study-log initialization populates Archetype/Framework defaults; Phase 1-2b updates Framework; Phase 3-1e updates Archetype
+- `smart-sdd/pipeline.md`: M6 trigger includes Philosophy Adherence composition guidance
+
+### Design Decisions
+- 8-section report structure preserved (philosophy content added as subsections within §4 and §8, not new top-level sections)
+- All philosophy sections are conditional — omitted when no data exists (backward compatible)
+- No init command for case-study — log initialization handled by reverse-spec and smart-sdd
+
+---
+
 ## [2026-03-15] Remove speckit-diff skill
 
 Removed the `speckit-diff` skill entirely (3 files: SKILL.md, commands/diff.md, reference/integration-surface.md).

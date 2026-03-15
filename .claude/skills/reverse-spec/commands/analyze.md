@@ -59,7 +59,7 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 **If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 **Step 4 — Auto-initialize case study logging**:
 Check if `case-study-log.md` exists at the target directory root:
-- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `{target-directory}/case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
+- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `{target-directory}/case-study-log.md`. Populate header fields: `**Archetype**: none`, `**Framework**: none` (these will be updated in-place after Phase 1-2b framework detection and Phase 3-1e archetype detection). Display: `📝 Case study log initialized: case-study-log.md`
 - **If already exists**: Skip silently (user may have manually initialized earlier)
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.
@@ -198,6 +198,8 @@ From Phase 1-2 tech stack results, identify the primary framework(s):
 3. If no match: `Framework: custom` (no Foundation loaded)
 
 This determination feeds into Phase 2-8 (Foundation Decision Extraction) and into `smart-sdd init` Step 3b for greenfield projects.
+
+Also update `case-study-log.md` header `**Framework**:` field with the detected framework name(s) (e.g., `electron`). If no match (`custom`), leave as `none`.
 
 ### 1-3. Project Type Classification
 Classify the project type based on the collected information. Use the project types defined in `domains/_core.md` § R2 (Project Type Classification).
@@ -1380,6 +1382,7 @@ Scan the project for archetype signals using A0 keywords from all archetype modu
 **Output**: Record detected/candidate archetypes in analysis notes. This data feeds into:
 - Phase 4-1: constitution-seed generation (archetype-specific principles)
 - smart-sdd pipeline: sdd-state.md Archetype field
+- case-study-log.md: Update `**Archetype**:` header field with detected archetype name(s) (e.g., `ai-assistant`). If no archetype detected, leave as `none`.
 
 **No HARD STOP** — archetype detection is informational. Display detected archetypes in the Phase 3 summary.
 

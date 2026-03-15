@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:25 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:45 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -96,7 +96,9 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 | Skill | Purpose |
 |-------|---------|
-| `/case-study` | Generates metrics + qualitative observations report from execution artifacts |
+| `/case-study` | Generates metrics + philosophy-aware narrative report from execution artifacts |
+
+> **Philosophy-aware reporting**: Case study reports don't just show *what* was built — they trace *why* each architectural decision was made. When archetype principles (e.g., "Streaming-First" for AI assistants) or framework philosophy (e.g., Electron's "Secure by Default") are active, the report maps decisions back to the principles that motivated them, evaluates which principles were applied across Features, and identifies gaps where principles were adopted but never referenced during implementation. This feedback loop helps refine domain modules over time.
 
 ---
 
@@ -1030,6 +1032,6 @@ Complete list of all files in this repository grouped by skill.
 | File | Description |
 |------|-------------|
 | `SKILL.md` | Skill router — case study report generator entry point |
-| `commands/generate.md` | Report generation — extract metrics from artifacts, combine with observation log |
-| `reference/recording-protocol.md` | M1-M8 milestone recording protocol for automatic observation capture |
+| `commands/generate.md` | Report generation — extract metrics + philosophy data, generate philosophy-aware narrative |
+| `reference/recording-protocol.md` | M1-M8 milestone recording protocol with philosophy adherence tracking |
 | `templates/case-study-log-template.md` | Observation log template for chronological milestone entries |
