@@ -24,6 +24,7 @@ Enhanced the case-study skill to capture and communicate architecture philosophy
 **Cross-Skill Triggers** (Phase 3):
 - `reverse-spec/analyze.md`: case-study-log initialization populates Archetype/Framework defaults; Phase 1-2b updates Framework; Phase 3-1e updates Archetype
 - `smart-sdd/pipeline.md`: M6 trigger includes Philosophy Adherence composition guidance
+- `smart-sdd/adopt.md`: M6 trigger aligned with pipeline.md — added same Philosophy Adherence composition guidance
 
 ### Design Decisions
 - 8-section report structure preserved (philosophy content added as subsections within §4 and §8, not new top-level sections)
