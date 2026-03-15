@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 08:25 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:25 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -38,7 +38,7 @@ cd spec-kit-skills
 | PRD로 새 프로젝트 | `/smart-sdd init --prd design.md` |
 | 기존 프로젝트에 Feature 추가 | `/smart-sdd add` |
 | SDD 도입 (기존 코드 유지) | `/reverse-spec --adopt` → `/smart-sdd adopt` |
-| spec-kit 호환성 검사 | `/speckit-diff` |
+| 케이스 스터디 리포트 생성 | `/case-study generate` |
 
 ### 설치 확인
 
@@ -96,7 +96,6 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 | 스킬 | 목적 |
 |------|------|
-| `/speckit-diff` | spec-kit 버전 비교, 호환성 판정 + 영향 리포트 |
 | `/case-study` | 실행 아티펙트에서 메트릭 + 정성적 관찰 보고서 생성 |
 
 ---
@@ -810,7 +809,6 @@ F003-order      | T2   |         |      |       |         |           |        |
 mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
-cp -r /path/to/spec-kit-skills/.claude/skills/speckit-diff .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```
 
@@ -819,7 +817,6 @@ cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```bash
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
-ln -s /path/to/spec-kit-skills/.claude/skills/speckit-diff ~/.claude/skills/speckit-diff
 ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-study
 ```
 
@@ -1024,14 +1021,6 @@ specs/
 | `scripts/pipeline-status.sh` | 대시보드 — 파이프라인 진행 개요 |
 | `scripts/sbi-coverage.sh` | 대시보드 — SBI 커버리지 매핑 |
 | `scripts/validate.sh` | 교차 파일 일관성 검증기 (종료 코드로 pass/fail 표시) |
-
-### speckit-diff (`.claude/skills/speckit-diff/`)
-
-| 파일 | 설명 |
-|------|------|
-| `SKILL.md` | 스킬 라우터 — 버전 호환성 분석기 진입점 |
-| `commands/diff.md` | 다단계 워크플로우 — spec-kit 소스 획득, 비교, 호환성 판정 생성 |
-| `reference/integration-surface.md` | 베이스라인 참조 — 알려진 spec-kit 스킬 및 구조적 시그니처 |
 
 ### case-study (`.claude/skills/case-study/`)
 

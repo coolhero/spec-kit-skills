@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 08:21 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:25 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
@@ -38,7 +38,7 @@ cd spec-kit-skills
 | New project from PRD | `/smart-sdd init --prd design.md` |
 | Add Feature to existing project | `/smart-sdd add` |
 | Adopt SDD (keep existing code) | `/reverse-spec --adopt` → `/smart-sdd adopt` |
-| Check spec-kit compatibility | `/speckit-diff` |
+| Generate case study report | `/case-study generate` |
 
 ### Verify
 
@@ -92,11 +92,10 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 **Five modes**: greenfield (`init`), incremental (`add`), rebuild (`pipeline` after `reverse-spec`), adoption (`adopt`), scope expansion (`expand`)
 
-### Utilities
+### Utility
 
 | Skill | Purpose |
 |-------|---------|
-| `/speckit-diff` | Compares spec-kit versions, produces compatibility verdict + impact report |
 | `/case-study` | Generates metrics + qualitative observations report from execution artifacts |
 
 ---
@@ -813,7 +812,6 @@ Shell scripts in `.claude/skills/smart-sdd/scripts/` let you inspect project pro
 mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
-cp -r /path/to/spec-kit-skills/.claude/skills/speckit-diff .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```
 
@@ -822,7 +820,6 @@ cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```bash
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
-ln -s /path/to/spec-kit-skills/.claude/skills/speckit-diff ~/.claude/skills/speckit-diff
 ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-study
 ```
 
@@ -1027,14 +1024,6 @@ Complete list of all files in this repository grouped by skill.
 | `scripts/pipeline-status.sh` | Dashboard — pipeline progress overview |
 | `scripts/sbi-coverage.sh` | Dashboard — SBI coverage mapping |
 | `scripts/validate.sh` | Cross-file consistency validator (exit code indicates pass/fail) |
-
-### speckit-diff (`.claude/skills/speckit-diff/`)
-
-| File | Description |
-|------|-------------|
-| `SKILL.md` | Skill router — version compatibility analyzer entry point |
-| `commands/diff.md` | Multi-phase workflow — acquire spec-kit source, compare, generate compatibility verdict |
-| `reference/integration-surface.md` | Baseline reference — known spec-kit skills and structural signatures |
 
 ### case-study (`.claude/skills/case-study/`)
 

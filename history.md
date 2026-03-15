@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-15] Remove speckit-diff skill
+
+Removed the `speckit-diff` skill entirely (3 files: SKILL.md, commands/diff.md, reference/integration-surface.md).
+
+### Rationale
+- **Extremely rare use case**: Only needed when spec-kit updates its internal structure — a rare event
+- **Simpler alternative exists**: `gh` CLI + changelog review is faster and more reliable
+- **Self-defeating maintenance**: `integration-surface.md` baseline requires manual updates when spec-kit changes — the tool doesn't fully automate what it promises
+- **Cognitive overhead**: 3 skill files + install symlink + documentation references for a utility used perhaps once per quarter
+
+### Impact
+- 4 skills → 3 skills (reverse-spec, smart-sdd, case-study)
+- install.sh/uninstall.sh unchanged (dynamic glob pattern)
+- README.md/README.ko.md updated (Quick Start, Utilities, Installation, File Map)
+
+---
+
 ## [2026-03-15] 4-Axis Domain Composition: Archetype modules + Foundation F7 Philosophy
 
 Expanded the domain composition model from 3 axes (Interface × Concern × Scenario) to 4 axes (Interface × Concern × Archetype × Scenario) by introducing Archetype modules for application-domain philosophical principles (e.g., AI assistant's "Streaming-First", Public API's "Contract Stability"). Also added Foundation F7 Philosophy sections for framework-specific guiding principles (distinct from F0–F6 operational checklists).
