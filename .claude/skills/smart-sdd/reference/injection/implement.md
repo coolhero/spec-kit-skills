@@ -581,7 +581,7 @@ FIX_LOOP (max 3 attempts):
 - Same error after 3 attempts → break
 - New error resets counter (different issue)
 - Error from external dependency (DB, API server, etc.) → break immediately, show reason
-- **Native module build failure** (node-gyp, prebuild, N-API binding) → attempt `electron-rebuild` or `npm rebuild [module]` first. If auto-fix fails → break with environment classification (see Smoke Launch Escalation in pipeline.md)
+- **Native/compiled dependency failure** → attempt platform-appropriate rebuild (e.g., `npm rebuild`, `cargo build`, etc.) first. If auto-fix fails → break with environment classification (see Smoke Launch Escalation in pipeline.md)
 
 **Break report**:
 ```

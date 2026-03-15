@@ -810,22 +810,22 @@ Level 1 — Code Fix (agent handles autonomously):
   → Re-run smoke launch
 
 Level 2 — Environment Fix (agent attempts before asking user):
-  Native module build failures (node-gyp, prebuild, N-API binding errors)
-  → Attempt auto-fix: electron-rebuild, npm rebuild, prebuild-install
+  Native/compiled dependency failures, toolchain version mismatches
+  → Identify the failing dependency and attempt platform-appropriate rebuild
   → If auto-fix succeeds → re-run smoke launch
   → If auto-fix fails → Level 3
 
 Level 3 — HARD STOP (only after Level 1-2 exhausted):
   Use AskUserQuestion with:
   - "Retry after manual environment fix" — user fixes toolchain, agent re-runs smoke launch
-  - "Switch to alternative dependency" — agent replaces the failing module (e.g., better-sqlite3 → sql.js)
+  - "Switch to alternative dependency" — agent replaces the failing module with a compatible alternative
   - "Proceed with build-only verification" — mark implement as ⚠️ SMOKE-LAUNCH-DEGRADED, NOT ✅
 ```
 
 > **CRITICAL**: The "Proceed with build-only" option does NOT mark implement ✅. It records `⚠️ SMOKE-LAUNCH-DEGRADED` in sdd-state.md Feature Progress and carries a warning into verify. The implement status line shows `implement ⚠️` (not ✅).
 >
-> ❌ **Wrong**: "✅ F001 implement complete. Verify is blocked by native module issue."
-> ✅ **Right**: "⚠️ F001 implement — Smoke Launch failed (native module). HARD STOP for resolution."
+> ❌ **Wrong**: "✅ implement complete. Verify is blocked by [issue]."
+> ✅ **Right**: "⚠️ implement — Smoke Launch failed ([reason]). HARD STOP for resolution."
 
 > This overlaps with verify Phase 0's Dev Mode Stability Probe but catches issues earlier, avoiding the verify → regression → re-implement cycle.
 

@@ -18,7 +18,7 @@ Reinforced the Post-Implement Smoke Launch section in pipeline.md. Previously, s
 - Added explicit Wrong/Right example to prevent the observed failure pattern
 
 **implement.md — Auto-Fix Loop**:
-- Added native module build failure as a loop break condition with `electron-rebuild` / `npm rebuild` auto-fix attempt before breaking
+- Added native/compiled dependency failure as a loop break condition with platform-appropriate rebuild attempt before breaking
 
 | Choice | Rationale |
 |--------|-----------|
