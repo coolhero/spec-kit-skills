@@ -324,7 +324,7 @@ This step is informational only — no user confirmation required.
 ### Step 3b — Foundation Verification Gate (first Feature only)
 
 > Runs ONCE before the first Feature enters the pipeline.
-> **Skip for**: greenfield projects (no Foundation exists yet — nothing to validate), OR if `sdd-state.md` records `Foundation Verified: [date]` with no Foundation-affecting changes since.
+> **Skip for**: greenfield projects (no Foundation exists yet — nothing to validate), OR the current Feature IS a T0 (Foundation) Feature (cannot verify Foundation before building it), OR if `sdd-state.md` records `Foundation Verified: [date]` with no Foundation-affecting changes since.
 
 **Purpose**: Validate cross-cutting Foundation systems (CSS theme, state management patterns, IPC bridge, core layout) before Feature code builds on them. Common Foundation-level bugs include: CSS theme not loading, state selector instability, IPC bridge disconnection, layout patterns breaking. No amount of Feature-level testing catches a broken Foundation. For user assistance patterns during Foundation setup, see [reference/user-cooperation-protocol.md](../reference/user-cooperation-protocol.md).
 
@@ -788,6 +788,8 @@ If tasks are executed sequentially (default), the parallel execution plan is omi
 
 #### Post-Implement Smoke Launch
 
+> **⚠️ implement is NOT complete until Smoke Launch passes.** Do NOT mark implement ✅ and defer failures to verify. If the app cannot launch, implement is still in progress.
+
 After build succeeds and before proceeding to the Review step, perform a **smoke launch** to catch build-pass-but-runtime-crash issues:
 
 1. **Start the app** using the project's standard launch command (dev or preview mode)
@@ -797,7 +799,33 @@ After build succeeds and before proceeding to the Review step, perform a **smoke
    - Can the user perform the fundamental interactions the Feature provides? (e.g., window control, navigation, settings access)
    - If the UI is a placeholder with no interactive elements → this is a smoke launch failure
 5. **Shut down** the app after the check
-6. **On failure**: Fix the issue immediately within the implement step (no Source Modification Gate needed — this is pre-verify). Re-run the smoke launch after fixing
+6. **On failure**: Follow the Auto-Fix Escalation below
+
+**Smoke Launch Auto-Fix Escalation** (step 6 detail):
+
+```
+Level 1 — Code Fix (agent handles autonomously):
+  Build errors, missing imports, config issues, runtime exceptions
+  → Fix immediately within implement (no Source Modification Gate needed)
+  → Re-run smoke launch
+
+Level 2 — Environment Fix (agent attempts before asking user):
+  Native module build failures (node-gyp, prebuild, N-API binding errors)
+  → Attempt auto-fix: electron-rebuild, npm rebuild, prebuild-install
+  → If auto-fix succeeds → re-run smoke launch
+  → If auto-fix fails → Level 3
+
+Level 3 — HARD STOP (only after Level 1-2 exhausted):
+  Use AskUserQuestion with:
+  - "Retry after manual environment fix" — user fixes toolchain, agent re-runs smoke launch
+  - "Switch to alternative dependency" — agent replaces the failing module (e.g., better-sqlite3 → sql.js)
+  - "Proceed with build-only verification" — mark implement as ⚠️ SMOKE-LAUNCH-DEGRADED, NOT ✅
+```
+
+> **CRITICAL**: The "Proceed with build-only" option does NOT mark implement ✅. It records `⚠️ SMOKE-LAUNCH-DEGRADED` in sdd-state.md Feature Progress and carries a warning into verify. The implement status line shows `implement ⚠️` (not ✅).
+>
+> ❌ **Wrong**: "✅ F001 implement complete. Verify is blocked by native module issue."
+> ✅ **Right**: "⚠️ F001 implement — Smoke Launch failed (native module). HARD STOP for resolution."
 
 > This overlaps with verify Phase 0's Dev Mode Stability Probe but catches issues earlier, avoiding the verify → regression → re-implement cycle.
 

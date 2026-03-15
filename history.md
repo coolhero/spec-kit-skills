@@ -5,6 +5,42 @@
 
 ---
 
+## [2026-03-15] Smoke Launch failure escalation + implement completion gate
+
+Reinforced the Post-Implement Smoke Launch section in pipeline.md. Previously, step 6 ("On failure: Fix the issue immediately") was too vague — the agent could mark implement ✅ and frame the failure as "verify is blocked," which is incorrect. Smoke Launch is part of implement, so its failure means implement is NOT complete.
+
+### Changes
+
+**pipeline.md — Post-Implement Smoke Launch**:
+- Added bold warning: "implement is NOT complete until Smoke Launch passes"
+- Replaced step 6 with 3-level Auto-Fix Escalation (Code Fix → Environment Fix → HARD STOP)
+- Added `SMOKE-LAUNCH-DEGRADED` status for "proceed with build-only" cases (distinct from ✅)
+- Added explicit Wrong/Right example to prevent the observed failure pattern
+
+**implement.md — Auto-Fix Loop**:
+- Added native module build failure as a loop break condition with `electron-rebuild` / `npm rebuild` auto-fix attempt before breaking
+
+| Choice | Rationale |
+|--------|-----------|
+| 3-level escalation (not just "fix immediately") | Agent needs clear guidance on what to try (code fix → env fix → user) before asking user |
+| `⚠️ SMOKE-LAUNCH-DEGRADED` status (not ✅) | implement ✅ with known launch failure is misleading — status must reflect reality |
+| Wrong/Right inline example | Agent tends to frame failures as "next step blocked" instead of "current step incomplete" |
+
+---
+
+## [2026-03-15] Foundation Verification Gate — T0 Feature skip condition
+
+Added skip condition to Step 3b (Foundation Verification Gate): when the current Feature IS a T0 (Foundation) Feature, skip the Gate. Rationale: the Gate validates Foundation systems before building Features on top of them, but when the Feature being processed IS the Foundation itself (e.g., F001 app-shell), there is nothing to verify yet. Previously only "greenfield" was listed as a skip condition, which missed the rebuild + clean restart + T0 Feature case.
+
+| Choice | Rationale |
+|--------|-----------|
+| Skip when current Feature is T0 | Cannot verify Foundation before building it — logical contradiction |
+| Keep existing skip conditions (greenfield, already-verified) | Still valid for their respective cases |
+
+**File**: `smart-sdd/commands/pipeline.md` Step 3b Skip-for line
+
+---
+
 ## [2026-03-15] MANDATORY RULE 3: spec-kit Output Suppression + Review Gate
 
 Added MANDATORY RULE 3 to smart-sdd SKILL.md to prevent the agent from showing spec-kit's raw output and skipping the Review HARD STOP. This is the most persistent failure pattern in the pipeline.
