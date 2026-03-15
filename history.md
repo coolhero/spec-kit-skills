@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-15] SKF-017: Electron CDP Connection Timing Guidance
+
+Added Electron CDP 3-phase polling guidance to `reverse-spec/analyze.md` Phase 1.5-4, based on field experience with Cherry Studio (electron-vite).
+
+### Changes
+- **Step 1b table**: Added `REMOTE_DEBUGGING_PORT` env var as alternative for electron-vite 5.0+
+- **Step 2**: Added "Electron CDP readiness — 3-phase polling" block: Port open → CDP HTTP API → Targets available, with expected timing (up to 120s total)
+- **Warnings**: Documented that empty targets `[]` is normal during BrowserWindow creation, and standalone browser access to renderer URL fails due to missing Electron preload bridge
+
+### Rationale
+During Cherry Studio reverse-spec, CDP connection repeatedly failed or returned empty targets. Root cause: electron-vite has a ~45-60s multi-stage startup, and CDP targets only appear after BrowserWindow creation + renderer load. Without this guidance, the agent incorrectly concluded "CDP is not working" and wasted time with retries and alternative approaches.
+
+---
+
 ## [2026-03-15] Case-Study Enhancement: Architecture Philosophy Integration
 
 Enhanced the case-study skill to capture and communicate architecture philosophy (Archetype principles + Foundation F7 Philosophy) throughout the Case Study report. Transforms the report from a metrics-focused execution log into a philosophy-aware narrative that explains *why* architectural decisions were made.

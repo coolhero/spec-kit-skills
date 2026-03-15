@@ -561,15 +561,15 @@ When `electron_mode = cli_direct` (Playwright CLI available), the app will be la
 
 Otherwise (MCP-only path), replace the start command with the CDP-enabled version. Do NOT run the original command — Playwright MCP needs CDP to connect to Electron.
 
-| Build Tool | CDP-Enabled Start Command |
-|-----------|--------------------------|
-| **electron-vite** | `npx electron-vite dev -- --remote-debugging-port=9222` |
-| **electron-forge** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run start` |
-| **electron-builder** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run dev` |
-| **Direct electron** | `npx electron . --remote-debugging-port=9222` |
-| **Other / Unknown** | Append ` -- --remote-debugging-port=9222` after the dev command |
+| Build Tool | CDP-Enabled Start Command | Alternative |
+|-----------|--------------------------|-------------|
+| **electron-vite** | `npx electron-vite dev -- --remote-debugging-port=9222` | `REMOTE_DEBUGGING_PORT=9222 npx electron-vite dev` |
+| **electron-forge** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run start` | — |
+| **electron-builder** | `ELECTRON_ARGS='--remote-debugging-port=9222' npm run dev` | — |
+| **Direct electron** | `npx electron . --remote-debugging-port=9222` | — |
+| **Other / Unknown** | Append ` -- --remote-debugging-port=9222` after the dev command | — |
 
-⚠️ **electron-vite requires the `--` separator** before `--remote-debugging-port`. It does NOT pick up the `ELECTRON_ARGS` environment variable. This is the most common cause of CDP connection failure with electron-vite projects.
+⚠️ **electron-vite requires the `--` separator** before `--remote-debugging-port`. Alternatively, electron-vite 5.0+ supports `REMOTE_DEBUGGING_PORT` env var. Either method passes `--remote-debugging-port` to the Electron process (verify with `ps aux | grep remote-debugging`).
 
 After launching, verify CDP is active: `lsof -i :9222`. If no result → the CDP flag was not picked up. Check the build tool and retry with the correct syntax.
 
@@ -578,7 +578,21 @@ Run the start command (or CDP-modified command for Electron) as a background pro
 - Monitor stdout for readiness signals: `ready`, `listening on`, `started`, `compiled`, `Local:`, `http://localhost`
 - Alternatively, poll the expected port with `lsof -i :[PORT]`
   - For Electron CDP: poll both the app port and port 9222
-- Timeout: 60 seconds
+- Timeout: 120 seconds (see Electron CDP note below)
+
+> **Electron CDP readiness — 3-phase polling**:
+> Electron apps (especially with electron-vite) have a multi-stage startup: main process build (~18s) → preload build (~1s) → renderer dev server (~5s) → Electron launch → BrowserWindow creation → renderer load. CDP responds at different phases:
+>
+> | Phase | Check | Expected Timing |
+> |-------|-------|-----------------|
+> | 1. Port open | `lsof -i :9222` | Immediate ~ 5s after Electron starts |
+> | 2. CDP HTTP API | `curl -m 5 http://127.0.0.1:9222/json/version` | After full build — 30-45s from command start |
+> | 3. Targets available | `curl -m 5 http://127.0.0.1:9222/json` returns non-empty array | After BrowserWindow + renderer load — 45-60s |
+>
+> - Retry each phase at 5-second intervals. Total timeout: 120 seconds.
+> - ⚠️ Phase 2 succeeding but Phase 3 returning `[]` is **normal** — BrowserWindow has not been created yet. Wait for renderer load.
+> - ⚠️ Do NOT attempt to access the renderer dev server URL (e.g., `http://localhost:5173`) via a standalone browser. Electron preload bridge (`window.api`) is not available outside Electron, so the React app will fail to initialize (typically showing only a splash screen).
+> - Only proceed to exploration (1.5-5) after Phase 3 confirms at least one target with `type: "page"`.
 
 **Step 3 — Handle launch failure**:
 If the app fails to start within the timeout:
