@@ -19,10 +19,15 @@ Identify the primary framework(s) from project files:
 | FastAPI | `fastapi` in pyproject.toml or requirements.txt + `uvicorn` or `gunicorn` |
 | React Native | `react-native` in package.json dependencies + `metro.config.*` or `app.json` with `expo` |
 | Flutter | `pubspec.yaml` with `flutter` SDK dependency |
+| Bun | `bun.lockb` present OR `bun` in `package.json` `packageManager` field OR `bunfig.toml` |
+| Solid.js | `solid-js` in package.json dependencies + `.tsx`/`.jsx` files with `createSignal` imports |
+| Hono | `hono` in package.json dependencies + route handler patterns (`app.get()`, `app.post()`) |
 
 **Multiple frameworks**: A project may use multiple frameworks (e.g., Express backend + React frontend). Detect all, load Foundation files for each. Comma-separate in `**Framework**` field.
 
 **Priority**: If multiple signals conflict, prioritize by specificity (e.g., Next.js over plain React, NestJS over Express).
+
+**Monorepo detection**: If root `package.json` contains `workspaces` field, OR `turbo.json`/`nx.json`/`lerna.json` exists, classify as monorepo. Scan each workspace package for individual framework detection. Record all detected frameworks comma-separated in `**Framework**` field.
 
 ---
 
@@ -285,6 +290,9 @@ Each framework Foundation file in this directory follows the structure defined i
 | `fastapi.md` | FastAPI | 41 | 12 | — | TODO scaffold |
 | `react-native.md` | React Native | 50 | 14 | — | TODO scaffold |
 | `flutter.md` | Flutter | 50 | 14 | — | TODO scaffold |
+| `bun.md` | Bun | — | 8 | ✅ | Implemented |
+| `solidjs.md` | Solid.js | — | 5 | ✅ | Implemented |
+| `hono.md` | Hono | — | 8 | ✅ | Implemented |
 
 ---
 
@@ -312,3 +320,59 @@ F7 is distinct from F0–F6: while F0–F6 capture **operational decisions** (wh
 
 - **reverse-spec**: F7 principles are extracted alongside F2 items and included in the constitution-seed § "Extracted Architecture Principles"
 - **smart-sdd**: F7 principles are referenced during `specify` and `plan` steps to validate architectural decisions against framework conventions
+
+---
+
+## F8. Toolchain Commands
+
+Foundation files MAY declare toolchain commands that the pipeline uses for build, test, and lint. When present, Foundation Gate and Verify Phase 1 use these commands instead of auto-detection.
+
+| Field | Description | Example (Bun) | Example (npm) |
+|-------|-------------|---------------|---------------|
+| `build` | Build command | `bun run build` | `npm run build` |
+| `test` | Test command | `bun test` | `npm test` |
+| `lint` | Lint command | `bunx biome check .` | `npx eslint .` |
+| `typecheck` | Type check command | `bun run typecheck` | `npx tsc --noEmit` |
+| `package_manager` | Package manager binary | `bun` | `npm` |
+| `install` | Dependency install command | `bun install` | `npm install` |
+
+**Pipeline integration**:
+- Foundation Gate Toolchain Pre-flight reads F8 to determine which commands to probe
+- Verify Phase 1 reads F8 to execute build/test/lint
+- If F8 is absent, pipeline falls back to auto-detection (npm/yarn/pnpm heuristics)
+
+**Multiple frameworks**: When multiple Foundation files are loaded, F8 from the PRIMARY framework (first in `**Framework**` field) takes precedence for toolchain commands
+
+---
+
+## F9. Scan Targets
+
+Foundation files MAY declare framework-specific scan targets for reverse-spec Phase 2 analysis. This allows new frameworks to participate in data model and API endpoint extraction without modifying `_core.md`.
+
+### Format
+
+```
+### F9. Scan Targets
+
+#### Data Model
+| Pattern | Description |
+|---------|-------------|
+| `table()`, `sqliteTable()` in `**/schema.ts` | Drizzle ORM table definitions |
+| `defineSchema()` calls | Schema builder pattern |
+
+#### API Endpoints
+| Pattern | Description |
+|---------|-------------|
+| `app.get()`, `app.post()` in route files | Hono/Express-style route handlers |
+| `createRoute()` | OpenAPI-compatible route definitions |
+
+#### Component Patterns
+| Pattern | Description |
+|---------|-------------|
+| `createSignal()`, `createEffect()` | Solid.js reactive primitives |
+```
+
+**Pipeline integration**:
+- reverse-spec Phase 2 (R2 Data Model, R3 API Endpoint extraction) reads F9 from active Foundation files
+- F9 scan targets are MERGED with the universal scan targets in `_core.md`
+- If F9 is absent, only universal scan targets apply (no loss of functionality)

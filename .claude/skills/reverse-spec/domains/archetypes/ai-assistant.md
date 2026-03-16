@@ -25,3 +25,13 @@ For each detected AI assistant pattern, extract:
 | **Token Awareness** | Token counting, context window management, conversation truncation strategy, cost tracking | Token budget strategy; context window policy |
 | **Prompt Versioning** | Prompt storage (inline vs file vs DB), prompt template patterns, A/B testing, version history | Prompt management maturity level |
 | **RAG Pipeline** | Document ingestion, embedding generation, vector store usage, retrieval strategy | RAG architecture if present; retrieval patterns |
+
+---
+
+### Coding Agent Sub-Pattern Detection
+When the AI assistant specifically generates/modifies code and executes system tools:
+- **Tool abstraction layer**: Identify tool registry, tool interface definitions, tool permission model
+- **Agent role system**: Detect different agent types (build/plan/review) with different capabilities
+- **Context management**: Identify message truncation, context window management, token counting
+- **Safety mechanisms**: Detect permission gates, workspace boundaries, doom loop prevention
+- **Persistence**: Identify session storage, conversation history, state management

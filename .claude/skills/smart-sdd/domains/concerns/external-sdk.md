@@ -47,3 +47,25 @@ When this concern is active, enforce:
   - Medium trust: async functions — add runtime validation for return values
   - Low trust: stream events, experimental APIs — always validate at runtime, never trust .d.ts alone
   See `injection/implement.md` § External SDK Type Trust Classification
+
+---
+
+## S7b. Large-Scale Provider Abstraction
+
+> When a project integrates 5+ external providers through a unified abstraction layer (e.g., Vercel AI SDK for 20+ LLM providers), additional SC and verification rules apply.
+
+### Detection
+- Unified SDK/adapter pattern: single interface, multiple provider implementations
+- Provider registry or factory pattern
+- Provider-specific configuration (API keys, endpoints, model names)
+
+### Additional SC Rules
+- **Abstraction layer SC**: The unified interface itself must have SCs (not just individual providers)
+- **Provider fallback chain**: If provider A fails → fallback to provider B → verify fallback behavior
+- **Provider-specific edge cases**: Each provider may have unique constraints (rate limits, token limits, response format differences) — SC for edge cases per active provider
+- **Mock strategy**: Test against mock provider that validates request/response contract (not real API calls in CI)
+
+### Verification
+- At minimum, verify against 2 providers: one primary + one alternative
+- Verify provider switching at runtime (if supported) doesn't lose state
+- Verify auth credential isolation per provider (no cross-contamination)

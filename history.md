@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-16] Extensibility expansion — new modules, F8/F9 schema, Structure parameter
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| F8 Toolchain Commands schema | `_foundation-core.md` | Foundation files can declare build/test/lint commands → pipeline reads them instead of auto-detection |
+| F9 Scan Targets schema | `_foundation-core.md` | Foundation files can declare framework-specific scan targets → reverse-spec Phase 2 reads them without modifying _core.md |
+| Structure parameter | `state-schema.md` | `single-package \| monorepo` parameter enables monorepo-aware pipeline behavior (workspace-aware build/test) |
+| Bun/Solid.js/Hono detection | `_foundation-core.md` F0 table | Added detection signals for 3 new runtime/framework ecosystems |
+| TUI interface (both skills) | `interfaces/tui.md` × 2 | Terminal UI support — PTY-based verification, keyboard navigation, reactivity patterns |
+| Protocol integration concern (both skills) | `concerns/protocol-integration.md` × 2 | LSP/MCP/custom protocol lifecycle — initialization, capability negotiation, transport |
+| Plugin system concern (both skills) | `concerns/plugin-system.md` × 2 | Plugin architecture — isolation, lifecycle, API contract, versioning |
+| Authorization concern (both skills) | `concerns/authorization.md` × 2 | RBAC/ABAC/ACL permission models — boundary verification, escalation prevention |
+| Bun Foundation | `foundations/bun.md` | Runtime/toolchain decisions with F7 philosophy (single binary, TypeScript-first) + F8 + F9 |
+| Solid.js Foundation | `foundations/solidjs.md` | Reactivity model with F7 philosophy (fine-grained reactivity, no virtual DOM, props as proxies) |
+| Hono Foundation | `foundations/hono.md` | Web framework decisions with F7 philosophy (ultralight, multi-runtime) + F8 + F9 |
+| External SDK enhancement | `concerns/external-sdk.md` × 2 | S7b Large-Scale Provider Abstraction for multi-provider scenarios (20+ providers) |
+| AI Assistant enhancement | `archetypes/ai-assistant.md` × 2 | A2b Coding Agent Sub-Pattern — sandbox, tool orchestration, context management |
+| F8/F9 documentation | `ARCHITECTURE-EXTENSIBILITY.md` | Added F8/F9 to Foundation creation guide |
+
+---
+
 ## [2026-03-16] README readability overhaul + flow diagram
 
 | Change | File | Rationale |

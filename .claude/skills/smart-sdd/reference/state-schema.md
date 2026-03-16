@@ -48,6 +48,7 @@ If validation fails:
 **Constitution Version**: [Version]
 **State Schema Version**: 2.0
 **Framework**: electron | tauri | express | nestjs | fastapi | nextjs | vite-react | react-native | flutter | custom | none
+**Structure**: single-package | monorepo
 
 ---
 
@@ -397,6 +398,11 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
    - `rebuild` — if initialized from `/reverse-spec` artifacts for rebuild workflow (`/smart-sdd pipeline`)
    - `adoption` — if initialized from `/reverse-spec` artifacts for adoption workflow (`/smart-sdd adopt`)
    - Origin does not change when Features are added later via `/smart-sdd add`
+6b. Set Structure based on project analysis:
+   - `monorepo` — if Turbo, Lerna, Nx, or Bun/pnpm/Yarn workspaces detected (multiple `package.json` files in subdirectories, or `workspaces` field in root `package.json`)
+   - `single-package` — default for all other projects
+   - For `rebuild` / `adoption`: auto-detected from source project structure during `/reverse-spec` Phase 1
+   - For `greenfield`: set based on init project configuration (default `single-package`)
 7. Set Source Path based on the project mode:
    - `greenfield` → `N/A` (no existing source code)
    - `rebuild` / `adoption` → Extract from the `**Source**:` field in `BASE_PATH/roadmap.md` (the original target-directory path used during `/reverse-spec`)
@@ -559,3 +565,11 @@ Cross-Feature: [verification point count] checked, [issue count] issues
 - After `specify` — spec.md generated: partial update (constraints/capabilities refined from spec details)
 - **CI never decreases**: Only dimensions that improve are updated; scores never drop
 - `rebuild` / `adoption` origins: CI remains `N/A` throughout (existing project, no inference needed)
+
+### Monorepo-specific State
+
+When `**Structure**: monorepo`:
+- **Toolchain section**: commands may include workspace filter (e.g., `turbo run build`, `bun run --filter=core test`)
+- **Feature Progress**: Features may span multiple packages — Notes column records affected packages
+- **Foundation Gate**: runs workspace-aware build check (`turbo run build` or equivalent)
+- **Verify Phase 1**: runs workspace-aware test/lint (per-package or aggregated based on toolchain)

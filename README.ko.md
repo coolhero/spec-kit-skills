@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:38 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:58 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -947,12 +947,16 @@ specs/
 | `domains/interfaces/http-api.md` | HTTP API 인터페이스 — 엔드포인트 탐색, 요청/응답 분석 |
 | `domains/interfaces/cli.md` | CLI 인터페이스 — 커맨드 파싱, 인자 분석 |
 | `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 탐색, 데이터 플로우 분석 |
+| `domains/interfaces/tui.md` | TUI 인터페이스 — 터미널 UI 컴포넌트 추출, PTY 기반 인터랙션 분석 |
 | `domains/concerns/async-state.md` | Async state concern — 로딩/스트리밍/에러 상태 감지 |
 | `domains/concerns/auth.md` | Authentication concern — 인증 플로우 감지 |
 | `domains/concerns/external-sdk.md` | External SDK concern — 서드파티 API 통합 감지 |
 | `domains/concerns/i18n.md` | Internationalization concern — 로케일 키 감지 |
 | `domains/concerns/ipc.md` | IPC concern — 프로세스간 통신 감지 (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE 감지 |
+| `domains/concerns/protocol-integration.md` | Protocol integration concern — LSP/MCP/커스텀 프로토콜 감지 및 라이프사이클 분석 |
+| `domains/concerns/plugin-system.md` | Plugin system concern — 플러그인 아키텍처, 격리, 라이프사이클 감지 |
+| `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL 권한 모델 감지 |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant 아키타입 — A0 신호 키워드 (LLM SDK, 스트리밍), A1 철학 추출 (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API 아키타입 — A0 신호 키워드 (OpenAPI, 속도 제한), A1 철학 추출 (Contract Stability, Rate Limit Transparency) |
@@ -968,6 +972,9 @@ specs/
 | `domains/foundations/fastapi.md` | FastAPI Foundation — TODO 스캐폴드 (41개 항목, 12개 카테고리) |
 | `domains/foundations/react-native.md` | React Native Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
 | `domains/foundations/flutter.md` | Flutter Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
+| `domains/foundations/bun.md` | Bun Foundation — 런타임/툴체인 결정, F7 철학, F8 툴체인 커맨드, F9 스캔 대상 |
+| `domains/foundations/solidjs.md` | Solid.js Foundation — 반응성 모델 결정, F7 파인 그레인 반응성 철학 |
+| `domains/foundations/hono.md` | Hono Foundation — 웹 프레임워크 결정, F7 철학, F8 툴체인, F9 스캔 대상 |
 | `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
 | **Templates** | |
 | `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
@@ -1006,12 +1013,16 @@ specs/
 | `domains/interfaces/http-api.md` | HTTP API 인터페이스 — API 호환성 매트릭스, 런타임 검증 |
 | `domains/interfaces/cli.md` | CLI 인터페이스 — CLI 검증, 프로세스 러너 백엔드 |
 | `domains/interfaces/data-io.md` | Data I/O 인터페이스 — 파이프라인 검증, 데이터 플로우 테스팅 |
+| `domains/interfaces/tui.md` | TUI 인터페이스 — 터미널 UI SC 생성, PTY 기반 런타임 검증, 버그 방지 (TUI-001–006) |
 | `domains/concerns/async-state.md` | Async state — 로딩/스트리밍 패턴, UX 동작 계약 |
 | `domains/concerns/auth.md` | Authentication — 인증 플로우 패턴, 세션 관리 |
 | `domains/concerns/external-sdk.md` | External SDK — 타입 신뢰 분류, API 계약 갭 감지 |
 | `domains/concerns/i18n.md` | Internationalization — 완성도 검사, 로케일 키 커버리지 |
 | `domains/concerns/ipc.md` | IPC — 경계 안전성, 반환값 방어 (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime — WebSocket/SSE 연결 관리 |
+| `domains/concerns/protocol-integration.md` | Protocol integration — LSP/MCP/커스텀 프로토콜 SC 생성, 기능 협상 검증 |
+| `domains/concerns/plugin-system.md` | Plugin system — 플러그인 라이프사이클 SC 생성, 격리 보증, API 계약 검증 |
+| `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC 생성, 권한 경계 검증 |
 | `domains/archetypes/ai-assistant.md` | AI assistant 아키타입 — A0–A4: 신호 키워드, 철학 (Streaming-First, Model Agnosticism), SC 확장, 프로브, constitution 주입 |
 | `domains/archetypes/public-api.md` | Public API 아키타입 — A0–A4: 신호 키워드, 철학 (Contract Stability, Rate Limit Transparency), SC 확장, 프로브, constitution 주입 |
 | `domains/archetypes/microservice.md` | Microservice 아키타입 — A0–A4: 신호 키워드, 철학 (Service Autonomy, Failure Isolation), SC 확장, 프로브, constitution 주입 |

@@ -231,10 +231,20 @@ Add a new Foundation when a framework has enough opinionated infrastructure deci
    - **F3**: Extraction Rules (how to detect existing decisions from code)
    - **F4**: T0 Feature Grouping (how Foundation items map to T0 Features)
    - **F7**: Framework Philosophy (optional — guiding principles the framework advocates)
+   - **F8**: Toolchain Commands (optional — build/test/lint/typecheck commands the pipeline reads for automation)
+   - **F9**: Scan Targets (optional — framework-specific patterns for reverse-spec Phase 2 data model/API extraction)
 
 2. **Update `_foundation-core.md`**: Add a row to the F6 Framework Files table.
 
 3. **Test**: Run reverse-spec on a project using this framework. Verify Foundation items are detected and grouped into T0 Features.
+
+### F8 Toolchain Commands
+
+F8 lets a Foundation file declare the exact build/test/lint commands for its ecosystem. When present, Foundation Gate and Verify Phase 1 use these commands instead of auto-detection. If F8 is absent, the pipeline falls back to npm/yarn/pnpm heuristics. See `_foundation-core.md` § F8 for the full field list.
+
+### F9 Scan Targets
+
+F9 lets a Foundation file declare framework-specific scan targets for reverse-spec Phase 2 analysis (data model extraction, API endpoint extraction, component patterns). These targets are MERGED with the universal scan targets in `_core.md` — no need to modify `_core.md` when adding a new framework. If F9 is absent, only universal targets apply. See `_foundation-core.md` § F9 for the format.
 
 ### TODO Scaffold Pattern
 

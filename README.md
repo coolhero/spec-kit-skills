@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:38 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:58 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -950,12 +950,16 @@ Complete list of all files in this repository grouped by skill.
 | `domains/interfaces/http-api.md` | HTTP API interface — endpoint discovery, request/response analysis |
 | `domains/interfaces/cli.md` | CLI interface — command parsing, argument analysis |
 | `domains/interfaces/data-io.md` | Data I/O interface — pipeline discovery, data flow analysis |
+| `domains/interfaces/tui.md` | TUI interface — terminal UI component extraction, PTY-based interaction analysis |
 | `domains/concerns/async-state.md` | Async state concern — loading/streaming/error state detection |
 | `domains/concerns/auth.md` | Authentication concern — auth flow detection |
 | `domains/concerns/external-sdk.md` | External SDK concern — third-party API integration detection |
 | `domains/concerns/i18n.md` | Internationalization concern — locale key detection |
 | `domains/concerns/ipc.md` | IPC concern — inter-process communication detection (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime concern — WebSocket/SSE detection |
+| `domains/concerns/protocol-integration.md` | Protocol integration concern — LSP/MCP/custom protocol detection and lifecycle analysis |
+| `domains/concerns/plugin-system.md` | Plugin system concern — plugin architecture, isolation, lifecycle detection |
+| `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL permission model detection |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0 signal keywords (LLM SDKs, streaming), A1 philosophy extraction (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API archetype — A0 signal keywords (OpenAPI, rate limiting), A1 philosophy extraction (Contract Stability, Rate Limit Transparency) |
@@ -971,6 +975,9 @@ Complete list of all files in this repository grouped by skill.
 | `domains/foundations/fastapi.md` | FastAPI Foundation — TODO scaffold (41 items, 12 categories) |
 | `domains/foundations/react-native.md` | React Native Foundation — TODO scaffold (50 items, 14 categories) |
 | `domains/foundations/flutter.md` | Flutter Foundation — TODO scaffold (50 items, 14 categories) |
+| `domains/foundations/bun.md` | Bun Foundation — runtime/toolchain decisions, F7 philosophy, F8 toolchain commands, F9 scan targets |
+| `domains/foundations/solidjs.md` | Solid.js Foundation — reactivity model decisions, F7 fine-grained reactivity philosophy |
+| `domains/foundations/hono.md` | Hono Foundation — web framework decisions, F7 philosophy, F8 toolchain, F9 scan targets |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -1009,12 +1016,16 @@ Complete list of all files in this repository grouped by skill.
 | `domains/interfaces/http-api.md` | HTTP API interface — API compatibility matrix, runtime verification |
 | `domains/interfaces/cli.md` | CLI interface — CLI verification, process-runner backend |
 | `domains/interfaces/data-io.md` | Data I/O interface — pipeline verification, data flow testing |
+| `domains/interfaces/tui.md` | TUI interface — terminal UI SC generation, PTY-based runtime verification, bug prevention (TUI-001–006) |
 | `domains/concerns/async-state.md` | Async state — loading/streaming patterns, UX behavior contract |
 | `domains/concerns/auth.md` | Authentication — auth flow patterns, session management |
 | `domains/concerns/external-sdk.md` | External SDK — type trust classification, API contract gap detection |
 | `domains/concerns/i18n.md` | Internationalization — completeness check, locale key coverage |
 | `domains/concerns/ipc.md` | IPC — boundary safety, return value defense (Electron/Tauri) |
 | `domains/concerns/realtime.md` | Realtime — WebSocket/SSE connection management |
+| `domains/concerns/protocol-integration.md` | Protocol integration — LSP/MCP/custom protocol SC generation, capability negotiation verification |
+| `domains/concerns/plugin-system.md` | Plugin system — plugin lifecycle SC generation, isolation guarantees, API contract verification |
+| `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC generation, permission boundary verification |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0–A4: signal keywords, philosophy (Streaming-First, Model Agnosticism), SC extensions, probes, constitution injection |
 | `domains/archetypes/public-api.md` | Public API archetype — A0–A4: signal keywords, philosophy (Contract Stability, Rate Limit Transparency), SC extensions, probes, constitution injection |
 | `domains/archetypes/microservice.md` | Microservice archetype — A0–A4: signal keywords, philosophy (Service Autonomy, Failure Isolation), SC extensions, probes, constitution injection |

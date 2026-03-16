@@ -65,3 +65,29 @@ Principles to inject into constitution-seed when this archetype is active:
 | Token budgets must be enforced at the application layer, not delegated to the provider | Provider limits cause hard failures; application-level enforcement enables graceful degradation |
 | Prompts are versioned assets stored outside of source code (or in dedicated prompt files) — never inline strings in business logic | Enables prompt iteration without code deployment; supports A/B testing and rollback |
 | Every LLM call site must have a defined fallback behavior (cached response, queued retry, or graceful error) | LLM APIs have variable availability; users must never see raw API errors |
+
+---
+
+## A2b. Coding Agent Sub-Pattern
+
+> When the AI assistant is specifically a coding agent (generates/modifies code, executes tools, manages files), these additional patterns apply.
+
+### Detection Keywords
+- "coding agent", "code generation", "file modification", "tool execution", "agentic coding"
+- Tool abstractions: `Tool.execute()`, tool registry, tool permission model
+- Agent role system: different agents with different capabilities/permissions
+
+### Additional Philosophy Principles
+
+| Principle | Description | Impact |
+|-----------|-------------|--------|
+| **Tool Safety** | Every tool execution must be permission-gated — no tool runs without explicit or rule-based authorization | SC must verify permission check before tool execution; unauthorized tool calls must be denied |
+| **Context Budget** | Total context sent to LLM must be managed — truncation strategy for long conversations | SC for message truncation: verify important context (system prompt, recent messages) preserved; old messages gracefully dropped |
+| **Agent Role Isolation** | Different agents (build, plan, review) have different tool access and behavioral constraints | SC per agent role: verify role-specific tool access (plan agent cannot write files), verify role switching preserves conversation |
+| **Doom Loop Prevention** | Agent repeatedly failing the same action must be detected and halted | SC for retry limit: verify exponential backoff or circuit breaker on repeated tool failures |
+
+### Additional SC Rules
+- **File modification safety**: All file writes must go through a controlled path (not arbitrary `fs.writeFileSync`)
+- **Workspace boundary**: Agent cannot modify files outside designated workspace (prevent writing to system dirs)
+- **Conversation persistence**: Session state survives process restart — verify SQLite/file persistence
+- **Multi-provider graceful degradation**: If primary LLM provider fails, agent degrades gracefully (not crash)
