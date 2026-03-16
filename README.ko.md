@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:46 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:51 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -133,7 +133,21 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 ## 아키텍처
 
-spec-kit-skills는 **에이전트 코딩을 위한 가드레일 시스템**입니다. 자율주행차에 차선 이탈 경고, 충돌 방지 브레이크, 속도 제한 장치가 있듯이 — spec-kit-skills는 AI 에이전트에게 계약(충족 조건), 컨텍스트(다른 Feature가 어떻게 되었는지), 검증(머지 전 점검)을 제공합니다. 에이전트가 올바른 코드를 작성하기를 바라는 대신, 시스템이 올바르게 만들어지도록 구조를 제공합니다.
+### 하네스 엔지니어링이란?
+
+말에 하네스를 씌우면 말이 약해지는 게 아니라, 말의 힘이 **방향성 있고 유용하게** 됩니다. AI 에이전트를 위한 하네스 엔지니어링도 같은 원리입니다. AI 코딩 에이전트는 강력하지만 불안정합니다 — 어제의 결정을 잊고, 컨텍스트 압박 하에서 규칙을 무시하고, 컴파일은 되지만 실제로 동작하지 않는 코드를 생성하고, 올바른 구현이 도메인 이해를 요구할 때 가장 단순한 구현으로 기본값을 잡습니다. **하네스 엔지니어링**은 이 원초적 능력을 신뢰할 수 있는 프로덕션급 결과물로 전환하는 제약, 컨텍스트 주입, 검증 게이트를 설계하는 엔지니어링 분야입니다.
+
+spec-kit-skills는 세 가지 엔지니어링 기둥 위에 구축된 **하네스 시스템**입니다:
+
+| 기둥 | 하는 일 | 없으면 |
+|------|---------|--------|
+| **컨텍스트 주입** | 각 단계에 필요한 지식을 정확히 주입 — 교차 Feature 계약, 소스 앱 구조, 데이터 라이프사이클 패러다임 | 에이전트가 불완전한 정보로 작업, 이미 결정된 것을 다시 발명 |
+| **게이트 강제** | 출력이 기준을 충족하지 못하면 파이프라인을 멈추는 BLOCKING 체크포인트 — "확인해야 함"이 아니라 "진행 불가" | 에이전트가 검증을 건너뛰고, 잘못된 가정이 6단계 이상 전파 |
+| **행동 충실도** | *무엇을* 만들지(컴포넌트, API)뿐 아니라 *어떻게 동작해야 하는지*(opt-in vs opt-out, CRUD 순서, 인터랙션 패러다임)를 캡처 | 구조적으로 정확하지만 경험적으로 틀린 소프트웨어 생산 |
+
+이 기둥들은 7개의 파이프라인 무결성 가드로 구현됩니다 — 5개 Feature에 걸친 44건의 현장 실패에서 추출한 일반화된 보호 패턴입니다. 각 가드는 트리거 조건, 검증 방법, 강제 수준을 갖춘 실패 *유형*을 정의합니다. 새로운 실패는 독립 규칙이 아니라 기존 가드의 확장으로 처리됩니다. [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md) 참조.
+
+> **요약**: spec-kit-skills는 에이전트의 지능을 대체하지 않고 **하네스**합니다. 에이전트가 창의적 작업(아키텍처, 코드, 문제 해결)을 하고, 하네스가 그 작업이 정보에 기반하고, 검증되었으며, 진실의 원천에 충실하도록 보장합니다.
 
 ### 설계 철학
 
@@ -347,7 +361,7 @@ T0 Feature는 코드가 필요한 Critical 항목이 있는 Foundation 카테고
 
 **소스 수정 게이트(Source Modification Gate)** — verify 중 모든 소스 편집은 코드 수정 *전에* 반드시 분류(Minor / Major-Implement / Major-Plan / Major-Spec)되어야 합니다. 분류 결과에 따라 수정이 인라인으로 이루어지거나 올바른 파이프라인 단계로 되돌아갑니다. Minor Fix 누적기가 Feature별 인라인 수정 횟수를 추적하며 — 3회에 도달하면 자동으로 Major로 에스컬레이션하여, 사소한 패치로 위장된 구조적 드리프트를 방지합니다.
 
-**파이프라인 무결성 가드(Pipeline Integrity Guards)** — 5개 Feature에 걸친 44건의 현장 실패에서 추출한 7가지 일반화된 보호 패턴입니다. 개별 규칙을 누적하는 대신, 각 가드가 실패 *유형*을 정의하며 트리거 조건, 검증 방법, 강제 수준을 갖습니다. Guard 1(가이드라인→게이트)은 첫 위반 후 규칙을 BLOCKING으로 자동 승격합니다. Guard 2(정적≠런타임)는 빌드부터 데이터 왕복까지 5단계 검증 체인을 강제합니다. Guard 3(단계 간 신뢰 차단기)는 잘못된 가정이 파이프라인을 통해 전파되는 것을 차단합니다. Guard 4(세분화 정렬)는 UI 밀도가 임계값을 초과할 때 파일 수준 분석을 컨트롤 수준으로 분해합니다. Guard 5(환경 동등성)는 클린 및 시드된 상태 양쪽에서의 듀얼 모드 테스트를 요구합니다. Guard 6(교차 Feature 인터페이스)는 `Provides →` 인터페이스를 소비자 관점에서 검증합니다. Guard 7(리빌드 충실도)는 소스 구조를 모든 파이프라인 단계에 관통시킵니다 — Component Tree + Data Lifecycle 추출부터 Source→Target 매핑 + 패러다임 매핑, Source-First 구현 게이트(rebuild+GUI에서 BLOCKING)까지. 새로운 실패는 기존 가드를 확장(테이블 행 추가)하며, 새 독립 규칙을 생성하지 않습니다. [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md) 참조.
+**파이프라인 무결성 가드(Pipeline Integrity Guards)** — 위의 [하네스 엔지니어링](#하네스-엔지니어링이란) 섹션에서 소개한 7개 가드가 세 기둥의 구체적 구현입니다. 각 가드가 특정 실패 유형을 커버합니다: G1 가이드라인→게이트 승격, G2 정적≠런타임 5단계 검증, G3 단계 간 신뢰 차단기, G4 세분화 정렬, G5 환경 동등성(듀얼 모드), G6 교차 Feature 인터페이스 검증, G7 리빌드 충실도 체인(Component Tree + Data Lifecycle → Source 매핑 → Source-First 게이트). 새로운 실패는 기존 가드를 확장하며, 독립 규칙을 생성하지 않습니다.
 
 **컨텍스트 윈도우 관리** — 스킬 파일은 지연 로딩 단위로 분해됩니다: `SKILL.md`(항상 로드, ~60줄)가 `commands/{cmd}.md`(명령별 로드)로 라우팅하고, 이는 `injection/{cmd}.md`(파이프라인 단계별 로드)와 `domains/{module}.md`(프로젝트 프로필별 로드)를 참조합니다. 데스크톱 Electron 재구축은 ~3,200 토큰의 도메인 규칙을 로드하고, CLI 그린필드는 ~800 토큰만 로드합니다. 사용하지 않는 모듈은 컨텍스트에 진입하지 않습니다.
 

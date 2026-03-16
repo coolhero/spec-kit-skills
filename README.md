@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:46 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:51 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -133,7 +133,21 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 ## Architecture
 
-When an AI agent builds software, it tends to forget what it did yesterday, ignore rules it was told last week, and produce code that compiles but doesn't actually work. spec-kit-skills is a **guardrail system** that prevents this — it tells the agent what it needs to know before each step, checks the results before accepting them, and blocks anything that breaks existing contracts. Think of it as a project manager that never sleeps, never forgets, and always checks the work.
+### What Is Harness Engineering?
+
+When you put a harness on a horse, you don't make the horse weaker — you make its power **directed and useful**. Harness engineering for AI agents works the same way: AI coding agents are powerful but unreliable. They forget yesterday's decisions, ignore rules under context pressure, produce code that compiles but doesn't actually work, and default to the simplest implementation when the correct one requires domain understanding. **Harness engineering** is the discipline of designing constraints, context injection, and verification gates that channel this raw capability into reliable, production-quality output.
+
+spec-kit-skills is a **harness system** built on three engineering pillars:
+
+| Pillar | What It Does | Without It |
+|--------|-------------|------------|
+| **Context Injection** | Feeds each step exactly the knowledge it needs — cross-Feature contracts, source app structure, data lifecycle paradigms | Agent works from incomplete information, re-invents what was already decided |
+| **Gate Enforcement** | BLOCKING checkpoints that stop the pipeline when output doesn't meet criteria — not "should check" but "cannot proceed" | Agent skips verification, wrong assumptions propagate through 6+ stages uncaught |
+| **Behavioral Fidelity** | Captures not just *what* to build (components, APIs) but *how it should behave* (opt-in vs opt-out, CRUD sequences, interaction paradigms) | Agent builds structurally correct but experientially wrong software |
+
+These pillars are implemented through 7 Pipeline Integrity Guards — generalized protection patterns extracted from 44 field-discovered failures. Each guard defines a failure *class* with trigger conditions, verification methods, and enforcement levels. New failures extend existing guards rather than accumulate as ad-hoc rules. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
+
+> **In short**: spec-kit-skills doesn't replace the agent's intelligence — it harnesses it. The agent does the creative work (architecture, code, problem-solving). The harness ensures that work is informed, verified, and faithful to the source of truth.
 
 ### Design Philosophy
 
@@ -347,7 +361,7 @@ Long pipeline sessions face two systemic risks: **context window loss** (agent f
 
 **Source Modification Gate** — During verify, every source edit must be classified (Minor / Major-Implement / Major-Plan / Major-Spec) *before* any code is touched. The classification determines whether the fix happens inline or routes back to the correct pipeline stage. A Minor Fix Accumulator tracks inline fixes per Feature — if the count reaches 3, the system auto-escalates to Major, preventing structural drift disguised as minor patches.
 
-**Pipeline Integrity Guards** — 7 generalized protection patterns extracted from 44 field-discovered failures across 5 Features. Instead of accumulating ad-hoc rules, each guard defines a failure *class* with trigger conditions, verification methods, and enforcement levels. Guard 1 (Guideline→Gate) auto-promotes rules to BLOCKING after first violation. Guard 2 (Static≠Runtime) enforces a 5-level verification chain from build to data round-trip. Guard 3 (Cross-Stage Trust Breakers) inserts circuit breakers that stop wrong assumptions from propagating through the pipeline. Guard 4 (Granularity Alignment) decomposes file-level analysis to control-level when UI density exceeds thresholds. Guard 5 (Environment Parity) requires dual-mode testing in both clean and seeded states. Guard 6 (Cross-Feature Interface) verifies `Provides →` interfaces from the consumer's perspective. Guard 7 (Rebuild Fidelity) threads source structure through every pipeline stage — from Component Tree + Data Lifecycle extraction to Source→Target mapping + paradigm mapping to Source-First implementation gates (BLOCKING for rebuild+GUI). New failures extend existing guards (add a table row) rather than create new standalone rules. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
+**Pipeline Integrity Guards** — The 7 guards introduced in the [Harness Engineering](#what-is-harness-engineering) section above are the concrete implementation of the three pillars. Each guard covers a specific failure class: G1 Guideline→Gate escalation, G2 Static≠Runtime 5-level verification, G3 Cross-Stage Trust Breakers, G4 Granularity Alignment, G5 Environment Parity (dual-mode), G6 Cross-Feature Interface verification, G7 Rebuild Fidelity Chain (Component Tree + Data Lifecycle → Source Mapping → Source-First gates). New failures extend existing guards rather than accumulate as ad-hoc rules.
 
 **Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
 
