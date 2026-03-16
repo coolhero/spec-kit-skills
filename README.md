@@ -2,13 +2,33 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 07:57 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 08:35 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
 - **Reverse-Spec** analyzes an existing codebase and extracts everything the SDD pipeline needs to know: what the app does, how it's structured, what data models and APIs exist. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
 - **Case Study** generates a structured after-action report from a completed project — what went well, what was hard, and what the numbers say. It collects the metrics that accumulated during the pipeline (how many Features, how tests went, how close the rebuild matched the original) and pairs them with the story of *why* things were built the way they were. The report also feeds back into improving the domain modules for next time.
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [What It Solves](#what-it-solves)
+- [Skills](#skills)
+- [User Journeys](#user-journeys)
+- [Quick Examples](#quick-examples)
+- [Architecture](#architecture)
+- [Domain Module System](#domain-module-system)
+- [Extensibility & Customization](#extensibility--customization)
+- [Session Resilience & Agent Governance](#session-resilience--agent-governance)
+- [Detailed Reference](#detailed-reference)
+- [/reverse-spec — Detailed Workflow](#reverse-spec--detailed-workflow)
+- [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd)
+- [/smart-sdd — Detailed Workflow](#smart-sdd--detailed-workflow)
+- [Reference](#reference)
+- [File Map](#file-map)
 
 ---
 
@@ -133,6 +153,133 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 ---
 
+## User Journeys
+
+```
+── From an Idea (Proposal Mode) ──────────────────────────────────
+/smart-sdd init "Build a Chrome extension that summarizes web pages using AI"
+→ Signal Extraction → Clarity Index scoring → Proposal (1 approval)
+→ auto-chains to constitution + add + pipeline
+
+── New Project (Standard) ────────────────────────────────────────
+/smart-sdd init  →  /smart-sdd add  →  /smart-sdd pipeline
+(project setup)     (define Features)   (implement)
+
+── SDD Adoption ──────────────────────────────────────────────────
+/reverse-spec --adopt  →  Global Evolution Layer  →  /smart-sdd adopt
+                           (roadmap, registries)      (document existing)
+
+── Rebuild ───────────────────────────────────────────────────────
+/reverse-spec  →  Global Evolution Layer  →  /smart-sdd pipeline
+(analyze code)    (roadmap, registries)      (rebuild code)
+
+── Incremental ───────────────────────────────────────────────────
+/smart-sdd add  →  updated Global Evolution  →  /smart-sdd pipeline
+```
+
+All journeys converge to **incremental mode** as the steady state.
+
+### End-to-End Workflow Examples
+
+### Scenario 1: Greenfield from an Idea (Proposal Mode)
+
+```
+1. /smart-sdd init "Build a task management app with Kanban boards and team workspaces"
+   +-- Signal Extraction: "task management" → Core Purpose, "Kanban boards" → gui,
+   |   "team workspaces" → auth + async-state
+   +-- Clarity Index: 58% (Medium tier) → ask 2 targeted questions
+   +-- Proposal: 5 Features, Domain Profile [gui, http-api] + [auth, async-state]
+   +-- User approves → auto-chain to constitution + add + pipeline
+
+2. /smart-sdd pipeline (auto-chained)
+   +-- Phase 0: Constitution finalized (principles inferred from Proposal)
+   +-- CI propagation: "Target Users" low-confidence → specify adds user role prompt
+   +-- F001-auth → F002-workspace → F003-task → F004-board → F005-notification
+```
+
+### Scenario 1b: Greenfield — Standard Q&A
+
+```
+1. /smart-sdd init
+   +-- Define project: "TaskFlow", TypeScript + Next.js + Prisma
+   +-- Constitution seed with 6 Best Practices
+   +-- Generate empty artifacts
+   +-- Chain into /smart-sdd add...
+       +-- Define: F001-auth, F002-workspace, F003-task, F004-board, F005-notification
+       +-- Demo Group assignment, create pre-context per Feature
+
+2. /smart-sdd pipeline
+   +-- Phase 0: Finalize constitution
+   +-- Release 1 (Foundation):
+   |   F001-auth → specify → plan → ... → verify
+   |   Update: User, Session entities → entity-registry
+   +-- Release 2 (Core):
+   |   F002-workspace (references F001's User entity)
+   |   F003-task ...
+   +-- Release 3 (Enhancement): F004-board, F005-notification
+```
+
+### Scenario 2: Brownfield Rebuild — Legacy e-commerce to React + FastAPI
+
+```
+1. /reverse-spec ./legacy-ecommerce --scope core --stack new
+   +-- Phase 1: Detect Django + jQuery stack
+   +-- Phase 2: Extract 12 entities, 45 APIs, 78 business rules
+   +-- Phase 3: Select Standard granularity (8 Features)
+   |   Tier 1: Auth, Product, Order
+   |   Tier 2: Cart, Payment, Search
+   |   Tier 3: Review, Notification
+   +-- Phase 4: Generate all artifacts
+
+2. /smart-sdd pipeline
+   +-- Scope: Core (Tier 1 only)
+   +-- F001-auth → F002-product → F003-order
+   +-- Tier 2/3 remain deferred
+
+3. /smart-sdd expand T2     → activates Cart, Payment, Search
+4. /smart-sdd expand full   → activates Review, Notification
+```
+
+### Scenario 3: Incremental — Adding notifications to existing project
+
+```
+1. /smart-sdd add
+   +-- "I need real-time notifications for task updates"
+   +-- Overlap check: No conflicts with existing Features
+   +-- ⚠️ Constitution Impact: WebSocket (new technology)
+   +-- F005-notification depends on F001-auth, F003-task
+
+2. /smart-sdd pipeline
+   +-- Skips completed Features
+   +-- F005-notification: specify → plan → ... → verify
+   +-- Update: Notification entity → entity-registry
+```
+
+---
+
+## Quick Examples
+
+**Rebuild an existing app**:
+```
+/reverse-spec ./legacy-app --scope core --stack new
+/smart-sdd pipeline
+```
+
+**Greenfield project**:
+```
+/smart-sdd init
+/smart-sdd add        # define Features interactively
+/smart-sdd pipeline   # specify → plan → tasks → implement → verify
+```
+
+**Add a Feature to an existing project**:
+```
+/smart-sdd add        # "I need real-time notifications"
+/smart-sdd pipeline   # processes only new/pending Features
+```
+
+---
+
 ## Architecture
 
 Beyond connecting Features, spec-kit-skills strengthens the harness in three ways — keeping the agent's memory alive across Features, making verification gates that can't be skipped, and checking that the software doesn't just have the right structure but actually *behaves* correctly:
@@ -229,6 +376,12 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 | Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
 | State | `specs/reverse-spec/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
 
+---
+
+## Domain Module System
+
+The system automatically selects which rules to load based on your project type. This section explains how that selection works.
+
 ### How Rules Are Selected for Your Project
 
 Different projects need different rules. A REST API needs status code checks; a desktop app needs window management safety; a rebuild needs to match the original; an AI app needs streaming-first design. Instead of loading every rule for every project, the system picks what's relevant based on **four questions about your project**:
@@ -261,15 +414,56 @@ Each axis answers a different question:
 
 A **Domain Profile** = selected Interfaces + selected Concerns + Archetype + Scenario. For example: `desktop-app + [gui] + [async-state, ipc] + ai-assistant + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, an AI project gets streaming verification that a CRUD app doesn't need.
 
-**How auto-detection works**: Each module declares **S0 Signal Keywords** (interfaces/concerns) or **A0 Signal Keywords** (archetypes). When you start a project with an idea string (`init "Build an AI chat assistant with..."`), the agent scans all keywords to infer your profile automatically. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers both `external-sdk` concern and `ai-assistant` archetype — all without manual configuration.
+### How Domain Profile Is Determined
 
-This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes. The generated Proposal can be modified per-section before approval — change the tech stack without re-answering purpose questions, or adjust Features without affecting the architecture. CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
+The way your Domain Profile is built depends on whether you're starting fresh or working with existing code:
 
-**How composition drives the pipeline**: Modules don't produce an output file — they merge into a behavioral ruleset in the agent's working memory. Each section routes to a specific pipeline step: `S1` shapes `specify` (SC generation), `S5` shapes `clarify` (consultation probes), `S7` shapes `plan`/`implement`/`verify` (bug prevention), `S3` shapes `verify` (verification gates), and `A1`/`A4`/`F7` shape `constitution` (domain principles). For a complete walkthrough with concrete before/after examples, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
+**Greenfield** (`/smart-sdd init`): Profile is inferred from **what you describe**. When you run `init "Build an AI-powered feature store with REST API"`, the system scans each module's signal keywords against your description. "AI" matches the `ai-assistant` archetype, "REST API" matches `http-api` interface, "feature store" matches `data-io` interface and `plugin-system` concern. The result is scored by the **Clarity Index** — a percentage across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) generates a Proposal directly; low CI triggers targeted questions to fill gaps. The Proposal shows the inferred profile for your approval before anything begins.
 
-**Module loading order**: `_core.md` (always) → each active Interface → each active Concern → each active Archetype → Scenario → user custom (`domain-custom.md`).
+**Brownfield** (`/reverse-spec`): Profile is detected from **what your code contains**. The system scans your source files for code patterns — `socket.io` imports activate `realtime`, `@Entity` decorators activate `http-api`, `Cargo.toml` alongside `pyproject.toml` activates `polyglot`. Framework-specific patterns (Express middleware, FastAPI decorators) identify the Foundation. The detected profile is recorded automatically and used when the pipeline runs.
 
-> **Why Archetype?** The original 3-Axis model covered _what_ the app exposes (Interface), _how_ it handles cross-cutting patterns (Concern), and _why_ it's being built (Scenario). But it lacked structured guidance for **domain-specific philosophy** — principles like "Streaming-First" for AI apps or "Contract Stability" for public APIs were generated ad-hoc. Archetype modules make these principles **structured, reusable, and extensible**.
+In both cases, the result is the same format stored in `sdd-state.md` — the pipeline doesn't care _how_ the profile was determined, only what it says.
+
+### What's Inside Each Module — The Section System
+
+Each module isn't just a tag that says "this project uses auth." It's a file containing **numbered sections**, where each section feeds a specific pipeline step. There are four section families, each serving a different skill:
+
+**S-sections** (smart-sdd — pipeline execution):
+
+| Section | What it provides | Which pipeline step uses it |
+|---------|-----------------|---------------------------|
+| **S0** | Signal keywords for auto-detection | `init` (profile inference) |
+| **S1** | Success criteria rules and anti-patterns | `specify` (what "done" means for this module) |
+| **S3** | Verification steps and gates | `verify` (what to check and what blocks progress) |
+| **S5** | Consultation questions | `clarify` / `add` (what to ask the user about this module) |
+| **S7** | Bug prevention rules with detection + fix | `plan` / `implement` / `verify` (known failure patterns) |
+
+**A-sections** (archetypes — domain philosophy):
+
+| Section | What it provides | Which pipeline step uses it |
+|---------|-----------------|---------------------------|
+| **A0** | Signal keywords for archetype detection | `init` (archetype inference) |
+| **A1** | Core philosophy principles | Guides all steps (e.g., "Streaming-First" shapes every decision) |
+| **A2** | SC generation extensions | `specify` (archetype-specific success criteria) |
+| **A3** | Domain-specific consultation questions | `clarify` / `add` (e.g., "Single or multi-provider LLM?") |
+| **A4** | Constitution injection | `constitution` (principles baked into the project's foundation) |
+
+**R-sections** (reverse-spec — source analysis):
+
+| Section | What it provides | Which pipeline step uses it |
+|---------|-----------------|---------------------------|
+| **R1** | Code patterns for detection | `analyze` Phase 1 (auto-detect which modules apply) |
+| **R3** | Extraction axes | `analyze` Phase 2 (what to extract from the code for this module) |
+
+**F-sections** (foundations — framework infrastructure):
+
+| Section | What it provides | Which pipeline step uses it |
+|---------|-----------------|---------------------------|
+| **F0** | Framework detection signals | `analyze` Phase 1 / `init` (identify framework) |
+| **F2** | Infrastructure checklist items | `init` (decisions before coding) / `analyze` (extract existing decisions) |
+| **F7** | Framework philosophy principles | `constitution` (framework-endorsed patterns) |
+
+When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
 ### Platform Foundation & Tier System
 
@@ -305,7 +499,9 @@ Foundation decisions feed into the **Tier System**, which determines Feature pro
 
 T0 Features are auto-generated from Foundation categories with Critical items requiring code. They must complete before T1 begins — a Foundation Gate enforces this.
 
-### Extensibility & Customization
+---
+
+## Extensibility & Customization
 
 The system is designed so you can start with defaults and progressively customize:
 
@@ -358,7 +554,9 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 
 For detailed step-by-step extension guides and the 5-level sophistication model, see [ARCHITECTURE-EXTENSIBILITY.md](ARCHITECTURE-EXTENSIBILITY.md). See also `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
 
-### Session Resilience & Agent Governance
+---
+
+## Session Resilience & Agent Governance
 
 Long pipeline sessions face two systemic risks: **context window loss** (agent forgets progress mid-session) and **uncontrolled edits** (agent patches code without classification). The system addresses both:
 
@@ -371,57 +569,6 @@ Long pipeline sessions face two systemic risks: **context window loss** (agent f
 **Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
 
 **Context Budget Protocol** — When assembled injection context for a pipeline step approaches the context window limit, sections are triaged via a 3-tier priority system: **P1** (must-inject — spec.md, tasks.md, Pattern Constraints), **P2** (summarizable to ≤30% — business-logic-map, referenced entities, preceding Feature results), **P3** (skip-safe — naming remapping, CSS value map, visual references). The overflow protocol: Summarize P2 → Skip P3 → Split (reduce parallel task batches). Each Checkpoint displays a budget indicator so the user sees what context was trimmed.
-
----
-
-## User Journeys
-
-```
-── From an Idea (Proposal Mode) ──────────────────────────────────
-/smart-sdd init "Build a Chrome extension that summarizes web pages using AI"
-→ Signal Extraction → Clarity Index scoring → Proposal (1 approval)
-→ auto-chains to constitution + add + pipeline
-
-── New Project (Standard) ────────────────────────────────────────
-/smart-sdd init  →  /smart-sdd add  →  /smart-sdd pipeline
-(project setup)     (define Features)   (implement)
-
-── SDD Adoption ──────────────────────────────────────────────────
-/reverse-spec --adopt  →  Global Evolution Layer  →  /smart-sdd adopt
-                           (roadmap, registries)      (document existing)
-
-── Rebuild ───────────────────────────────────────────────────────
-/reverse-spec  →  Global Evolution Layer  →  /smart-sdd pipeline
-(analyze code)    (roadmap, registries)      (rebuild code)
-
-── Incremental ───────────────────────────────────────────────────
-/smart-sdd add  →  updated Global Evolution  →  /smart-sdd pipeline
-```
-
-All journeys converge to **incremental mode** as the steady state.
-
----
-
-## Quick Examples
-
-**Rebuild an existing app**:
-```
-/reverse-spec ./legacy-app --scope core --stack new
-/smart-sdd pipeline
-```
-
-**Greenfield project**:
-```
-/smart-sdd init
-/smart-sdd add        # define Features interactively
-/smart-sdd pipeline   # specify → plan → tasks → implement → verify
-```
-
-**Add a Feature to an existing project**:
-```
-/smart-sdd add        # "I need real-time notifications"
-/smart-sdd pipeline   # processes only new/pending Features
-```
 
 ---
 
@@ -770,81 +917,7 @@ Shell scripts in `.claude/skills/smart-sdd/scripts/` let you inspect project pro
 | Demo group readiness | `demo-status.sh` |
 | Cross-file consistency | `validate.sh` |
 
-## End-to-End Workflow Examples
-
-### Scenario 1: Greenfield from an Idea (Proposal Mode)
-
-```
-1. /smart-sdd init "Build a task management app with Kanban boards and team workspaces"
-   +-- Signal Extraction: "task management" → Core Purpose, "Kanban boards" → gui,
-   |   "team workspaces" → auth + async-state
-   +-- Clarity Index: 58% (Medium tier) → ask 2 targeted questions
-   +-- Proposal: 5 Features, Domain Profile [gui, http-api] + [auth, async-state]
-   +-- User approves → auto-chain to constitution + add + pipeline
-
-2. /smart-sdd pipeline (auto-chained)
-   +-- Phase 0: Constitution finalized (principles inferred from Proposal)
-   +-- CI propagation: "Target Users" low-confidence → specify adds user role prompt
-   +-- F001-auth → F002-workspace → F003-task → F004-board → F005-notification
-```
-
-### Scenario 1b: Greenfield — Standard Q&A
-
-```
-1. /smart-sdd init
-   +-- Define project: "TaskFlow", TypeScript + Next.js + Prisma
-   +-- Constitution seed with 6 Best Practices
-   +-- Generate empty artifacts
-   +-- Chain into /smart-sdd add...
-       +-- Define: F001-auth, F002-workspace, F003-task, F004-board, F005-notification
-       +-- Demo Group assignment, create pre-context per Feature
-
-2. /smart-sdd pipeline
-   +-- Phase 0: Finalize constitution
-   +-- Release 1 (Foundation):
-   |   F001-auth → specify → plan → ... → verify
-   |   Update: User, Session entities → entity-registry
-   +-- Release 2 (Core):
-   |   F002-workspace (references F001's User entity)
-   |   F003-task ...
-   +-- Release 3 (Enhancement): F004-board, F005-notification
-```
-
-### Scenario 2: Brownfield Rebuild — Legacy e-commerce to React + FastAPI
-
-```
-1. /reverse-spec ./legacy-ecommerce --scope core --stack new
-   +-- Phase 1: Detect Django + jQuery stack
-   +-- Phase 2: Extract 12 entities, 45 APIs, 78 business rules
-   +-- Phase 3: Select Standard granularity (8 Features)
-   |   Tier 1: Auth, Product, Order
-   |   Tier 2: Cart, Payment, Search
-   |   Tier 3: Review, Notification
-   +-- Phase 4: Generate all artifacts
-
-2. /smart-sdd pipeline
-   +-- Scope: Core (Tier 1 only)
-   +-- F001-auth → F002-product → F003-order
-   +-- Tier 2/3 remain deferred
-
-3. /smart-sdd expand T2     → activates Cart, Payment, Search
-4. /smart-sdd expand full   → activates Review, Notification
-```
-
-### Scenario 3: Incremental — Adding notifications to existing project
-
-```
-1. /smart-sdd add
-   +-- "I need real-time notifications for task updates"
-   +-- Overlap check: No conflicts with existing Features
-   +-- ⚠️ Constitution Impact: WebSocket (new technology)
-   +-- F005-notification depends on F001-auth, F003-task
-
-2. /smart-sdd pipeline
-   +-- Skips completed Features
-   +-- F005-notification: specify → plan → ... → verify
-   +-- Update: Notification entity → entity-registry
-```
+---
 
 ## Reference
 
