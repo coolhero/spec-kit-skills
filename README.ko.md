@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:07 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:10 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -135,9 +135,9 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 AI 코딩 에이전트는 코드를 잘 작성합니다 — 프로젝트가 커지기 전까지는. 프로젝트가 커지면 지난주에 쓴 코드와 이번 주 코드가 모순되기 시작하고, 고친 버그가 다시 나타나고, 만드는 시간보다 에이전트를 교정하는 시간이 더 길어집니다.
 
-[spec-kit](https://github.com/github/spec-kit)은 Specification-Driven Development로 이 문제에 접근합니다: 먼저 spec을 쓰고, 그에 맞춰 코딩합니다. 에이전트에게 명확한 목표와 구조화된 pipeline(specify → plan → implement → verify)을 줍니다. 효과가 있습니다 — 하지만 하나의 Feature 안에서만. 에이전트는 여전히 두 Feature 전에 뭘 결정했는지 기억하지 못하고, 불편한 검증은 건너뛰고, 겉보기에는 맞지만 실제 동작이 다른 결과물을 만들어냅니다.
+이것은 **harness engineering** 문제입니다. 말에 harness를 씌우듯, 에이전트의 힘을 제한하는 게 아니라 방향성 있고 신뢰할 수 있게 만드는 것이 목표입니다. [spec-kit](https://github.com/github/spec-kit)은 Specification-Driven Development를 통해 첫 번째 harness를 제공합니다: 먼저 spec을 쓰고, 그에 맞춰 코딩합니다. 에이전트에게 명확한 목표와 구조화된 pipeline(specify → plan → implement → verify)을 줍니다.
 
-spec-kit-skills는 이것을 **harness engineering** 문제로 접근합니다. 말에 harness를 씌우듯, 에이전트의 능력을 제한하는 게 아니라 방향성 있고 신뢰할 수 있게 만드는 것이 목표입니다. spec-kit 위에 에이전트가 스스로 갖추지 못하는 세 가지를 덧씌웁니다:
+spec-kit-skills는 이 harness를 강화합니다. spec-kit이 각 Feature를 개별적으로 구조화한다면, spec-kit-skills는 그것들을 연결합니다 — Feature 간 에이전트의 기억을 유지하고, 건너뛸 수 없는 verification gate를 만들고, 구조뿐 아니라 실제 *동작*까지 올바른지 검증합니다:
 
 | 기둥 | 하는 일 | 없으면 |
 |------|---------|--------|
