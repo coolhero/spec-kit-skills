@@ -45,6 +45,24 @@ FR→Task coverage gaps are classified by the following severity rules:
 
 **MEDIUM rule**: If an FR has task(s) that cover the core behavioral intent but the task description doesn't specify implementation approach (e.g., visual preview method, data source, rendering technique). The agent can resolve these details during implement. Example: FR says "avatar style with visual previews" and a task covers avatar style, but doesn't specify how previews are rendered — this is MEDIUM, not HIGH.
 
+**FR Element Decomposition** (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 4b):
+
+When verifying FR→Task coverage, decompose each FR into its constituent **interactive elements**:
+
+1. Split FR description at "and", "," and "with" conjunctions to identify individual elements
+2. For each element containing interactive keywords (`selector`, `dropdown`, `picker`, `toggle`, `switch`, `slider`, `chooser`, `editor`, `input`, `button`, `menu`), verify a corresponding task AND Interaction Chain exist
+3. If any interactive element lacks a task → **HIGH** gap (not MEDIUM — the element is a user-visible control, not an implementation detail)
+
+Example:
+```
+FR-003: "Chat header with assistant name, model selector dropdown, and topic info"
+→ 3 elements: (1) assistant name, (2) model selector dropdown ← INTERACTIVE, (3) topic info
+→ "model selector dropdown" MUST have a task + Interaction Chain
+→ If tasks.md mentions "ChatHeader" generically but no task for model selector → HIGH gap
+```
+
+This rule prevents coarse FR→Task mapping from hiding missing interactive components.
+
 ---
 
 ## Review Display Content

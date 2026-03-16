@@ -429,3 +429,29 @@ Safety:      Catch-all fallback (unconditional continue prompt)
 **What happened** (internal review): Step 3f (User-Assisted SC Completion Gate) was fully implemented in verify-phases.md at line ~1594 with complete logic, but was missing from the Phase 3 checklist at line ~1026. The checklist jumped from 3e to 3f2, making Step 3f invisible to the execution flow.
 
 **Universal takeaway**: When adding a new step to a multi-step process, update BOTH the implementation AND the index/checklist that enumerates the steps. Implementation without checklist entry = invisible step. Checklist entry without implementation = phantom step. Both cause failures.
+
+### Theme G: Pipeline Architecture Patterns
+
+#### L29. Ad-hoc Rules Don't Scale — Generalize into Guards
+
+**What happened** (SKF-001~044): Over 5 Features (F001–F005), 44 individual failure reports were filed. Each was reflected as a specific rule in the relevant file. But the rules accumulated without structure — implement.md grew to 960+ lines, verify-phases.md to 1890+ lines. Agents started ignoring rules due to context pressure, causing the same *class* of failure to recur in different *instances*.
+
+**Universal takeaway**: When individual rules exceed ~20 for the same failure class, stop adding rules and extract a **Guard Pattern** — a generalized trigger/verification/enforcement template. The Guard tells the agent *why* to check, *when* to check, and *how strongly* to enforce. New incidents extend the existing Guard (add a row to a table) instead of creating a new standalone rule. See `pipeline-integrity-guards.md` for the 7 Guards extracted from 44 SKFs.
+
+#### L30. Single-Direction Trust Kills Pipelines
+
+**What happened** (SKF-013/014/015/044): A wrong runtime default (`navbarPosition: 'left'` instead of `'top'`) was inferred at reverse-spec via static code analysis. This wrong assumption propagated unchanged through specify → plan → tasks → implement → verify — 6 stages, 27 files, 3 user feedback rounds to discover. No stage independently verified the assumption.
+
+**Universal takeaway**: In any multi-stage pipeline where each stage trusts the previous stage's output, insert **circuit breakers** — independent verification points that check critical assumptions against ground truth (runtime state, source app, user confirmation). Minimum 2 breakers: one early (after initial analysis) and one late (before final delivery). The cost of 2 extra checks is trivial compared to 6-stage error propagation.
+
+#### L31. Granularity Mismatch — Analysis Resolution Must Match Problem Resolution
+
+**What happened** (SKF-028/037/038/039): SBI extraction operated at file level ("renders settings page"), FR→Task mapping at FR level ("ChatHeader covers FR-003"). But actual bugs occurred at control level (missing model selector dropdown, missing theme toggle). 14 controls on a settings page → 1 SBI entry → 13 controls lost.
+
+**Universal takeaway**: The granularity of analysis must match the granularity of the problem domain. For UI, the problem domain is individual interactive controls. For APIs, it's individual endpoints. For data, it's individual fields. When analysis granularity is coarser than problem granularity, bugs hide in the aggregation. Rule of thumb: if a single analysis unit contains 5+ distinct user-visible behaviors, decompose it.
+
+#### L32. Test Environment ≠ User Environment — Both Must Pass
+
+**What happened** (SKF-033/040/043): Playwright tested in clean state (no persisted data, default settings). All tests passed. User's app had fontSize:22, dark theme persisted, API keys saved — and UI was broken (double scrollbars, invisible switches, stale data). The clean-state tests were true positives for clean state but false negatives for real state.
+
+**Universal takeaway**: Automated tests prove the feature works *in the test environment*. They say nothing about the user's environment unless the test environment replicates it. For any feature with persistent state, test in both clean AND seeded environments. The seeded environment should include: non-default settings, edge-case values (max fontSize, long strings), and data from previous sessions.

@@ -492,6 +492,50 @@ Pattern Constraints identify framework+library interaction patterns known to cau
 
 ---
 
+## Source → Target Component Mapping (rebuild mode, BLOCKING)
+
+> (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
+> **Skip for**: greenfield, add mode, or backend-only Features.
+
+When pre-context.md contains a `## Component Tree` section (populated by reverse-spec Phase 2-7c), the plan MUST include a `## Source → Target Component Mapping` section in plan.md.
+
+### Required format
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| [SourceName] | [source/path.tsx] | [TargetName] | [target/path.tsx] | [1:1 / merged into X / deferred to F00N] |
+
+### Construction rules
+
+1. **Enumerate**: List every component from pre-context.md Component Tree (all levels, not just roots)
+2. **Map**: For each source component, identify the target component in plan.md's Project Structure
+3. **Account for all**: Every source component must appear in the table with one of:
+   - **1:1 mapping**: Direct correspondence (may be renamed)
+   - **Merged**: Multiple source components combined into one target (`merged into [TargetName]`)
+   - **Split**: One source component split into multiple targets (multiple rows with same source)
+   - **Deferred**: Component belongs to a future Feature (`deferred to F00N-name`)
+   - **Removed**: Component intentionally excluded (`removed — [reason]`)
+4. **No silent omissions**: A source component with no row in this table is a BLOCKING error
+
+### Checkpoint addition
+
+Add to the plan Checkpoint display:
+```
+📊 Source Component Mapping: [N] source → [M] target ([K] deferred, [J] merged)
+```
+
+### Review enforcement
+
+During plan Review HARD STOP:
+- If any source component has no mapping AND no explicit "deferred"/"removed" note → **BLOCKING — do not proceed**
+- User must either add the mapping or explicitly approve the omission
+
+### Downstream flow
+
+- **tasks.md**: Each UI task should reference its source component(s) from this mapping
+- **implement**: Source-First Implementation Gate reads this table to determine which source files to load per task
+- **verify**: Phase 3e Source App Comparison checks that all "1:1" mappings actually match structurally
+
 ## Post-Step Update Rules
 
 1. Read `SPEC_PATH/[NNN-feature-name]/data-model.md`

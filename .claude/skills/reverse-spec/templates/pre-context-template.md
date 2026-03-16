@@ -177,6 +177,33 @@
 > **How to use**: During `/speckit.specify`, ensure each P1/P2 interaction maps to an FR-### or is noted as a non-functional requirement in SCs. During `/speckit.plan`, design components to support these interactions. During `/smart-sdd verify`, check interaction completeness.
 > If this Feature has no micro-interactions (e.g., backend processing, data-only Feature), write "N/A — no interactive UI in this Feature".
 
+### Component Tree
+
+> **Only present for frontend/fullstack projects** with hierarchical UI components.
+> Captures parent-child component relationships, conditional rendering branches, and panel/layout systems.
+> Invisible to function-level analysis (SBI) and library-level analysis (UI Component Features).
+> Omit this section for backend-only, library, or CLI projects.
+> Extracted during `/reverse-spec` Phase 2-7c.
+
+```
+[PageName / RoutePath]
+├── [ComponentA]
+│   ├── [SubComponentA1] (conditional: [condition])
+│   └── [SubComponentA2] (interactive: [type])
+├── [ComponentB] (tab switcher: [Tab1] | [Tab2])
+│   ├── [Tab1Content]
+│   └── [Tab2Content]
+└── [ComponentC]
+    ├── [SubComponentC1]
+    └── [SubComponentC2] (conditional: [condition])
+```
+
+> **How to use**:
+> - During `/speckit.plan`: Build the Source → Target Component Mapping Table from this tree. Each source component must map to a target component or have an explicit "deferred to F00N" / "merged into X" note.
+> - During `/smart-sdd implement`: Before writing UI code, read this tree to understand the source structure. The Source-First Implementation Gate requires loading the corresponding source files.
+> - During `/smart-sdd verify`: Phase 3e Source App Comparison uses this tree to check structural fidelity.
+> If this Feature has no hierarchical components (e.g., single utility component), write "N/A — flat component structure, no hierarchy to capture".
+
 ### Naming Remapping
 
 > **Only present when the project identity changed** (Phase 0 Question 3). Omit this section entirely if the project name is unchanged.

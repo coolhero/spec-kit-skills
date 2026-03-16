@@ -707,3 +707,7 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Foundation files (frontend)** | `reverse-spec/domains/foundations/{nextjs,vite-react,solidjs}.md` |
 | **Foundation files (runtime)** | `reverse-spec/domains/foundations/{bun}.md` |
 | **Foundation files (mobile)** | `reverse-spec/domains/foundations/{react-native,flutter}.md` (TODO scaffolds) |
+| **Pipeline Integrity Guards** | `smart-sdd/reference/pipeline-integrity-guards.md` (7 guard patterns), `smart-sdd/reference/injection/implement.md` (Guards 1,2,5,6,7), `smart-sdd/reference/injection/plan.md` (Guard 7), `smart-sdd/reference/injection/analyze.md` (Guard 4), `smart-sdd/commands/verify-phases.md` (Guards 2,3,5,6), `reverse-spec/commands/analyze.md` (Guards 4,7) |
+| **Component Tree flow** | `reverse-spec/commands/analyze.md` § Phase 2-7c, `reverse-spec/templates/pre-context-template.md` § Component Tree, `smart-sdd/reference/injection/plan.md` § Source Component Mapping, `smart-sdd/reference/injection/implement.md` § Source-First Implementation |
+| **FR Element Decomposition** | `smart-sdd/reference/injection/analyze.md` § FR Element Decomposition, `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 4b |
+| **Data Round-trip Verification** | `smart-sdd/reference/injection/implement.md` § Data Persistence Round-Trip, `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 2 Level 4 |

@@ -849,6 +849,43 @@ When a store/config that is **asynchronously hydrated** (e.g., from electron-sto
 
 > **Rationale**: Static initialization (compile-time default) and async hydration (runtime persisted value) create a race condition window where the external system and config store disagree. This window causes UI mismatch (Select shows 'English' while UI renders Korean) that users perceive as a bug. The unconditional sync eliminates this window regardless of timing.
 
+### Data Persistence Round-Trip Verification
+
+> (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 2: Static ≠ Runtime, Level 4)
+
+**Trigger**: Feature writes data that must survive app restart (DB, electron-store, localStorage, file system).
+
+After implementing any data persistence flow, the agent MUST verify the **round-trip**: write → close → reopen → read → same data.
+
+**Rules**:
+
+1. **INSERT vs UPDATE awareness**: When flushing in-memory data to a database:
+   - New entities (created during this session) → MUST use INSERT or UPSERT
+   - Existing entities (loaded from DB, modified in-memory) → may use UPDATE
+   - **UPDATE-only flush for new entities = data loss** (UPDATE on non-existent row = no-op)
+
+2. **Renderer ↔ Main Process sync**: If a renderer store persists data via IPC to main process:
+   - Renderer store MUST have `hydrate()` that calls main process on app start
+   - `hydrate()` MUST be called in App initialization (not lazy)
+   - localStorage `partialize` MUST NOT strip fields that main process owns (e.g., `apiKey: ''` in localStorage while actual key is in safeStorage)
+
+3. **Post-implement verification** (when runtime verification is available):
+   ```
+   1. Create data (e.g., send chat message, save API key)
+   2. Verify data visible in UI
+   3. Close app (or reload)
+   4. Reopen app
+   5. Verify same data still visible
+   If data disappears → BLOCKING (do not proceed to verify)
+   ```
+
+4. **Streaming data special case**: For streaming features (AI chat, real-time feeds):
+   - Streaming blocks are created in-memory during stream
+   - Flush to DB must INSERT new blocks, not just UPDATE existing
+   - Verify: stream → complete → reload → blocks still present
+
+This rule prevents the class of bugs where "data works during session but vanishes on restart" — a critical failure mode that static checks (build/TS) cannot catch.
+
 ### Cross-Feature Integration
 
 - **Import Path Validation**: Verify correct paths when importing modules from other Features

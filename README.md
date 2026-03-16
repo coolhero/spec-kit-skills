@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:56 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 16:51 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -174,11 +174,11 @@ Each Feature goes through a **6-step lifecycle**. If verify finds bugs, they loo
 ```
 specify → plan → tasks → implement → verify → merge
    │                                    │
-   │  ◄──── Major-Spec ───────────────┤
-   │  ◄──── Major-Plan ───────────────┤
-   │  ◄──── Major-Implement ──────────┤
+   │  ◄──── Major-Spec ─────────────────┤
+   │  ◄──── Major-Plan ─────────────────┤
+   │  ◄──── Major-Implement ────────────┤
    │                                    │
-   └── Minor Fix (inline, ≤2 files) ───┘
+   └── Minor Fix (inline, ≤2 files) ────┘
 ```
 
 Verify discovers bugs and classifies them into 4 severity levels. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step.
@@ -1087,6 +1087,7 @@ Each skill follows the same internal directory convention:
 | `reference/state-schema.md` | `sdd-state.md` schema — Feature status, Toolchain, Demo Groups, Special Flags |
 | `reference/ui-testing-integration.md` | Playwright MCP integration guide for UI verification |
 | `reference/user-cooperation-protocol.md` | User assistance patterns for HARD STOP interactions |
+| `reference/pipeline-integrity-guards.md` | 7 generalized guard patterns from 44 SKF field failures — extensible pipeline protection system |
 | **Context Injection** | |
 | `reference/injection/adopt-plan.md` | Adopt plan step — document existing architecture as-is |
 | `reference/injection/adopt-specify.md` | Adopt specify step — SDD documentation wrapping of existing code |

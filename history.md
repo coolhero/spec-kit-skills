@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-03-16] Pipeline Integrity Guards — SKF-001~044 Root Cause Generalization
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **Pipeline Integrity Guards (new)** | `smart-sdd/reference/pipeline-integrity-guards.md` | 44건의 SKF를 7개 근본 원인 패턴으로 일반화. 개별 ad-hoc 규칙 대신 확장 가능한 Guard 시스템으로 설계. Guard 1(Guideline→Gate), Guard 2(Static≠Runtime), Guard 3(Cross-Stage Trust), Guard 4(Granularity), Guard 5(Environment Parity), Guard 6(Cross-Feature Interface), Guard 7(Rebuild Fidelity) |
+| **Component Tree Extraction** | `reverse-spec/commands/analyze.md` Phase 2-7c | GUI Feature의 컴포넌트 계층 구조를 pre-context에 추출 (Guard 4c, 7). SKF-037/044의 "파일 단위 SBI만으로는 UI 구조를 캡처할 수 없다" 문제 해결 |
+| **Component Tree template** | `reverse-spec/templates/pre-context-template.md` | pre-context에 `### Component Tree` 섹션 추가. plan/implement/verify가 참조하는 구조적 기준선 |
+| **Source→Target Component Mapping** | `smart-sdd/reference/injection/plan.md` | rebuild 모드에서 plan.md에 source↔target 컴포넌트 매핑 테이블 필수 (BLOCKING). SKF-038/044의 "plan이 source 구조를 참조하지 않고 독자적 아키텍처 설계" 문제 해결 |
+| **FR Element Decomposition** | `smart-sdd/reference/injection/analyze.md` | FR 내 interactive 요소를 개별 분해하여 task 누락 감지 (Guard 4b). SKF-039의 "model selector dropdown 누락" 문제 해결 |
+| **Data Round-Trip Verification** | `smart-sdd/reference/injection/implement.md` | INSERT vs UPDATE, hydrate(), streaming flush 등 persist 왕복 검증 규칙 (Guard 2 Level 4). SKF-040/041의 "데이터가 세션 중에는 보이지만 재시작 시 사라짐" 문제 해결 |
+| **Cross-Reference Map 확장** | `ARCHITECTURE-EXTENSIBILITY.md` | Pipeline Integrity Guards, Component Tree flow, FR Decomposition, Data Round-trip 항목 추가 |
+
+**설계 원칙**: 개별 SKF를 하나씩 반영하면 규칙이 무한히 증가하고 에이전트가 무시함. 대신 7개 Guard 패턴으로 일반화하여, 새로운 실패가 발생하면 기존 Guard를 확장하는 구조. Guard는 Trigger→Verification→Enforcement 3요소를 갖추어 어떤 프로젝트 유형에서도 적용 가능.
+
+---
+
 ## [2026-03-16] Architecture Review — Content Distribution + Contributor Templates
 
 | Change | File | Rationale |

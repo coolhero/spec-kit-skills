@@ -1201,6 +1201,73 @@ After completing source code analysis (Part A) and optional runtime probing (Par
 
 This file is a required input for Phase 4-2 (Interaction Behavior Inventory section of each pre-context.md). Its absence causes the Interaction Behavior Inventory section to be silently omitted.
 
+### 2-7c. Component Tree Extraction (Frontend/Fullstack Projects Only)
+
+> (See [pipeline-integrity-guards.md](../../smart-sdd/reference/pipeline-integrity-guards.md) § Guard 4: Granularity Alignment, § Guard 7: Rebuild Fidelity Chain)
+
+For each GUI Feature, extract the **hierarchical component structure** of every page/route. This captures parent-child relationships, conditional rendering branches, and panel systems that are invisible to file-level SBI extraction.
+
+**Why**: SKF-037/044 showed that file-level SBI ("renders HomePage") misses critical sub-components (SelectModelButton, TopicSidebar toggle). The Component Tree gives plan/implement a structural baseline to match.
+
+**Extraction procedure**:
+
+1. **Identify route entry points**: For each Feature, find the root component rendered by the router (e.g., `HomePage.tsx`, `SettingsPage.tsx`)
+
+2. **Walk the import tree**: From the root, follow child component imports to build the hierarchy. Stop at leaf components (no further child components) or third-party library components.
+
+3. **Mark conditional branches**: If a child renders conditionally based on a setting/mode/state, annotate the condition:
+   ```
+   ├── TopicSidebar (conditional: topicPosition='right')
+   ```
+
+4. **Mark interactive hotspots**: Components that contain interactive elements (dropdowns, modals, popovers, selectors) get a note:
+   ```
+   ├── ChatNavBar
+   │   ├── AssistantName (click → settings popup)
+   │   ├── SelectModelButton (model selector dropdown ← INTERACTIVE)
+   │   └── ToolButtons (settings, search)
+   ```
+
+5. **Mark panel/layout systems**: Components that manage dynamic layout (resizable panels, tab switchers, collapsible sections):
+   ```
+   ├── HomeTabs (tab switcher: Assistants | Topics)
+   ```
+
+**Output format** — Add a `## Component Tree` section to each Feature's `pre-context.md`:
+
+```markdown
+## Component Tree
+
+> Hierarchical component structure extracted from source code.
+> Conditional branches are marked. Interactive hotspots are tagged.
+> This tree is the structural baseline for plan (Source Component Mapping)
+> and implement (Source-First Implementation).
+
+[PageName/RoutePath]
+├── [ComponentA]
+│   ├── [SubComponentA1] (conditional: [condition])
+│   └── [SubComponentA2] (interactive: [type])
+├── [ComponentB] (tab switcher: [Tab1] | [Tab2])
+│   ├── [Tab1Content]
+│   └── [Tab2Content]
+└── [ComponentC]
+    ├── [SubComponentC1]
+    └── [SubComponentC2] (conditional: [condition])
+```
+
+**UI Control Density Check** (per Guard 4a):
+While building the tree, count interactive form controls (Switch, Select, Input, Button, Slider, etc.) per component. If a single component contains **5+ controls**, decompose each control as a separate SBI entry (not just "renders component").
+
+**Component Tree Generation Gate (MANDATORY for frontend/fullstack)**:
+1. After completing Phase 2-7c, each GUI Feature's pre-context draft must include a `## Component Tree` section
+2. If no components were found (e.g., backend-only Feature), record: `Component Tree: N/A — backend-only Feature`
+3. Verify the tree exists before proceeding to Phase 2-8
+
+This tree feeds into:
+- `/speckit.plan` → Source Component Mapping Table (see injection/plan.md)
+- `/smart-sdd implement` → Source-First Implementation Gate (see injection/implement.md)
+- `/smart-sdd verify` → Source App Comparison (see verify-phases.md Phase 3e)
+
 ### 2-8. Foundation Decision Extraction
 
 For each identified framework (from Phase 1-2b):

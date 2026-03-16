@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:56 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 16:51 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -174,9 +174,9 @@ spec-kit-skills는 **에이전트 코딩을 위한 가드레일 시스템**입�
 ```
 specify → plan → tasks → implement → verify → merge
    │                                    │
-   │  ◄──── Major-Spec ───────────────┤
-   │  ◄──── Major-Plan ───────────────┤
-   │  ◄──── Major-Implement ──────────┤
+   │  ◄──── Major-Spec ─────────────────┤
+   │  ◄──── Major-Plan ─────────────────┤
+   │  ◄──── Major-Implement ────────────┤
    │                                    │
    └── Minor Fix (인라인, ≤2 파일) ─────┘
 ```
@@ -1084,6 +1084,7 @@ specs/
 | `reference/state-schema.md` | `sdd-state.md` 스키마 — Feature 상태, Toolchain, Demo Groups, Special Flags |
 | `reference/ui-testing-integration.md` | Playwright MCP 통합 가이드 — UI 검증용 |
 | `reference/user-cooperation-protocol.md` | HARD STOP 인터랙션을 위한 사용자 협력 패턴 |
+| `reference/pipeline-integrity-guards.md` | 44건의 SKF 현장 실패에서 추출한 7가지 일반화된 가드 패턴 — 확장 가능한 파이프라인 보호 시스템 |
 | **Context Injection** | |
 | `reference/injection/adopt-plan.md` | Adopt plan 단계 — 기존 아키텍처를 있는 그대로 문서화 |
 | `reference/injection/adopt-specify.md` | Adopt specify 단계 — 기존 코드의 SDD 문서 래핑 |
