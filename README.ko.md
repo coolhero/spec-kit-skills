@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:57 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:59 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -133,9 +133,11 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 ## 아키텍처
 
-AI 코딩 에이전트는 강력하지만, multi-Feature 프로젝트에서는 불안정합니다. 세션 간 cross-Feature context를 잃고, build가 통과하면 검증을 건너뛰고, 잘못된 가정이 multi-stage pipeline을 검증 없이 통과하며, 구조적으로는 정확하지만 동작은 틀린 구현을 만들어냅니다.
+AI 코딩 에이전트를 오래 써본 사람이라면 이 패턴을 알 겁니다 — 한 세션에서 인상적인 코드를 작성하더니, 다음 세션에서는 자기가 내린 결정을 스스로 뒤집습니다. Build가 통과하면 "완료"라고 하지만, 정작 기능은 동작하지 않습니다. 같은 제약을 세 번째 설명해도 여전히 무시합니다. 프로젝트가 커질수록, 만드는 시간보다 에이전트를 교정하는 시간이 더 길어집니다.
 
-spec-kit-skills는 이것을 **harness engineering** 문제로 접근합니다 — 말에 harness를 씌우듯, 에이전트의 능력을 제한하는 게 아니라 **방향성 있고 유용하게** 만드는 것이 목표입니다. Harness engineering은 원초적 AI 능력을 신뢰할 수 있는 프로덕션급 결과물로 전환하는 제약, context injection, verification gate를 설계하는 엔지니어링 분야입니다.
+[spec-kit](https://github.com/github/spec-kit)은 SDD(Specification-Driven Development) 프레임워크를 도입하여 이 문제에 접근합니다 — 먼저 spec을 정의하고, 그에 맞춰 구현합니다. 에이전트에게 막연한 지시 대신 명확한 목표를 줍니다. 하지만 프레임워크만으로는 다 해결되지 않습니다 — 에이전트는 여전히 두 Feature 전에 뭘 결정했는지 잊고, 불편한 검증 단계는 건너뛰고, 프로젝트 전체 맥락이 필요한 곳에서 가장 단순한 구현을 선택합니다.
+
+spec-kit-skills는 이 gap을 **harness engineering**으로 메웁니다 — 말에 harness를 씌우듯, 에이전트의 능력을 제한하는 게 아니라 **방향성 있고 유용하게** 만드는 것이 목표입니다. spec-kit 위에 cross-Feature context 관리, 자동화된 verification gate, 에이전트가 건너뛸 수 없는 behavioral fidelity check를 덧씌웁니다.
 
 시스템은 세 가지 기둥 위에 구축됩니다:
 
