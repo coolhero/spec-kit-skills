@@ -204,6 +204,30 @@
 > - During `/smart-sdd verify`: Phase 3e Source App Comparison uses this tree to check structural fidelity.
 > If this Feature has no hierarchical components (e.g., single utility component), write "N/A — flat component structure, no hierarchy to capture".
 
+### Data Lifecycle Patterns
+
+> **Only present when entities with lifecycle signals are found** during `/reverse-spec` Phase 2-7d.
+> Captures how each entity type is created, activated, deactivated, and deleted in the source app.
+> Without this, downstream stages default to the simplest paradigm (typically opt-out/auto-enable-all), producing behaviorally divergent implementations.
+> Omit this section if no managed entities are detected (backend utilities, pure UI shells, static content).
+> Extracted during `/reverse-spec` Phase 2-7d.
+
+| Entity | Paradigm | CRUD Flow | Evidence Components |
+|--------|----------|-----------|-------------------|
+| [EntityName] | [opt-in / opt-out / curated / import-driven] | [Step1 → Step2 → ... → Final State] | [Component1, Component2] |
+
+> **Paradigm definitions**:
+> - **opt-in**: Items don't exist until user explicitly adds them. Source has Add/Create/Import components.
+> - **opt-out**: Items auto-appear; user removes/disables unwanted ones. Source has Enable/Disable/Toggle components.
+> - **curated**: System provides a preset collection; user selects/customizes from it.
+> - **import-driven**: Data enters via file/API import, not manual creation.
+>
+> **How to use**:
+> - During `/speckit.plan`: Build the Data Lifecycle Mapping table. Each entity's paradigm must match source OR have explicit justification for divergence.
+> - During `/smart-sdd implement`: Before implementing data flows (store, API, CRUD), read this table to understand how entities enter and exit the system. Implementing opt-out when source is opt-in = BLOCKING divergence.
+> - During `/smart-sdd verify`: Round-trip verification checks that the lifecycle paradigm produces the same user experience as the source app.
+> If no managed entities exist, write "N/A — no managed entities detected".
+
 ### Naming Remapping
 
 > **Only present when the project identity changed** (Phase 0 Question 3). Omit this section entirely if the project name is unchanged.

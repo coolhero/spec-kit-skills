@@ -201,27 +201,33 @@ During dependency Feature's verify: check that relevant stubs were resolved.
 
 **Fidelity Chain** (source structure flows through entire pipeline):
 ```
-reverse-spec → Component Tree in pre-context.md
+reverse-spec → Component Tree + Data Lifecycle Patterns in pre-context.md
     ↓
-specify → FR references specific source components
+specify → FR references specific source components + lifecycle paradigms
     ↓
-plan → Source Component Mapping Table (source→target, BLOCKING)
+plan → Source Component Mapping + Data Lifecycle Mapping (BLOCKING)
     ↓
-tasks → Each UI task references source component(s)
+tasks → Each UI task refs source component(s) + lifecycle paradigm
     ↓
-implement → Source-First: read source BEFORE writing code (BLOCKING gate)
+implement → Source-First: read source BEFORE writing (BLOCKING gate)
+          + Lifecycle compliance: data flow matches declared paradigm
     ↓
-verify → Source App Comparison: run both apps, compare (BLOCKING for rebuild+GUI)
+verify → Source App Comparison + Lifecycle round-trip (BLOCKING)
 ```
 
 **Key artifacts**:
 | Artifact | Created by | Consumed by |
 |----------|-----------|-------------|
 | Component Tree (pre-context.md § Component Tree) | reverse-spec Phase 2-7c | plan, implement |
+| Data Lifecycle Patterns (pre-context.md § Data Lifecycle Patterns) | reverse-spec Phase 2-7d | plan, implement, verify |
 | Source→Target Mapping (plan.md § Source Component Mapping) | plan | tasks, implement, verify |
+| Data Lifecycle Mapping (plan.md § Data Lifecycle Mapping) | plan | implement, verify |
 | Source Reference Log (per-task "📂 Source Reference: [files]") | implement | verify |
+| Lifecycle Compliance Log (per-task "📂 Lifecycle: [entity]=[paradigm]") | implement | verify |
 
-**Extensibility**: The chain structure is generic. For non-GUI rebuilds (API migration, CLI tool rebuild), the "Component Tree" becomes "API Endpoint Tree" or "Command Tree" — same pattern, different vocabulary. Add new tree types to reverse-spec Phase 2 as needed.
+**Extensibility**: The chain structure is generic:
+- For non-GUI rebuilds (API migration, CLI tool rebuild), "Component Tree" becomes "API Endpoint Tree" or "Command Tree" — same pattern, different vocabulary. Add new tree types to reverse-spec Phase 2 as needed.
+- Data Lifecycle Patterns apply to **any project type** with managed entities (models, plugins, users, configs). The paradigm vocabulary (opt-in, opt-out, curated, import-driven) is extensible — add new paradigms to the signal pattern table in reverse-spec Phase 2-7d.
 
 ---
 

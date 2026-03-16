@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-16] SKF-045 — Data Lifecycle Paradigm Mapping + Source Reference BLOCKING
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **Data Lifecycle Pattern Extraction (Phase 2-7d)** | `reverse-spec/commands/analyze.md` | Source app의 데이터 진입 패러다임(opt-in/opt-out/curated/import-driven)을 pre-context에 추출. 컴포넌트 구조만으로는 비즈니스 로직 패러다임을 캡처할 수 없음 (SKF-045) |
+| **Data Lifecycle Patterns template** | `reverse-spec/templates/pre-context-template.md` | pre-context에 `### Data Lifecycle Patterns` 섹션 추가. Entity별 Paradigm, CRUD Flow, Evidence Components 기록 |
+| **Data Lifecycle Mapping (BLOCKING)** | `smart-sdd/reference/injection/plan.md` | plan.md에 Source→Target 패러다임 매핑 테이블 필수. 패러다임 변경 시 Justification 없으면 BLOCKING |
+| **Source Reference Injection → BLOCKING** | `smart-sdd/reference/injection/implement.md` | rebuild+GUI에서 UI 태스크의 source 파일 읽기를 BLOCKING gate로 승격. 라이프사이클 준수 검증 추가 |
+| **Guard 7 Fidelity Chain 확장** | `pipeline-integrity-guards.md` | Data Lifecycle Patterns/Mapping을 체인에 추가. 6개 artifact로 확장 |
+| **Cross-Reference Map 확장** | `ARCHITECTURE-EXTENSIBILITY.md` | Data Lifecycle Paradigm Mapping, Source Reference BLOCKING Gate 항목 추가 |
+
+**설계 원칙**: Guard 7의 Fidelity Chain이 UI 구조(Component Tree)만 커버하고 데이터 흐름 패러다임을 놓치는 문제 해결. "opt-in vs opt-out" 같은 패러다임 차이는 기능적으로는 정상이지만 UX적으로 완전히 다른 앱을 만듦. 패러다임 vocabulary(opt-in, opt-out, curated, import-driven)는 확장 가능하도록 설계.
+
+---
+
 ## [2026-03-16] Pipeline Integrity Guards — Gap Closure (5 fixes)
 
 | Change | File | Rationale |

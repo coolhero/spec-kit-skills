@@ -1268,6 +1268,56 @@ This tree feeds into:
 - `/smart-sdd implement` → Source-First Implementation Gate (see injection/implement.md)
 - `/smart-sdd verify` → Source App Comparison (see verify-phases.md Phase 3e)
 
+### 2-7d. Data Lifecycle Pattern Extraction (All Project Types)
+
+> (See [pipeline-integrity-guards.md](../../smart-sdd/reference/pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
+
+Source apps embed **data lifecycle paradigms** — the rules governing how entities are created, activated, deactivated, and deleted. These paradigms are invisible to component-tree or file-level analysis but fundamentally shape UX behavior. If not explicitly captured, downstream stages default to the simplest paradigm (often opt-out / auto-enable-all), producing functionally correct but behaviorally wrong implementations.
+
+**Trigger**: For each entity type discovered in Phase 2 (SBIs, stores, DB tables, config objects), check if any of these **lifecycle signal components** exist in the source:
+
+| Signal Pattern | Component Name Examples | Indicates |
+|---|---|---|
+| Manage / Admin | `ManageModelsPopup`, `AdminPanel` | Curated collection — not all items are active |
+| Add / Create | `AddModelPopup`, `CreateAssistant` | Explicit opt-in — user adds items individually |
+| Enable / Disable / Toggle | `ToggleProvider`, `EnablePlugin` | Selective activation — items exist but may be inactive |
+| Import / Export | `ImportConfig`, `ExportData` | External lifecycle — data originates outside the app |
+| Archive / Soft-delete | `ArchiveChat`, `TrashFolder` | Retention lifecycle — deleted ≠ destroyed |
+
+**Extraction procedure** (for each entity with lifecycle signals):
+
+1. **Identify the entry paradigm**:
+   - **opt-in**: Items don't exist until user explicitly adds them (e.g., fetch models → display in "available" list → user clicks (+) to add)
+   - **opt-out**: Items auto-appear and user removes/disables unwanted ones (e.g., fetch models → all enabled by default → user disables)
+   - **curated**: Admin/system provides a set, user selects from it (e.g., preset assistants, template library)
+   - **import-driven**: Data enters via file/API import, not manual creation
+
+2. **Trace the CRUD flow**: Document the exact sequence the source app uses
+   - Example (opt-in): `API fetch → ManageModelsPopup (browse available) → user (+) → addModel() → model appears in selector`
+   - Example (opt-out): `API fetch → all models auto-added with enabled:true → user can disable individually`
+
+3. **Record evidence**: List the source components that implement this lifecycle
+
+**Output format** (in pre-context.md `### Data Lifecycle Patterns`):
+
+```
+| Entity | Paradigm | CRUD Flow | Evidence Components |
+|--------|----------|-----------|-------------------|
+| Model | opt-in | Fetch → Browse(ManageModelsPopup) → UserAdd(+) → Active | ManageModelsPopup, AddModelPopup |
+| Assistant | curated | Presets loaded → User selects/customizes → Save | AssistantPresets, EditAssistant |
+| Chat | opt-in | User creates → Messages append → Archive/Delete | NewChatButton, ArchiveChat |
+```
+
+**Data Lifecycle Generation Gate (MANDATORY when lifecycle signals found)**:
+1. After completing Phase 2-7d, each entity with lifecycle signals must have an entry in `### Data Lifecycle Patterns`
+2. If no lifecycle signals found → record: `Data Lifecycle Patterns: N/A — no managed entities detected`
+3. Verify the section exists before proceeding to Phase 2-8
+
+This feeds into:
+- `/speckit.plan` → Data Lifecycle Mapping Table (see injection/plan.md)
+- `/smart-sdd implement` → Source-First Implementation Gate uses lifecycle paradigm to validate data flow logic
+- `/smart-sdd verify` → Round-trip verification checks that lifecycle matches source paradigm
+
 ### 2-8. Foundation Decision Extraction
 
 For each identified framework (from Phase 1-2b):

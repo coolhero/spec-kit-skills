@@ -536,6 +536,49 @@ During plan Review HARD STOP:
 - **implement**: Source-First Implementation Gate reads this table to determine which source files to load per task
 - **verify**: Phase 3e Source App Comparison checks that all "1:1" mappings actually match structurally
 
+## Data Lifecycle Mapping (rebuild mode, BLOCKING)
+
+> (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
+> **Skip for**: greenfield, add mode, or Features with no managed entities.
+
+When pre-context.md contains a `### Data Lifecycle Patterns` section (populated by reverse-spec Phase 2-7d), the plan MUST include a `## Data Lifecycle Mapping` section in plan.md.
+
+### Required format
+
+| Entity | Source Paradigm | Target Paradigm | Justification | Key Components |
+|--------|----------------|-----------------|---------------|----------------|
+| [EntityName] | [opt-in / opt-out / curated / import-driven] | [same or different] | [why — required if different] | [TargetComponent1, TargetComponent2] |
+
+### Construction rules
+
+1. **Enumerate**: List every entity from pre-context.md § Data Lifecycle Patterns
+2. **Map paradigm**: For each entity, declare the target paradigm
+3. **Justify divergence**: If Target Paradigm ≠ Source Paradigm, a Justification is MANDATORY. Examples of valid justification:
+   - "Source has 200+ models — opt-out UX is impractical. Switch to opt-in with category filter."
+   - "Source uses file import but target is cloud-first — switch to API-driven with sync."
+4. **No unjustified divergence**: An entity with Source=opt-in and Target=opt-out (or vice versa) WITHOUT justification is a **BLOCKING error**
+5. **Key Components**: List the target components that implement this lifecycle (must exist in plan.md Project Structure)
+
+### Checkpoint addition
+
+Add to the plan Checkpoint display:
+```
+📊 Data Lifecycle Mapping: [N] entities — [M] same paradigm, [K] diverged (justified)
+```
+
+### Review enforcement
+
+During plan Review HARD STOP:
+- If any entity has paradigm divergence without justification → **BLOCKING — do not proceed**
+- If any entity's Key Components don't exist in plan.md Project Structure → **BLOCKING**
+- User must approve all paradigm divergences explicitly
+
+### Downstream flow
+
+- **tasks.md**: Data-handling tasks should note the lifecycle paradigm (e.g., "opt-in: implement ManageModelsPopup add flow")
+- **implement**: Source-First Implementation Gate verifies data flow logic matches declared paradigm
+- **verify**: Round-trip verification checks lifecycle behavior (e.g., "new model is NOT auto-enabled" for opt-in)
+
 ## Post-Step Update Rules
 
 1. Read `SPEC_PATH/[NNN-feature-name]/data-model.md`

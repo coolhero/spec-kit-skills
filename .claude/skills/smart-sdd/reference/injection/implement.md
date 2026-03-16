@@ -60,24 +60,35 @@ If plan.md contains an `## API Compatibility Matrix` section, inject the full ma
 
 Display before each API-related task: `📋 API Compatibility Matrix: [N] providers — follow per-provider contracts (auth, endpoints, response format)`
 
-## Source Reference Injection (rebuild/adoption mode)
+## Source Reference Injection (rebuild/adoption mode) — BLOCKING for rebuild+GUI
 
 If the Feature's `pre-context.md` has a non-empty Source Reference section AND `sdd-state.md` Source Path ≠ `N/A`:
 
 1. Read `Source Path` from `sdd-state.md` (Source Root)
 2. Resolve each file in the "Related Original File List" table as `[Source Path]/[File Path]`
-3. Before each `speckit-implement` task:
+3. **Before each `speckit-implement` task** (BLOCKING — no UI task may proceed without this):
    a. Identify which original source files are relevant to the current task (match by Rebuild Target column if populated, otherwise by Role/component name)
-   b. Read those files and inject as reference context
+   b. **Actually read those files** — not just reference them. The agent must open and parse the source code.
    c. Display: `📂 Source Reference: [N] original files loaded for task context`
+   d. **If no source files can be identified for a UI task**: Display `⚠️ No source reference found for task [name]` and check if the task creates a component that exists in the Source→Target Component Mapping. If it does, the corresponding source file MUST be loaded — resolve the mapping before proceeding.
 4. Reference Guide determines HOW to use the source:
    - Same Stack: Actively reuse patterns, match test structure, reference concrete values (CSS, padding, border-radius, etc.)
    - New Stack: Extract business logic only, use idiomatic new-stack patterns. Still reference concrete CSS/style values from original for visual fidelity
+5. **Data lifecycle compliance** (when pre-context.md § Data Lifecycle Patterns exists):
+   - Before implementing any data flow (store, API call, CRUD operation), read the lifecycle paradigm for the entity
+   - Verify the implementation matches the declared paradigm (e.g., opt-in → explicit user add action required, NOT auto-enable-all)
+   - Display: `📂 Lifecycle: [Entity] = [paradigm] — implementing [specific pattern]`
+   - Paradigm mismatch (e.g., implementing opt-out when source is opt-in) = **BLOCKING — stop and flag**
+
+**Enforcement level**:
+- **rebuild + GUI Features**: BLOCKING — a UI task without `📂 Source Reference` display is a gate violation. If context limits prevent loading all files, load at minimum the primary component file and display `📂 Source Reference: [N] of [M] files loaded (context-limited)`.
+- **rebuild + backend-only**: WARNING — source reference is strongly recommended but not blocking.
+- **adoption mode**: WARNING — source is the current project, reference for understanding not replication.
 
 **Skip if**: Source Path = `N/A` (greenfield) or Source Reference = "N/A".
 **Incremental (add)**: Source Path = `.` — files are in the current project. Read them for context but do not copy.
 
-> **Rationale**: The specify and plan steps read original source files via `injection/specify.md` Source Reference Path Resolution. But implement — the step that actually writes code — had no equivalent. This gap meant agents implemented code without ever seeing the original implementation, leading to behavioral and visual divergence in rebuild projects.
+> **Rationale**: The specify and plan steps read original source files via `injection/specify.md` Source Reference Path Resolution. But implement — the step that actually writes code — had no equivalent. This gap meant agents implemented code without ever seeing the original implementation, leading to behavioral and visual divergence in rebuild projects. Field observation (SKF-038) confirmed that even with this rule present, agents skip it unless it is a BLOCKING gate with explicit per-task enforcement.
 
 ## CSS Value Map Generation (rebuild mode with utility CSS)
 
