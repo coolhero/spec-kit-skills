@@ -293,6 +293,7 @@ When CI scoring is complete and Proposal is generated (CI ≥ 40%):
 ## Inferred Domain Profile
 **Interfaces**: {list with rationale}
 **Concerns**: {list with rationale}
+**Archetype**: {matched archetype(s) from A0 keywords, or "none"}
 **Scenario**: greenfield
 
 ## Proposed Features

@@ -170,11 +170,11 @@ Without this check, agents produce 2 tasks for a 500-line source file, resulting
 > **Estimation heuristic**: ~100 lines of original source ≈ 1 implementation task (varies by complexity). Files over 300 lines typically need 3+ tasks.
 
 **Source Component Reference Tags** (rebuild mode only — skip if greenfield or no GUI components):
-After reading tasks.md, if pipeline mode = rebuild AND the Feature has GUI components AND plan.md contains a `## Source→Target Component Mapping` table, scan each UI-related task description for a `Source: [ComponentName] (path/to/file.tsx)` tag. If **any UI task lacks this tag**, append:
+After reading tasks.md, if pipeline mode = rebuild AND the Feature has GUI components AND plan.md contains a `## Source → Target Component Mapping` table, scan each UI-related task description for a `Source: [ComponentName] (path/to/file.tsx)` tag. If **any UI task lacks this tag**, append:
 
 ```
 ── ⚠️ Source Component References Missing ─────────
-plan.md has a Source→Target Component Mapping table but [N] UI task(s)
+plan.md has a Source → Target Component Mapping table but [N] UI task(s)
 in tasks.md lack a Source: tag linking back to the original component.
 
 Without source references, implement loses traceability to the original
@@ -194,7 +194,7 @@ Add Source: tags to each UI task now or during the "I've finished editing" step.
 
 (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
 
-**Enforcement**: If rebuild mode + plan.md has Source→Target Component Mapping + any UI task lacks a `Source:` tag → **BLOCKING**. The agent MUST add source references before approval is offered. Without source component traceability, the rebuild may silently drop or duplicate original components.
+**Enforcement**: If rebuild mode + plan.md has Source → Target Component Mapping + any UI task lacks a `Source:` tag → **BLOCKING**. The agent MUST add source references before approval is offered. Without source component traceability, the rebuild may silently drop or duplicate original components.
 
 **Interaction Chain task injection check** (only if plan.md contains an `## Interaction Chains` section):
 After reading tasks.md, scan for tasks that address the full chain propagation (keywords: "interaction chain", "DOM effect", "store mutation", "visual result", "propagation", "classList", "style."). If tasks only mention handlers (e.g., "implement onThemeChange") but NOT the DOM/visual steps, append:
@@ -348,7 +348,7 @@ These are recommendations, not blockers. Proceed if the Feature is inherently la
 
 ── ⚠️ Source Component References Missing ─────────
 [Only if rebuild mode AND Feature has GUI components AND plan.md has
- Source→Target Component Mapping AND any UI task lacks a Source: tag
+ Source → Target Component Mapping AND any UI task lacks a Source: tag
  (See pipeline-integrity-guards.md § Guard 7: Rebuild Fidelity Chain)]
 
 ── ⚠️ Interaction Chain Tasks Incomplete ──────────

@@ -30,7 +30,7 @@ Detection patterns by framework:
 | Ratatui (Rust) | `Frame::render_widget()`, `Layout::default()`, terminal backend setup |
 | Textual (Python) | `class App(textual.app.App)`, `compose()`, CSS-like styling |
 
-## R4. Analysis Axes — TUI Interaction Patterns
+## R3b. Analysis Axes — TUI Interaction Patterns
 
 - Keyboard navigation: tab order, arrow key behavior, vim-like bindings
 - Focus management: which component receives input, focus transitions

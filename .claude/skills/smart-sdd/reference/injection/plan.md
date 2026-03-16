@@ -171,7 +171,7 @@ Interaction Chains cover **synchronous** state propagation (click → handler �
 Without async-flow rows, the agent implements the handler but may skip: auto-scroll during streaming, loading spinner management, error recovery UI, cleanup on unmount.
 
 **If `## Interaction Chains` is missing from plan.md** (UI Feature):
-- Display in Review: `⚠️ Interaction Chains section missing — UI propagation paths not documented.`
+- Display in Review: `🚫 Interaction Chains section missing — UI propagation paths not documented. BLOCKING.`
 - This is **BLOCKING** for UI Features. Without chains, implement creates handlers but skips DOM effects and visual results — producing code that builds but doesn't work visually.
 - The agent MUST add the section during Review before approval is offered.
 - The Verify Method column feeds directly into:
@@ -205,7 +205,7 @@ When Integration Contracts (see below) contain `Consumes ←` entries that requi
 3. **verify** → Phase 2 Step 1f (Cross-Feature File Modification Audit) checks that the target files were actually modified in git diff
 
 **If Integration Contracts have `Consumes ←` entries but NO cross-feature Interaction Chain rows**:
-- Display in Review: `⚠️ Integration Contracts define cross-Feature dependencies but Interaction Chains have no cross-feature rows. Without explicit chains, implement will create isolated modules that are never wired into existing code.`
+- Display in Review: `🚫 Integration Contracts define cross-Feature dependencies but Interaction Chains have no cross-feature rows. Without explicit chains, implement will create isolated modules that are never wired into existing code. BLOCKING.`
 
 ## Integration Contract Verification (Features with cross-Feature dependencies)
 
@@ -236,7 +236,7 @@ After `speckit-plan` completes, if the Feature has Functional Enablement Chain e
 **Why this matters**: Without explicit shape contracts, integration mismatches (e.g., `mcpMode` vs `mcp.mode`, `Tool[]` vs `{tools: Tool[]}`) slip through spec/plan/tasks/implement and are only discovered at runtime. This section makes the contract explicit so implement can build the bridge and verify can check it.
 
 **If `## Integration Contracts` is missing from plan.md** (Feature with Enablement Chain):
-- Display in Review: `⚠️ Integration Contracts section missing — cross-Feature data shape contracts not defined.`
+- Display in Review: `🚫 Integration Contracts section missing — cross-Feature data shape contracts not defined. BLOCKING.`
 - Display: `Risk: Shape mismatches between Features (e.g., different field names, nested vs flat) will only be caught at runtime.`
 - This is **BLOCKING** for Features with Enablement Chain entries. Without explicit shape contracts, implement creates isolated modules that are never integrated correctly. The agent MUST add the section during Review before approval is offered.
 
@@ -265,7 +265,7 @@ If multi-provider integration detected, check plan.md for an `## API Compatibili
 | Ollama | None (local) | http://localhost:11434 | — | GET /api/tags | POST /api/chat | `{message:{content}}` | No auth needed |
 
 If `## API Compatibility Matrix` is missing from plan.md:
-- Display: `⚠️ API Compatibility Matrix missing — multiple providers detected but per-provider differences not documented.`
+- Display: `🚫 API Compatibility Matrix missing — multiple providers detected but per-provider differences not documented. BLOCKING.`
 - Display: `Risk: Using one provider's pattern for all (e.g., OpenAI Bearer + /v1/models for Anthropic) causes runtime auth failures.`
 - This is **BLOCKING** for multi-provider Features. Using one provider's auth/endpoint pattern for all causes silent runtime failures. The agent MUST add the section during Review before approval is offered.
 
@@ -329,7 +329,7 @@ After `speckit-plan` completes:
 [If UI Feature: show the Interaction Chains table from plan.md.
  Each row = one interactive FR with full propagation path.
  If section is missing from plan.md for a UI Feature, display:
- "⚠️ Interaction Chains section missing — UI propagation paths not documented."
+ "🚫 Interaction Chains section missing — UI propagation paths not documented. BLOCKING."
  If non-UI Feature: omit this section entirely.]
 
 ── UX Behavior Contract (async UI Features only) ─
@@ -343,14 +343,14 @@ After `speckit-plan` completes:
 [If Feature has Functional Enablement Chain: show the contracts from plan.md.
  Each row = one integration boundary with Provider/Consumer shapes and bridge.
  If section is missing from plan.md for a Feature with Enablement Chain, display:
- "⚠️ Integration Contracts missing — cross-Feature data shape contracts not defined."
+ "🚫 Integration Contracts missing — cross-Feature data shape contracts not defined. BLOCKING."
  If no Enablement Chain entries: omit this section entirely.]
 
 ── API Compatibility Matrix (multi-provider only) ─
 [If 2+ external API providers detected: show the matrix from plan.md.
  Each row = one provider with auth, endpoints, response format.
  If section is missing from plan.md for a multi-provider Feature, display:
- "⚠️ API Compatibility Matrix missing — per-provider differences not documented."
+ "🚫 API Compatibility Matrix missing — per-provider differences not documented. BLOCKING."
  If single-provider or no external API: omit this section entirely.]
 
 ── SDK Migration (version upgrades only) ─────────

@@ -5,6 +5,10 @@
 
 ---
 
+## R1. Detection Signals
+
+> See [`shared/domains/interfaces/gui.md`](../../../shared/domains/interfaces/gui.md) § Code Patterns
+
 ## R3. Analysis Axes — UI Component Feature Extraction (Phase 2-7)
 
 > Skip this step entirely for backend-only, library, or CLI projects.

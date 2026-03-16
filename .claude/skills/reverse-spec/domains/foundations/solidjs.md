@@ -37,43 +37,43 @@
 ### RCT — Reactivity
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| RCT-01 | State management | Critical | Signals + Context vs Solid Store vs external (e.g., Zustand adapter)? |
-| RCT-02 | Derived state | Important | `createMemo` vs inline computation? Granularity guidelines? |
-| RCT-03 | Side effects | Important | `createEffect` cleanup patterns? onCleanup registration? |
-| RCT-04 | Batch updates | Optional | `batch()` for grouped signal updates? |
+| SO-RCT-01 | State management | Critical | Signals + Context vs Solid Store vs external (e.g., Zustand adapter)? |
+| SO-RCT-02 | Derived state | Important | `createMemo` vs inline computation? Granularity guidelines? |
+| SO-RCT-03 | Side effects | Important | `createEffect` cleanup patterns? onCleanup registration? |
+| SO-RCT-04 | Batch updates | Optional | `batch()` for grouped signal updates? |
 
 ### CMP — Components
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| CMP-01 | Component convention | Critical | Function components (only option in Solid) — naming, file organization? |
-| CMP-02 | Props pattern | Important | Destructuring props (loses reactivity!) vs `props.x` access? `splitProps()`? `mergeProps()`? |
-| CMP-03 | Children handling | Important | `props.children` vs `children()` helper for reactive children? |
-| CMP-04 | Ref forwarding | Optional | `ref` prop pattern? |
+| SO-CMP-01 | Component convention | Critical | Function components (only option in Solid) — naming, file organization? |
+| SO-CMP-02 | Props pattern | Important | Destructuring props (loses reactivity!) vs `props.x` access? `splitProps()`? `mergeProps()`? |
+| SO-CMP-03 | Children handling | Important | `props.children` vs `children()` helper for reactive children? |
+| SO-CMP-04 | Ref forwarding | Optional | `ref` prop pattern? |
 
 ### BST — App Bootstrap
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| BST-01 | Render target | Critical | Browser DOM (`render()`) vs Terminal (OpenTUI) vs Custom renderer? |
-| BST-02 | SSR/Hydration | Important | SolidStart SSR? Client-only? Hydration strategy? |
-| BST-03 | Entry point | Important | `index.tsx` → `render()` vs SolidStart `entry-server`/`entry-client`? |
+| SO-BST-01 | Render target | Critical | Browser DOM (`render()`) vs Terminal (OpenTUI) vs Custom renderer? |
+| SO-BST-02 | SSR/Hydration | Important | SolidStart SSR? Client-only? Hydration strategy? |
+| SO-BST-03 | Entry point | Important | `index.tsx` → `render()` vs SolidStart `entry-server`/`entry-client`? |
 
 ### STY — Styling
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| STY-01 | CSS strategy | Important | Tailwind? CSS Modules? vanilla-extract? Styled components? |
-| STY-02 | Component library | Optional | Solid-specific UI library? Kobalte? Ark UI? |
+| SO-STY-01 | CSS strategy | Important | Tailwind? CSS Modules? vanilla-extract? Styled components? |
+| SO-STY-02 | Component library | Optional | Solid-specific UI library? Kobalte? Ark UI? |
 
 ### BLD — Build & Bundle
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| BLD-01 | Bundler | Critical | Vite (default) vs custom? SolidStart? |
-| BLD-02 | Babel transform | Important | `babel-preset-solid` for JSX transform (required) |
+| SO-BLD-01 | Bundler | Critical | Vite (default) vs custom? SolidStart? |
+| SO-BLD-02 | Babel transform | Important | `babel-preset-solid` for JSX transform (required) |
 
 ### TST — Testing
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| TST-01 | Test library | Important | `@solidjs/testing-library`? Direct render testing? |
-| TST-02 | Signal testing | Important | How to test reactive state? `createRoot()` wrapping? |
+| SO-TST-01 | Test library | Important | `@solidjs/testing-library`? Direct render testing? |
+| SO-TST-02 | Signal testing | Important | How to test reactive state? `createRoot()` wrapping? |
 
 ---
 

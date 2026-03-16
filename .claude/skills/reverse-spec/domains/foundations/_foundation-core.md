@@ -127,7 +127,7 @@ When a project's framework is identified, resolve the Foundation checklist:
 
 ### Generic Foundation Protocol (Case B)
 
-When a framework is detected but has no Foundation file (e.g., Django, Spring Boot, Remix):
+When a framework is detected but has no Foundation file (e.g., Remix, Svelte, Nuxt):
 
 1. Load universal categories from this file (§ F1 Universal Categories)
 2. For each universal category, present **generic probes** to user:
@@ -200,7 +200,7 @@ Each Foundation item has a globally unique ID:
 
 | Component | Description | Example |
 |-----------|-------------|---------|
-| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), SB (Spring Boot), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix) |
+| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix) |
 | CAT | Category code from § F1 | WIN, SEC, IPC, MID, REN, etc. |
 | NN | Sequential number (01-99) | 01, 02, 03, ... |
 

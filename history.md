@@ -5,6 +5,42 @@
 
 ---
 
+## [2026-03-16] Post-Pull Comprehensive Consistency Audit (17 fixes across 13 files)
+
+### Foundation ID Prefix Fixes (Critical — ID collision prevention)
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **Bun F2 IDs prefixed** | `reverse-spec/domains/foundations/bun.md` | 22 IDs: `BST-01` → `BU-BST-01` etc. F4 convention requires `{FW}-{CAT}-{NN}` |
+| **Hono F2 IDs prefixed** | `reverse-spec/domains/foundations/hono.md` | 9 IDs: `BST-01` → `HO-BST-01` etc. |
+| **Solid.js F2 IDs prefixed** | `reverse-spec/domains/foundations/solidjs.md` | 16 IDs: `RCT-01` → `SO-RCT-01` etc. |
+| **F4 registry updated** | `reverse-spec/domains/foundations/_foundation-core.md` | Added BU, HO, SO to FW code table |
+
+### Structural Consistency (Moderate)
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **R1 section added** | `reverse-spec/domains/interfaces/http-api.md` | Missing R1 Detection Signals cross-ref to shared module |
+| **R1 section added** | `reverse-spec/domains/interfaces/gui.md` | Same — aligns with cli.md/data-io.md pattern |
+| **R4 → R3b renumbered** | `reverse-spec/domains/interfaces/tui.md` | R4 = "Registries (_core only)" per _schema.md; TUI patterns = R3b |
+| **Stale Case B examples** | `reverse-spec/domains/foundations/_foundation-core.md` L130 | Django/Spring Boot → Remix/Svelte/Nuxt (former now have Foundation files) |
+| **SKILL.md module list** | `smart-sdd/SKILL.md` L204-205 | Inline lists → `see shared/domains/_taxonomy.md` reference |
+
+### Pipeline/Injection Fixes
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **S0 path corrected** | `smart-sdd/commands/init.md` L32 | `domains/` → `shared/domains/` for signal keyword scan |
+| **Foundation paths clarified** | `smart-sdd/commands/init.md` L184, L199 | Short name → full relative path matching _resolver.md |
+| **§ ref fixed** | `smart-sdd/commands/init.md` L56 | `§ A0 Aggregation` → `§ S0/A0 Aggregation` |
+| **Archetype field added** | `smart-sdd/reference/clarity-index.md` §7 | Proposal Format missing Archetype field required by init.md Step 3 |
+| **Step 1b → 1c renumber** | `smart-sdd/reference/injection/implement.md` | i18n check renumbered to avoid collision with new native dependency check |
+| **BLOCKING icons** | `smart-sdd/reference/injection/plan.md` | `⚠️` → `🚫 ... BLOCKING.` for 3 BLOCKING sections (Interaction Chains, Integration Contracts, API Compat) |
+| **Arrow spacing** | `smart-sdd/reference/injection/tasks.md` | `Source→Target` → `Source → Target` consistent with plan.md |
+| **Orphaned params → optional** | `smart-sdd/domains/scenarios/greenfield.md` | `project_maturity`/`team_context` marked optional with defaults (`mvp`/`solo`) |
+
+---
+
 ## [2026-03-16] SKF-045 — Data Lifecycle Paradigm Mapping + Source Reference BLOCKING
 
 | Change | File | Rationale |

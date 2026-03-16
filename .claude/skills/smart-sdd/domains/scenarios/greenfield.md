@@ -12,7 +12,10 @@
 | `project_maturity` | `prototype`, `mvp`, `production` | S1 (SC depth), S5 (probes), S7 (over-engineering guard) |
 | `team_context` | `solo`, `small-team`, `large-team` | S5 (collaboration probes) |
 
-> Set during init Phase 1 or inferred from CI Scale & Scope dimension:
+> **Defaults**: `project_maturity` = `mvp`, `team_context` = `solo`.
+> These are **optional** — if not explicitly set, defaults apply and all conditional rules below still function.
+>
+> **Auto-inference** (when CI scoring data is available during init Proposal Mode):
 > - CI Scale = 0–1 or "personal tool" → `prototype`
 > - CI Scale = 2 or "MVP", "startup" → `mvp`
 > - CI Scale = 3 or "enterprise", "production" → `production`

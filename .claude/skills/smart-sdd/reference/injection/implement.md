@@ -391,7 +391,7 @@ After each `speckit-implement` task completes (before starting the next task):
 - **Build failure**: Enter Auto-Fix Loop (see below)
 - **Build success**: Proceed to Step 2
 
-**Step 1b — i18n Completeness Check** (when project uses i18n — skip otherwise):
+**Step 1c — i18n Completeness Check** (when project uses i18n — skip otherwise):
 After each task that creates/modifies UI files:
 1. Grep the task's changed files for translation call patterns (`t('key')`, `$t('key')`, etc.)
 2. For each extracted key, check existence in ALL locale JSON files

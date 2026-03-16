@@ -29,7 +29,7 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 #### Proposal Step 1: Signal Extraction + CI Scoring
 
 1. **Parse input**: Extract keyword signals from the idea string or PRD text
-2. **S0 scan**: Read S0 Signal Keywords from all `domains/interfaces/*.md` and `domains/concerns/*.md` modules (see `domains/_resolver.md` § Greenfield Inference)
+2. **S0 scan**: Read S0 Signal Keywords from all `shared/domains/interfaces/*.md` and `shared/domains/concerns/*.md` modules (see `domains/_resolver.md` § Greenfield Inference)
 3. **Match signals**: Map extracted keywords against S0 Primary/Secondary keywords
 4. **Score CI**: Calculate Clarity Index across 7 dimensions (see `reference/clarity-index.md` § 1)
 5. **Infer Domain Profile**: Build candidate Interfaces + Concerns from signal matches
@@ -53,7 +53,7 @@ Generate the Proposal document (format in `reference/clarity-index.md` § 7) con
 - **Overview**: 1–2 sentence summary
 - **Clarity Index**: Score breakdown per dimension
 - **Inferred Domain Profile**: Interfaces, Concerns, and rationale
-- **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § A0 Aggregation)
+- **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § S0/A0 Aggregation)
 - **Proposed Features**: Extracted from signals + inferred from domain knowledge
 - **Quality Rules Activated**: S1/S7 rules from active modules
 - **Open Questions**: Any CI dimensions with confidence ≤ 1
@@ -181,7 +181,7 @@ Check if `case-study-log.md` exists at project root:
 
 3. **Load Foundation checklist** from `../../reverse-spec/domains/foundations/{framework}.md`
    - If Foundation file exists (Case A): Load full F2 items
-   - If no Foundation file (Case B): Load universal categories from `_foundation-core.md` § F1 and present generic probes
+   - If no Foundation file (Case B): Load universal categories from `../../reverse-spec/domains/foundations/_foundation-core.md` § F1 and present generic probes
    - If "Custom" selected (Case D): Skip Foundation entirely, record `Framework: custom`
 
 4. **Present Critical items via AskUserQuestion** (grouped by category):
@@ -196,7 +196,7 @@ Check if `case-study-log.md` exists at project root:
 
 6. **Generate T0 Feature candidates** from Foundation categories:
    - Each Foundation category with >= 1 Critical item requiring code → T0 Feature candidate
-   - Apply T0 Feature Grouping rules from `_foundation-core.md` § F3
+   - Apply T0 Feature Grouping rules from `../../reverse-spec/domains/foundations/_foundation-core.md` § F3
    - Present candidates to user via AskUserQuestion for selection
    **If response is empty → re-ask** (per MANDATORY RULE 1)
    - Selected candidates become T0 Features in the roadmap

@@ -36,27 +36,27 @@
 ### BST — App Bootstrap
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| BST-01 | Runtime adapter | Critical | Bun (`Bun.serve`) vs Node.js (`@hono/node-server`) vs Workers? |
-| BST-02 | App factory | Important | Single `new Hono()` vs `createApp()` factory? |
+| HO-BST-01 | Runtime adapter | Critical | Bun (`Bun.serve`) vs Node.js (`@hono/node-server`) vs Workers? |
+| HO-BST-02 | App factory | Important | Single `new Hono()` vs `createApp()` factory? |
 
 ### MID — Middleware
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| MID-01 | Middleware chain | Critical | Which built-in middleware? (logger, cors, compress, etag, etc.) |
-| MID-02 | Custom middleware | Important | Middleware pattern: `async (c, next) => {}` conventions? |
+| HO-MID-01 | Middleware chain | Critical | Which built-in middleware? (logger, cors, compress, etag, etc.) |
+| HO-MID-02 | Custom middleware | Important | Middleware pattern: `async (c, next) => {}` conventions? |
 
 ### API — API Design
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| API-01 | Route organization | Critical | Flat routes vs grouped (`app.route()`) vs file-based? |
-| API-02 | Validation | Important | Zod validator middleware? `@hono/zod-validator`? |
-| API-03 | OpenAPI | Optional | `@hono/zod-openapi` for auto-generated OpenAPI specs? |
+| HO-API-01 | Route organization | Critical | Flat routes vs grouped (`app.route()`) vs file-based? |
+| HO-API-02 | Validation | Important | Zod validator middleware? `@hono/zod-validator`? |
+| HO-API-03 | OpenAPI | Optional | `@hono/zod-openapi` for auto-generated OpenAPI specs? |
 
 ### ERR — Error Handling
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| ERR-01 | Error handler | Critical | `app.onError()` global handler? Error response format? |
-| ERR-02 | Not found | Important | `app.notFound()` handler? |
+| HO-ERR-01 | Error handler | Critical | `app.onError()` global handler? Error response format? |
+| HO-ERR-02 | Not found | Important | `app.notFound()` handler? |
 
 ---
 

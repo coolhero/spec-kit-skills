@@ -37,58 +37,58 @@
 ### BST — App Bootstrap
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| BST-01 | Entry point strategy | Critical | Direct `bun run` vs compiled binary? |
-| BST-02 | Bun.serve usage | Important | Use Bun.serve for HTTP or external framework (Hono, Express)? |
-| BST-03 | Bun.file API | Optional | Use Bun.file for file I/O or Node.js fs API? |
+| BU-BST-01 | Entry point strategy | Critical | Direct `bun run` vs compiled binary? |
+| BU-BST-02 | Bun.serve usage | Important | Use Bun.serve for HTTP or external framework (Hono, Express)? |
+| BU-BST-03 | Bun.file API | Optional | Use Bun.file for file I/O or Node.js fs API? |
 
 ### BLD — Build & Bundle
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| BLD-01 | Bundler choice | Critical | Bun bundler vs esbuild vs custom? |
-| BLD-02 | Build target | Critical | `bun` target vs `node` target vs `browser` target? |
-| BLD-03 | Macros | Optional | Use Bun macros for compile-time code generation? |
-| BLD-04 | Binary compilation | Optional | Compile to standalone binary with `bun build --compile`? |
+| BU-BLD-01 | Bundler choice | Critical | Bun bundler vs esbuild vs custom? |
+| BU-BLD-02 | Build target | Critical | `bun` target vs `node` target vs `browser` target? |
+| BU-BLD-03 | Macros | Optional | Use Bun macros for compile-time code generation? |
+| BU-BLD-04 | Binary compilation | Optional | Compile to standalone binary with `bun build --compile`? |
 
 ### TST — Testing
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| TST-01 | Test runner | Critical | `bun test` (built-in) vs Jest vs Vitest? |
-| TST-02 | Test timeout | Important | Default timeout (5s) vs custom? |
-| TST-03 | Snapshot testing | Optional | Bun snapshot format vs Jest-compatible? |
+| BU-TST-01 | Test runner | Critical | `bun test` (built-in) vs Jest vs Vitest? |
+| BU-TST-02 | Test timeout | Important | Default timeout (5s) vs custom? |
+| BU-TST-03 | Snapshot testing | Optional | Bun snapshot format vs Jest-compatible? |
 
 ### PKG — Package Management
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| PKG-01 | Workspace setup | Critical | Bun workspaces vs Turborepo vs Nx? |
-| PKG-02 | Lockfile format | Important | `bun.lockb` (binary) — team tooling compatibility? |
-| PKG-03 | Overrides/patches | Optional | `overrides` vs `resolutions` for dependency patching? |
+| BU-PKG-01 | Workspace setup | Critical | Bun workspaces vs Turborepo vs Nx? |
+| BU-PKG-02 | Lockfile format | Important | `bun.lockb` (binary) — team tooling compatibility? |
+| BU-PKG-03 | Overrides/patches | Optional | `overrides` vs `resolutions` for dependency patching? |
 
 ### CMP — Node.js Compatibility
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| CMP-01 | Node.js API gaps | Critical | Which Node.js APIs are used that Bun doesn't support? (check Bun compatibility table) |
-| CMP-02 | Native modules | Important | Any native addons (node-gyp)? Bun native module support? |
-| CMP-03 | npm ecosystem | Important | Packages with Node.js-specific postinstall scripts? |
+| BU-CMP-01 | Node.js API gaps | Critical | Which Node.js APIs are used that Bun doesn't support? (check Bun compatibility table) |
+| BU-CMP-02 | Native modules | Important | Any native addons (node-gyp)? Bun native module support? |
+| BU-CMP-03 | npm ecosystem | Important | Packages with Node.js-specific postinstall scripts? |
 
 ### PTY — Process & PTY
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| PTY-01 | Subprocess spawning | Important | `Bun.spawn` vs Node.js child_process? |
-| PTY-02 | PTY management | Important | `bun-pty` for terminal interaction? |
-| PTY-03 | IPC | Optional | Bun IPC vs Node.js IPC? |
+| BU-PTY-01 | Subprocess spawning | Important | `Bun.spawn` vs Node.js child_process? |
+| BU-PTY-02 | PTY management | Important | `bun-pty` for terminal interaction? |
+| BU-PTY-03 | IPC | Optional | Bun IPC vs Node.js IPC? |
 
 ### ENV — Environment
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| ENV-01 | .env loading | Important | Bun built-in .env vs dotenv package? |
-| ENV-02 | Runtime detection | Important | `Bun.env` vs `process.env`? Runtime detection pattern? |
+| BU-ENV-01 | .env loading | Important | Bun built-in .env vs dotenv package? |
+| BU-ENV-02 | Runtime detection | Important | `Bun.env` vs `process.env`? Runtime detection pattern? |
 
 ### DXP — Developer Experience
 | ID | Item | Priority | Question |
 |----|------|----------|----------|
-| DXP-01 | Hot reload | Important | `bun --hot` vs `bun --watch`? Difference and use case? |
-| DXP-02 | Debugger | Optional | Bun debugger (`bun --inspect`) vs VS Code integration? |
-| DXP-03 | Path aliases | Optional | tsconfig paths vs bunfig.toml paths? |
+| BU-DXP-01 | Hot reload | Important | `bun --hot` vs `bun --watch`? Difference and use case? |
+| BU-DXP-02 | Debugger | Optional | Bun debugger (`bun --inspect`) vs VS Code integration? |
+| BU-DXP-03 | Path aliases | Optional | tsconfig paths vs bunfig.toml paths? |
 
 ---
 

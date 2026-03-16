@@ -5,6 +5,10 @@
 
 ---
 
+## R1. Detection Signals
+
+> See [`shared/domains/interfaces/http-api.md`](../../../shared/domains/interfaces/http-api.md) § Code Patterns
+
 ## R3. Analysis Axes — API Endpoint Extraction (Phase 2-2)
 
 Extract APIs from appropriate sources depending on the tech stack:

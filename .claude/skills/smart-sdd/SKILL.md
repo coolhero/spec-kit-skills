@@ -201,8 +201,8 @@ The `--profile` argument (or `--domain` for backward compatibility) selects the 
 **Loading**: After argument parsing, read `domains/_resolver.md` for the module resolution protocol. The resolver loads modules based on the Domain Profile stored in `sdd-state.md`:
 
 1. `domains/_core.md` — Universal rules (always loaded)
-2. `domains/interfaces/{interface}.md` — For each active interface (http-api, gui, cli, data-io)
-3. `domains/concerns/{concern}.md` — For each active concern (async-state, ipc, external-sdk, i18n, realtime, auth)
+2. `domains/interfaces/{interface}.md` — For each active interface (see `shared/domains/_taxonomy.md` for complete list)
+3. `domains/concerns/{concern}.md` — For each active concern (see `shared/domains/_taxonomy.md` for complete list)
 4. `domains/scenarios/{scenario}.md` — One scenario (greenfield, rebuild, incremental, adoption)
 5. User customization file (if specified in sdd-state.md `**Custom**` field)
 
