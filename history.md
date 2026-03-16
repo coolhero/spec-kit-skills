@@ -3234,3 +3234,21 @@ Three problems drove this change:
 | `ARCHITECTURE-EXTENSIBILITY.md` | New § 2b: Section→Pipeline mapping table, concrete step-by-step walkthrough, merge rule summary, ASCII diagrams |
 | `README.md` | Added "How composition drives the pipeline" paragraph with link to § 2b |
 | `README.ko.md` | Korean translation of the same paragraph |
+
+## [2026-03-16] README Architecture Section Restructure
+
+| Choice | Rationale |
+|--------|-----------|
+| Reordered Architecture subsections for user understanding flow | Original order: Design Philosophy → 4-Axis → Rebuild Config → Extensibility → Signal Keywords → Foundation → Tier → Data Flow → Feature Lifecycle → Session Resilience → Project Modes → Key Artifacts → Adapting. Users couldn't understand 4-Axis composition without knowing what the pipeline does first |
+| New order follows natural questions | "What does it do?" (Pipeline + Lifecycle) → "How do I use it?" (Modes) → "What does it produce?" (Artifacts) → "How does it know my rules?" (4-Axis + auto-detection + composition) → "Framework specifics?" (Foundation + Tiers) → "How do I customize?" (Extensibility) → "How is it reliable?" (Session Resilience) |
+| Merged Data Flow + Feature Lifecycle into "How the Pipeline Works" | These are two views of the same concept — splitting them separated related information |
+| Merged Platform Foundation + Tier System | Foundation creates T0 → Tiers order processing. Separating them broke the causal chain |
+| Merged Extensibility + Adapting + module extension examples | Previously scattered across 3 sections with overlapping content |
+| Moved Rebuild Configuration into Project Modes | It's a mode-specific detail, not a general architecture concept |
+| Moved Signal Keywords into 4-Axis section | Auto-detection is HOW the 4 axes get selected — not a separate concept |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `README.md` | Architecture section restructured: 13 subsections → 8 subsections in user-understanding order |
+| `README.ko.md` | Same restructure applied to Korean version |
