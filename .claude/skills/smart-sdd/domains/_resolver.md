@@ -21,7 +21,7 @@ Look for the Domain Profile fields in `sdd-state.md` header:
 
 ### Step 2. Resolve Profile (if needed)
 
-- If `**Domain Profile**` is a profile name (e.g., `desktop-app`): read `domains/profiles/{name}.md` to expand into interfaces + concerns
+- If `**Domain Profile**` is a profile name (e.g., `desktop-app`): read `domains/profiles/{name}.md` to expand into interfaces + concerns (+ archetype if profile specifies one, e.g., `sdk-library` → `sdk-framework`)
 - If `**Interfaces**` and `**Concerns**` are already explicit: use directly
 - **Scenario** is determined by the `**Origin**` field in sdd-state.md:
   - `greenfield` → `scenarios/greenfield.md`

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:16 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 07:57 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -237,11 +237,20 @@ Different projects need different rules. A REST API needs status code checks; a 
 Interface                    Concern                      Archetype                    Scenario
 (what the app exposes)       (cross-cutting patterns)     (domain philosophy)          (why we're building)
 ├── http-api                 ├── async-state              ├── ai-assistant             ├── greenfield
-├── gui                      ├── ipc                      ├── public-api               ├── rebuild
-├── cli                      ├── external-sdk             └── microservice             ├── incremental
-└── data-io                  ├── i18n                                                  └── adoption
+├── gui                      ├── auth                     ├── public-api               ├── rebuild
+├── cli                      ├── authorization            ├── microservice             ├── incremental
+├── data-io                  ├── codegen                  └── sdk-framework            └── adoption
+└── tui                      ├── external-sdk
+                             ├── i18n
+                             ├── infra-as-code
+                             ├── ipc
+                             ├── message-queue
+                             ├── multi-tenancy
+                             ├── plugin-system
+                             ├── polyglot
+                             ├── protocol-integration
                              ├── realtime
-                             └── auth
+                             └── task-worker
 ```
 
 Each axis answers a different question:
@@ -267,11 +276,11 @@ This inference is scored by the **Clarity Index (CI)** — a percentage measurin
 Projects built on specific frameworks (Electron, Express, Next.js, etc.) have infrastructure decisions that must be established before any business Feature — single-instance lock, IPC architecture, middleware chain, rendering strategy. The Platform Foundation layer captures these decisions explicitly:
 
 ```
-Profile (desktop-app, web-api, fullstack-web, cli-tool)
+Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library)
    │
-   ├── Interface modules (gui, http-api, cli, data-io)
-   ├── Concern modules (auth, async-state, ipc, i18n, realtime, external-sdk)
-   ├── Archetype modules (ai-assistant, public-api, microservice)
+   ├── Interface modules (gui, http-api, cli, data-io, tui)
+   ├── Concern modules (15: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
+   ├── Archetype modules (ai-assistant, public-api, microservice, sdk-framework)
    ├── Scenario (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: framework-specific guiding principles (distinct from F0–F6 checklists)
@@ -980,7 +989,7 @@ Each skill follows the same internal directory convention:
 | `domains/_core.md` | Universal analysis framework (R1–R7 analysis sections, including Foundation Detection Heuristics) |
 | `domains/_schema.md` | Domain profile schema template (Detection Signals, Analysis Axes, Feature Registry, etc.) |
 | `domains/app.md` | Application domain profile — detection and analysis behavior for backend/frontend/fullstack/mobile/library |
-| `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
+| `domains/data-science.md` | Data science domain profile — detection signals, project type classification, analysis axes, registries, tier classification |
 | `domains/interfaces/gui.md` | GUI interface — R3 UI component extraction, R4 micro-interaction pattern extraction (hover, keyboard, animation, DnD, focus, context menu, scroll) |
 | `domains/interfaces/http-api.md` | HTTP API interface — endpoint discovery, request/response analysis |
 | `domains/interfaces/cli.md` | CLI interface — command parsing, argument analysis |
@@ -997,11 +1006,16 @@ Each skill follows the same internal directory convention:
 | `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL permission model detection |
 | `domains/concerns/message-queue.md` | Message queue concern — broker library detection (RabbitMQ, Kafka, BullMQ, Sidekiq, Celery), config and code pattern signals |
 | `domains/concerns/task-worker.md` | Task worker concern — background job library detection (Celery, Sidekiq, BullMQ, Oban, Hangfire), scheduling pattern signals |
+| `domains/concerns/polyglot.md` | Polyglot concern — multi-build-file detection, bridge directory patterns, generated stub co-location, R3 cross-language bridge extraction |
+| `domains/concerns/codegen.md` | Codegen concern — generated marker scan, repetition analysis, generator config detection, R3 generated code extraction |
+| `domains/concerns/multi-tenancy.md` | Multi-tenancy concern — tenant identification and query filtering detection |
+| `domains/concerns/infra-as-code.md` | Infra-as-Code concern — IaC directory patterns, first-class infrastructure detection |
 | `domains/concerns/_TEMPLATE.md` | Contributor template for adding new reverse-spec concern modules (R1 detection signals) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0 signal keywords (LLM SDKs, streaming), A1 philosophy extraction (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API archetype — A0 signal keywords (OpenAPI, rate limiting), A1 philosophy extraction (Contract Stability, Rate Limit Transparency) |
 | `domains/archetypes/microservice.md` | Microservice archetype — A0 signal keywords (gRPC, Docker), A1 philosophy extraction (Service Autonomy, Failure Isolation) |
+| `domains/archetypes/sdk-framework.md` | SDK/Framework archetype — A0 signal keywords (package metadata, public API), A1 philosophy extraction (API Surface, Extension Model, Consumer Patterns) |
 | **Foundations** | |
 | `domains/foundations/_foundation-core.md` | Foundation resolution protocol — detection signals, category taxonomy, case matrix, T0 grouping, cross-framework carry-over map |
 | `domains/foundations/_TEMPLATE.md` | Contributor template for adding new Foundation files (F0-F9 structure) |
@@ -1059,7 +1073,7 @@ Each skill follows the same internal directory convention:
 | `domains/_resolver.md` | Profile resolution protocol — profile expansion, backward compatibility, module loading order |
 | `domains/_schema.md` | Domain profile schema — demo patterns, parity dimensions, verification behavior |
 | `domains/app.md` | Application domain profile — demo patterns, lint detection rules, UI testing, bug prevention |
-| `domains/data-science.md` | Data science domain profile template (not yet implemented — intentional TODO scaffolding) |
+| `domains/data-science.md` | Data science domain profile — demo patterns (3 project types), parity dimensions, verify steps |
 | `domains/interfaces/gui.md` | GUI interface — CSS rendering bugs, UI interaction surface audit, visual fidelity, micro-interaction verification |
 | `domains/interfaces/http-api.md` | HTTP API interface — API compatibility matrix, runtime verification |
 | `domains/interfaces/cli.md` | CLI interface — CLI verification, process-runner backend |
@@ -1076,14 +1090,21 @@ Each skill follows the same internal directory convention:
 | `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC generation, permission boundary verification |
 | `domains/concerns/message-queue.md` | Message queue — publish/consume lifecycle SC, dead letter handling, idempotency, bug prevention (MQ-001–005) |
 | `domains/concerns/task-worker.md` | Task worker — dispatch/execution lifecycle SC, failure handling, scheduling, bug prevention (TW-001–005) |
+| `domains/concerns/polyglot.md` | Polyglot — cross-language bridge SC, type mapping, build orchestration, bug prevention (PLY-001–005) |
+| `domains/concerns/codegen.md` | Codegen — generated code integrity SC, source-of-truth tracking, Feature boundary rules, bug prevention (CGN-001–005) |
+| `domains/concerns/multi-tenancy.md` | Multi-tenancy — tenant isolation SC, context propagation, cache isolation, bug prevention (MTN-001–005) |
+| `domains/concerns/infra-as-code.md` | Infra-as-Code — IaC validity SC, app-infra sync, secret management, bug prevention (IAC-001–005) |
 | `domains/concerns/_TEMPLATE.md` | Contributor template for adding new smart-sdd concern modules (S0/S1/S5/S7 structure) |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0–A4: signal keywords, philosophy (Streaming-First, Model Agnosticism), SC extensions, probes, constitution injection |
 | `domains/archetypes/public-api.md` | Public API archetype — A0–A4: signal keywords, philosophy (Contract Stability, Rate Limit Transparency), SC extensions, probes, constitution injection |
 | `domains/archetypes/microservice.md` | Microservice archetype — A0–A4: signal keywords, philosophy (Service Autonomy, Failure Isolation), SC extensions, probes, constitution injection |
+| `domains/archetypes/sdk-framework.md` | SDK/Framework archetype — A0–A4: API Stability, Extension-First Design, Example-as-Contract, Documentation Parity, Backward Compatibility |
 | `domains/profiles/fullstack-web.md` | Preset: [http-api, gui] + [async-state, auth, i18n] |
 | `domains/profiles/web-api.md` | Preset: [http-api] + [auth] |
 | `domains/profiles/desktop-app.md` | Preset: [gui] + [async-state, ipc] |
 | `domains/profiles/cli-tool.md` | Preset: [cli] |
+| `domains/profiles/ml-platform.md` | Preset: [http-api, cli, data-io] + [plugin-system, auth] |
+| `domains/profiles/sdk-library.md` | Preset: [cli] + [plugin-system] + archetype: sdk-framework |
 | `domains/scenarios/greenfield.md` | New project — no existing code, full pipeline from scratch |
 | `domains/scenarios/rebuild.md` | Rebuild — preservation_level, change_scope, migration_strategy parameters |
 | `domains/scenarios/incremental.md` | Incremental — add Features to existing SDD project |
@@ -1145,10 +1166,15 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/concerns/protocol-integration.md` | Protocol — S0 + R1 (LSP, MCP, JSON-RPC, capability negotiation) |
 | `domains/concerns/realtime.md` | Realtime — S0 + R1 (Socket.io, WebSocket, SSE) |
 | `domains/concerns/task-worker.md` | Task worker — S0 + R1 (Celery, Sidekiq, BullMQ, cron patterns) |
+| `domains/concerns/polyglot.md` | Polyglot — S0 + R1 (FFI bridges, Protobuf, WASM, multi-build-file coexistence) |
+| `domains/concerns/codegen.md` | Codegen — S0 + R1 (generated markers, template files, generator configs, repetitive file groups) |
+| `domains/concerns/multi-tenancy.md` | Multi-tenancy — S0 + R1 (tenant_id patterns, RLS policies, tenant middleware) |
+| `domains/concerns/infra-as-code.md` | Infra-as-Code — S0 + R1 (Terraform, Helm, K8s manifests, Docker Compose, CI/CD, operators) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant — A0 semantic + code patterns (LLM SDKs, streaming, RAG) |
 | `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |
 | `domains/archetypes/microservice.md` | Microservice — A0 semantic + code patterns (gRPC, service mesh, Docker) |
+| `domains/archetypes/sdk-framework.md` | SDK/Framework — A0 semantic + code patterns (package metadata, public API, extension points, examples) |
 
 ### case-study (`.claude/skills/case-study/`)
 

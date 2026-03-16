@@ -378,6 +378,10 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 | `authorization` | RBAC/ABAC/ACL access control | Permission models, role hierarchy, policy enforcement |
 | `message-queue` | Message broker / event bus patterns | Publish/consume lifecycle, DLQ, delivery guarantees, idempotency |
 | `task-worker` | Background job / scheduled task patterns | Task dispatch, retry, timeout, periodic scheduling, worker lifecycle |
+| `polyglot` | Multi-language codebases with cross-language bridges | FFI (PyO3, cgo, JNI), Protobuf/gRPC, WASM, build orchestration |
+| `codegen` | Generated/templated code from IDL/schema/template | Source-of-truth tracking, regeneration pipeline, repetitive file detection |
+| `multi-tenancy` | Tenant isolation, per-tenant configuration | Row-level security, tenant context propagation, cache isolation |
+| `infra-as-code` | Infrastructure definitions as first-class components | Terraform, Helm, K8s, Docker Compose, app-infra sync |
 
 ### Examples of Potential New Concerns
 
@@ -434,7 +438,15 @@ Add a new archetype when a class of applications has distinct philosophical prin
 - `saas-platform` — Multi-tenancy, Tenant Isolation, Subscription Lifecycle, Usage Metering
 - `real-time-collaboration` — Conflict Resolution (CRDT/OT), Presence Awareness, Offline-First
 - `iot-gateway` — Device Lifecycle, Telemetry Pipeline, Firmware Updates, Connection Management
-- `developer-tool` — Extensibility (plugins/hooks), Configuration as Code, Backward Compatibility
+
+### Existing Archetype Modules
+
+| Archetype | Description | Key Principles |
+|-----------|-------------|---------------|
+| `ai-assistant` | LLM-powered applications | Streaming-First, Model Agnosticism, Offline Resilience, Token Awareness, Prompt Versioning |
+| `public-api` | External-facing API platforms | Rate Limiting, Versioning, API Key Lifecycle, Documentation Parity |
+| `microservice` | Distributed service architecture | Service Autonomy, Contract-First, Circuit Breaking, Observability |
+| `sdk-framework` | Libraries, SDKs, frameworks for other developers | API Stability, Extension-First Design, Example-as-Contract, Documentation Parity, Backward Compatibility |
 
 ---
 
@@ -542,16 +554,18 @@ Add a profile when a common project configuration (interface + concern combinati
 
 1. Create `.claude/skills/smart-sdd/domains/profiles/{name}.md`
 2. List the interfaces and concerns
-3. Archetypes are **not** part of profiles — they are resolved separately (Step 2c in resolver)
+3. Profiles may optionally include an `archetype:` field (e.g., `sdk-library` → `sdk-framework`). When present, the resolver activates that archetype during Step 2c.
 
 ### Existing Profiles
 
-| Profile | Interfaces | Concerns |
-|---------|-----------|----------|
-| `desktop-app` | gui | async-state, ipc |
-| `fullstack-web` | http-api, gui | async-state, auth, i18n |
-| `web-api` | http-api | auth |
-| `cli-tool` | cli | (none) |
+| Profile | Interfaces | Concerns | Archetype |
+|---------|-----------|----------|-----------|
+| `desktop-app` | gui | async-state, ipc | — |
+| `fullstack-web` | http-api, gui | async-state, auth, i18n | — |
+| `web-api` | http-api | auth | — |
+| `cli-tool` | cli | (none) | — |
+| `ml-platform` | http-api, cli, data-io | plugin-system, auth | — |
+| `sdk-library` | cli | plugin-system | sdk-framework |
 
 ---
 
@@ -713,3 +727,11 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Data Round-trip Verification** | `smart-sdd/reference/injection/implement.md` § Data Persistence Round-Trip, `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 2 Level 4 |
 | **Data Lifecycle Paradigm Mapping** | `reverse-spec/commands/analyze.md` § Phase 2-7d, `reverse-spec/templates/pre-context-template.md` § Data Lifecycle Patterns, `smart-sdd/reference/injection/plan.md` § Data Lifecycle Mapping, `smart-sdd/reference/injection/implement.md` § Source Reference Injection (lifecycle compliance), `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 7 |
 | **Source Reference BLOCKING Gate** | `smart-sdd/reference/injection/implement.md` § Source Reference Injection (BLOCKING for rebuild+GUI), `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 7 |
+| **Polyglot concern** | `shared/domains/concerns/polyglot.md` (S0/R1), `smart-sdd/domains/concerns/polyglot.md` (S1/S5/S7), `reverse-spec/domains/concerns/polyglot.md` (R1/R3) |
+| **Codegen concern** | `shared/domains/concerns/codegen.md` (S0/R1), `smart-sdd/domains/concerns/codegen.md` (S1/S5/S7), `reverse-spec/domains/concerns/codegen.md` (R1/R3) |
+| **Multi-tenancy concern** | `shared/domains/concerns/multi-tenancy.md` (S0/R1), `smart-sdd/domains/concerns/multi-tenancy.md` (S1/S5/S7), `reverse-spec/domains/concerns/multi-tenancy.md` (R1) |
+| **Infra-as-Code concern** | `shared/domains/concerns/infra-as-code.md` (S0/R1), `smart-sdd/domains/concerns/infra-as-code.md` (S1/S5/S7), `reverse-spec/domains/concerns/infra-as-code.md` (R1) |
+| **SDK/Framework archetype** | `shared/domains/archetypes/sdk-framework.md` (A0), `smart-sdd/domains/archetypes/sdk-framework.md` (A1-A4), `reverse-spec/domains/archetypes/sdk-framework.md` (A0/A1) |
+| **Data science domain** | `smart-sdd/domains/data-science.md` (Demo/Parity/Verify), `reverse-spec/domains/data-science.md` (Detection/Classification/Axes/Registries/Boundaries/Tiers/Demo/Parity/Verify) |
+| **ML platform profile** | `smart-sdd/domains/profiles/ml-platform.md` |
+| **SDK library profile** | `smart-sdd/domains/profiles/sdk-library.md` |

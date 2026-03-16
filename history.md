@@ -5,6 +5,56 @@
 
 ---
 
+## [2026-03-17] Domain Module Expansion — 6 GAPs from OSS Project Analysis
+
+Analyzed 4 open-source projects (OpenJarvis, open-trading-api, Feast, Vanna) against spec-kit-skills' domain coverage. Identified 6 structural gaps and implemented solutions.
+
+### New Concern Modules (4)
+
+| Module | Files Created | Key Patterns |
+|--------|-------------|-------------|
+| **polyglot** | shared + smart-sdd + reverse-spec | FFI bridges (PyO3, cgo, JNI), Protobuf/gRPC, WASM, build orchestration, type mapping |
+| **codegen** | shared + smart-sdd + reverse-spec | IDL/schema source-of-truth, generated file tracking, repetitive pattern detection, Feature boundary rules |
+| **multi-tenancy** | shared + smart-sdd + reverse-spec | Tenant isolation strategies, context propagation, cache isolation, cross-tenant leak prevention |
+| **infra-as-code** | shared + smart-sdd + reverse-spec | Terraform/Helm/K8s as first-class, app-infra sync, secret management, IaC validation |
+
+### New Archetype (1)
+
+| Module | Files Created | Key Principles |
+|--------|-------------|---------------|
+| **sdk-framework** | shared + smart-sdd + reverse-spec | API Stability, Extension-First Design, Example-as-Contract, Documentation Parity, Backward Compatibility. Feature boundary guidance: extension-point scoping (interface Feature + implementation Features) |
+
+### Data Science Domain Completion
+
+| Change | File | What Changed |
+|--------|------|-------------|
+| **reverse-spec/data-science.md** | Filled all 9 TODO sections | Detection signals (feature store, vector DB, NL-to-SQL), 5 project types, 7 analysis axes, 4 registries, tier classification |
+| **smart-sdd/data-science.md** | Filled all 3 TODO sections | Demo pattern (3 project types), parity dimensions (structural + logic), verify steps (6 steps with conditional gating) |
+
+### New Profiles (2)
+
+| Profile | Interfaces | Concerns | Archetype |
+|---------|-----------|----------|-----------|
+| **ml-platform** | http-api, cli, data-io | plugin-system, auth | — |
+| **sdk-library** | cli | plugin-system | sdk-framework |
+
+### Infrastructure Updates
+
+| File | Change |
+|------|--------|
+| `shared/domains/_taxonomy.md` | Added 4 concerns, 1 archetype, 2 profiles with archetype column |
+| `smart-sdd/domains/_resolver.md` | Profile can now specify archetype (e.g., sdk-library → sdk-framework) |
+| `ARCHITECTURE-EXTENSIBILITY.md` | Added 4 concerns + 1 archetype to tables, 9 cross-reference entries, profile table with archetype column |
+
+### Design Decisions
+
+- **codegen concern**: Introduces explicit Feature boundary rule — repetitive generated code (e.g., 669 API wrappers in open-trading-api) is NOT split into individual Features. One Feature for the generation rule + one for generator infrastructure.
+- **sdk-framework archetype**: Redefines Feature = "extension point boundary" instead of "user-facing feature". Each extension interface = 1 Feature, each implementation = 1 Feature.
+- **data-science completion**: Added `nl-interface` and `platform` project types beyond original pipeline/modeling/analysis. Store Backend Map registry added for plugin-heavy ML platforms.
+- **Profiles with archetype**: Resolver updated so profiles can declare an archetype field. This enables `sdk-library` profile to auto-activate `sdk-framework` archetype.
+
+---
+
 ## [2026-03-16] Post-Pull Comprehensive Consistency Audit (17 fixes across 13 files)
 
 ### Foundation ID Prefix Fixes (Critical — ID collision prevention)
