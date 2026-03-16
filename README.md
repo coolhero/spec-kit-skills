@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:12 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:15 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -141,13 +141,13 @@ spec-kit-skills strengthens this harness. Where spec-kit structures each Feature
 
 | Pillar | What It Does | Without It |
 |--------|-------------|------------|
-| **Context Injection** | Feeds each step exactly the knowledge it needs — cross-Feature contracts, source app structure, data lifecycle paradigms | Agent works from incomplete information, re-invents what was already decided |
-| **Gate Enforcement** | BLOCKING checkpoints that stop the pipeline when output doesn't meet criteria — not "should check" but "cannot proceed" | Agent skips verification, wrong assumptions propagate through 6+ stages uncaught |
-| **Behavioral Fidelity** | Captures not just *what* to build (components, APIs) but *how it should behave* (opt-in vs opt-out, CRUD sequences, interaction paradigms) | Agent builds structurally correct but experientially wrong software |
+| **Context Injection** | Feeds each step the knowledge it needs — what other Features decided, how the existing app works, what rules apply | Agent works from incomplete information, re-invents what was already decided |
+| **Gate Enforcement** | Checkpoints that stop the pipeline when output doesn't meet criteria — not "should check" but "cannot proceed" | Agent skips verification, wrong assumptions propagate uncaught |
+| **Behavioral Fidelity** | Captures not just *what* to build but *how it should work* — how users interact, how data flows, how the app responds | Agent builds something that looks right but works wrong |
 
-These pillars are implemented through 7 Pipeline Integrity Guards — generalized protection patterns extracted from 44 field-discovered failures. Each guard defines a failure *class* with trigger conditions, verification methods, and enforcement levels. New failures extend existing guards rather than accumulate as ad-hoc rules. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
+These pillars are implemented through 7 Pipeline Integrity Guards — protection patterns extracted from real-world failures. Each guard covers a class of problems with clear trigger conditions and enforcement rules. When new failures are discovered, they extend existing guards rather than pile up as one-off fixes. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
 
-> **In short**: spec-kit-skills doesn't replace the agent's intelligence — it harnesses it. The agent does the creative work (architecture, code, problem-solving). The harness ensures that work is informed, verified, and faithful to the source of truth.
+> **In short**: spec-kit-skills doesn't replace the agent's intelligence — it harnesses it. The agent does the creative work; the harness makes sure that work stays informed, verified, and on target.
 
 ### Design Philosophy
 
