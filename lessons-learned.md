@@ -389,3 +389,43 @@ Safety:      Catch-all fallback (unconditional continue prompt)
 **What happened**: Bug prevention rules referenced specific features: "F005 Zustand selector instability." These looked narrowly applicable.
 
 **Universal takeaway**: Describe the *pattern*, not the *instance*. "State selector creating new references per render" is universal. "F005 Zustand selector instability" is a case study. Patterns go in rules; instances go in history.
+
+---
+
+### Theme F: Verification Completeness
+
+#### L23. Automation-Impossible ≠ Verification Skip
+
+**What happened** (SKF-033/034): `manual` SCs and `manual-only` TEST PLAN items were silently skipped during verify — no error, no warning, just unverified. The agent treated "can't automate" as "doesn't need verification."
+
+**Universal takeaway**: When automated verification is impossible, the system must explicitly route to user-assisted verification — not silently omit. Every verification item must end in one of three states: machine-verified ✅, user-verified ✅, or explicitly acknowledged as unverifiable ⚠️. "Skipped because no automation path" is not a valid state.
+
+#### L24. Test State Isolation — False Results from Persisted State
+
+**What happened** (SKF-028): Tests passed because previous test runs left data in the app's persistent storage. The feature appeared to work because it was reading stale data, not generating fresh data.
+
+**Universal takeaway**: 3-tier isolation strategy: (1) clean data directory before test run, (2) reset API/service state, (3) read-before-act pattern (verify initial state before asserting behavior). Applies to any system with persistent state — databases, file caches, browser storage, config files.
+
+#### L25. Feature Reachability — Code Exists but User Can't Reach It
+
+**What happened** (SKF-029): A feature was fully implemented and tests passed, but users couldn't reach it — no navigation path from the home screen. The feature was an orphan in the UI.
+
+**Universal takeaway**: For GUI features, verify the navigation path from the entry point (home screen) to the feature. A feature that exists but can't be reached is functionally nonexistent. This is the UI analog of the "orphaned service" pattern (G1).
+
+#### L26. Async Hydration Sync — External Systems Stale After Config Load
+
+**What happened** (SKF-030): App loaded async configuration (from store/API/file), updated internal state, but didn't sync dependent external systems. The external system operated with default/stale configuration until next restart.
+
+**Universal takeaway**: After any async config hydration, unconditionally sync all dependent external systems. Don't assume the external system's initial state matches the loaded config. Pattern: `loadConfig() → applyToState() → syncExternalSystems()`. The third step is always forgotten.
+
+#### L27. Dead Schema — Defined but Never Consumed
+
+**What happened** (SKF-028~032, internal review): F8 Toolchain Commands and F9 Scan Targets were fully defined in Foundation files with text claiming "Foundation Gate reads F8" and "Phase 2 reads F9" — but neither pipeline.md nor analyze.md actually referenced these sections. The schema was dead code.
+
+**Universal takeaway**: When defining a new schema/format, immediately add the consumption logic in the consumer files. "Will be read by X" is not the same as "X reads this." Trace the data flow end-to-end: producer → storage → consumer. A schema with no consumer is documentation, not infrastructure.
+
+#### L28. Checklist-Implementation Divergence
+
+**What happened** (internal review): Step 3f (User-Assisted SC Completion Gate) was fully implemented in verify-phases.md at line ~1594 with complete logic, but was missing from the Phase 3 checklist at line ~1026. The checklist jumped from 3e to 3f2, making Step 3f invisible to the execution flow.
+
+**Universal takeaway**: When adding a new step to a multi-step process, update BOTH the implementation AND the index/checklist that enumerates the steps. Implementation without checklist entry = invisible step. Checklist entry without implementation = phantom step. Both cause failures.

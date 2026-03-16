@@ -251,6 +251,12 @@ Execute the **full Common Protocol** with adoption-specific injection:
 adopt-specify → Assemble → Checkpoint(STOP) → speckit-specify + Review(STOP) → Update
 ```
 
+> **⚠️ MANDATORY RULE 3 REMINDER — Execute+Review Continuity**:
+> After `speckit-specify` completes, **SUPPRESS** any raw output ('Ready for', 'Coverage:', etc.).
+> Instead: Read `spec.md` → Display Review → Call AskUserQuestion. Same response.
+> If this response ends without AskUserQuestion — for ANY reason — show:
+> `✅ speckit-specify executed.` `💡 Type "continue" to review the results.`
+
 **Injection rules**: Read `reference/injection/adopt-specify.md`
 
 Key behaviors:
@@ -269,6 +275,12 @@ Execute the **full Common Protocol** with adoption-specific injection:
 adopt-plan → Assemble → Checkpoint(STOP) → speckit-plan + Review(STOP) → Update
 ```
 
+> **⚠️ MANDATORY RULE 3 REMINDER — Execute+Review Continuity**:
+> After `speckit-plan` completes, **SUPPRESS** any raw output (navigation output, etc.).
+> Instead: Read `plan.md` → Display Review → Call AskUserQuestion. Same response.
+> If this response ends without AskUserQuestion — for ANY reason — show:
+> `✅ speckit-plan executed.` `💡 Type "continue" to review the results.`
+
 **Injection rules**: Read `reference/injection/adopt-plan.md`
 
 Key behaviors:
@@ -284,6 +296,12 @@ Execute the analyze step with a key difference: **`tasks.md` does not exist** in
 ```
 analyze → Assemble → Checkpoint(STOP) → speckit-analyze + Review(STOP) → Update
 ```
+
+> **⚠️ MANDATORY RULE 3 REMINDER — Execute+Review Continuity**:
+> After `speckit-analyze` completes, **SUPPRESS** any raw analysis output.
+> Instead: Read the analysis report → Display Review → Call AskUserQuestion. Same response.
+> If this response ends without AskUserQuestion — for ANY reason — show:
+> `✅ speckit-analyze executed.` `💡 Type "continue" to review the results.`
 
 **Injection rules**: Read `reference/injection/analyze.md` (standard). Per `context-injection-rules.md` Missing/Sparse Content Handling rules, `tasks.md` absence is expected — analyze gracefully degrades to two-artifact mode.
 

@@ -348,14 +348,15 @@ This step is informational only — no user confirmation required.
 
 **Execution**:
 1. Run build → **BLOCK on failure** (same as Phase 1 build gate)
+   **Structure-aware build**: Read `sdd-state.md` → `**Structure**` field. If `monorepo`, use workspace-aware build command (e.g., `turbo run build`, `nx build`, `bun run --filter=* build`) instead of single-package build. The workspace build tool is determined from F8 `build` field or auto-detected from `turbo.json`/`nx.json`/root `package.json` scripts.
 1b. **Toolchain Pre-flight** — Verify development tools are available:
-   Read `domains/_core.md` § S3b (Lint Tool Detection Rules) and follow the detection order.
+   **F8 Foundation Override**: If the active Foundation file declares an `### F8. Toolchain Commands` section (see `domains/foundations/_foundation-core.md` § F8), use those commands directly instead of auto-detection. Read the PRIMARY framework's Foundation file (first in `**Framework**` field of sdd-state.md) and extract `build`, `test`, `lint`, `typecheck`, `package_manager`, `install` fields. If F8 is absent, fall back to auto-detection below.
 
-   1. **Lint detection**: Follow the domain-specific detection rules to identify the lint command.
+   1. **Lint detection**: If F8 `lint` field exists → use that command. Otherwise, read `domains/_core.md` § S3b (Lint Tool Detection Rules) and follow the detection order.
       If a lint command is found, verify it is executable (`--version` check or binary exists).
-   2. **Test detection**: Detect test command from project config (`package.json` → `scripts.test`, `pyproject.toml` → `[tool.pytest]`, `Makefile` test target, etc.).
+   2. **Test detection**: If F8 `test` field exists → use that command. Otherwise, detect test command from project config (`package.json` → `scripts.test`, `pyproject.toml` → `[tool.pytest]`, `Makefile` test target, etc.).
       Verify it is executable.
-   3. **Build detection**: Record the build command already verified in Step 1.
+   3. **Build detection**: If F8 `build` field exists → use that command. Otherwise, record the build command already verified in Step 1.
 
    **Result display** (example — adapt tool names to project stack):
    ```
@@ -1027,11 +1028,21 @@ Running `/smart-sdd analyze [FID]` executes `speckit-analyze` to verify cross-ar
 
 **Workflow**:
 1. Execute `speckit-analyze` via the Common Protocol (Assemble → Checkpoint → Execute+Review → Update)
+
+   > **⚠️ MANDATORY RULE 3 REMINDER — Execute+Review Continuity**:
+   > After `speckit-analyze` completes, **SUPPRESS** any raw analysis output, "next steps", or navigation messages.
+   > Instead: Read the analysis report artifact → Display the Review below → Call AskUserQuestion.
+   > These three actions MUST happen in the SAME response as execution.
+
 2. Review the analysis report:
    - If **CRITICAL** issues exist (including FR with zero mapped tasks): Block implementation. The user must resolve them first (re-run specify, plan, or tasks as needed)
    - If **HIGH** issues exist (including FR with partial task coverage): Strongly recommend addressing, but user may override and proceed
    - If only **MEDIUM/LOW** issues: Display findings, user may proceed or address them
 3. Record analysis results in `sdd-state.md`
+
+   > If this response ends without AskUserQuestion after speckit-analyze execution — for ANY reason (context limit, error, unexpected flow) — you MUST show:
+   > `✅ speckit-analyze executed.`
+   > `💡 Type "continue" to review the results.`
 
 **Prerequisite**: `tasks.md` must exist for the Feature (`speckit-analyze` requires all three artifacts: spec.md, plan.md, tasks.md)
 

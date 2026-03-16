@@ -1,7 +1,7 @@
 # TODO — spec-kit-skills
 
 > All planned tasks (G1–G7 gaps, Tasks 1–9) completed as of 2026-03-08.
-> See `history.md` for decision history and `specs/history.md` for per-project decisions.
+> See `history.md` for decision history.
 
 ---
 

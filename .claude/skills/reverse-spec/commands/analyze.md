@@ -1009,6 +1009,8 @@ Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration
 
 Perform deep analysis using patterns appropriate to the tech stack identified in Phase 1. For large codebases, leverage parallel sub-agents via the Task tool.
 
+> **F9 Scan Target Loading**: If the active Foundation file(s) declare an `### F9. Scan Targets` section (see `domains/foundations/_foundation-core.md` § F9), load those scan targets and MERGE them with the universal scan targets from `_core.md`. F9 targets supplement — not replace — universal targets. This ensures framework-specific patterns (e.g., Drizzle ORM `table()` for Bun, `createSignal()` for Solid.js, Hono route handlers) are included in Phase 2-1 (Data Model), 2-2 (API Endpoint), and 2-6 (SBI) extraction without modifying `_core.md`.
+
 > **Phase 1.5 Cross-Reference**: If `specs/reverse-spec/runtime-exploration.md` exists, read the file and use the observations to enrich analysis:
 > - Validate route definitions against actually observed screens (Screen Inventory)
 > - Enrich entity extraction with observed data display patterns — tables, forms, card views (UI Patterns)
