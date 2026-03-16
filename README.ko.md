@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 16:51 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 16:56 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -346,6 +346,8 @@ T0 Feature는 코드가 필요한 Critical 항목이 있는 Foundation 카테고
 **압축 복원 가능 상태(Compaction-Resilient State)** — Verify 진행 상황, 프로세스 규칙, Minor Fix 누적기가 모든 Phase 경계에서 `sdd-state.md`에 기록됩니다. verify 도중 컨텍스트 윈도우가 압축되면, 재개 프로토콜이 저장된 상태를 읽고 정확한 Phase부터 재개합니다 — 반복 작업 없이, 분류 손실 없이. 이를 통해 수 시간에 걸친 파이프라인 세션이 생존 가능합니다.
 
 **소스 수정 게이트(Source Modification Gate)** — verify 중 모든 소스 편집은 코드 수정 *전에* 반드시 분류(Minor / Major-Implement / Major-Plan / Major-Spec)되어야 합니다. 분류 결과에 따라 수정이 인라인으로 이루어지거나 올바른 파이프라인 단계로 되돌아갑니다. Minor Fix 누적기가 Feature별 인라인 수정 횟수를 추적하며 — 3회에 도달하면 자동으로 Major로 에스컬레이션하여, 사소한 패치로 위장된 구조적 드리프트를 방지합니다.
+
+**파이프라인 무결성 가드(Pipeline Integrity Guards)** — 5개 Feature에 걸친 44건의 현장 실패에서 추출한 7가지 일반화된 보호 패턴입니다. 개별 규칙을 누적하는 대신, 각 가드가 실패 *유형*을 정의하며 트리거 조건, 검증 방법, 강제 수준을 갖습니다. Guard 1(가이드라인→게이트)은 첫 위반 후 규칙을 BLOCKING으로 자동 승격합니다. Guard 2(정적≠런타임)는 빌드부터 데이터 왕복까지 5단계 검증 체인을 강제합니다. Guard 3(단계 간 신뢰 차단기)는 잘못된 가정이 파이프라인을 통해 전파되는 것을 차단합니다. Guard 4(세분화 정렬)는 UI 밀도가 임계값을 초과할 때 파일 수준 분석을 컨트롤 수준으로 분해합니다. Guard 5(환경 동등성)는 클린 및 시드된 상태 양쪽에서의 듀얼 모드 테스트를 요구합니다. Guard 6(교차 Feature 인터페이스)는 `Provides →` 인터페이스를 소비자 관점에서 검증합니다. Guard 7(리빌드 충실도)는 소스 컴포넌트 구조를 모든 파이프라인 단계에 관통시킵니다 — Component Tree 추출부터 Source→Target 매핑, Source-First 구현 게이트까지. 새로운 실패는 기존 가드를 확장(테이블 행 추가)하며, 새 독립 규칙을 생성하지 않습니다. [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md) 참조.
 
 **컨텍스트 윈도우 관리** — 스킬 파일은 지연 로딩 단위로 분해됩니다: `SKILL.md`(항상 로드, ~60줄)가 `commands/{cmd}.md`(명령별 로드)로 라우팅하고, 이는 `injection/{cmd}.md`(파이프라인 단계별 로드)와 `domains/{module}.md`(프로젝트 프로필별 로드)를 참조합니다. 데스크톱 Electron 재구축은 ~3,200 토큰의 도메인 규칙을 로드하고, CLI 그린필드는 ~800 토큰만 로드합니다. 사용하지 않는 모듈은 컨텍스트에 진입하지 않습니다.
 
