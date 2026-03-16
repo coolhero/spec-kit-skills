@@ -59,17 +59,17 @@ Later modules extend earlier ones. Merge rules vary by section — see `_schema.
 The domain composition system has 4 orthogonal axes. Each axis answers a different question:
 
 ```
-                    ┌─────────────────────────────┐
-                    │      Project Domain          │
-                    │                               │
-  INTERFACE ────────┤  What does the app expose?    │──── http-api, gui, cli, data-io
-                    │                               │
-  CONCERN ──────────┤  What cross-cutting patterns? │──── auth, async-state, ipc, i18n, realtime
-                    │                               │
-  ARCHETYPE ────────┤  What domain philosophy?      │──── ai-assistant, public-api, microservice
-                    │                               │
-  SCENARIO ─────────┤  Why are we building?         │──── greenfield, rebuild, incremental, adoption
-                    └─────────────────────────────┘
+                    ┌─────────────────────────────────┐
+                    │       Project Domain            │
+                    │                                 │
+  INTERFACE ────────┤  What does the app expose?      │──── http-api, gui, cli, data-io
+                    │                                 │
+  CONCERN ──────────┤  What cross-cutting patterns?   │──── auth, async-state, ipc, i18n, realtime
+                    │                                 │
+  ARCHETYPE ────────┤  What domain philosophy?        │──── ai-assistant, public-api, microservice
+                    │                                 │
+  SCENARIO ─────────┤  Why are we building?           │──── greenfield, rebuild, incremental, adoption
+                    └─────────────────────────────────┘
 ```
 
 ### How the Axes Differ
@@ -118,13 +118,13 @@ Think of it like CSS for a pipeline: modules cascade, merge, and the combined ru
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Module Loading (once)                      │
-│                                                               │
+│                    Module Loading (once)                    │
+│                                                             │
 │  _core.md → gui.md → async-state.md → ipc.md                │
-│           → ai-assistant.md → rebuild.md                      │
-│           → electron.md (Foundation)                          │
-│                                                               │
-│  Result: Merged ruleset cached in agent working memory        │
+│           → ai-assistant.md → rebuild.md                    │
+│           → electron.md (Foundation)                        │
+│                                                             │
+│  Result: Merged ruleset cached in agent working memory      │
 └──────────────────────────┬──────────────────────────────────┘
                            │
          Each S/A/F section routes to a pipeline step

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:46 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:00 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -115,17 +115,17 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 │                roadmap, entity/API registries, pre-contexts             │
 │                         │                                               │
 │                         ▼                                               │
-│  3. BUILD      /smart-sdd pipeline runs spec-kit for each Feature,     │
+│  3. BUILD      /smart-sdd pipeline runs spec-kit for each Feature,      │
 │                automatically injecting cross-Feature context            │
 │                         │                                               │
 │                   ┌─────┴─────┐                                         │
 │                   ▼           ▼                                         │
-│  4. PER FEATURE  specify → plan → tasks → implement → verify → merge   │
-│                  Each step gets context from previous Features           │
+│  4. PER FEATURE  specify → plan → tasks → implement → verify → merge    │
+│                  Each step gets context from previous Features          │
 │                  Each step has human checkpoints (HARD STOP)            │
 │                         │                                               │
 │                         ▼                                               │
-│  5. REPORT     /case-study generates after-action report (optional)    │
+│  5. REPORT     /case-study generates after-action report (optional)     │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -911,6 +911,29 @@ specs/
 ## File Map
 
 Complete list of all files in this repository grouped by skill.
+
+### Directory Structure Overview
+
+Each skill follows the same internal directory convention:
+
+```
+.claude/skills/{skill}/
+├── SKILL.md              Entry point — command routing and mandatory rules
+├── commands/             User commands — one file per command workflow
+├── domains/              Domain modules — project-type-specific behavioral rules
+│   ├── interfaces/       Per-interface rules (gui, http-api, cli, data-io, tui)
+│   ├── concerns/         Per-concern rules (auth, ipc, async-state, i18n, ...)
+│   ├── archetypes/       Domain philosophy rules (ai-assistant, public-api, ...)
+│   ├── scenarios/        Project context rules (greenfield, rebuild, ...)
+│   ├── profiles/         Preset interface+concern combinations (smart-sdd only)
+│   └── foundations/      Framework-specific checklists (reverse-spec only)
+├── reference/            Shared pipeline mechanics — protocols and standards
+│   └── injection/        Per-step context injection rules (smart-sdd only)
+├── templates/            Artifact generation templates (reverse-spec only)
+└── scripts/              Status dashboard utilities (smart-sdd only)
+```
+
+**Key distinction**: `commands/` defines _what to execute_ (workflow steps), `domains/` defines _what rules to apply_ (behavioral modifiers per project type), and `reference/` defines _how the pipeline works_ (shared mechanics like HARD STOP protocol, branch management, state schema). Domains vary by project; reference is universal.
 
 ### Root
 

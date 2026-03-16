@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:46 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:00 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -105,27 +105,27 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         전체 흐름                                        │
+│                         전체 흐름                                       │
 │                                                                         │
-│  1. 분석       /reverse-spec이 코드를 분석 (또는 /smart-sdd init으로     │
-│                처음부터 생성)                                             │
+│  1. 분석       /reverse-spec이 코드를 분석 (또는 /smart-sdd init으로    │
+│                처음부터 생성)                                           │
 │                         │                                               │
 │                         ▼                                               │
-│  2. 산출물     Global Evolution Layer 생성:                              │
-│                roadmap, 엔티티/API 레지스트리, pre-context               │
+│  2. 산출물     Global Evolution Layer 생성:                             │
+│                roadmap, 엔티티/API 레지스트리, pre-context              │
 │                         │                                               │
 │                         ▼                                               │
 │  3. 구축       /smart-sdd pipeline이 각 Feature마다 spec-kit 실행,      │
-│                교차 Feature 컨텍스트를 자동 주입                          │
+│                교차 Feature 컨텍스트를 자동 주입                        │
 │                         │                                               │
 │                   ┌─────┴─────┐                                         │
 │                   ▼           ▼                                         │
-│  4. Feature별   specify → plan → tasks → implement → verify → merge    │
-│                 각 단계에서 이전 Feature의 컨텍스트를 받음                  │
-│                 각 단계에서 사용자 확인 (HARD STOP)                        │
+│  4. Feature별   specify → plan → tasks → implement → verify → merge     │
+│                 각 단계에서 이전 Feature의 컨텍스트를 받음              │
+│                 각 단계에서 사용자 확인 (HARD STOP)                     │
 │                         │                                               │
 │                         ▼                                               │
-│  5. 보고       /case-study가 회고 보고서 생성 (선택)                      │
+│  5. 보고       /case-study가 회고 보고서 생성 (선택)                    │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -908,6 +908,29 @@ specs/
 ## 파일 맵
 
 이 저장소의 모든 파일을 스킬별로 그룹핑한 전체 목록입니다.
+
+### 디렉토리 구조 개요
+
+각 스킬은 동일한 내부 디렉토리 규약을 따릅니다:
+
+```
+.claude/skills/{skill}/
+├── SKILL.md              진입점 — 커맨드 라우팅 및 필수 규칙
+├── commands/             사용자 커맨드 — 커맨드별 워크플로우 정의
+├── domains/              도메인 모듈 — 프로젝트 유형별 행동 규칙
+│   ├── interfaces/       인터페이스별 규칙 (gui, http-api, cli, data-io, tui)
+│   ├── concerns/         관심사별 규칙 (auth, ipc, async-state, i18n, ...)
+│   ├── archetypes/       도메인 철학 규칙 (ai-assistant, public-api, ...)
+│   ├── scenarios/        프로젝트 컨텍스트 규칙 (greenfield, rebuild, ...)
+│   ├── profiles/         인터페이스+관심사 프리셋 조합 (smart-sdd 전용)
+│   └── foundations/      프레임워크별 체크리스트 (reverse-spec 전용)
+├── reference/            공유 파이프라인 메커니즘 — 프로토콜 및 표준
+│   └── injection/        단계별 컨텍스트 주입 규칙 (smart-sdd 전용)
+├── templates/            아티펙트 생성 템플릿 (reverse-spec 전용)
+└── scripts/              상태 대시보드 유틸리티 (smart-sdd 전용)
+```
+
+**핵심 구분**: `commands/`는 _무엇을 실행하는가_ (워크플로우 단계), `domains/`는 _어떤 규칙을 적용하는가_ (프로젝트 유형별 행동 수정자), `reference/`는 _파이프라인이 어떻게 작동하는가_ (HARD STOP 프로토콜, 브랜치 관리, 상태 스키마 등 공용 메커니즘)를 정의합니다. domains는 프로젝트마다 달라지고, reference는 범용입니다.
 
 ### 루트
 

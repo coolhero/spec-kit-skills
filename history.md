@@ -3252,3 +3252,22 @@ Three problems drove this change:
 |------|--------|
 | `README.md` | Architecture section restructured: 13 subsections → 8 subsections in user-understanding order |
 | `README.ko.md` | Same restructure applied to Korean version |
+
+---
+
+## [2026-03-16] Diagram Alignment Fix + File Map Directory Descriptions
+
+| Choice | Rationale |
+|--------|-----------|
+| Fix ASCII box diagram alignment across 3 files | Display width measurement revealed 1-2 column misalignment in 4 diagrams (box chars vs content padding) |
+| Widen ARCH-EXT 4-Axis box from 29→33 inner width | "What cross-cutting patterns?" (29 chars) needs padding inside the box; 33 accommodates all questions with 2-space margins |
+| Add directory structure overview to File Map | Users see file list without understanding why directories exist — "commands = what, domains = rules, reference = how" distinction aids navigation |
+| Include sub-directory descriptions (interfaces/, concerns/, etc.) | Nested structure is non-obvious; one-line descriptions per sub-dir prevent users from having to open files to understand organization |
+| No physical domain separation in reference/ | reference/ files are universal pipeline mechanics (not domain-specific); `injection/` sub-dir already handles per-step grouping |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `ARCHITECTURE-EXTENSIBILITY.md` | Fixed 4-Axis box (inner 29→33), Module Loading box (trailing space alignment) |
+| `README.md` | Fixed Big Picture box (3 lines off by ±1), added Directory Structure Overview to File Map |
+| `README.ko.md` | Fixed Korean Big Picture box (CJK display width compensation), added Korean Directory Structure Overview |
