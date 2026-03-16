@@ -10,7 +10,7 @@
 
 **Primary**: Zustand, Redux, MobX, Pinia, Recoil, Jotai, Valtio, state management, reactive store, global state
 
-**Secondary**: selector, derived state, optimistic update, loading state, cache invalidation
+**Secondary**: selector, derived state, optimistic update, loading state, cache invalidation, conversation history, undo/redo, persistence, local storage state
 
 ### Code Patterns (R1 — for source analysis)
 

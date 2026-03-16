@@ -275,7 +275,8 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
 | Core Purpose keywords | chat, messaging, collaboration | Message Ordering Guarantee | Conversation coherence |
 | **Active concern modules** | | | |
 | `realtime` concern active | WebSocket, SSE, live updates | Optimistic UI Updates, Reconnection Strategy | UX responsiveness under network variance |
-| `external-sdk` concern active | third-party API, webhook | Contract Testing, Retry with Backoff | Integration resilience against external failures |
+| `external-sdk` concern active | third-party API, SDK | Contract Testing, Retry with Backoff | Integration resilience against external failures |
+| `external-sdk` + webhook signal | webhook, callback URL | Webhook Idempotency, Retry-safe Handlers | Prevent duplicate processing from webhook retries |
 | `auth` concern active | JWT, OAuth, login | Secure Token Storage, Session Timeout Policy | Security baseline for user data |
 | `i18n` concern active | multi-language, localization | String Externalization, RTL-safe Layout | Internationalization readiness from day one |
 | **Active archetype modules** | | | |

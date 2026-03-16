@@ -8,7 +8,7 @@
 
 ### Semantic (A0 — for init inference)
 
-**Primary**: LLM, GPT, Claude API, OpenAI, Anthropic, langchain, llamaindex, AI assistant, chatbot, conversational AI, RAG, retrieval-augmented generation, prompt engineering
+**Primary**: LLM, GPT, Claude, Claude API, OpenAI, Anthropic, langchain, llamaindex, AI assistant, chatbot, conversational AI, RAG, retrieval-augmented generation, prompt engineering
 
 **Secondary**: embeddings, vector database, token limit, context window, streaming response, model provider, fine-tuning, AI agent
 

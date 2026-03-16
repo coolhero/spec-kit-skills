@@ -8,7 +8,7 @@
 
 ### Semantic (S0 — for init inference)
 
-**Primary**: authentication, authorization, JWT, OAuth, session, login, signup, RBAC, role-based, permissions, access control, SSO, SAML, Passport.js, Auth0, Clerk, NextAuth
+**Primary**: auth, authentication, authorization, JWT, OAuth, session, login, signup, RBAC, role-based, permissions, access control, SSO, SAML, Passport.js, Auth0, Clerk, NextAuth
 
 **Secondary**: password reset, multi-factor, MFA, 2FA, token refresh, protected routes
 

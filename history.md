@@ -3330,3 +3330,33 @@ Fixed 7 gaps in the greenfield pipeline to bring it to parity with the rebuild p
 | `domains/scenarios/greenfield.md` | Expanded from 23→103 lines: Configuration Parameters, S1 anti-patterns + maturity depth, S3 scaffolding check, S5 per-maturity/team probes, S7 7 bug prevention rules |
 | `commands/pipeline.md` | Added CI pre-check to specify (step 1), CI coverage check to specify (step 5), CI propagation to plan (step 3) |
 | `commands/verify-phases.md` | Added CI propagation check to Phase 3b |
+
+---
+
+## [2026-03-16] Greenfield Simulation + Signal Keyword Fixes
+
+Simulated 3 greenfield projects through the init pipeline (Hono REST API, Electron AI Desktop, CLI Build Tool) to validate the matching algorithm, CI scoring, and principle recommendation. Found and fixed 4 signal vocabulary gaps.
+
+| Choice | Rationale |
+|--------|-----------|
+| Add `auth` to auth concern S0 Primary | Simulation showed `auth` (most common abbreviation) was missing — only `authentication` (full word) was listed |
+| Add `Claude` standalone to ai-assistant A0 Primary | `Claude API` (compound) existed but `Claude` alone didn't match — users write "OpenAI, Claude" not "OpenAI, Claude API" |
+| Add functional keywords to async-state Secondary | `conversation history`, `undo/redo`, `persistence` — S0 was biased toward library names (Zustand, Redux) and missed feature-describing signals |
+| Add webhook principle row to Recommendation Table | Webhook-heavy projects (e-commerce, integrations) had no idempotency principle despite webhook being a common signal |
+| Consolidate _resolver.md A0 Aggregation → cross-reference to clarity-index.md | File review found A0 algorithm duplicated between two files — now _resolver.md references clarity-index.md § 5 |
+
+### Simulation Results Summary
+| Project | CI Score | Tier | Modules Activated | Issues Found |
+|---------|---------|------|------------------|--------------|
+| Hono REST API | 58% | Medium | http-api, external-sdk (auth missed → fixed) | G1: `auth` abbreviation, G2: webhook principle |
+| Electron AI Desktop | 78% | Rich | gui, ipc, external-sdk, realtime, ai-assistant | G3: `Claude` standalone, G4: async-state feature keywords |
+| CLI Build Tool | 44% | Medium | cli only | G5: TypeScript not in S0 (correct — pure tech stack) |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `shared/domains/concerns/auth.md` | Added `auth` to S0 Primary |
+| `shared/domains/archetypes/ai-assistant.md` | Added `Claude` to A0 Primary |
+| `shared/domains/concerns/async-state.md` | Added `conversation history`, `undo/redo`, `persistence`, `local storage state` to S0 Secondary |
+| `commands/init.md` | Added webhook principle row to Recommendation Table |
+| `domains/_resolver.md` | Replaced A0 Aggregation section with cross-reference to clarity-index.md § 5 |

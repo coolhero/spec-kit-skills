@@ -201,31 +201,14 @@ When `init` is invoked with an idea string or PRD (Proposal Mode), Domain Profil
 - If no `--profile` and inference yields high confidence: present inferred profile directly
 - If inference yields low confidence: present as suggestions with "Other" option
 
-### S0 Aggregation
+### S0/A0 Aggregation
 
-During inference, the agent reads S0 keywords from `shared/domains/` to build the signal vocabulary:
+> Full matching algorithm, S0/A0 aggregation rules, and archetype inference: See `reference/clarity-index.md` § 3 (Matching Algorithm), § 5 (S0/A0 Aggregation Rules).
 
-```
-shared/domains/interfaces/gui.md       → S0.Primary: ["React", "Vue", ...]
-shared/domains/interfaces/http-api.md  → S0.Primary: ["REST", "Express", ...]
-shared/domains/concerns/auth.md        → S0.Primary: ["JWT", "OAuth", ...]
-...
-```
+During inference, the agent reads signal keywords from `shared/domains/` to build the vocabulary:
+- **S0**: `shared/domains/interfaces/*.md` + `shared/domains/concerns/*.md` → Interface/Concern signal maps
+- **A0**: `shared/domains/archetypes/*.md` → Archetype signal map (runs in parallel with S0)
 
-> **Module registry**: `shared/domains/_taxonomy.md` lists all available modules. Scan all files in `shared/domains/interfaces/`, `shared/domains/concerns/`, and `shared/domains/archetypes/` for complete S0/A0 vocabulary.
-
-### A0 Aggregation
-
-Alongside S0, the agent reads A0 keywords from shared archetype modules:
-
-```
-shared/domains/archetypes/ai-assistant.md  → A0.Primary: ["LLM", "openai", "langchain", ...]
-shared/domains/archetypes/public-api.md    → A0.Primary: ["OpenAPI", "rate-limit", ...]
-shared/domains/archetypes/microservice.md  → A0.Primary: ["gRPC", "docker-compose", ...]
-```
-
-Archetype inference runs in parallel with S0 inference. Results are merged into the Proposal:
-- **Inferred Archetype**: matched archetype name(s) or `"none"` if no A0 keywords match
-- Archetype is inferred separately from profile — a `web-api` profile may or may not have a `public-api` archetype
+> **Module registry**: `shared/domains/_taxonomy.md` lists all available modules.
 
 Both S0 and A0 are one-time scans at init start. Results are cached for the duration of the init command.
