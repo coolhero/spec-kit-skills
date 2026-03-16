@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:10 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:12 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -135,7 +135,7 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 AI coding agents write great code — until the project gets big enough. Then things start falling apart: code written last week contradicts code written today, bugs you already fixed come back, and you spend more time correcting the agent than building.
 
-This is a **harness engineering** problem. Like harnessing a horse, the goal isn't to limit the agent's power but to make it directed and reliable. [spec-kit](https://github.com/github/spec-kit) provides the first layer of harness through Specification-Driven Development: write specs first, then code against them. The agent gets a clear target and a structured pipeline (specify → plan → implement → verify) instead of winging it.
+This is a **harness engineering** problem. Like harnessing a horse, the goal isn't to limit the agent's power but to make it directed and reliable. [spec-kit](https://github.com/github/spec-kit) provides the first layer of harness through Specification-Driven Development: break the project into Features, write specs for each one, then code against them. The agent gets a clear target and a structured pipeline (specify → plan → implement → verify) instead of winging it.
 
 spec-kit-skills strengthens this harness. Where spec-kit structures each Feature individually, spec-kit-skills connects them — keeping the agent's memory alive across Features, making verification gates that can't be skipped, and checking that the software doesn't just have the right structure but actually *behaves* correctly:
 
