@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:56 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:57 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -133,7 +133,7 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 ## Architecture
 
-AI coding agents are powerful but unreliable in multi-Feature projects. When building Feature 3, the agent has no memory of Feature 1's data models or API contracts. It declares "build passes" without verifying that the UI actually renders at runtime. A wrong assumption made during analysis propagates unchallenged through specify → plan → tasks → implement → verify. And when rebuilding an existing app, it reproduces the component structure correctly but misses the behavioral paradigm — implementing opt-out where the source app was opt-in, producing software that *looks* right but *works* wrong.
+AI coding agents are powerful but unreliable in multi-Feature projects. They lose cross-Feature context between sessions, skip verification when build passes, let wrong assumptions propagate through multi-stage pipelines unchecked, and produce implementations that are structurally correct but behaviorally wrong.
 
 spec-kit-skills approaches this as a **harness engineering** problem — like putting a harness on a horse, the goal isn't to limit the agent's capability but to make it **directed and useful**. Harness engineering is the discipline of designing constraints, context injection, and verification gates that channel raw AI capability into reliable, production-quality output.
 
