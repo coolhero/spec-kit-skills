@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:05 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:07 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -133,7 +133,7 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 ## 아키텍처
 
-AI 코딩 에이전트는 코드를 잘 작성합니다 — 프로젝트가 커지기 전까지는. 프로젝트가 커지면 feature끼리 모순되기 시작하고, 고친 버그가 다시 나타나고, 만드는 시간보다 에이전트를 교정하는 시간이 더 길어집니다.
+AI 코딩 에이전트는 코드를 잘 작성합니다 — 프로젝트가 커지기 전까지는. 프로젝트가 커지면 지난주에 쓴 코드와 이번 주 코드가 모순되기 시작하고, 고친 버그가 다시 나타나고, 만드는 시간보다 에이전트를 교정하는 시간이 더 길어집니다.
 
 [spec-kit](https://github.com/github/spec-kit)은 Specification-Driven Development로 이 문제에 접근합니다: 먼저 spec을 쓰고, 그에 맞춰 코딩합니다. 에이전트에게 명확한 목표와 구조화된 pipeline(specify → plan → implement → verify)을 줍니다. 효과가 있습니다 — 하지만 하나의 Feature 안에서만. 에이전트는 여전히 두 Feature 전에 뭘 결정했는지 기억하지 못하고, 불편한 검증은 건너뛰고, 겉보기에는 맞지만 실제 동작이 다른 결과물을 만들어냅니다.
 
