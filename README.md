@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:15 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:16 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -31,15 +31,13 @@ cd spec-kit-skills
 
 ### First Commands
 
-| Goal | Command |
-|------|---------|
-| New project from an idea | `/smart-sdd init "Build a task app with Kanban boards"` |
-| Rebuild existing code | `/reverse-spec ./path/to/source` |
-| New project (full Q&A) | `/smart-sdd init` → `/smart-sdd add` |
-| New project from PRD | `/smart-sdd init --prd design.md` |
-| Add Feature to existing project | `/smart-sdd add` |
-| Adopt SDD (keep existing code) | `/reverse-spec --adopt` → `/smart-sdd adopt` |
-| Generate case study report | `/case-study generate` |
+| Your situation | Command | What happens |
+|------|---------|------|
+| **Starting from scratch** | `/smart-sdd init` | Set up a new project, define Features, run the pipeline |
+| **Have existing code, want to rebuild it** | `/reverse-spec ./path/to/source` | Analyze the code → rebuild with SDD |
+| **Have existing code, want to keep it** | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs, no rewrite |
+| **Already running smart-sdd, need more Features** | `/smart-sdd add` | Add new Features to an existing project |
+| **Want an after-action report** | `/case-study generate` | Generate metrics and lessons from completed project |
 
 ### Verify
 
@@ -52,9 +50,13 @@ cd spec-kit-skills
 
 ## What It Solves
 
-spec-kit processes **one Feature at a time** — it has no mechanism for tracking shared entities, API contracts, or dependencies across Features. When you run `/speckit-plan` for Feature 3, it doesn't know what data models Feature 1 defined or what APIs Feature 2 expects.
+AI coding agents write great code — until the project gets big enough. Then things start falling apart: code written last week contradicts code written today, bugs you already fixed come back, and you spend more time correcting the agent than building.
 
-**spec-kit-skills** fills this gap with a **Global Evolution Layer** — project-wide artifacts that sit above spec-kit's per-Feature scope:
+This is a **harness engineering** problem. Like harnessing a horse, the goal isn't to limit the agent's power but to make it directed and reliable. [spec-kit](https://github.com/github/spec-kit) provides the first layer of harness through Specification-Driven Development: break the project into Features, write specs for each one, then code against them. The agent gets a clear target and a structured pipeline (specify → plan → implement → verify) instead of winging it.
+
+But spec-kit processes **one Feature at a time** — it has no mechanism for tracking shared entities, API contracts, or dependencies across Features. When you run `/speckit-plan` for Feature 3, it doesn't know what data models Feature 1 defined or what APIs Feature 2 expects.
+
+**spec-kit-skills** strengthens the harness by adding a **Global Evolution Layer** — project-wide artifacts that sit above spec-kit's per-Feature scope:
 
 | Artifact | What it tracks |
 |----------|---------------|
@@ -133,11 +135,7 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 ## Architecture
 
-AI coding agents write great code — until the project gets big enough. Then things start falling apart: code written last week contradicts code written today, bugs you already fixed come back, and you spend more time correcting the agent than building.
-
-This is a **harness engineering** problem. Like harnessing a horse, the goal isn't to limit the agent's power but to make it directed and reliable. [spec-kit](https://github.com/github/spec-kit) provides the first layer of harness through Specification-Driven Development: break the project into Features, write specs for each one, then code against them. The agent gets a clear target and a structured pipeline (specify → plan → implement → verify) instead of winging it.
-
-spec-kit-skills strengthens this harness. Where spec-kit structures each Feature individually, spec-kit-skills connects them — keeping the agent's memory alive across Features, making verification gates that can't be skipped, and checking that the software doesn't just have the right structure but actually *behaves* correctly:
+Beyond connecting Features, spec-kit-skills strengthens the harness in three ways — keeping the agent's memory alive across Features, making verification gates that can't be skipped, and checking that the software doesn't just have the right structure but actually *behaves* correctly:
 
 | Pillar | What It Does | Without It |
 |--------|-------------|------------|
@@ -146,8 +144,6 @@ spec-kit-skills strengthens this harness. Where spec-kit structures each Feature
 | **Behavioral Fidelity** | Captures not just *what* to build but *how it should work* — how users interact, how data flows, how the app responds | Agent builds something that looks right but works wrong |
 
 These pillars are implemented through 7 Pipeline Integrity Guards — protection patterns extracted from real-world failures. Each guard covers a class of problems with clear trigger conditions and enforcement rules. When new failures are discovered, they extend existing guards rather than pile up as one-off fixes. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
-
-> **In short**: spec-kit-skills doesn't replace the agent's intelligence — it harnesses it. The agent does the creative work; the harness makes sure that work stays informed, verified, and on target.
 
 ### Design Philosophy
 
