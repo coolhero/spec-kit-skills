@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-16] Pipeline Integrity Guards — Gap Closure (5 fixes)
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **G5: Dual-Mode Verification integrated** | `verify-phases.md` Phase 3b | Clean + Seeded state 양쪽 통과 필수 (BLOCKING for persistent storage Features). Test State Isolation Rules 3개 추가. SKF-033/040 재발 방지 |
+| **G7: Source Component Reference Tags** | `injection/tasks.md` | rebuild+GUI에서 각 UI task에 `Source: [Component] (file)` 태그 필수 (BLOCKING). plan.md Mapping → tasks.md 연결 끊김 방지 |
+| **G6: Guarantee → BLOCKING in rebuild** | `verify-phases.md` Step 1a | Provides 인터페이스 미구현 시 rebuild 모드에서 BLOCKING 승격. SKF-041 재발 방지 |
+| **G2: CSS Rendering → BLOCKING upgrade** | `verify-phases.md` CSS Token Check | GUI + CSS framework 사용 시 CSS Rendering 실패를 BLOCKING으로 승격. SKF-023 재발 방지 |
+| **Guard doc cross-reference** | `pipeline.md` | pipeline-integrity-guards.md 직접 참조 링크 추가 |
+
+---
+
 ## [2026-03-16] Pipeline Integrity Guards — SKF-001~044 Root Cause Generalization
 
 | Change | File | Rationale |

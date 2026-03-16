@@ -655,7 +655,16 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
        ✅ C-F007-D01: F001-auth verified, middleware available
    ```
 
-4. **Result**: ⚠️ warnings (NOT blocking). Unimplemented Guarantees are strong indicators of downstream Feature failures and should be prioritized during Phase 3 runtime verification.
+4. **Result**:
+   - **Default**: ⚠️ warnings (NOT blocking). Unimplemented Guarantees are strong indicators of downstream Feature failures and should be prioritized during Phase 3 runtime verification.
+   - **BLOCKING escalation for rebuild mode**: When Origin=`rebuild` AND this Feature has `Provides →` interfaces (i.e., at least one C-[FID]-G## Guarantee), unimplemented Guarantees are **❌ BLOCKING**, not warnings. The agent MUST halt and report:
+     ```
+     🔴 BLOCKING: Contract C-[FID]-G## not implemented — rebuild mode requires all Guarantees to be fulfilled.
+        [Consumer Feature] depends on this interface matching the source app's behavior.
+        → Return to implement to complete the interface, or explicitly defer with user approval.
+     ```
+     **Rationale**: In rebuild mode, downstream Features depend on these interfaces matching the source app's behavior. An unimplemented Guarantee will cause the next Feature's implementation to diverge from the original app, propagating behavioral drift through the pipeline.
+     (See pipeline-integrity-guards.md § Guard 6: Cross-Feature Interface Verification, § Guard 1: Guideline → Gate Escalation)
 
 **Step 1b — Plan Deviation Quick Check**:
 Lightweight sanity check to catch structural drift between plan artifacts and implementation:
@@ -1026,7 +1035,7 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 5: CI/Interactive path convergence
   □ Step 6: Execute demo --ci
   □ Step 6b: Execute VERIFY_STEPS (functional verification)
-  □ Phase 3b: Bug Prevention Verification (includes Empty State ≠ PASS)
+  □ Phase 3b: Bug Prevention Verification (includes Empty State ≠ PASS + Dual-Mode Verification)
 ```
 
 **Step 0 — SC Verification Planning** (classify ALL SCs — not just those in demo Coverage header):
@@ -1341,8 +1350,9 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
      - Tailwind CSS 3: CSS variables defined but `tailwind.config.js` `theme.extend.colors` doesn't reference them
      - CSS Modules: Variables defined in `:root` but not imported in component module files
   4. This check catches the "elements exist but are invisible" failure mode — build passes, type-check passes, elements are in DOM, but they render with no visible styling.
+  5. **Conditional BLOCKING upgrade** (See pipeline-integrity-guards.md § Guard 2): For GUI Features using a CSS framework (Tailwind CSS, PostCSS, CSS Modules, UnoCSS): CSS Token Rendering Check failure is **BLOCKING, not WARNING**. Static checks cannot catch invisible-element failures — runtime rendering verification is the only gate. If the Feature does not use a CSS framework (plain HTML/CSS only), the check remains ⚠️ WARNING.
 
-- **Result classification** (all warnings, NOT blocking):
+- **Result classification** (all warnings, NOT blocking — except CSS Token Rendering for CSS-framework Features, see item 5 above):
   - SC Tier 1 (presence) failure: ⚠️ warning (false positive possible — selector changes, etc.)
   - SC Tier 2 (state change) failure: ⚠️ warning — indicates interaction doesn't produce expected state change
   - SC Tier 3 (side effect) failure: ⚠️ warning — indicates state change doesn't propagate to downstream DOM
@@ -1843,6 +1853,35 @@ Display:
     - "No items yet" / "Add your first..." / "No results" / placeholder text = ✅ intentional empty state
     - Blank area with no content and no empty-state indicator = `⚠️ Empty State — data area has no content and no empty-state indicator. Possible missing data source or unimplemented empty state UI.`
   - This check helps catch cross-Feature data dependency issues (e.g., Feature depends on AI model data that isn't populated)
+
+**Seeded State Verification** — "Dual-Mode: Clean + Seeded" (See pipeline-integrity-guards.md § Guard 5):
+
+> Principle: Clean-state verification alone is INSUFFICIENT. Features that read from persistent
+> storage pass in Playwright's isolated `_electron.launch()` environment but fail in the user's
+> real environment with non-default settings and accumulated data.
+
+- **BLOCKING** for Features that read from persistent storage (electron-store, SQLite, localStorage, IndexedDB)
+- **⚠️ WARNING** for Features with no persistent storage dependency (included in Review but not blocking)
+
+**Protocol — both A and B must pass**:
+
+A. **Clean Environment** (already covered by Empty State Smoke Test above):
+   - Playwright `_electron.launch()` with isolated userData
+   - Baseline rendering + default-setting functionality
+
+B. **Seeded Environment** (non-default, real-world state):
+   - Launch with non-default settings: fontSize extremes (e.g., 12, 24), non-default language, non-default theme
+   - Option 1: `_electron.launch()` with `--user-data-dir` pointing to a pre-seeded test profile
+   - Option 2: Dev server + Playwright MCP `browser_navigate(localhost:port)` with seeded localStorage/store
+   - Option 3: Screenshot request to user (last resort — when programmatic seeding is infeasible)
+   - Verify: UI renders correctly with non-default values, no layout overflow, no invisible text, no hardcoded defaults overriding persisted values
+
+**Test State Isolation Rules** (mandatory for all seeded-state tests):
+1. **Reset or detect**: Before each test, reset to a known state OR detect current state before asserting
+2. **Toggle tests**: Read current value → change to opposite → verify change (NEVER assume initial state)
+3. **Order-independent**: Each test scenario must be independent — no dependency on previous test's side effects
+
+**Result**: If Feature has persistent storage dependency and Seeded Environment (B) is not verified → `❌ BLOCKING — Dual-Mode Verification incomplete. Seeded state not tested.`
 
 **Smoke Launch Criteria** (basic app stability):
 1. Process starts — no immediate exit with non-zero exit code

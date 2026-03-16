@@ -17,6 +17,8 @@ The pipeline is single-direction (reverse-spec → specify → plan → tasks �
 | **Gate 3** | verify Phase 3e | Run source app + rebuilt app side-by-side comparison. **BLOCKING** for rebuild+GUI — skip only when source app genuinely cannot build/launch. | `verify-phases.md` § Step 3e Source App Comparative Verification |
 
 > These gates are NOT optional for rebuild+GUI projects. Without them, a single incorrect assumption (e.g., wrong layout mode default) can propagate through all 6 stages undetected.
+>
+> For foundational guard patterns underlying all gates, see [pipeline-integrity-guards.md](../reference/pipeline-integrity-guards.md).
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 

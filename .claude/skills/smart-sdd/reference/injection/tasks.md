@@ -169,6 +169,33 @@ Without this check, agents produce 2 tasks for a 500-line source file, resulting
 
 > **Estimation heuristic**: ~100 lines of original source ≈ 1 implementation task (varies by complexity). Files over 300 lines typically need 3+ tasks.
 
+**Source Component Reference Tags** (rebuild mode only — skip if greenfield or no GUI components):
+After reading tasks.md, if pipeline mode = rebuild AND the Feature has GUI components AND plan.md contains a `## Source→Target Component Mapping` table, scan each UI-related task description for a `Source: [ComponentName] (path/to/file.tsx)` tag. If **any UI task lacks this tag**, append:
+
+```
+── ⚠️ Source Component References Missing ─────────
+plan.md has a Source→Target Component Mapping table but [N] UI task(s)
+in tasks.md lack a Source: tag linking back to the original component.
+
+Without source references, implement loses traceability to the original
+codebase and Guard 7 (Rebuild Fidelity Chain) cannot verify coverage.
+
+Example — with source reference (correct):
+  Task 5: Implement sidebar navigation panel
+    Source: SidebarNav (src/components/SidebarNav.tsx)
+
+Example — without source reference (flagged):
+  Task 5: Implement sidebar navigation panel
+    [no Source: tag — which original component does this rebuild?]
+
+Add Source: tags to each UI task now or during the "I've finished editing" step.
+────────────────────────────────────────────────────
+```
+
+(See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
+
+**Enforcement**: If rebuild mode + plan.md has Source→Target Component Mapping + any UI task lacks a `Source:` tag → **BLOCKING**. The agent MUST add source references before approval is offered. Without source component traceability, the rebuild may silently drop or duplicate original components.
+
 **Interaction Chain task injection check** (only if plan.md contains an `## Interaction Chains` section):
 After reading tasks.md, scan for tasks that address the full chain propagation (keywords: "interaction chain", "DOM effect", "store mutation", "visual result", "propagation", "classList", "style."). If tasks only mention handlers (e.g., "implement onThemeChange") but NOT the DOM/visual steps, append:
 
@@ -319,6 +346,11 @@ These are recommendations, not blockers. Proceed if the Feature is inherently la
 [Only if rebuild/adoption mode AND pre-context has Source Reference files.
  Shows original file sizes and estimated task count comparison]
 
+── ⚠️ Source Component References Missing ─────────
+[Only if rebuild mode AND Feature has GUI components AND plan.md has
+ Source→Target Component Mapping AND any UI task lacks a Source: tag
+ (See pipeline-integrity-guards.md § Guard 7: Rebuild Fidelity Chain)]
+
 ── ⚠️ Interaction Chain Tasks Incomplete ──────────
 [Only if plan.md has Interaction Chains AND tasks.md only covers
  handlers without DOM effect/visual result tasks]
@@ -360,6 +392,7 @@ Before displaying ReviewApproval options, verify all applicable blocking checks 
 | Demo tasks present | Demo-Ready Delivery active (constitution § VI) | **YES** — add before approval |
 | Integration wiring tasks present | Cross-boundary data flow detected | **YES** — add before approval |
 | Source complexity parity | Rebuild mode + task count < 70% estimate | **YES** — add tasks or acknowledge |
+| Source component references | Rebuild mode + UI tasks + plan.md has Source→Target mapping | **YES** — add Source: tags before approval |
 | Pattern Audit task present | plan.md has Pattern Constraints | ⚠️ Warning — strongly recommended |
 | Integration test task present | UI Feature + Test-First active | ⚠️ Warning — strongly recommended |
 | Visual verification task present | UI Feature + rebuild mode | ⚠️ Warning — strongly recommended |
