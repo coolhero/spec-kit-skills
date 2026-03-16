@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:02 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:05 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -133,13 +133,11 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 ## Architecture
 
-Building software with AI coding agents is a **harness engineering** problem — like harnessing a horse, the goal isn't to limit the agent's power but to make it directed and reliable. Without any harness, the agent writes code that compiles but doesn't hold together: features contradict each other, bugs reappear, and the bigger the project gets, the more time you spend correcting the agent instead of building.
+AI coding agents write great code — until the project gets big enough. Then features start contradicting each other, fixed bugs come back, and you spend more time correcting the agent than building.
 
-[spec-kit](https://github.com/github/spec-kit) provides the first layer of harness through SDD (Specification-Driven Development) — define specs first, implement against them. This gives the agent a clear target instead of vague instructions, and a structured pipeline (specify → plan → implement → verify) instead of ad-hoc coding.
+[spec-kit](https://github.com/github/spec-kit) tackles this with Specification-Driven Development: write specs first, then code against them. The agent gets a clear target and a structured pipeline (specify → plan → implement → verify) instead of winging it. This works — but only within a single Feature. The agent still can't remember what it decided two Features ago, still skips verification when it's inconvenient, and still builds things that look right but don't work the way the original did.
 
-spec-kit-skills adds the next layer: **cross-Feature context, enforcement, and behavioral fidelity**. spec-kit defines *what* to build and *in what order*. spec-kit-skills ensures the agent actually *remembers* what it decided two Features ago, *cannot skip* verification steps, and produces implementations that match not just the structure but the *behavior* of what was specified.
-
-The system is built on three pillars:
+spec-kit-skills approaches this as a **harness engineering** problem. Like putting a harness on a horse, the goal isn't to limit the agent's capability but to make it directed and reliable. It wraps spec-kit with the three things agents lack on their own:
 
 | Pillar | What It Does | Without It |
 |--------|-------------|------------|
