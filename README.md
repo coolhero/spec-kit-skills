@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:00 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:20 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -917,23 +917,31 @@ Complete list of all files in this repository grouped by skill.
 Each skill follows the same internal directory convention:
 
 ```
-.claude/skills/{skill}/
-├── SKILL.md              Entry point — command routing and mandatory rules
-├── commands/             User commands — one file per command workflow
-├── domains/              Domain modules — project-type-specific behavioral rules
-│   ├── interfaces/       Per-interface rules (gui, http-api, cli, data-io, tui)
-│   ├── concerns/         Per-concern rules (auth, ipc, async-state, i18n, ...)
-│   ├── archetypes/       Domain philosophy rules (ai-assistant, public-api, ...)
-│   ├── scenarios/        Project context rules (greenfield, rebuild, ...)
-│   ├── profiles/         Preset interface+concern combinations (smart-sdd only)
-│   └── foundations/      Framework-specific checklists (reverse-spec only)
-├── reference/            Shared pipeline mechanics — protocols and standards
-│   └── injection/        Per-step context injection rules (smart-sdd only)
-├── templates/            Artifact generation templates (reverse-spec only)
-└── scripts/              Status dashboard utilities (smart-sdd only)
+.claude/skills/
+├── shared/                        Cross-skill shared resources
+│   └── domains/                   Signal keywords (S0 + R1/A0) — single source of truth
+│       ├── _taxonomy.md           Module registry (all interfaces, concerns, archetypes)
+│       ├── interfaces/            Per-interface signal keywords
+│       ├── concerns/              Per-concern signal keywords
+│       └── archetypes/            Per-archetype signal keywords
+│
+├── {skill}/                       Per-skill directory (reverse-spec, smart-sdd, case-study)
+│   ├── SKILL.md                   Entry point — command routing and mandatory rules
+│   ├── commands/                  User commands — one file per command workflow
+│   ├── domains/                   Skill-specific behavioral rules (S1-S8 or R3-R7)
+│   │   ├── interfaces/            Per-interface rules (reference shared/ for S0/R1)
+│   │   ├── concerns/              Per-concern rules (reference shared/ for S0/R1)
+│   │   ├── archetypes/            Per-archetype rules (reference shared/ for A0)
+│   │   ├── scenarios/             Project context rules (smart-sdd only)
+│   │   ├── profiles/              Preset combinations (smart-sdd only)
+│   │   └── foundations/           Framework checklists (reverse-spec only)
+│   ├── reference/                 Pipeline mechanics — protocols and standards
+│   │   └── injection/             Per-step context injection (smart-sdd only)
+│   ├── templates/                 Artifact generation templates (reverse-spec only)
+│   └── scripts/                   Status dashboard utilities (smart-sdd only)
 ```
 
-**Key distinction**: `commands/` defines _what to execute_ (workflow steps), `domains/` defines _what rules to apply_ (behavioral modifiers per project type), and `reference/` defines _how the pipeline works_ (shared mechanics like HARD STOP protocol, branch management, state schema). Domains vary by project; reference is universal.
+**Key distinction**: `shared/` contains signal keywords used by both skills for module activation (single source of truth). `commands/` defines _what to execute_, `domains/` defines _what rules to apply_ (referencing shared/ for signal data), and `reference/` defines _how the pipeline works_.
 
 ### Root
 
@@ -1097,6 +1105,37 @@ Each skill follows the same internal directory convention:
 | `scripts/pipeline-status.sh` | Dashboard — pipeline progress overview |
 | `scripts/sbi-coverage.sh` | Dashboard — SBI coverage mapping |
 | `scripts/validate.sh` | Cross-file consistency validator (exit code indicates pass/fail) |
+
+### shared (`.claude/skills/shared/`)
+
+Signal keywords and module metadata shared by both reverse-spec and smart-sdd. Each module file merges S0 (semantic keywords for init inference) and R1/A0 (code patterns for source analysis) into a single source of truth.
+
+| File | Description |
+|------|-------------|
+| `domains/_taxonomy.md` | Module registry — complete list of all interfaces, concerns, archetypes with metadata |
+| `domains/_TEMPLATE.md` | Contributor template for adding new shared module files |
+| **Interfaces** | |
+| `domains/interfaces/gui.md` | GUI — S0 keywords (React, Vue, Electron, ...) |
+| `domains/interfaces/http-api.md` | HTTP API — S0 keywords (REST, GraphQL, Express, ...) + R1 generic |
+| `domains/interfaces/cli.md` | CLI — S0 keywords (CLI, Commander, yargs, ...) + R1 (bin/, CLI frameworks) |
+| `domains/interfaces/data-io.md` | Data I/O — S0 keywords (ETL, Airflow, ...) + R1 (pipeline frameworks) |
+| `domains/interfaces/tui.md` | TUI — S0 keywords (Ink, bubbletea, ...) + R1 (TUI framework imports) |
+| **Concerns** | |
+| `domains/concerns/async-state.md` | Async state — S0 + R1 (Zustand, Redux, MobX, store patterns) |
+| `domains/concerns/auth.md` | Auth — S0 + R1 (passport, next-auth, JWT patterns) |
+| `domains/concerns/authorization.md` | Authorization — S0 + R1 (RBAC, ABAC, ACL, permission checks) |
+| `domains/concerns/external-sdk.md` | External SDK — S0 + R1 (AI SDKs, payment SDKs, cloud SDKs) |
+| `domains/concerns/i18n.md` | i18n — S0 + R1 (i18next, locale files, translation patterns) |
+| `domains/concerns/ipc.md` | IPC — S0 + R1 (Electron IPC, Web Workers, child_process) |
+| `domains/concerns/message-queue.md` | Message queue — S0 + R1 (RabbitMQ, Kafka, BullMQ, broker patterns) |
+| `domains/concerns/plugin-system.md` | Plugin system — S0 + R1 (dynamic import, extension points, isolation) |
+| `domains/concerns/protocol-integration.md` | Protocol — S0 + R1 (LSP, MCP, JSON-RPC, capability negotiation) |
+| `domains/concerns/realtime.md` | Realtime — S0 + R1 (Socket.io, WebSocket, SSE) |
+| `domains/concerns/task-worker.md` | Task worker — S0 + R1 (Celery, Sidekiq, BullMQ, cron patterns) |
+| **Archetypes** | |
+| `domains/archetypes/ai-assistant.md` | AI assistant — A0 semantic + code patterns (LLM SDKs, streaming, RAG) |
+| `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |
+| `domains/archetypes/microservice.md` | Microservice — A0 semantic + code patterns (gRPC, service mesh, Docker) |
 
 ### case-study (`.claude/skills/case-study/`)
 

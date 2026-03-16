@@ -7,11 +7,7 @@
 
 ## R1. Detection Signals
 
-- TUI framework imports: Ink, Blessed, OpenTUI, tui-rs, bubbletea, Ratatui, Textual, Rich
-- Terminal rendering patterns: raw mode toggling, ANSI escape sequence generation, cursor positioning
-- Solid.js/React rendering to terminal (non-browser JSX targets)
-- PTY management: `node-pty`, `bun-pty`, pseudoterminal handling
-- Terminal detection: `process.stdout.isTTY`, `isatty()`, terminal dimension queries
+> See [`shared/domains/interfaces/tui.md`](../../../shared/domains/interfaces/tui.md) § Code Patterns
 
 ## R3. Analysis Axes — TUI Component Extraction
 

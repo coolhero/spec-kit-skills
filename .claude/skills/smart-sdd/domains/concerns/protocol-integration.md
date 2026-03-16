@@ -8,10 +8,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated.
-
-**Primary**: LSP, Language Server Protocol, MCP, Model Context Protocol, JSON-RPC, protocol server, protocol client, language server
-**Secondary**: capabilities negotiation, initialize/shutdown lifecycle, stdio transport, tool registration, resource provider, protocol handler
+> See [`shared/domains/concerns/protocol-integration.md`](../../../shared/domains/concerns/protocol-integration.md) § Signal Keywords
 
 ---
 

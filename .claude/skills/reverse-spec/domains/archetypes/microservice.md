@@ -7,9 +7,7 @@
 
 ## A0. Signal Keywords
 
-- **Libraries**: `@grpc/grpc-js`, `protobufjs`, `amqplib` (RabbitMQ), `kafkajs`, `@nestjs/microservices`, `bull` / `bullmq`, `ioredis` (pub/sub), `nats`, `@aws-sdk/client-sqs`
-- **Code patterns**: gRPC service definitions (`.proto` files), message queue producers/consumers, service-to-service HTTP calls, circuit breaker patterns, distributed tracing (correlation IDs, trace headers), health check endpoints (`/health`, `/ready`, `/live`)
-- **Config files**: `docker-compose.yml` with multiple services, `Dockerfile`, Kubernetes manifests (`k8s/`, `helm/`), service mesh configs, `.proto` files, API gateway configs
+> See [`shared/domains/archetypes/microservice.md`](../../../shared/domains/archetypes/microservice.md) § Signal Keywords
 
 ---
 

@@ -10,11 +10,9 @@
 
 ## S0. Signal Keywords
 
-**Primary** (high-confidence — activates this module):
-- {keyword1}, {keyword2}, {keyword3}
-
-**Secondary** (needs confirmation with user):
-- {keyword4}, {keyword5}
+> See [`shared/domains/concerns/{name}.md`](../../../shared/domains/concerns/{name}.md) § Signal Keywords
+>
+> _(Define Signal Keywords in the shared module, not here. smart-sdd references them via this cross-link.)_
 
 ---
 

@@ -7,10 +7,7 @@
 
 ## A0. Signal Keywords
 
-> Keywords that indicate this archetype should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: LLM, GPT, Claude API, OpenAI, Anthropic, langchain, llamaindex, AI assistant, chatbot, conversational AI, RAG, retrieval-augmented generation, prompt engineering
-**Secondary**: embeddings, vector database, token limit, context window, streaming response, model provider, fine-tuning, AI agent
+> See [`shared/domains/archetypes/ai-assistant.md`](../../../shared/domains/archetypes/ai-assistant.md) § Signal Keywords
 
 ---
 

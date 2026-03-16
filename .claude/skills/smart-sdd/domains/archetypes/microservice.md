@@ -7,10 +7,7 @@
 
 ## A0. Signal Keywords
 
-> Keywords that indicate this archetype should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: microservice, service mesh, gRPC, message queue, event-driven architecture, distributed system, service discovery, API gateway, container orchestration, Kubernetes, Docker Compose (multi-service)
-**Secondary**: circuit breaker, saga pattern, eventual consistency, distributed tracing, sidecar, service registry, CQRS, event sourcing, correlation ID
+> See [`shared/domains/archetypes/microservice.md`](../../../shared/domains/archetypes/microservice.md) § Signal Keywords
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:00 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:20 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -914,23 +914,31 @@ specs/
 각 스킬은 동일한 내부 디렉토리 규약을 따릅니다:
 
 ```
-.claude/skills/{skill}/
-├── SKILL.md              진입점 — 커맨드 라우팅 및 필수 규칙
-├── commands/             사용자 커맨드 — 커맨드별 워크플로우 정의
-├── domains/              도메인 모듈 — 프로젝트 유형별 행동 규칙
-│   ├── interfaces/       인터페이스별 규칙 (gui, http-api, cli, data-io, tui)
-│   ├── concerns/         관심사별 규칙 (auth, ipc, async-state, i18n, ...)
-│   ├── archetypes/       도메인 철학 규칙 (ai-assistant, public-api, ...)
-│   ├── scenarios/        프로젝트 컨텍스트 규칙 (greenfield, rebuild, ...)
-│   ├── profiles/         인터페이스+관심사 프리셋 조합 (smart-sdd 전용)
-│   └── foundations/      프레임워크별 체크리스트 (reverse-spec 전용)
-├── reference/            공유 파이프라인 메커니즘 — 프로토콜 및 표준
-│   └── injection/        단계별 컨텍스트 주입 규칙 (smart-sdd 전용)
-├── templates/            아티펙트 생성 템플릿 (reverse-spec 전용)
-└── scripts/              상태 대시보드 유틸리티 (smart-sdd 전용)
+.claude/skills/
+├── shared/                        스킬 간 공유 리소스
+│   └── domains/                   시그널 키워드 (S0 + R1/A0) — 단일 진실 소스
+│       ├── _taxonomy.md           모듈 레지스트리 (전체 인터페이스, 관심사, 아키타입)
+│       ├── interfaces/            인터페이스별 시그널 키워드
+│       ├── concerns/              관심사별 시그널 키워드
+│       └── archetypes/            아키타입별 시그널 키워드
+│
+├── {skill}/                       스킬별 디렉토리 (reverse-spec, smart-sdd, case-study)
+│   ├── SKILL.md                   진입점 — 커맨드 라우팅 및 필수 규칙
+│   ├── commands/                  사용자 커맨드 — 커맨드별 워크플로우 정의
+│   ├── domains/                   스킬 고유 행동 규칙 (S1-S8 또는 R3-R7)
+│   │   ├── interfaces/            인터페이스별 규칙 (S0/R1은 shared/ 참조)
+│   │   ├── concerns/              관심사별 규칙 (S0/R1은 shared/ 참조)
+│   │   ├── archetypes/            아키타입별 규칙 (A0은 shared/ 참조)
+│   │   ├── scenarios/             프로젝트 컨텍스트 규칙 (smart-sdd 전용)
+│   │   ├── profiles/              프리셋 조합 (smart-sdd 전용)
+│   │   └── foundations/           프레임워크 체크리스트 (reverse-spec 전용)
+│   ├── reference/                 파이프라인 메커니즘 — 프로토콜 및 표준
+│   │   └── injection/             단계별 컨텍스트 주입 (smart-sdd 전용)
+│   ├── templates/                 아티펙트 생성 템플릿 (reverse-spec 전용)
+│   └── scripts/                   상태 대시보드 유틸리티 (smart-sdd 전용)
 ```
 
-**핵심 구분**: `commands/`는 _무엇을 실행하는가_ (워크플로우 단계), `domains/`는 _어떤 규칙을 적용하는가_ (프로젝트 유형별 행동 수정자), `reference/`는 _파이프라인이 어떻게 작동하는가_ (HARD STOP 프로토콜, 브랜치 관리, 상태 스키마 등 공용 메커니즘)를 정의합니다. domains는 프로젝트마다 달라지고, reference는 범용입니다.
+**핵심 구분**: `shared/`는 양 스킬이 모듈 활성화에 사용하는 시그널 키워드를 단일 소스로 관리합니다. `commands/`는 _무엇을 실행하는가_, `domains/`는 _어떤 규칙을 적용하는가_ (시그널 데이터는 shared/ 참조), `reference/`는 _파이프라인이 어떻게 작동하는가_를 정의합니다.
 
 ### 루트
 
@@ -1094,6 +1102,37 @@ specs/
 | `scripts/pipeline-status.sh` | 대시보드 — 파이프라인 진행 개요 |
 | `scripts/sbi-coverage.sh` | 대시보드 — SBI 커버리지 매핑 |
 | `scripts/validate.sh` | 교차 파일 일관성 검증기 (종료 코드로 pass/fail 표시) |
+
+### shared (`.claude/skills/shared/`)
+
+reverse-spec과 smart-sdd가 공유하는 시그널 키워드 및 모듈 메타데이터. 각 모듈 파일은 S0(시맨틱 키워드 — init 추론용)과 R1/A0(코드 패턴 — 소스 분석용)을 단일 소스로 통합합니다.
+
+| 파일 | 설명 |
+|------|------|
+| `domains/_taxonomy.md` | 모듈 레지스트리 — 전체 인터페이스, 관심사, 아키타입 목록 + 메타데이터 |
+| `domains/_TEMPLATE.md` | 새 shared 모듈 파일 추가를 위한 기여자 템플릿 |
+| **Interfaces** | |
+| `domains/interfaces/gui.md` | GUI — S0 키워드 (React, Vue, Electron, ...) |
+| `domains/interfaces/http-api.md` | HTTP API — S0 키워드 (REST, GraphQL, Express, ...) |
+| `domains/interfaces/cli.md` | CLI — S0 키워드 + R1 (bin/, CLI 프레임워크) |
+| `domains/interfaces/data-io.md` | Data I/O — S0 키워드 + R1 (파이프라인 프레임워크) |
+| `domains/interfaces/tui.md` | TUI — S0 키워드 + R1 (TUI 프레임워크 임포트) |
+| **Concerns** | |
+| `domains/concerns/async-state.md` | Async state — S0 + R1 (Zustand, Redux, MobX, 스토어 패턴) |
+| `domains/concerns/auth.md` | Auth — S0 + R1 (passport, next-auth, JWT 패턴) |
+| `domains/concerns/authorization.md` | Authorization — S0 + R1 (RBAC, ABAC, ACL, 권한 검사) |
+| `domains/concerns/external-sdk.md` | External SDK — S0 + R1 (AI SDK, 결제 SDK, 클라우드 SDK) |
+| `domains/concerns/i18n.md` | i18n — S0 + R1 (i18next, 로케일 파일, 번역 패턴) |
+| `domains/concerns/ipc.md` | IPC — S0 + R1 (Electron IPC, Web Workers, child_process) |
+| `domains/concerns/message-queue.md` | Message queue — S0 + R1 (RabbitMQ, Kafka, BullMQ, 브로커 패턴) |
+| `domains/concerns/plugin-system.md` | Plugin system — S0 + R1 (동적 임포트, 확장점, 격리) |
+| `domains/concerns/protocol-integration.md` | Protocol — S0 + R1 (LSP, MCP, JSON-RPC, 기능 협상) |
+| `domains/concerns/realtime.md` | Realtime — S0 + R1 (Socket.io, WebSocket, SSE) |
+| `domains/concerns/task-worker.md` | Task worker — S0 + R1 (Celery, Sidekiq, BullMQ, cron 패턴) |
+| **Archetypes** | |
+| `domains/archetypes/ai-assistant.md` | AI assistant — A0 시맨틱 + 코드 패턴 (LLM SDK, 스트리밍, RAG) |
+| `domains/archetypes/public-api.md` | Public API — A0 시맨틱 + 코드 패턴 (OpenAPI, 속도 제한, 버저닝) |
+| `domains/archetypes/microservice.md` | Microservice — A0 시맨틱 + 코드 패턴 (gRPC, 서비스 메시, Docker) |
 
 ### case-study (`.claude/skills/case-study/`)
 

@@ -8,8 +8,7 @@
 
 ## S0. Signal Keywords
 
-**Primary**: authorization, permissions, RBAC, ABAC, ACL, access control, role-based, permission model, policy engine, capabilities
-**Secondary**: permission check, guard, authorize decorator, permission rule, scopes, row-level security, tenant isolation, glob pattern permissions
+> See [`shared/domains/concerns/authorization.md`](../../../shared/domains/concerns/authorization.md) § Signal Keywords
 
 ---
 

@@ -7,9 +7,7 @@
 
 ## R1. Detection Signals
 
-- Binary entry points: `bin/` directory, `package.json` `bin` field
-- CLI framework imports: Commander, yargs, clap, cobra, click, argparse
-- `main()` with argument parsing patterns
+> See [`shared/domains/interfaces/cli.md`](../../../shared/domains/interfaces/cli.md) § Code Patterns
 
 ## R3. Analysis Axes — CLI Command Extraction
 

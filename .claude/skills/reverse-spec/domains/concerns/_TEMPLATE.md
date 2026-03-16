@@ -10,17 +10,4 @@
 
 ## R1. Detection Signals
 
-### Library Signals
-| Library/Package | Language/Ecosystem | Signal Strength |
-|----------------|-------------------|----------------|
-| `{package-name}` | {Language} | HIGH |
-
-### Code Pattern Signals
-| Pattern | Description | Signal Strength |
-|---------|-------------|----------------|
-| `{code pattern}` | {What it indicates} | HIGH |
-
-### Config Signals
-| File/Pattern | Description | Signal Strength |
-|-------------|-------------|----------------|
-| `{config file}` | {What it indicates} | MEDIUM |
+> See [`shared/domains/concerns/{name}.md`](../../../shared/domains/concerns/{name}.md) § Code Patterns

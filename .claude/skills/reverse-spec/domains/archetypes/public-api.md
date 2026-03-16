@@ -7,9 +7,7 @@
 
 ## A0. Signal Keywords
 
-- **Libraries**: `swagger-ui-express`, `@nestjs/swagger`, `express-rate-limit`, `@nestjs/throttler`, `rate-limiter-flexible`, `express-openapi-validator`, `fastapi` (with OpenAPI auto-gen), `drf-spectacular`
-- **Code patterns**: API versioning (`/v1/`, `/v2/` route patterns), rate limit middleware, API key validation, webhook dispatch, CORS configuration for external consumers, OpenAPI/Swagger annotations
-- **Config files**: `openapi.yaml`, `swagger.json`, API gateway configs, rate limit configuration, API key management
+> See [`shared/domains/archetypes/public-api.md`](../../../shared/domains/archetypes/public-api.md) § Signal Keywords
 
 ---
 

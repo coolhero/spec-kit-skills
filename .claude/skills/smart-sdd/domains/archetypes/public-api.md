@@ -7,10 +7,7 @@
 
 ## A0. Signal Keywords
 
-> Keywords that indicate this archetype should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: public API, API platform, developer portal, API versioning, rate limiting, API key, OpenAPI, Swagger, API gateway, developer experience, DX, SDK generation
-**Secondary**: webhook, API documentation, deprecation policy, API consumer, third-party integration, API marketplace, developer onboarding
+> See [`shared/domains/archetypes/public-api.md`](../../../shared/domains/archetypes/public-api.md) § Signal Keywords
 
 ---
 

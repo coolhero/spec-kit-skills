@@ -8,10 +8,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: Electron, IPC, main process, renderer process, Web Workers, SharedWorker, microservice RPC, child process, message passing
-**Secondary**: preload script, contextBridge, process isolation, sandboxed
+> See [`shared/domains/concerns/ipc.md`](../../../shared/domains/concerns/ipc.md) § Signal Keywords
 
 ---
 

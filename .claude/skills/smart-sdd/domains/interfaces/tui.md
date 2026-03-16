@@ -7,10 +7,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: TUI, terminal UI, terminal interface, Ink, Blessed, OpenTUI, bubbletea, Ratatui, Textual, Rich, ncurses, curses
-**Secondary**: raw mode, ANSI escape, terminal rendering, PTY, pseudoterminal, terminal app, console UI
+> See [`shared/domains/interfaces/tui.md`](../../../shared/domains/interfaces/tui.md) § Signal Keywords
 
 ---
 

@@ -7,9 +7,7 @@
 
 ## A0. Signal Keywords
 
-- **Libraries**: `openai`, `anthropic`, `@anthropic-ai/sdk`, `langchain`, `llamaindex`, `llama-index`, `huggingface`, `transformers`, `ollama`, `ai` (Vercel AI SDK)
-- **Code patterns**: `stream()`, `ReadableStream`, `SSE`, `text/event-stream`, token counting, `ChatCompletion`, `messages.create`, embedding generation, vector store queries
-- **Config files**: `.env` with `*_API_KEY` for LLM providers, `prompts/` directory, model configuration files, RAG pipeline configs
+> See [`shared/domains/archetypes/ai-assistant.md`](../../../shared/domains/archetypes/ai-assistant.md) § Signal Keywords
 
 ---
 

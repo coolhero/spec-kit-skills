@@ -7,8 +7,7 @@
 
 ## S0. Signal Keywords
 
-**Primary**: message queue, RabbitMQ, Kafka, AMQP, event bus, pub/sub broker, BullMQ, Sidekiq, Celery, message broker, event-driven
-**Secondary**: dead letter queue, message retry, consumer group, topic, exchange, queue binding, message ordering, exactly-once delivery, at-least-once, backpressure, partition, offset
+> See [`shared/domains/concerns/message-queue.md`](../../../shared/domains/concerns/message-queue.md) § Signal Keywords
 
 ---
 

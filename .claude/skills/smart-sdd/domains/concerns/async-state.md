@@ -8,10 +8,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: Zustand, Redux, MobX, Pinia, Recoil, Jotai, Valtio, state management, reactive store, global state
-**Secondary**: selector, derived state, optimistic update, loading state, cache invalidation
+> See [`shared/domains/concerns/async-state.md`](../../../shared/domains/concerns/async-state.md) § Signal Keywords
 
 ---
 

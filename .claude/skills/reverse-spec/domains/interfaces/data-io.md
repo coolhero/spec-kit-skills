@@ -7,10 +7,7 @@
 
 ## R1. Detection Signals
 
-- Pipeline frameworks: Apache Airflow, Luigi, Prefect, Dagster, dbt
-- Data processing: pandas, polars, Spark, Flink
-- ML frameworks: scikit-learn, PyTorch, TensorFlow, Hugging Face
-- Config files: `dvc.yaml`, `pipeline.yml`, `dags/`
+> See [`shared/domains/interfaces/data-io.md`](../../../shared/domains/interfaces/data-io.md) § Code Patterns
 
 ## R3. Analysis Axes — Pipeline Extraction
 

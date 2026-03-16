@@ -7,10 +7,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: ETL, data pipeline, batch processing, stream processing, data transformation, Apache Kafka, Apache Spark, Airflow, Luigi, Prefect, dbt
-**Secondary**: CSV, Parquet, data lake, data warehouse, cron job, ingestion, aggregation
+> See [`shared/domains/interfaces/data-io.md`](../../../shared/domains/interfaces/data-io.md) § Signal Keywords
 
 ---
 

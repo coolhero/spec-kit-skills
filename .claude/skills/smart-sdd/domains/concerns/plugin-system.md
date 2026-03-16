@@ -7,8 +7,7 @@
 
 ## S0. Signal Keywords
 
-**Primary**: plugin, extension, addon, module loader, dynamic loading, plugin API, extension point, hook system
-**Secondary**: plugin manifest, plugin registry, hot reload, plugin isolation, plugin SDK, extension marketplace
+> See [`shared/domains/concerns/plugin-system.md`](../../../shared/domains/concerns/plugin-system.md) § Signal Keywords
 
 ---
 

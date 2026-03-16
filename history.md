@@ -3271,3 +3271,37 @@ Three problems drove this change:
 | `ARCHITECTURE-EXTENSIBILITY.md` | Fixed 4-Axis box (inner 29→33), Module Loading box (trailing space alignment) |
 | `README.md` | Fixed Big Picture box (3 lines off by ±1), added Directory Structure Overview to File Map |
 | `README.ko.md` | Fixed Korean Big Picture box (CJK display width compensation), added Korean Directory Structure Overview |
+
+---
+
+## [2026-03-16] Shared Domain Directory Introduction
+
+Extracted cross-skill signal keywords (S0/R1/A0) into a unified `shared/domains/` directory, eliminating 40-70% duplication between reverse-spec and smart-sdd domain modules.
+
+| Choice | Rationale |
+|--------|-----------|
+| Create `.claude/skills/shared/` as a non-skill resource directory | Shared modules need a home outside either skill; shared/ has no SKILL.md, just resources consumed by both skills |
+| Extract S0 (semantic) + R1 (code patterns) into unified shared files | 26 matching file pairs had 40-70% keyword overlap; single source of truth prevents drift |
+| Extract A0 (archetype signals) into shared archetype files | ~50% overlap between smart-sdd A0 (semantic) and reverse-spec A0 (code patterns) |
+| Keep _core.md files skill-specific (no sharing) | R1-R7 (analysis) vs S1-S7 (execution) have 0% overlap — intentionally different concerns |
+| Use cross-reference pattern (`See [shared/...] § Signal Keywords`) | Skill modules retain their S1-S8/R3-R7 sections; only signal keywords are replaced with references |
+| Add `_taxonomy.md` as module registry | Single source of truth listing all 19 modules (5 interfaces + 11 concerns + 3 archetypes) with metadata |
+| Add `_TEMPLATE.md` for contributors | Standardizes new module creation with both S0/A0 and R1/A0 signal sections |
+| No changes to install.sh/uninstall.sh | Existing `$SKILLS_SRC/*/` glob auto-discovers shared/ directory |
+
+### Files Created (21 new)
+| File | Purpose |
+|------|---------|
+| `shared/domains/_taxonomy.md` | Module registry — lists all interfaces, concerns, archetypes |
+| `shared/domains/_TEMPLATE.md` | Contributor template for new shared modules |
+| `shared/domains/interfaces/{gui,http-api,cli,data-io,tui}.md` | 5 interface signal modules (S0 semantic + R1 code patterns) |
+| `shared/domains/concerns/{async-state,auth,authorization,external-sdk,i18n,ipc,message-queue,plugin-system,protocol-integration,realtime,task-worker}.md` | 11 concern signal modules |
+| `shared/domains/archetypes/{ai-assistant,public-api,microservice}.md` | 3 archetype signal modules (A0 unified) |
+
+### Files Modified (~40)
+| File | Change |
+|------|--------|
+| 37 smart-sdd + reverse-spec domain modules | S0/R1/A0 sections replaced with `See [shared/...]` cross-references |
+| `smart-sdd/domains/_resolver.md` | Added Signal Keywords resolution note + updated S0/A0 Aggregation paths |
+| `README.md` | Added shared/ directory overview + file map section |
+| `README.ko.md` | Korean version of above |

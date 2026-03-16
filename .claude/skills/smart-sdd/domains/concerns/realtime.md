@@ -8,10 +8,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: WebSocket, SSE, Socket.io, real-time, live updates, streaming, push notifications, gRPC streaming, MQTT
-**Secondary**: reconnection, heartbeat, pub/sub, event-driven, broadcast, presence
+> See [`shared/domains/concerns/realtime.md`](../../../shared/domains/concerns/realtime.md) § Signal Keywords
 
 ---
 

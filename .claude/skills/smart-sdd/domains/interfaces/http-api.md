@@ -7,10 +7,7 @@
 
 ## S0. Signal Keywords
 
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: REST, GraphQL, API, endpoints, backend, server, Express, FastAPI, Hono, Koa, NestJS, Django, Flask, Spring Boot, Rails, HTTP, microservice
-**Secondary**: CORS, rate limiting, middleware, webhook, versioning, OpenAPI, Swagger
+> See [`shared/domains/interfaces/http-api.md`](../../../shared/domains/interfaces/http-api.md) § Signal Keywords
 
 ---
 

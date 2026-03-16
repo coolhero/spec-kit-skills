@@ -62,6 +62,8 @@ Look for the Domain Profile fields in `sdd-state.md` header:
 6. {Custom path}/domain-custom.md                 (if specified and file exists)
 ```
 
+> **Signal Keywords resolution**: Each module's S0/A0 section references `shared/domains/` for signal keywords. During S0/A0 aggregation (init inference), read keywords from `../../shared/domains/{type}/{name}.md § Signal Keywords` instead of the skill-local module. See `shared/domains/_taxonomy.md` for the complete module registry.
+
 **Merge rule**: Later modules extend earlier ones. For same-section content:
 - **S5 Elaboration Probes**: Append (accumulate all probes)
 - **S1 SC Rules**: Append (accumulate all rules)
@@ -201,23 +203,25 @@ When `init` is invoked with an idea string or PRD (Proposal Mode), Domain Profil
 
 ### S0 Aggregation
 
-During inference, the agent reads S0 sections from all interface and concern modules to build the signal vocabulary:
+During inference, the agent reads S0 keywords from `shared/domains/` to build the signal vocabulary:
 
 ```
-domains/interfaces/gui.md       → S0.Primary: ["React", "Vue", ...]
-domains/interfaces/http-api.md  → S0.Primary: ["REST", "Express", ...]
-domains/concerns/auth.md        → S0.Primary: ["JWT", "OAuth", ...]
+shared/domains/interfaces/gui.md       → S0.Primary: ["React", "Vue", ...]
+shared/domains/interfaces/http-api.md  → S0.Primary: ["REST", "Express", ...]
+shared/domains/concerns/auth.md        → S0.Primary: ["JWT", "OAuth", ...]
 ...
 ```
 
+> **Module registry**: `shared/domains/_taxonomy.md` lists all available modules. Scan all files in `shared/domains/interfaces/`, `shared/domains/concerns/`, and `shared/domains/archetypes/` for complete S0/A0 vocabulary.
+
 ### A0 Aggregation
 
-Alongside S0, the agent reads A0 sections from all archetype modules:
+Alongside S0, the agent reads A0 keywords from shared archetype modules:
 
 ```
-domains/archetypes/ai-assistant.md  → A0.Primary: ["LLM", "openai", "langchain", ...]
-domains/archetypes/public-api.md    → A0.Primary: ["OpenAPI", "rate-limit", ...]
-domains/archetypes/microservice.md  → A0.Primary: ["gRPC", "docker-compose", ...]
+shared/domains/archetypes/ai-assistant.md  → A0.Primary: ["LLM", "openai", "langchain", ...]
+shared/domains/archetypes/public-api.md    → A0.Primary: ["OpenAPI", "rate-limit", ...]
+shared/domains/archetypes/microservice.md  → A0.Primary: ["gRPC", "docker-compose", ...]
 ```
 
 Archetype inference runs in parallel with S0 inference. Results are merged into the Proposal:

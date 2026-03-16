@@ -7,8 +7,7 @@
 
 ## S0. Signal Keywords
 
-**Primary**: background job, task worker, Celery, Sidekiq, BullMQ, cron job, scheduled task, async worker, job queue, background service
-**Secondary**: task retry, task timeout, periodic task, task result backend, task priority, worker concurrency, beat scheduler, dead letter, task state, worker pool
+> See [`shared/domains/concerns/task-worker.md`](../../../shared/domains/concerns/task-worker.md) § Signal Keywords
 
 ---
 
