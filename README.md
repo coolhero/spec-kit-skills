@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:19 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:29 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -208,6 +208,8 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 3. This file loads last with highest priority, extending all other modules
 
 New modules compose freely with existing ones — no duplication, no unused rules. Each interface module also declares an **S8 Runtime Verification Strategy** — how to start, verify, and stop that interface type at runtime. See `domains/_schema.md` for the module schema, `domains/_resolver.md` for the full loading protocol, and `reference/runtime-verification.md` for the multi-backend runtime verification architecture.
+
+**How composition drives the pipeline**: Modules don't produce an output file — they merge into a behavioral ruleset in the agent's working memory. Each section routes to a specific pipeline step: `S1` shapes `specify` (SC generation), `S5` shapes `clarify` (consultation probes), `S7` shapes `plan`/`implement`/`verify` (bug prevention), `S3` shapes `verify` (verification gates), and `A1`/`A4`/`F7` shape `constitution` (domain principles). For a complete walkthrough with concrete before/after examples, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
 **Add a new archetype** (e.g., your project is a SaaS platform with multi-tenancy patterns):
 1. Create `domains/archetypes/saas-platform.md` in both skills — define A0 signal keywords ("multi-tenant", "subscription"), A1 philosophy principles ("Tenant Isolation", "Subscription Lifecycle"), and A2-A4 sections for SC rules, probes, and constitution injection

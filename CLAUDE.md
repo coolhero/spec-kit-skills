@@ -40,7 +40,7 @@
 ## Conventions
 
 - **Git commit messages MUST be written in English.**
-- 변경 시 항상 `history.md`에 이력을 기록합니다.
+- 변경 시 항상 `history.md`에 이력을 기록합니다. **이 레포에서 `history.md`는 루트(`./history.md`)에 위치합니다.** `specs/history.md`가 아닙니다. (스킬이 사용되는 대상 프로젝트에서는 `specs/history.md`가 맞지만, spec-kit-skills 레포 자체에서는 루트입니다.)
 - README.md와 README.ko.md는 항상 동기화 상태를 유지합니다.
 - README 수정 시 `Last updated:` 타임스탬프를 **반드시** 현재 시간으로 갱신합니다. `date '+%Y-%m-%d %H:%M KST'` 명령으로 실제 시간을 확인한 후 적용하세요. 추측하지 마세요.
 - 스크립트(`scripts/*.sh`)는 dead code로 판단하지 말고, 사용처를 확인하거나 연결해야 합니다.

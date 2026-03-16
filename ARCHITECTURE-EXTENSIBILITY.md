@@ -9,6 +9,7 @@
 
 1. [Module System Overview](#1-module-system-overview)
 2. [4-Axis Domain Composition](#2-4-axis-domain-composition)
+2b. [How Composed Modules Drive the Pipeline](#2b-how-composed-modules-drive-the-pipeline)
 3. [Adding a New Interface](#3-adding-a-new-interface)
 4. [Adding a New Concern](#4-adding-a-new-concern)
 5. [Adding a New Archetype](#5-adding-a-new-archetype)
@@ -102,6 +103,162 @@ The original 3-Axis model (Interface × Concern × Scenario) covered _what_ the 
 **Before (3-Axis)**: When reverse-spec analyzed an AI desktop app, it generated principles like "Streaming-First" and "Model Agnosticism" ad-hoc in the constitution-seed. These principles were valuable but unstandardized — different analysis runs might extract different principles with different names.
 
 **After (4-Axis)**: Archetype modules provide a structured vocabulary of domain principles. The `ai-assistant` archetype defines exactly which principles to extract (A1), how they affect SC generation (A2), what questions to ask during consultation (A3), and what to inject into the constitution (A4). This makes domain philosophy **reusable, consistent, and extensible**.
+
+---
+
+## 2b. How Composed Modules Drive the Pipeline
+
+> The previous section explains *what* gets composed. This section explains *what the composition produces* and *how it shapes each pipeline step*.
+
+### The Core Mechanism
+
+Domain modules are **not** compiled into an output file. They are loaded into the agent's working memory at session start and act as **behavioral modifiers** — each S-section tells the agent to do something *additional* or *different* at a specific pipeline step.
+
+Think of it like CSS for a pipeline: modules cascade, merge, and the combined rules "style" each step's behavior.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Module Loading (once)                      │
+│                                                               │
+│  _core.md → gui.md → async-state.md → ipc.md                │
+│           → ai-assistant.md → rebuild.md                      │
+│           → electron.md (Foundation)                          │
+│                                                               │
+│  Result: Merged ruleset cached in agent working memory        │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+         Each S/A/F section routes to a pipeline step
+                           │
+    ┌──────────┬──────────┬┴─────────┬───────────┬──────────┐
+    ▼          ▼          ▼          ▼           ▼          ▼
+ specify     plan      tasks    implement    verify    parity
+```
+
+### Section → Pipeline Step Mapping
+
+Every section from every module routes to a specific pipeline step. This is the complete mapping:
+
+| Section | What It Contains | Pipeline Step | How It Modifies Behavior |
+|---------|-----------------|---------------|--------------------------|
+| **S0** | Signal Keywords | `init` | Auto-detects which modules to activate from user's project description |
+| **S1** | SC Generation Rules | `specify` | Adds mandatory Success Criteria patterns; rejects anti-patterns |
+| **S2** | Parity Dimensions | `parity` | Defines structural/logic comparison axes (old vs new) |
+| **S3** | Verify Steps | `verify` | Adds/extends verification gates (test, build, lint, demo + module-specific) |
+| **S5** | Elaboration Probes | `specify` (clarify) | Adds domain-specific questions during Feature consultation |
+| **S6** | UI Testing Strategy | `verify` Phase 2-3 | Defines how to test UI rendering (Playwright, screenshots) |
+| **S7** | Bug Prevention Rules | `plan` / `analyze` / `implement` / `verify` | Activates stage-specific checks (split into B-1, B-2, B-3, B-4) |
+| **S8** | Runtime Verification | `verify` Phase 2-3 | Defines how to start, probe, and stop the running app |
+| **A1** | Philosophy Principles | `constitution` | Injects domain guiding principles (e.g., "Streaming-First") |
+| **A2** | SC Extensions | `specify` | Adds archetype-specific SC patterns (appended to S1) |
+| **A3** | Probes | `specify` (clarify) | Adds archetype-specific questions (appended to S5) |
+| **A4** | Constitution Injection | `constitution` | Embeds actionable principles into project constitution |
+| **F2** | Foundation Checklist | `pipeline` Phase 0 | Creates T0 infrastructure Features from framework decisions |
+| **F7** | Framework Philosophy | `constitution` | Adds framework-specific principles (e.g., Electron process model) |
+| **F8** | Toolchain Commands | `verify` Phase 1 | Overrides auto-detected build/test/lint commands |
+| **F9** | Scan Targets | `reverse-spec` Phase 2 | Adds framework-specific extraction patterns (decorators, models) |
+
+### Concrete Walkthrough: Step by Step
+
+Using the `desktop-app + ai-assistant + rebuild + electron` example, here is exactly what changes at each pipeline step:
+
+#### 1. `constitution` — What gets injected into the project's constitution
+
+| Source | Contribution |
+|--------|-------------|
+| **A1** (ai-assistant) | Principles: Streaming-First, Model Agnosticism, Offline Resilience, Token Awareness, Prompt Versioning |
+| **A4** (ai-assistant) | Actionable rules: "Never call provider SDKs directly from business logic" |
+| **F7** (electron) | Framework principles: Process Crash Isolation, Secure by Default, Web Standards First |
+
+Without modules: constitution contains only user-provided and spec-kit default principles.
+With modules: constitution embeds **12+ domain-specific principles** that guide all downstream decisions.
+
+#### 2. `specify` — How Feature specs are shaped
+
+| Source | Contribution |
+|--------|-------------|
+| **S1** (_core) | Base SC rules: every Feature needs testable SCs with clear pass/fail |
+| **S1** (gui) | +UI SCs: interaction SCs must specify user action → visual result |
+| **S1** (async-state) | +State SCs: async operations must have loading/error/success states |
+| **S1** (ipc) | +IPC SCs: cross-process calls must specify channel, payload, response |
+| **S1** (rebuild) | +Preservation SCs: must verify original behavior is maintained |
+| **A2** (ai-assistant) | +AI SCs: streaming responses must handle partial/complete/error states |
+| **S5** (all modules) | Combined probes: 30+ questions across auth, CRUD, routing, UI, IPC, streaming, model selection, preservation |
+
+Without modules: specify generates generic SCs like "user can log in."
+With modules: specify generates **precise, domain-aware SCs** like "User sends a message → streaming response renders token-by-token in the chat panel (loading indicator during first-token latency) → response completes → chat history persists across app restart."
+
+#### 3. `plan` — Bug prevention during architecture design
+
+| Source | Contribution |
+|--------|-------------|
+| **S7 B-1** (_core) | Runtime Compatibility, Async & Concurrency, Dependency Safety |
+| **S7 B-1** (gui) | +UI anti-patterns: CSS rendering traps, component lifecycle issues |
+| **S7 B-1** (ipc) | +IPC anti-patterns: serialization boundaries, process lifecycle |
+
+Without modules: plan checks for generic runtime issues.
+With modules: plan **proactively flags** IPC serialization boundary issues, CSS theme token mapping gaps, and Electron process model violations.
+
+#### 4. `implement` — Conditional bug checks during coding
+
+| Source | Contribution |
+|--------|-------------|
+| **S7 B-3** (_core) | Cross-Feature integration, data persistence, module-scope lifecycle |
+| **S7 B-3** (gui) | +Platform CSS Rendering check, +UI Interaction Surface Audit |
+| **S7 B-3** (ipc) | +IPC Boundary Safety, +IPC Return Value Defense |
+| **S7 B-3** (async-state) | +Selector instability, +Unbatched updates, +UX behavior contract |
+
+Without modules: implement runs generic safety checks.
+With modules: implement **actively verifies** that every IPC handler validates return values, every CSS variable maps to the theme system, and every async selector is memoized.
+
+#### 5. `verify` — Multi-phase verification
+
+| Source | Contribution |
+|--------|-------------|
+| **S3** (_core) | Phase 1: test + build + lint (BLOCKING) |
+| **S3** (rebuild) | +Migration regression gate, +Foundation compliance (S3d) |
+| **S6** (gui) | Phase 2-3: Playwright UI testing — screenshot comparison, interaction testing |
+| **S8** (gui) | Runtime strategy: how to start/stop the Electron app for testing |
+| **F8** (electron) | Toolchain override: use Electron-specific build/test commands |
+
+Without modules: verify runs test/build/lint and stops.
+With modules: verify runs **5 phases** — test/build/lint → Playwright UI testing → demo script → migration parity check → Foundation compliance audit.
+
+### The Merge Rule (How Conflicts Resolve)
+
+When multiple modules contribute to the same section, the merge follows a simple rule:
+
+```
+Load order: _core → interfaces → concerns → archetypes → scenarios → custom
+
+Merge behavior:
+  S1 (SC Rules)        → APPEND  (accumulate all rules)
+  S5 (Probes)          → APPEND  (accumulate all questions)
+  S7 (Bug Prevention)  → APPEND  (accumulate all checks)
+  S2 (Parity)          → APPEND  (add module-specific dimensions)
+  S3 (Verify Steps)    → EXTEND  (later modules add steps; override only if explicit)
+```
+
+No conflicts arise because each module contributes **additive** domain knowledge. The `gui` module doesn't conflict with the `ipc` module — they add different rules to different domains.
+
+### Summary: What Composition Actually Produces
+
+```
+Modules in:   [_core, gui, async-state, ipc, ai-assistant, rebuild, electron]
+                                    │
+                                    ▼
+Merged output:  NOT a file — a behavioral ruleset in agent memory
+                                    │
+                    ┌───────────────┼───────────────┐
+                    ▼               ▼               ▼
+              SC Rules ×18    Probes ×30+     Bug Checks ×15
+              (S1+A2)         (S5+A3)         (S7 B1-B4)
+                    │               │               │
+                    ▼               ▼               ▼
+              Shapes          Shapes          Shapes
+              specify         clarify         plan/impl/verify
+```
+
+The agent doesn't "generate" a composition artifact. It **behaves differently** at each step because the merged rules tell it: "when writing SCs, also check for IPC patterns" or "during verify, also run Playwright UI tests." The modules are invisible infrastructure — the user sees better specs, more thorough plans, and more reliable implementations.
 
 ---
 

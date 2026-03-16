@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:19 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:29 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -208,6 +208,8 @@ Interface                    Concern                      Archetype             
 3. 이 파일은 가장 마지막에 최우선 순위로 로드되어 다른 모든 모듈을 확장
 
 새 모듈은 기존 모듈과 자유롭게 합성됩니다 — 중복 없이, 불필요한 규칙 없이. 각 인터페이스 모듈은 **S8 런타임 검증 전략**도 선언합니다 — 해당 인터페이스 타입을 런타임에서 어떻게 시작, 검증, 종료하는지 정의합니다. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md`, 다중 백엔드 런타임 검증 아키텍처는 `reference/runtime-verification.md` 참고.
+
+**합성이 파이프라인을 어떻게 구동하는가**: 모듈은 출력 파일을 생성하지 않습니다 — 에이전트의 워킹 메모리에 행동 규칙셋으로 병합됩니다. 각 섹션은 특정 파이프라인 단계로 라우팅됩니다: `S1`은 `specify`(SC 생성)를, `S5`는 `clarify`(상담 프로브)를, `S7`은 `plan`/`implement`/`verify`(버그 방지)를, `S3`는 `verify`(검증 게이트)를, `A1`/`A4`/`F7`은 `constitution`(도메인 원칙)을 형성합니다. 구체적인 before/after 예시가 포함된 전체 워크스루는 [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline) 참고.
 
 **새 Archetype 추가** (예: 프로젝트가 멀티테넌시 패턴을 가진 SaaS 플랫폼인 경우):
 1. 양쪽 스킬 모두에 `domains/archetypes/saas-platform.md` 생성 — A0 신호 키워드("multi-tenant", "subscription"), A1 철학 원칙("Tenant Isolation", "Subscription Lifecycle"), A2-A4 섹션(SC 규칙, 프로브, constitution 주입) 정의

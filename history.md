@@ -3217,3 +3217,20 @@ Three problems drove this change:
 | `domains/interfaces/gui.md` | S6/S8: CLI primary backend, `_electron.launch()` |
 | `README.md` + `README.ko.md` | Playwright Setup Guide link, CLI primary prerequisites |
 | `CLAUDE.md` | Language rule: MCP-GUIDE.md → PLAYWRIGHT-GUIDE.md |
+
+## [2026-03-16] Composition → Pipeline Mapping Documentation
+
+| Choice | Rationale |
+|--------|-----------|
+| Added ARCHITECTURE-EXTENSIBILITY.md § 2b "How Composed Modules Drive the Pipeline" | User requested clear explanation of what module composition produces and how it affects each pipeline step — the composition mechanism was documented (4-axis, resolver) but the output mapping to pipeline steps was not |
+| Section → Pipeline Step mapping table | Each S/A/F section routes to exactly one pipeline step — making this explicit eliminates the "what does this actually do?" question |
+| Concrete before/after walkthrough per step | Abstract merge rules are insufficient — showing "without modules: generic SCs" vs "with modules: domain-specific SCs with IPC/streaming/preservation" makes the value tangible |
+| "CSS for a pipeline" metaphor | Modules cascade and merge to "style" each step's behavior — aligns with developers' existing mental model of cascading rules |
+| Brief summary in README.md/README.ko.md linking to § 2b | README provides the one-sentence explanation, ARCHITECTURE-EXTENSIBILITY provides the full walkthrough — per CLAUDE.md § Documentation Writing Guidelines |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `ARCHITECTURE-EXTENSIBILITY.md` | New § 2b: Section→Pipeline mapping table, concrete step-by-step walkthrough, merge rule summary, ASCII diagrams |
+| `README.md` | Added "How composition drives the pipeline" paragraph with link to § 2b |
+| `README.ko.md` | Korean translation of the same paragraph |
