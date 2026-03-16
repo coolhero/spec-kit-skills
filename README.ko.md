@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 17:59 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 18:02 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -133,11 +133,11 @@ spec-kit은 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 
 
 ## 아키텍처
 
-AI 코딩 에이전트를 오래 써본 사람이라면 이 패턴을 알 겁니다 — 한 세션에서 인상적인 코드를 작성하더니, 다음 세션에서는 자기가 내린 결정을 스스로 뒤집습니다. Build가 통과하면 "완료"라고 하지만, 정작 기능은 동작하지 않습니다. 같은 제약을 세 번째 설명해도 여전히 무시합니다. 프로젝트가 커질수록, 만드는 시간보다 에이전트를 교정하는 시간이 더 길어집니다.
+AI 코딩 에이전트로 소프트웨어를 만드는 것은 **harness engineering** 문제입니다 — 말에 harness를 씌우듯, 에이전트의 힘을 제한하는 게 아니라 방향성 있고 신뢰할 수 있게 만드는 것이 목표입니다. Harness 없이는, 에이전트가 작성한 코드가 컴파일은 되지만 하나의 시스템으로 성립하지 않습니다 — feature끼리 모순되고, 고친 버그가 다시 나타나고, 프로젝트가 커질수록 만드는 시간보다 교정하는 시간이 더 길어집니다.
 
-[spec-kit](https://github.com/github/spec-kit)은 SDD(Specification-Driven Development) 프레임워크를 도입하여 이 문제에 접근합니다 — 먼저 spec을 정의하고, 그에 맞춰 구현합니다. 에이전트에게 막연한 지시 대신 명확한 목표를 줍니다. 하지만 프레임워크만으로는 다 해결되지 않습니다 — 에이전트는 여전히 두 Feature 전에 뭘 결정했는지 잊고, 불편한 검증 단계는 건너뛰고, 프로젝트 전체 맥락이 필요한 곳에서 가장 단순한 구현을 선택합니다.
+[spec-kit](https://github.com/github/spec-kit)은 SDD(Specification-Driven Development)를 통해 첫 번째 harness layer를 제공합니다 — 먼저 spec을 정의하고, 그에 맞춰 구현합니다. 에이전트에게 막연한 지시 대신 명확한 목표를, ad-hoc 코딩 대신 구조화된 pipeline(specify → plan → implement → verify)을 줍니다.
 
-spec-kit-skills는 이 gap을 **harness engineering**으로 메웁니다 — 말에 harness를 씌우듯, 에이전트의 능력을 제한하는 게 아니라 **방향성 있고 유용하게** 만드는 것이 목표입니다. spec-kit 위에 cross-Feature context 관리, 자동화된 verification gate, 에이전트가 건너뛸 수 없는 behavioral fidelity check를 덧씌웁니다.
+spec-kit-skills는 그 다음 layer를 추가합니다: **cross-Feature context, enforcement, behavioral fidelity**. spec-kit이 *무엇을*, *어떤 순서로* 만들지 정의한다면, spec-kit-skills는 에이전트가 두 Feature 전의 결정을 실제로 *기억하게* 하고, 검증 단계를 *건너뛸 수 없게* 하며, 구조뿐 아니라 *동작*까지 spec과 일치하는 구현을 만들어내도록 보장합니다.
 
 시스템은 세 가지 기둥 위에 구축됩니다:
 
