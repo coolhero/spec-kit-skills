@@ -40,6 +40,8 @@ Before executing `specify` for a new Feature:
    - Record the branch name in sdd-state.md Feature Mapping → Branch column
 
 > **Why smart-sdd creates the branch**: spec-kit is initialized with `--no-git` (Step 0c) to avoid conflicts with existing git repos. This means `speckit-specify` does NOT create Feature branches. smart-sdd handles all git operations explicitly.
+>
+> **⚠️ Auto-numbering conflict**: Because the Feature branch `{NNN}-{short-name}` already exists when `speckit-specify` runs, spec-kit's `create-new-feature.sh` auto-numbering may detect `{NNN}` as "in use" and assign the next number. When invoking `speckit-specify`, always pass the Feature name as `{NNN}-{short-name}` (e.g., `002-navigation`) to force the correct number. See `commands/pipeline.md` § Feature Number Conflict Prevention.
 
 ### During Feature Development (specify → verify)
 

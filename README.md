@@ -2,12 +2,13 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:45 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-16 09:18 KST
 
 **Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
 
 - **Reverse-Spec** reverse-extracts implicit contracts (behaviors, interfaces, data models) from brownfield codebases and realigns them into Specs — bringing legacy code into the contract-based system. Supports both Rebuild (rewrite from scratch using the original as reference) and Adopt (keep existing code, add SDD documentation). Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** automatically assembles and injects related Features' contracts and state into each spec-kit command, then verifies changes don't violate existing contracts — keeping cross-Feature consistency intact.
+- **Case Study** generates structured reports from completed SDD workflows — aggregating quantitative metrics (Feature counts, test pass rates, parity scores) and tracing architectural decisions back to the domain principles that motivated them. Feeds insights back into domain module refinement.
 
 ---
 
@@ -644,16 +645,16 @@ Phase 6: Finalization         — Create artifacts, update roadmap/sdd-state
 Phase 0: Constitution Finalization
 Foundation Gate (first Feature only — validates project infrastructure once):
    - Build check (BLOCKING), Toolchain Pre-flight (lint/test availability),
-     CSS theme, state management, IPC bridge, layout verification
+     Build Plugins, state management, IPC bridge, layout verification
    - Results cached in sdd-state.md — skipped for subsequent Features
 Phase 1~N: Per Feature (in Release Group order):
    0. pre-flight → Ensure on main branch
-   1. specify    → (pre-context + business-logic injection) → /speckit-specify
+   1. specify    → (pre-context + business-logic injection) → /speckit-specify → Pre-Approval Validation (BLOCK)
    2. clarify    → Only if [NEEDS CLARIFICATION] exists
-   3. plan       → (pre-context + registry injection) → /speckit-plan
-   4. tasks      → /speckit-tasks
+   3. plan       → (pre-context + registry injection) → /speckit-plan → Pre-Approval Validation (BLOCK)
+   4. tasks      → /speckit-tasks → Pre-Approval Validation (BLOCK)
    5. analyze    → /speckit-analyze (consistency check)
-   6. implement  → Env var check (HARD STOP) → /speckit-implement → runtime verification + fix loop
+   6. implement  → Env var check (HARD STOP) → /speckit-implement → Smoke Launch → Completeness Gate (BLOCK) → runtime verification + fix loop
    7. verify     → 4-phase verification (+ Phase 3b bug prevention)
    8. merge      → Checkpoint (HARD STOP) → Merge to main
 ```
@@ -672,7 +673,7 @@ What verify catches — before merge:
 | Context compaction recovery | Agent losing progress mid-verify after long sessions |
 
 ```
-Phase 1:  Execution (tests, build, lint) — BLOCKS on failure
+Phase 1:  Execution (tests, build, lint, build output fidelity) — BLOCKS on failure
 Phase 2:  Cross-Feature Consistency — entity/API compat, interaction chains,
           UX behavior contract, API compat matrix, enablement smoke test,
           integration contract shape verification (Provider↔Consumer + bridge)

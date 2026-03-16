@@ -349,6 +349,8 @@ const { _electron } = require('playwright');
 
 No CDP port, no MCP configuration, no session restart required.
 
+**Electron Console Noise**: When Playwright's `evaluate()` injects code into an Electron renderer, the Chromium DevTools Console may display an anti-self-XSS warning ("Don't paste code into the DevTools Console that you don't understand..."). This is normal Chromium security behavior triggered by CDP code injection — it does NOT block `evaluate()` execution and is NOT an application error. During console error scans (verify Phase 3), filter out this warning along with other platform noise: `"Electron Security Warning"`, `[DEP0` deprecation notices, and DevTools internal messages. If the user sees this warning while manually inspecting DevTools, inform them it is a Playwright automation artifact, not an app issue.
+
 ### Source + Built App Dual Lifecycle (Rebuild Mode)
 
 During implement in rebuild mode, the agent manages two app instances:

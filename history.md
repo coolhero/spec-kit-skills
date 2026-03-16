@@ -5,6 +5,150 @@
 
 ---
 
+## [2026-03-16] Systemic: Feature completeness + rebuild parity enforcement + rule generalization
+
+### Feature Completeness — no blocking gate existed (Critical)
+
+Features could pass all verification gates while being incomplete. Task completion was only checked as a ⚠️ warning in verify Phase 2 (too late, non-blocking). SC coverage threshold was advisory. Integration contracts, orphaned services, and demo coverage were all non-blocking warnings.
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Post-Implement Completeness Gate | `pipeline.md` | BLOCKING gate between Smoke Launch and Review — audits tasks.md completion rate + rebuild visual reference. Catches incompleteness BEFORE verify |
+| Elevate Phase 2 task completion to BLOCKING | `verify-phases.md` | If tasks incomplete without DEFERRED acknowledgment → blocks (not warning) |
+
+### Rebuild Parity — plan/implement had no blocking parity gates (Critical)
+
+In rebuild mode, agent produced output that didn't match the original app (SKF-024: sidebar+tabbar simultaneously instead of mode-exclusive). Visual references were "MUST consult" in prose but had no HARD STOP enforcement. Verify 3e could be skipped with single acknowledgment.
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Rebuild Visual Reference Checkpoint (HARD STOP) | `injection/implement.md` | MANDATORY gate before first UI task — detects no visual reference and blocks |
+| Strengthen 3e skip: require visual ref fallback | `verify-phases.md` | Source app unavailable → fallback to static visual refs → if neither exists, Feature = `limited` not `success` |
+| Completeness Gate rebuild parity check | `pipeline.md` | Verifies visual reference was consulted during implement |
+
+### Rule Generalization — specific → general
+
+SKF-023 fixes were CSS-specific. Generalized to cover any build-time transformation framework.
+
+| Before | After | Files |
+|--------|-------|-------|
+| CSS Build Pipeline Verification | Build Toolchain Integration Verification | `injection/implement.md` |
+| CSS rendering check (Phase 1) | Build Output Fidelity Check | `verify-phases.md` |
+| CSS Toolchain (Foundation Gate) | Build Plugins | `pipeline.md` |
+| CSS framework misconfiguration (Smoke Launch) | Build-time framework misconfiguration | `pipeline.md` |
+| CSS Value Map (utility CSS only) | CSS Value Map (all build-time CSS frameworks) | `injection/implement.md` |
+| "avoid unnecessary re-renders" (React-specific) | "for performance and simplicity" (general) | `injection/implement.md` |
+
+---
+
+## [2026-03-16] Systemic: Warning → BLOCK escalation across specify/plan/tasks + build-time detection
+
+### Problem Pattern — same as implement/verify but in earlier phases
+
+The previous session fixed warning→BLOCK in implement.md and verify-phases.md. Same pattern existed in specify.md, plan.md, and tasks.md — critical architectural checks (Interaction Chains, Integration Contracts, SBI accuracy, Platform Constraints, Edge Cases, Multi-Provider coverage, demo tasks, integration wiring) were all ⚠️ warnings that users could dismiss with "Approve", allowing defects to propagate downstream.
+
+### Changes — specify.md
+
+| Check | Before | After |
+|-------|--------|-------|
+| SBI Accuracy Cross-Check | ⚠️ warning | **BLOCKING** if discrepancies found |
+| Platform Constraint FR Verification | ⚠️ warning | **BLOCKING** if constraint uncovered by FR |
+| Edge Case Coverage | ⚠️ warning | **BLOCKING** with acknowledge option |
+| Multi-Provider API Detection | ⚠️ warning | **BLOCKING** if provider lacks SC |
+| Runtime Default Coverage | ⚠️ warning | **BLOCKING** for layout defaults, ⚠️ for others |
+| Build-Time Plugin FR Check | *didn't exist* | NEW — detects build-time plugins in source, warns if no FR |
+| Pre-ReviewApproval Validation gate | *didn't exist* | NEW — verifies all blockers resolved before offering "Approve" |
+
+### Changes — plan.md
+
+| Check | Before | After |
+|-------|--------|-------|
+| Interaction Chains missing (UI Feature) | ⚠️ warning | **BLOCKING** — must add before approval |
+| Integration Contracts missing (Enablement Chain) | ⚠️ warning | **BLOCKING** — must add before approval |
+| Pattern Constraints missing | prose "MUST add" | **BLOCKING** — explicitly enforced |
+| API Compatibility Matrix missing (multi-provider) | ⚠️ warning | **BLOCKING** — must add before approval |
+| Pre-ReviewApproval Validation gate | *didn't exist* | NEW — 5-check table before offering "Approve" |
+| Pattern Constraints table | 5 runtime-only rows | +3 build-time rows (plugin registration, chain ordering, codegen) |
+| Rebuild Target mapping | No completeness check | +completeness check (>30% unmapped = warning) + build config verification |
+
+### Changes — tasks.md
+
+| Check | Before | After |
+|-------|--------|-------|
+| Demo tasks missing (Demo-Ready active) | ⚠️ warning | **BLOCKING** if constitution § VI active |
+| Integration wiring missing (cross-boundary) | ⚠️ warning | **BLOCKING** if cross-boundary flow detected |
+| Source complexity parity (rebuild) | Info only | **BLOCKING** if task count < 70% of estimate |
+| Pattern Audit keywords | React-specific hardcoded | Framework-agnostic + framework-specific terms from Pattern Constraints |
+| IPC detection keywords | Electron only | +Tauri keywords |
+| Pre-ReviewApproval Validation gate | *didn't exist* | NEW — 6-check table before offering "Approve" |
+
+---
+
+## [2026-03-16] SKF-023: CSS rendering verification — build passes but UI is unstyled
+
+### SKF-023: CSS framework misconfiguration invisible to build/TS/smoke gates (Critical)
+
+Tailwind CSS 4 utility classes were not being generated because `@tailwindcss/vite` plugin was missing from the renderer build config. Build passed (no errors), TypeScript passed (CSS classes are strings), smoke launch passed (app didn't crash), verify Phase 1 passed — but the UI was completely unstyled. General problem: CSS frameworks that generate classes at build time can silently fail without any gate detecting it.
+
+| Choice | Rationale |
+|--------|-----------|
+| CSS Build Pipeline Verification in implement B-3 | Catches misconfiguration at the source — before code is written against broken CSS |
+| Smoke Launch snapshot MANDATORY for GUI | Previous rule said "if Playwright available" — changed to MANDATORY with layout structure check |
+| CSS rendering check in verify Phase 1 (item 5) | Build gate alone cannot catch CSS-generates-but-doesn't-apply; need plugin registration + runtime spot check |
+| CSS Toolchain row in Foundation Gate | Detect missing CSS plugin before any Feature starts |
+
+**Files**: `injection/implement.md` (CSS Build Pipeline Verification), `pipeline.md` (Smoke Launch step 3 + Foundation Gate CSS Toolchain), `verify-phases.md` (Phase 1 item 5 — CSS rendering check)
+
+---
+
+## [2026-03-16] SKF-022: Inline Execution as default for speckit-* commands + Case Study README enhancement
+
+### SKF-022: Execute+Review continuity structurally impossible with Skill tool (Critical)
+
+The Skill tool creates a response boundary — when speckit-* completes via `Skill(speckit-plan)`, the skill's completion message becomes the final response. smart-sdd cannot continue to Review in the same turn, violating the Execute+Review Continuity Rule. Observed 3 times during F002 pipeline (specify, plan).
+
+| Choice | Rationale |
+|--------|-----------|
+| Inline Execution as default (not Skill tool) | Skill tool's response boundary is a structural limitation, not a usage error. Inline execution keeps everything in smart-sdd's context |
+| Removed "Skill Invocation Fallback" framing | Inline is now primary, not fallback. Renamed to "Inline Execution Protocol" |
+| Added "Why not the Skill tool?" explanation | Prevents future contributors from reverting to Skill tool usage |
+
+**Files**: `pipeline.md` (Step 3 Execute — replaced Skill tool invocation with Inline Execution Protocol), `CLAUDE.md` (Do NOT Modify #8 — added Violation Pattern C and Skill tool prohibition)
+
+### README Enhancement: Case Study skill description
+
+Added case-study as a third bullet in the top-level skill introduction (both README.md and README.ko.md). Previously only reverse-spec and smart-sdd were introduced at the top level, making case-study less discoverable.
+
+---
+
+## [2026-03-16] SKF-020 + SKF-021: Console noise filter + Feature number conflict prevention
+
+### SKF-020: Playwright evaluate() Console noise filter (Minor)
+
+Playwright's `evaluate()` triggers Chromium's anti-self-XSS warning in Electron DevTools Console. While it doesn't block execution, verify Phase 3's console error scan could misclassify it as a runtime error.
+
+| Choice | Rationale |
+|--------|-----------|
+| Filter list in verify-phases.md (2 locations) | Console scan runs at Phase 3 Step 3a and Phase 3 Step 6 (demo --ci browser scan) |
+| Explicit Electron note in runtime-verification.md | Central reference for all Electron-specific Playwright behaviors |
+| Pattern-based filter (not exact string match) | Chromium may change exact warning text across versions |
+
+**Files**: `verify-phases.md` (Phase 3 Step 3a console filter, Step 6 browser console filter), `runtime-verification.md` (§ Electron Library Mode)
+
+### SKF-021: speckit-specify auto-numbering conflict with pre-created branch (Major)
+
+smart-sdd creates Feature branch `{NNN}-{name}` in pre-flight (Step 0), then `speckit-specify` runs `create-new-feature.sh` which auto-detects the next available number. Since the branch already exists, the script assigns `{NNN+1}` — causing branch/directory number mismatch.
+
+| Choice | Rationale |
+|--------|-----------|
+| Pass explicit `{NNN}-{name}` to speckit-specify (Option A from SKF) | smart-sdd controls Feature IDs; explicit number is safer than auto-numbering |
+| Mismatch recovery instruction (rename + branch delete) | Graceful handling if conflict still occurs |
+| Added to branch-management.md as cross-reference | Branch lifecycle docs should document this caveat |
+
+**Files**: `pipeline.md` (§ Feature Number Conflict Prevention), `branch-management.md` (§ Pre-Flight auto-numbering warning)
+
+---
+
 ## [2026-03-15] Tech-stack agnostic generalization + SKF-019 native dependency check
 
 Comprehensive review identified 40+ points across pipeline.md, implement.md, and verify-phases.md where general rules were locked to specific technologies (JS/TS, React, Electron, Tailwind, npm). Instead of adding multi-language examples everywhere (which would bloat files), applied a lightweight strategy:

@@ -100,18 +100,20 @@ PROCEDURE ApprovalGate(type):
 ### 3. Execute — spec-kit Command Execution
 
 Executes the corresponding spec-kit command with the approved context:
-- Invokes `speckit-[command]` via the Skill tool (e.g., `Skill(speckit-specify)`, `Skill(speckit-plan)`)
+- **Always use Inline Execution** (read SKILL.md → execute as inline workflow steps). Do NOT use the Skill tool for `speckit-*` commands.
 - Includes the assembled context content in the conversation so spec-kit can reference it
 - Feature artifacts created/modified by the spec-kit command are located under `specs/{NNN-feature}/`
 - **Prerequisite**: spec-kit skills must be installed in the target project (Step 0c handles this automatically)
 
-#### Skill Invocation Fallback
+#### Inline Execution Protocol
 
-If the Skill tool returns "Unknown skill" for a `speckit-*` command (e.g., skills were installed mid-session):
+**Why not the Skill tool?** The Skill tool creates a response boundary — when the speckit skill completes, its output becomes the final response, and smart-sdd loses the ability to continue with Review in the same turn. This structurally violates the Execute + Review Continuity Rule (see below). Inline execution keeps everything in smart-sdd's response context.
+
+**How to execute inline**:
 1. Read the skill's SKILL.md file directly: `.claude/skills/speckit-[command]/SKILL.md`
 2. Execute the instructions contained in the SKILL.md as inline workflow steps
-3. This ensures the pipeline can continue even when skills aren't registered in the current session
-4. Display: "ℹ️ Using inline execution for speckit-[command] (skill not yet registered in this session)"
+3. Suppress spec-kit's completion messages (per MANDATORY RULE 3)
+4. Continue IMMEDIATELY to Step 3b (Review) in the same response
 
 #### Execute Error Handling
 
@@ -341,6 +343,7 @@ This step is informational only — no user confirmation required.
 | **State Management** | State access stability | Access the same state twice → verify consistent results (no unintended re-creation) | ⚠️ warning |
 | **IPC / Cross-boundary** | Inter-process communication works (if applicable) | Send test message across boundary → verify response | ⚠️ warning |
 | **Layout** | Core layout renders without error | Navigate to base route → snapshot → no error screen | ⚠️ warning |
+| **Build Plugins** | Build-time framework plugins registered | Check build config for required plugins (CSS: `@tailwindcss/vite`, i18n: extraction plugin, codegen: generate script in prebuild). See `injection/implement.md` § Build Toolchain Integration Verification | ⚠️ warning |
 | **Toolchain** | Lint/Test/Build tools available | Detect per `domains/_core.md` § S3b → verify executable | ⚠️ warning |
 
 **Execution**:
@@ -694,7 +697,7 @@ Executes the following steps **strictly in order** for each Feature.
 2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
 3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP) → Update
 4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
-5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → Demo-Ready Delivery → Review(STOP)
+5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → **Completeness Gate(BLOCK)** → Demo-Ready Delivery → Review(STOP)
 6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → SC UI Verify → Phase 3b (B-4) → Review(STOP) → Update
 7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
@@ -796,7 +799,11 @@ After build succeeds and before proceeding to the Review step, perform a **smoke
 
 1. **Start the app** using the project's standard launch command (dev or preview mode)
 2. **Wait 5 seconds** — if the process exits with a non-zero code or stderr contains crash indicators (uncaught exception, segfault, FATAL), the smoke launch fails
-3. **For GUI projects**: Confirm the main window is not blank — if Playwright CLI is available, take a single snapshot to verify basic UI elements rendered
+3. **For GUI projects (MANDATORY)**: Take a Playwright snapshot (`page.accessibility.snapshot()`) and verify:
+   - The window is not blank (snapshot contains interactive elements)
+   - Layout structure is reasonable (elements are not all stacked linearly without styling — symptom of build-time framework misconfiguration, e.g., CSS plugin missing, asset pipeline broken)
+   - Content is rendered (not showing raw template keys, placeholder text, or empty containers that should have data)
+   - If Playwright CLI is not available, manually inspect the running app and report what is visible
 4. **GUI operability check**: If the Feature includes user-facing UI, verify basic operability:
    - Can the user perform the fundamental interactions the Feature provides? (e.g., window control, navigation, settings access)
    - If the UI is a placeholder with no interactive elements → this is a smoke launch failure
@@ -831,7 +838,50 @@ Level 3 — HARD STOP (only after Level 1-2 exhausted):
 
 > This overlaps with verify Phase 0's Dev Mode Stability Probe but catches issues earlier, avoiding the verify → regression → re-implement cycle.
 
+#### Post-Implement Completeness Gate
+
+> **⚠️ implement is NOT complete until the Completeness Gate passes.** This gate catches incomplete implementations BEFORE they reach verify — where detection is too late and produces only non-blocking warnings.
+
+After Smoke Launch passes, verify implementation completeness:
+
+1. **Task completion audit**: Read `specs/{NNN-feature}/tasks.md` → count checked `[x]` vs total `[ ]` tasks.
+   - 100% completion → ✅ proceed
+   - <100% completion → list uncompleted tasks and **HARD STOP**:
+     ```
+     ⚠️ Completeness Gate — [N]/[total] tasks incomplete:
+       [ ] Task 5: Implement settings persistence
+       [ ] Task 8: Add keyboard shortcuts
+     ```
+     **Use AskUserQuestion**:
+     - "Complete remaining tasks before Review" — resume implement for missing tasks
+     - "Defer [N] tasks — proceed to Review" — user explicitly acknowledges incomplete (recorded in sdd-state.md Notes: `⚠️ DEFERRED: [task list]`)
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+2. **Rebuild parity check** (rebuild mode + GUI only):
+   - If visual references exist (`specs/reverse-spec/visual-references/manifest.md`): verify that the Visual Reference Checkpoint (see `injection/implement.md`) was executed (check sdd-state.md for `📂 Visual References` or `📂 Source App Reference` entry)
+   - If NO visual reference was consulted for a GUI Feature in rebuild mode → **HARD STOP**:
+     ```
+     ⚠️ Completeness Gate — No visual reference consulted for rebuild GUI Feature:
+       Visual references/ directory: [exists / not found]
+       Source app reference: [captured / not captured]
+
+     Rebuild without visual reference is high-risk for layout divergence.
+     ```
+     **Use AskUserQuestion**:
+     - "Load visual references now" — capture source app screenshots or read static references
+     - "Acknowledge risk — proceed without visual reference" (recorded: `⚠️ NO-VISUAL-REF`)
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+3. **Display gate result**:
+   ```
+   ✅ Completeness Gate:
+     Tasks: [N]/[N] complete
+     Visual reference: [✅ consulted / ⚠️ deferred / N/A (not rebuild)]
+   ```
+
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
+>
+> **⚠️ Feature Number Conflict Prevention**: Since smart-sdd creates the Feature branch `{NNN}-{short-name}` in pre-flight (Step 0), the branch already exists when `speckit-specify` runs. spec-kit's `create-new-feature.sh` auto-numbering scans existing branches and directories, so it will detect `{NNN}` as "in use" and assign the next available number — causing a branch/directory mismatch. To prevent this: when invoking `speckit-specify`, pass the Feature name as `{NNN}-{short-name}` (e.g., `002-navigation`) so that `create-new-feature.sh` uses the explicit number rather than auto-detecting. If a mismatch occurs anyway (spec directory created with wrong number), immediately rename the directory (`mv specs/{wrong}-{name} specs/{NNN}-{name}`) and delete the spurious branch before proceeding.
 
 📋 **Dependency Stub Registry**: After implement completion, generate `specs/{NNN-feature}/stubs.md` if any stub/placeholder implementations depend on future Features. See `injection/implement.md` § Post-Step Update Rules #2 for format and detection rules. These stubs are auto-injected into the dependent Feature's pipeline context.
 

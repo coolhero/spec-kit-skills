@@ -2,12 +2,13 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-15 10:45 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-16 09:18 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
 - **Reverse-Spec** — 브라운필드 코드베이스에서 암묵적 계약(동작·인터페이스·데이터 모델)을 역추출해 Spec으로 정렬하고, 레거시를 계약 기반 체계에 편입시킵니다. Rebuild(원본 참조, 새로 작성)과 Adopt(기존 코드 유지, SDD 문서 추가) 두 접근을 지원하며, smart-sdd 없이 spec-kit만 사용할 수 있도록 독립 프롬프트(`speckit-prompt.md`)도 함께 생성합니다.
 - **Smart-SDD** — spec-kit 명령 실행 시 관련 Feature의 계약·상태를 자동 주입하고, 변경이 기존 계약을 위반하지 않는지 검증하여 Feature 간 정합성을 유지합니다.
+- **Case Study** — 완료된 SDD 워크플로우에서 구조화된 보고서를 생성합니다. 정량 메트릭(Feature 수, 테스트 통과율, 패리티 점수)을 집계하고 아키텍처 결정을 그 근거가 된 도메인 원칙으로 역추적합니다. 분석 결과는 도메인 모듈 개선에 피드백됩니다.
 
 ---
 
@@ -641,16 +642,16 @@ Phase 6: 확정              — 아티펙트 생성, roadmap/sdd-state 갱신
 Phase 0: Constitution 확정
 Foundation Gate (첫 번째 Feature만 — 프로젝트 인프라를 한 번 검증):
    - 빌드 검사 (차단), Toolchain Pre-flight (lint/test 도구 가용성),
-     CSS 테마, 상태 관리, IPC 브릿지, 레이아웃 검증
+     Build Plugins, 상태 관리, IPC 브릿지, 레이아웃 검증
    - 결과를 sdd-state.md에 캐시 — 이후 Feature에서는 건너뜀
 Phase 1~N: Feature별 (Release Group 순서):
    0. pre-flight → main 브랜치 확인
-   1. specify    → (pre-context + 비즈니스 로직 주입) → /speckit-specify
+   1. specify    → (pre-context + 비즈니스 로직 주입) → /speckit-specify → Pre-Approval Validation (BLOCK)
    2. clarify    → [NEEDS CLARIFICATION] 있을 때만
-   3. plan       → (pre-context + 레지스트리 주입) → /speckit-plan
-   4. tasks      → /speckit-tasks
+   3. plan       → (pre-context + 레지스트리 주입) → /speckit-plan → Pre-Approval Validation (BLOCK)
+   4. tasks      → /speckit-tasks → Pre-Approval Validation (BLOCK)
    5. analyze    → /speckit-analyze (일관성 검사)
-   6. implement  → 환경 변수 확인 (HARD STOP) → /speckit-implement → 런타임 검증 + 수정 루프
+   6. implement  → 환경 변수 확인 (HARD STOP) → /speckit-implement → Smoke Launch → Completeness Gate (BLOCK) → 런타임 검증 + 수정 루프
    7. verify     → 4단계 검증 (+ Phase 3b 버그 예방)
    8. merge      → 체크포인트 (HARD STOP) → main에 머지
 ```
@@ -669,7 +670,7 @@ merge 전에 verify가 잡아내는 것들:
 | 컨텍스트 압축 복구 | 긴 세션 중 에이전트가 verify 진행을 잊는 것 |
 
 ```
-Phase 1:  실행 검증 (테스트, 빌드, 린트) — 실패 시 차단
+Phase 1:  실행 검증 (테스트, 빌드, 린트, 빌드 출력 무결성) — 실패 시 차단
 Phase 2:  교차 Feature 일관성 — 엔티티/API 호환, 인터랙션 체인,
           UX 행동 계약, API 호환성 매트릭스, 활성화 스모크 테스트,
           통합 계약 형태 검증 (Provider↔Consumer 형태 + 브리지)

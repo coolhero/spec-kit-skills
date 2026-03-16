@@ -81,13 +81,13 @@ If the Feature's `pre-context.md` has a non-empty Source Reference section AND `
 
 ## CSS Value Map Generation (rebuild mode with utility CSS)
 
-> **Skip if**: `specs/reverse-spec/visual-references/style-tokens.md` does not exist, OR the project does not use a utility CSS framework (detected from constitution tech stack — if plain CSS/SCSS/CSS-in-JS → skip).
-> Applies to: rebuild mode with utility CSS frameworks (Tailwind, UnoCSS, WindiCSS).
+> **Skip if**: `specs/reverse-spec/visual-references/style-tokens.md` does not exist, OR the project does not use a build-time CSS framework (detected from constitution tech stack — if plain inline styles only → skip).
+> Applies to: rebuild mode with build-time CSS frameworks (utility-first: Tailwind/UnoCSS/WindiCSS; CSS-in-JS: styled-components/Emotion/Vanilla Extract; Atomic: Pico/Open Props).
 
 Before the first UI-related `speckit-implement` task (one-time):
 
 1. Read `specs/reverse-spec/visual-references/style-tokens.md` → extract CSS property-value pairs organized by category (colors, spacing, typography, layout)
-2. Read the utility framework config (e.g., `tailwind.config.js`, `uno.config.ts`) → identify available utility classes and custom theme values
+2. Read the CSS framework config (e.g., `tailwind.config.js`, `uno.config.ts`, theme file, design tokens) → identify available utility classes/theme values
 3. Generate `specs/{NNN-feature}/css-value-map.md`:
 
 ```markdown
@@ -172,7 +172,43 @@ Even when the source app cannot be launched (dependency issues, missing env, etc
 3. Use these as the visual reference instead of live source app snapshots
 4. Display: `📂 Visual References (static): [N] screenshots loaded from visual-references/`
 
-This is NOT optional — if visual-references/ exists in a rebuild project, the agent MUST consult it before implementing UI. Skipping visual references leads to layout divergence from the original app.
+### Rebuild Visual Reference Checkpoint (MANDATORY — rebuild + GUI)
+
+> **Why this is a HARD STOP, not a read instruction**: Prior failures (SKF-024) show agents skip visual references despite "MUST consult" prose. This gate ensures visual reference is loaded and confirmed before any UI task begins.
+
+**Run ONCE before the first UI-related task** (after Layout Structure Analysis):
+
+1. **Detect available visual references**:
+   - Live source app: Source App Visual Reference (§ Protocol above) was executed → `source_ref = true`
+   - Static screenshots: `specs/reverse-spec/visual-references/manifest.md` exists → `static_ref = true`
+   - Neither available → `no_ref = true`
+
+2. **If source_ref OR static_ref**:
+   - Load relevant screens for this Feature
+   - Display:
+     ```
+     📂 Rebuild Visual Reference Checkpoint:
+       Source: [live app on port NNNN / static screenshots]
+       Screens loaded: [N] — [screen list]
+
+       These references will be compared against your implementation.
+     ```
+   - Record in sdd-state.md Notes: `📂 Visual References: [source type], [N] screens`
+   - Proceed to implement.
+
+3. **If no_ref** (rebuild + GUI with NO visual reference at all):
+   - **HARD STOP** — Use AskUserQuestion:
+     ```
+     ⚠️ No visual reference available for rebuild GUI Feature [FID]:
+       Visual references/ directory: not found
+       Source app: cannot be started ([reason])
+
+     Without visual reference, layout divergence from the original is very likely.
+     ```
+     - "Start source app manually — I'll provide the port" → agent captures reference
+     - "Provide screenshots — I'll place them in visual-references/" → user provides, agent re-checks
+     - "Acknowledge risk — proceed without visual reference" → record `⚠️ NO-VISUAL-REF` in sdd-state.md
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 ### Skip Conditions
 
@@ -769,6 +805,28 @@ When implementing code that calls external SDK functions, classify each call by 
 - **Electron/Tauri Webview CSS Constraints**: Desktop-specific CSS considerations (`-webkit-app-region: drag`, frameless window layouts)
 - **Cross-browser Compatibility**: CSS Grid/Flexbox fallbacks, vendor prefix requirements
 
+### Build Toolchain Integration Verification
+
+Many frameworks require **build-time plugin registration** to function. Code compiles without the plugin, but runtime output is incomplete or broken. This is a **silent failure** — build passes, types check, app runs, but the framework's output is missing.
+
+**When to check**: Whenever adding components that depend on a build-time transformation framework.
+
+**General procedure**:
+
+1. **Plugin registration check**: Verify the framework's build plugin is registered in the project's build tool configuration:
+   - **CSS frameworks**: Tailwind CSS 4 + Vite (`@tailwindcss/vite`), Tailwind CSS 3 + PostCSS (`tailwindcss` in `postcss.config`), CSS Modules (bundler `.module.css` support)
+   - **i18n extraction**: Compile-time key extractors (`@formatjs/swc-plugin`, `babel-plugin-react-intl`, etc.) in bundler/compiler config
+   - **Code generation**: Prisma (`prisma generate` in build scripts), GraphQL codegen (`graphql-codegen` config), OpenAPI generators
+   - **Asset pipeline**: Image optimization (`vite-plugin-image-optimizer`), SVG sprite generation, font subsetting
+   - **Other build-time transforms**: Any plugin listed in project docs or `package.json` scripts that must run for correct output
+2. **Scope/scanning check**: Verify the plugin's scope covers the new files:
+   - CSS: content scanning includes new component paths
+   - i18n: extraction config includes new source directories
+   - Codegen: schema/spec files are included in generation input
+3. **Build output sanity check**: After build, compare relevant output (CSS file size, generated type count, asset manifest entries) before and after changes. If output is unchanged or decreased after adding new framework-dependent code → likely misconfigured
+
+> **Why this pattern is dangerous**: Build-time transformation frameworks (CSS utility generators, i18n extractors, code generators) produce output only when their plugin is correctly registered AND their input scope covers the source files. Without the plugin, the build succeeds (the framework's references are just strings/imports that don't cause errors), but the runtime output is incomplete. This silent failure is invisible to build, type-check, and basic smoke gates.
+
 ### Cross-Feature Integration
 
 - **Import Path Validation**: Verify correct paths when importing modules from other Features
@@ -800,7 +858,7 @@ When implementing hover, click, or popup interactions, check the following befor
 
 - **Hover area scope**: Is the hover trigger area larger than the visual target? (e.g., entire row hover for a small button) → Narrow to the specific element, or use CSS `group-hover` on a tighter container
 - **Hover response timing**: Does hover trigger instantly on a high-traffic area (e.g., message list, scrollable container)? → Add CSS `transition-opacity` or debounce to prevent flicker during scroll
-- **Hover implementation method**: Is framework state used purely for show/hide? → Prefer CSS-only (`:hover` pseudo-class, CSS transitions) to avoid unnecessary re-renders
+- **Hover implementation method**: Is framework state used purely for show/hide? → Prefer CSS-only (`:hover` pseudo-class, CSS transitions) for performance and simplicity; reserve framework state for interactions requiring logic (data fetching, complex conditionals)
 - **Popup occlusion**: Does the hover popup obscure adjacent interactive elements? → Review z-index and positioning
 - **Scroll-through interference**: Does scrolling through a list trigger hover effects on every item passed? → CSS transitions naturally handle this; framework state hover does not
 

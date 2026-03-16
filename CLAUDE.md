@@ -17,9 +17,11 @@
 7. **verify-phases.md — Playwright Pre-flight**: verify Phase 1 시작 전 Playwright 가용성 체크(CLI probe → library import probe → MCP probe)를 반드시 수행합니다. 이 pre-flight를 제거하거나 건너뛰지 마세요. CLI가 primary이며, Electron 앱은 `_electron.launch()`로 직접 연결합니다.
 
 8. **pipeline.md — Execute+Review Continuity**: speckit-* 명령 실행 후 결과 요약만 표시하고 멈추지 마세요. Execute와 Review는 하나의 연속 동작입니다. `speckit-* 완료 → spec-kit raw output 억제 → artifact 읽기 → Review 표시 → AskUserQuestion 호출`이 반드시 같은 응답에서 이루어져야 합니다. 컨텍스트 한계로 불가능한 경우에만 fallback 메시지(`💡 Type "continue" to review the results.`)를 표시합니다.
+   - **⚠️ speckit-* 호출 시 Skill tool 사용 금지**: `Skill(speckit-specify)`, `Skill(speckit-plan)` 등으로 호출하면 Skill tool의 응답 경계에서 smart-sdd의 턴이 종료되어 Review를 동일 응답에서 이어갈 수 없습니다. 반드시 **Inline Execution** (SKILL.md를 직접 읽고 inline 단계로 실행)을 사용하세요. pipeline.md의 Inline Execution Protocol 참조.
    - **위반 패턴 A (멈춤)**: spec-kit raw output 표시 후 멈춤 → 사용자가 Review를 볼 수 없고, 다음 단계로 진행 불가
    - **위반 패턴 B (건너뜀)**: spec-kit raw output 표시 후 Review/HARD STOP을 건너뛰고 다음 step으로 바로 진행 → 사용자가 산출물 승인 기회를 잃음
-   - 두 패턴 모두 금지. Review HARD STOP은 생략 불가. SKILL.md MANDATORY RULE 3 참조.
+   - **위반 패턴 C (Skill tool)**: `Skill(speckit-*)` 호출 → speckit의 completion 메시지가 최종 응답이 됨 → Review 미표시, fallback 안내도 없음 → 사용자가 파이프라인 중단인지 완료인지 판단 불가
+   - 세 패턴 모두 금지. Review HARD STOP은 생략 불가. SKILL.md MANDATORY RULE 3 참조.
 
 9. **pipeline.md — Inter-step Continuity**: Feature 내 step 간 전환(예: plan Update → tasks Checkpoint)은 자동으로 이어져야 합니다. step 완료 후 "completed" 메시지만 표시하고 멈추지 마세요. 멈출 수 있는 유일한 지점은 HARD STOP(사용자 승인 대기), BLOCK 조건, Feature 완료, 복구 불가 에러뿐입니다. **HARD STOP 없이 다음 step으로 건너뛰는 것은 "continuity"가 아니라 "HARD STOP 위반"입니다.**
 

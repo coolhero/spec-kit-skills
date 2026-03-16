@@ -154,6 +154,10 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
   → Standalone section separation (instruction visibility > checklist piggyback)
   → Dependency Interpretation Rules (implementation ordering ≠ runtime coupling)
   → Explicit CWD path annotations (CWD vs target-directory disambiguation)
+  → Console Noise Filter (automation platform warnings ≠ app errors)
+  → Explicit Feature Number Passing (pre-allocated number → downstream system)
+  → Inline Execution Protocol (Skill tool response boundary → inline SKILL.md execution)
+  → CSS Rendering Verification (build success ≠ CSS applied → plugin check + runtime spot check)
 ```
 
 ---
@@ -239,3 +243,23 @@ Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source R
 **Situation**: reverse-spec placed F008 (Data & Storage) before F001 (Electron Shell) in the dependency graph because "Shell imports DB at startup → Shell depends on DB." This caused smart-sdd to select F008 as the first Feature instead of F001.
 **Resolution**: Added 3 Dependency Interpretation Rules to analyze.md Phase 3-2: (1) Bootstrap Feature always RG-1 first, (2) Foundation sanity check with AskUserQuestion, (3) "Could I write A without B's code?" test. Added post-sort validation.
 **Lesson**: "A's code imports B at runtime" ≠ "A cannot be implemented without B." Feature dependency is about implementation ordering ("I need B's code to exist before I can write A"), not runtime initialization sequence. The test: "If B's code didn't exist at all, could I still write A from scratch?" If yes, A does not depend on B.
+
+### L17. Automation Platform Noise ≠ Application Errors (SKF-020)
+**Situation**: Playwright `evaluate()` triggered Chromium's anti-self-XSS warning in Electron DevTools Console. Verify Phase 3 console error scan could misclassify this as a runtime error.
+**Resolution**: Added console noise filter list to verify-phases.md (two locations) and Electron-specific note to runtime-verification.md.
+**Lesson**: When automation tools inject code into an application, the platform may generate its own warnings (Chromium anti-XSS, deprecation notices, DevTools internal messages). Console error scans must distinguish platform noise from application errors. Maintain a filter list of known automation artifacts.
+
+### L18. Pre-Created Resources Conflict with Auto-Numbering Scripts (SKF-021)
+**Situation**: smart-sdd creates Feature branch `002-navigation` in pre-flight, then `speckit-specify` auto-numbers and detects 002 as "in use" → creates `003-navigation` instead.
+**Resolution**: Pass explicit `{NNN}-{name}` to speckit-specify so auto-numbering is bypassed. Added mismatch recovery instructions.
+**Lesson**: When two systems both create numbered resources (branches, directories) and one runs before the other, the second system's auto-numbering will conflict with the first's pre-allocated number. Fix: the controlling system (smart-sdd) must pass its predetermined number explicitly to the downstream system (spec-kit), not rely on auto-detection.
+
+### L19. Skill Tool Response Boundary Breaks Multi-Step Orchestration (SKF-022)
+**Situation**: smart-sdd invoked `speckit-plan` via the Skill tool. The Skill tool executed the speckit skill, which generated its own completion message — and this became the final response. smart-sdd's "Execute + Review Continuity Rule" (Review must happen in the same response as Execute) was structurally impossible to satisfy. Occurred 3 times during F002 pipeline.
+**Resolution**: Changed pipeline.md to use Inline Execution (read SKILL.md → execute as inline steps) as the default, instead of the Skill tool. Inline execution keeps everything within smart-sdd's response context.
+**Lesson**: When an orchestrator skill delegates to a sub-skill via the Skill tool, the sub-skill's response terminates the orchestrator's turn. If the orchestrator needs to perform post-processing (review, validation, continuation) in the same turn, the Skill tool is structurally incompatible. Use inline execution (read and execute the sub-skill's instructions directly) instead. The Skill tool is appropriate for user-invoked standalone commands, not for orchestrator-to-sub-skill delegation within a pipeline.
+
+### L20. Build Success ≠ CSS Rendering — Silent CSS Framework Failures (SKF-023)
+**Situation**: F002 implement and verify all passed (build, TypeScript, smoke launch, Phase 1), but the UI was completely unstyled. Tailwind CSS 4's `@tailwindcss/vite` plugin was not registered in `electron.vite.config.ts` renderer section. The build succeeded (no errors), TypeScript compiled (CSS classes are strings), and the app ran (no crash) — but zero utility classes were generated.
+**Resolution**: Added 4-layer defense: (1) CSS Build Pipeline Verification in implement B-3 checks plugin registration, (2) Smoke Launch snapshot made MANDATORY with layout structure check, (3) verify Phase 1 CSS rendering check (plugin registration + runtime spot check), (4) Foundation Gate CSS Toolchain row.
+**Lesson**: CSS frameworks that generate classes at build time (Tailwind, CSS Modules) create a category of "silent failures" invisible to all traditional gates: build passes (no compilation errors), TypeScript passes (CSS classes are untyped strings), smoke launch passes (app doesn't crash), tests pass (they don't check visual appearance). The only reliable detection is: (a) verify the build plugin is registered in the correct config section, and (b) runtime rendering check via Playwright snapshot. Build-time CSS generation requires build-tool-aware verification, not just build success.

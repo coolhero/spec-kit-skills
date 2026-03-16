@@ -527,13 +527,45 @@ Run each check and record results. **If any check fails, verification is BLOCKED
 
    **Blocking**: Missing keys (code references a key that exists in NO locale file) → Phase 1 FAILURE. Incomplete translations (key in one locale but not another) → ⚠️ WARNING (not blocking, but reported).
 
-**If ANY check fails** (test, build, lint errors, or missing i18n keys), display and STOP:
+5. **Build output fidelity check** (all project types — scope varies):
+
+   Build success does NOT guarantee runtime correctness. Many frameworks require build-time plugins that, when missing, cause **silent failures** — build passes, types check, app runs, but framework output is absent.
+
+   **Step 5a — Build-time framework detection**: Scan project configuration for frameworks requiring build plugins:
+   - **CSS frameworks**: Tailwind CSS (`@tailwindcss/vite`, `@tailwindcss/postcss`), PostCSS plugins, CSS Modules
+   - **i18n extraction**: compile-time message extractors (`@formatjs/swc-plugin`, `babel-plugin-react-intl`)
+   - **Code generation**: Prisma, GraphQL codegen, OpenAPI generators (check if `generate` scripts exist in `package.json`)
+   - **Asset pipeline**: image optimizers, SVG sprite generators, font subsetters
+   - No build-time frameworks detected → skip this check
+
+   **Step 5b — Plugin registration verification** (for each detected framework):
+   - Verify the framework's build plugin is registered in the correct build configuration
+   - For multi-config builds (e.g., `electron.vite.config` with main/preload/renderer): verify the plugin is in the **correct target config** (e.g., CSS plugin in renderer, not main)
+   - For codegen: verify generation scripts run before build (prebuild hook or explicit step)
+   - If plugin/script is missing → ❌ **BLOCKING** — framework output will not be generated
+
+   **Step 5c — Runtime output spot check** (if applicable and Playwright available for GUI):
+   - **GUI/CSS**: Start the app, take a snapshot — check that styled container elements have non-default dimensions (not all at 0×0 or stacked linearly)
+   - **i18n**: Verify at least one translated string appears in rendered output (not raw keys like `messages.welcome`)
+   - **Codegen**: Verify generated types/clients exist and are importable
+   - If output appears non-functional → ⚠️ WARNING — likely build plugin misconfiguration
+
+   **Display**:
+   ```
+   🔧 Build Output Fidelity:
+     Detected frameworks: [Tailwind CSS 4, i18n (formatjs) / none]
+     Plugin registration: [✅ all registered / ❌ MISSING — {framework}: {expected plugin} not in {config}]
+     Runtime check: [✅ output verified / ⚠️ output missing / skipped (not applicable)]
+   ```
+
+**If ANY check fails** (test, build, lint errors, missing i18n keys, or build plugin missing), display and STOP:
 ```
 ❌ Execution Verification failed for [FID] - [Feature Name]:
   Tests: [PASS/FAIL — pass count/total, failure details]
   Build: [PASS/FAIL — error summary]
   Lint:  [PASS/FAIL/skipped (not installed)/not configured]
   i18n:  [PASS/FAIL/skipped (no i18n) — missing key count]
+  Build fidelity: [PASS/FAIL/skipped (no build-time frameworks detected)]
 
 Fix the failing checks before verification can continue.
 Verification is BLOCKED — merge will not be allowed until all checks pass.
@@ -591,7 +623,10 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 Lightweight sanity check to catch structural drift between plan artifacts and implementation:
 1. **Entity count**: Count entities in `data-model.md` (or plan.md data model section) → compare to actual model/type/schema files. Flag if actual count differs by ±30% or more.
 2. **API/IPC channel count**: Count endpoints/channels in `contracts/` → compare to actual route/handler definitions. Flag if mismatch.
-3. **Tasks completion rate**: Read `tasks.md` checkbox states → report completion rate. If uncompleted tasks exist, list them with a note: `⚠️ [N] tasks not marked complete — verify if intentionally deferred or missed.`
+3. **Tasks completion rate**: Read `tasks.md` checkbox states → report completion rate.
+   - 100% complete → ✅ proceed
+   - <100% AND sdd-state.md Notes contains `⚠️ DEFERRED:` for this Feature → ⚠️ warning (user already acknowledged during Completeness Gate)
+   - <100% AND no DEFERRED acknowledgment → ❌ **BLOCKING**: `🔴 [N] tasks not completed and not deferred — implement Completeness Gate may have been skipped. Return to implement to complete remaining tasks or explicitly defer them.`
 4. Report:
    ```
    📋 Plan Deviation Quick Check:
@@ -1203,6 +1238,13 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
        - `verify-animation selector property` → check computed style change after interaction — for CSS transition/animation verification (compare before/after values)
      - ⬜-marked SC: Skip (record reason)
   3. Collect JS errors from Console logs (TypeError, ReferenceError, etc.)
+     **Console noise filter**: Exclude system-generated warnings that are NOT application errors:
+     - Electron/Chromium anti-self-XSS: `"Don't paste code into the DevTools Console"`, `"allow pasting"`
+     - Electron security warnings: `"Electron Security Warning"`
+     - Node.js deprecation notices: `[DEP0` prefix
+     - Chromium DevTools internal: `"DevTools failed to load"`
+     - Playwright automation artifacts: warnings triggered by `evaluate()` injection
+     These are automation/platform noise, not application runtime errors.
   4. Detect page load failures
   5. Result report:
   ```
@@ -1403,25 +1445,31 @@ After executing each SC's verification, record the **Reached Depth** and compare
 
 **Skip conditions**:
 - Not rebuild mode, OR Source Path is N/A → skip entirely
-- `source_available` is not `running` AND source app cannot be started by the agent → skip with explicit reason
 
-> **🚫 MANDATORY for rebuild + GUI**: When Origin=`rebuild` AND `gui` is in active Interfaces, source app comparison is BLOCKING, not optional. The agent MUST attempt to start and compare against the source app. Skipping is only permitted when the source app genuinely cannot be built/launched (missing dependencies, broken build), and the skip reason must be displayed with a HARD STOP for user acknowledgment. Without source comparison, errors like wrong layout mode defaults propagate undetected through the entire pipeline (see SKF-014).
+> **🚫 MANDATORY for rebuild + GUI**: When Origin=`rebuild` AND `gui` is in active Interfaces, source app comparison is BLOCKING, not optional. The agent MUST attempt to start and compare against the source app. Without source comparison, errors like wrong layout mode defaults propagate undetected through the entire pipeline (see SKF-014, SKF-024).
 
 **Prerequisite**: Source app must be running. Detection:
 1. Read Source Path from sdd-state.md
 2. Probe source app (curl health endpoint or process check)
 3. If not running → **attempt to start** the source app (read the project's script configuration, try the detected dev start command)
-4. If start attempt fails → User Cooperation Protocol:
-   ```
-   📋 Source App Comparison requires the original app running.
-   Source Path: [path]
-   Expected at: http://localhost:[port]
-   Start attempt failed: [reason]
-   ```
-   **Use AskUserQuestion**:
-   - "Source app is running — proceed with comparison"
-   - "Skip source comparison — acknowledge risk" (rebuild+GUI: display `⚠️ Skipping source comparison for rebuild GUI Feature. Layout/default mismatches may go undetected.`)
-   **If response is empty → re-ask** (per MANDATORY RULE 1)
+4. If start attempt fails → **Fallback to static visual references**:
+   a. Check if `specs/reverse-spec/visual-references/manifest.md` exists
+   b. If exists → use static screenshots for comparison (same as Step 3b) and record: `⚠️ Source app unavailable — used static visual references as fallback`
+   c. If no static references either → **HARD STOP** — Use AskUserQuestion:
+      ```
+      ⚠️ Source App Comparison BLOCKED for rebuild GUI Feature [FID]:
+        Source app: cannot be started ([reason])
+        Static visual references: not found
+
+      Without ANY visual reference, parity verification is impossible.
+      Feature verify status will be "unverified-visual" (not "success").
+      ```
+      - "Start source app manually — I'll provide the port" → agent captures reference and compares
+      - "Provide screenshots — I'll place them in visual-references/" → user provides, agent re-checks
+      - "Acknowledge — proceed with unverified-visual status" → record `⚠️ UNVERIFIED-VISUAL` in sdd-state.md (Feature status = `limited`, not `success`)
+      **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+   > **Why single "skip and acknowledge risk" is insufficient**: A single acknowledgment hides the severity. Marking the Feature as `limited` (not `success`) makes the gap visible in sdd-state.md and blocks merge unless the user explicitly overrides the verify-gate.
 
 **Comparison procedure** (when both apps are running):
 
@@ -1518,6 +1566,7 @@ Before running the demo, **read the demo script source** and verify:
   1. Navigate to the app's main URL (from demo script's "Try it" output or health check URL)
   2. Wait 5 seconds for the page to stabilize
   3. Read browser Console logs for: `TypeError`, `ReferenceError`, framework-specific infinite loop warnings (e.g., React `Maximum update depth exceeded`), `unhandled rejection`, infinite render warnings
+     **Exclude platform noise**: Filter out Electron/Chromium system warnings (`"Don't paste code"`, `"Electron Security Warning"`, `[DEP0` deprecation, DevTools internal messages) — these are automation artifacts, not app errors
   4. **If browser console errors detected**: Demo is FAILED even if health endpoint returned 200 and stdout was clean — these are client-side-only bugs (infinite re-renders, selector instability, DOM timing) that never appear in server output
   5. Display: `❌ Browser console errors detected: [N] errors — [first error message]`
   6. If `PLAYWRIGHT_MCP = unavailable`: Skip browser console scan. Display: `ℹ️ Browser console scan skipped (Playwright MCP not available in this session)`

@@ -52,7 +52,7 @@ npx playwright install
 claude mcp add --scope user playwright -- npx @playwright/mcp@latest
 ```
 
-**Electron**: CLI mode uses `_electron.launch()` (no CDP needed). MCP mode still requires CDP pre-configuration — see [PLAYWRIGHT-GUIDE.md](../../../PLAYWRIGHT-GUIDE.md). See [PLAYWRIGHT-GUIDE.md](../../../PLAYWRIGHT-GUIDE.md) for full setup.
+**Electron**: CLI mode uses `_electron.launch()` (no CDP needed). MCP mode still requires CDP pre-configuration — see [PLAYWRIGHT-GUIDE.md](../../../PLAYWRIGHT-GUIDE.md) for full setup.
 
 Wraps spec-kit commands with cross-Feature context injection and Global Evolution Layer management. Works with four project modes:
 

@@ -172,7 +172,8 @@ Without async-flow rows, the agent implements the handler but may skip: auto-scr
 
 **If `## Interaction Chains` is missing from plan.md** (UI Feature):
 - Display in Review: `⚠️ Interaction Chains section missing — UI propagation paths not documented.`
-- This is a **warning** (not blocking), but strongly recommended before approval.
+- This is **BLOCKING** for UI Features. Without chains, implement creates handlers but skips DOM effects and visual results — producing code that builds but doesn't work visually.
+- The agent MUST add the section during Review before approval is offered.
 - The Verify Method column feeds directly into:
   1. **demo Coverage header** → `verify-state`/`verify-effect` verbs in SC→UI Action format
   2. **verify Phase 3** → Tier 2/3 functional SC verification
@@ -237,7 +238,7 @@ After `speckit-plan` completes, if the Feature has Functional Enablement Chain e
 **If `## Integration Contracts` is missing from plan.md** (Feature with Enablement Chain):
 - Display in Review: `⚠️ Integration Contracts section missing — cross-Feature data shape contracts not defined.`
 - Display: `Risk: Shape mismatches between Features (e.g., different field names, nested vs flat) will only be caught at runtime.`
-- This is a **warning in Review** (not blocking), but strongly recommended before approval.
+- This is **BLOCKING** for Features with Enablement Chain entries. Without explicit shape contracts, implement creates isolated modules that are never integrated correctly. The agent MUST add the section during Review before approval is offered.
 
 **Downstream flow**:
 1. **plan.md** → Integration Contracts define shape expectations and required bridges
@@ -266,7 +267,7 @@ If multi-provider integration detected, check plan.md for an `## API Compatibili
 If `## API Compatibility Matrix` is missing from plan.md:
 - Display: `⚠️ API Compatibility Matrix missing — multiple providers detected but per-provider differences not documented.`
 - Display: `Risk: Using one provider's pattern for all (e.g., OpenAI Bearer + /v1/models for Anthropic) causes runtime auth failures.`
-- This is a **warning in Review** (not blocking), but strongly recommended before approval.
+- This is **BLOCKING** for multi-provider Features. Using one provider's auth/endpoint pattern for all causes silent runtime failures. The agent MUST add the section during Review before approval is offered.
 
 **Downstream flow**:
 1. **plan.md** → matrix defined with per-provider contracts
@@ -373,6 +374,20 @@ You can open and edit these files directly, then select
 ──────────────────────────────────────────────────
 ```
 
+**Pre-ReviewApproval Validation** (before offering options):
+
+Before displaying ReviewApproval options, the agent MUST verify all applicable blocking sections exist:
+
+| Check | Condition | Blocking? |
+|-------|-----------|-----------|
+| Pattern Constraints present | Always | **YES** — add before approval |
+| Interaction Chains present | UI Feature | **YES** — add before approval |
+| Integration Contracts present | Feature has Enablement Chain entries | **YES** — add before approval |
+| API Compatibility Matrix present | 2+ external API providers detected | **YES** — add before approval |
+| UX Behavior Contract present | UI Feature with async operations | ⚠️ Warning — strongly recommended |
+
+If ANY blocking section is missing, the agent MUST add it now (not just warn). Only after all blocking sections are present, proceed to:
+
 **HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
 ---
@@ -446,7 +461,7 @@ The UX Behavior Contract makes **expected temporal behavior** explicit — thing
 
 ## Pattern Constraints (mandatory plan.md output section)
 
-After speckit-plan completes, verify the generated `plan.md` includes a **`## Pattern Constraints`** section. If absent, the agent MUST add it during Review before approval.
+After speckit-plan completes, verify the generated `plan.md` includes a **`## Pattern Constraints`** section. If absent, the agent MUST add it during Review before approval — this is **BLOCKING**. Without Pattern Constraints, implement proceeds without awareness of framework-specific runtime pitfalls, producing code that builds but fails at runtime.
 
 Pattern Constraints identify framework+library interaction patterns known to cause **runtime-only bugs** (pass build, fail at runtime). They are derived from the project's tech stack detected from constitution and pre-context — NOT library-specific but **stack-pattern-generic**.
 
@@ -459,6 +474,9 @@ Pattern Constraints identify framework+library interaction patterns known to cau
 | **Concurrent/Fiber rendering** (React 18+, Vue 3 Suspense) | No side effects in render path. Pure components must be idempotent under concurrent mode | Concurrent rendering may invoke render multiple times before commit |
 | **SSR + hydration** (Next.js, Nuxt, SvelteKit) | Components must produce identical output on server and client for initial render | Hydration mismatch causes full client-side re-render and state loss |
 | **Event handler + state update** | Batch state updates within event handlers. Avoid sequential setState calls triggering multiple re-renders | Unbatched updates cause intermediate renders with inconsistent state |
+| **Build-time plugin registration** (Tailwind/PostCSS, i18n extractors, codegen, asset pipeline) | Every build-time transformation framework MUST have its plugin registered in the build config (vite.config, webpack.config, next.config, etc.). Verify: plugin listed → scope/scanning configured → build output contains expected artifacts | Missing plugin registration = build passes, types check, app runs, but output is silently incomplete (unstyled UI, raw i18n keys, missing generated types) |
+| **Plugin chain ordering** (Babel, PostCSS, Vite plugins) | Plugins with order dependencies must be registered in the correct sequence. Document order constraints when 2+ plugins in the same chain | Wrong order = silent incorrect output or plugin conflict that only manifests at runtime |
+| **Code generation pipeline** (GraphQL codegen, Prisma, OpenAPI) | Generated files must be re-generated after schema changes. Build scripts must include codegen step before compilation | Stale generated types = TypeScript passes with old types, runtime fails with new schema |
 
 ### Always include (regardless of stack):
 - **Error Boundary requirement**: Every route/page-level component MUST be wrapped with an Error Boundary (or framework equivalent). Uncaught render errors must not crash the entire application — they must be caught, reported, and display a fallback UI.
@@ -491,3 +509,5 @@ Pattern Constraints identify framework+library interaction patterns known to cau
    - For each original source file, populate the `Rebuild Target` column with the expected new path from the plan's architecture
    - Match by component role/functionality (e.g., original `ChatPanel.vue` → new `src/components/ChatPanel.tsx`)
    - If a 1:1 mapping is unclear, set `Rebuild Target` to `[multiple]` or `[see plan.md]`
+   - **Completeness check**: If >30% of source files have `Rebuild Target` = `[multiple]` or blank, display ⚠️ warning: "Rebuild Target mapping is incomplete — plan architecture may not cover all source components. Review before proceeding."
+   - **Build config verification**: If source files include build config files (vite.config, webpack.config, tsconfig, babel.config, postcss.config, etc.), verify the plan accounts for migrating their plugin registrations and settings

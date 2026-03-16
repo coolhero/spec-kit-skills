@@ -52,10 +52,12 @@ Add these tasks now or add them during the "I've finished editing" step.
 ────────────────────────────────────────────────────
 ```
 
+**Enforcement**: If Demo-Ready Delivery is active in the constitution (§ VI) → **BLOCKING**. The agent MUST add demo tasks before approval is offered. Without demo tasks, demo work gets deferred to "batch-at-the-end" — the anti-pattern Demo-Ready Delivery was designed to prevent.
+
 > **Rationale**: Demo surfaces (routes, pages, data fixtures) should be built incrementally during `implement`, not deferred until all Features are complete. Injecting demo tasks into `tasks.md` at this stage prevents the "batch-at-the-end" anti-pattern where demo code is rushed or skipped.
 
 **Pattern Audit task injection check** (only if plan.md contains a `## Pattern Constraints` section):
-After reading tasks.md, scan the task list for pattern-audit-related tasks (keywords: "pattern constraint", "pattern audit", "selector", "reference equality", "layout effect", "error boundary", "anti-pattern"). If **no pattern audit tasks are found**, append:
+After reading tasks.md, scan the task list for pattern-audit-related tasks (keywords: "pattern constraint", "pattern audit", "anti-pattern", "plugin registration", "build verification", and framework-specific terms from Pattern Constraints — e.g., "selector"/"reference equality" for React, "computed stability" for Vue, "reactive block" for Svelte, "plugin chain" for build-time frameworks). If **no pattern audit tasks are found**, append:
 
 ```
 ── ⚠️ Pattern Audit Task Missing ──────────────────
@@ -64,8 +66,8 @@ Without an explicit task, pattern constraints may be forgotten during implement.
 
 Recommended task to add (insert before the last implementation phase):
   1. Pattern Audit: verify all components comply with Pattern Constraints
-     - Check selector reference stability (no new array/object per call)
-     - Check DOM measurement effect timing (useLayoutEffect, not useEffect)
+     - Check framework-specific constraints from plan.md Pattern Constraints table
+     - Check build-time plugin registration (all required plugins in build config)
      - Check Error Boundary coverage (every route/page wrapped)
 
 Add this task now or add it during the "I've finished editing" step.
@@ -75,7 +77,7 @@ Add this task now or add it during the "I've finished editing" step.
 **Integration wiring task injection check** (if Feature has cross-boundary data flow):
 
 Detect cross-boundary flow: scan plan.md / tasks.md / pre-context.md for patterns indicating multi-layer data flow:
-- Renderer → IPC → Main process (Electron/Tauri keywords: "ipcRenderer", "ipcMain", "invoke", "handle", "preload")
+- Renderer → IPC → Main process (Desktop app keywords: "ipcRenderer", "ipcMain", "invoke", "handle", "preload", "tauri::command", "window.__TAURI__")
 - Frontend → Backend API (keywords: "fetch", "axios", "API call", "endpoint", "REST", "GraphQL")
 - Service → External API (keywords: "embeddings", "OpenAI", "external API", "third-party", "webhook")
 - File I/O across process boundaries (keywords: "file upload", "file picker", "drag and drop", "file processing")
@@ -102,6 +104,8 @@ Recommended tasks to add:
 Add these tasks now or add them during the "I've finished editing" step.
 ────────────────────────────────────────────────────
 ```
+
+**Enforcement**: If cross-boundary flow detected → **BLOCKING**. Without explicit wiring tasks, implement produces isolated modules that individually "work" but are never connected end-to-end. This was the root cause of 12 bugs in F007 Knowledge Base. The agent MUST add wiring tasks before approval is offered.
 
 **Integration test task injection check** (only if Feature has UI components — detected from plan.md architecture or pre-context tech stack):
 After reading tasks.md, scan for integration/render test tasks (keywords: "render test", "integration test", "component test", "mount test", "smoke test", "rendering test"). If **no integration test tasks are found**, append:
@@ -156,6 +160,12 @@ If tasks seem under-scoped, consider adding more granular
 implementation tasks for complex source files.
 ────────────────────────────────────────────────────
 ```
+
+**Enforcement**: If task count < 70% of source complexity estimate (estimated tasks from line counts) → **BLOCKING** with options:
+- "Add more granular tasks for under-covered files" (recommended)
+- "Acknowledge reduced scope — this Feature intentionally covers less than the original"
+
+Without this check, agents produce 2 tasks for a 500-line source file, resulting in incomplete rebuild that passes all downstream gates.
 
 > **Estimation heuristic**: ~100 lines of original source ≈ 1 implementation task (varies by complexity). Files over 300 lines typically need 3+ tasks.
 
@@ -340,6 +350,21 @@ You can open and edit this file directly, then select
 "I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
+
+**Pre-ReviewApproval Validation** (before offering options):
+
+Before displaying ReviewApproval options, verify all applicable blocking checks passed:
+
+| Check | Condition | Blocking? |
+|-------|-----------|-----------|
+| Demo tasks present | Demo-Ready Delivery active (constitution § VI) | **YES** — add before approval |
+| Integration wiring tasks present | Cross-boundary data flow detected | **YES** — add before approval |
+| Source complexity parity | Rebuild mode + task count < 70% estimate | **YES** — add tasks or acknowledge |
+| Pattern Audit task present | plan.md has Pattern Constraints | ⚠️ Warning — strongly recommended |
+| Integration test task present | UI Feature + Test-First active | ⚠️ Warning — strongly recommended |
+| Visual verification task present | UI Feature + rebuild mode | ⚠️ Warning — strongly recommended |
+
+If ANY blocking check failed, the agent MUST add missing tasks before offering "Approve".
 
 **HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 

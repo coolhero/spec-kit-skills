@@ -168,8 +168,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 3. **Edge Case Coverage Check** (if applicable — pre-context has Edge Cases)
 4. **Multi-Provider API Detection** (if applicable — 2+ external API providers in FR-###)
 5. **Runtime Default Coverage Check** (if applicable — rebuild mode + Feature has settings/mode/configuration)
-6. **Assemble Review Display** (include any ⚠️ warnings from steps 1-5)
-7. **HARD STOP** (ReviewApproval)
+6. **Build-Time Plugin FR Check** (if applicable — rebuild mode + source has build config with plugins)
+7. **Assemble Review Display** (include any ⚠️/❌ from steps 1-6)
+8. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -192,6 +193,8 @@ If pre-context has SBI entries AND Source Reference files:
    ```
 4. **If visual references exist** (`specs/reverse-spec/visual-references/`): Cross-reference UI structure claims in FRs against reference screenshots. Visual references are the ground truth for tab counts, layout structure, and visible elements.
 
+5. **Enforcement**: If discrepancies are found → **BLOCKING**. SBI mismatches represent silent functionality loss in rebuild — the rebuilt Feature will have wrong behavior (e.g., wrong tab count, missing conditional views). The user must correct FRs or acknowledge the gap before approval.
+
 **Skip if**: No SBI entries, or Source Reference = "N/A" (greenfield).
 
 ### Platform Constraint FR Verification
@@ -210,6 +213,8 @@ If pre-context has a "Platform Constraints from Preceding Features" section with
    → Recommend adding an FR for window drag region.
    ────────────────────────────────────────────────────
    ```
+
+3. **Enforcement**: If any constraint is NOT covered by an FR → **BLOCKING**. Uncovered platform constraints cause critical bugs (e.g., frameless window with no drag region = unusable app). The agent MUST add missing FRs before approval is offered.
 
 **Skip if**: No Platform Constraints section, or section says "None".
 
@@ -232,7 +237,10 @@ If pre-context contains an "Edge Cases" section with entries:
    ⚠️ [N] edge cases have no corresponding SC-###.
    ────────────────────────────────────────────────
    ```
-3. This is a **warning** (NOT blocking) — included in Review Display. The user decides whether to add missing SCs or proceed without them.
+3. **Enforcement**: If uncovered edge cases exist → **BLOCKING** with options in ReviewApproval:
+   - "Add missing SCs for uncovered edge cases" (recommended)
+   - "Acknowledge gap — proceed without coverage" (records ⚠️ EDGE-CASE-GAP in Review notes)
+   Without explicit acknowledgment, uncovered edge cases surface as surprise bugs during implement/verify.
 
 **Skip if**: No Edge Cases section in pre-context, or section is empty/contains only "N/A".
 
@@ -258,7 +266,7 @@ If spec.md FR-### descriptions mention 2+ external API providers:
    ⚠️ Missing provider-specific SCs may cause runtime auth/parsing failures.
    ────────────────────────────────────────────────
    ```
-4. **Warning (NOT blocking)** — included in Review Display.
+4. **Enforcement**: If any provider lacks dedicated SC → **BLOCKING**. Without per-provider SCs, one provider's auth/parsing pattern gets applied to all — causing silent runtime failures for N-1 providers. The agent MUST add missing SCs before approval is offered.
 
 **Skip if**: < 2 providers detected, or Feature does not call external APIs.
 
@@ -288,9 +296,38 @@ If this Feature involves settings, modes, layout positions, or configuration tha
    ────────────────────────────────────────────────────
    ```
 
-4. **Warning (NOT blocking)** — included in Review Display.
+4. **Enforcement**: If layout-affecting default mismatch found → **BLOCKING**. Wrong layout defaults (e.g., sidebar position, navigation mode) cause the entire Feature's UI to be built around the wrong structure — requiring complete rework. Non-layout mismatches (e.g., theme default) → ⚠️ warning (not blocking).
 
 **Skip if**: Not rebuild mode, or Feature does not involve settings/modes/configuration.
+
+### Build-Time Plugin FR Check (rebuild mode)
+
+> **Purpose**: Build-time transformation frameworks (CSS preprocessors, i18n extractors, code generators, asset pipelines) require explicit plugin registration in build config. If the source project uses these but the spec doesn't capture them as requirements, the rebuild will silently produce incomplete output — build passes, types check, app runs, but content is missing (unstyled UI, raw i18n keys, missing generated types).
+
+If rebuild mode AND source project has build config files (vite.config, webpack.config, next.config, tsconfig, babel.config, postcss.config, etc.):
+
+1. **Scan source build configs** for plugin registrations:
+   - CSS: `@tailwindcss/vite`, `postcss-*`, `sass`, `less`, `styled-components/babel`
+   - i18n: `i18next-parser`, `babel-plugin-react-intl`, `@formatjs/*`
+   - Codegen: `@graphql-codegen/*`, `prisma generate`, `openapi-typescript`
+   - Asset: `vite-plugin-svgr`, `@svgr/webpack`, `image-webpack-loader`
+2. **Cross-check spec.md FR-###** for each detected plugin category:
+   - Does an FR explicitly address the build-time setup?
+   - If not, the rebuild will silently skip that transformation
+3. **If any build-time plugin has no corresponding FR**, append to Review Display:
+   ```
+   ── ⚠️ Build-Time Plugin Coverage Gap ──────────────
+   Source build config registers plugins not covered by FR-###:
+     ❌ @tailwindcss/vite (CSS) — no FR for Tailwind CSS setup
+     ✅ @vitejs/plugin-react — covered by FR-003
+
+   ⚠️ Missing build-time plugin FRs cause silent output failures:
+   build passes, app runs, but output is incomplete (unstyled, raw keys).
+   ────────────────────────────────────────────────────
+   ```
+4. **Enforcement**: ⚠️ Warning (not blocking) — but **strongly recommended** to add FRs. Build-time plugin gaps are caught later by the Post-Implement Completeness Gate and Verify Phase 1 Build Output Fidelity check, but catching them here is far cheaper.
+
+**Skip if**: Not rebuild mode, or no build config files in source.
 
 ### Review Display Content
 
@@ -330,6 +367,20 @@ You can open and edit this file directly, then select
 "I've finished editing" to continue.
 ──────────────────────────────────────────────────
 ```
+
+**Pre-ReviewApproval Validation** (before offering options):
+
+Before displaying ReviewApproval options, verify all applicable blocking checks passed:
+
+| Check | Condition | Blocking? |
+|-------|-----------|-----------|
+| SBI Accuracy — no discrepancies | Rebuild/adoption with SBI | **YES** — correct FRs before approval |
+| Platform Constraints — all covered by FR | Pre-context has Platform Constraints | **YES** — add FRs before approval |
+| Edge Cases — all covered by SC (or acknowledged) | Pre-context has Edge Cases | **YES** — add SCs or acknowledge gap |
+| Multi-Provider — all providers have SCs | 2+ external API providers | **YES** — add SCs before approval |
+| Runtime Default — no layout mismatch | Rebuild mode + settings Feature | **YES** (layout) / ⚠️ (non-layout) |
+
+If ANY blocking check failed, resolve before offering "Approve". Add missing FRs/SCs, then re-run the failed check.
 
 **HARD STOP** (ReviewApproval): Options: "Approve", "Request modifications", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
 
