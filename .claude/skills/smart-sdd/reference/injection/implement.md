@@ -827,6 +827,21 @@ Many frameworks require **build-time plugin registration** to function. Code com
 
 > **Why this pattern is dangerous**: Build-time transformation frameworks (CSS utility generators, i18n extractors, code generators) produce output only when their plugin is correctly registered AND their input scope covers the source files. Without the plugin, the build succeeds (the framework's references are just strings/imports that don't cause errors), but the runtime output is incomplete. This silent failure is invisible to build, type-check, and basic smoke gates.
 
+### Async Hydration Sync (Features with persistent config + external system binding)
+
+When a store/config that is **asynchronously hydrated** (e.g., from electron-store, localStorage, database, file) also controls an **external system's state** (i18n language, theme engine, OS notification preferences, audio/video settings), apply these rules:
+
+1. **Unconditional sync on hydrate completion**: After hydrate completes, ALWAYS call the external system's API to synchronize, even if the loaded value appears to match the current state. The external system may have been initialized with a different default (e.g., i18n initialized with `lng: 'ko'` while config has `'en'` from previous session)
+2. **Ordering guarantee**: The external system sync call must happen AFTER hydrate is complete, not in parallel. If the framework provides lifecycle hooks (`onRehydrate`, `afterHydrate`), use them
+3. **UI binding**: UI controls that display the config value (Select, Radio, Toggle) must be bound to the **config store value**, not the external system's current state. This prevents display/state mismatch after hydrate
+4. **Common instances** (non-exhaustive):
+   - i18n library (i18next, react-intl) + language config: `i18n.changeLanguage(config.language)` after hydrate
+   - Theme engine (CSS variables, class toggle) + theme config: apply theme after hydrate
+   - Audio/video settings + media config: apply device selection after hydrate
+   - Notification preferences + permission config: sync permission state after hydrate
+
+> **Rationale**: Static initialization (compile-time default) and async hydration (runtime persisted value) create a race condition window where the external system and config store disagree. This window causes UI mismatch (Select shows 'English' while UI renders Korean) that users perceive as a bug. The unconditional sync eliminates this window regardless of timing.
+
 ### Cross-Feature Integration
 
 - **Import Path Validation**: Verify correct paths when importing modules from other Features

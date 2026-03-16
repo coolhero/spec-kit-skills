@@ -362,7 +362,24 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
   Use AskUserQuestion: "Retry" / "Continue without UI verification"
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-**0-4. Feature Reachability Gate** (GUI Features only):
+**0-4. Test State Isolation** (all Features with persistent state):
+
+> Prevents false positive/negative test results caused by state persisted from previous sessions (localStorage, electron-store, SQLite, config files, cookies, etc.).
+
+**Skip if**: Feature has no persistent state (pure stateless API, library, CLI with no config).
+
+Apply ONE of these strategies (in priority order):
+1. **Clean user data directory**: Launch the app with an isolated/temporary user data path (e.g., `--user-data-dir=/tmp/verify-clean-{FID}` for Electron, fresh browser profile for web). This guarantees pristine default state
+2. **Reset API**: If the app provides a config reset mechanism (IPC `config:reset`, API `POST /reset`, CLI `--factory-reset`), invoke it at verify start before any test execution
+3. **State-aware test pattern**: If neither 1 nor 2 is possible, every test scenario MUST follow the **read-before-act** pattern:
+   - Read current value first (`const before = await getCurrentTheme()`)
+   - Set to the **opposite** of desired test value (ensure a real change happens)
+   - Then set to desired value and verify the change
+   - Never assume the starting state matches defaults
+
+**Display**: `🧹 Test State Isolation: [strategy used] — [clean data dir | config reset | state-aware tests]`
+
+**0-4b. Feature Reachability Gate** (GUI Features only):
 
 > Prevents "Feature implemented but unreachable" — the Feature's UI exists but no navigation path leads to it from the home screen.
 
@@ -383,7 +400,7 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
    ```
    → Regression to implement: add navigation entry point (icon, button, menu item) in the appropriate existing UI component
 
-**0-5. Note**: After Phase 0 (including Reachability Gate), the app is running. Pre-flight MCP check (next) can now detect tools correctly.
+**0-5. Note**: After Phase 0 (including State Isolation and Reachability Gate), the app is running. Pre-flight MCP check (next) can now detect tools correctly.
 If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight section below) provides specific guidance.
 
 ---

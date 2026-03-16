@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-03-16] SKF-033~034: Test State Isolation + Async Hydration Sync
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Test State Isolation (Phase 0, Step 0-4) | `verify-phases.md` | SKF-033: Persist된 앱 상태(theme, language)가 테스트에 false positive/negative 유발. 3-tier 전략: clean data dir → reset API → read-before-act 패턴 |
+| Async Hydration Sync | `injection/implement.md` | SKF-034: 비동기 hydration과 외부 시스템(i18n, theme) 간 race condition. i18n에 한정하지 않고 "async hydrate → unconditional sync" 범용 패턴으로 일반화 |
+
+---
+
 ## [2026-03-16] SKF-028~032: SBI resolution, Interaction Chain verification, Feature Reachability, TEST PLAN
 
 | Change | File | Rationale |
