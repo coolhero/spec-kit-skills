@@ -2,13 +2,13 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 09:18 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:38 KST
 
-**Claude Code skills that extend [spec-kit](https://github.com/github/spec-kit) beyond Feature-local scope into AI-controllable, contract-based development**
+**Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
-- **Reverse-Spec** reverse-extracts implicit contracts (behaviors, interfaces, data models) from brownfield codebases and realigns them into Specs — bringing legacy code into the contract-based system. Supports both Rebuild (rewrite from scratch using the original as reference) and Adopt (keep existing code, add SDD documentation). Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
-- **Smart-SDD** automatically assembles and injects related Features' contracts and state into each spec-kit command, then verifies changes don't violate existing contracts — keeping cross-Feature consistency intact.
-- **Case Study** generates structured reports from completed SDD workflows — aggregating quantitative metrics (Feature counts, test pass rates, parity scores) and tracing architectural decisions back to the domain principles that motivated them. Feeds insights back into domain module refinement.
+- **Reverse-Spec** analyzes an existing codebase and extracts everything the SDD pipeline needs to know: what the app does, how it's structured, what data models and APIs exist. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
+- **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
+- **Case Study** generates a structured after-action report from a completed project — what went well, what was hard, and what the numbers say. It collects the metrics that accumulated during the pipeline (how many Features, how tests went, how close the rebuild matched the original) and pairs them with the story of *why* things were built the way they were. The report also feeds back into improving the domain modules for next time.
 
 ---
 
@@ -97,33 +97,61 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 | Skill | Purpose |
 |-------|---------|
-| `/case-study` | Generates metrics + philosophy-aware narrative report from execution artifacts |
+| `/case-study` | Generates an after-action report from a completed project — metrics, decisions, and what to improve next time |
 
-> **Philosophy-aware reporting**: Case study reports don't just show *what* was built — they trace *why* each architectural decision was made. When archetype principles (e.g., "Streaming-First" for AI assistants) or framework philosophy (e.g., Electron's "Secure by Default") are active, the report maps decisions back to the principles that motivated them, evaluates which principles were applied across Features, and identifies gaps where principles were adopted but never referenced during implementation. This feedback loop helps refine domain modules over time.
+> **What the report covers**: The case study isn't just numbers — it tells the story of the project. For each major architectural decision ("Why did we use an abstraction layer for AI providers?"), it traces back to the principle that motivated it ("Model Agnosticism from the AI Assistant archetype"). It also spots gaps — principles you declared but never actually applied. This feedback helps refine domain modules so the next project starts smarter.
+
+### How the Skills Connect
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        The Big Picture                                  │
+│                                                                         │
+│  1. ANALYZE    /reverse-spec analyzes your code (or /smart-sdd init     │
+│                creates from scratch)                                    │
+│                         │                                               │
+│                         ▼                                               │
+│  2. ARTIFACTS  Global Evolution Layer is created:                       │
+│                roadmap, entity/API registries, pre-contexts             │
+│                         │                                               │
+│                         ▼                                               │
+│  3. BUILD      /smart-sdd pipeline runs spec-kit for each Feature,     │
+│                automatically injecting cross-Feature context            │
+│                         │                                               │
+│                   ┌─────┴─────┐                                         │
+│                   ▼           ▼                                         │
+│  4. PER FEATURE  specify → plan → tasks → implement → verify → merge   │
+│                  Each step gets context from previous Features           │
+│                  Each step has human checkpoints (HARD STOP)            │
+│                         │                                               │
+│                         ▼                                               │
+│  5. REPORT     /case-study generates after-action report (optional)    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Architecture
 
-spec-kit-skills is a **harness for agentic coding** — a structural layer that constrains, guides, and verifies what an AI agent produces. Rather than hoping the agent writes correct code, the harness defines contracts the agent must satisfy, injects cross-Feature context the agent would otherwise lack, and verifies results against those contracts before anything merges. The architecture below shows how this harness is designed for extensibility across three independent dimensions.
+When an AI agent builds software, it tends to forget what it did yesterday, ignore rules it was told last week, and produce code that compiles but doesn't actually work. spec-kit-skills is a **guardrail system** that prevents this — it tells the agent what it needs to know before each step, checks the results before accepting them, and blocks anything that breaks existing contracts. Think of it as a project manager that never sleeps, never forgets, and always checks the work.
 
 ### Design Philosophy
 
 Five principles shape every design decision in spec-kit-skills:
 
-1. **Contracts over hope** — Instead of hoping an agent writes correct code, the harness defines explicit contracts (Success Criteria, Source Behavior Inventory, Foundation Decisions) that the agent must satisfy. Verification runs against these contracts, not against vague notions of "correct."
+1. **Define what "done" means, upfront** — Instead of hoping the agent writes correct code, every Feature has explicit success criteria and contracts. Verification checks against these criteria — not against a vague feeling of "looks right."
 
-2. **Cross-Feature context injection** — An agent working on Feature F003 has no memory of what it decided for F001. The Global Evolution Layer (roadmap, registries, constitution) captures cross-Feature knowledge and injects the relevant subset into each pipeline step. The agent sees exactly what it needs — entity schemas it must reference, API contracts it must respect, Foundation decisions it must obey.
+2. **Give each step the context it needs** — An agent working on Feature 3 has no memory of what it decided for Feature 1. So before each step, the system automatically feeds in the relevant data models, API contracts, and project rules. The agent sees exactly what it needs — no more, no less.
 
-3. **Composable domain knowledge** — Project types differ wildly (REST API vs desktop app vs AI assistant). Rather than one monolithic ruleset, domain knowledge decomposes into independent modules along 4 axes (Interface × Concern × Archetype × Scenario) plus a Foundation layer, composing freely. A desktop AI rebuild project loads `gui + ipc + async-state + ai-assistant + rebuild + electron`; a greenfield public API loads `http-api + auth + public-api + greenfield + express`. No unused rules, no missing context.
+3. **Load only relevant rules** — A REST API project doesn't need GUI testing rules. An AI chat app doesn't need CRUD validation rules. The system auto-detects your project type and loads only the modules that apply — keeping the agent focused and the context window lean.
 
-4. **Human checkpoints at irreversible boundaries** — The pipeline flows autonomously through research, context assembly, and code generation. But before spec-kit commands execute (irreversible artifact creation) and before results are accepted (they feed into downstream Features), HARD STOPs force human review. This creates a trust-but-verify loop where the agent does the heavy lifting but humans gate the decisions.
+4. **Humans approve before anything is final** — The agent runs autonomously through research, planning, and coding. But before specs are created and before code is accepted, you review and approve. The agent does the work; you make the decisions.
 
-5. **Progressive detail capture** — Analysis starts broad (tech stack, project structure) and progressively drills into finer detail (function signatures → UI component features → micro-interactions → tooltips and hover effects). Each level feeds the next, so nothing is analyzed without context from the level above.
+5. **Start broad, drill deep** — Analysis begins with tech stack and project structure, then progressively zooms into function signatures, UI components, micro-interactions, and edge cases. Each level builds on the one above, so nothing is analyzed out of context.
 
 ### 4-Axis Domain Composition
 
-Domain behavior (SC generation, verification, probes, bug prevention) varies by project type. A REST API needs endpoint status code checks; a desktop app needs IPC boundary safety; a rebuild project needs behavioral parity verification; an AI assistant needs streaming-first principles. Instead of one monolithic file that loads every rule for every project, this system decomposes domain knowledge into **four independent axes**:
+Different projects need different rules. A REST API needs status code checks; a desktop app needs window management safety; a rebuild needs to match the original; an AI app needs streaming-first design. Instead of loading every rule for every project, the system picks what's relevant based on **four questions about your project**:
 
 ```
 Interface                    Concern                      Archetype                    Scenario
@@ -150,7 +178,7 @@ A **Domain Profile** = selected Interfaces + selected Concerns + Archetype + Sce
 
 ### Rebuild Configuration
 
-When rebuilding existing software (stack migration, framework upgrade, platform migration, etc.), reverse-spec Phase 0 collects four configuration parameters that influence pipeline behavior throughout the harness:
+When rebuilding existing software (stack migration, framework upgrade, platform migration, etc.), reverse-spec Phase 0 collects four configuration parameters that influence pipeline behavior throughout the system:
 
 | Parameter | What it controls | Example |
 |-----------|-----------------|---------|

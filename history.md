@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-16] README readability overhaul + flow diagram
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Tagline rewrite | `README.md`, `README.ko.md` | "AI-controllable contract-based development" → "so Feature 3 knows what Feature 1 already decided" — concrete over abstract |
+| Skill descriptions rewrite | `README.md`, `README.ko.md` | Technical jargon → plain language explaining what each skill does and when to use it |
+| Architecture intro rewrite | `README.md`, `README.ko.md` | "harness" metaphor → "guardrail system" with self-driving car analogy |
+| Design Philosophy rewrite | `README.md`, `README.ko.md` | All 5 principles rewritten in plain language with everyday analogies |
+| 4-axis intro rewrite | `README.md`, `README.ko.md` | Removed internal jargon (SC generation, probes), focused on user-facing benefit |
+| "How the Skills Connect" flow diagram | `README.md`, `README.ko.md` | Added big-picture 5-step visual (analyze → artifacts → build → per-feature → report) bridging Skills section to Architecture |
+| "harness" → "system" | `README.md` | Consistent terminology in Rebuild Configuration |
+
+---
+
 ## [2026-03-16] SKF-026/027: Branch conflict recovery + FR coverage severity calibration
 
 | Change | File | Rationale |
