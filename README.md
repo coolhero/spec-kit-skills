@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:02 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:19 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -962,12 +962,14 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL permission model detection |
 | `domains/concerns/message-queue.md` | Message queue concern — broker library detection (RabbitMQ, Kafka, BullMQ, Sidekiq, Celery), config and code pattern signals |
 | `domains/concerns/task-worker.md` | Task worker concern — background job library detection (Celery, Sidekiq, BullMQ, Oban, Hangfire), scheduling pattern signals |
+| `domains/concerns/_TEMPLATE.md` | Contributor template for adding new reverse-spec concern modules (R1 detection signals) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0 signal keywords (LLM SDKs, streaming), A1 philosophy extraction (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API archetype — A0 signal keywords (OpenAPI, rate limiting), A1 philosophy extraction (Contract Stability, Rate Limit Transparency) |
 | `domains/archetypes/microservice.md` | Microservice archetype — A0 signal keywords (gRPC, Docker), A1 philosophy extraction (Service Autonomy, Failure Isolation) |
 | **Foundations** | |
 | `domains/foundations/_foundation-core.md` | Foundation resolution protocol — detection signals, category taxonomy, case matrix, T0 grouping, cross-framework carry-over map |
+| `domains/foundations/_TEMPLATE.md` | Contributor template for adding new Foundation files (F0-F9 structure) |
 | `domains/foundations/electron.md` | Electron Foundation — 58 items, 13 categories (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
 | `domains/foundations/tauri.md` | Tauri Foundation — 44 items, 12 categories |
 | `domains/foundations/express.md` | Express.js Foundation — 43 items, 12 categories |
@@ -1039,6 +1041,7 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC generation, permission boundary verification |
 | `domains/concerns/message-queue.md` | Message queue — publish/consume lifecycle SC, dead letter handling, idempotency, bug prevention (MQ-001–005) |
 | `domains/concerns/task-worker.md` | Task worker — dispatch/execution lifecycle SC, failure handling, scheduling, bug prevention (TW-001–005) |
+| `domains/concerns/_TEMPLATE.md` | Contributor template for adding new smart-sdd concern modules (S0/S1/S5/S7 structure) |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0–A4: signal keywords, philosophy (Streaming-First, Model Agnosticism), SC extensions, probes, constitution injection |
 | `domains/archetypes/public-api.md` | Public API archetype — A0–A4: signal keywords, philosophy (Contract Stability, Rate Limit Transparency), SC extensions, probes, constitution injection |
 | `domains/archetypes/microservice.md` | Microservice archetype — A0–A4: signal keywords, philosophy (Service Autonomy, Failure Isolation), SC extensions, probes, constitution injection |

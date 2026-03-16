@@ -1,4 +1,5 @@
 # Foundation: ASP.NET Core
+<!-- Format: _foundation-core.md | ID prefix: DN (see § F4) -->
 
 > Server framework Foundation for C# projects using ASP.NET Core (.NET 6+).
 > Convention-based framework with built-in DI, middleware pipeline, and strongly-typed configuration.

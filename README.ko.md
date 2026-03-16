@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:02 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:19 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -959,12 +959,14 @@ specs/
 | `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL 권한 모델 감지 |
 | `domains/concerns/message-queue.md` | Message queue concern — 브로커 라이브러리 감지 (RabbitMQ, Kafka, BullMQ, Sidekiq, Celery), 설정 및 코드 패턴 시그널 |
 | `domains/concerns/task-worker.md` | Task worker concern — 백그라운드 잡 라이브러리 감지 (Celery, Sidekiq, BullMQ, Oban, Hangfire), 스케줄링 패턴 시그널 |
+| `domains/concerns/_TEMPLATE.md` | 새로운 reverse-spec concern 모듈 추가를 위한 기여자 템플릿 (R1 감지 시그널) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant 아키타입 — A0 신호 키워드 (LLM SDK, 스트리밍), A1 철학 추출 (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API 아키타입 — A0 신호 키워드 (OpenAPI, 속도 제한), A1 철학 추출 (Contract Stability, Rate Limit Transparency) |
 | `domains/archetypes/microservice.md` | Microservice 아키타입 — A0 신호 키워드 (gRPC, Docker), A1 철학 추출 (Service Autonomy, Failure Isolation) |
 | **Foundations** | |
 | `domains/foundations/_foundation-core.md` | Foundation 해석 프로토콜 — 감지 신호, 카테고리 분류, 케이스 매트릭스, T0 그룹핑, 교차 프레임워크 이전 맵 |
+| `domains/foundations/_TEMPLATE.md` | 새로운 Foundation 파일 추가를 위한 기여자 템플릿 (F0-F9 구조) |
 | `domains/foundations/electron.md` | Electron Foundation — 58개 항목, 13개 카테고리 (WIN, SEC, IPC, NAT, UPD, DLK, BLD, LOG, STR, ERR, DXP, BST, ENV) |
 | `domains/foundations/tauri.md` | Tauri Foundation — 44개 항목, 12개 카테고리 |
 | `domains/foundations/express.md` | Express.js Foundation — 43개 항목, 12개 카테고리 |
@@ -1036,6 +1038,7 @@ specs/
 | `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC 생성, 권한 경계 검증 |
 | `domains/concerns/message-queue.md` | Message queue — 발행/소비 라이프사이클 SC, 데드레터 처리, 멱등성, 버그 방지 (MQ-001–005) |
 | `domains/concerns/task-worker.md` | Task worker — 디스패치/실행 라이프사이클 SC, 실패 처리, 스케줄링, 버그 방지 (TW-001–005) |
+| `domains/concerns/_TEMPLATE.md` | 새로운 smart-sdd concern 모듈 추가를 위한 기여자 템플릿 (S0/S1/S5/S7 구조) |
 | `domains/archetypes/ai-assistant.md` | AI assistant 아키타입 — A0–A4: 신호 키워드, 철학 (Streaming-First, Model Agnosticism), SC 확장, 프로브, constitution 주입 |
 | `domains/archetypes/public-api.md` | Public API 아키타입 — A0–A4: 신호 키워드, 철학 (Contract Stability, Rate Limit Transparency), SC 확장, 프로브, constitution 주입 |
 | `domains/archetypes/microservice.md` | Microservice 아키타입 — A0–A4: 신호 키워드, 철학 (Service Autonomy, Failure Isolation), SC 확장, 프로브, constitution 주입 |

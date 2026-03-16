@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-16] Architecture Review — Content Distribution + Contributor Templates
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Post-Change Propagation Check | `CLAUDE.md` | 작업 완료 시 README, ARCHITECTURE-EXTENSIBILITY, history, lessons-learned 반영 필요 여부를 반드시 판단하도록 규칙 추가 |
+| Foundation _TEMPLATE.md | `reverse-spec/domains/foundations/` | 신규 Foundation 추가 시 copy-paste 가능한 F0-F9 구조 템플릿. 기여자 진입 장벽 감소 |
+| Concern _TEMPLATE.md (reverse-spec) | `reverse-spec/domains/concerns/` | R1 Detection Signals 템플릿 |
+| Concern _TEMPLATE.md (smart-sdd) | `smart-sdd/domains/concerns/` | S0/S1/S5/S7 구조 템플릿 |
+| Foundation back-references | 19개 foundation 파일 전체 | `<!-- Format: _foundation-core.md \| ID prefix: XX -->` 코멘트 추가. 역참조 명시화 |
+
+---
+
 ## [2026-03-16] SKF-035~036: Demo --ci ≠ UI Verification + CSS Theme Token Rendering
 
 | Change | File | Rationale |

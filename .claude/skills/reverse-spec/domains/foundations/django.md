@@ -1,4 +1,5 @@
 # Foundation: Django
+<!-- Format: _foundation-core.md | ID prefix: DJ (see § F4) -->
 
 > Server framework Foundation for Python projects using Django.
 > Batteries-included framework with built-in ORM, admin, auth, and convention-based app structure.

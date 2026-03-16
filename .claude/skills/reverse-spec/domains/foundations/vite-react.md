@@ -1,4 +1,5 @@
 # Vite + React Foundation
+<!-- Format: _foundation-core.md | ID prefix: VR (see § F4) -->
 
 ## F0. Detection Signals
 

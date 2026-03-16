@@ -1,4 +1,5 @@
 # Foundation: Hono
+<!-- Format: _foundation-core.md | ID prefix: HO (see § F4) -->
 
 > Web framework Foundation for projects using Hono.
 > Lightweight, multi-runtime web framework (Bun, Deno, Cloudflare Workers, Node.js).

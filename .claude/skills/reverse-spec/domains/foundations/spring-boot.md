@@ -1,4 +1,5 @@
 # Foundation: Spring Boot
+<!-- Format: _foundation-core.md | ID prefix: SB (see § F4) -->
 
 > Server framework Foundation for Java/Kotlin projects using Spring Boot.
 > Convention-over-configuration framework with auto-configuration, starters, and production-ready features (Actuator).

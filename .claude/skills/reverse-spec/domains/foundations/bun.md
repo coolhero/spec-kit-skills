@@ -1,4 +1,5 @@
 # Foundation: Bun
+<!-- Format: _foundation-core.md | ID prefix: BU (see § F4) -->
 
 > Runtime and toolkit Foundation for projects using Bun as primary runtime.
 > Covers Bun-specific decisions that differ from Node.js defaults.

@@ -1,4 +1,5 @@
 # Foundation: NestJS
+<!-- Format: _foundation-core.md | ID prefix: NE (see § F4) -->
 
 > Server framework Foundation for TypeScript projects using NestJS.
 > Angular-inspired framework with decorators, modules, DI container, and opinionated architecture.

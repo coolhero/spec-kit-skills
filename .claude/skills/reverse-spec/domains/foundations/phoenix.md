@@ -1,4 +1,5 @@
 # Foundation: Phoenix
+<!-- Format: _foundation-core.md | ID prefix: PX (see § F4) -->
 
 > Server framework Foundation for Elixir projects using Phoenix Framework.
 > Functional framework built on OTP with real-time capabilities (Channels/LiveView) and fault-tolerant supervision.

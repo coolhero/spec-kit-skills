@@ -1,4 +1,5 @@
 # Foundation: Actix-web
+<!-- Format: _foundation-core.md | ID prefix: AW (see § F4) -->
 
 > Server framework Foundation for Rust projects using Actix-web.
 > High-performance async web framework built on Tokio with type-safe extractors and actor model heritage.

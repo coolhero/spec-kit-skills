@@ -1,4 +1,5 @@
 # Foundation: Laravel
+<!-- Format: _foundation-core.md | ID prefix: LV (see § F4) -->
 
 > Server framework Foundation for PHP projects using Laravel.
 > Elegant framework with Eloquent ORM, Artisan CLI, and rich ecosystem (Horizon, Sanctum, Sail).

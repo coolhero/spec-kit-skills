@@ -46,6 +46,17 @@
 - 스크립트(`scripts/*.sh`)는 dead code로 판단하지 말고, 사용처를 확인하거나 연결해야 합니다.
 - Dead reference는 삭제가 아니라 연결(connect)하는 방향으로 처리합니다.
 
+## Post-Change Propagation Check
+
+작업 완료 시 아래 파일들에 변경 사항을 반영해야 하는지 반드시 판단합니다:
+
+| 파일 | 반영 기준 |
+|------|----------|
+| `README.md` + `README.ko.md` | 파일 추가/삭제/이동 → 파일 테이블 업데이트. 기능 변경 → 해당 섹션 업데이트. 항상 `Last updated:` 갱신 |
+| `ARCHITECTURE-EXTENSIBILITY.md` | 모듈 추가/삭제, 확장성 구조 변경, Cross-Reference Map에 영향 |
+| `history.md` | 설계 결정, 구조 변경, SKF 반영 등 기록할 만한 변경 |
+| `lessons-learned.md` | 범용적으로 적용 가능한 실패 패턴이나 교훈 발견 시 |
+
 ## README File Table
 
 - README.md와 README.ko.md 말미에는 프로젝트 전체 파일 설명 테이블을 유지합니다.

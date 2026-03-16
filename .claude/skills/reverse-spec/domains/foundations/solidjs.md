@@ -1,4 +1,5 @@
 # Foundation: Solid.js
+<!-- Format: _foundation-core.md | ID prefix: SO (see § F4) -->
 
 > Frontend framework Foundation for projects using Solid.js.
 > Covers Solid.js-specific patterns that differ from React.

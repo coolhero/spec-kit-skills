@@ -1,4 +1,5 @@
 # Foundation: Flask
+<!-- Format: _foundation-core.md | ID prefix: FK (see § F4) -->
 
 > Server framework Foundation for Python projects using Flask.
 > Micro-framework with explicit extension ecosystem and app factory pattern.

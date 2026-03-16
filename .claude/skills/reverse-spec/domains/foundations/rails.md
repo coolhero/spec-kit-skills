@@ -1,4 +1,5 @@
 # Foundation: Rails
+<!-- Format: _foundation-core.md | ID prefix: RL (see § F4) -->
 
 > Server framework Foundation for Ruby projects using Ruby on Rails.
 > Convention-over-configuration framework with MVC, ActiveRecord, and rich CLI generators.

@@ -1,4 +1,5 @@
 # Next.js Foundation
+<!-- Format: _foundation-core.md | ID prefix: NX (see § F4) -->
 
 ## F0. Detection Signals
 

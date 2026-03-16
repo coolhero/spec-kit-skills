@@ -1,4 +1,5 @@
 # Foundation: FastAPI
+<!-- Format: _foundation-core.md | ID prefix: FA (see § F4) -->
 
 > Server framework Foundation for Python projects using FastAPI.
 > Modern, async-first framework with automatic OpenAPI docs, Pydantic validation, and dependency injection.

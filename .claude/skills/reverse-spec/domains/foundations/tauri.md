@@ -1,4 +1,5 @@
 # Tauri Foundation
+<!-- Format: _foundation-core.md | ID prefix: TA (see § F4) -->
 
 ## F0. Detection Signals
 

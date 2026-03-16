@@ -1,4 +1,5 @@
 # Foundation: Go HTTP (Chi / Gin / stdlib)
+<!-- Format: _foundation-core.md | ID prefix: GC (see § F4) -->
 
 > Server framework Foundation for Go projects using Chi, Gin, Fiber, or stdlib net/http.
 > Covers the Go HTTP server ecosystem with emphasis on simplicity, explicit error handling, and composition.

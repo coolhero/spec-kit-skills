@@ -1,4 +1,5 @@
 # Electron Foundation
+<!-- Format: _foundation-core.md | ID prefix: EL (see § F4) -->
 
 ## F0. Detection Signals
 

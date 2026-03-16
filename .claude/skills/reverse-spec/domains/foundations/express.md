@@ -1,4 +1,5 @@
 # Express.js Foundation
+<!-- Format: _foundation-core.md | ID prefix: EX (see § F4) -->
 
 ## F0. Detection Signals
 
