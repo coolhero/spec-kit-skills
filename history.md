@@ -5,6 +5,39 @@
 
 ---
 
+## [2026-03-16] SKF-026/027: Branch conflict recovery + FR coverage severity calibration
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Branch-already-exists recovery | `pipeline.md` | SKF-026: `create-new-feature.sh` errors on pre-created branch → added non-fatal error recovery guidance. Extends L18 pattern. |
+| MEDIUM severity tier for FR coverage | `injection/analyze.md` | SKF-027: "task exists but lacks implementation detail" was HIGH → added MEDIUM tier. HIGH now reserved for missing behavioral coverage, not missing implementation specifics. |
+
+---
+
+## [2026-03-16] Inline Execute+Review sections for specify/plan/tasks
+
+Pipeline.md had inline Execute+Review instructions for constitution (Phase 0, line 599-611) but NOT for specify, plan, or tasks. These steps relied on: (1) Common Protocol section at the top of pipeline.md, (2) injection files (specify.md, plan.md, tasks.md). Both could be compacted out of context by execution time. Result: agent showed raw spec-kit output ("Spec created and validated", "Ready for /speckit.clarify or /speckit.plan") and stopped — 위반 패턴 A.
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Add Specify Execute+Review (HARD STOP) | `pipeline.md` | Inline reminder to suppress raw output, read artifact, show Review, AskUserQuestion |
+| Add Plan Execute+Review (HARD STOP) | `pipeline.md` | Same pattern for plan step |
+| Add Tasks Execute+Review (HARD STOP) | `pipeline.md` | Same pattern for tasks step |
+| Catch-all fallback → all Execute+Review | `pipeline.md`, `injection/specify.md` | Fallback changed from "context limit only" to "ANY reason response ends without AskUserQuestion". Prevents silent dead-end where user doesn't know what to do next |
+| CLAUDE.md #8 catch-all sub-item | `CLAUDE.md` | Permanent rule: user must NEVER be left without knowing what to do next. Fallback applies to ALL abnormal terminations, not just context limits |
+
+---
+
+## [2026-03-16] Pre-context freshness check at specify time
+
+Specify injection read pre-context.md as-is without validating assumptions against preceding Features' actual implementation. If a dependency's tech choice changed after pre-context was written (e.g., better-sqlite3 → electron-store in F001), specify would draft SCs based on stale assumptions. Plan injection already reads actual data-model.md/contracts/, but that's 2 steps too late.
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Pre-context freshness check | `injection/specify.md` | Step 3 added to Preceding Feature Result Reference — reads actual implementation artifacts and flags ⚠️ discrepancies against pre-context at Checkpoint |
+
+---
+
 ## [2026-03-16] Systemic: Feature completeness + rebuild parity enforcement + rule generalization
 
 ### Feature Completeness — no blocking gate existed (Critical)

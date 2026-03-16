@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | Last updated: 2026-03-16 09:18 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 09:18 KST
 
 **[spec-kit](https://github.com/github/spec-kit)의 Feature-local 한계를 넘어 AI 통제 가능한 계약 기반 개발을 실현하는 Claude Code 스킬**
 
@@ -832,7 +832,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-s
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd 상태 파일 | `specs/reverse-spec/sdd-state.md` |
 | 결정 이력 | `history.md` |
-| 실패 패턴 & 대응책 | `lessons-learned.md` |
+| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 16개 갭 패턴 + 22개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
 
 ### Feature 네이밍 규약
 
@@ -900,7 +900,7 @@ specs/
 | `PLAYWRIGHT-GUIDE.md` | Playwright 설정 가이드 — 브라우저 자동화 및 Electron CDP 설정 |
 | `TODO.md` | 프로젝트 작업 추적기 (2026-03-08 기준 모든 계획 작업 완료) |
 | `history.md` | git 이력에서 추출한 설계 결정 이력 |
-| `lessons-learned.md` | 실제 파이프라인 실행에서 발견된 실패 패턴(G1–G11)과 대응책 |
+| `lessons-learned.md` | AI 에이전트 파이프라인 실패 패턴(G1–G16)과 구체적 교훈(L1–L22) — 에이전트 스킬 설계자를 위한 범용 takeaway |
 | `install.sh` | 설치 스크립트 — `~/.claude/skills/`에 심링크 생성 |
 | `uninstall.sh` | 제거 스크립트 — `~/.claude/skills/`에서 심링크 제거 |
 

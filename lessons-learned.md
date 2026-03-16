@@ -1,265 +1,391 @@
-# Lessons Learned — spec-kit-skills Pipeline
+# Lessons Learned — AI Agent Pipeline Design
 
-> Key failure patterns and their countermeasures.
-> Read this file when starting verify or debugging quality issues.
-
----
-
-## G1. Build Pass ≠ Feature Works
-
-**Problem**: Build and tests pass, but runtime is broken
-**Case**: F005 Zustand selector instability → infinite re-renders, scroll not working during streaming
-**Countermeasures**: Per-task Runtime Check, Runtime Error Zero Gate, 3-Tier SC verification, Pattern Compliance Scan
-**Coverage**: ~80% — drops to Level 1 (build-only) when MCP is unavailable
-
-## G2. Foundation Absence
-
-**Problem**: Same infrastructure bugs found repeatedly across Features
-**Case**: CSS theme, IPC bridge, state management patterns — 7/7 bugs were Foundation-level
-**Countermeasures**: Foundation Gate (one-time pre-verification), Foundation Test auto-generation, Toolchain Pre-flight
-**Coverage**: ~90% — most robust
-
-## G3. Source Information Gap
-
-**Problem**: Agent cannot see original source during implement
-**Case**: CSS value guessing, SBI metric errors ("3 tabs" vs actual 2 tabs), platform constraint omissions
-**Countermeasures**: Source Reference Active Read, Style Token Extraction, SBI Accuracy Cross-Check, CSS Value Map
-**Coverage**: ~85% — weakens when Phase 1.5 is skipped
-
-## G4. Async/Temporal Pattern Omission
-
-**Problem**: Only synchronous chains documented, async state transitions missing
-**Case**: Loading → streaming → completion → error → cleanup full flow undefined
-**Countermeasures**: UX Behavior Contract, Interaction Chains, VERIFY_STEPS temporal verbs
-**Coverage**: ~70% — most recently added, insufficient real-world validation
-
-## G5. Context Compaction Procedure Loss
-
-**Problem**: Context compaction during verify → agent loses verify-phases.md reference → Phases skipped
-**Case**: F006 Playwright CDP UI verification entirely skipped (F001~F005 all executed successfully)
-**Countermeasures**: Verify Progress Checkpoint (sdd-state.md) + Resumption Protocol
-**Key insight**: All 66 countermeasures are built on the premise "agent reads skill files." G5 is the meta-problem that breaks this premise.
-
-## G6. Runtime Behavior Verification Gap
-
-**Problem**: verify does static checks (test/build/lint) + UI rendering confirmation (CDP snapshot), but does NOT verify actual runtime behavior (feature interactions, data flow, state changes)
-**Case**: F006 — SC verification covered 1/10 SCs (only SC-028 rendering). SCs requiring server connection, tool execution, enable/disable toggles were never runtime-tested. F001~F005 had the same pattern.
-**Root causes**:
-- verify-phases.md had no step for "run the app and test the feature works"
-- SC-level verification (Phase 3 Step 3) only covered SCs in the demo Coverage header — if coverage was low, most SCs got no runtime check
-- No defined boundary for what CDP can vs cannot automate (external deps, API keys, etc.)
-**Countermeasures**: SC Verification Matrix (classify ALL SCs from spec.md), verification boundary rules (CDP capabilities), coverage gate (warn if < 50%)
-**Coverage**: ~75% — external-dependency SCs still need manual verification
-
-## G7. Cross-Feature Integration Contract Gap
-
-**Problem**: Pipeline treats each Feature as isolated unit — no mechanism to define or verify data shape contracts at Feature boundaries
-**Case**: F003 ParameterBuilder expects `assistant.mcpMode/mcpServers`, F006 useMCPStore stores differently — no bridge designed, implemented, or verified. 3-layer miss: spec/plan didn't define the contract, implement didn't build the bridge, verify didn't check shape compatibility.
-**Root causes**:
-- Functional Enablement Chain says "A enables B" but not "A provides {shape} and B expects {shape}"
-- Entity/API registries track schemas independently per Feature, no cross-Feature shape comparison
-- Enablement Interface Smoke Test checks existence (grep + curl), not data shape compatibility
-**Countermeasures**: Integration Contracts (plan.md section defining Provider/Consumer shapes + bridges), Integration Contract Data Shape Verification (verify Phase 2 Step 6)
-**Coverage**: ~80% — catches shape mismatches and missing bridges at plan+verify, but cannot catch all semantic compatibility issues
-
-## G8. i18n Key Coverage Gap
-
-**Problem**: Components use `t('key')` but keys are missing from locale JSON files → UI shows raw key strings instead of translations
-**Case**: F006 — 7 i18n keys added to components but missing from `ko.json`. Build/tests pass because i18next silently falls back to key string. Only discovered during CDP UI verification.
-**Countermeasures**: Per-task i18n completeness check (implement Step 1b), verify Phase 1 Step 4 i18n coverage lint (cross-check code→locale + locale→locale)
-**Coverage**: ~95% — grep-based extraction covers standard `t()` patterns; dynamic key construction (`t(\`prefix.${var}\`)`) is not detectable
-
-## G9. SDK API Contract Gap (Placeholder Implementation)
-
-**Problem**: Code passes metadata-only objects to SDK functions that expect callable objects → build passes (loose types), runtime silently fails
-**Case**: F006 MCP tool injection — `ParameterBuilder` returned `{ type: "mcp", serverId: "xxx" }` instead of `tool({ execute: async () => {...} })`. AI SDK ignored the objects, AI responded without tools.
-**Also**: F005 MCP — `fullStream` tool-result `part.result === undefined` despite `.d.ts` declaring `output` field. 5 fix iterations due to trusting type definitions.
-**Countermeasures**: SDK API contract gap detection in Pattern Compliance Scan, Loose type bypass warning, External SDK Type Trust Classification (High/Medium/Low trust levels)
-**Coverage**: ~70% — grep-based detection catches common patterns; complex SDK contract mismatches require runtime verification
-
-## G10. UI Interaction Over-exposure
-
-**Problem**: Hover/click interactions applied to overly broad areas → UI flickers, re-renders, poor UX during scroll
-**Case**: F006 — message-level `onMouseEnter/Leave` state caused Copy button to flash on every message during scroll. CSS `group-hover` with `transition-opacity` resolved with zero re-renders.
-**Countermeasures**: UI Interaction Surface Audit checklist in implement B-3 (hover area scope, response timing, CSS vs React state, scroll interference)
-**Coverage**: ~60% — checklist raises awareness but requires agent judgment; no automated detection
-
-## G11. Verify Checks Code Existence, Not Runtime Behavior
-
-**Problem**: verify passes when code structure is correct (grep finds the right patterns) but the Feature doesn't actually work at runtime
-**Case**: F007 — embedding model not running → search returns empty results, but verify passed because code for embedding/search was structurally present. Header layout cramped when navigating between Features, but verify only checked individual pages in isolation.
-**Root causes**:
-- verify had no step for "start the app and exercise the Feature's actual behavior"
-- Pre-flight only checked Playwright MCP — if unavailable, immediately recommended session restart even when Playwright CLI was available
-- SC classification had no interface-specific categories (only `cdp-auto` for GUI)
-- No cross-Feature navigation transition check
-- No runtime data dependency verification
-**Countermeasures**: Multi-backend detection protocol (MCP → CLI → demo-only → build-only), interface-aware SC categories (`api-auto`, `cli-auto`, `pipeline-auto`, `user-assisted`), Step 1c Data Dependency Verification, Step 3c Navigation Transition Sanity Check, Step 3d Interactive Runtime Verification, Step 3e Source App Comparative Verification, SC Minimum Depth Rule, Empty State ≠ PASS principle
-**Coverage**: ~85% — `external-dep` SCs still require manual verification; `user-assisted` SCs depend on user cooperation
-
-## G12. Ad-hoc Domain Philosophy in Constitution
-
-**Problem**: Domain-specific philosophical principles (e.g., "Streaming-First" for AI apps, "Contract Stability" for public APIs) were generated ad-hoc in constitution-seed without structured guidance — quality and consistency varied by session
-**Case**: angdu-studio constitution-seed produced "AI Desktop App Domain" principles (Streaming-First, Model Agnosticism, Offline Resilience, Token Awareness) correctly, but these emerged from the agent's general knowledge, not from a structured extraction module. Different sessions could produce different principles for the same archetype.
-**Countermeasures**: Archetype modules (A0–A4) provide structured signal detection, philosophy extraction, SC generation extensions, elaboration probes, and constitution injection per application domain
-**Coverage**: ~90% — structured extraction ensures consistent principles; novel domains without archetype modules still rely on agent ad-hoc generation
-
-## G13. Framework Philosophy vs Operational Checklists
-
-**Problem**: Foundation files (F0–F6) mixed operational configuration decisions with philosophical principles — "what to configure" and "why certain patterns are preferred" were conflated in the same checklist
-**Case**: Express's "everything is middleware" and Electron's "main process must survive renderer crashes" are philosophical principles that guide all architectural decisions, not just individual configuration items. Mixing them with checklist items (e.g., "CORS policy: config") diluted their importance.
-**Countermeasures**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists. F7 defines _why_ patterns are preferred; F0–F6 define _what_ to configure.
-**Coverage**: ~85% — F7 is optional per Foundation, so frameworks without F7 still lack explicit philosophy separation
-
-## G14. Metrics-Only Reports Miss the "Why"
-
-**Problem**: Case study reports focused on quantitative metrics (FR/SC/Task counts, coverage %, parity %) but failed to explain *why* architectural decisions were made — the philosophy behind the decisions was invisible
-**Case**: angdu-studio case study would show "Provider abstraction layer" as a decision but not trace it to the "Model Agnosticism" archetype principle that motivated it. The report told *what* was built but not *why* it was designed that way.
-**Countermeasures**: Philosophy-aware report generation — §4.2 Architecture Philosophy (principle tables with Constitution Status), §4.3 Principle-to-Decision Mapping (decision → principle correlation), §8 Philosophy Assessment (principle application coverage + gaps + module feedback). M6 milestone enhanced with Philosophy Adherence subsection for per-Feature principle tracking.
-**Coverage**: ~75% — depends on M6 Philosophy Adherence data being recorded; implicit principle adherence (followed but not recorded) creates coverage gaps
-
-## G15. Skill Tool Return Overrides Pipeline Instructions
-
-**Problem**: Agent treats spec-kit Skill tool return value as "final response to show user" — bypasses all post-execution steps (output suppression, artifact read, Review display, HARD STOP)
-**Case**: angdu-studio constitution — `speckit-constitution` returned, agent showed "Constitution finalized" + "Suggested commit" (raw output), then jumped directly to "F001-app-shell pipeline" without reading `.specify/memory/constitution.md`, displaying Review format, or calling AskUserQuestion. Both Pattern A (stop) and Pattern B (skip) observed in different runs.
-**Root cause**: The default agent behavior for any tool call is: execute tool → show result to user → stop or continue. Pipeline instructions saying "suppress tool output and do X instead" are in pipeline.md (loaded on-demand), but by the time the Skill tool returns, the agent's working memory is dominated by the tool output. The pipeline suppression rules have already been pushed down in context priority.
-**Countermeasures**: MANDATORY RULE 3 in SKILL.md (always-loaded, 5-step protocol: SUPPRESS → READ → DISPLAY → ASK → FALLBACK), inline reminders at each Execute+Review point in pipeline.md, CLAUDE.md Review Protocol #5 (pattern verification during file review)
-**Coverage**: ~uncertain — this is a model-level behavioral tendency, not a rule enforcement gap. SKILL.md placement is the strongest possible mitigation, but the underlying behavior (tool output = user response) cannot be structurally prevented.
-**Key insight**: Unlike G1-G14 where the fix is "add a verification gate," this problem has no verification gate solution — the failure happens *between* tool execution and the next instruction read. The only defense is placing suppression rules at the highest-priority context level (SKILL.md).
-
-## G16. CWD vs Target Directory Path Ambiguity
-
-**Problem**: Instructions using `{target-directory}` are ambiguous — "target" can mean "the source being analyzed" (reverse-spec target) or "the project being built" (build target). Agent picks whichever interpretation fits the immediate context.
-**Case**: reverse-spec analyze.md Phase 0 Step 4 said "Write `case-study-log.md` to `{target-directory}`." Agent interpreted target-directory as the source code being analyzed (cherry-studio), not the CWD project being built (angdu-studio). File was written to the wrong location.
-**Countermeasures**: Replaced all ambiguous path references with explicit `./case-study-log.md (CWD root)` + added ⚠️ Path warning block explaining CWD vs target distinction
-**Coverage**: ~95% — explicit "CWD root" annotation eliminates ambiguity for known cases; new file creation instructions must be reviewed for the same pattern
-**Key insight**: In reverse-spec, the agent operates across two directories (source = read-only, CWD = write target). Any path instruction that doesn't specify which directory is a bug waiting to happen.
+> **What this file is for**: This document captures failure patterns discovered while building and operating AI agent pipelines with spec-kit-skills. Each entry describes a real problem, how it was fixed, and — most importantly — the **universal lesson** applicable to any AI agent system.
+>
+> Whether you're building your own agent skills, designing multi-step workflows, or trying to make AI agents more reliable, these patterns will save you time.
+>
+> **How to read**: Part 1 (Gap Patterns) describes *categories* of problems. Part 2 (Specific Lessons) describes *concrete incidents* with actionable takeaways. Cross-references (e.g., "see L10") link related entries.
 
 ---
 
-## Countermeasure Lineage
+## Part 1: Gap Patterns
+
+> Recurring failure categories discovered across multiple Features. Each pattern represents a class of bugs that traditional software checks (build, test, lint) do not catch.
+
+### G1. Build Pass ≠ Feature Works
+
+**The trap**: Your build succeeds, tests pass, linter is clean — but the feature doesn't actually work at runtime.
+
+**Real example**: Zustand state selectors created new object references every render → infinite re-renders, scroll broken during streaming. Build and TypeScript saw nothing wrong.
+
+**Why it happens**: Build tools check syntax and types. Tests check isolated units. Neither checks runtime state behavior, animation timing, or interaction between live components.
+
+**How we catch it**: Per-task runtime verification after each implementation task, pattern compliance scanning for known anti-patterns (selector instability, stale closures), runtime error zero-tolerance gate.
+
+**Coverage**: ~80% — drops to build-only verification when Playwright is unavailable.
+
+---
+
+### G2. Foundation Absence
+
+**The trap**: The same infrastructure bug appears in every Feature because nobody verified the foundation.
+
+**Real example**: CSS theme misconfiguration, IPC bridge errors, state management anti-patterns — all 7 bugs found across Features were actually foundation-level issues that should have been caught once.
+
+**Why it happens**: Each Feature's pipeline starts fresh. Without a one-time foundation check, every Feature rediscovers the same infrastructure problems.
+
+**How we catch it**: Foundation Gate runs once before the first business Feature — verifies build toolchain, framework plugins, IPC bridges, layout structure. Results are cached so subsequent Features skip it.
+
+**Coverage**: ~90% — most robust pattern.
+
+---
+
+### G3. Source Information Gap
+
+**The trap**: The agent guesses values it could have looked up in the original source code.
+
+**Real example**: Agent guessed CSS color tokens instead of reading them from source. Assumed "3 sidebar tabs" from a summary when the source code actually had 2 tabs (the third was a conditional view). Pre-context said "better-sqlite3" when the preceding Feature had already switched to electron-store.
+
+**Why it happens**: Agents work from summaries and descriptions, not from source code. Summaries lose nuance — counts get rounded, conditional behavior gets flattened, implementation changes aren't back-propagated.
+
+**How we catch it**: Source Reference Active Read (read actual source files for each SBI entry), SBI Accuracy Cross-Check (verify counts/structures against code), Pre-context Freshness Check (compare pre-context assumptions against actual implementation of completed dependencies), Visual Reference Checkpoint (load screenshots before UI implementation).
+
+**Coverage**: ~85% — weakens when runtime exploration (Phase 1.5) is skipped.
+
+---
+
+### G4. Async/Temporal Pattern Omission
+
+**The trap**: Only synchronous "happy path" flows are documented. Async state transitions, error recovery, and cleanup are missing.
+
+**Real example**: A streaming chat feature's spec defined `send message → receive response` but not `loading → streaming → completion → error → cleanup → retry`. The implementation had no error state handling.
+
+**How we catch it**: UX Behavior Contract (mandatory temporal flow documentation), Interaction Chains (state machine for each user flow), VERIFY_STEPS with temporal verbs (loading, streaming, completing).
+
+**Coverage**: ~70% — most recently added, needs more real-world validation.
+
+---
+
+### G5. Context Compaction Procedure Loss
+
+**The trap**: The AI agent's context window compacts mid-session → it forgets which verification phases it already completed → phases get skipped or repeated.
+
+**Real example**: During F006 verify, context compaction erased the verify-phases.md reference. The agent skipped Playwright UI verification entirely — despite completing it successfully for F001~F005.
+
+**Why it's a meta-problem**: Every other countermeasure (G1-G4, G6-G16) assumes the agent reads its skill files. G5 breaks that assumption — if the skill file is compacted out of context, no rule in it matters.
+
+**How we catch it**: Verify progress is written to sdd-state.md at every phase boundary. A resumption protocol reads persisted state and resumes from the exact phase after compaction.
+
+---
+
+### G6. Runtime Behavior Verification Gap
+
+**The trap**: Verify does static checks (tests pass, code structure correct) but never actually runs the feature to see if it works.
+
+**Real example**: SC verification covered only 1 of 10 success criteria for F006 — the one about "renders correctly." The 9 SCs requiring server connection, tool execution, and toggle interactions were never tested at runtime.
+
+**How we catch it**: SC Verification Matrix classifies ALL success criteria (not just the ones covered by demos). Coverage gate warns if less than 50% of SCs have runtime verification. Multi-backend verification (Playwright for GUI, curl for API, shell for CLI).
+
+**Coverage**: ~75% — SCs that depend on external services still require manual verification.
+
+---
+
+### G7. Cross-Feature Integration Contract Gap
+
+**The trap**: Each Feature works in isolation, but Features break when they try to talk to each other — because nobody defined the data shapes at Feature boundaries.
+
+**Real example**: Feature A's ParameterBuilder expected `{ mcpMode, mcpServers }` on the assistant object. Feature B's store actually stored `{ mcpEnabled, servers }`. No bridge was designed, built, or verified. Three-layer miss: spec didn't define it, implement didn't build it, verify didn't check it.
+
+**How we catch it**: Integration Contracts in plan.md explicitly define Provider Shape vs Consumer Shape for each cross-Feature boundary. Verify Phase 2 checks actual data shape compatibility.
+
+**Coverage**: ~80% — catches structural mismatches, but cannot catch all semantic compatibility issues.
+
+---
+
+### G8. i18n Key Coverage Gap
+
+**The trap**: Components use `t('key')` but the keys are missing from translation files → UI shows raw key strings like `settings.general.language` instead of actual translations.
+
+**Why it's invisible**: i18next silently falls back to the key string. Build passes. Tests pass. TypeScript passes. The only way to notice is to look at the rendered UI.
+
+**How we catch it**: Per-task i18n completeness check during implement, verify Phase 1 i18n coverage lint (cross-check code → locale files, locale → locale consistency).
+
+**Coverage**: ~95% — doesn't catch dynamically constructed keys like `t(\`prefix.${var}\`)`.
+
+---
+
+### G9. SDK API Contract Gap
+
+**The trap**: Code passes metadata-only objects to SDK functions that expect callable objects → build passes (loose types), but the SDK silently ignores the objects at runtime.
+
+**Real example**: AI SDK's `tool()` function expects `{ execute: async () => {...} }`. The agent passed `{ type: "mcp", serverId: "xxx" }` — metadata only, no execute function. The SDK silently ignored these "tools." The AI responded without tool access.
+
+**How we catch it**: SDK API contract gap detection in Pattern Compliance Scan. External SDK Type Trust Classification: High-trust (well-typed, strict), Medium-trust (typed but permissive), Low-trust (any-typed or documentation-only).
+
+**Coverage**: ~70% — complex SDK contract mismatches require runtime verification.
+
+---
+
+### G10. UI Interaction Over-exposure
+
+**The trap**: Hover/click interactions are attached to overly broad DOM areas → UI flickers, re-renders cascade, poor UX during scroll.
+
+**Real example**: `onMouseEnter/Leave` on each chat message caused Copy buttons to flash on every message during scroll. Solution: CSS `group-hover` with `transition-opacity` — zero re-renders, smooth scroll.
+
+**Universal takeaway**: Before adding any hover/click handler, ask: "What's the smallest DOM element this interaction should apply to?" Prefer CSS-only solutions (`:hover`, `group-hover`) over framework state (`useState`) for visual-only effects.
+
+**Coverage**: ~60% — checklist raises awareness but requires judgment.
+
+---
+
+### G11. Verify Checks Code Existence, Not Runtime Behavior
+
+**The trap**: Verify uses `grep` to confirm code patterns exist in the codebase — but the code doesn't actually run correctly.
+
+**Real example**: Embedding model wasn't running → vector search returned empty results. Verify passed because `grep` found the embedding/search code. The code was structurally correct but functionally useless without the model.
+
+**Key principle**: **Empty state ≠ PASS.** If a search returns zero results, a list shows zero items, or a feature produces no output — that's a verification failure, not a pass.
+
+**Coverage**: ~85% — external-dependency SCs still require manual verification.
+
+---
+
+### G12. Ad-hoc Domain Philosophy
+
+**The trap**: Domain-specific principles (e.g., "Streaming-First" for AI apps) are generated ad-hoc by the agent's general knowledge — different sessions produce different principles for the same domain.
+
+**How we catch it**: Archetype modules provide structured, reusable principle extraction per application domain. The agent loads domain-specific philosophy from files, not from its training data.
+
+---
+
+### G13. Framework Philosophy vs Operational Checklists
+
+**The trap**: Configuration checklists mix "what to configure" with "why certain patterns are preferred." The philosophical principles get diluted among checklist items.
+
+**Real example**: "Main process must survive renderer crashes" (Electron philosophy) was a checklist item alongside "CORS policy: config" (operational setting). The philosophical principle's importance was invisible.
+
+**How we catch it**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists.
+
+---
+
+### G14. Metrics-Only Reports Miss the "Why"
+
+**The trap**: Reports show *what* was built (FR count, SC coverage %, lines of code) but not *why* decisions were made.
+
+**How we catch it**: Philosophy-aware report generation traces each architectural decision back to the principle that motivated it.
+
+---
+
+### G15. Skill Tool Return Overrides Pipeline Instructions
+
+**The trap**: When an AI agent calls a sub-skill via the Skill tool, the sub-skill's completion message becomes the agent's final response — bypassing all post-execution steps.
+
+**Real example**: `speckit-constitution` returned "Constitution finalized." The agent showed this raw output and jumped to the next pipeline step — without reading the generated artifact, showing a review, or asking for user approval.
+
+**Why it's hard to fix**: The failure happens *between* tool execution and the next instruction. Unlike other gaps where you can add a verification gate, this one requires behavioral change at the agent level. No single fix was sufficient — it took 4 layers of defense (see L14, L20, L21).
+
+**Coverage**: Improved from ~uncertain to ~moderate with multi-layer defense.
+
+---
+
+### G16. Path Ambiguity in Multi-Directory Operations
+
+**The trap**: Instructions say "write to `{target-directory}`" but "target" means different things in different contexts — the source being analyzed vs the project being built.
+
+**How we catch it**: Explicit `(CWD root)` annotations on every file path instruction. No ambiguous path references.
+
+---
+
+## Countermeasure Evolution
+
+How defenses were added over time, each triggered by a real failure:
 
 ```
-Initial → V1~V4 (SC verification) → V7 (Foundation Gate) → S1~S4 (Source Reference)
-  → S12~S15 (SBI Cross-Check, Stub Detection) → W1~W4 (Playwright Fallback, Pattern Scan)
-  → W5~W6 (Chain Completeness, Enablement) → W8~W9 (API Matrix, Zero Gate)
-  → W10 (UX Behavior Contract) → Toolchain Pre-flight → Verify Progress Checkpoint
-  → SC Verification Matrix (runtime coverage) → Integration Contracts (cross-Feature shapes)
-  → i18n Coverage Lint (translation completeness) → SDK API Contract Gap + Type Trust Classification
-  → UI Interaction Surface Audit (hover/click UX)
-  → Runtime Verification Architecture (multi-backend, interface-aware, data dependency)
-  → BLOCKING Gates (output file verification > MANDATORY keyword)
-  → Pre-context Completeness Verification (template checklist enforcement)
-  → MANDATORY RULE 3 (Skill tool output suppression + Review gate — SKILL.md level)
-  → Standalone section separation (instruction visibility > checklist piggyback)
-  → Dependency Interpretation Rules (implementation ordering ≠ runtime coupling)
-  → Explicit CWD path annotations (CWD vs target-directory disambiguation)
-  → Console Noise Filter (automation platform warnings ≠ app errors)
-  → Explicit Feature Number Passing (pre-allocated number → downstream system)
-  → Inline Execution Protocol (Skill tool response boundary → inline SKILL.md execution)
-  → CSS Rendering Verification (build success ≠ CSS applied → plugin check + runtime spot check)
+Foundation:  SC verification → Foundation Gate → Source Reference → SBI Cross-Check
+Playwright:  Fallback chain → Pattern Scan → Chain Completeness → API Matrix
+Behavior:    UX Contract → Verify Progress → SC Matrix → Integration Contracts
+i18n/SDK:    i18n Lint → SDK Contract Gap → Type Trust Classification
+UX:          Interaction Surface Audit → Runtime multi-backend architecture
+Governance:  BLOCKING gates → Completeness verification → MANDATORY RULE 3
+Instruction: Standalone sections → Dependency rules → CWD annotations
+Pipeline:    Console filter → Feature numbering → Inline Execution
+Build:       CSS verification → Build Output Fidelity (generalized)
+Gates:       Completeness Gate → Visual Reference Checkpoint → Pre-Approval Validation
+Freshness:   Pre-context check (specify reads actual impl vs stale assumptions)
+Proximity:   Inline Execute+Review sections (per-step instruction placement)
+Safety:      Catch-all fallback (unconditional continue prompt)
 ```
 
 ---
 
-## Specific Lessons (Past Resolutions)
+## Part 2: Specific Lessons
 
-### L1. HARD STOP Bypass — 56-Point Audit Result
-**Situation**: Agent auto-skipped HARD STOPs citing health check passes, non-blocking classification, etc.
-**Resolution**: Inserted inline re-ask text at 30+ locations (countering tendency to ignore reference file rules)
-**Lesson**: Agents fabricate "reasonable excuses" to bypass safety gates. Inline repetition is the only defense.
+> Concrete incidents with actionable takeaways. Grouped by theme.
 
-### L2. Feature ID Tier-First Reordering
-**Situation**: RG-first ordering → Feature skip in T1-only pipeline (F003 → F004(T2) → F005 ordering issue)
-**Resolution**: Switched to Tier-first global ordering (all T1 → all T2 → all T3)
-**Lesson**: Feature ordering must be tested under "single Tier active" scenarios, not just "all Tiers active."
+### Theme A: How Agents Interpret (and Ignore) Instructions
 
-### L3. ESLint Command Not Found — Recurring
-**Situation**: "eslint: command not found" repeated at every Feature's verify Phase 1
-**Resolution**: Foundation Gate Toolchain Pre-flight (detect once → cache in sdd-state.md) + auto-install offer
-**Lesson**: The assumption "tool is installed" must be verified early in the pipeline.
+#### L1. Agents Fabricate Excuses to Bypass Safety Gates
 
-### L4. verify-phases.md and injection/verify.md Inconsistency
-**Situation**: Added verification items to verify-phases.md → injection/verify.md Checkpoint/Review not updated
-**Resolution**: Full file audit found 4 Critical + 2 Major inconsistencies, all fixed
-**Lesson**: Verification logic and display logic must always be updated as a pair.
+**What happened**: Agent auto-skipped HARD STOP checkpoints, citing "health check passed" or "non-blocking classification."
 
-### L5. Zustand Selector Instability — Infinite Re-renders
-**Situation**: F005 build passes but runtime has infinite re-renders (new array/object references created every render)
-**Resolution**: Added "Selector reference instability" pattern to Pattern Compliance Scan
-**Lesson**: React state library selector patterns cannot be caught by build/test alone.
+**Fix**: Inserted inline re-ask text at 30+ locations throughout the codebase.
 
-### L6. Demo-Ready Anti-Pattern — Test Files Mistaken for Demos
-**Situation**: Agent generated test suites as "demos." Executable but doesn't demonstrate the actual Feature
-**Resolution**: Added "MUST launch real Feature, NOT test-only" rule to Demo Standard + Phase 3 verification
-**Lesson**: "Executable" and "demonstrable" are different. The purpose of a demo is to showcase functionality.
+**Universal takeaway**: Agents will find "reasonable" reasons to skip inconvenient steps. The only defense is inline repetition — put the rule at every point where the violation can occur. Reference-only rules ("see file X for details") are ignored under context pressure.
 
-### L7. Source Reference Path Resolution
-**Situation**: pre-context.md recorded absolute paths to original files → unresolvable on other machines
-**Resolution**: Store Source Path in sdd-state.md, pre-context uses relative paths only
-**Lesson**: Paths must always be designed as relative path + runtime resolution.
+#### L10. "MANDATORY" Is a Suggestion — Only BLOCKING Gates Work
 
-### L8. Cross-File Consistency — 9-Issue Audit
-**Situation**: After adding W1~W10, downstream files (injection/tasks, implement, verify) were not updated
-**Resolution**: Full pipeline ↔ verify ↔ injection flow audit, 9 issues fixed
-**Lesson**: When adding new mechanisms, always trace "which downstream files read this value."
+**What happened**: A step marked `MANDATORY — You MUST NOT skip it` was skipped twice. The keyword was treated as "important but situational."
 
-### L9. Feature-Specific References → Universal Patterns
-**Situation**: Bug prevention rules and lessons referenced specific Feature cases (e.g., "F005 Zustand selector instability", "F006 AI SDK v6 tool() requires execute callback", "F006 hover flicker on message scroll"). These are useful for case-study context but make rules appear narrowly applicable.
-**Resolution**: Generalized to universal patterns: "State selector instability: creating new object/array references per render", "SDK function expects callable/executable object but receives metadata-only object", "Hover/click interaction applied to overly broad container causes re-renders during scroll". Specific case histories preserved in history.md.
-**Lesson**: Bug prevention rules should describe the *pattern*, not the *instance*. Specific cases belong in decision history, not in operational rules that the agent evaluates on every run.
+**Fix**: Added a BLOCKING gate that checks the output file contains the expected section. Missing section → re-execute.
 
-### L10. MANDATORY ≠ Enforced — BLOCKING Gates Required
-**Situation**: Runtime Default Verification was marked MANDATORY with "You MUST NOT skip it." Agent skipped it anyway — twice (before and after the fix). The MANDATORY keyword was treated as "important but situational."
-**Resolution**: Added a BLOCKING gate at Phase 2 entry that verifies the output file contains the expected section (`## Runtime Default Verification` in `runtime-exploration.md`). Missing section → re-execute the step. Same pattern as SBI Numbering Verification (which worked on first attempt).
-**Lesson**: "MANDATORY" is a request. "BLOCKING gate that checks the output file" is enforcement. Agents comply with verifiable constraints (file section exists? Y/N), not with behavioral directives ("you must do X"). Design enforcement as downstream output verification, not upstream instruction emphasis.
+**Universal takeaway**: Design enforcement as downstream output verification, not upstream instruction emphasis. "MANDATORY" is a request. "Does the file contain section X? If no → block" is enforcement. Agents comply with verifiable constraints (Y/N), not behavioral directives.
 
-### L11. Bullet List Content Requirements → Post-Generation Completeness Check
-**Situation**: analyze.md Phase 4-2 listed 14 required sections for each pre-context.md in a bullet list. Agent generated pre-contexts with only 6 of 14 sections — selectively ignoring sections it deemed "not needed" (Runtime Exploration, UI Component Features, Interaction Behavior, Static Resources, Environment Variables, Feature Contracts, etc.).
-**Resolution**: Added Pre-context Completeness Verification — a 14-row checklist table (MANDATORY + BLOCKING) that runs after all pre-contexts are generated. Each section must exist or have an explicit empty value ("None", "Skipped — [reason]", "N/A — backend-only").
-**Lesson**: Content requirements in prose/bullet lists are suggestions to agents. Enforceable requirements need a structured checklist with a verification step. The pattern: define expected sections in a table → generate → verify table against output → block if incomplete.
+#### L11. Bullet Lists Are Suggestions — Tables Are Requirements
 
-### L12. "Update" ≠ "Write to File" — Ambiguous Verbs
-**Situation**: SBI Numbering Verification Step 5 said "Update Demo Group SBI ranges." Agent calculated the ranges, displayed them in the verification output, but did NOT write them to roadmap.md. The verb "Update" was interpreted as "calculate and show."
-**Resolution**: Changed to explicit language: "**Write these ranges into roadmap.md** by adding a `| **SBI Coverage** | B###–B### |` row. This is a file modification, not just a display."
-**Lesson**: When you need the agent to modify a file, say "Write X into [filename]" or "Add X to [filename]." Never use ambiguous verbs like "Update," "Reflect," or "Record" without specifying the target file and the exact content format.
+**What happened**: A 14-item bullet list of required sections for a document. Agent generated only 6 of 14, ignoring sections it deemed "not needed."
 
-### L13. Fix Verification Requires Re-execution, Not Just Code Review
-**Situation**: Applied Fix 1-4 to analyze.md rules. Assumed the fixes were sufficient based on code review. After re-running reverse-spec, found Fix 1-3 worked perfectly but Fix 4 failed completely — the MANDATORY keyword was simply ignored.
-**Resolution**: Established a feedback loop: apply fix → re-run the pipeline → analyze output → identify remaining failures → apply stronger fix. Needed two rounds to get Runtime Default Verification right (1st: MANDATORY keyword, 2nd: BLOCKING gate).
-**Lesson**: Rule changes cannot be validated by reading the rule. They can only be validated by observing agent behavior under the rule. Every fix must be followed by a re-execution to verify the fix actually changed agent behavior.
+**Fix**: Changed from bullet list to a structured checklist table with a post-generation verification step.
 
-### L14. Skill Tool Return Treated as User Response
-**Situation**: `speckit-constitution` completed. Agent showed raw output ("Constitution finalized", "Suggested commit") and jumped to F001 pipeline — skipping artifact read, Review display, and HARD STOP AskUserQuestion. In a separate run, agent showed raw `speckit-specify` output ("Ready for /speckit.clarify or /speckit.plan") and stopped without Review or "continue" fallback.
-**Resolution**: Added MANDATORY RULE 3 to SKILL.md (always-loaded context). Defined 5-step post-execution protocol (SUPPRESS → READ → DISPLAY → ASK → FALLBACK). Documented Pattern A (Stop) and Pattern B (Skip) as distinct violations.
-**Lesson**: Pipeline instructions in on-demand files (pipeline.md) lose priority against the agent's default tool-use behavior. Critical behavioral rules must live in SKILL.md — the only file guaranteed to be in context when the violation occurs. This is the same principle as L1 (inline repetition), elevated to file-level: put the rule where it will be read at the moment it matters.
+**Universal takeaway**: Content requirements in prose are suggestions. Enforceable requirements need a table + a verification step that checks completeness. Pattern: define expected items → generate → verify → block if incomplete.
 
-### L15. Instruction Buried in Unrelated Checklist
-**Situation**: Demo Group SBI range calculation was step 5 of a 5-step "SBI Numbering Verification" checklist. Agent completed steps 1-4 (numbering checks) and stopped, treating step 5 (Demo Group SBI calculation) as optional or irrelevant since it wasn't about "numbering verification."
-**Resolution**: Separated Demo Group SBI into its own `#### Demo Group SBI Coverage Ranges (MANDATORY — BLOCKING)` section with dedicated heading, algorithm, display format, and anti-TBD warning.
-**Lesson**: Agents interpret checklist items through the lens of the checklist title. An item that doesn't match the title's semantic scope will be skipped even if it's marked MANDATORY. Fix: give distinct tasks their own section headings, don't piggyback on existing checklists.
+#### L12. Ambiguous Verbs — "Update" ≠ "Write to File"
 
-### L16. Runtime Coupling ≠ Implementation Dependency (SKF-018)
-**Situation**: reverse-spec placed F008 (Data & Storage) before F001 (Electron Shell) in the dependency graph because "Shell imports DB at startup → Shell depends on DB." This caused smart-sdd to select F008 as the first Feature instead of F001.
-**Resolution**: Added 3 Dependency Interpretation Rules to analyze.md Phase 3-2: (1) Bootstrap Feature always RG-1 first, (2) Foundation sanity check with AskUserQuestion, (3) "Could I write A without B's code?" test. Added post-sort validation.
-**Lesson**: "A's code imports B at runtime" ≠ "A cannot be implemented without B." Feature dependency is about implementation ordering ("I need B's code to exist before I can write A"), not runtime initialization sequence. The test: "If B's code didn't exist at all, could I still write A from scratch?" If yes, A does not depend on B.
+**What happened**: Instruction said "Update Demo Group SBI ranges." Agent calculated the values and displayed them — but did NOT write them to the file.
 
-### L17. Automation Platform Noise ≠ Application Errors (SKF-020)
-**Situation**: Playwright `evaluate()` triggered Chromium's anti-self-XSS warning in Electron DevTools Console. Verify Phase 3 console error scan could misclassify this as a runtime error.
-**Resolution**: Added console noise filter list to verify-phases.md (two locations) and Electron-specific note to runtime-verification.md.
-**Lesson**: When automation tools inject code into an application, the platform may generate its own warnings (Chromium anti-XSS, deprecation notices, DevTools internal messages). Console error scans must distinguish platform noise from application errors. Maintain a filter list of known automation artifacts.
+**Fix**: Changed to: "**Write** these ranges **into** roadmap.md by adding a `| SBI Coverage | B###–B### |` row."
 
-### L18. Pre-Created Resources Conflict with Auto-Numbering Scripts (SKF-021)
-**Situation**: smart-sdd creates Feature branch `002-navigation` in pre-flight, then `speckit-specify` auto-numbers and detects 002 as "in use" → creates `003-navigation` instead.
-**Resolution**: Pass explicit `{NNN}-{name}` to speckit-specify so auto-numbering is bypassed. Added mismatch recovery instructions.
-**Lesson**: When two systems both create numbered resources (branches, directories) and one runs before the other, the second system's auto-numbering will conflict with the first's pre-allocated number. Fix: the controlling system (smart-sdd) must pass its predetermined number explicitly to the downstream system (spec-kit), not rely on auto-detection.
+**Universal takeaway**: When you need file modification, use explicit verbs: "Write X into [filename]", "Add X to [filename]." Never use "Update," "Reflect," or "Record" without specifying target file and format.
 
-### L19. Skill Tool Response Boundary Breaks Multi-Step Orchestration (SKF-022)
-**Situation**: smart-sdd invoked `speckit-plan` via the Skill tool. The Skill tool executed the speckit skill, which generated its own completion message — and this became the final response. smart-sdd's "Execute + Review Continuity Rule" (Review must happen in the same response as Execute) was structurally impossible to satisfy. Occurred 3 times during F002 pipeline.
-**Resolution**: Changed pipeline.md to use Inline Execution (read SKILL.md → execute as inline steps) as the default, instead of the Skill tool. Inline execution keeps everything within smart-sdd's response context.
-**Lesson**: When an orchestrator skill delegates to a sub-skill via the Skill tool, the sub-skill's response terminates the orchestrator's turn. If the orchestrator needs to perform post-processing (review, validation, continuation) in the same turn, the Skill tool is structurally incompatible. Use inline execution (read and execute the sub-skill's instructions directly) instead. The Skill tool is appropriate for user-invoked standalone commands, not for orchestrator-to-sub-skill delegation within a pipeline.
+#### L15. Checklists Are Interpreted by Title Scope
 
-### L20. Build Success ≠ CSS Rendering — Silent CSS Framework Failures (SKF-023)
-**Situation**: F002 implement and verify all passed (build, TypeScript, smoke launch, Phase 1), but the UI was completely unstyled. Tailwind CSS 4's `@tailwindcss/vite` plugin was not registered in `electron.vite.config.ts` renderer section. The build succeeded (no errors), TypeScript compiled (CSS classes are strings), and the app ran (no crash) — but zero utility classes were generated.
-**Resolution**: Added 4-layer defense: (1) CSS Build Pipeline Verification in implement B-3 checks plugin registration, (2) Smoke Launch snapshot made MANDATORY with layout structure check, (3) verify Phase 1 CSS rendering check (plugin registration + runtime spot check), (4) Foundation Gate CSS Toolchain row.
-**Lesson**: CSS frameworks that generate classes at build time (Tailwind, CSS Modules) create a category of "silent failures" invisible to all traditional gates: build passes (no compilation errors), TypeScript passes (CSS classes are untyped strings), smoke launch passes (app doesn't crash), tests pass (they don't check visual appearance). The only reliable detection is: (a) verify the build plugin is registered in the correct config section, and (b) runtime rendering check via Playwright snapshot. Build-time CSS generation requires build-tool-aware verification, not just build success.
+**What happened**: Step 5 of "SBI Numbering Verification" was a Demo Group calculation. Agent completed steps 1-4 (about numbering) and stopped — step 5 didn't match the checklist title.
+
+**Fix**: Gave the Demo Group calculation its own section heading.
+
+**Universal takeaway**: Agents interpret checklist items through the title's semantic scope. An item that doesn't match the title will be skipped. Fix: give distinct tasks their own headings — don't piggyback unrelated tasks on existing checklists.
+
+---
+
+### Theme B: Context Window and Instruction Placement
+
+#### L14. Sub-Skill Calls Break Multi-Step Orchestration
+
+**What happened**: Orchestrator skill called `speckit-plan` via the Skill tool. The sub-skill's completion message terminated the orchestrator's turn. Post-execution review was structurally impossible.
+
+**Fix**: (1) Changed to Inline Execution (read sub-skill's instructions → execute as inline steps). (2) Added MANDATORY RULE 3 to always-loaded SKILL.md. (3) Per-step inline Execute+Review sections.
+
+**Universal takeaway**: When an orchestrator needs to do post-processing after a sub-skill, the Skill tool is structurally incompatible — it creates a response boundary. Use inline execution instead. Place critical behavioral rules in always-loaded files, not on-demand files.
+
+#### L20. Safety Nets Must Be Unconditional
+
+**What happened**: Agent stopped after showing raw spec-kit output. No review, no prompt, no fallback — user had no idea what to do next. The fallback was scoped to "if context limit prevents..." but the failure wasn't a context limit.
+
+**Fix**: Changed fallback from condition-specific to catch-all: "if this response ends without AskUserQuestion, for ANY reason, show the continue prompt."
+
+**Universal takeaway**: Define safety nets as INVARIANTS ("every response after X must end with Y"), not CONDITIONS ("if error Z occurs, show fallback"). If you enumerate failure conditions, you'll always miss one.
+
+#### L21. Instruction Proximity Determines Compliance
+
+**What happened**: Execute+Review instructions existed in two places: (1) file top (~150 lines away), (2) a separate injection file. By execution time, both were pushed out of context. The agent only had a compressed one-liner saying WHAT to do, not HOW.
+
+**Fix**: Added dedicated inline sections immediately adjacent to each execution point.
+
+**Universal takeaway**: The probability of an instruction being followed is inversely proportional to its distance from the execution point. File-top instructions are "documentation" by execution time. Adjacent instructions are "working memory." Same principle as L1 and L14, generalized.
+
+#### L13. Rule Changes Require Re-execution to Validate
+
+**What happened**: Applied 4 fixes. Code review said they looked correct. Re-execution showed fixes 1-3 worked, fix 4 failed completely — the agent simply ignored it.
+
+**Fix**: Established a feedback loop: apply fix → re-run pipeline → observe behavior → fix again if needed.
+
+**Universal takeaway**: You cannot validate agent behavior rules by reading the rules. Only re-execution reveals whether the rule actually changes agent behavior. Budget time for at least 2 iterations.
+
+---
+
+### Theme C: Build and Verification Traps
+
+#### L5. State Selector Instability — Build Passes, Runtime Loops
+
+**What happened**: Zustand selectors created new array/object references every render → infinite re-renders. Build, TypeScript, and tests saw nothing wrong.
+
+**Universal takeaway**: State library selector patterns that create new references per render are invisible to static analysis. Only runtime verification or pattern-aware scanning detects them. Applies to Zustand, Redux, MobX, and similar libraries.
+
+#### L19. Build Success ≠ Output Correctness
+
+**What happened**: Tailwind CSS 4 plugin not registered in build config. UI was completely unstyled, but build/TypeScript/tests all passed. Generalized to all build-time frameworks: CSS, i18n, codegen, asset pipelines.
+
+**Universal takeaway**: Build-time transformation frameworks (Tailwind, i18next, code generators) fail silently when their plugins aren't registered. The build succeeds because the framework's absence doesn't cause errors — it just produces no output. Detection requires two checks: (a) is the plugin registered? (b) does the runtime output look correct?
+
+#### L6. Test Files Are Not Demos
+
+**What happened**: Agent generated test suites as "demos." They were executable but didn't demonstrate the feature.
+
+**Universal takeaway**: "Executable" and "demonstrable" are different. A demo's purpose is to showcase functionality to a human, not to assert correctness programmatically.
+
+---
+
+### Theme D: Cross-System Coordination
+
+#### L16. Runtime Coupling ≠ Implementation Dependency
+
+**What happened**: `Shell imports DB at startup` was interpreted as `Shell depends on DB for implementation`. This put the DB Feature before Shell in the dependency graph — but Shell can be implemented without DB code existing.
+
+**Universal takeaway**: Feature dependency = implementation ordering ("I need B's code to write A"), NOT runtime initialization sequence. Test: "If B didn't exist, could I still write A from scratch?" If yes, A doesn't depend on B.
+
+#### L17. Automation Platform Noise ≠ Application Errors
+
+**What happened**: Playwright's `evaluate()` triggered Chromium's anti-XSS warning. Console error scanning misclassified this as an app error.
+
+**Universal takeaway**: Automation tools inject code that triggers platform warnings. Console error scans must maintain a filter list of known automation artifacts (Chromium warnings, deprecation notices, DevTools messages).
+
+#### L18. Pre-Allocated Numbers Conflict with Auto-Numbering
+
+**What happened**: smart-sdd created branch `002-navigation`, then spec-kit's auto-numbering detected 002 as "in use" and created `003-navigation` instead.
+
+**Universal takeaway**: When two systems both create numbered resources and one runs before the other, pass the number explicitly from the controlling system. Don't rely on auto-detection.
+
+#### L22. Pre-Context Assumptions Drift After Dependencies Complete
+
+**What happened**: Pre-context said "better-sqlite3" but the dependency Feature had switched to electron-store during implementation. The downstream Feature's spec was based on stale assumptions.
+
+**Universal takeaway**: Any artifact written before implementation is a hypothesis. When dependencies change during the pipeline, downstream artifacts become silently wrong. Every step that reads a pre-implementation artifact should cross-check it against actual completed implementations.
+
+---
+
+### Theme E: Process and Maintenance
+
+#### L2. Feature Ordering Must Survive Edge Cases
+
+**What happened**: Release-Group-first ordering worked when all tiers were active but skipped features when only T1 was enabled.
+
+**Universal takeaway**: Test ordering logic under minimal configurations, not just full configurations.
+
+#### L3. Tool Availability Must Be Verified Early
+
+**What happened**: "eslint: command not found" at every Feature's verify phase.
+
+**Universal takeaway**: Don't assume tools are installed. Verify once at pipeline start, cache the result.
+
+#### L4. Logic and Display Must Update Together
+
+**What happened**: Added verification items to the logic file but forgot to update the display file → items were checked but never shown to the user.
+
+**Universal takeaway**: When logic and display are in separate files, always update both. Create a review checklist: "which downstream files consume this value?"
+
+#### L7. Paths Must Be Relative
+
+**What happened**: Absolute paths to source files → unresolvable on other machines.
+
+**Universal takeaway**: Store a base path separately. All file references should be relative + runtime-resolved.
+
+#### L8. New Mechanisms Require Downstream Tracing
+
+**What happened**: Added 10 new verification items. None of the downstream files (injection, display, checkpoint) were updated.
+
+**Universal takeaway**: When adding any new mechanism, trace: "which files READ this value?" Update all of them.
+
+#### L9. Rules Should Describe Patterns, Not Instances
+
+**What happened**: Bug prevention rules referenced specific features: "F005 Zustand selector instability." These looked narrowly applicable.
+
+**Universal takeaway**: Describe the *pattern*, not the *instance*. "State selector creating new references per render" is universal. "F005 Zustand selector instability" is a case study. Patterns go in rules; instances go in history.

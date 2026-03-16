@@ -33,14 +33,17 @@ FR→Task coverage gaps are classified by the following severity rules:
 | Situation | Severity | Blocking? |
 |-----------|----------|-----------|
 | FR has **zero** mapped tasks | **CRITICAL** | ✅ BLOCKS implement — requirement will be entirely missed |
-| FR has task(s) but **partial** coverage (sub-aspect not explicit) | **HIGH** | ❌ Non-blocking — strongly recommended to fix, user can override |
+| FR has task(s) but a **functionally distinct sub-behavior** is entirely missing | **HIGH** | ❌ Non-blocking — strongly recommended to fix, user can override |
+| FR has task(s) covering **core behavior** but **implementation detail** not explicit in task description | **MEDIUM** | ❌ Non-blocking — nice to have, can be resolved during implement |
 | All FRs fully covered | — | — |
 
 **Zero-task CRITICAL rule**: If any FR-### has no task mapped to it at all, this is a CRITICAL issue. The analyze step MUST block implementation until the user either:
 - Adds a task covering the requirement, or
 - Removes/merges the FR into another requirement
 
-**Partial-coverage HIGH rule**: If an FR has task(s) but a specific sub-aspect isn't explicitly mentioned in any task description, this is HIGH severity. The user is strongly encouraged to update the task description or add a sub-task, but may proceed.
+**HIGH rule**: If an FR has task(s) but a functionally distinct sub-behavior (user-visible action, state transition, or output) is entirely missing from all task descriptions. Example: FR says "export data with format selection" but no task mentions format selection — only export.
+
+**MEDIUM rule**: If an FR has task(s) that cover the core behavioral intent but the task description doesn't specify implementation approach (e.g., visual preview method, data source, rendering technique). The agent can resolve these details during implement. Example: FR says "avatar style with visual previews" and a task covers avatar style, but doesn't specify how previews are rendered — this is MEDIUM, not HIGH.
 
 ---
 

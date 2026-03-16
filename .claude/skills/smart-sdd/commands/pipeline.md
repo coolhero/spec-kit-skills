@@ -161,14 +161,14 @@ Instead, in the SAME response where the spec-kit command completed, IMMEDIATELY:
 
 **If you find yourself about to generate a response after Execute without showing the Review — STOP. You are violating this rule. Continue to Step 3b.**
 
-> **Fallback — if Review cannot proceed in the same response** (e.g., context limit, tool error):
-> Instead of showing raw spec-kit output and stopping silently, display a friendly continuation prompt:
+> **Fallback — if this response ends without AskUserQuestion** (for ANY reason — context limit, tool error, unexpected flow):
+> Before generating ANY response after Execute that does NOT include AskUserQuestion, you MUST append this continuation prompt:
 > ```
 > ✅ [command] executed for [FID] - [Feature Name].
 >
 > 💡 Type "continue" to review the results.
 > ```
-> This ensures the user always knows what to do next, even if the flow breaks unexpectedly.
+> **This is a catch-all safety net.** The normal path is Review + AskUserQuestion in the same response. But if that fails for ANY reason, the user must NEVER be left without knowing what to do next. A response that ends after showing spec-kit output without EITHER AskUserQuestion OR this fallback message is a critical violation.
 
 #### Step 3b. Display the Review Content
 
@@ -608,7 +608,7 @@ Display the constitution-seed content per [injection/constitution.md → Checkpo
 4. Display the Review content per [injection/constitution.md → Review Display Content](../reference/injection/constitution.md)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
 6. Follow **PROCEDURE ReviewApproval** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
-7. **If context limit prevents steps 3-6**: Show `✅ speckit-constitution executed. 💡 Type "continue" to review the results.` — Do NOT skip to Phase 1.
+7. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-constitution executed.\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to Phase 1.
 
 Constitution is the most critical artifact — it governs all subsequent Features.
 
@@ -710,6 +710,37 @@ Executes the following steps **strictly in order** for each Feature.
 
 > **⚠️ INTER-STEP CONTINUITY — DO NOT STOP BETWEEN STEPS**:
 > After a step's Update completes and there are remaining steps, **IMMEDIATELY begin the next step** (e.g., plan Update done → start tasks Checkpoint). Do NOT display a "completed" summary and wait. Do NOT show "Next steps" commands. The pipeline is a continuous flow within a Feature — the ONLY valid pause points are HARD STOPs (awaiting user approval), BLOCK conditions, Feature completion, or unrecoverable errors. If you find yourself about to generate a response that ends without starting the next step — **STOP, you are breaking continuity. Proceed to the next step.**
+
+#### Specify Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-specify` returns, do NOT show its raw output ("Spec created and validated", "Ready for /speckit.clarify or /speckit.plan", "Coverage: N functional requirements", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A** — see SKILL.md Rule 3.
+
+1. Execute `speckit-specify` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any "Ready for", "Coverage:", "No [NEEDS CLARIFICATION]", "Spec created" or navigation output from speckit-specify. Do NOT show these to the user.
+3. Run Post-Execution Verification Sequence from `injection/specify.md` (SBI Accuracy, Platform Constraints, Edge Cases, etc.)
+4. Read `SPEC_PATH/{NNN-feature}/spec.md` and assemble Review Display
+5. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+6. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to plan.
+
+#### Plan Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-plan` returns, do NOT show its raw output ("Plan created", "architecture decisions", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+
+1. Execute `speckit-plan` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any navigation output from speckit-plan. Do NOT show these to the user.
+3. Read `SPEC_PATH/{NNN-feature}/plan.md` and assemble Review Display
+4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-plan executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to tasks.
+
+#### Tasks Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-tasks` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+
+1. Execute `speckit-tasks` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any navigation output from speckit-tasks. Do NOT show these to the user.
+3. Read `SPEC_PATH/{NNN-feature}/tasks.md` and assemble Review Display
+4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-tasks executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to implement.
 
 #### Clarify Trigger (after specify Review)
 
@@ -881,7 +912,9 @@ After Smoke Launch passes, verify implementation completeness:
 
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
 >
-> **⚠️ Feature Number Conflict Prevention**: Since smart-sdd creates the Feature branch `{NNN}-{short-name}` in pre-flight (Step 0), the branch already exists when `speckit-specify` runs. spec-kit's `create-new-feature.sh` auto-numbering scans existing branches and directories, so it will detect `{NNN}` as "in use" and assign the next available number — causing a branch/directory mismatch. To prevent this: when invoking `speckit-specify`, pass the Feature name as `{NNN}-{short-name}` (e.g., `002-navigation`) so that `create-new-feature.sh` uses the explicit number rather than auto-detecting. If a mismatch occurs anyway (spec directory created with wrong number), immediately rename the directory (`mv specs/{wrong}-{name} specs/{NNN}-{name}`) and delete the spurious branch before proceeding.
+> **⚠️ Feature Number & Branch Conflict Prevention**: Since smart-sdd creates the Feature branch `{NNN}-{short-name}` in pre-flight (Step 0), the branch already exists when `speckit-specify` runs. Two conflicts can occur:
+> 1. **Numbering conflict**: `create-new-feature.sh` auto-numbering detects `{NNN}` as "in use" and assigns the next number → branch/directory mismatch. **Prevention**: pass the Feature name as `{NNN}-{short-name}` (e.g., `002-navigation`) so `create-new-feature.sh` uses the explicit number. **Recovery**: If mismatch occurs, rename the directory (`mv specs/{wrong}-{name} specs/{NNN}-{name}`) and delete the spurious branch.
+> 2. **Branch-already-exists error**: `create-new-feature.sh` tries to create a branch that smart-sdd already created → `git checkout -b` fails with "already exists." **This error is non-fatal.** The pre-created branch from smart-sdd pre-flight is correct. Ignore the branch creation error and proceed directly to spec directory/file creation. If `create-new-feature.sh` terminates on this error, manually create `specs/{NNN}-{short-name}/` and run `speckit-specify` without the branch creation step.
 
 📋 **Dependency Stub Registry**: After implement completion, generate `specs/{NNN-feature}/stubs.md` if any stub/placeholder implementations depend on future Features. See `injection/implement.md` § Post-Step Update Rules #2 for format and detection rules. These stubs are auto-injected into the dependent Feature's pipeline context.
 

@@ -66,7 +66,8 @@ To resolve file paths at runtime:
 When a completed preceding Feature exists and the current Feature depends on it:
 1. Check the dependency relationship in `BASE_PATH/roadmap.md`
 2. If the preceding Feature's `SPEC_PATH/[NNN-feature]/spec.md` exists, reference the relevant requirements
-3. Display "Preceding Feature [FID] spec referenced" information at the Checkpoint
+3. **Pre-context freshness check**: Read the preceding Feature's actual implementation artifacts (`SPEC_PATH/[NNN-feature]/data-model.md`, `contracts/`) and compare key assumptions against this Feature's `pre-context.md`. If a discrepancy is found (e.g., pre-context says "better-sqlite3" but preceding Feature actually used "electron-store"), flag it at Checkpoint with ⚠️ and override the stale assumption in the injected context.
+4. Display "Preceding Feature [FID] spec referenced" information at the Checkpoint
 
 ### Checkpoint Display Content
 
@@ -159,7 +160,7 @@ Review the above content. You can:
 
 ### Post-Execution Verification Sequence
 
-> **⚠️ SUPPRESS spec-kit output**: `speckit-specify` prints messages like "Ready for /speckit.clarify or /speckit.plan." — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the verification steps and Review Display below. If context limit prevents continuing, show instead: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+> **⚠️ SUPPRESS spec-kit output**: `speckit-specify` prints messages like "Ready for /speckit.clarify or /speckit.plan." — **never show these to the user**. Suppress ALL spec-kit navigation messages. Immediately proceed to the verification steps and Review Display below. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason — context limit, tool error, or any other cause), you MUST show: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently.
 
 After `speckit-specify` completes and BEFORE assembling the Review Display, run these checks in order:
 

@@ -22,6 +22,8 @@
    - **위반 패턴 B (건너뜀)**: spec-kit raw output 표시 후 Review/HARD STOP을 건너뛰고 다음 step으로 바로 진행 → 사용자가 산출물 승인 기회를 잃음
    - **위반 패턴 C (Skill tool)**: `Skill(speckit-*)` 호출 → speckit의 completion 메시지가 최종 응답이 됨 → Review 미표시, fallback 안내도 없음 → 사용자가 파이프라인 중단인지 완료인지 판단 불가
    - 세 패턴 모두 금지. Review HARD STOP은 생략 불가. SKILL.md MANDATORY RULE 3 참조.
+   - **⚠️ 인라인 Execute+Review 섹션 필수**: pipeline.md에서 speckit-* 명령을 실행하는 모든 step(constitution, specify, plan, tasks, clarify, analyze, implement)에는 **전용 인라인 Execute+Review 섹션**이 있어야 합니다. Common Protocol(파일 상단)이나 injection 파일(specify.md 등)의 지시만으로는 부족합니다 — 실행 시점에 컨텍스트에서 밀려나 에이전트가 무시합니다. 새로운 speckit-* 실행 지점을 추가할 때 반드시 전용 섹션도 함께 추가하세요.
+   - **⚠️ Catch-all fallback 필수**: 어떤 이유로든(context limit, tool error, 예기치 않은 흐름) AskUserQuestion 없이 응답이 끝나려 하면, 반드시 `✅ [command] executed for [FID].\n💡 Type "continue" to review the results.` fallback을 표시해야 합니다. **사용자가 다음에 뭘 해야 하는지 모르는 상태로 멈추는 것은 절대 허용되지 않습니다.** fallback은 "context limit인 경우"만이 아니라 **모든 비정상 종료**에 적용됩니다.
 
 9. **pipeline.md — Inter-step Continuity**: Feature 내 step 간 전환(예: plan Update → tasks Checkpoint)은 자동으로 이어져야 합니다. step 완료 후 "completed" 메시지만 표시하고 멈추지 마세요. 멈출 수 있는 유일한 지점은 HARD STOP(사용자 승인 대기), BLOCK 조건, Feature 완료, 복구 불가 에러뿐입니다. **HARD STOP 없이 다음 step으로 건너뛰는 것은 "continuity"가 아니라 "HARD STOP 위반"입니다.**
 
