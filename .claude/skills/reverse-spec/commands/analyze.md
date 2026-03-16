@@ -1039,6 +1039,16 @@ For each source file identified in Phase 1, extract a **function-level inventory
 - Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
 - Skip internal/private helpers that are implementation details, not behaviors
 
+#### UI Control-Level Resolution Rule
+
+File-level SBI ("Settings page renders") misses individual controls. Apply finer granularity for UI-dense files:
+
+1. **UI-dense file detection**: If a source file's render function contains **5+ interactive form controls** (Switch, Select, Input, Button, Slider, RadioGroup, Checkbox, Toggle, ColorPicker, etc.) → activate control-level extraction
+2. **Per-control SBI**: Each interactive control becomes its own SBI entry with a unique B### ID:
+   - `B056 Settings page renders` → split into `B056a Theme selector (dark/light/system)`, `B056b Font size slider`, `B056c Spell check toggle`, `B056d Hardware acceleration toggle`, etc.
+3. **Phase 1.5 cross-verification**: After code-based SBI extraction, if Phase 1.5 runtime exploration was performed → compare extracted UI control count against actually rendered controls. Flag any controls visible at runtime but missing from code-based SBI
+4. **Applies to**: Settings pages, form-heavy pages, dashboard widgets, admin panels, preference dialogs — any page where a single component file produces multiple independent user interactions
+
 This inventory feeds into each Feature's `pre-context.md` → "Source Behavior Inventory" section (Phase 4-2) and is used by `/smart-sdd verify` for Feature-level completeness checking.
 
 > **SBI Generation Timing**: Phase 2-6 generates the project-wide global SBI. At this point, Feature classification has not yet been performed (done in Phase 3), so no per-Feature filtering is applied. Per-Feature filtering and B### ID assignment are performed in Phase 4-2.

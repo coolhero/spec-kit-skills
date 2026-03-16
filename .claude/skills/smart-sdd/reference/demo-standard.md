@@ -227,6 +227,33 @@ wait || true
   npx playwright test demos/verify/F00N-name.spec.ts --reporter=list 2>&1
   ```
   Also used by verify Phase 3 as a CLI fallback when MCP is unavailable (see verify-phases.md Step 6b).
+- **TEST PLAN comment block** (REQUIRED): Every demo script MUST include a structured TEST PLAN at the top of the file. Each test item follows 4-field format derived from spec.md Acceptance Scenarios and plan.md Interaction Chains:
+  ```bash
+  # ══════════════════════════════════════════════
+  # TEST PLAN — F003-settings
+  # ══════════════════════════════════════════════
+  #
+  # ── Test 1: Theme switching ──
+  #   Precondition: On Settings page, General tab
+  #   Action: Click "Dark" radio button in Theme section
+  #   Expected: Entire UI transitions to dark colors within 200ms
+  #   Confirm: Background #1a1a2e, text white, sidebar/tabbar both dark
+  #
+  # ── Test 2: Font size adjustment ──
+  #   Precondition: On Settings page, General tab
+  #   Action: Drag font size slider to 18px
+  #   Expected: All body text resizes to 18px
+  #   Confirm: Chat messages, sidebar labels, tab text all enlarged
+  #
+  # ── Test 3: Settings persistence ──
+  #   Precondition: Theme set to Dark, font 18px
+  #   Action: Close and reopen the app
+  #   Expected: Settings persist across restart
+  #   Confirm: Theme still Dark, font still 18px (manual — requires app restart)
+  # ══════════════════════════════════════════════
+  ```
+  **Sources**: Derive Action/Expected from spec.md SC definitions + plan.md Interaction Chain Verify Method column. Confirm maps to what the user visually observes. Mark `(manual — [reason])` for items requiring OS-level actions.
+  **Downstream**: verify Phase 3 Step 3d3 parses this TEST PLAN and executes automatable items via Playwright.
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
 - **Playwright header** (optional): For UI Features, include a `# Playwright` comment section with URLs and element assertions for automated UI verification. See [reference/ui-testing-integration.md](ui-testing-integration.md)

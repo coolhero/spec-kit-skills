@@ -133,6 +133,15 @@ Feature: [FID] - [Feature Name]
   ⚠️ This Feature should resolve these stubs. Ensure requirements/SCs cover the target behavior.
 [If no preceding stubs target this Feature: skip this block entirely]
 
+── Feature Reachability Path (GUI Features) ────
+[If GUI interface is active:]
+  ⚠️ Every GUI Feature spec MUST include at least one FR or Acceptance Scenario
+  describing how the user navigates to this Feature from the app's home screen.
+  If accessing this Feature requires modifying another Feature's UI (e.g., adding
+  a settings gear icon to the Navbar), declare it as an Integration Contract.
+  Example: "FR-001: User clicks the Settings gear icon in the Navbar to open Settings page"
+[If not GUI: skip this block entirely]
+
 ── Functional Enablement Chain ─────────────────
 [If present in pre-context — show enablement/blocking relationships]
   Enables → F005-chat: Provider settings panel works

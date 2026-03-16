@@ -5,6 +5,19 @@
 
 ---
 
+## [2026-03-16] SKF-028~032: SBI resolution, Interaction Chain verification, Feature Reachability, TEST PLAN
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| UI Control-Level Resolution Rule | `reverse-spec/commands/analyze.md` | SKF-028: SBI extraction stopped at file level → missed individual UI controls in dense pages (settings, forms). Now splits to per-control SBI when 5+ controls detected |
+| Interaction Chain Verify Method Execution (Step 3d2) | `smart-sdd/commands/verify-phases.md` | SKF-029: plan.md Verify Method column was a dead column — verify never executed it. Now parsed and run as Playwright assertions |
+| Feature Reachability Gate (Phase 0, Step 0-4) | `smart-sdd/commands/verify-phases.md` | SKF-030: GUI Feature could pass verify despite being unreachable from home screen. Now BLOCKS if no UI navigation path exists |
+| Feature Reachability Path in specify | `smart-sdd/reference/injection/specify.md` | SKF-030: spec.md lacked FR for "how user accesses this Feature". Now requires navigation path FR for GUI Features |
+| Demo TEST PLAN Comment Block | `smart-sdd/reference/demo-standard.md` | SKF-031: demo scripts listed features without "action → expected → confirm" format. Now requires structured TEST PLAN block |
+| Demo TEST PLAN Execution (Step 3d3) | `smart-sdd/commands/verify-phases.md` | SKF-032: TEST PLAN was write-only — verify never executed its items. Now parses and runs automatable tests via Playwright |
+
+---
+
 ## [2026-03-16] Extensibility expansion — new modules, F8/F9 schema, Structure parameter
 
 | Change | File | Rationale |

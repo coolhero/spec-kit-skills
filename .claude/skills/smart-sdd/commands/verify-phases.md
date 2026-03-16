@@ -362,7 +362,28 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
   Use AskUserQuestion: "Retry" / "Continue without UI verification"
   **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-**0-4. Note**: After Phase 0, the app is running. Pre-flight MCP check (next) can now detect tools correctly.
+**0-4. Feature Reachability Gate** (GUI Features only):
+
+> Prevents "Feature implemented but unreachable" — the Feature's UI exists but no navigation path leads to it from the home screen.
+
+**Skip if**: Feature has no GUI interface, or Feature IS the home/shell Feature (F001-shell, F000-* bootstrap).
+
+1. From the app's home screen (initial state after launch), attempt to navigate to the current Feature's primary screen using **only UI interactions** (click navigation items, menu entries, buttons, icons)
+2. **Do NOT use direct URL navigation** (`page.goto('/settings')`) — users don't type URLs in desktop/mobile apps
+3. Navigation path sources (check in order):
+   a. `interaction-surfaces.md` — if exists, look for entry point mapping for this Feature
+   b. `pre-context.md` → Source Reference or SBI — look for navigation hints (e.g., "gear icon in navbar")
+   c. Common patterns: sidebar menu, top nav tabs, settings gear icon, user menu dropdown
+4. **If reachable** → record navigation path: `✅ Reachable: Home → Sidebar → Settings icon → Settings page`
+5. **If NOT reachable** within 3 attempts → **CRITICAL BLOCK**:
+   ```
+   🚫 Feature Reachability BLOCKED for [FID]:
+     No UI path from home screen to [Feature] screen.
+     The Feature exists but users cannot access it.
+   ```
+   → Regression to implement: add navigation entry point (icon, button, menu item) in the appropriate existing UI component
+
+**0-5. Note**: After Phase 0 (including Reachability Gate), the app is running. Pre-flight MCP check (next) can now detect tools correctly.
 If Pre-flight still fails → the CDP Endpoint Diagnostic (in the Pre-flight section below) provides specific guidance.
 
 ---
@@ -978,6 +999,8 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 3b: Visual Fidelity Check (rebuild mode only)
   □ Step 3c: Navigation Transition Sanity Check (GUI only)
   □ Step 3d: Interactive Runtime Verification (all interfaces — core runtime check)
+  □ Step 3d2: Interaction Chain Verify Method Execution (GUI + plan.md chains)
+  □ Step 3d3: Demo TEST PLAN Execution (when TEST PLAN block exists in demo script)
   □ Step 3e: Source App Comparative Verification (rebuild mode only)
   □ Step 4: Coverage mapping and demo components
   □ Step 5: CI/Interactive path convergence
@@ -1435,6 +1458,54 @@ After executing each SC's verification, record the **Reached Depth** and compare
   user-assisted: 2/3 verified (1 skipped — external API unavailable)
 
   Depth Compliance: 4/5 SCs met required depth (1 shortfall)
+```
+
+**Step 3d2 — Interaction Chain Verify Method Execution** (GUI Features with plan.md Interaction Chains):
+
+> Bridges the plan→verify gap: plan.md defines Verify Method for each Interaction Chain row, but without this step those definitions are dead columns.
+
+**Skip if**: plan.md has no `## Interaction Chains` section, or Feature has no GUI interface.
+
+1. Read `specs/{NNN-feature}/plan.md` → extract the Interaction Chains table
+2. For each row with a non-empty `Verify Method` column:
+   - Parse the verb: `verify-state selector attribute "expected"` → `expect(page.locator(selector)).toHaveAttribute(attribute, expected)`
+   - Parse the verb: `verify-effect target property "expected"` → evaluate via `page.evaluate()` + assert
+   - Parse the verb: `verify-state selector class "expected"` → `expect(page.locator(selector)).toHaveClass(/expected/)`
+3. Execute the chain **in order**: User Action → wait for DOM Effect → run Verify Method assertion
+4. Record result per chain row: PASS / FAIL with details
+5. FAIL items → classify per Bug Fix Severity Rule (same as other verify failures)
+
+**Result report** (appended after Step 3d report):
+```
+── Interaction Chain Verification ──────────────
+  Chain 1 (FR-012 Theme toggle): ✅ verify-effect body class "dark" PASS
+  Chain 2 (FR-015 Font size):    ✅ verify-effect body style.fontSize "18px" PASS
+  Chain 3 (FR-018 Sidebar):      ❌ verify-state .sidebar class "hidden" FAIL — sidebar still visible
+  Total: 2/3 PASS
+────────────────────────────────────────────────
+```
+
+**Step 3d3 — Demo TEST PLAN Execution** (when demo script contains TEST PLAN block):
+
+> Ensures that the TEST PLAN written in implement is not a dead document — each test scenario is actually executed and verified during verify.
+
+**Skip if**: Demo script has no `# ── TEST PLAN` or `# ── Test N:` comment block.
+
+1. Parse the demo script's TEST PLAN block → extract each test item (precondition, action, expected, confirmation)
+2. Classify each test item:
+   - **auto**: UI action + DOM state check → execute via Playwright
+   - **semi-auto**: UI action possible but expected result requires visual judgment → Playwright screenshot + agent comparison against expected description
+   - **manual-only**: OS-level action (file dialog, app restart, hardware), external dependency → skip with recorded reason
+3. Execute auto and semi-auto items via Playwright:
+   - Perform the action (click, fill, navigate, toggle)
+   - Assert the expected result (DOM state, attribute, visual comparison)
+   - Record PASS/FAIL per item
+4. FAIL items → classify per Bug Fix Severity Rule
+5. Display result in verify Review:
+```
+── Demo TEST PLAN Execution ─────────────────
+  Total: 9 tests | Auto: 5 PASS | Semi-auto: 2 PASS | Manual: 2 SKIPPED (file dialog, app restart)
+────────────────────────────────────────────────
 ```
 
 **Step 3e — Source App Comparative Verification** (rebuild mode only):
