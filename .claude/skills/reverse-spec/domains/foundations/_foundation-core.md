@@ -22,6 +22,15 @@ Identify the primary framework(s) from project files:
 | Bun | `bun.lockb` present OR `bun` in `package.json` `packageManager` field OR `bunfig.toml` |
 | Solid.js | `solid-js` in package.json dependencies + `.tsx`/`.jsx` files with `createSignal` imports |
 | Hono | `hono` in package.json dependencies + route handler patterns (`app.get()`, `app.post()`) |
+| Spring Boot | `spring-boot-starter-*` in `pom.xml`/`build.gradle` + `@SpringBootApplication` |
+| Django | `django` in `requirements.txt`/`pyproject.toml` + `manage.py` + `settings.py` with `INSTALLED_APPS` |
+| Rails | `rails` in Gemfile + `config/application.rb` + `bin/rails` |
+| Flask | `flask` in `requirements.txt`/`pyproject.toml` + `Flask(__name__)` factory pattern |
+| Actix-web | `actix-web` in `Cargo.toml` + `HttpServer::new` or `#[actix_web::main]` |
+| Go Chi/Gin | `go-chi/chi` or `gin-gonic/gin` in `go.mod` + router initialization pattern |
+| ASP.NET Core | `*.csproj` with `Microsoft.AspNetCore.*` + `WebApplication.CreateBuilder` in `Program.cs` |
+| Laravel | `laravel/framework` in `composer.json` + `artisan` + `routes/api.php` |
+| Phoenix | `:phoenix` in `mix.exs` deps + `lib/*_web/` + `router.ex` with `scope`/`pipe_through` |
 
 **Multiple frameworks**: A project may use multiple frameworks (e.g., Express backend + React frontend). Detect all, load Foundation files for each. Comma-separate in `**Framework**` field.
 
@@ -57,7 +66,7 @@ Identify the primary framework(s) from project files:
 | DLK | Deep Linking & File Associations | Protocol handler, custom schemes, file type registration |
 | STR | Storage | Persistent storage, session management, proxy settings |
 
-### Server-specific Categories (Express, NestJS, FastAPI)
+### Server-specific Categories (Express, NestJS, FastAPI, Spring Boot, Django, Rails, Flask, Actix-web, Go Chi, ASP.NET Core, Laravel, Phoenix)
 
 | Code | Category | Description |
 |------|----------|-------------|
@@ -191,7 +200,7 @@ Each Foundation item has a globally unique ID:
 
 | Component | Description | Example |
 |-----------|-------------|---------|
-| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter) |
+| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), SB (Spring Boot), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix) |
 | CAT | Category code from § F1 | WIN, SEC, IPC, MID, REN, etc. |
 | NN | Sequential number (01-99) | 01, 02, 03, ... |
 
@@ -286,13 +295,22 @@ Each framework Foundation file in this directory follows the structure defined i
 | `express.md` | Express.js | 43 | 13 | ✅ | Implemented |
 | `nextjs.md` | Next.js | 44 | 13 | — | Implemented |
 | `vite-react.md` | Vite + React | 43 | 12 | — | Implemented |
-| `nestjs.md` | NestJS | 51 | 13 | — | TODO scaffold |
-| `fastapi.md` | FastAPI | 41 | 12 | — | TODO scaffold |
+| `nestjs.md` | NestJS | ~20 | 13 | ✅ | Implemented |
+| `fastapi.md` | FastAPI | ~20 | 12 | ✅ | Implemented |
 | `react-native.md` | React Native | 50 | 14 | — | TODO scaffold |
 | `flutter.md` | Flutter | 50 | 14 | — | TODO scaffold |
 | `bun.md` | Bun | — | 8 | ✅ | Implemented |
 | `solidjs.md` | Solid.js | — | 5 | ✅ | Implemented |
 | `hono.md` | Hono | — | 8 | ✅ | Implemented |
+| `spring-boot.md` | Spring Boot | ~35 | 13 | ✅ | Implemented |
+| `django.md` | Django | ~30 | 12 | ✅ | Implemented |
+| `rails.md` | Rails | ~30 | 13 | ✅ | Implemented |
+| `flask.md` | Flask | ~25 | 12 | ✅ | Implemented |
+| `actix-web.md` | Actix-web | ~30 | 12 | ✅ | Implemented |
+| `go-chi.md` | Go Chi/Gin | ~30 | 12 | ✅ | Implemented |
+| `dotnet.md` | ASP.NET Core | ~30 | 13 | ✅ | Implemented |
+| `laravel.md` | Laravel | ~30 | 13 | ✅ | Implemented |
+| `phoenix.md` | Phoenix | ~25 | 12 | ✅ | Implemented |
 
 ---
 

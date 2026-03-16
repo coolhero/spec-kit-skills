@@ -81,6 +81,56 @@
 - `cargo clippy -- -D warnings` (clippy is a standard rustup component)
 - If not installed: `not installed -- run: rustup component add clippy`
 
+**Java** (detected by `pom.xml` / `build.gradle` / `build.gradle.kts` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `pom.xml` with `maven-checkstyle-plugin` or `checkstyle.xml` exists | `./mvnw checkstyle:check` (or `mvn checkstyle:check`) |
+| 2 | `build.gradle` with `checkstyle` plugin or `checkstyle.xml` exists | `./gradlew checkstyleMain` |
+| 3 | `spotbugs` plugin in build file | `./gradlew spotbugsMain` or `mvn spotbugs:check` |
+| 4 | None of the above | `not configured` |
+
+**Kotlin** (detected by `build.gradle.kts` with `kotlin` plugin):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `.editorconfig` with ktlint rules or `ktlint` in build plugins | `./gradlew ktlintCheck` |
+| 2 | `detekt.yml` exists or `detekt` plugin in `build.gradle.kts` | `./gradlew detekt` |
+| 3 | None of the above | `not configured` |
+
+**Ruby** (detected by `Gemfile` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `.rubocop.yml` exists or `rubocop` in Gemfile | `bundle exec rubocop` |
+| 2 | `standard` in Gemfile | `bundle exec standardrb` |
+| 3 | None of the above | `not configured` |
+
+**PHP** (detected by `composer.json` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `phpstan.neon` or `phpstan.neon.dist` exists | `vendor/bin/phpstan analyse` |
+| 2 | `phpcs.xml` or `.phpcs.xml` exists | `vendor/bin/phpcs` |
+| 3 | `pint.json` exists or `laravel/pint` in composer.json | `vendor/bin/pint --test` |
+| 4 | None of the above | `not configured` |
+
+**Elixir** (detected by `mix.exs` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `.credo.exs` exists or `:credo` in deps | `mix credo --strict` |
+| 2 | `:dialyxir` in deps | `mix dialyzer` |
+| 3 | None of the above | `not configured` |
+
+**C# / .NET** (detected by `*.csproj` / `*.sln` presence):
+
+| Priority | Check | Command |
+|----------|-------|---------|
+| 1 | `.editorconfig` with C# rules or `Directory.Build.props` with analyzers | `dotnet format --verify-no-changes` |
+| 2 | Roslyn analyzers in `.csproj` (`PackageReference` for `Microsoft.CodeAnalysis.*`) | `dotnet build /p:TreatWarningsAsErrors=true` |
+| 3 | None of the above | `dotnet format --verify-no-changes` (built-in with .NET SDK 6+) |
+
 **Executable verification**: After detecting the lint command, verify the tool is actually runnable:
 - Run `[tool] --version` (e.g., `npx eslint --version`, `ruff --version`) -> exit 0 = available
 - Exit != 0 or "command not found" -> not installed
@@ -95,6 +145,16 @@
 | flake8 | `pip install flake8` |
 | golangci-lint | `go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest` |
 | clippy | `rustup component add clippy` |
+| Checkstyle | (Maven/Gradle plugin — configured in build file) |
+| ktlint | (Gradle plugin — configured in build file) |
+| detekt | (Gradle plugin — configured in build file) |
+| RuboCop | `gem install rubocop` or add to Gemfile |
+| PHPStan | `composer require --dev phpstan/phpstan` |
+| PHP_CodeSniffer | `composer require --dev squizlabs/php_codesniffer` |
+| Laravel Pint | `composer require --dev laravel/pint` |
+| Credo | Add `{:credo, "~> 1.7", only: [:dev, :test]}` to mix.exs |
+| dialyxir | Add `{:dialyxir, "~> 1.4", only: [:dev], runtime: false}` to mix.exs |
+| dotnet format | Built-in with .NET SDK 6+ |
 
 ### Limited Verification
 
@@ -176,3 +236,7 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 | SDK Type Trust Classification | `concerns/external-sdk` | `injection/implement.md` § Bug Prevention B-3 |
 | SDK API Contract Gap | `concerns/external-sdk` | `injection/implement.md` § Bug Prevention B-3 |
 | i18n Completeness Check | `concerns/i18n` | `injection/implement.md` § Step 1b |
+| MQ Message Loss on Crash | `concerns/message-queue` | `concerns/message-queue.md` § S7 MQ-001 |
+| MQ Poison Message Loop | `concerns/message-queue` | `concerns/message-queue.md` § S7 MQ-003 |
+| TW Zombie Task Detection | `concerns/task-worker` | `concerns/task-worker.md` § S7 TW-002 |
+| TW Schedule Overlap | `concerns/task-worker` | `concerns/task-worker.md` § S7 TW-004 |

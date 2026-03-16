@@ -503,8 +503,8 @@ How to enable runtime verification:
 
 Run each check and record results. **If any check fails, verification is BLOCKED — do not proceed to Phase 2/3/4.**
 
-1. **Test check**: Detect and execute the project's test command (from `package.json` scripts, `pyproject.toml`, `Makefile`, etc.)
-2. **Build check**: Run the build command and confirm no errors
+1. **Test check**: Detect and execute the project's test command (from `sdd-state.md` → `## Toolchain` → Test row, or from `package.json` scripts, `pyproject.toml`, `Makefile`, etc.). If `**Structure**: monorepo`, use workspace-aware test command (e.g., `turbo run test`, `bun run --filter=* test`).
+2. **Build check**: Run the build command and confirm no errors. If `**Structure**: monorepo`, use workspace-aware build command.
 3. **Lint check**: Detect and execute the lint tool per domain detection rules.
 
    **Step 3a — Check Toolchain state** (from Foundation Gate):
@@ -1006,6 +1006,7 @@ Verifies that the data shape contracts defined in plan.md are actually implement
 > 4. **Post-gate announcement** (display after gate passes):
 >    `🔒 Playwright Gate: PASSED — [N] cdp-auto SCs will be verified via Playwright [CLI|MCP]`
 >    If Playwright unavailable after install attempt: `🔒 Playwright Gate: BLOCKED — [reason]. HARD STOP required.`
+> 5. **Demo `--ci` ≠ UI Verification**: Running the demo script in CI mode (`--ci`) tests health/build/startup but does NOT verify UI element rendering or interaction. For GUI Features, Steps 3/3d (Playwright SC verification) are MANDATORY and cannot be replaced by demo `--ci` alone. If Steps 3/3d were skipped or produced no results, GUI verification is incomplete — this must be flagged in Review.
 
 ```
 Phase 3 Checklist (must complete ALL in order):
@@ -1019,11 +1020,12 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 3d2: Interaction Chain Verify Method Execution (GUI + plan.md chains)
   □ Step 3d3: Demo TEST PLAN Execution (when TEST PLAN block exists in demo script)
   □ Step 3e: Source App Comparative Verification (rebuild mode only)
+  □ Step 3f: User-Assisted SC Completion Gate (user-assisted SCs — MANDATORY)
+  □ Step 3f2: User-Assisted Manual Verification (manual SCs + manual TEST PLAN items)
   □ Step 4: Coverage mapping and demo components
   □ Step 5: CI/Interactive path convergence
   □ Step 6: Execute demo --ci
   □ Step 6b: Execute VERIFY_STEPS (functional verification)
-  □ Step 3f2: User-Assisted Manual Verification (manual SCs + manual TEST PLAN items)
   □ Phase 3b: Bug Prevention Verification (includes Empty State ≠ PASS)
 ```
 
@@ -1327,6 +1329,18 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
   If no `verify-state` or `verify-effect` verbs exist in any SC's Coverage header, skip Tiers 2/3 entirely and use the basic Tier 1 report format.
 
   **App Shutdown**: After all SC verifications (including Tier 2/3) complete, terminate the app process started above. Do NOT leave it running.
+
+- **CSS Theme Token Rendering Check** (GUI Features with CSS variable-based theming):
+  When the project uses CSS variable-based design tokens (e.g., `--primary`, `--background`, `--muted`) with a utility CSS framework (Tailwind CSS, UnoCSS) or component library (shadcn/ui, Radix Themes, Chakra UI):
+  1. **During SC Tier 1 (presence check)**: After confirming interactive elements exist (buttons, switches, inputs), sample at least 1 styled interactive element and evaluate its `getComputedStyle()`:
+     - `backgroundColor` must NOT be `transparent`, `rgba(0, 0, 0, 0)`, or empty
+     - `color` must NOT be identical to `backgroundColor` (text invisible against background)
+  2. **If transparent/invisible**: Report `⚠️ CSS Token Rendering Failure — interactive elements exist but have no visible styling. Likely cause: CSS variable theme tokens are defined but not mapped to the CSS framework's theme system (e.g., Tailwind CSS 4 requires @theme block, CSS Modules require explicit var() usage).`
+  3. **Common causes by framework**:
+     - Tailwind CSS 4: CSS variables defined without `@theme` block → utility classes (`bg-primary`) resolve to nothing
+     - Tailwind CSS 3: CSS variables defined but `tailwind.config.js` `theme.extend.colors` doesn't reference them
+     - CSS Modules: Variables defined in `:root` but not imported in component module files
+  4. This check catches the "elements exist but are invisible" failure mode — build passes, type-check passes, elements are in DOM, but they render with no visible styling.
 
 - **Result classification** (all warnings, NOT blocking):
   - SC Tier 1 (presence) failure: ⚠️ warning (false positive possible — selector changes, etc.)

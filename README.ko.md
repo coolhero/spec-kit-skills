@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:58 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:02 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -957,6 +957,8 @@ specs/
 | `domains/concerns/protocol-integration.md` | Protocol integration concern — LSP/MCP/커스텀 프로토콜 감지 및 라이프사이클 분석 |
 | `domains/concerns/plugin-system.md` | Plugin system concern — 플러그인 아키텍처, 격리, 라이프사이클 감지 |
 | `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL 권한 모델 감지 |
+| `domains/concerns/message-queue.md` | Message queue concern — 브로커 라이브러리 감지 (RabbitMQ, Kafka, BullMQ, Sidekiq, Celery), 설정 및 코드 패턴 시그널 |
+| `domains/concerns/task-worker.md` | Task worker concern — 백그라운드 잡 라이브러리 감지 (Celery, Sidekiq, BullMQ, Oban, Hangfire), 스케줄링 패턴 시그널 |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant 아키타입 — A0 신호 키워드 (LLM SDK, 스트리밍), A1 철학 추출 (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API 아키타입 — A0 신호 키워드 (OpenAPI, 속도 제한), A1 철학 추출 (Contract Stability, Rate Limit Transparency) |
@@ -968,13 +970,22 @@ specs/
 | `domains/foundations/express.md` | Express.js Foundation — 43개 항목, 12개 카테고리 |
 | `domains/foundations/nextjs.md` | Next.js Foundation — 44개 항목, 13개 카테고리 |
 | `domains/foundations/vite-react.md` | Vite + React Foundation — 43개 항목, 12개 카테고리 |
-| `domains/foundations/nestjs.md` | NestJS Foundation — TODO 스캐폴드 (51개 항목, 13개 카테고리) |
-| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO 스캐폴드 (41개 항목, 12개 카테고리) |
+| `domains/foundations/nestjs.md` | NestJS Foundation — F0 감지, 13개 카테고리, F7 Modular Architecture/Decorator-Driven 철학, F8 nest build/jest 툴체인 |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — F0 감지, 12개 카테고리, F7 Type-Driven/Async-First 철학, F8 pytest/ruff 툴체인 |
 | `domains/foundations/react-native.md` | React Native Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
 | `domains/foundations/flutter.md` | Flutter Foundation — TODO 스캐폴드 (50개 항목, 14개 카테고리) |
 | `domains/foundations/bun.md` | Bun Foundation — 런타임/툴체인 결정, F7 철학, F8 툴체인 커맨드, F9 스캔 대상 |
 | `domains/foundations/solidjs.md` | Solid.js Foundation — 반응성 모델 결정, F7 파인 그레인 반응성 철학 |
 | `domains/foundations/hono.md` | Hono Foundation — 웹 프레임워크 결정, F7 철학, F8 툴체인, F9 스캔 대상 |
+| `domains/foundations/spring-boot.md` | Spring Boot Foundation — F0 감지, 13개 카테고리 (35+ 항목), F7 Convention over Configuration 철학, F8 Maven/Gradle 툴체인 |
+| `domains/foundations/django.md` | Django Foundation — F0 감지, 12개 카테고리, F7 Batteries Included 철학, F8 pytest/collectstatic 툴체인 |
+| `domains/foundations/rails.md` | Rails Foundation — F0 감지, 13개 카테고리, F7 Convention over Configuration/Rails Doctrine 철학, F8 rspec/rubocop 툴체인 |
+| `domains/foundations/flask.md` | Flask Foundation — F0 감지, 12개 카테고리, F7 Micro-Framework/Extension Ecosystem 철학, F8 pytest 툴체인 |
+| `domains/foundations/actix-web.md` | Actix Web Foundation — F0 감지, 12개 카테고리, F7 Type-Safe Extractors/Zero-Cost Abstractions 철학, F8 cargo 툴체인 |
+| `domains/foundations/go-chi.md` | Go Chi/Gin Foundation — F0 감지, 12개 카테고리, F7 Simplicity/Explicit Error Handling 철학, F8 go build/golangci-lint 툴체인 |
+| `domains/foundations/dotnet.md` | ASP.NET Core Foundation — F0 감지, 13개 카테고리, F7 DI First/Middleware Pipeline 철학, F8 dotnet build/test 툴체인 |
+| `domains/foundations/laravel.md` | Laravel Foundation — F0 감지, 13개 카테고리, F7 Elegant Syntax/Service Container 철학, F8 artisan/phpstan 툴체인 |
+| `domains/foundations/phoenix.md` | Phoenix Foundation — F0 감지, 12개 카테고리, F7 Let It Crash/Functional Core 철학, F8 mix compile/credo 툴체인 |
 | `reference/speckit-compatibility.md` | reverse-spec 출력물을 spec-kit 커맨드에 매핑하는 호환성 가이드 |
 | **Templates** | |
 | `templates/roadmap-template.md` | 프로젝트 로드맵 아티펙트 템플릿 |
@@ -1023,6 +1034,8 @@ specs/
 | `domains/concerns/protocol-integration.md` | Protocol integration — LSP/MCP/커스텀 프로토콜 SC 생성, 기능 협상 검증 |
 | `domains/concerns/plugin-system.md` | Plugin system — 플러그인 라이프사이클 SC 생성, 격리 보증, API 계약 검증 |
 | `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC 생성, 권한 경계 검증 |
+| `domains/concerns/message-queue.md` | Message queue — 발행/소비 라이프사이클 SC, 데드레터 처리, 멱등성, 버그 방지 (MQ-001–005) |
+| `domains/concerns/task-worker.md` | Task worker — 디스패치/실행 라이프사이클 SC, 실패 처리, 스케줄링, 버그 방지 (TW-001–005) |
 | `domains/archetypes/ai-assistant.md` | AI assistant 아키타입 — A0–A4: 신호 키워드, 철학 (Streaming-First, Model Agnosticism), SC 확장, 프로브, constitution 주입 |
 | `domains/archetypes/public-api.md` | Public API 아키타입 — A0–A4: 신호 키워드, 철학 (Contract Stability, Rate Limit Transparency), SC 확장, 프로브, constitution 주입 |
 | `domains/archetypes/microservice.md` | Microservice 아키타입 — A0–A4: 신호 키워드, 철학 (Service Autonomy, Failure Isolation), SC 확장, 프로브, constitution 주입 |

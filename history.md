@@ -5,6 +5,70 @@
 
 ---
 
+## [2026-03-16] SKF-035~036: Demo --ci ≠ UI Verification + CSS Theme Token Rendering
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Demo --ci ≠ UI Verification (Gate rule 5) | `verify-phases.md` | SKF-035: Demo `--ci`만으로 GUI Feature verify를 완료하는 것을 명시적으로 금지. Steps 3/3d Playwright SC 검증이 필수이며, 누락 시 Review에 표시 |
+| CSS Theme Token Rendering Check | `verify-phases.md` Step 3 | SKF-036: SC Tier 1 존재 확인 시 최소 1개 interactive 요소의 getComputedStyle() 검증. transparent/invisible 감지 시 테마 토큰 매핑 누락 경고 |
+| CSS Theme Token mapping check | `injection/implement.md` Build Toolchain | SKF-036: CSS 변수 기반 디자인 토큰 사용 시 CSS 프레임워크 테마 시스템 매핑 확인 (Tailwind 4 @theme, Tailwind 3 config, UnoCSS config) |
+| gui.md S7 cross-reference | `gui.md` | CSS Theme Token Rendering 규칙을 S7 Bug Prevention에 교차 참조 추가 |
+
+---
+
+## [2026-03-16] Multi-Language Backend Expansion — Phase D Completion + Full Verification
+
+Completed remaining Phase D: FastAPI and NestJS Foundation files upgraded from TODO scaffold to full compact format (F0-F9). Updated ARCHITECTURE-EXTENSIBILITY.md with Foundation coverage table, Foundation format variants documentation, and expanded Cross-Reference Map. Full 87-point verification confirmed 100% pass rate across all files.
+
+| Change | Category | Details |
+|--------|----------|---------|
+| FastAPI Foundation implemented | Foundation | Upgraded from TODO scaffold to compact format: F0-F9 complete, FA-* IDs, Pydantic/async-first philosophy |
+| NestJS Foundation implemented | Foundation | Upgraded from TODO scaffold to compact format: F0-F9 complete, NJ-* IDs, modular/decorator-driven philosophy |
+| Foundation Coverage table | ARCHITECTURE-EXTENSIBILITY.md | Language-by-language coverage matrix (14 languages, 21 frameworks) |
+| Foundation Format Variants | ARCHITECTURE-EXTENSIBILITY.md | Documented Full vs Compact format decision with usage criteria |
+| Cross-Reference Map expansion | ARCHITECTURE-EXTENSIBILITY.md | Added S3b, message-queue, task-worker, foundation file groups |
+| README file table updates | README.md + README.ko.md | 13 new files added, nestjs/fastapi descriptions updated from "TODO scaffold" |
+| _foundation-core.md F6 update | Foundation protocol | nestjs + fastapi status changed from "TODO scaffold" to "Implemented" |
+
+---
+
+## [2026-03-16] Multi-Language Backend Expansion — Architecture Stress Test
+
+Stress-tested spec-kit-skills against 13+ real-world open source projects across 10 languages (TypeScript, Python, Java, Kotlin, Go, Rust, Ruby, PHP, Elixir, C#). Identified and resolved gaps in Foundation coverage, Concern modules, and toolchain detection.
+
+| Change | Category | Details |
+|--------|----------|---------|
+| 9 new Foundation files | Foundation | spring-boot, django, rails, flask, actix-web, go-chi, dotnet, laravel, phoenix |
+| 2 new Concern modules | Concern | `message-queue` (R1+S0/S1/S5/S7), `task-worker` (R1+S0/S1/S5/S7) |
+| S3b Lint Detection expansion | _core.md | Added Java, Kotlin, Ruby, PHP, Elixir, C#/.NET toolchains (7 new languages) |
+| R3-2 Data Model targets | reverse-spec _core.md | Added Ecto, EF Core, Eloquent, ActiveRecord, Diesel/SQLx/SeaORM, Go ORMs |
+| R3-5 Env Var patterns | reverse-spec _core.md | Added Elixir, PHP, C#, Kotlin, Rust detection patterns |
+| R1 Detection Signals expanded | reverse-spec _core.md | Added mix.exs, *.csproj, build.gradle.kts, 9 new framework imports |
+| _foundation-core.md registry | Foundation protocol | F0 (10 new detection rows), F4 (9 new codes), F6 (9 new file entries) |
+| B-3 Conditional Rules | smart-sdd _core.md | Added MQ-001/003, TW-002/004 to conditional rules table |
+| Case-study Stack Profile | case-study generate.md | Optional subsection for non-JS/TS projects in Section 2 |
+| Case-study challenge categories | case-study generate.md | Language/Framework/Ecosystem/Domain/Foundation gap categorization hint |
+| ARCHITECTURE-EXTENSIBILITY.md | Documentation | Added message-queue, task-worker to concern table; native-app Out of Scope section |
+
+**Projects analyzed**: OpenClaw (TS), Superset (Flask), mall (Spring Boot), conductor (Spring Boot), Gitea (Go/Chi), Mattermost (Go), Harbor (Go/Beego), Qdrant (Rust/Actix), Lemmy (Rust/Actix), Meilisearch (Rust/Actix), Mastodon (Ruby/Rails), Bagisto (PHP/Laravel), Plausible (Elixir/Phoenix), Sentry (Python/Django), Polar (Python/FastAPI), Vendure (TS/NestJS), eShop (C#/.NET), Komga (Kotlin/Spring Boot)
+
+**Design decision**: Native app interface (SwiftUI/Jetpack Compose) explicitly deferred — documented in ARCHITECTURE-EXTENSIBILITY.md as "Out of Scope (Future Extension)".
+
+---
+
+## [2026-03-16] Full File Review — Dead Schema Fix + Structure Consumption + Checklist Repair
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| F8 Foundation Override in Toolchain Pre-flight | `pipeline.md`, `verify-phases.md` | F8 Toolchain Commands는 정의만 되고 소비처가 없었음 (dead schema). Foundation Gate와 verify Phase 1이 F8을 읽어 auto-detection 대신 사용하도록 연결 |
+| F9 Scan Target Loading in Phase 2 | `analyze.md` | F9 Scan Targets도 dead schema. Phase 2 서두에 F9 로딩 지시 추가, `_core.md` universal targets와 MERGE하도록 연결 |
+| Structure-aware build/test | `pipeline.md`, `verify-phases.md` | `**Structure**: monorepo` 필드가 정의·자동감지되지만 미사용. Foundation Gate build와 verify Phase 1 test/build에 workspace-aware 명령 분기 추가 |
+| Step 3f checklist 추가 | `verify-phases.md` | Step 3f (User-Assisted SC Completion Gate) 구현은 있으나 Phase 3 checklist에서 누락. 3e와 3f2 사이에 Step 3f 항목 추가 |
+| Cross-Reference Map 확장 | `ARCHITECTURE-EXTENSIBILITY.md` | F8, F9, Structure 항목을 Cross-Reference Map에 추가. 새 concern/interface 모듈 목록 추가 |
+| Lessons Learned L23~L28 | `lessons-learned.md` | SKF-028~034 패턴을 universal lessons로 추가 (verification completeness, dead schema, checklist divergence 등) |
+
+---
+
 ## [2026-03-16] User-Assisted Manual Verification Gate (Step 3f2)
 
 | Change | File | Rationale |

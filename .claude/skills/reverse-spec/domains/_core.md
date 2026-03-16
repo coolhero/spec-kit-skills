@@ -6,9 +6,9 @@
 
 ## R1. Detection Signals
 
-- Configuration files: `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `pom.xml`, `build.gradle`, `Gemfile`, `composer.json`
-- Directory patterns: `routes/`, `controllers/`, `views/`, `models/`, `src/`, `app/`, `lib/`
-- HTTP framework imports: Express, Fastify, Django, FastAPI, Spring, Rails, Next.js, Nuxt
+- Configuration files: `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `pom.xml`, `build.gradle`, `build.gradle.kts`, `Gemfile`, `composer.json`, `mix.exs`, `pubspec.yaml`, `*.csproj`, `*.sln`
+- Directory patterns: `routes/`, `controllers/`, `views/`, `models/`, `src/`, `app/`, `lib/`, `cmd/`, `internal/`, `pkg/`
+- HTTP framework imports: Express, Fastify, Django, FastAPI, Flask, Spring Boot, Rails, Next.js, Nuxt, Actix-web, Gin, Chi, ASP.NET Core, Laravel, Phoenix, NestJS, Hono
 
 ---
 
@@ -32,7 +32,7 @@ Read configuration files to identify the tech stack:
 
 | Detection Target | Files to Search |
 |------------------|-----------------|
-| Language/Version | `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `build.gradle`, `pom.xml`, `Gemfile`, `composer.json`, `.python-version`, `.nvmrc`, `.tool-versions` |
+| Language/Version | `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `build.gradle`, `build.gradle.kts`, `pom.xml`, `Gemfile`, `composer.json`, `mix.exs`, `*.csproj`, `.python-version`, `.nvmrc`, `.tool-versions`, `.ruby-version`, `.java-version` |
 | Framework | Identify frameworks from dependency lists (React, Next.js, Django, FastAPI, Spring, Express, Rails, etc.) |
 | DB/Storage | ORM configuration, migration files, connection settings |
 | Testing | Test framework configuration, test directory structure |
@@ -50,8 +50,12 @@ Extract entities from appropriate sources depending on the tech stack:
 | Sequelize | Model definitions, migrations |
 | JPA/Hibernate | `@Entity` classes |
 | Mongoose | Schema definitions |
-| Go | struct definitions + DB tags |
-| Rails | `app/models/`, migrations |
+| Go (GORM/ent/sqlc) | GORM model structs + `gorm:"..."` tags, ent schemas, sqlc query files |
+| Rails (ActiveRecord) | `app/models/*.rb` extending `ApplicationRecord`, `db/migrate/` |
+| Ecto (Elixir/Phoenix) | `schema` macro in `lib/*/schemas/`, Ecto migrations in `priv/repo/migrations/` |
+| Entity Framework (.NET) | `DbSet<T>` in DbContext, EF Core migrations, Fluent API configurations |
+| Eloquent (Laravel) | `app/Models/*.php` extending `Model`, `database/migrations/` |
+| Diesel/SQLx/SeaORM (Rust) | `table!` macros (Diesel), `#[derive(FromRow)]` (SQLx), entity derives (SeaORM) |
 
 Information to extract from each entity:
 - Entity name, fields (name, type, constraints)
@@ -91,6 +95,11 @@ Scan the codebase for environment variable usage to identify runtime configurati
 | Go | `os.Getenv()` |
 | Java/Spring | `@Value("${...}")`, `application.properties`, `application.yml` env references |
 | Ruby/Rails | `ENV["..."]`, `ENV.fetch(...)`, `credentials.yml.enc` |
+| Elixir/Phoenix | `System.get_env()`, `runtime.exs` env reads, `config/prod.exs` env references |
+| PHP/Laravel | `env()` helper, `.env` file, `config/*.php` files referencing `env()` |
+| C#/.NET | `Configuration["Key"]`, `IOptions<T>` binding, `appsettings.json`, `appsettings.{Environment}.json` |
+| Kotlin/Spring | `@Value("${...}")`, `application.yml`/`application.properties` env references |
+| Rust | `std::env::var()`, `dotenvy::dotenv()`, `config` crate |
 | Generic | `dotenv` config files, Docker Compose `environment:` sections |
 
 For each discovered environment variable, extract:

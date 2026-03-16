@@ -824,6 +824,13 @@ Many frameworks require **build-time plugin registration** to function. Code com
    - i18n: extraction config includes new source directories
    - Codegen: schema/spec files are included in generation input
 3. **Build output sanity check**: After build, compare relevant output (CSS file size, generated type count, asset manifest entries) before and after changes. If output is unchanged or decreased after adding new framework-dependent code → likely misconfigured
+4. **CSS Theme Token mapping check** (when adding components that use CSS variable-based design tokens):
+   - Verify that CSS variables (e.g., `--primary`, `--background`) are not only defined in `:root`/`@layer base` but also **mapped to the CSS framework's theme system**:
+     - Tailwind CSS 4: `@theme` block must exist with token mappings (`--color-primary: var(--primary)` or `--color-primary: hsl(...)`)
+     - Tailwind CSS 3: `tailwind.config.js` → `theme.extend.colors` must reference the CSS variables
+     - UnoCSS: `uno.config.ts` → `theme.colors` must reference the CSS variables
+   - Without this mapping, utility classes (`bg-primary`, `text-muted-foreground`) compile to empty values — the build succeeds but elements render with no visible styling
+   - **When to check**: Any time a component library (shadcn/ui, Radix Themes, DaisyUI, Flowbite) is first added or components are added that use design token utility classes
 
 > **Why this pattern is dangerous**: Build-time transformation frameworks (CSS utility generators, i18n extractors, code generators) produce output only when their plugin is correctly registered AND their input scope covers the source files. Without the plugin, the build succeeds (the framework's references are just strings/imports that don't cause errors), but the runtime output is incomplete. This silent failure is invisible to build, type-check, and basic smoke gates.
 

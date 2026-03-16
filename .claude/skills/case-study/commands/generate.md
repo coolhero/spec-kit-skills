@@ -240,6 +240,16 @@ Auto-generated from aggregated metrics + qualitative context:
 ### Why This Project
 {From M1 observations + roadmap.md — what the project is and why SDD was applied}
 
+### Stack Profile (optional — include when primary language is NOT JavaScript/TypeScript)
+| Dimension | Value |
+|-----------|-------|
+| Primary Language | {detected from tech stack: Java, Python, Go, Rust, Ruby, PHP, Elixir, C#, Kotlin, etc.} |
+| Framework | {detected framework: Spring Boot, Django, Rails, Flask, Actix-web, Chi, ASP.NET Core, Laravel, Phoenix, etc.} |
+| Build System | {Maven, Gradle, Mix, Cargo, Go modules, Composer, Bundler, dotnet, etc.} |
+| Foundation File | {Foundation file used, or "Generic (Case B)" if no Foundation file exists} |
+
+> This subsection provides ecosystem context for case studies involving non-JS/TS backends. It helps readers understand framework-specific decisions and toolchain choices. Omit for JS/TS projects where the default context is already well-understood.
+
 ### Project Context (rebuild/adoption only)
 | | Details |
 |---|---------|
@@ -372,6 +382,16 @@ This mapping shows how architecture philosophy translated into concrete implemen
 - From history.md: per-Feature Implementation Decisions that resolved challenges (spec deviations, architecture trade-offs, limited verification decisions with rationale)
 - From history.md: restructure/parity decisions that addressed structural issues
 - If no qualitative data: show only structural issues (failed/limited steps, restructures)
+
+**Challenge categorization hint** (for multi-language or non-JS/TS projects):
+When reporting challenges, categorize by source where possible:
+- **Language/Runtime**: Challenges specific to the programming language or runtime (e.g., Rust borrow checker, Go error handling verbosity, Elixir hot code reloading, JVM startup time)
+- **Framework Convention**: Challenges from framework-specific patterns (e.g., Rails convention compliance, Spring auto-configuration conflicts, Django migration ordering)
+- **Ecosystem Tooling**: Challenges from build/test/lint tooling (e.g., Gradle configuration complexity, Mix/Hex ecosystem gaps, Cargo compile times)
+- **Domain Complexity**: Challenges from business logic regardless of tech stack (e.g., workflow state machines, payment processing edge cases)
+- **Foundation Gap**: Challenges from missing or incomplete Foundation files (when Generic Foundation Case B was used)
+
+> This categorization is a guideline, not a required format. Apply when the project's challenges have a meaningful relationship to its tech stack.
 
 ### Section 8 — Outcomes & Lessons Learned
 

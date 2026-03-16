@@ -78,6 +78,7 @@ When this interface is active, enforce:
 - Platform CSS Rendering Constraints: see `injection/implement.md` § Bug Prevention B-3
 - UI Interaction Surface Audit: see `injection/implement.md` § Bug Prevention B-3
 - CSS Value Map Generation (rebuild mode): see `injection/implement.md` § CSS Value Map
+- CSS Theme Token Rendering: see `injection/implement.md` § Build Toolchain Integration Verification (step 4) — when adding components that use CSS variable tokens, verify theme mapping exists (e.g., `@theme` for Tailwind CSS 4). See also `verify-phases.md` § Step 3 CSS Theme Token Rendering Check for runtime verification
 
 ---
 

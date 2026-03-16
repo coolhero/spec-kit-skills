@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 10:58 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 14:02 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -960,6 +960,8 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/protocol-integration.md` | Protocol integration concern — LSP/MCP/custom protocol detection and lifecycle analysis |
 | `domains/concerns/plugin-system.md` | Plugin system concern — plugin architecture, isolation, lifecycle detection |
 | `domains/concerns/authorization.md` | Authorization concern — RBAC/ABAC/ACL permission model detection |
+| `domains/concerns/message-queue.md` | Message queue concern — broker library detection (RabbitMQ, Kafka, BullMQ, Sidekiq, Celery), config and code pattern signals |
+| `domains/concerns/task-worker.md` | Task worker concern — background job library detection (Celery, Sidekiq, BullMQ, Oban, Hangfire), scheduling pattern signals |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0 signal keywords (LLM SDKs, streaming), A1 philosophy extraction (Streaming-First, Model Agnosticism, Token Awareness) |
 | `domains/archetypes/public-api.md` | Public API archetype — A0 signal keywords (OpenAPI, rate limiting), A1 philosophy extraction (Contract Stability, Rate Limit Transparency) |
@@ -971,13 +973,22 @@ Complete list of all files in this repository grouped by skill.
 | `domains/foundations/express.md` | Express.js Foundation — 43 items, 12 categories |
 | `domains/foundations/nextjs.md` | Next.js Foundation — 44 items, 13 categories |
 | `domains/foundations/vite-react.md` | Vite + React Foundation — 43 items, 12 categories |
-| `domains/foundations/nestjs.md` | NestJS Foundation — TODO scaffold (51 items, 13 categories) |
-| `domains/foundations/fastapi.md` | FastAPI Foundation — TODO scaffold (41 items, 12 categories) |
+| `domains/foundations/nestjs.md` | NestJS Foundation — F0 detection, 13 categories, F7 Modular Architecture/Decorator-Driven philosophy, F8 nest build/jest toolchain |
+| `domains/foundations/fastapi.md` | FastAPI Foundation — F0 detection, 12 categories, F7 Type-Driven/Async-First philosophy, F8 pytest/ruff toolchain |
 | `domains/foundations/react-native.md` | React Native Foundation — TODO scaffold (50 items, 14 categories) |
 | `domains/foundations/flutter.md` | Flutter Foundation — TODO scaffold (50 items, 14 categories) |
 | `domains/foundations/bun.md` | Bun Foundation — runtime/toolchain decisions, F7 philosophy, F8 toolchain commands, F9 scan targets |
 | `domains/foundations/solidjs.md` | Solid.js Foundation — reactivity model decisions, F7 fine-grained reactivity philosophy |
 | `domains/foundations/hono.md` | Hono Foundation — web framework decisions, F7 philosophy, F8 toolchain, F9 scan targets |
+| `domains/foundations/spring-boot.md` | Spring Boot Foundation — F0 detection, 13 categories (35+ items), F7 Convention over Configuration philosophy, F8 Maven/Gradle toolchain |
+| `domains/foundations/django.md` | Django Foundation — F0 detection, 12 categories, F7 Batteries Included philosophy, F8 pytest/collectstatic toolchain |
+| `domains/foundations/rails.md` | Rails Foundation — F0 detection, 13 categories, F7 Convention over Configuration/Rails Doctrine philosophy, F8 rspec/rubocop toolchain |
+| `domains/foundations/flask.md` | Flask Foundation — F0 detection, 12 categories, F7 Micro-Framework/Extension Ecosystem philosophy, F8 pytest toolchain |
+| `domains/foundations/actix-web.md` | Actix Web Foundation — F0 detection, 12 categories, F7 Type-Safe Extractors/Zero-Cost Abstractions philosophy, F8 cargo toolchain |
+| `domains/foundations/go-chi.md` | Go Chi/Gin Foundation — F0 detection, 12 categories, F7 Simplicity/Explicit Error Handling philosophy, F8 go build/golangci-lint toolchain |
+| `domains/foundations/dotnet.md` | ASP.NET Core Foundation — F0 detection, 13 categories, F7 DI First/Middleware Pipeline philosophy, F8 dotnet build/test toolchain |
+| `domains/foundations/laravel.md` | Laravel Foundation — F0 detection, 13 categories, F7 Elegant Syntax/Service Container philosophy, F8 artisan/phpstan toolchain |
+| `domains/foundations/phoenix.md` | Phoenix Foundation — F0 detection, 12 categories, F7 Let It Crash/Functional Core philosophy, F8 mix compile/credo toolchain |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -1026,6 +1037,8 @@ Complete list of all files in this repository grouped by skill.
 | `domains/concerns/protocol-integration.md` | Protocol integration — LSP/MCP/custom protocol SC generation, capability negotiation verification |
 | `domains/concerns/plugin-system.md` | Plugin system — plugin lifecycle SC generation, isolation guarantees, API contract verification |
 | `domains/concerns/authorization.md` | Authorization — RBAC/ABAC/ACL SC generation, permission boundary verification |
+| `domains/concerns/message-queue.md` | Message queue — publish/consume lifecycle SC, dead letter handling, idempotency, bug prevention (MQ-001–005) |
+| `domains/concerns/task-worker.md` | Task worker — dispatch/execution lifecycle SC, failure handling, scheduling, bug prevention (TW-001–005) |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0–A4: signal keywords, philosophy (Streaming-First, Model Agnosticism), SC extensions, probes, constitution injection |
 | `domains/archetypes/public-api.md` | Public API archetype — A0–A4: signal keywords, philosophy (Contract Stability, Rate Limit Transparency), SC extensions, probes, constitution injection |
 | `domains/archetypes/microservice.md` | Microservice archetype — A0–A4: signal keywords, philosophy (Service Autonomy, Failure Isolation), SC extensions, probes, constitution injection |

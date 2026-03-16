@@ -111,7 +111,7 @@ Interfaces define the app's external surface — the protocol through which user
 
 ### When to Add
 
-Add a new interface when a project has a distinct interaction surface not covered by existing interfaces (gui, http-api, cli, data-io).
+Add a new interface when a project has a distinct interaction surface not covered by existing interfaces (gui, http-api, cli, data-io, tui).
 
 ### Steps
 
@@ -164,12 +164,32 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 
 3. **Update profiles**: If the concern should be default for a profile, update the profile manifest.
 
+### Existing Concern Modules
+
+| Concern | Description | Key Patterns |
+|---------|-------------|-------------|
+| `auth` | Authentication flows, session management | Token lifecycle, OAuth, RBAC |
+| `async-state` | Async data fetching, loading/error states | Race conditions, stale-while-revalidate |
+| `ipc` | Inter-process communication (desktop apps) | Channel design, preload bridge, message serialization |
+| `i18n` | Internationalization | Key coverage, locale fallback, RTL support |
+| `realtime` | WebSocket, SSE, live data | Connection lifecycle, reconnection, state sync |
+| `external-sdk` | Third-party SDK integration | SDK contract validation, version management |
+| `protocol-integration` | LSP/MCP/custom protocol implementations | Message lifecycle, capability negotiation, transport abstraction |
+| `plugin-system` | Plugin architecture patterns | Plugin lifecycle, isolation, API surface, versioning |
+| `authorization` | RBAC/ABAC/ACL access control | Permission models, role hierarchy, policy enforcement |
+| `message-queue` | Message broker / event bus patterns | Publish/consume lifecycle, DLQ, delivery guarantees, idempotency |
+| `task-worker` | Background job / scheduled task patterns | Task dispatch, retry, timeout, periodic scheduling, worker lifecycle |
+
 ### Examples of Potential New Concerns
 
 - `caching` — Redis, in-memory cache, CDN cache invalidation patterns
 - `file-storage` — S3, local filesystem, upload handling, CDN integration
 - `notifications` — Push notifications, email, SMS, in-app notifications
 - `search` — Elasticsearch, Algolia, full-text search patterns
+
+### Out of Scope (Future Extension)
+
+- **`native-app` interface** — Pure native mobile/desktop apps (SwiftUI, Jetpack Compose, WinUI). The existing `gui` interface + `react-native`/`flutter` foundations cover cross-platform native, but pure native (Swift/Kotlin/C++ without JS bridge) requires a dedicated interface module for build systems (Xcode/Gradle), native UI testing (XCTest/Espresso), and platform-specific SC generation. The 4-axis composition model supports this extension without structural changes — only new module files are needed.
 
 ---
 
@@ -246,9 +266,43 @@ F8 lets a Foundation file declare the exact build/test/lint commands for its eco
 
 F9 lets a Foundation file declare framework-specific scan targets for reverse-spec Phase 2 analysis (data model extraction, API endpoint extraction, component patterns). These targets are MERGED with the universal scan targets in `_core.md` — no need to modify `_core.md` when adding a new framework. If F9 is absent, only universal targets apply. See `_foundation-core.md` § F9 for the format.
 
+### Foundation Format Variants
+
+Foundation files exist in two formats depending on framework maturity and item density:
+
+| Format | When to Use | Sections | Example Files |
+|--------|------------|----------|---------------|
+| **Full** | Frameworks with 40+ decision items | F0, F1 (item counts), F2 (per-category item tables), F3, F4, F7, F8, F9 | `electron.md`, `express.md`, `nextjs.md` |
+| **Compact** | Well-known frameworks where the agent has strong built-in knowledge | F0, F1, F2 (key items only), F7, F8, F9 | `hono.md`, `spring-boot.md`, `django.md`, `fastapi.md`, `nestjs.md` |
+
+The compact format works because Foundation files guide **structured extraction** rather than teach the framework — the agent already has deep framework knowledge. Compact files typically run ~80-120 lines vs ~200+ for full files.
+
 ### TODO Scaffold Pattern
 
-For frameworks not yet fully documented, use a TODO scaffold (only F0 and F1 filled, rest marked TODO). This is intentional — see CLAUDE.md § Do NOT Modify #2. Examples: `nestjs.md`, `fastapi.md`.
+For frameworks not yet fully documented, use a TODO scaffold (only F0 and F1 filled, rest marked TODO). This is intentional — see CLAUDE.md § Do NOT Modify #2. Examples: `react-native.md`, `flutter.md`.
+
+### Foundation Coverage by Language
+
+Current Foundation coverage across languages and frameworks:
+
+| Language | Frameworks Covered | Foundation File | Format |
+|----------|-------------------|-----------------|--------|
+| **JavaScript/TypeScript** | Express, NestJS, Next.js, Hono | `express.md`, `nestjs.md`, `nextjs.md`, `hono.md` | Full / Compact |
+| **Python** | FastAPI, Django, Flask | `fastapi.md`, `django.md`, `flask.md` | Compact |
+| **Java/Kotlin** | Spring Boot | `spring-boot.md` | Compact |
+| **Go** | Chi, Gin | `go-chi.md` | Compact |
+| **Rust** | Actix-web | `actix-web.md` | Compact |
+| **Ruby** | Rails | `rails.md` | Compact |
+| **PHP** | Laravel | `laravel.md` | Compact |
+| **Elixir** | Phoenix | `phoenix.md` | Compact |
+| **C#** | ASP.NET Core | `dotnet.md` | Compact |
+| **Dart** | Flutter | `flutter.md` | TODO scaffold |
+| **JS (Mobile)** | React Native | `react-native.md` | TODO scaffold |
+| **JS (Desktop)** | Electron, Tauri | `electron.md`, `tauri.md` | Full |
+| **JS (Frontend)** | Vite+React, Solid.js | `vite-react.md`, `solidjs.md` | Full / Compact |
+| **JS (Runtime)** | Bun | `bun.md` | Compact |
+
+When a project uses a framework not listed above, the **Generic Foundation Protocol** (Case B in `_foundation-core.md`) applies — universal categories are used with agent-supplemented probes.
 
 ### F7 Philosophy Guidelines
 
@@ -325,7 +379,7 @@ Modules evolve through 5 levels of sophistication. This model helps prioritize i
 - Fill S0/S1/S5/S8 for all smart-sdd interface modules
 - Fill S0/S1/S5/S7 for all smart-sdd concern modules
 - Fill A0–A4 / A0–A1 for all archetype modules
-- Fill F0–F4 for all Foundation files (currently: nestjs, fastapi, react-native, flutter are TODO)
+- Fill F0–F4 for all Foundation files (currently: react-native, flutter are TODO)
 
 **Metric**: `(filled sections) / (total required sections)` across all modules.
 
@@ -385,7 +439,7 @@ A project with `web-api` profile + `express` Foundation. Currently:
 
 ### Level 1: Complete the Modules
 
-1. Fill `nestjs.md` and `fastapi.md` Foundation files (currently TODO scaffolds)
+1. Verify Foundation files for relevant frameworks are implemented (e.g., `nestjs.md`, `fastapi.md`, `spring-boot.md`)
 2. Add `public-api` archetype to the project's sdd-state.md
 3. Now the pipeline loads: `_core → http-api → auth → public-api → scenarios/greenfield`
 
@@ -431,10 +485,21 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Section schema (S0–S8)** | `smart-sdd/domains/_schema.md` § Section Schema |
 | **Section schema (R1–R6)** | `reverse-spec/domains/_schema.md` § Section Schema |
 | **Section schema (A0–A4)** | `smart-sdd/domains/_schema.md` § Archetype Section Schema, `reverse-spec/domains/_schema.md` § Archetype Section Schema |
-| **Foundation schema (F0–F7)** | `reverse-spec/domains/foundations/_foundation-core.md` |
+| **Foundation schema (F0–F9)** | `reverse-spec/domains/foundations/_foundation-core.md` |
+| **F8 Toolchain Commands** | `reverse-spec/domains/foundations/_foundation-core.md` § F8, `smart-sdd/commands/pipeline.md` § Foundation Gate Toolchain Pre-flight, `smart-sdd/commands/verify-phases.md` § Phase 1 |
+| **F9 Scan Targets** | `reverse-spec/domains/foundations/_foundation-core.md` § F9, `reverse-spec/commands/analyze.md` § Phase 2 F9 Scan Target Loading |
+| **Structure field** | `smart-sdd/reference/state-schema.md` § Structure, `smart-sdd/commands/pipeline.md` § Foundation Gate build, `smart-sdd/commands/verify-phases.md` § Phase 1 test/build |
 | **State file format** | `smart-sdd/reference/state-schema.md` |
 | **Signal keywords (S0/A0)** | `smart-sdd/reference/clarity-index.md` § 5, `smart-sdd/domains/_resolver.md` § S0/A0 Aggregation |
 | **Constitution flow** | `reverse-spec/commands/analyze.md` § Phase 4-1, `reverse-spec/templates/constitution-seed-template.md`, `smart-sdd/commands/pipeline.md` § Phase 0, `smart-sdd/reference/injection/constitution.md` |
 | **Profile resolution** | `smart-sdd/domains/_resolver.md` § Step 2, `smart-sdd/domains/profiles/*.md` |
 | **Archetype resolution** | `smart-sdd/domains/_resolver.md` § Step 2c, `smart-sdd/reference/state-schema.md` § Archetype field |
 | **Foundation resolution** | `smart-sdd/domains/_resolver.md` § Step 2b, `reverse-spec/domains/foundations/_foundation-core.md` § F2 |
+| **S3b Lint Detection** | `smart-sdd/domains/_core.md` § S3b (language-specific lint tool priority), `smart-sdd/commands/verify-phases.md` § Phase 1 |
+| **Message queue concern** | `reverse-spec/domains/concerns/message-queue.md` (R1 detection), `smart-sdd/domains/concerns/message-queue.md` (S0/S1/S5/S7), `smart-sdd/domains/_core.md` § B-3 (MQ-001, MQ-003) |
+| **Task worker concern** | `reverse-spec/domains/concerns/task-worker.md` (R1 detection), `smart-sdd/domains/concerns/task-worker.md` (S0/S1/S5/S7), `smart-sdd/domains/_core.md` § B-3 (TW-002, TW-004) |
+| **Foundation files (server)** | `reverse-spec/domains/foundations/{express,nestjs,fastapi,spring-boot,django,rails,flask,actix-web,go-chi,dotnet,laravel,phoenix,hono}.md` |
+| **Foundation files (desktop)** | `reverse-spec/domains/foundations/{electron,tauri}.md` |
+| **Foundation files (frontend)** | `reverse-spec/domains/foundations/{nextjs,vite-react,solidjs}.md` |
+| **Foundation files (runtime)** | `reverse-spec/domains/foundations/{bun}.md` |
+| **Foundation files (mobile)** | `reverse-spec/domains/foundations/{react-native,flutter}.md` (TODO scaffolds) |
