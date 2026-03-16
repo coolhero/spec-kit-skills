@@ -3360,3 +3360,19 @@ Simulated 3 greenfield projects through the init pipeline (Hono REST API, Electr
 | `shared/domains/concerns/async-state.md` | Added `conversation history`, `undo/redo`, `persistence`, `local storage state` to S0 Secondary |
 | `commands/init.md` | Added webhook principle row to Recommendation Table |
 | `domains/_resolver.md` | Replaced A0 Aggregation section with cross-reference to clarity-index.md § 5 |
+
+## [2026-03-16] Documentation Strengthening — shared/ Architecture + Proposal Modification
+
+| Decision | Rationale |
+|----------|-----------|
+| Add ARCHITECTURE-EXTENSIBILITY.md § 1.5 "Signal Keywords: Shared Architecture" | shared/ directory was created but never documented in the extensibility guide — contributors wouldn't know the 3-file pattern |
+| Update § 3/4/5 steps to shared-first 3-file pattern | Steps still said "create files in both skills" — outdated after shared/ refactoring |
+| Add Proposal Modification overview to README.md + README.ko.md | Proposal Mode modification (per-section editing, CI re-scoring) was implemented in init.md but never mentioned in user-facing docs |
+| Verify README.ko.md parity with README.md | Korean README was missing the same Proposal Modification mention — both now in sync |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `ARCHITECTURE-EXTENSIBILITY.md` | Added § 1.5 shared architecture section; updated § 3/4/5 contributor steps to 3-file pattern |
+| `README.md` | Added Proposal Modification sentence to CI/Proposal paragraph; updated timestamp |
+| `README.ko.md` | Added Proposal Modification sentence (Korean); updated timestamp |

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:46 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:56 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
@@ -244,7 +244,7 @@ Interface                    Concern                      Archetype             
 
 **자동 감지**: 각 모듈은 **S0 신호 키워드**(인터페이스/관심사) 또는 **A0 신호 키워드**(아키타입)를 선언합니다. 아이디어 문자열로 프로젝트를 시작하면 (`init "AI로 웹 페이지를 요약하는 Chrome 확장 프로그램"`), 에이전트가 모든 키워드를 스캔하여 프로필을 자동으로 추론합니다. "React"는 `gui`를, "REST API"는 `http-api`를, "OpenAI"는 `external-sdk` 관심사와 `ai-assistant` 아키타입을 동시에 트리거합니다 — 수동 설정 없이 자동으로.
 
-이 추론은 **Clarity Index (CI)**로 채점됩니다 — 7개 차원(목적, 기능, 유형, 스택, 사용자, 규모, 제약조건)에 걸쳐 아이디어의 구체성을 측정하는 백분율입니다. 높은 CI(70%+)는 명확화를 건너뛰고 Proposal을 바로 생성하고, 낮은 CI는 활성 모듈의 S5 정교화 프로브를 사용하여 타겟 질문을 합니다. CI는 파이프라인으로 전파됩니다 — 초기 CI가 낮을수록 specify와 plan에서 더 많은 검증 체크포인트가 적용되어, 모호한 아이디어가 불완전한 스펙을 생성하지 않도록 합니다. 전체 모델은 `reference/clarity-index.md` 참고.
+이 추론은 **Clarity Index (CI)**로 채점됩니다 — 7개 차원(목적, 기능, 유형, 스택, 사용자, 규모, 제약조건)에 걸쳐 아이디어의 구체성을 측정하는 백분율입니다. 높은 CI(70%+)는 명확화를 건너뛰고 Proposal을 바로 생성하고, 낮은 CI는 활성 모듈의 S5 정교화 프로브를 사용하여 타겟 질문을 합니다. 생성된 Proposal은 승인 전에 섹션별 수정이 가능합니다 — 목적 관련 질문을 다시 받지 않고 기술 스택만 변경하거나, 아키텍처에 영향 없이 Feature만 조정할 수 있습니다. CI는 파이프라인으로 전파됩니다 — 초기 CI가 낮을수록 specify와 plan에서 더 많은 검증 체크포인트가 적용되어, 모호한 아이디어가 불완전한 스펙을 생성하지 않도록 합니다. 전체 모델은 `reference/clarity-index.md` 참고.
 
 **합성이 파이프라인을 어떻게 구동하는가**: 모듈은 출력 파일을 생성하지 않습니다 — 에이전트의 워킹 메모리에 행동 규칙셋으로 병합됩니다. 각 섹션은 특정 파이프라인 단계로 라우팅됩니다: `S1`은 `specify`(SC 생성)를, `S5`는 `clarify`(상담 프로브)를, `S7`은 `plan`/`implement`/`verify`(버그 방지)를, `S3`는 `verify`(검증 게이트)를, `A1`/`A4`/`F7`은 `constitution`(도메인 원칙)을 형성합니다. 구체적인 before/after 예시가 포함된 전체 워크스루는 [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline) 참고.
 

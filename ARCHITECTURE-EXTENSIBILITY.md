@@ -8,6 +8,7 @@
 ## Table of Contents
 
 1. [Module System Overview](#1-module-system-overview)
+   - [Signal Keywords: Shared Architecture](#signal-keywords-shared-architecture)
 2. [4-Axis Domain Composition](#2-4-axis-domain-composition)
 2b. [How Composed Modules Drive the Pipeline](#2b-how-composed-modules-drive-the-pipeline)
 3. [Adding a New Interface](#3-adding-a-new-interface)
@@ -51,6 +52,37 @@ Modules are loaded at skill invocation based on the project's `sdd-state.md` con
 ```
 
 Later modules extend earlier ones. Merge rules vary by section — see `_schema.md` in each skill for details.
+
+### Signal Keywords: Shared Architecture
+
+Signal keywords (S0/A0 for init inference, R1/A0 for source analysis) are **shared across skills** — they live in a single location rather than being duplicated in each skill's domain modules.
+
+```
+.claude/skills/shared/domains/          ← Cross-skill shared resources (NOT a skill)
+├── _taxonomy.md                        ← Module registry (single source of truth)
+├── _TEMPLATE.md                        ← Contributor template for new modules
+├── interfaces/{name}.md                ← S0 (semantic) + R1 (code patterns) per interface
+├── concerns/{name}.md                  ← S0 (semantic) + R1 (code patterns) per concern
+└── archetypes/{name}.md                ← A0 (semantic + code patterns) per archetype
+```
+
+Each shared module file contains:
+- **Semantic keywords (S0/A0)** — used by `smart-sdd init` for Proposal Mode signal extraction. Matched via the [Matching Algorithm](smart-sdd/reference/clarity-index.md) (case-insensitive, compound-first, whole-token-only).
+- **Code pattern keywords (R1/A0)** — used by `reverse-spec` for source code analysis and module auto-detection.
+
+**How skill modules reference shared keywords**: Each skill-local domain module (e.g., `smart-sdd/domains/concerns/auth.md`) replaces its S0/R1 section with a cross-reference:
+```
+> See [shared/domains/concerns/auth.md](../../../shared/domains/concerns/auth.md) § Signal Keywords
+```
+
+This ensures a **single source of truth** — keyword updates in `shared/` automatically apply to both skills.
+
+**When adding a new module**, create **3 files** (not 2):
+1. `shared/domains/{type}/{name}.md` — Signal keywords (S0/R1 or A0)
+2. `reverse-spec/domains/{type}/{name}.md` — R3–R7 analysis sections (reference shared/ for R1)
+3. `smart-sdd/domains/{type}/{name}.md` — S1–S8 execution sections (reference shared/ for S0)
+
+See `shared/domains/_TEMPLATE.md` for the contributor template and `shared/domains/_taxonomy.md` for the complete module registry.
 
 ---
 
@@ -272,23 +304,24 @@ Add a new interface when a project has a distinct interaction surface not covere
 
 ### Steps
 
-1. **Create reverse-spec module**: `.claude/skills/reverse-spec/domains/interfaces/{name}.md`
-   - Add R1 (Detection Signals) and R3 (Analysis Axes)
-   - R1: file patterns and code patterns that indicate this interface
-   - R3: what to extract during analysis (e.g., for `graphql`: schema extraction, resolver patterns, subscription patterns)
+1. **Create shared signal module**: `.claude/skills/shared/domains/interfaces/{name}.md`
+   - Add S0 (Semantic keywords) and R1 (Code patterns)
+   - Use `shared/domains/_TEMPLATE.md` as the starting template
+   - Register in `shared/domains/_taxonomy.md`
 
-2. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/interfaces/{name}.md`
-   - Add S0 (Signal Keywords), S1 (SC Generation Rules), S5 (Elaboration Probes), S8 (Runtime Verification)
-   - S0: keywords for auto-detection during `init` Proposal Mode
-   - S1: required SC patterns and anti-patterns for this interface
-   - S5: domain-specific consultation questions
-   - S8: how to start, verify, and stop runtime testing for this interface
+2. **Create reverse-spec module**: `.claude/skills/reverse-spec/domains/interfaces/{name}.md`
+   - Reference shared/ for R1: `See [shared/domains/interfaces/{name}.md] § Signal Keywords`
+   - Add R3 (Analysis Axes): what to extract during analysis (e.g., for `graphql`: schema extraction, resolver patterns)
 
-3. **Update _schema.md** (both skills): No changes needed — existing schema supports new interfaces automatically.
+3. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/interfaces/{name}.md`
+   - Reference shared/ for S0: `See [shared/domains/interfaces/{name}.md] § Signal Keywords`
+   - Add S1 (SC Generation Rules), S5 (Elaboration Probes), S8 (Runtime Verification)
 
-4. **Update profiles**: If the new interface should be part of a profile (e.g., `web-api` might include `graphql`), update the profile manifest.
+4. **Update _schema.md** (both skills): No changes needed — existing schema supports new interfaces automatically.
 
-5. **Test**: Run through an init → specify flow with a project that uses this interface. Verify S0 keywords trigger detection and S1 rules produce meaningful SCs.
+5. **Update profiles**: If the new interface should be part of a profile (e.g., `web-api` might include `graphql`), update the profile manifest.
+
+5. **Test**: Run through an init → specify flow with a project that uses this interface. Verify S0 keywords trigger detection and S1 rules produce meaningful SCs. For signal matching mechanics (case-insensitive, compound-first, whole-token-only), see [`clarity-index.md` § 3 Matching Algorithm](smart-sdd/reference/clarity-index.md).
 
 ### Section Checklist
 
@@ -313,13 +346,22 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 
 ### Steps
 
-1. **Create reverse-spec module**: `.claude/skills/reverse-spec/domains/concerns/{name}.md`
-   - Add R1 (Detection Signals): libraries, code patterns, config files
+1. **Create shared signal module**: `.claude/skills/shared/domains/concerns/{name}.md`
+   - Add S0 (Semantic keywords for init inference) and R1 (Code patterns for source analysis)
+   - Use `shared/domains/_TEMPLATE.md` as the starting template
+   - Register in `shared/domains/_taxonomy.md`
 
-2. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/concerns/{name}.md`
-   - Add S0, S1, S5, S7 (optional: S3 for verification overrides)
+2. **Create reverse-spec module**: `.claude/skills/reverse-spec/domains/concerns/{name}.md`
+   - Reference shared/ for R1: `See [shared/domains/concerns/{name}.md] § Signal Keywords`
+   - Add R3–R7 analysis-specific sections
 
-3. **Update profiles**: If the concern should be default for a profile, update the profile manifest.
+3. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/concerns/{name}.md`
+   - Reference shared/ for S0: `See [shared/domains/concerns/{name}.md] § Signal Keywords`
+   - Add S1, S5, S7 (optional: S3 for verification overrides)
+
+4. **Update profiles**: If the concern should be default for a profile, update the profile manifest.
+
+5. **Test**: Verify S0 keywords trigger module activation during `init` Proposal Mode. For matching mechanics, see [`clarity-index.md` § 3 Matching Algorithm](smart-sdd/reference/clarity-index.md).
 
 ### Existing Concern Modules
 
@@ -360,18 +402,23 @@ Add a new archetype when a class of applications has distinct philosophical prin
 
 ### Steps
 
-1. **Create reverse-spec module**: `.claude/skills/reverse-spec/domains/archetypes/{name}.md`
-   - **A0**: Signal Keywords — libraries, code patterns, config files specific to this domain
+1. **Create shared signal module**: `.claude/skills/shared/domains/archetypes/{name}.md`
+   - **A0**: Signal Keywords — Semantic (for init inference) + Code Patterns (for source analysis)
+   - Use `shared/domains/_TEMPLATE.md` as the starting template
+   - Register in `shared/domains/_taxonomy.md`
+
+2. **Create reverse-spec module**: `.claude/skills/reverse-spec/domains/archetypes/{name}.md`
+   - Reference shared/ for A0: `See [shared/domains/archetypes/{name}.md] § Signal Keywords`
    - **A1**: Analysis Axes — Philosophy Extraction — what principles to look for in the code
 
-2. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/archetypes/{name}.md`
-   - **A0**: Signal Keywords — Primary (high-confidence) and Secondary (needs confirmation)
+3. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/archetypes/{name}.md`
+   - Reference shared/ for A0: `See [shared/domains/archetypes/{name}.md] § Signal Keywords`
    - **A1**: Philosophy Principles — the core domain principles (name, description, implication)
    - **A2**: SC Generation Extensions — domain-specific SC patterns and anti-patterns
    - **A3**: Elaboration Probes — domain-specific consultation questions
    - **A4**: Constitution Injection — principles to embed in the project's constitution
 
-3. **No schema/resolver changes needed** — the archetype loading system is generic.
+4. **No schema/resolver changes needed** — the archetype loading system is generic.
 
 4. **Test**: Run `init` with an idea string containing A0 keywords. Verify the archetype is auto-detected.
 

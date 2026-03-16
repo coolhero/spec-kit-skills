@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:46 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-16 15:56 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -244,7 +244,7 @@ A **Domain Profile** = selected Interfaces + selected Concerns + Archetype + Sce
 
 **How auto-detection works**: Each module declares **S0 Signal Keywords** (interfaces/concerns) or **A0 Signal Keywords** (archetypes). When you start a project with an idea string (`init "Build an AI chat assistant with..."`), the agent scans all keywords to infer your profile automatically. "React" triggers `gui`, "REST API" triggers `http-api`, "OpenAI" triggers both `external-sdk` concern and `ai-assistant` archetype — all without manual configuration.
 
-This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes. CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
+This inference is scored by the **Clarity Index (CI)** — a percentage measuring how concrete your idea is across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) skips clarification and generates a Proposal directly; low CI triggers targeted questions using the active modules' S5 Elaboration Probes. The generated Proposal can be modified per-section before approval — change the tech stack without re-answering purpose questions, or adjust Features without affecting the architecture. CI propagates into the pipeline — lower initial CI means more verification checkpoints during specify and plan, ensuring vague ideas don't produce incomplete specs. See `reference/clarity-index.md` for the full model.
 
 **How composition drives the pipeline**: Modules don't produce an output file — they merge into a behavioral ruleset in the agent's working memory. Each section routes to a specific pipeline step: `S1` shapes `specify` (SC generation), `S5` shapes `clarify` (consultation probes), `S7` shapes `plan`/`implement`/`verify` (bug prevention), `S3` shapes `verify` (verification gates), and `A1`/`A4`/`F7` shape `constitution` (domain principles). For a complete walkthrough with concrete before/after examples, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
