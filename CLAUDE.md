@@ -35,6 +35,7 @@
 
 - **All artifacts MUST be written in English.** This includes skill files (SKILL.md, commands/*.md, reference/*.md, domains/*.md, templates/*.md), TODO.md, history.md, PLAYWRIGHT-GUIDE.md, and all other project files.
 - **Exception**: `README.ko.md` is the only file written in Korean.
+- **README.ko.md 내 기술 용어**: 한국어로 번역하면 어색하거나 의미가 불분명해지는 기술 용어는 영어 원어를 그대로 사용합니다. 예: ~~하네스 엔지니어링~~ → Harness Engineering, ~~컨텍스트 주입~~ → Context Injection, ~~게이트 강제~~ → Gate Enforcement, ~~행동 충실도~~ → Behavioral Fidelity, ~~파이프라인 무결성 가드~~ → Pipeline Integrity Guard. 판단 기준: 한국어 번역이 원래 의미를 즉시 전달하지 못하면 영어로 씁니다.
 - User-facing AskUserQuestion option labels may use Korean if contextually appropriate for Korean-speaking users, but the surrounding documentation and comments must be in English.
 
 ## Conventions
