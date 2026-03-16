@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-03-16] User-Assisted Manual Verification Gate (Step 3f2)
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| Step 3f2: User-Assisted Manual Verification | `verify-phases.md` | "자동화 불가 ≠ 검증 스킵" 원칙 관철. manual SC, manual-only TEST PLAN 항목을 사용자에게 제시하여 수동 확인 요청. 3-state 결과: machine-verified / user-verified / explicitly-deferred |
+| `manual` SC 분류 변경 | `verify-phases.md` Step 0 | `manual` SC가 "Skip as manual-only" → "User-assisted manual verification in Step 3f2"로 변경 |
+| Core Principle 추가 | `user-cooperation-protocol.md` | "Automation-impossible ≠ verification skip" 원칙을 프로토콜 헤더에 명시 |
+
+---
+
 ## [2026-03-16] SKF-033~034: Test State Isolation + Async Hydration Sync
 
 | Change | File | Rationale |

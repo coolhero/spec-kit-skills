@@ -5,6 +5,8 @@
 > This file defines the canonical taxonomy and flow. It does NOT replace inline HARD STOP text
 > (per CLAUDE.md Rule 1 — "If response is empty → re-ask" must stay inlined at every call site).
 > Referenced by: `commands/verify-phases.md`, `injection/implement.md`, `commands/pipeline.md`, `domains/scenarios/rebuild.md`.
+>
+> **Core Principle**: "Automation-impossible ≠ verification skip". When the agent cannot auto-verify an item (OS dialog, app restart, visual judgment, hardware interaction), it MUST request user cooperation rather than silently skipping. Every verification item ends in one of three states: ✅ machine-verified, ✅ user-verified, or ⚠️ explicitly deferred (with recorded reason). Silent omission is a protocol violation.
 
 ---
 

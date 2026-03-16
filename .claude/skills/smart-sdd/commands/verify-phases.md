@@ -1023,6 +1023,7 @@ Phase 3 Checklist (must complete ALL in order):
   □ Step 5: CI/Interactive path convergence
   □ Step 6: Execute demo --ci
   □ Step 6b: Execute VERIFY_STEPS (functional verification)
+  □ Step 3f2: User-Assisted Manual Verification (manual SCs + manual TEST PLAN items)
   □ Phase 3b: Bug Prevention Verification (includes Empty State ≠ PASS)
 ```
 
@@ -1042,7 +1043,7 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 | `test-covered` | Behavior already verified by unit/integration tests in Phase 1 | Reference passing test name |
 | `user-assisted` | Automatable AFTER user provides a dependency (API key, local service, config) | Step 3d — after user cooperation (see [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3) |
 | `external-dep` | Truly inaccessible — production-only API, specific hardware, rate-limited service | Skip with explicit reason |
-| `manual` | Requires visual/subjective judgment that automation cannot evaluate | Skip as manual-only |
+| `manual` | Requires visual/subjective judgment that automation cannot evaluate | User-assisted manual verification in Step 3f2 |
 
    > **`user-assisted` vs `external-dep`**: If the user CAN provide the dependency locally (API key in .env, start a local service, test credentials), classify as `user-assisted`. If truly inaccessible (production-only, hardware, rate-limited quota), classify as `external-dep`. See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3.
 
@@ -1512,16 +1513,17 @@ After executing each SC's verification, record the **Reached Depth** and compare
 2. Classify each test item:
    - **auto**: UI action + DOM state check → execute via Playwright
    - **semi-auto**: UI action possible but expected result requires visual judgment → Playwright screenshot + agent comparison against expected description
-   - **manual-only**: OS-level action (file dialog, app restart, hardware), external dependency → skip with recorded reason
+   - **manual-only**: OS-level action (file dialog, app restart, hardware), external dependency → routed to user-assisted manual verification in Step 3f2
 3. Execute auto and semi-auto items via Playwright:
    - Perform the action (click, fill, navigate, toggle)
    - Assert the expected result (DOM state, attribute, visual comparison)
    - Record PASS/FAIL per item
 4. FAIL items → classify per Bug Fix Severity Rule
-5. Display result in verify Review:
+5. Manual-only items → accumulated for Step 3f2 (do NOT silently skip)
+6. Display result in verify Review:
 ```
 ── Demo TEST PLAN Execution ─────────────────
-  Total: 9 tests | Auto: 5 PASS | Semi-auto: 2 PASS | Manual: 2 SKIPPED (file dialog, app restart)
+  Total: 9 tests | Auto: 5 PASS | Semi-auto: 2 PASS | Manual: 2 → Step 3f2
 ────────────────────────────────────────────────
 ```
 
@@ -1617,6 +1619,53 @@ Comparison criteria vary by `preservation_level` (read from sdd-state.md Rebuild
 5. **`external-dep` re-classification check**: Review `external-dep` SCs from Step 0. If any could realistically be provided by the user (API key the user likely has, local service the user can start), reclassify as `user-assisted` and include in the cooperation request above. See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3 for classification criteria.
 
 > **BLOCKING**: Do NOT proceed to Step 4 until this gate is passed. Marking `user-assisted` SCs as `⚠️` without presenting AskUserQuestion to the user is a protocol violation.
+
+**Step 3f2 — User-Assisted Manual Verification** (MANDATORY when manual items exist):
+
+> **Principle: "자동화 불가 ≠ 검증 스킵"**. Automation-impossible items must still be verified — through user cooperation, not silent omission. This gate ensures every verification item is either machine-verified, user-verified, or explicitly acknowledged as unverifiable.
+
+**Sources** — accumulate all items that couldn't be auto-verified from prior steps:
+- `manual` SCs from SC Verification Matrix (Step 0)
+- `manual-only` TEST PLAN items from Step 3d3
+- Interaction Chain rows that failed Playwright execution and need visual confirmation (Step 3d2)
+
+**Skip if**: No manual/manual-only items accumulated from any source.
+
+1. **Present manual verification checklist to user** via AskUserQuestion:
+   ```
+   📋 Manual Verification for [FID] — [N] items need your confirmation:
+
+   From SC Matrix:
+     SC-045: "Animation completes within 300ms" — visual timing judgment
+     SC-052: "Print dialog opens with correct layout" — OS dialog interaction
+
+   From TEST PLAN:
+     Test 3: Settings persistence after app restart
+     Test 7: File export opens OS save dialog
+
+   For each item, please:
+   1. Perform the action described
+   2. Observe whether the expected result occurs
+   3. Report PASS or FAIL (with what you observed if FAIL)
+   ```
+   - Options: "All PASS", "Some FAIL — [details]", "Cannot test now — defer"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+2. **Record results**:
+   - "All PASS" → record each as `✅ manual — user-verified`
+   - "Some FAIL" → classify per Bug Fix Severity Rule (same as auto failures)
+   - "Cannot test now" → record as `⚠️ manual — deferred (user unavailable)`. This does NOT block merge but is recorded in verify Notes as a limitation
+
+3. **Display in verify Review**:
+```
+── User-Assisted Manual Verification ───────────
+  SC Matrix: 2 items | 2 PASS (user-verified)
+  TEST PLAN: 2 items | 1 PASS, 1 deferred (app restart — user unavailable)
+  Total: 4 items | 3 verified, 1 deferred
+────────────────────────────────────────────────
+```
+
+> **Why not just skip?** Silent skip creates a false sense of coverage — "verify passed" implies everything was checked. With this gate, unverified items are explicitly recorded, and the user has the opportunity to catch bugs that automation cannot.
 
 **Step 4 — Check coverage mapping and demo components**:
 - The demo script must include a **Coverage** header comment mapping FR-###/SC-### from spec.md to what the user can try/see in the demo
