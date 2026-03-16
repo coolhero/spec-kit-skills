@@ -65,6 +65,43 @@ Display the Proposal and ask via AskUserQuestion:
 
 **You MUST STOP and WAIT for the user's response. Do NOT proceed until the user explicitly approves.** **If response is empty → re-ask** (per MANDATORY RULE 1).
 
+#### Proposal Step 3a: Modify Proposal
+
+When the user selects "Modify Proposal" at Step 3's HARD STOP:
+
+1. **Ask which section to modify** via AskUserQuestion:
+   - "Overview / Project Description"
+   - "Features (add, remove, or change)"
+   - "Domain Profile (Interfaces / Concerns)"
+   - "Tech Stack"
+   - "Archetype"
+   - "Other section"
+
+   **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+2. **Section-specific modification rules**:
+
+   | Section Modified | Modification Action | CI Re-score? |
+   |-----------------|-------------------|--------------|
+   | Overview | Free-text edit by user | Re-score Core Purpose dimension only |
+   | Features | Add/remove/rename features in the table | Re-score Key Capabilities dimension |
+   | Domain Profile | Add/remove interfaces or concerns | Re-score Project Type dimension + re-run S0 for added modules |
+   | Tech Stack | Change/add technologies | Re-score Tech Stack dimension + re-run S0 for new tech keywords |
+   | Archetype | Add/remove archetype | No CI change (archetypes are orthogonal) + re-run A0 for new keywords |
+   | Target Users | Free-text edit | Re-score Target Users dimension only |
+   | Scale & Scope | Free-text edit | Re-score Scale & Scope dimension only |
+   | Constraints | Free-text edit | Re-score Constraints dimension only |
+
+3. **CI re-scoring rules**:
+   - Only re-score affected dimension(s), not all 7
+   - CI never decreases (per `reference/clarity-index.md` § 6)
+   - If modification adds new S0/A0 keyword matches, update Domain Profile accordingly
+   - Display updated CI after modification
+
+4. **Signal re-extraction**: Modification does NOT re-run full signal extraction on the original input. It only processes newly added/changed text against the S0/A0 vocabulary (see `reference/clarity-index.md` § 3 Matching Algorithm). Original extraction results are preserved for unchanged sections.
+
+5. **After modification**: Re-generate the Proposal with updated content and return to Step 3 HARD STOP (Approve / Modify / Switch to standard). Multiple modification rounds are allowed.
+
 #### Proposal Step 4: Auto-Chain to Standard Flow
 
 After Proposal approval:
@@ -126,8 +163,16 @@ Check if `case-study-log.md` exists at project root:
 
 #### Step 3b. Framework Selection & Foundation Decisions
 
-1. **Auto-detect framework** from project files using detection heuristics
-   (See `../../reverse-spec/domains/_core.md` § R7 for detection signals)
+1. **Determine framework source** based on project state:
+
+   | Condition | Source | Action |
+   |-----------|--------|--------|
+   | **Proposal Mode** (idea string / PRD) | User input signals | Extract framework from Tech Stack CI dimension. If confidence ≥ 2, infer from matched S0 keywords (e.g., `React` → `react`, `Hono` → `hono`). If confidence ≤ 1, ask user directly |
+   | **Standard Mode + existing project files** | File system scan | Auto-detect from project files using R7 heuristics (see `../../reverse-spec/domains/_core.md` § R7) |
+   | **Standard Mode + empty directory** | Phase 1 Q&A answers | Use the tech stack answer from Phase 1 |
+   | **`--prd` with explicit tech stack** | PRD document | Extract from PRD content |
+
+   > In true greenfield (empty directory), there are no project files to scan. The framework comes from user input, not file detection. Step 2 (user confirmation) still applies regardless of source.
 
 2. **Confirm with user via AskUserQuestion**:
    - Detected: "{framework}" — Is this correct?
@@ -214,7 +259,35 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
    - Architecture Principles: From user input (if any), otherwise "Define as the project evolves"
    - Technical Constraints: From user input (if any)
    - Coding Conventions: From user input (if any)
-   - Project-Specific Recommended Principles: Based on the domain and tech stack from Phase 1 (e.g., e-commerce → Inventory Consistency, Payment Idempotency; SaaS → Tenant Isolation; real-time → Optimistic Updates). Use the recommendation categories in the constitution-seed template as a guide
+   - Project-Specific Recommended Principles: Derive from active signal matches and CI dimensions using the Principle Recommendation Table below. Each principle maps from a signal source (active module, CI dimension, domain keyword) to a concrete rule + rationale
+
+#### Principle Recommendation Table
+
+> Signal-driven principle selection for greenfield constitution-seed. Apply all rows where the "Signal Match" condition is true based on the current project's CI scoring and active S0/A0 modules.
+
+| Signal Source | Signal Match | Recommended Principle | Rationale |
+|--------------|-------------|----------------------|-----------|
+| **Domain signals** | | | |
+| Core Purpose keywords | payment, checkout, cart, order, e-commerce | Payment Idempotency, Inventory Consistency | Double-charge and oversell prevention |
+| Core Purpose keywords | patient, medical, health, HIPAA, PHI | Encryption at Rest, Audit Logging | Healthcare compliance requirement |
+| Core Purpose keywords | tenant, multi-tenant, subscription, SaaS | Tenant Data Isolation | Data leak prevention between tenants |
+| Core Purpose keywords | transaction, ledger, accounting, finance | Double-Entry Consistency, Audit Trail | Financial data integrity |
+| Core Purpose keywords | chat, messaging, collaboration | Message Ordering Guarantee | Conversation coherence |
+| **Active concern modules** | | | |
+| `realtime` concern active | WebSocket, SSE, live updates | Optimistic UI Updates, Reconnection Strategy | UX responsiveness under network variance |
+| `external-sdk` concern active | third-party API, webhook | Contract Testing, Retry with Backoff | Integration resilience against external failures |
+| `auth` concern active | JWT, OAuth, login | Secure Token Storage, Session Timeout Policy | Security baseline for user data |
+| `i18n` concern active | multi-language, localization | String Externalization, RTL-safe Layout | Internationalization readiness from day one |
+| **Active archetype modules** | | | |
+| `ai-assistant` archetype active | LLM, AI, chatbot | Streaming-First, Model Agnosticism, Token Budget Awareness | AI-specific quality guarantees |
+| `public-api` archetype active | OpenAPI, developer portal | Semantic Versioning, Rate Limiting, Deprecation Policy | API consumer trust |
+| `microservice` archetype active | gRPC, distributed, containers | Circuit Breaker, Distributed Tracing, Idempotent Operations | Fault isolation in distributed systems |
+| **Scale signals** | | | |
+| CI Scale ≥ 2 | enterprise, high-traffic, production | Rate Limiting, Cache Strategy, Horizontal Scalability | Performance under load |
+| CI Scale ≤ 1 | personal tool, prototype, MVP | Start Simple (YAGNI), No Premature Optimization | Avoid over-engineering early |
+| **Interface signals** | | | |
+| `data-io` interface active | pipeline, ETL, batch | Idempotent Processing, Checkpoint/Resume | Data integrity in long-running jobs |
+| `cli` interface active | CLI, command-line | Graceful Degradation, Meaningful Exit Codes | Developer experience in automation |
    - Best Practices: From Phase 2 selections
    - Global Evolution Layer Operational Principles: Always included
 

@@ -716,12 +716,14 @@ Executes the following steps **strictly in order** for each Feature.
 
 > **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-specify` returns, do NOT show its raw output ("Spec created and validated", "Ready for /speckit.clarify or /speckit.plan", "Coverage: N functional requirements", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A** — see SKILL.md Rule 3.
 
-1. Execute `speckit-specify` via Inline Execution (NOT Skill tool)
-2. **In the SAME response** — SUPPRESS any "Ready for", "Coverage:", "No [NEEDS CLARIFICATION]", "Spec created" or navigation output from speckit-specify. Do NOT show these to the user.
-3. Run Post-Execution Verification Sequence from `injection/specify.md` (SBI Accuracy, Platform Constraints, Edge Cases, etc.)
-4. Read `SPEC_PATH/{NNN-feature}/spec.md` and assemble Review Display
-5. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
-6. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to plan.
+1. **CI Pre-check (greenfield only)**: Read `Clarity Index` and `CI Low-confidence` from sdd-state.md. If CI < 40%: insert an inline clarify sub-step — ask 1–2 targeted questions for the lowest-confidence dimensions, re-score, then proceed. If Core Purpose confidence ≤ 1: **HARD STOP** — "Purpose unclear, clarify before proceeding to specify."
+2. Execute `speckit-specify` via Inline Execution (NOT Skill tool)
+3. **In the SAME response** — SUPPRESS any "Ready for", "Coverage:", "No [NEEDS CLARIFICATION]", "Spec created" or navigation output from speckit-specify. Do NOT show these to the user.
+4. Run Post-Execution Verification Sequence from `injection/specify.md` (SBI Accuracy, Platform Constraints, Edge Cases, etc.)
+5. **CI Coverage Check (greenfield, CI 40–69% only)**: After reading spec.md, verify every CI dimension with confidence ≤ 1 has at least one FR or SC addressing it. If gaps found, list them in the Review as "⚠️ CI Coverage Gaps" section. Also: if Target Users confidence ≤ 1, add "user role identification" note. If Key Capabilities confidence ≤ 1, add "completeness gap" warnings.
+6. Read `SPEC_PATH/{NNN-feature}/spec.md` and assemble Review Display
+7. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+8. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-specify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to plan.
 
 #### Plan Execute+Review (HARD STOP)
 
@@ -729,9 +731,10 @@ Executes the following steps **strictly in order** for each Feature.
 
 1. Execute `speckit-plan` via Inline Execution (NOT Skill tool)
 2. **In the SAME response** — SUPPRESS any navigation output from speckit-plan. Do NOT show these to the user.
-3. Read `SPEC_PATH/{NNN-feature}/plan.md` and assemble Review Display
-4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
-5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-plan executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to tasks.
+3. **CI Propagation Check (greenfield only)**: Read `CI Low-confidence` from sdd-state.md. If CI 40–69%: in Review, emphasize low-CI areas and highlight architecture decisions compensating for uncertainty. If CI < 40%: display "⚠️ Low-CI areas remain underspecified" warning before Review. Per-dimension: if Project Type confidence ≤ 1, Review must include "Interface Choice Rationale". If Tech Stack confidence ≤ 1, Review must include "Tech Stack Rationale". If Scale & Scope confidence ≤ 1, plan should default to minimal architecture.
+4. Read `SPEC_PATH/{NNN-feature}/plan.md` and assemble Review Display
+5. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+6. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-plan executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to tasks.
 
 #### Tasks Execute+Review (HARD STOP)
 

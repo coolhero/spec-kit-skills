@@ -69,10 +69,46 @@
 
 ### Extraction Procedure
 
-1. **Parse input** → extract keyword signals (nouns, technologies, patterns)
-2. **Match signals against S0 Signal Keywords** in domain modules (see § 5)
-3. **Score each CI dimension** based on matched signals
-4. **Map signals to 3-Axis** → infer Interface, Concern, Scenario axes
+1. **Load vocabulary**: Read S0 keywords from `shared/domains/interfaces/*.md` and `shared/domains/concerns/*.md`, plus A0 keywords from `shared/domains/archetypes/*.md` (see `domains/_resolver.md` § S0/A0 Aggregation). This is a one-time scan cached for the session.
+2. **Parse input** → extract keyword signals (nouns, technologies, patterns)
+3. **Match signals** against S0/A0 keyword vocabulary using the Matching Algorithm (see below)
+4. **Score each CI dimension** based on matched signals (see Dimension-Signal Mapping below)
+5. **Map signals to 3-Axis** → infer Interface, Concern, Scenario axes (see § 4)
+6. **Infer Archetype** from A0 matches (see § 4b)
+
+### Matching Algorithm
+
+Defines how user input tokens are compared against S0/A0 keyword vocabulary.
+
+**Tokenization**:
+1. Split input text at whitespace and punctuation boundaries (preserve hyphens within compound terms like `real-time`)
+2. Before single-token matching, attempt **compound keyword matching**: scan for multi-word S0/A0 keywords (e.g., `Chrome extension`, `web app`, `state management`) by checking consecutive token sequences in the input
+3. Matched compound keywords are consumed — their individual tokens are NOT re-matched against single-token keywords (prevents `Chrome` from matching `cli` module if `Chrome extension` already matched `gui`)
+
+**Comparison rules**:
+- **Case-insensitive**: `react` matches `React`, `GRAPHQL` matches `GraphQL`
+- **Dot/separator-insensitive for technology names**: `nextjs` matches `Next.js`, `socketio` matches `Socket.io` (strip dots and compare)
+- **Whole-token only**: `graph` does NOT match `GraphQL`, `web` does NOT match `WebSocket`. Only complete token or compound matches count
+- **No stemming or lemmatization**: `streaming` ≠ `stream` unless both are listed as separate S0 keywords
+
+**Match classification**:
+- **Primary match** (≥ 1 Primary keyword hit) → **activate** the module
+- **Secondary match only** (≥ 1 Secondary keyword hit, 0 Primary) → **flag** for user confirmation at the Proposal HARD STOP
+- **No match** → module not loaded
+
+**Disambiguation**: A token may match keywords in multiple modules (e.g., `streaming` may appear in both `realtime` S0 and `ai-assistant` A0). All matches are recorded — disambiguation happens at the Proposal level where the user sees all activated/flagged modules and can adjust.
+
+**Scoring integration**: Each matched keyword contributes to CI dimensions based on its nature:
+
+| Keyword Nature | CI Dimension Affected |
+|---------------|----------------------|
+| Technology names (React, PostgreSQL, Hono) | Tech Stack |
+| Platform keywords (web app, CLI, desktop) | Project Type |
+| Feature-indicating keywords (drag-drop, search, export) | Key Capabilities |
+| Domain nouns (task management, e-commerce, chat) | Core Purpose |
+| User role keywords (admin, developer, customer) | Target Users |
+| Scale indicators (enterprise, SaaS, personal) | Scale & Scope |
+| Constraint keywords (HIPAA, offline, real-time) | Constraints |
 
 ### Dimension-Signal Mapping
 
@@ -121,6 +157,20 @@ For `init`, scenario is always `greenfield`. Other scenarios are determined by o
 - `/reverse-spec` → `rebuild` or `adoption`
 - `/smart-sdd add` on existing project → `incremental`
 
+### Archetype Inference (A0)
+
+A0 keywords from `shared/domains/archetypes/*.md` are matched in the same pass as S0:
+
+| Signal Pattern | Inferred Archetype |
+|---------------|-------------------|
+| "LLM", "OpenAI", "Claude", "langchain", "AI agent", "chatbot", "prompt" | `ai-assistant` |
+| "OpenAPI", "rate-limit", "API key", "developer portal", "API versioning" | `public-api` |
+| "gRPC", "docker-compose", "service mesh", "Kubernetes", "distributed" | `microservice` |
+
+Archetype inference is **orthogonal to CI scoring** — it does not affect the 7 CI dimensions. Matched archetypes load A1 philosophy principles and A2 SC extensions during the pipeline.
+
+If no A0 keywords match → Archetype is `"none"` (no archetype-specific rules loaded).
+
 ### Per-Axis Confidence
 
 Each axis gets a confidence score (0–3) based on signal strength:
@@ -136,30 +186,44 @@ Per-axis confidence feeds into CI Dimension #3 (Project Type) scoring.
 
 ---
 
-## 5. S0 Signal Keywords — Distributed Vocabulary
+## 5. S0/A0 Signal Keywords — Distributed Vocabulary
 
-Each domain module (interface, concern) declares its own signal keywords in an optional **S0** section. This creates a distributed vocabulary — when a new module is added, its signals are automatically available for extraction.
+Each domain module declares its own signal keywords in the shared directory (`shared/domains/`). This creates a distributed vocabulary — when a new module is added, its signals are automatically available for extraction.
 
-### S0 Section Format
+### Signal Keyword Format
 
-```markdown
-## S0. Signal Keywords
-
-> Keywords that indicate this module should be activated. Used by Clarity Index signal extraction.
-
-**Primary**: [high-confidence keywords — strong indicator]
-**Secondary**: [medium-confidence keywords — needs confirmation]
+```
+shared/domains/interfaces/{name}.md   → § Signal Keywords → Semantic (S0)
+shared/domains/concerns/{name}.md     → § Signal Keywords → Semantic (S0)
+shared/domains/archetypes/{name}.md   → § Signal Keywords → Semantic (A0)
 ```
 
-### Aggregation Rule
+Each section contains:
+- **Primary**: High-confidence keywords — ≥ 1 match activates the module
+- **Secondary**: Medium-confidence keywords — ≥ 1 match flags for user confirmation
+
+> Module registry: `shared/domains/_taxonomy.md` lists all available modules.
+
+### S0 Aggregation Rule
 
 During Signal Extraction (init Proposal Mode):
 1. Read `_core.md` (no S0 — core is always loaded)
-2. Read each `interfaces/*.md` S0 section → build Interface signal map
-3. Read each `concerns/*.md` S0 section → build Concern signal map
-4. Match user input against all signal maps
+2. Read each `shared/domains/interfaces/*.md` S0 section → build Interface signal map
+3. Read each `shared/domains/concerns/*.md` S0 section → build Concern signal map
+4. Match user input against all signal maps using the Matching Algorithm (§ 3)
 5. Activate modules whose Primary keywords have ≥ 1 match
 6. Flag modules whose Secondary keywords have ≥ 1 match (ask for confirmation)
+
+### A0 Aggregation Rule
+
+Runs **in parallel with S0** during the same vocabulary scan:
+1. Read each `shared/domains/archetypes/*.md` A0 section → build Archetype signal map
+2. Match user input against archetype signal maps using the same Matching Algorithm (§ 3)
+3. Activate archetypes whose Primary keywords have ≥ 1 match
+4. Flag archetypes whose Secondary keywords have ≥ 1 match (ask for confirmation)
+5. Result → Proposal's "Inferred Archetype" field (or `"none"` if no A0 matches)
+
+**A0 does NOT affect CI score** — archetypes are orthogonal to the 7 CI dimensions. However, matched archetypes determine which A1 philosophy principles and A2 SC extensions are loaded for the pipeline.
 
 ---
 

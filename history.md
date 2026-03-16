@@ -3305,3 +3305,28 @@ Extracted cross-skill signal keywords (S0/R1/A0) into a unified `shared/domains/
 | `smart-sdd/domains/_resolver.md` | Added Signal Keywords resolution note + updated S0/A0 Aggregation paths |
 | `README.md` | Added shared/ directory overview + file map section |
 | `README.ko.md` | Korean version of above |
+
+---
+
+## [2026-03-16] Greenfield Pipeline Strengthening (Track B)
+
+Fixed 7 gaps in the greenfield pipeline to bring it to parity with the rebuild pipeline's specificity and rigor.
+
+| Choice | Rationale |
+|--------|-----------|
+| Add concrete Matching Algorithm to clarity-index.md (Gap 1) | "Parse input and extract keywords" was too vague — no spec for case sensitivity, compound keywords, or disambiguation. Added tokenization, compound-first matching, whole-token-only rules |
+| Integrate A0 archetype inference into clarity-index.md (Gap 3) | A0 was scattered across 3 files (_resolver.md, init.md, clarity-index.md). Now clarity-index.md is the single source for both S0 and A0 extraction |
+| Add Proposal modification flow to init.md (Gap 2) | "Modify Proposal" option existed but had no specification for what happens. Added per-section modification rules, CI re-scoring rules, and signal re-extraction scoping |
+| Add Principle Recommendation Table to init.md (Gap 4) | constitution-seed generation for greenfield had only 3 inline examples. Added systematic mapping table driven by active S0/A0 modules and CI dimensions |
+| Clarify framework detection source in greenfield (Gap 5) | init.md referenced "auto-detect from project files" but greenfield has no files. Added conditional routing table: Proposal Mode → S0 signals, Standard + empty dir → Phase 1 Q&A |
+| Enrich greenfield.md from 23 to 103 lines (Gap 7) | rebuild.md had Configuration Parameters, per-category probes, bug prevention rules. greenfield.md had none. Added project_maturity parameter, SC anti-patterns, maturity-adjusted depth, architecture scaffolding, 7 bug prevention rules |
+| Add inline CI propagation to pipeline specify/plan/verify (Gap 6) | clarity-index.md § 6 defined propagation but pipeline steps didn't implement it. Added CI pre-checks at specify (low-CI clarify sub-step), plan (emphasis on uncertain areas), verify Phase 3b (empty-state checks) |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `reference/clarity-index.md` | Added Matching Algorithm (§3), A0 Archetype Inference (§4b), renamed §5 to S0/A0, added A0 Aggregation Rule |
+| `commands/init.md` | Added framework source routing table (Step 3b), Proposal modification flow (Step 3a), Principle Recommendation Table (Phase 3) |
+| `domains/scenarios/greenfield.md` | Expanded from 23→103 lines: Configuration Parameters, S1 anti-patterns + maturity depth, S3 scaffolding check, S5 per-maturity/team probes, S7 7 bug prevention rules |
+| `commands/pipeline.md` | Added CI pre-check to specify (step 1), CI coverage check to specify (step 5), CI propagation to plan (step 3) |
+| `commands/verify-phases.md` | Added CI propagation check to Phase 3b |

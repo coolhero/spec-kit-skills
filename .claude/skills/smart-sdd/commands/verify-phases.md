@@ -1823,6 +1823,8 @@ Display:
 > Additional checks to automatically verify basic stability of code written during implement.
 > Runs after Phase 3 Demo-Ready, before Phase 4 Update.
 
+**CI Propagation Check (greenfield only)**: Read `CI Low-confidence` from sdd-state.md. If CI < 40%: add **empty-state checks for each low-CI area** — verify the Feature handles undefined/missing data gracefully for dimensions that were vague at project start. For example, if Scale & Scope was low-confidence and no scale decisions were made, verify the app doesn't crash under minimal load. If Constraints confidence ≤ 1: no additional checks (constraints clarify during implementation — per `reference/clarity-index.md` § 6).
+
 **Empty State Smoke Test** — "Empty State ≠ PASS":
 
 > Principle: A Feature that renders an empty state without errors is NOT automatically passing.
