@@ -2,13 +2,12 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 07:48 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:23 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
 - **Reverse-Spec** analyzes an existing codebase and extracts everything the SDD pipeline needs to know: what the app does, how it's structured, what data models and APIs exist. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
-- **Case Study** generates a structured after-action report from a completed project — what went well, what was hard, and what the numbers say. It collects the metrics that accumulated during the pipeline (how many Features, how tests went, how close the rebuild matched the original) and pairs them with the story of *why* things were built the way they were. The report also feeds back into improving the domain modules for next time.
 
 ---
 
@@ -57,7 +56,6 @@ cd spec-kit-skills
 | **Have existing code, want to rebuild it** | `/reverse-spec ./path/to/source` | Analyze the code → rebuild with SDD |
 | **Have existing code, want to keep it** | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs, no rewrite |
 | **Already running smart-sdd, need more Features** | `/smart-sdd add` | Add new Features to an existing project |
-| **Want an after-action report** | `/case-study generate` | Generate metrics and lessons from completed project |
 
 ### Verify
 
@@ -117,19 +115,23 @@ A Domain Profile is composed from four axes: **Interface** (what the app exposes
 
 A Brief is **not** the same as a PRD. A PRD is one possible *input* to the Brief process; a casual conversation or a gap analysis result are equally valid inputs. The Brief is the *output* — a normalized, quality-checked Feature definition that has been validated for both **completeness** (all key dimensions covered) and **accuracy** (the agent's interpretation confirmed by the user through an explicit approval gate).
 
-```
-/smart-sdd init                      /smart-sdd add (= Briefing)
-Sets up the PROJECT:                 Defines each FEATURE:
-- name, stack, principles            - capabilities, data, interfaces
-- Domain Profile detection           - quality criteria, boundaries
-- Feature candidates (names only)    - normalized Brief per Feature
-         │                                      │
-         └──── chains into ────────→            │
-                                                ▼
-                                         pre-context (GEL)
-                                                │
-                                                ▼
-                                         spec-kit pipeline
+```mermaid
+flowchart LR
+    subgraph init["/smart-sdd init — PROJECT setup"]
+        I1["name, stack, principles"]
+        I2["Domain Profile detection"]
+        I3["Feature candidates (names only)"]
+    end
+
+    subgraph add["/smart-sdd add — FEATURE definition"]
+        A1["capabilities, data, interfaces"]
+        A2["quality criteria, boundaries"]
+        A3["normalized Brief per Feature"]
+    end
+
+    init -- "chains into" --> add
+    add --> PC["pre-context (GEL)"]
+    PC --> Pipeline["spec-kit pipeline"]
 ```
 
 `init` may accept a PRD to understand the *project* — extracting stack hints, Domain Profile signals, and a rough Feature list. But it stops at Feature *names*. The actual Feature *definition* — ensuring each Feature has complete capabilities, data requirements, interface contracts — happens in `add` through the Brief process.
@@ -170,41 +172,62 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 **Five modes**: greenfield (`init`), incremental (`add`), rebuild (`pipeline` after `reverse-spec`), adoption (`adopt`), scope expansion (`expand`)
 
-### Utility
-
-| Skill | Purpose |
-|-------|---------|
-| `/case-study` | Generates an after-action report from a completed project — metrics, decisions, and what to improve next time |
-
-> **What the report covers**: The case study isn't just numbers — it tells the story of the project. For each major architectural decision ("Why did we use an abstraction layer for AI providers?"), it traces back to the principle that motivated it ("Model Agnosticism from the AI Assistant archetype"). It also spots gaps — principles you declared but never actually applied. This feedback helps refine domain modules so the next project starts smarter.
-
 ### How the Skills Connect
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        The Big Picture                                  │
-│                                                                         │
-│  1. ANALYZE    /reverse-spec analyzes your code (or /smart-sdd init     │
-│                creates from scratch)                                    │
-│                         │                                               │
-│                         ▼                                               │
-│  2. ARTIFACTS  Global Evolution Layer is created:                       │
-│                roadmap, entity/API registries, pre-contexts             │
-│                         │                                               │
-│                         ▼                                               │
-│  3. BUILD      /smart-sdd pipeline runs spec-kit for each Feature,      │
-│                automatically injecting cross-Feature context            │
-│                         │                                               │
-│                   ┌─────┴─────┐                                         │
-│                   ▼           ▼                                         │
-│  4. PER FEATURE  specify → plan → tasks → analyze → implement → verify  │
-│                  Each step gets GEL context from previous Features      │
-│                  Domain Profile shapes each step's behavior             │
-│                  Each step has human checkpoints (HARD STOP)            │
-│                         │                                               │
-│                         ▼                                               │
-│  5. REPORT     /case-study generates after-action report (optional)     │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph entry["Entry Points"]
+        direction LR
+        IDEA["💡 Idea / PRD"]
+        CODE["📦 Existing Code"]
+    end
+
+    subgraph analyze["Analyze"]
+        INIT["/smart-sdd init
+        Domain Profile detection
+        Feature candidates"]
+        RS["/reverse-spec
+        Source analysis
+        Behavior extraction"]
+        ADOPT_RS["/reverse-spec --adopt
+        Document existing code"]
+    end
+
+    subgraph define["Define"]
+        ADD["/smart-sdd add
+        Brief: 6-perspective validation
+        Intent verification gate"]
+    end
+
+    subgraph artifacts["Global Evolution Layer"]
+        GEL["roadmap · entity registry · API registry
+        pre-contexts · constitution · sdd-state"]
+    end
+
+    subgraph build["Build / Adopt"]
+        PIPELINE["/smart-sdd pipeline
+        Per Feature: specify → plan → tasks
+        → analyze → implement → verify"]
+        ADOPT_P["/smart-sdd adopt
+        Per Feature: specify → plan
+        → analyze → verify"]
+    end
+
+    DP["⚙️ Domain Profile
+    Per-step rules loaded
+    from project type"]
+
+    IDEA --> INIT
+    CODE --> RS
+    CODE --> ADOPT_RS
+    INIT --> ADD
+    RS --> GEL
+    ADOPT_RS --> GEL
+    ADD --> GEL
+    GEL --> PIPELINE
+    GEL --> ADOPT_P
+    DP -.- PIPELINE
+    DP -.- ADOPT_P
 ```
 
 ---
@@ -376,26 +399,24 @@ All journeys converge to **incremental mode** as the steady state. In every jour
 
 The three concepts aren't independent features — they form a layered system where each concept feeds the next:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Brief                                    │
-│  Structured intake: ensure Feature definition is complete        │
-│  Domain Profile adds project-type-specific completion criteria   │
-│                           │                                      │
-│                           ▼                                      │
-│                    Global Evolution Layer                         │
-│  Cross-Feature memory: roadmap, registries, pre-contexts         │
-│  Brief output becomes pre-context for spec-kit pipeline          │
-│                           │                                      │
-│                           ▼                                      │
-│                      Domain Profile                              │
-│  Per-step rules: SC generation, bug prevention, verification     │
-│  Shapes every pipeline step based on project type                │
-│                           │                                      │
-│                           ▼                                      │
-│                    spec-kit Pipeline                              │
-│  specify → plan → tasks → analyze → implement → verify → merge    │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Brief["🎯 Brief
+    Structured intake: ensure Feature definition is complete
+    Domain Profile adds project-type-specific completion criteria"]
+
+    GEL["📋 Global Evolution Layer
+    Cross-Feature memory: roadmap, registries, pre-contexts
+    Brief output becomes pre-context for spec-kit pipeline"]
+
+    DP["⚙️ Domain Profile
+    Per-step rules: SC generation, bug prevention, verification
+    Shapes every pipeline step based on project type"]
+
+    Pipeline["🔄 spec-kit Pipeline
+    specify → plan → tasks → analyze → implement → verify → merge"]
+
+    Brief --> GEL --> DP --> Pipeline
 ```
 
 **Brief** produces a complete Feature definition → stored as **pre-context** in the **GEL** → injected into the **spec-kit pipeline** → where **Domain Profile** rules shape every step's behavior.
@@ -448,14 +469,15 @@ The pipeline runs in three phases. First, the project is analyzed (or defined fr
 
 Each Feature goes through a **6-step lifecycle**. If verify finds bugs, they loop back to the right step instead of being patched silently:
 
-```
-specify → plan → tasks → analyze → implement → verify → merge
-   │                                          │
-   │  ◄──── Major-Spec ───────────────────────┤
-   │  ◄──── Major-Plan ───────────────────────┤
-   │  ◄──── Major-Implement ──────────────────┤
-   │                                          │
-   └── Minor Fix (inline, ≤2 files) ──────────┘
+```mermaid
+flowchart LR
+    specify --> plan --> tasks --> analyze --> implement --> verify --> merge
+
+    verify -. "Minor Fix
+    (inline, ≤2 files)" .-> verify
+    verify -- "Major-Implement" --> implement
+    verify -- "Major-Plan" --> plan
+    verify -- "Major-Spec" --> specify
 ```
 
 Verify discovers bugs and classifies them into 4 severity levels. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step.
@@ -703,12 +725,21 @@ Long pipeline sessions face two systemic risks: **context window loss** (agent f
 
 All spec-kit command executions follow this 4-step protocol:
 
-```
-+--------------+     +---------------+     +------------------------+     +--------------+
-|  1. Assemble |---->| 2. Checkpoint |---->|  3. Execute + Review   |---->|  4. Update   |
-|  Context     |     |  Pre-Exec     |     | spec-kit Execution +   |     | Global       |
-|  Assembly    |     |  Confirmation |     | Artifact Review        |     | Refresh      |
-+--------------+     +---------------+     +------------------------+     +--------------+
+```mermaid
+flowchart LR
+    A["1. Assemble
+    Context Assembly"]
+    B["2. Checkpoint
+    Pre-Exec Confirmation
+    (HARD STOP)"]
+    C["3. Execute + Review
+    spec-kit Execution +
+    Artifact Review
+    (HARD STOP)"]
+    D["4. Update
+    Global Refresh"]
+
+    A --> B --> C --> D
 ```
 
 | Step | Description |
@@ -1054,7 +1085,6 @@ Shell scripts in `.claude/skills/smart-sdd/scripts/` let you inspect project pro
 mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
-cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```
 
 **Manual Symlinks**:
@@ -1062,7 +1092,6 @@ cp -r /path/to/spec-kit-skills/.claude/skills/case-study .claude/skills/
 ```bash
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
-ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-study
 ```
 
 ### Path Conventions
@@ -1144,7 +1173,7 @@ Each skill follows the same internal directory convention:
 │       ├── concerns/              Per-concern signal keywords
 │       └── archetypes/            Per-archetype signal keywords
 │
-├── {skill}/                       Per-skill directory (reverse-spec, smart-sdd, case-study)
+├── {skill}/                       Per-skill directory (reverse-spec, smart-sdd)
 │   ├── SKILL.md                   Entry point — command routing and mandatory rules
 │   ├── commands/                  User commands — one file per command workflow
 │   ├── domains/                   Skill-specific behavioral rules (S1-S8 or R3-R7)
@@ -1374,11 +1403,3 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/archetypes/microservice.md` | Microservice — A0 semantic + code patterns (gRPC, service mesh, Docker) |
 | `domains/archetypes/sdk-framework.md` | SDK/Framework — A0 semantic + code patterns (package metadata, public API, extension points, examples) |
 
-### case-study (`.claude/skills/case-study/`)
-
-| File | Description |
-|------|-------------|
-| `SKILL.md` | Skill router — case study report generator entry point |
-| `commands/generate.md` | Report generation — extract metrics + philosophy data, generate philosophy-aware narrative |
-| `reference/recording-protocol.md` | M1-M8 milestone recording protocol with philosophy adherence tracking |
-| `templates/case-study-log-template.md` | Observation log template for chronological milestone entries |
