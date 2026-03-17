@@ -585,11 +585,14 @@ During plan Review HARD STOP:
 
 ## Post-Step Update Rules
 
+> **Pre-condition**: The Entity Ownership Conflict Gate (see pipeline.md § Plan Execute+Review step 5) must have passed before these updates run. All ownership conflicts must be resolved first.
+
 1. Read `SPEC_PATH/[NNN-feature-name]/data-model.md`
 2. Compare with `BASE_PATH/entity-registry.md`:
-   - Newly defined entities → Add to entity-registry
-   - Field/relationship changes in existing entities → Update entity-registry
-   - Update "Used by Features" column
+   - Newly defined entities → Add to entity-registry with `Owner Feature` = current FID
+   - Field/relationship changes in existing entities **owned by current FID** → Update entity-registry
+   - Field/relationship changes in entities **owned by another FID** → Do NOT update directly. Instead, add a `⚠️ Schema Divergence` note in the entity's section: "[current FID] plan proposes different fields — coordinate with owner [other FID]"
+   - Update "Referencing Features" column for all referenced entities
 3. Read `SPEC_PATH/[NNN-feature-name]/contracts/`
 4. Compare with `BASE_PATH/api-registry.md`:
    - Newly defined APIs → Add to api-registry

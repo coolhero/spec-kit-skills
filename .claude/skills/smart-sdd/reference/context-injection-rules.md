@@ -153,6 +153,16 @@ Step 2: SKIP P3 sections
   → Omit entirely
   → Mark in Checkpoint: "ℹ️ {Section} skipped (re-readable on demand)"
 
+Step 2.5: RE-READ GATE for skipped P2/P3 sections
+  → After command execution completes (before Review), check if any skipped/summarized section
+    is relevant to the generated artifact's content:
+    - If spec.md references an entity that was in a summarized registry section → re-read that entity
+    - If plan.md defines architecture touching a skipped business rule → re-read business-logic-map.md
+    - If implement touches files listed in a skipped source reference → re-read those entries
+  → Display in Review: "📖 Re-read [N] sections that were initially skipped/summarized:
+    [list of sections re-read and why]"
+  → If NO skipped sections were relevant → display: "📖 Skipped sections verified — none relevant to generated output"
+
 Step 3: SPLIT if still over budget
   → implement: reduce parallel task batch (8 → 4 → 2 → 1)
   → specify/plan with large pre-context: split into 2 injection rounds

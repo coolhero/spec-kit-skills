@@ -713,6 +713,10 @@ Update `specs/add-draft.md` with Demo Group assignment.
      - **Without SBI**: Feature description + dependency summary only (no FR/SC drafts)
    - For /speckit.plan: Dependencies with entity/API info from existing registries
    - For /speckit.analyze: Dependency-based cross-Feature verification points
+   - **Cross-Feature Awareness (greenfield/add)**: Even without source code, populate the following from the roadmap and registries:
+     - **Sibling Feature Summary**: For each Feature defined in the same batch or already in roadmap, include: FID, name, description (1-line), owned entities (if any in registry), APIs provided (if any in registry). This gives each Feature visibility into the broader project context.
+     - **Dependency Context**: For each dependency edge involving this Feature (from roadmap Dependency Graph), include: direction (blocked-by / enables), related FID, and the nature of the dependency (entity, API, UI component).
+     - **Registry Snapshot**: If `entity-registry.md` or `api-registry.md` has entries from previously completed Features, include a summary (entity names + owner FIDs, API names + provider FIDs) so the new Feature's specify/plan can reference existing definitions rather than redefine from scratch.
 
 2. **Update `roadmap.md`**:
    - Add new Feature(s) to Feature Catalog (with Tier for core scope, or dependency position for full scope)

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:35 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:48 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -135,6 +135,8 @@ Brief는 PRD와 같은 것이 **아닙니다**. PRD는 Brief 프로세스의 가
 Domain Profile 규칙이 프로젝트 유형별 완성 기준을 추가합니다 — API 프로젝트의 Brief는 엔드포인트 계약을 정의해야 하고, GUI 프로젝트의 Brief는 사용자 인터랙션을 명시해야 합니다. 불완전한 입력은 gap을 안고 진행하는 대신 타겟 질문을 트리거합니다.
 
 완전성 기준이 충족되면, 에이전트는 자신의 해석을 보여주는 **Brief Summary**를 제시합니다. 사용자가 명시적으로 승인하거나 오해를 수정합니다 — 해석 오류가 파이프라인을 통해 전파되기 전에 잡는 **Intent Verification Gate**입니다. `specify` 단계에서의 **Brief↔Spec Alignment Check**가 생성된 spec이 승인된 Brief를 충실히 반영하는지 2차 검증합니다.
+
+기존 코드베이스(`/smart-sdd adopt`)의 경우, Feature는 소스 코드에서 자동 추출됩니다 — 하지만 동일한 의도 검증 원칙이 적용됩니다. 각 Feature는 adoption 시작 전에 scope 확인 게이트를 거치며, 코드 분석에서 추론된 내용을 사용자가 검증합니다.
 
 결과: 잘 구성되고 사용자가 검증한 Brief에서 생성된 spec은 더 완전하고, 더 테스트 가능하며, 구현 중 수정이 적습니다.
 
@@ -1165,7 +1167,6 @@ specs/
 | `README.md` | 영문 문서 |
 | `README.ko.md` | 한국어 문서 |
 | `PLAYWRIGHT-GUIDE.md` | Playwright 설정 가이드 — 브라우저 자동화 및 Electron CDP 설정 |
-| `TODO.md` | 프로젝트 작업 추적기 (2026-03-08 기준 모든 계획 작업 완료) |
 | `history.md` | git 이력에서 추출한 설계 결정 이력 |
 | `lessons-learned.md` | AI 에이전트 파이프라인 실패 패턴(G1–G16)과 구체적 교훈(L1–L33) — 에이전트 스킬 설계자를 위한 범용 takeaway |
 | `install.sh` | 설치 스크립트 — `~/.claude/skills/`에 심링크 생성 |

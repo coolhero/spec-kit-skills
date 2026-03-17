@@ -108,6 +108,27 @@ Organization-level conventions provide shared rules that apply across all projec
 
 > See `_schema.md` § Section Merge Rules for the complete merge rule table (15 rules covering S0–S9, A0–A5).
 
+### Step 3.5. Apply Cross-Concern Integration Rules
+
+After loading all individual modules (Step 3), apply integration rules for concern combinations that produce emergent patterns. Individual modules define independent rules; integration rules define **combined patterns** that arise only when specific modules are active together.
+
+| Active Combination | Integration Pattern | Injected Rule |
+|-------------------|-------------------|---------------|
+| `gui` + `realtime` | Real-time UI sync | S1: SC must cover optimistic update + conflict resolution + reconnection UI. S7: Add "stale UI after reconnect" prevention rule |
+| `gui` + `async-state` + `realtime` | Live state synchronization | S5: Add probe "How does remote state sync with local store? Conflict resolution strategy?" |
+| `microservice` + `message-queue` | Inter-service async communication | S1: SC must cover message contract versioning + dead-letter handling. S7: Add "cross-service message schema drift" prevention |
+| `microservice` + `auth` | Distributed authentication | S5: Add probe "Token propagation strategy across service boundaries? Service-to-service auth vs user auth?" |
+| `microservice` + `multi-tenancy` | Tenant-aware service mesh | S1: SC must cover tenant ID propagation across service calls. S7: Add "tenant context lost in async service call" prevention |
+| `http-api` + `external-sdk` | Third-party API integration | S5: Add probe "SDK pagination strategy? Rate limit handling? Retry policy?" S7: Add "SDK version breaking change" prevention |
+| `gui` + `i18n` + `async-state` | Localized reactive UI | S7: Add "locale change doesn't trigger state-dependent re-render" prevention |
+| archetype:`ai-assistant` + `realtime` | Streaming AI responses | S1: SC must cover stream interruption + partial response display + token budget mid-stream. S5: Add probe "Stream backpressure when UI can't keep up?" |
+| archetype:`ai-assistant` + `external-sdk` | Multi-provider LLM | S5: Add probe "Provider failover strategy? Response format normalization across providers?" |
+| archetype:`microservice` + `task-worker` | Distributed job processing | S1: SC must cover cross-service job ownership + progress tracking. S7: Add "orphaned job after service restart" prevention |
+
+**Application**: Integration rules are appended to the merged profile after Step 3 completes. They follow the same merge rules (S1 append, S5 append, S7 append). Only combinations where ALL listed modules are active trigger their rules.
+
+**Extensibility**: To add new integration rules, append rows to this table. Each row must specify: the combination trigger, the emergent pattern name, and the concrete rules injected.
+
 ### Step 4. Cache in Working Memory
 
 Once loaded, the merged domain profile is used for the entire command session. No need to re-read module files mid-command.

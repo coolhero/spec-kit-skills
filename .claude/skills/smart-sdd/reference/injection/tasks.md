@@ -269,26 +269,33 @@ Add this task now or during the "I've finished editing" step.
 ────────────────────────────────────────────────────
 ```
 
-**Stub resolution task injection check** (if preceding Features have `stubs.md` entries targeting the current FID — see `context-injection-rules.md` § Dependency Stub Resolution Injection):
-After reading tasks.md, if any preceding Feature's `stubs.md` contains rows where `Dependent Feature` = current FID, scan tasks.md for stub resolution tasks (keywords: the stub's file name, "replace stub", "replace placeholder", "replace hardcoded", the previous FID like "F002"). If **no stub resolution tasks are found**, append:
+**Stub resolution task injection check — BLOCKING** (if preceding Features have `stubs.md` entries targeting the current FID — see `context-injection-rules.md` § Dependency Stub Resolution Injection):
+After reading tasks.md, if any preceding Feature's `stubs.md` contains rows where `Dependent Feature` = current FID, scan tasks.md for stub resolution tasks (keywords: the stub's file name, "replace stub", "replace placeholder", "replace hardcoded", the previous FID like "F002"). If **no stub resolution tasks are found**:
+
+1. **BLOCK ReviewApproval** — Do NOT offer approval options until resolved.
+2. Display the following and call AskUserQuestion:
 
 ```
-── ⚠️ Stub Resolution Tasks Missing ────────────────
+── 🚫 Stub Resolution Tasks Missing (BLOCKING) ─────
 Preceding Features have [N] stubs depending on this Feature:
   From [FID]-[name]:
     • [File:Line] — [Current (Stub)] → [Target (Real)]
     • [File:Line] — [Current (Stub)] → [Target (Real)]
 
-But tasks.md has no tasks to resolve these stubs. Without explicit
-tasks, the stubs will remain as hardcoded/placeholder code even after
-this Feature is implemented.
+tasks.md has no tasks to resolve these stubs. Without explicit tasks,
+the stubs will remain as hardcoded/placeholder code even after this
+Feature is implemented, breaking the cross-Feature contract.
 
-Recommended: add a task per stub (or group related stubs into one task):
-  1. Replace [stub description] in [file] with real [Feature] implementation
-
-Add these tasks now or add them during the "I've finished editing" step.
+This is BLOCKING — stubs from preceding Features MUST be resolved.
 ────────────────────────────────────────────────────
 ```
+
+3. AskUserQuestion options:
+   - **"Add stub resolution tasks"** → Agent generates stub resolution tasks (one per stub or grouped by file) and appends to tasks.md. Then re-display Review with updated tasks.
+   - **"Stubs are already covered by existing tasks"** → Agent must verify by mapping each stub to a specific existing task. If verified, proceed. If not, re-block.
+   - **"Skip — I'll handle stubs manually"** → Record in sdd-state.md Global Evolution Log: `⚠️ [FID]: stub resolution skipped by user for [N] stubs from [preceding FIDs]`. Proceed with warning badge in Review.
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
 **Feature size warning** (always checked):
 After reading tasks.md, count the total number of tasks. Also read plan.md to estimate file count from architecture/phases:

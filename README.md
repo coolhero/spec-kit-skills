@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:35 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:48 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -137,6 +137,8 @@ Sets up the PROJECT:                 Defines each FEATURE:
 Domain Profile rules add project-type-specific completion criteria — an API project's Brief must define endpoint contracts; a GUI project's Brief must specify user interactions. Incomplete inputs trigger targeted questions rather than proceeding with gaps.
 
 After completeness criteria are met, the agent presents a **Brief Summary** showing its interpretation. The user explicitly approves it or corrects misunderstandings — an **intent verification gate** that catches interpretation errors before they propagate through the pipeline. A second-layer **Brief↔Spec alignment check** during `specify` verifies that the generated spec faithfully reflects the approved Brief.
+
+For existing codebases (`/smart-sdd adopt`), Features are auto-extracted from source code — but the same intent verification principle applies. Each Feature goes through a scope confirmation gate before adoption begins, ensuring the user validates what was inferred from code analysis.
 
 The result: specs generated from a well-formed, user-verified Brief are more complete, more testable, and require fewer mid-implementation corrections.
 
@@ -1170,7 +1172,6 @@ Each skill follows the same internal directory convention:
 | `README.md` | English documentation |
 | `README.ko.md` | Korean documentation |
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for browser automation and Electron CDP configuration |
-| `TODO.md` | Project task tracker (all planned tasks completed as of 2026-03-08) |
 | `history.md` | Design decision history extracted from git history |
 | `lessons-learned.md` | AI agent pipeline failure patterns (G1–G16) and specific lessons (L1–L33) — universal takeaways for agent skill builders |
 | `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |

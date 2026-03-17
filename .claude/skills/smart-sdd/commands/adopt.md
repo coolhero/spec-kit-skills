@@ -243,6 +243,35 @@ For each Feature in the Release Group:
    - `completed` → skip (already completed via standard pipeline)
    - `restructured` → warn user and ask whether to re-adopt (restructured Features have 🔀 steps that need re-execution; see `reference/state-schema.md` § Restructure)
 
+#### Step 0.5 — Feature Intent Verification (HARD STOP)
+
+> **Why this gate exists**: Unlike greenfield/add where the user explicitly defines each Feature through the Briefing process (6-perspective elaboration + Brief Confirmation), adoption mode auto-extracts Features from code analysis. The user never explicitly stated their intent for each Feature — they only approved the Feature *list* during reverse-spec. This gate ensures the user understands and confirms what each Feature will document before spec extraction begins.
+
+Before starting adoption for this Feature, display a Feature Intent Summary and get explicit user confirmation:
+
+```
+📋 Feature Intent Verification — [FID]-[name]
+
+Description: [from roadmap.md Feature Catalog]
+Source files: [from pre-context.md Source Reference — list top 5 files]
+Owned entities: [from pre-context.md or entity-registry if populated]
+Dependencies: [from roadmap Dependency Graph — blocked-by / enables]
+
+This Feature was auto-extracted from source code analysis.
+Before we document it as a spec, please confirm:
+
+  1. Is the scope correct? (Does this Feature cover what you expect?)
+  2. Should any source files be added or removed?
+  3. Is the description accurate?
+```
+
+AskUserQuestion options:
+- **"Scope is correct — proceed"** → Continue to Step 1
+- **"Adjust scope"** → User provides corrections. Agent updates pre-context.md and roadmap.md accordingly, then re-displays for confirmation.
+- **"Skip this Feature"** → Mark as `deferred` in sdd-state.md with reason `user-skipped-during-adopt`. Proceed to next Feature.
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
 #### Step 1 — Specify (Adoption Mode)
 
 Execute the **full Common Protocol** with adoption-specific injection:

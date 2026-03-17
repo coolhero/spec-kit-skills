@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-03-17] Implementation Gap Analysis — 6 Structural Fixes
+
+### Context
+
+Analyzed whether the three README-claimed gaps (cross-Feature memory, project context understanding, user intent verification) were actually addressed by the implementation. Found 6 gaps and fixed all.
+
+### Fixes
+
+| # | Gap | File(s) Modified | Fix |
+|---|-----|-----------------|-----|
+| 1 | Greenfield pre-context empty | `commands/add.md` | Added Cross-Feature Awareness section to Phase 6 pre-context generation: Sibling Feature Summary, Dependency Context, Registry Snapshot |
+| 2 | Entity ownership conflict undetected | `commands/pipeline.md`, `reference/injection/plan.md` | Added Entity Ownership Conflict Gate in Plan Execute+Review (BLOCKING). Added schema divergence protection in Post-Step Update Rules |
+| 3 | Stub propagation silent failure | `reference/injection/implement.md`, `reference/injection/tasks.md` | Made stub scan mandatory (always runs, always reports). Made stub resolution task check BLOCKING in tasks Review |
+| 4 | Adoption mode no intent verification | `commands/adopt.md` | Added Step 0.5 Feature Intent Verification (HARD STOP) before each Feature's adoption |
+| 5 | Context Budget silent info loss | `reference/context-injection-rules.md` | Added Step 2.5 RE-READ GATE: post-execution relevance check for skipped/summarized sections |
+| 6 | Concern integration knowledge missing | `domains/_resolver.md` | Added Step 3.5 Cross-Concern Integration Rules: 10 combination patterns (gui+realtime, microservice+auth, etc.) |
+
+### Other
+
+- Deleted `TODO.md` (all tasks completed, deferred items tracked in history)
+- Removed TODO.md from README file tables
+
+---
+
 ## [2026-03-17] Full Review Protocol Verification (11-point) — Integrity Fixes
 
 ### Context

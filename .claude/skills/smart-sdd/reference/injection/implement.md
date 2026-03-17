@@ -974,13 +974,17 @@ When implementing hover, click, or popup interactions, check the following befor
    - If the entity/API drafts in the "For /speckit.plan" section differ from the actual implementation, update them
    - Report the changes to the user
 
-2. **Dependency Stub Registry** — generate `SPEC_PATH/[NNN-feature]/stubs.md`:
-   After all tasks are implemented, scan the codebase for stub/placeholder implementations created due to dependency on future Features. Generate `stubs.md` only if stubs exist.
+2. **Dependency Stub Registry (MANDATORY SCAN)** — generate `SPEC_PATH/[NNN-feature]/stubs.md`:
+   After all tasks are implemented, **always scan** the codebase for stub/placeholder implementations created due to dependency on future Features. This scan is mandatory — do NOT skip it even if no stubs seem obvious.
 
-   **Detection method** (apply ALL):
+   **Detection method** (apply ALL three — do not stop at the first):
    - Scan `tasks.md` for tasks explicitly marked as partial/stub due to future Feature dependency
-   - Search implemented files for `TODO` comments referencing other Feature IDs (e.g., `// TODO: F003`, `// TODO: Read from settings store (F003-settings)`)
-   - Check for hardcoded values that should come from a not-yet-implemented Feature's store/API/config
+   - Search **all files modified or created during this implement step** for `TODO` comments referencing other Feature IDs (e.g., `// TODO: F003`, `// TODO: Read from settings store (F003-settings)`)
+   - Cross-reference the roadmap Dependency Graph: for each Feature that depends on the current Feature, check if any implemented code includes hardcoded values, empty stub components, or mock data that should eventually come from that dependent Feature's store/API/config
+
+   **Result reporting** (always display, even when no stubs found):
+   - If stubs found: generate `stubs.md` and display summary
+   - If no stubs found: display `📋 Dependency Stubs: None — scanned [N] modified files, no future-Feature dependencies detected` (explicit confirmation that the scan ran)
 
    **stubs.md format**:
    ```markdown
@@ -998,9 +1002,8 @@ When implementing hover, click, or popup interactions, check the following befor
    **Rules**:
    - Each row must have a specific `File:Line` location (not just a file name)
    - `Dependent Feature` must reference an actual FID from the roadmap
-   - If no stubs are found, do NOT create an empty `stubs.md` — skip this step entirely
-   - Display summary: `📋 Dependency Stubs: [N] stubs registered in stubs.md (dependencies: [FID list])`
-   - If zero stubs: `📋 Dependency Stubs: None — no future-Feature dependencies detected`
+   - If no stubs are found, do NOT create an empty `stubs.md` — but still display the scan confirmation (see Result reporting above)
+   - If stubs found: display summary `📋 Dependency Stubs: [N] stubs registered in stubs.md (dependencies: [FID list])`
 
 3. **Interaction Surface Inventory** (GUI Features only) — generate `SPEC_PATH/[NNN-feature]/interaction-surfaces.md`:
    After all tasks are implemented, scan the Feature's UI components and record all user-facing interaction surfaces.
