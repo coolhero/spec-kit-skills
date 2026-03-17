@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-17] README.ko.md Structure Sync with README.md (c541674)
+
+Synchronized README.ko.md structure with README.md changes from commit c541674.
+
+### Changes
+- **Section reordering**: Moved User Journeys + Quick Examples before Architecture (matching README.md)
+- **E2E merge**: Merged standalone "End-to-End 워크플로우 예시" section into User Journeys as subsections
+- **Architecture split**: Split monolithic Architecture section into 4 independent ## sections: 아키텍처, 도메인 모듈 시스템, 확장성 & 커스터마이징, 세션 복원력 & 에이전트 거버넌스
+- **New content**: Added "Domain Profile 결정 방법" (Greenfield vs Brownfield detection paths) and "모듈 내부 구조 — Section 시스템" (S/A/R/F section tables) — translated from README.md
+
+### Also in this session (earlier commit 9aa2d3b)
+- Created ARCHITECTURE-EXTENSIBILITY.ko.md (Korean translation, 738 lines)
+- Updated README.ko.md links to point to .ko.md version
+- Added sync rules to CLAUDE.md
+- Updated _resolver.md with Brownfield/Greenfield profile detection split
+
+---
+
 ## [2026-03-17] Domain Module Expansion — 6 GAPs from OSS Project Analysis
 
 Analyzed 4 open-source projects (OpenJarvis, open-trading-api, Feast, Vanna) against spec-kit-skills' domain coverage. Identified 6 structural gaps and implemented solutions.
