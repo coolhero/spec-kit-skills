@@ -161,15 +161,25 @@ If user passes `--profile <name>`, read the named profile from `domains/profiles
 
 ## Profile Selection (during init or reverse-spec)
 
-When no Domain Profile exists yet (first-time setup):
+When no Domain Profile exists yet (first-time setup), the detection method depends on the scenario:
 
-1. **Auto-detection**: Scan project for signals:
+### Brownfield / Adoption (existing codebase)
+
+1. **File-system scanning**: Scan project files for R1 code pattern signals:
    - `package.json` + `src/pages/` or `src/app/` → likely `fullstack-web`
    - `Cargo.toml` + `src/main.rs` without UI → likely `cli-tool` or `web-api`
    - Electron indicators (`electron`, `electron-builder` in dependencies) → likely `desktop-app`
 2. **User confirmation**: Present detected profile via AskUserQuestion
-3. **User can specify** `--profile` argument to override auto-detection
-4. Write Domain Profile to sdd-state.md
+
+### Greenfield (no existing code)
+
+1. **S0/A0 keyword inference**: Extract signals from the user's text description (idea string or PRD) and match against S0/A0 signal keywords from `shared/domains/` modules. See § Greenfield Inference below for the full algorithm.
+2. **User confirmation**: Present inferred profile via AskUserQuestion (HARD STOP)
+
+### Common
+
+- **User can specify** `--profile` argument to override auto-detection or inference
+- Both paths produce the same Domain Profile format written to sdd-state.md
 
 ---
 

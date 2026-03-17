@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 08:35 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 10:11 KST
 
 **Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
 
@@ -1041,7 +1041,8 @@ Each skill follows the same internal directory convention:
 
 | File | Description |
 |------|-------------|
-| `ARCHITECTURE-EXTENSIBILITY.md` | Detailed architecture extensibility guide — module system, adding interfaces/concerns/archetypes/foundations, sophistication levels |
+| `ARCHITECTURE-EXTENSIBILITY.md` | Detailed architecture extensibility guide (English) — module system, adding interfaces/concerns/archetypes/foundations, sophistication levels |
+| `ARCHITECTURE-EXTENSIBILITY.ko.md` | Detailed architecture extensibility guide (Korean) |
 | `CLAUDE.md` | Project rules for Claude Code agents (immutable rules, conventions, review protocol) |
 | `README.md` | English documentation |
 | `README.ko.md` | Korean documentation |

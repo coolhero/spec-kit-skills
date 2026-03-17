@@ -2,13 +2,31 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 07:57 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 10:11 KST
 
 **[spec-kit](https://github.com/github/spec-kit)이 Feature 간에 동작하게 만드는 Claude Code 스킬 — Feature 3이 Feature 1이 이미 결정한 것을 알 수 있도록**
 
 - **Reverse-Spec** — 기존 코드베이스를 분석하여 SDD 파이프라인에 필요한 모든 정보를 추출합니다: 앱이 무엇을 하는지, 어떻게 구조화되어 있는지, 어떤 데이터 모델과 API가 존재하는지. 기존 앱을 처음부터 재구축하거나, 이미 작성된 코드에 SDD 문서를 추가할 때 사용합니다. smart-sdd 없이 spec-kit만 사용할 수 있는 독립 프롬프트(`speckit-prompt.md`)도 함께 생성합니다.
 - **Smart-SDD** — 각 spec-kit 명령에 프로젝트 전체 맥락을 자동으로 주입합니다. Feature 3에 대해 `/speckit-plan`을 실행하면, Feature 1의 데이터 모델과 Feature 2의 API 계약이 자동으로 전달되어 — 가정이 아닌 실제 존재하는 것에 기반하여 계획을 세울 수 있습니다.
 - **Case Study** — 완료된 프로젝트에서 구조화된 회고 보고서를 생성합니다. 파이프라인을 돌리며 쌓인 수치(Feature 수, 테스트 결과, 원본 대비 재현도)와 함께 *왜* 그렇게 만들었는지의 이야기를 정리합니다. 보고서는 도메인 모듈 개선에도 피드백됩니다.
+
+## 목차
+
+- [빠른 시작](#빠른-시작)
+- [해결하는 문제](#해결하는-문제)
+- [스킬](#스킬)
+- [사용자 여정](#사용자-여정)
+- [빠른 예시](#빠른-예시)
+- [아키텍처](#아키텍처)
+- [도메인 모듈 시스템](#도메인-모듈-시스템)
+- [확장성 & 커스터마이징](#확장성--커스터마이징)
+- [세션 복원력 & 에이전트 거버넌스](#세션-복원력--에이전트-거버넌스)
+- [상세 레퍼런스](#상세-레퍼런스)
+- [/reverse-spec — 상세 워크플로우](#reverse-spec--상세-워크플로우)
+- [smart-sdd 없이 spec-kit 사용하기](#smart-sdd-없이-spec-kit-사용하기)
+- [/smart-sdd — 상세 워크플로우](#smart-sdd--상세-워크플로우)
+- [레퍼런스](#레퍼런스)
+- [파일 맵](#파일-맵)
 
 ---
 
@@ -265,7 +283,7 @@ Interface                    Concern                      Archetype             
 
 이 추론은 **Clarity Index (CI)**로 채점됩니다 — 7개 차원(목적, 기능, 유형, 스택, 사용자, 규모, 제약조건)에 걸쳐 아이디어의 구체성을 측정하는 백분율입니다. 높은 CI(70%+)는 명확화를 건너뛰고 Proposal을 바로 생성하고, 낮은 CI는 활성 모듈의 S5 정교화 프로브를 사용하여 타겟 질문을 합니다. 생성된 Proposal은 승인 전에 섹션별 수정이 가능합니다 — 목적 관련 질문을 다시 받지 않고 기술 스택만 변경하거나, 아키텍처에 영향 없이 Feature만 조정할 수 있습니다. CI는 파이프라인으로 전파됩니다 — 초기 CI가 낮을수록 specify와 plan에서 더 많은 검증 체크포인트가 적용되어, 모호한 아이디어가 불완전한 스펙을 생성하지 않도록 합니다. 전체 모델은 `reference/clarity-index.md` 참고.
 
-**합성이 파이프라인을 어떻게 구동하는가**: 모듈은 출력 파일을 생성하지 않습니다 — 에이전트의 워킹 메모리에 행동 규칙셋으로 병합됩니다. 각 섹션은 특정 파이프라인 단계로 라우팅됩니다: `S1`은 `specify`(SC 생성)를, `S5`는 `clarify`(상담 프로브)를, `S7`은 `plan`/`implement`/`verify`(버그 방지)를, `S3`는 `verify`(검증 게이트)를, `A1`/`A4`/`F7`은 `constitution`(도메인 원칙)을 형성합니다. 구체적인 before/after 예시가 포함된 전체 워크스루는 [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline) 참고.
+**합성이 파이프라인을 어떻게 구동하는가**: 모듈은 출력 파일을 생성하지 않습니다 — 에이전트의 워킹 메모리에 행동 규칙셋으로 병합됩니다. 각 섹션은 특정 파이프라인 단계로 라우팅됩니다: `S1`은 `specify`(SC 생성)를, `S5`는 `clarify`(상담 프로브)를, `S7`은 `plan`/`implement`/`verify`(버그 방지)를, `S3`는 `verify`(검증 게이트)를, `A1`/`A4`/`F7`은 `constitution`(도메인 원칙)을 형성합니다. 구체적인 before/after 예시가 포함된 전체 워크스루는 [ARCHITECTURE-EXTENSIBILITY.ko.md § 2b](ARCHITECTURE-EXTENSIBILITY.ko.md#2b-합성된-모듈이-파이프라인을-구동하는-방식) 참고.
 
 **모듈 로딩 순서**: `_core.md` (항상) → 활성 Interface → 활성 Concern → 활성 Archetype → Scenario → 사용자 커스텀 (`domain-custom.md`).
 
@@ -356,7 +374,7 @@ T0 Feature는 코드가 필요한 Critical 항목이 있는 Foundation 카테고
 - **파이프라인 단계**: sdd-state.md 플래그를 통해 특정 spec-kit 단계 건너뛰기
 - **심각도 임계값**: `domain-custom.md`를 통해 어떤 verify 버그가 루프백 vs 인라인 수정할지 조정
 
-단계별 확장 가이드와 5단계 정교화 모델의 상세 내용은 [ARCHITECTURE-EXTENSIBILITY.md](ARCHITECTURE-EXTENSIBILITY.md) 참고. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md`, 다중 백엔드 런타임 검증 아키텍처는 `reference/runtime-verification.md` 참고.
+단계별 확장 가이드와 5단계 정교화 모델의 상세 내용은 [ARCHITECTURE-EXTENSIBILITY.ko.md](ARCHITECTURE-EXTENSIBILITY.ko.md) 참고. 모듈 스키마는 `domains/_schema.md`, 로딩 프로토콜은 `domains/_resolver.md`, 다중 백엔드 런타임 검증 아키텍처는 `reference/runtime-verification.md` 참고.
 
 ### 세션 복원력 & 에이전트 거버넌스
 
@@ -965,7 +983,8 @@ specs/
 
 | 파일 | 설명 |
 |------|------|
-| `ARCHITECTURE-EXTENSIBILITY.md` | 아키텍처 확장성 상세 가이드 — 모듈 시스템, 인터페이스/관심사/아키타입/Foundation 추가, 정교화 레벨 |
+| `ARCHITECTURE-EXTENSIBILITY.md` | 아키텍처 확장성 상세 가이드 (영문) — 모듈 시스템, 인터페이스/관심사/아키타입/Foundation 추가, 정교화 레벨 |
+| `ARCHITECTURE-EXTENSIBILITY.ko.md` | 아키텍처 확장성 상세 가이드 (한국어) |
 | `CLAUDE.md` | Claude Code 에이전트용 프로젝트 규칙 (불변 규칙, 규약, 리뷰 프로토콜) |
 | `README.md` | 영문 문서 |
 | `README.ko.md` | 한국어 문서 |
