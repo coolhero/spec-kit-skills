@@ -33,6 +33,17 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 3. **Match signals**: Map extracted keywords against S0 Primary/Secondary keywords
 4. **Score CI**: Calculate Clarity Index across 7 dimensions (see `reference/clarity-index.md` § 1)
 5. **Infer Domain Profile**: Build candidate Interfaces + Concerns from signal matches
+6. **Infer Project Maturity & Team Context** (greenfield only — see `domains/scenarios/greenfield.md` § Configuration Parameters):
+   - **Project Maturity**: Infer from CI Scale & Scope dimension:
+     - CI Scale = 0–1 or keywords "personal tool", "experiment", "POC" → `prototype`
+     - CI Scale = 2 or keywords "MVP", "startup", "first version" → `mvp`
+     - CI Scale = 3 or keywords "enterprise", "production", "scalable" → `production`
+     - Default: `mvp`
+   - **Team Context**: Infer from user input keywords:
+     - "team of", "large team", "multiple developers", "organization" → `large-team`
+     - "small team", "pair", "2-3 developers" → `small-team`
+     - No team mention → `solo` (default)
+   - Store both values in sdd-state.md header after Proposal approval (see `reference/state-schema.md`)
 
 #### Proposal Step 2: Tier-Based Routing
 
@@ -56,6 +67,8 @@ Generate the Proposal document (format in `reference/clarity-index.md` § 7) con
 - **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § S0/A0 Aggregation)
 - **Proposed Features**: Extracted from signals + inferred from domain knowledge
 - **Quality Rules Activated**: S1/S7 rules from active modules
+- **Project Maturity**: Inferred value (`prototype`/`mvp`/`production`) with rationale
+- **Team Context**: Inferred value (`solo`/`small-team`/`large-team`) with rationale
 - **Open Questions**: Any CI dimensions with confidence ≤ 1
 
 Display the Proposal and ask via AskUserQuestion:
@@ -75,6 +88,7 @@ When the user selects "Modify Proposal" at Step 3's HARD STOP:
    - "Domain Profile (Interfaces / Concerns)"
    - "Tech Stack"
    - "Archetype"
+   - "Project Maturity / Team Context"
    - "Other section"
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
@@ -91,6 +105,7 @@ When the user selects "Modify Proposal" at Step 3's HARD STOP:
    | Target Users | Free-text edit | Re-score Target Users dimension only |
    | Scale & Scope | Free-text edit | Re-score Scale & Scope dimension only |
    | Constraints | Free-text edit | Re-score Constraints dimension only |
+   | Project Maturity / Team Context | Select from `prototype`/`mvp`/`production` and `solo`/`small-team`/`large-team` | No CI change — these are greenfield scenario parameters stored in sdd-state.md |
 
 3. **CI re-scoring rules**:
    - Only re-score affected dimension(s), not all 7

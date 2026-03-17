@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-17] Enforcement Gap Closure — 4 Fixes (from external analysis)
+
+### Context
+
+External agent analysis identified "trust-based vs guard-rail" enforcement gaps. Domain rules were loaded into context but never verified post-execution. Greenfield scenario parameters were defined but never collected. Registry updates had no atomicity guarantee. Brief↔Spec alignment was warning-only for capability gaps.
+
+### Fixes
+
+| # | Gap | Fix | File(s) |
+|---|-----|-----|---------|
+| 2f | Domain rule enforcement implicit | Added Domain Rule Compliance Check: S1→SC coverage in specify (warning), S7→Pattern Constraints in plan (blocking — auto-add missing rules) | `specify.md`, `plan.md` |
+| 2g | greenfield params orphaned | Connected `project_maturity`/`team_context`: auto-inference in init.md Proposal Step 1, storage in state-schema.md, display in Proposal Step 3, modifiable in Step 3a, graceful degradation defaults | `init.md`, `state-schema.md`, `context-injection-rules.md` |
+| 1g | Registry update atomicity | Added Registry Freshness Pre-check in Assemble step: verify preceding Feature's entities/APIs are in registry before context assembly, catch-up update if stale | `pipeline.md` |
+| 3g | Brief↔Spec alignment too weak | Upgraded capability coverage gaps from Warning to BLOCKING (entity/interface/scope drift remain Warning). Added rationale for blocking | `specify.md` |
+
+### Design Decision
+
+- S1 compliance check is **warning** (specify output varies widely, false positives likely). S7 compliance check is **blocking** (Pattern Constraints section already blocking — extending completeness is natural).
+- Brief capability gaps are **blocking** because they represent clear intent violation (user defined X, spec dropped X). Scope drift stays warning (spec may legitimately expand).
+
+---
+
 ## [2026-03-17] Implementation Gap Analysis — 6 Structural Fixes
 
 ### Context

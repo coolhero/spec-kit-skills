@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:48 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 07:48 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -72,13 +72,13 @@ cd spec-kit-skills
 
 ### Background: Spec-Driven Development
 
-In spec-driven development, you don't ask an AI agent to "build a todo app." You break the app into **Features** — self-contained units of functionality like authentication, task CRUD, or dashboard UI. Each Feature gets exactly one **spec** that defines *what* it does (functional requirements, success criteria, data models) before the agent writes any code. The agent then implements that spec through a structured pipeline: specify → plan → tasks → analyze → implement → verify.
+In spec-driven development, you don't ask an AI agent to "build a TO-DO app." You break the app into **Features** — self-contained units of functionality like authentication, task CRUD, or dashboard UI. Each Feature gets exactly one **spec** that defines *what* it does (functional requirements, success criteria, data models) before the agent writes any code. The agent then implements that spec through a structured pipeline: specify → plan → tasks → analyze → implement → verify.
 
 This is the approach that [spec-kit](https://github.com/github/spec-kit) provides. One Feature, one spec, one pipeline run — and it works well.
 
 ### The Problem: Specs Don't Talk to Each Other
 
-The challenge is that **real software is never just one Feature.** Even a simple todo app has auth, task management, and a UI — three Features, three specs, three separate pipeline runs. And each spec is written independently.
+The challenge is that **real software is never just one Feature.** Even a simple TO-DO app has auth, task management, and a UI — three Features, three specs, three separate pipeline runs. And each spec is written independently.
 
 The agent building Feature 2 *might* figure out what Feature 1 decided — but that depends on the agent's capability and context window, not on any systematic guarantee. It may define the same `User` entity with different field names, or design APIs without knowing the auth pattern already chosen. Even within a single spec, the agent may lack sufficient understanding of the user's environment — the same "add authentication" means very different things for a multi-tenant SaaS platform versus an internal admin tool. And when the user's description is vague, like "add profile management," the agent may just accept it without asking what it actually means.
 

@@ -183,8 +183,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 4. **Multi-Provider API Detection** (if applicable — 2+ external API providers in FR-###)
 5. **Runtime Default Coverage Check** (if applicable — rebuild mode + Feature has settings/mode/configuration)
 6. **Build-Time Plugin FR Check** (if applicable — rebuild mode + source has build config with plugins)
-7. **Assemble Review Display** (include any ⚠️/❌ from steps 1-6)
-8. **HARD STOP** (ReviewApproval)
+7. **Domain Rule Compliance Check (S1)** (always — see § Domain Rule Compliance Check below)
+8. **Assemble Review Display** (include any ⚠️/❌ from steps 1-7)
+9. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -375,9 +376,52 @@ Spec additions beyond Brief:
 ────────────────────────────────────────────────
 ```
 
-**Enforcement**: ⚠️ Warning (not blocking). Include in the Review Display so the user sees the alignment status before approving the spec. The user may approve the drift ("yes, the spec correctly expanded the scope") or request corrections.
+**Enforcement**:
+- **Capability coverage gaps** (Brief capability → no FR): **🚫 BLOCKING**. If any Brief-defined capability has no corresponding FR, the user MUST resolve before approving:
+  - Add an FR to cover the capability, OR
+  - Confirm the capability was intentionally deferred ("Remove from scope")
+  - Display in Review with AskUserQuestion options per gap
+- **Entity alignment / Interface consistency gaps**: ⚠️ Warning (not blocking) — shown in Review for awareness
+- **Scope drift** (spec adds beyond Brief): ⚠️ Warning (not blocking) — user should be aware but may approve
+
+> **Rationale for blocking capability gaps**: The Brief represents the user's verified intent. If the spec silently drops a capability the user explicitly defined, it defeats the purpose of intent verification. Entity/interface gaps and scope drift are softer signals that benefit from user awareness but don't represent clear intent violations.
 
 **Skip if**: No Brief Summary exists in pre-context (legacy projects without Phase 1e).
+
+### Domain Rule Compliance Check (S1)
+
+> **Purpose**: Domain modules load S1 SC rules into context, but loading ≠ application. This check verifies that active S1 rules actually influenced the generated spec.md. Without this gate, domain rules are "trusted implicitly" — the agent may silently ignore rules buried in long context.
+
+After spec.md is generated, cross-check the active domain modules' S1 rules against the actual SCs in spec.md:
+
+**Procedure**:
+1. Recall the active S1 SC rules from the cached domain profile (loaded at session start by `_resolver.md` Step 3)
+2. For each S1 rule that is applicable to this Feature's scope:
+   - Check if at least one SC in spec.md addresses this rule's concern
+   - Example: S1 rule "UI interaction SCs must include loading states" → check if any SC covers loading state behavior
+   - Example: S1 rule "IPC call SCs must include timeout handling" → check if any SC covers IPC timeout
+3. Classify results:
+   - **✅ Covered**: SC exists that addresses this rule
+   - **⚠️ Not covered**: No SC addresses this rule — potential gap
+
+**Display (if gaps found)**:
+```
+── ⚠️ Domain Rule Compliance (S1) ──────────────
+Active S1 rules not reflected in spec SCs:
+  ⚠️ [gui] "UI interaction SCs must include loading states"
+     → No SC covers loading/spinner behavior
+  ⚠️ [async-state] "State transition SCs must cover error→retry"
+     → No SC covers retry-after-error flow
+  ✅ [ipc] "IPC call SCs must include timeout handling"
+     → Covered by SC-007
+
+[N] of [M] applicable S1 rules are covered by SCs.
+────────────────────────────────────────────────
+```
+
+**Enforcement**: ⚠️ Warning (not blocking) — included in Review Display. The user decides whether uncovered rules need additional SCs. If all rules are covered, display a single line in Review: `✅ Domain Rules (S1): [M]/[M] applicable rules covered by SCs`.
+
+**Skip if**: No domain modules loaded (e.g., `--skip-domain`), or only `_core.md` is active (core rules are too generic for meaningful compliance checking).
 
 ### Review Display Content
 

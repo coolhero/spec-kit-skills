@@ -429,6 +429,37 @@ The UX Behavior Contract makes **expected temporal behavior** explicit — thing
 4. **verify** → Phase 2 Step 3b (UX Behavior Contract Verification) uses Verify Method column for temporal checks
 5. **demo** → VERIFY_STEPS includes temporal verification sequences (wait-for + verify)
 
+## Domain Rule Compliance Check (S7 → Pattern Constraints)
+
+> **Purpose**: S7 Bug Prevention rules are loaded from domain modules, but loading ≠ enforcement. This check verifies that active S7 rules are reflected in the plan's Pattern Constraints and Bug Prevention sections. Without this gate, domain-specific prevention rules may be silently ignored.
+
+After plan.md is generated, cross-check the active domain modules' S7 rules against the plan:
+
+**Procedure**:
+1. Recall the active S7 Bug Prevention rules from the cached domain profile
+2. For each S7 rule applicable to this Feature:
+   - Check if Pattern Constraints section addresses this rule's concern
+   - Check if Bug Prevention Checks (B-1) below cover this rule
+   - Example: S7 rule [gui] "CSS rendering: stale hover state on scroll" → check if Pattern Constraints mentions scroll/hover interaction
+   - Example: S7 rule [ipc] "IPC boundary safety: unhandled rejection in main process" → check if Pattern Constraints mentions IPC error handling
+3. Classify:
+   - **✅ Addressed**: Rule reflected in Pattern Constraints or B-1
+   - **⚠️ Missing**: Rule not addressed — add to Pattern Constraints
+
+**Enforcement**: If missing rules are found, the agent MUST add them to Pattern Constraints before offering ReviewApproval. This is **BLOCKING** — Pattern Constraints completeness is already a blocking gate, and this extends it to cover domain-specific rules. Display in Review:
+```
+── Domain Rule Compliance (S7) ──────────────────
+  ✅ [N] domain-specific S7 rules addressed in Pattern Constraints
+  ➕ [M] rules auto-added to Pattern Constraints:
+     • [async-state] "Unbatched state updates in event handlers"
+     • [ipc] "Unhandled rejection crossing IPC boundary"
+────────────────────────────────────────────────
+```
+
+**Skip if**: No domain modules beyond `_core.md` are active.
+
+---
+
 ## Bug Prevention Checks (B-1)
 
 > Pre-implementation bug prevention checks at the plan stage.

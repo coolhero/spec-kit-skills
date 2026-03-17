@@ -50,6 +50,8 @@ If validation fails:
 **State Schema Version**: 2.0
 **Framework**: electron | tauri | express | nestjs | fastapi | nextjs | vite-react | react-native | flutter | custom | none
 **Structure**: single-package | monorepo
+**Project Maturity**: prototype | mvp | production
+**Team Context**: solo | small-team | large-team
 
 ---
 

@@ -34,6 +34,19 @@ The pipeline is single-direction (reverse-spec → specify → plan → tasks �
 - Also references actual implementation results from preceding Features (under `specs/`) if available
 - **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See `context-injection-rules.md` § Missing/Sparse Content Handling for details.
 
+**Registry Freshness Pre-check** (for Features after F001):
+Before assembling context, verify that registries reflect the latest preceding Feature's updates:
+1. Read `BASE_PATH/entity-registry.md` and `BASE_PATH/api-registry.md`
+2. Check the last "Used by Features" / "Cross-Feature Consumers" entries — do they include the preceding Feature that just completed its plan/implement step?
+3. If the preceding Feature's plan completed but its entities/APIs are NOT reflected in the registry:
+   - **Registry is stale** — the Post-Step Update from the preceding Feature's plan was likely skipped or failed
+   - Display: `⚠️ Registry Freshness: entity-registry.md does not reflect [preceding FID]'s plan output. Running catch-up update.`
+   - Read the preceding Feature's `data-model.md` and `contracts/` → update registries now
+   - Display: `✅ Registry updated with [preceding FID]'s [N] entities and [M] APIs`
+4. If registries are current: proceed silently (no message needed)
+
+> **Why this check exists**: If a plan Post-Step Update fails (context limit, session break, or agent omission), the next Feature assembles stale registry data. This pre-check catches the gap before it propagates. The cost is one registry read per Feature start — negligible compared to the cost of cross-Feature inconsistency.
+
 **Context Budget Estimation** (for projects with 10+ Features):
 Before reading files, estimate the total context volume of Read Targets:
 1. Count the number of Read Target files and their approximate sizes (pre-context: ~200 lines, spec: ~100 lines, plan: ~150 lines, registries: varies)
