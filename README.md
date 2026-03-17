@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:19 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:21 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -70,11 +70,11 @@ cd spec-kit-skills
 
 ## What It Solves
 
-### Background: Specification-Driven Development
+### Background: Spec-Driven Development
 
-In [Specification-Driven Development (SDD)](https://github.com/github/spec-kit), you don't ask an AI agent to "build a todo app." You break the app into **Features** — authentication, task CRUD, dashboard UI — and write a **spec** for each one. A spec defines *what* a Feature does (functional requirements, success criteria, data models) before the agent writes any code. The agent then implements against the spec through a structured pipeline: specify → plan → tasks → analyze → implement → verify.
+In spec-driven development, you don't ask an AI agent to "build a todo app." You break the app into **Features** — self-contained units of functionality like authentication, task CRUD, or dashboard UI. Each Feature gets exactly one **spec** that defines *what* it does (functional requirements, success criteria, data models) before the agent writes any code. The agent then implements that spec through a structured pipeline: specify → plan → tasks → analyze → implement → verify.
 
-This is what [spec-kit](https://github.com/github/spec-kit) provides. One Feature, one spec, one pipeline run — and it works well.
+This is the approach that [spec-kit](https://github.com/github/spec-kit) provides. One Feature, one spec, one pipeline run — and it works well.
 
 ### The Problem: Specs Don't Talk to Each Other
 
