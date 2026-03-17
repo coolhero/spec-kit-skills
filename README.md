@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 14:40 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 15:26 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -105,13 +105,13 @@ spec-kit-skills adds three concepts on top of spec-kit, each addressing one gap:
 | **Source Behavior Inventory** | Function-level coverage tracking (for existing codebases) |
 | **Constitution** | Project-wide principles and architectural decisions |
 
-Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated. The agent doesn't need to remember — the artifacts remember for it.
+Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
 
 #### Domain Profile
 
-**The gap**: Agents apply the same generic approach regardless of project type.
+**The gap**: Agents apply the same generic approach regardless of project type. Every project and every organization has its own conventions, constraints, and quality criteria that agents don't know about.
 
-**The solution**: A composable rule system that detects your project type and loads only the relevant rules — so a REST API gets endpoint validation checks, a desktop app gets window management safety rules, and an AI chatbot gets streaming-first design principles.
+**The solution**: A composable rule system that detects your project type and loads only the relevant rules — so a REST API gets endpoint validation checks, a desktop app gets window management safety rules, and an AI chatbot gets streaming-first design principles. Organization-level conventions can be shared across projects, and project-specific rules can override both.
 
 A Domain Profile is composed from four axes: **Interface** (what the app exposes — GUI, API, CLI), **Concern** (cross-cutting patterns — auth, IPC, i18n), **Archetype** (domain philosophy — AI assistant, public API, microservice), and **Scenario** (why we're building — greenfield, rebuild, adoption). Each axis contributes rules that shape spec generation, bug prevention, and verification. See [Domain Module System](#domain-module-system) for details.
 
@@ -538,11 +538,15 @@ Each axis answers a different question:
 
 A **Domain Profile** = selected Interfaces + selected Concerns + Archetype + Scenario. For example: `desktop-app + [gui] + [async-state, ipc] + ai-assistant + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, an AI project gets streaming verification that a CRUD app doesn't need.
 
+> **Why Archetype?** The original 3-axis model covered _what_ the app exposes (Interface), _how_ it handles cross-cutting patterns (Concern), and _why_ it's being built (Scenario). But **domain-specific philosophy** — principles like "streaming-first" for AI apps or "contract stability" for public APIs — had no structured guidance. Archetype modules make these principles **structured, reusable, and extensible**.
+
+Conventions can be customized at three levels: **Skill-level** (built-in module defaults), **Org-level** (shared across projects via `org-convention.md`), and **Project-level** (per-project via `domain-custom.md`). Later levels override earlier ones — so an organization can enforce "all APIs must use our standard error envelope" across all projects, while individual projects can add project-specific rules on top.
+
 ### How Domain Profile Is Determined
 
 The way your Domain Profile is built depends on whether you're starting fresh or working with existing code:
 
-**Greenfield** (`/smart-sdd init`): Profile is inferred from **what you describe**. When you run `init "Build an AI-powered feature store with REST API"`, the system scans each module's signal keywords against your description. "AI" matches the `ai-assistant` archetype, "REST API" matches `http-api` interface, "feature store" matches `data-io` interface and `plugin-system` concern. The result is scored by the **Clarity Index** — a percentage across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) generates a Proposal directly; low CI triggers targeted questions to fill gaps. The Proposal shows the inferred profile for your approval before anything begins.
+**Greenfield** (`/smart-sdd init`): Profile is inferred from **what you describe**. When you run `init "Build an AI-powered feature store with REST API"`, the system scans each module's signal keywords against your description. "AI" matches the `ai-assistant` archetype, "REST API" matches `http-api` interface, "feature store" matches `data-io` interface and `plugin-system` concern. The result is scored by the **Clarity Index** — a percentage across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) generates a Proposal directly; low CI triggers targeted questions to fill gaps. The Proposal is section-editable — you can adjust the tech stack without re-answering purpose questions, or modify Feature candidates without affecting architecture decisions. After approval, CI propagates through the pipeline: a lower initial CI triggers more validation checkpoints during `specify` and `plan` to compensate for initial ambiguity. See `reference/clarity-index.md` for the full model.
 
 **Brownfield** (`/reverse-spec`): Profile is detected from **what your code contains**. The system scans your source files for code patterns — `socket.io` imports activate `realtime`, `@Entity` decorators activate `http-api`, `Cargo.toml` alongside `pyproject.toml` activates `polyglot`. Framework-specific patterns (Express middleware, FastAPI decorators) identify the Foundation. The detected profile is recorded automatically and used when the pipeline runs.
 
@@ -587,7 +591,7 @@ Each module isn't just a tag that says "this project uses auth." It's a file con
 | **F2** | Infrastructure checklist items | `init` (decisions before coding) / `analyze` (extract existing decisions) |
 | **F7** | Framework philosophy principles | `constitution` (framework-endorsed patterns) |
 
-When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
+**Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Scenario → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
 ### Platform Foundation & Tier System
 
@@ -602,7 +606,8 @@ Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library
    ├── Scenario (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: framework-specific guiding principles (distinct from F0–F6 checklists)
-   └── Custom (project-specific overrides)
+   ├── Org Convention (organization-level shared rules)
+   └── Project Custom (project-specific overrides)
 ```
 
 **Foundation files** in `reverse-spec/domains/foundations/` provide exhaustive checklists of infrastructure decisions per framework. Each item is classified by priority (Critical / Important / Optional) and grouped into categories (Window Management, Security, IPC, Middleware, Routing, etc.). F7 Philosophy captures framework-endorsed principles (e.g., Electron's "Process Crash Isolation", Express's "Middleware Composition") — _why_ certain patterns are preferred, not _what_ to configure.
