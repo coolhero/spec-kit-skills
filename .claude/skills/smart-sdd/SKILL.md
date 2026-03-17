@@ -227,7 +227,7 @@ After parsing the command, read the corresponding file for the detailed workflow
 | Command | Reference File | Description |
 |---------|---------------|-------------|
 | `init` | `commands/init.md` | Greenfield project setup |
-| `add` | `commands/add.md` | Add Features to existing project |
+| `add` | `commands/add.md` | Feature Briefing — structured intake + completeness validation |
 | `adopt` | `commands/adopt.md` | SDD adoption pipeline — wrap existing code with SDD docs |
 | `pipeline` | `commands/pipeline.md` | SDD pipeline — one Feature at a time (default) or batch (`--all`) |
 | `pipeline [FID]` | `commands/pipeline.md` | Target a specific Feature |

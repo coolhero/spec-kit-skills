@@ -5,6 +5,60 @@
 
 ---
 
+## [2026-03-17] Brief Implementation — S9/A5 Schema, Briefing Process, Pre-Context Template
+
+### Changes Made
+
+1. **S9 Brief Completion Criteria (domain module schema)**
+   - Added `S9. Brief Completion Criteria` section to `_schema.md` (S0-S9, was S0-S8)
+   - Added `A5. Brief Completion Criteria` for archetypes (A0-A5, was A0-A4)
+   - Implemented S9 in `_core.md` (universal criteria: name, capability, entity, dependency)
+   - Implemented S9 in all 5 interfaces: http-api (endpoints), gui (screens), cli (commands), data-io (sources/pipeline), tui (views/input)
+   - Implemented S9 in 6 key concerns: auth, realtime, i18n, plugin-system, async-state, multi-tenancy
+   - Implemented A5 in all 4 archetypes: ai-assistant (provider strategy), public-api (versioning), microservice (service boundary), sdk-framework (public API surface)
+   - Updated merge rules in `_schema.md` to include S9 and A5
+
+2. **add.md → "Feature Briefing" restructure**
+   - Renamed "6-Phase Universal Feature Definition" → "Feature Briefing"
+   - Renamed "Phase 1: Feature Definition" → "Phase 1: Briefing"
+   - Connected Phase 1 header to Brief concept (README § Three Core Concepts)
+   - Updated completion criteria to include 3 layers: base (6 perspectives) + S9 (domain) + A5 (archetype)
+   - Added note about S9/A5 gap-filling using S5 probes
+
+3. **feature-elaboration-framework.md → Brief quality gate**
+   - Updated purpose to explicitly identify as the "quality gate for the Brief concept"
+   - Added step 4: "Verify domain-specific Brief Completion Criteria (§ S9/A5)"
+   - Extended Completion Criteria section with domain-specific table (S9/A5 checks)
+
+4. **pre-context-template.md → Brief Summary section**
+   - Added "Brief Summary" section at top (after header, before Runtime Exploration)
+   - Fields: Description, User & Purpose, Capabilities, Data, Interfaces, Quality, Boundaries
+   - Serves as single source of truth for the Feature definition agreed during Briefing
+
+5. **SKILL.md → command description update**
+   - Updated `add` command description: "Feature Briefing — structured intake + completeness validation"
+
+6. **ARCHITECTURE-EXTENSIBILITY.md/ko.md → S9/A5 in section mapping**
+   - Added S9 and A5 rows to the "Section → Pipeline Step" mapping table
+
+7. **README.md/ko.md improvements (per user feedback)**
+   - Gap 2: Added organization/project-specific characteristics to the problem framing
+   - Gap 3: Changed from "accepts whatever input" to "doesn't verify intent understanding"
+   - Pipeline: Full pipeline (specify → plan → tasks → analyze → implement → verify)
+   - Workflow examples: Three concepts woven into all End-to-End scenarios with visual annotations
+   - User Journeys: Added Brief/GEL/Domain Profile labels to each journey path
+
+### Design Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| S9 numbering (not S10) | S9 | Keeps numbering compact; S4 was already scenario-specific, no collision |
+| A5 for archetypes | Separate from S9 | Archetype criteria are philosophical (e.g., "provider strategy"), interface criteria are structural (e.g., "endpoint defined") |
+| Universal S9 in _core | 4 universal criteria | Minimum bar for ALL projects regardless of domain |
+| Brief Summary in pre-context | Top of template | Quick-reference for downstream steps; single source of truth |
+
+---
+
 ## [2026-03-17] Three Core Concepts Framework — GEL, Domain Profile, Brief
 
 Established a unified conceptual framework for spec-kit-skills built on three core concepts, each addressing a structural gap in agentic coding at scale.

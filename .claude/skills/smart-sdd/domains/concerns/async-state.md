@@ -36,6 +36,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Async operations | At least one async operation identified (API calls, file I/O, background tasks) |
+| State management approach | How async state is tracked (loading/error/success states) |
+| Optimistic update intent | Whether optimistic updates are needed for UX stated |
+
+---
+
 ## S7. Bug Prevention Rules
 
 When this concern is active, enforce:

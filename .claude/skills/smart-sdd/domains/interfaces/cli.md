@@ -47,6 +47,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| At least one command or subcommand | Command name + what it does stated |
+| Input/output format | How input is provided (args, stdin, file) and output format (JSON, table, text) |
+| Error behavior | What happens on invalid input (exit code, error message approach) |
+
+---
+
 ## S8. Runtime Verification Strategy
 
 > Cross-references [reference/runtime-verification.md](../../reference/runtime-verification.md) § 6c.

@@ -37,6 +37,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Extension point(s) | At least one hook/event/slot where plugins can extend behavior |
+| Plugin lifecycle | How plugins are loaded (startup, dynamic, lazy) stated |
+| Isolation model | Whether plugins run in sandbox, shared process, or separate process |
+
+---
+
 ## S7. Bug Prevention — Plugin-Specific
 
 | ID | Pattern | Detection | Prevention |

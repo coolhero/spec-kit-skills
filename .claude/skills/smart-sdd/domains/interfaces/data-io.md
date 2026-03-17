@@ -43,6 +43,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Data source(s) identified | Input type (file, database, API, stream) + format (CSV, JSON, Parquet, etc.) stated |
+| Processing pipeline described | At least one transformation step + expected output format |
+| Volume/frequency indication | Batch vs streaming, approximate data size or frequency |
+
+---
+
 ## S8. Runtime Verification Strategy
 
 > Cross-references [reference/runtime-verification.md](../../reference/runtime-verification.md) § 6d.

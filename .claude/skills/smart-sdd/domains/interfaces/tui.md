@@ -53,6 +53,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| At least one view or screen | View name + what it displays stated |
+| Input handling approach | Key bindings or mouse interactions described |
+| Terminal framework choice | Framework identified (Ink, bubbletea, Blessed, custom) or "TBD — decide in plan" |
+
+---
+
 ## S7. Bug Prevention — TUI-Specific
 
 | ID | Pattern | Detection | Prevention |

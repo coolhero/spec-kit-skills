@@ -49,6 +49,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| At least one endpoint | Method (GET/POST/PUT/DELETE) + path + purpose stated |
+| API consumer or provider role | Direction clear: "provides API for X" or "consumes API from Y" |
+| Authentication requirement | Stated whether endpoints are public or auth-protected |
+
+---
+
 ## S7. Bug Prevention Rules
 
 When this interface is active, enforce:

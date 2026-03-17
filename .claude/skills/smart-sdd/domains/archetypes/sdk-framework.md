@@ -90,3 +90,14 @@
 4. **Backward compatibility by default** — new Features must not break existing consumer code. Deprecation warnings for at least one minor version before removal.
 
 5. **Documentation ships with code** — public API without documentation is a bug. Docstrings on all public exports. API reference generated from source.
+
+---
+
+## A5. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Public API surface | At least one public export/function/class described |
+| Extension mechanism | How consumers extend the SDK (plugins, hooks, subclassing, composition) — or "none" |
+| Target consumer | Who uses this SDK/framework (application developers, library authors, internal teams) |
+| Compatibility scope | Minimum supported versions (language, runtime, OS) stated or "TBD" |

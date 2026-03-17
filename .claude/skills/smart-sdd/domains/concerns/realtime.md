@@ -32,3 +32,13 @@
 | **Events** | What events are published/subscribed? Payload shapes? |
 | **Reliability** | Reconnection strategy? Message ordering? At-least-once/exactly-once? |
 | **Scaling** | Multiple server instances? Sticky sessions? Pub/sub broker? |
+
+---
+
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Connection type | WebSocket, SSE, or polling identified |
+| Event types | At least one real-time event described (what triggers it, what data it carries) |
+| Reconnection requirement | Whether auto-reconnect is needed stated |

@@ -19,7 +19,7 @@
 
 ---
 
-## Section Schema (S0–S7)
+## Section Schema (S0–S9)
 
 Every module uses the same section numbering. Omit sections that don't apply to the module type.
 
@@ -114,6 +114,18 @@ Interface-specific runtime verification configuration. Cross-references [referen
 | **Stop method** | How to clean up after verification |
 | **SC classification extensions** | Interface-specific SC auto-categories (e.g., `api-auto` for http-api) |
 
+### S9. Brief Completion Criteria (interfaces, concerns — additions to _core)
+
+Domain-specific minimum requirements for the **Briefing** process (`/smart-sdd add` Phase 1). When this module is active, the Brief is not considered complete until these criteria are met in addition to the base six-perspective completion criteria from `reference/feature-elaboration-framework.md`.
+
+| Field | Description |
+|-------|-------------|
+| **Required elements** | Domain-specific items that must be present in the Brief (e.g., "at least one endpoint for http-api") |
+| **Completion signal** | How to confirm the element is sufficiently defined (e.g., "method + path + purpose stated") |
+
+> S9 criteria are checked during `add` Phase 1 Elaboration (1c) alongside the base six perspectives.
+> If a criterion is not met, the agent asks targeted S5 probes to fill the gap before proceeding.
+
 ---
 
 ## Archetype Section Schema (A0–A4)
@@ -166,6 +178,17 @@ Principles to inject into the constitution-seed during reverse-spec analysis and
 | **Principle** | Constitution-level principle statement |
 | **Rationale** | Why this principle is critical for this archetype |
 
+### A5. Brief Completion Criteria (archetypes)
+
+Archetype-specific minimum requirements for the **Briefing** process (`/smart-sdd add` Phase 1). When this archetype is active, the Brief must satisfy these criteria in addition to base and interface/concern criteria.
+
+| Field | Description |
+|-------|-------------|
+| **Required elements** | Archetype-specific items that must be present in the Brief (e.g., "model provider strategy for ai-assistant") |
+| **Completion signal** | How to confirm the element is sufficiently defined |
+
+> A5 criteria extend S9 criteria. Checked during `add` Phase 1 Elaboration (1c).
+
 ---
 
 ## Profile Schema
@@ -206,8 +229,10 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 - **S5 Elaboration Probes**: Append (accumulate all probes)
 - **S7 Bug Prevention**: Append (accumulate all activation conditions)
 - **S8 Runtime Verification**: Per-interface (no merge — each interface has its own strategy)
+- **S9 Brief Completion Criteria**: Append (accumulate all module-specific Brief requirements)
 - **A0 Signal Keywords**: Aggregated per-archetype (each archetype's keywords are independent; see `reference/clarity-index.md` § 5)
 - **A1 Philosophy Principles**: Append (accumulate from all active archetypes)
 - **A2 SC Generation Extensions**: Append (add archetype-specific SC rules to S1)
 - **A3 Elaboration Probes**: Append (add archetype-specific probes to S5)
 - **A4 Constitution Injection**: Append (accumulate all archetype constitution principles)
+- **A5 Brief Completion Criteria**: Append (add archetype-specific Brief requirements to S9)

@@ -88,3 +88,14 @@ Principles to inject into constitution-seed when this archetype is active:
 - **Workspace boundary**: Agent cannot modify files outside designated workspace (prevent writing to system dirs)
 - **Conversation persistence**: Session state survives process restart — verify SQLite/file persistence
 - **Multi-provider graceful degradation**: If primary LLM provider fails, agent degrades gracefully (not crash)
+
+---
+
+## A5. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| LLM provider strategy | At least one provider identified + multi-provider intent stated (single, multi, or abstracted) |
+| Response delivery mode | Streaming vs batch decision stated |
+| Prompt management approach | Where prompts live (inline, files, DB) — even if "TBD" is acceptable |
+| Fallback behavior | What happens when LLM is unavailable (cached response, error, queue) |

@@ -33,3 +33,13 @@
 | **Authorization** | Role-based? Permission-based? Resource-level? |
 | **Token management** | Expiration? Refresh? Revocation? |
 | **Session** | Server-side? Cookie-based? Concurrent session limits? |
+
+---
+
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Authentication method | Method identified (session, JWT, OAuth2, API key, SSO) |
+| Protected resource scope | What needs auth (all routes, specific routes, specific actions) |
+| User identity model | User entity fields needed for auth (email, role, permissions) stated |

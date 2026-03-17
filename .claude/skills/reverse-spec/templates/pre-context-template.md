@@ -6,6 +6,25 @@
 
 ---
 
+## Brief Summary
+
+> Normalized Feature definition produced by the Briefing process (`/smart-sdd add` Phase 1).
+> For reverse-spec-generated pre-contexts, this section is auto-populated from Phase 2-3 analysis.
+> For `/smart-sdd add`-generated pre-contexts, this section captures the validated Brief output.
+
+- **Description**: [1-2 sentence Feature description]
+- **User & Purpose**: [Primary actor(s) + core problem solved + key scenario]
+- **Capabilities**: [Bullet list of concrete capabilities — what the user can DO]
+- **Data**: [Owned entities + referenced entities from other Features]
+- **Interfaces**: [APIs provided/consumed, UI touchpoints, external integrations]
+- **Quality**: [Key non-functional requirements — or "TBD"]
+- **Boundaries**: [Explicit exclusions, assumptions, constraints — or "TBD"]
+
+> This section serves as a quick-reference for downstream pipeline steps (specify, plan, analyze, implement).
+> It is the **single source of truth** for the Feature definition agreed upon during Briefing.
+
+---
+
 ## Runtime Exploration Results
 
 > Observations from running the original application during `/reverse-spec` Phase 1.5.

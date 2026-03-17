@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 13:50 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 14:11 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -76,13 +76,13 @@ AI coding agents are powerful — they write functions, build components, fix bu
 
 **1. Every agent manages context differently.** Claude Code uses CLAUDE.md, Cursor uses .cursorrules, Windsurf uses its own memory system. None of them provide a structured way to track how Features relate to each other — which data models are shared, which API contracts must stay compatible, what architectural decisions were already made. The result: Feature 3 contradicts what Feature 1 decided, because nothing connects them.
 
-**2. Agents have no project-type awareness.** A REST API project and a desktop Electron app need fundamentally different rules — different testing strategies, different verification checks, different bug patterns to watch for. But agents treat every project the same way, producing generic specs and missing domain-specific failure modes.
+**2. Agents have no project-type awareness.** A REST API project and a desktop Electron app need fundamentally different rules — different testing strategies, different verification checks, different bug patterns to watch for. Every project and every organization has its own conventions, constraints, and quality criteria. But agents treat every project the same way, producing generic specs and missing project-specific failure modes — whether that's a missing authentication check for a public API or a missing window management rule for an Electron app.
 
-**3. Agents accept whatever input they get.** Whether a Feature starts from a detailed PRD, a casual conversation, or a gap in existing code, the agent takes whatever description it receives and starts coding. There's no structured process to ensure the Feature definition is complete — missing edge cases, undefined data models, and unclear boundaries only surface during implementation, when fixing them is expensive.
+**3. Agents don't verify that they understood the user's intent.** Whether a Feature starts from a detailed PRD, a casual conversation, or a gap in existing code, the agent takes whatever description it receives and starts coding. There's no structured process to confirm the agent's understanding is complete and accurate — is the scope clear? are the data models defined? are interface contracts specified? Missing dimensions don't trigger questions; they become assumptions that surface as bugs during implementation, when fixing them is expensive.
 
 ### What spec-kit Does
 
-[spec-kit](https://github.com/github/spec-kit) addresses the first layer: it introduces **Specification-Driven Development (SDD)** — break the project into Features, write specs for each one, then code against them. The agent gets a structured pipeline (specify → plan → implement → verify) instead of winging it.
+[spec-kit](https://github.com/github/spec-kit) addresses the first layer: it introduces **Specification-Driven Development (SDD)** — break the project into Features, write specs for each one, then code against them. The agent gets a structured pipeline (specify → plan → tasks → analyze → implement → verify) instead of winging it.
 
 But spec-kit processes **one Feature at a time**. It doesn't track what other Features decided, doesn't know what kind of project you're building, and doesn't validate whether the Feature definition is complete enough to produce good specs.
 
@@ -199,8 +199,9 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 │                         │                                               │
 │                   ┌─────┴─────┐                                         │
 │                   ▼           ▼                                         │
-│  4. PER FEATURE  specify → plan → tasks → implement → verify → merge    │
-│                  Each step gets context from previous Features          │
+│  4. PER FEATURE  specify → plan → tasks → analyze → implement → verify  │
+│                  Each step gets GEL context from previous Features      │
+│                  Domain Profile shapes each step's behavior             │
 │                  Each step has human checkpoints (HARD STOP)            │
 │                         │                                               │
 │                         ▼                                               │
@@ -214,27 +215,29 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 ```
 ── From an Idea (Proposal Mode) ──────────────────────────────────
-/smart-sdd init "Build a Chrome extension that summarizes web pages using AI"
-→ Signal Extraction → Clarity Index scoring → Proposal (1 approval)
-→ auto-chains to constitution + add + pipeline
+/smart-sdd init "Build a Chrome extension..."
+  Domain Profile detected → auto-chain to:
+  /smart-sdd add (Brief) → /smart-sdd pipeline (GEL + Domain Profile)
 
 ── New Project (Standard) ────────────────────────────────────────
-/smart-sdd init  →  /smart-sdd add  →  /smart-sdd pipeline
-(project setup)     (define Features)   (implement)
+/smart-sdd init         →  /smart-sdd add      →  /smart-sdd pipeline
+(Domain Profile setup)     (Brief per Feature)    (GEL + Domain Profile)
 
 ── SDD Adoption ──────────────────────────────────────────────────
-/reverse-spec --adopt  →  Global Evolution Layer  →  /smart-sdd adopt
-                           (roadmap, registries)      (document existing)
+/reverse-spec --adopt   →  GEL artifacts       →  /smart-sdd adopt
+(Domain Profile auto)      (roadmap, registries)   (document existing)
 
 ── Rebuild ───────────────────────────────────────────────────────
-/reverse-spec  →  Global Evolution Layer  →  /smart-sdd pipeline
-(analyze code)    (roadmap, registries)      (rebuild code)
+/reverse-spec           →  GEL artifacts       →  /smart-sdd pipeline
+(Domain Profile auto)      (Brief Summary in      (GEL + Domain Profile
+                            pre-contexts)           per step)
 
 ── Incremental ───────────────────────────────────────────────────
-/smart-sdd add  →  updated Global Evolution  →  /smart-sdd pipeline
+/smart-sdd add          →  updated GEL         →  /smart-sdd pipeline
+(Brief for new Feature)    (pre-context added)    (GEL + Domain Profile)
 ```
 
-All journeys converge to **incremental mode** as the steady state.
+All journeys converge to **incremental mode** as the steady state. In every journey, the three core concepts participate: **Brief** ensures Feature definitions are complete, **GEL** provides cross-Feature context, and **Domain Profile** shapes each pipeline step's behavior.
 
 ### End-to-End Workflow Examples
 
@@ -242,16 +245,32 @@ All journeys converge to **incremental mode** as the steady state.
 
 ```
 1. /smart-sdd init "Build a task management app with Kanban boards and team workspaces"
-   +-- Signal Extraction: "task management" → Core Purpose, "Kanban boards" → gui,
-   |   "team workspaces" → auth + async-state
-   +-- Clarity Index: 58% (Medium tier) → ask 2 targeted questions
-   +-- Proposal: 5 Features, Domain Profile [gui, http-api] + [auth, async-state]
-   +-- User approves → auto-chain to constitution + add + pipeline
+   ┌─ Domain Profile ─────────────────────────────────────────────────┐
+   │ Signal Extraction: "task management" → Core Purpose,            │
+   │   "Kanban boards" → gui, "team workspaces" → auth + async-state │
+   │ Clarity Index: 58% (Medium) → ask 2 targeted questions          │
+   │ Result: [gui, http-api] + [auth, async-state]                   │
+   └──────────────────────────────────────────────────────────────────┘
+   +-- Proposal: 5 Features → User approves → auto-chain
 
-2. /smart-sdd pipeline (auto-chained)
-   +-- Phase 0: Constitution finalized (principles inferred from Proposal)
-   +-- CI propagation: "Target Users" low-confidence → specify adds user role prompt
-   +-- F001-auth → F002-workspace → F003-task → F004-board → F005-notification
+2. /smart-sdd add (auto-chained) ← Brief
+   ┌─ Briefing ───────────────────────────────────────────────────────┐
+   │ Each Feature validated against 6 perspectives                    │
+   │ + Domain-specific S9 criteria (gui: screens, http-api: endpoints)│
+   │ → Normalized Brief → pre-context per Feature                     │
+   └──────────────────────────────────────────────────────────────────┘
+
+3. /smart-sdd pipeline ← GEL + Domain Profile
+   +-- Phase 0: Constitution finalized
+   +-- For each Feature (specify → plan → tasks → analyze → implement → verify):
+   |   ┌─ GEL ─────────────────────────────────────────────────────────┐
+   |   │ Each step gets cross-Feature context: entity registry,        │
+   |   │ API contracts, preceding Features' decisions                   │
+   |   └───────────────────────────────────────────────────────────────┘
+   |   ┌─ Domain Profile ──────────────────────────────────────────────┐
+   |   │ S1 shapes SCs, S7 prevents bugs, S8 drives verification      │
+   |   └───────────────────────────────────────────────────────────────┘
+   +-- F001-auth → F002-workspace → F003-task → F004-board → F005-notif
 ```
 
 ### Scenario 1b: Greenfield — Standard Q&A
@@ -259,19 +278,23 @@ All journeys converge to **incremental mode** as the steady state.
 ```
 1. /smart-sdd init
    +-- Define project: "TaskFlow", TypeScript + Next.js + Prisma
+   +-- Domain Profile detected: [gui, http-api] + [auth, async-state]
    +-- Constitution seed with 6 Best Practices
-   +-- Generate empty artifacts
    +-- Chain into /smart-sdd add...
-       +-- Define: F001-auth, F002-workspace, F003-task, F004-board, F005-notification
-       +-- Demo Group assignment, create pre-context per Feature
 
-2. /smart-sdd pipeline
-   +-- Phase 0: Finalize constitution
+2. /smart-sdd add ← Brief
+   +-- Briefing: F001-auth, F002-workspace, F003-task, F004-board, F005-notif
+   +-- Each Feature validated: capabilities, data, interfaces complete
+   +-- S9 check: gui Brief requires screens, http-api Brief requires endpoints
+   +-- Demo Group assignment → create pre-context (GEL) per Feature
+
+3. /smart-sdd pipeline ← GEL + Domain Profile
+   +-- Phase 0: Finalize constitution (Domain Profile A4 principles injected)
    +-- Release 1 (Foundation):
-   |   F001-auth → specify → plan → ... → verify
-   |   Update: User, Session entities → entity-registry
+   |   F001-auth → specify → plan → tasks → analyze → implement → verify
+   |   GEL Update: User, Session entities → entity-registry
    +-- Release 2 (Core):
-   |   F002-workspace (references F001's User entity)
+   |   F002-workspace (GEL injects F001's User entity as context)
    |   F003-task ...
    +-- Release 3 (Enhancement): F004-board, F005-notification
 ```
@@ -280,16 +303,18 @@ All journeys converge to **incremental mode** as the steady state.
 
 ```
 1. /reverse-spec ./legacy-ecommerce --scope core --stack new
+   ┌─ Domain Profile ─────────────────────────────────────────────────┐
+   │ Auto-detected: [http-api, gui] + [auth, async-state]            │
+   │ Archetype: none (standard e-commerce)                            │
+   └──────────────────────────────────────────────────────────────────┘
    +-- Phase 1: Detect Django + jQuery stack
    +-- Phase 2: Extract 12 entities, 45 APIs, 78 business rules
-   +-- Phase 3: Select Standard granularity (8 Features)
-   |   Tier 1: Auth, Product, Order
-   |   Tier 2: Cart, Payment, Search
-   |   Tier 3: Review, Notification
-   +-- Phase 4: Generate all artifacts
+   +-- Phase 3: 8 Features (Tier 1: Auth, Product, Order | T2: Cart, Payment, Search | T3: Review, Notif)
+   +-- Phase 4: Generate GEL artifacts (roadmap, registries, pre-contexts with Brief Summary)
 
-2. /smart-sdd pipeline
+2. /smart-sdd pipeline ← GEL + Domain Profile
    +-- Scope: Core (Tier 1 only)
+   +-- Each Feature: specify → plan → tasks → analyze → implement → verify
    +-- F001-auth → F002-product → F003-order
    +-- Tier 2/3 remain deferred
 
@@ -300,16 +325,26 @@ All journeys converge to **incremental mode** as the steady state.
 ### Scenario 3: Incremental — Adding notifications to existing project
 
 ```
-1. /smart-sdd add
+1. /smart-sdd add ← Brief
    +-- "I need real-time notifications for task updates"
+   ┌─ Briefing ───────────────────────────────────────────────────────┐
+   │ 6-perspective validation:                                        │
+   │  ✅ User & Purpose: end users receive task update notifications  │
+   │  ✅ Capabilities: real-time push, email digest, preferences      │
+   │  ✅ Data: Notification entity (owned), User (referenced)         │
+   │  ✅ Interfaces: WebSocket channel + /api/notifications           │
+   │ S9 (http-api): endpoint defined ✅  S9 (realtime): WS type ✅   │
+   └──────────────────────────────────────────────────────────────────┘
    +-- Overlap check: No conflicts with existing Features
    +-- ⚠️ Constitution Impact: WebSocket (new technology)
    +-- F005-notification depends on F001-auth, F003-task
+   +-- Brief → pre-context stored in GEL
 
-2. /smart-sdd pipeline
+2. /smart-sdd pipeline ← GEL + Domain Profile
    +-- Skips completed Features
-   +-- F005-notification: specify → plan → ... → verify
-   +-- Update: Notification entity → entity-registry
+   +-- F005-notification: specify → plan → tasks → analyze → implement → verify
+   +-- GEL Update: Notification entity → entity-registry
+   +-- Domain Profile: S1 shapes SCs (realtime: reconnection SC required)
 ```
 
 ---
@@ -326,7 +361,7 @@ All journeys converge to **incremental mode** as the steady state.
 ```
 /smart-sdd init
 /smart-sdd add        # define Features interactively
-/smart-sdd pipeline   # specify → plan → tasks → implement → verify
+/smart-sdd pipeline   # specify → plan → tasks → analyze → implement → verify
 ```
 
 **Add a Feature to an existing project**:
@@ -361,7 +396,7 @@ The three concepts aren't independent features — they form a layered system wh
 │                           │                                      │
 │                           ▼                                      │
 │                    spec-kit Pipeline                              │
-│  specify → plan → tasks → implement → verify → merge             │
+│  specify → plan → tasks → analyze → implement → verify → merge    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -416,13 +451,13 @@ The pipeline runs in three phases. First, the project is analyzed (or defined fr
 Each Feature goes through a **6-step lifecycle**. If verify finds bugs, they loop back to the right step instead of being patched silently:
 
 ```
-specify → plan → tasks → implement → verify → merge
-   │                                    │
-   │  ◄──── Major-Spec ─────────────────┤
-   │  ◄──── Major-Plan ─────────────────┤
-   │  ◄──── Major-Implement ────────────┤
-   │                                    │
-   └── Minor Fix (inline, ≤2 files) ────┘
+specify → plan → tasks → analyze → implement → verify → merge
+   │                                          │
+   │  ◄──── Major-Spec ───────────────────────┤
+   │  ◄──── Major-Plan ───────────────────────┤
+   │  ◄──── Major-Implement ──────────────────┤
+   │                                          │
+   └── Minor Fix (inline, ≤2 files) ──────────┘
 ```
 
 Verify discovers bugs and classifies them into 4 severity levels. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step.

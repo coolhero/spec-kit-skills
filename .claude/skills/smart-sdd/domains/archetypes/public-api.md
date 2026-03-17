@@ -62,3 +62,13 @@ Principles to inject into constitution-seed when this archetype is active:
 | Breaking changes require a new API version — additive changes (new fields, new endpoints) do not | Consumer code must not break on deploy; versioning strategy must be defined before first release |
 | OpenAPI specification must be auto-generated from code and validated in CI | Manual documentation drifts from implementation; auto-generation ensures accuracy |
 | All write operations on public endpoints must support idempotency keys | Network retries are inevitable for external consumers; duplicate operations must be safely handled |
+
+---
+
+## A5. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| API versioning strategy | Versioning approach stated (URL path, header, query param) |
+| Consumer audience | Who consumes this API (internal, external, partner) — affects breaking-change policy |
+| Rate limiting intent | Whether rate limiting applies + rough limits stated (or "TBD") |

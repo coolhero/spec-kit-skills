@@ -1,10 +1,12 @@
-# Add Command — 6-Phase Universal Feature Definition
+# Add Command — Feature Briefing
 
 > Reference: Read after `/smart-sdd add` is invoked. For shared rules, see SKILL.md.
 
-## Add Command — Universal Feature Definition
+## Add Command — Feature Briefing
 
-Running `/smart-sdd add` defines new Feature(s) through a **6-Phase collaborative consultation process**. This is the **universal Feature definition path** for all project modes:
+Running `/smart-sdd add` defines new Feature(s) through a **6-Phase Briefing process** — a structured Feature intake that validates completeness across key dimensions before spec generation. This is the core implementation of the **Brief** concept (see README § Three Core Concepts). The output is a normalized, quality-checked Feature definition that feeds into the spec-kit pipeline.
+
+This is the **universal Feature definition path** for all project modes:
 
 - **Greenfield**: After `/smart-sdd init` sets up the project, use `add` to define Features
 - **Incremental**: Add new Features to an existing smart-sdd project
@@ -21,10 +23,10 @@ Running `/smart-sdd add` defines new Feature(s) through a **6-Phase collaborativ
 
 ---
 
-## 6-Phase Overview
+## 6-Phase Briefing Overview
 
 ```
-Phase 1: Feature Definition   — Adaptive consultation (no HARD STOP)
+Phase 1: Briefing             — Adaptive consultation + completeness validation (no HARD STOP)
 Phase 2: Overlap & Impact     — Overlap check + constitution impact (HARD STOP)
 Phase 3: Scope Negotiation    — Single vs multiple Feature, Tier assignment (HARD STOP)
 Phase 4: SBI Match + Expand   — Link/create source behaviors (HARD STOP, conditional)
@@ -123,11 +125,13 @@ If the user selects "Review and clean up":
 
 ---
 
-## Phase 1: Feature Definition (Adaptive Consultation)
+## Phase 1: Briefing (Adaptive Consultation)
 
-> Conversational phase — no HARD STOP.
-> Uses [feature-elaboration-framework.md](../reference/feature-elaboration-framework.md) for definition quality evaluation.
+> The **Briefing** phase — structured Feature intake that validates completeness before proceeding.
+> Conversational phase — no HARD STOP (elaboration continues until Brief completion criteria are met).
+> Uses [feature-elaboration-framework.md](../reference/feature-elaboration-framework.md) for the six-perspective quality evaluation.
 > Uses `domains/_core.md` § S5 + active interface/concern modules § S5 for domain-specific elaboration probes.
+> Uses active module § S9 / § A5 for domain-specific **Brief Completion Criteria** (see `domains/_schema.md`).
 
 ### 1a. Entry Detection + Auto Gap Suggestion
 
@@ -237,7 +241,12 @@ After initial gathering, evaluate the Feature definition against the **Feature E
 - **Type 2**: Start with Perspective 1 (who/why), build incrementally
 - **Type 3**: SBI behaviors provide Perspectives 2–3 automatically; focus on 1 (user scenarios) and 4 (interfaces)
 
-**Completion criteria**: Perspectives 1–4 each have at least basic coverage (see framework's Completion Criteria table).
+**Completion criteria**:
+1. **Base**: Perspectives 1–4 each have at least basic coverage (see framework's Completion Criteria table)
+2. **Domain-specific**: All active module § S9 Brief Completion Criteria items are satisfied
+3. **Archetype-specific**: All active archetype § A5 Brief Completion Criteria items are satisfied
+
+If domain criteria are not met but base perspectives are covered, ask targeted questions using the module's S5 probes for the missing S9/A5 elements.
 
 **Do NOT propose Feature structure yet** — just ensure the definition is rich enough to scope in Phase 3.
 

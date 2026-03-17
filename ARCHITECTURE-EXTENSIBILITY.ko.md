@@ -194,10 +194,12 @@ Framework:  electron
 | **S6** | UI 테스트 전략 | `verify` Phase 2-3 | UI 렌더링 테스트 방법 정의 (Playwright, 스크린샷) |
 | **S7** | 버그 방지 규칙 | `plan` / `analyze` / `implement` / `verify` | 단계별 검사 활성화 (B-1, B-2, B-3, B-4로 분류) |
 | **S8** | 런타임 검증 | `verify` Phase 2-3 | 실행 중인 앱의 시작, 프로브, 종료 방법 정의 |
+| **S9** | Brief 완료 기준 | `add` Phase 1 | Briefing 프로세스를 위한 도메인별 최소 요구사항 |
 | **A1** | 철학 원칙 | `constitution` | 도메인 가이드 원칙 주입 (예: "Streaming-First") |
 | **A2** | SC 확장 | `specify` | 아키타입별 SC 패턴 추가 (S1에 append) |
 | **A3** | 프로브 | `specify` (clarify) | 아키타입별 질문 추가 (S5에 append) |
 | **A4** | Constitution 주입 | `constitution` | 실행 가능한 원칙을 프로젝트 Constitution에 내장 |
+| **A5** | Brief 완료 기준 | `add` Phase 1 | 아키타입별 Briefing 프로세스 최소 요구사항 |
 | **F2** | Foundation 체크리스트 | `pipeline` Phase 0 | 프레임워크 결정에서 T0 인프라 Feature 생성 |
 | **F7** | Framework Philosophy | `constitution` | 프레임워크별 원칙 추가 (예: Electron 프로세스 모델) |
 | **F8** | Toolchain 명령 | `verify` Phase 1 | 자동 감지된 build/test/lint 명령 오버라이드 |

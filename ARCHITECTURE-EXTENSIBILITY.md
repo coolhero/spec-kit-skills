@@ -194,10 +194,12 @@ Every section from every module routes to a specific pipeline step. This is the 
 | **S6** | UI Testing Strategy | `verify` Phase 2-3 | Defines how to test UI rendering (Playwright, screenshots) |
 | **S7** | Bug Prevention Rules | `plan` / `analyze` / `implement` / `verify` | Activates stage-specific checks (split into B-1, B-2, B-3, B-4) |
 | **S8** | Runtime Verification | `verify` Phase 2-3 | Defines how to start, probe, and stop the running app |
+| **S9** | Brief Completion Criteria | `add` Phase 1 | Domain-specific minimum requirements for the Briefing process |
 | **A1** | Philosophy Principles | `constitution` | Injects domain guiding principles (e.g., "Streaming-First") |
 | **A2** | SC Extensions | `specify` | Adds archetype-specific SC patterns (appended to S1) |
 | **A3** | Probes | `specify` (clarify) | Adds archetype-specific questions (appended to S5) |
 | **A4** | Constitution Injection | `constitution` | Embeds actionable principles into project constitution |
+| **A5** | Brief Completion Criteria | `add` Phase 1 | Archetype-specific minimum requirements for the Briefing process |
 | **F2** | Foundation Checklist | `pipeline` Phase 0 | Creates T0 infrastructure Features from framework decisions |
 | **F7** | Framework Philosophy | `constitution` | Adds framework-specific principles (e.g., Electron process model) |
 | **F8** | Toolchain Commands | `verify` Phase 1 | Overrides auto-detected build/test/lint commands |

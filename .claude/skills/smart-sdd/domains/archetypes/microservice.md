@@ -62,3 +62,13 @@ Principles to inject into constitution-seed when this archetype is active:
 | Cross-service data consistency uses eventual consistency patterns (events/sagas) — never distributed transactions | Distributed transactions don't scale and create tight coupling; eventual consistency preserves autonomy |
 | All cross-service requests must propagate correlation IDs for distributed tracing | Without trace propagation, debugging production issues across services is effectively impossible |
 | Services must be independently deployable with backward-compatible API changes | Coordinated deployments negate the primary benefit of microservices (independent release cycles) |
+
+---
+
+## A5. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Service boundary | What this service owns (data store, domain) clearly separated from other services |
+| Inter-service communication | Sync (HTTP/gRPC) vs async (events/messages) stated for each dependency |
+| Data ownership | Which entities this service owns exclusively (no shared DB) |

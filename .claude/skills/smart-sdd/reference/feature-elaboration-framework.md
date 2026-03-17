@@ -1,16 +1,18 @@
 # Feature Elaboration Framework
 
-> Reference: Used by `/smart-sdd add` Phase 1 to evaluate Feature definitions for completeness.
+> Reference: Used by `/smart-sdd add` Phase 1 (Briefing) to evaluate Feature definitions for completeness.
 > Read by the agent after initial information gathering (regardless of entry type) to identify gaps and guide elaboration.
+> This framework is the **quality gate** for the **Brief** concept — it ensures every Feature intake meets a minimum quality bar before entering the spec-kit pipeline.
 
 ## Purpose
 
-When a user defines a Feature, the initial definition is often incomplete. This framework provides **six perspectives** for evaluating Feature definitions and identifying areas that need elaboration before proceeding to Phase 2.
+When a user defines a Feature, the initial definition is often incomplete. This framework provides **six base perspectives** for evaluating Feature definitions and identifying areas that need elaboration before proceeding to Phase 2. Domain modules extend these with **S9/A5 Brief Completion Criteria** for project-type-specific requirements.
 
 All three Phase 1 entry types (Document-based, Conversational, Gap-driven) converge on this framework after initial information gathering. The agent uses it to:
 1. Assess what information is already available
 2. Identify which perspectives have insufficient coverage
 3. Ask targeted questions to fill gaps
+4. Verify domain-specific Brief Completion Criteria (§ S9/A5) are met
 
 ---
 
@@ -155,7 +157,9 @@ The agent should NOT dump all perspectives at once. Instead:
 
 ### Completion Criteria
 
-A Feature definition is ready for Phase 2 when:
+A Feature definition (Brief) is ready for Phase 2 when:
+
+**Base criteria** (all projects):
 
 | Perspective | Minimum Coverage |
 |-------------|-----------------|
@@ -165,3 +169,14 @@ A Feature definition is ready for Phase 2 when:
 | 4. Interfaces | API direction clear (provides/consumes), UI need stated |
 | 5. Quality | Acknowledged or "TBD" |
 | 6. Boundaries | Acknowledged or "TBD" |
+
+**Domain-specific criteria** (when modules are active):
+
+| Source | Check |
+|--------|-------|
+| Active interface modules § S9 | All Required Elements have Completion Signals met |
+| Active concern modules § S9 | All Required Elements have Completion Signals met |
+| Active archetype modules § A5 | All Required Elements have Completion Signals met |
+
+> If no domain modules define S9/A5, only base criteria apply.
+> See `domains/_schema.md` for the S9/A5 schema definition.

@@ -49,6 +49,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| At least one screen or page | Route/path or view name + purpose stated |
+| Primary user interaction | What the user does on the screen (form, list, editor, dashboard) |
+| Navigation context | How user reaches this screen (entry point, menu item, redirect) |
+
+---
+
 ## S6. UI Testing Integration
 
 > Browser automation hook points for Features with user-facing UI.

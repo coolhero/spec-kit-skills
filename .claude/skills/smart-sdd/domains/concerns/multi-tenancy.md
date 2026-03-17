@@ -44,6 +44,16 @@
 
 ---
 
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Tenant isolation model | Database-per-tenant, schema-per-tenant, or row-level isolation identified |
+| Tenant identification | How tenant is determined per request (subdomain, header, path, token claim) |
+| Data sharing policy | Whether any data is shared across tenants stated |
+
+---
+
 ## S7. Bug Prevention
 
 | ID | Pattern | Detection | Prevention |
