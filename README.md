@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:13 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:19 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -70,15 +70,19 @@ cd spec-kit-skills
 
 ## What It Solves
 
-### The Problem: Real Software Can't Be Built With One Spec
+### Background: Specification-Driven Development
 
-SDD demos show one Feature flowing through specify → plan → implement. It works perfectly. But **no real software is a single Feature.** Even a simple todo app has auth, CRUD, and a UI — three Features that need to know about each other.
+In [Specification-Driven Development (SDD)](https://github.com/github/spec-kit), you don't ask an AI agent to "build a todo app." You break the app into **Features** — authentication, task CRUD, dashboard UI — and write a **spec** for each one. A spec defines *what* a Feature does (functional requirements, success criteria, data models) before the agent writes any code. The agent then implements against the spec through a structured pipeline: specify → plan → tasks → analyze → implement → verify.
 
-The single-spec demo hides a fundamental problem: **each spec is written in isolation.** Feature 2 doesn't know what Feature 1 decided. The agent defines the same entity with different field names, designs APIs without knowing the auth pattern, and accepts vague Feature descriptions without asking clarifying questions. Every spec is internally correct but incompatible with the others.
+This is what [spec-kit](https://github.com/github/spec-kit) provides. One Feature, one spec, one pipeline run — and it works well.
 
-This isn't a scaling problem that shows up at Feature 10. It shows up at Feature 2 — the moment your software becomes real.
+### The Problem: Specs Don't Talk to Each Other
 
-[spec-kit](https://github.com/github/spec-kit) gives the agent a rigorous per-Feature pipeline (specify → plan → tasks → analyze → implement → verify). But it processes **one Feature at a time** — no cross-Feature memory, no project-type awareness, no intent verification. Three gaps remain open, and spec-kit-skills adds three concepts to close them:
+The challenge is that **real software is never just one Feature.** Even a simple todo app has auth, task management, and a UI — three Features, three specs, three separate pipeline runs. And each spec is written independently.
+
+This means the agent building Feature 2 has no idea what Feature 1 decided. It defines the same `User` entity with different field names, designs APIs without knowing the auth pattern already chosen, and accepts a vague description like "add profile management" without asking what it actually means. Each spec is internally solid, but they don't fit together — and this breaks at Feature 2, not Feature 10.
+
+The root cause is three gaps that single-spec workflows can't address: no memory across Features, no awareness of project type, and no verification of user intent. spec-kit-skills adds three concepts to close them:
 
 #### Global Evolution Layer
 

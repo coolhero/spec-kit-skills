@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:13 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:19 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -68,15 +68,19 @@ cd spec-kit-skills
 
 ## 해결하는 문제
 
-### 문제: 실제 소프트웨어는 Spec 하나로 만들 수 없다
+### 배경: Specification-Driven Development
 
-SDD 데모는 하나의 Feature가 specify → plan → implement을 거치는 모습을 보여줍니다. 깔끔하게 동작합니다. 하지만 **실제 소프트웨어는 Feature 하나가 아닙니다.** 간단한 할 일 앱조차 인증, CRUD, UI — 최소 세 개의 Feature가 서로를 알아야 합니다.
+[Specification-Driven Development (SDD)](https://github.com/github/spec-kit)에서는 AI 에이전트에게 "할 일 앱 만들어줘"라고 하지 않습니다. 앱을 **Feature** 단위로 나누고 — 인증, 할 일 CRUD, 대시보드 UI — 각각에 대해 **spec**을 작성합니다. Spec은 에이전트가 코드를 쓰기 *전에* 해당 Feature가 *무엇을 하는지* (기능 요구사항, 성공 기준, 데이터 모델)를 정의합니다. 에이전트는 이 spec에 맞춰 구조화된 파이프라인을 따릅니다: specify → plan → tasks → analyze → implement → verify.
 
-단일 spec 데모는 근본적인 문제를 감춥니다: **각 spec이 격리된 상태로 작성된다는 것.** Feature 2는 Feature 1이 뭘 결정했는지 모릅니다. 에이전트는 같은 엔티티를 다른 필드명으로 정의하고, 인증 패턴을 모른 채 API를 설계하고, 모호한 Feature 설명을 질문 없이 수용합니다. 개별 spec은 내부적으로 정확하지만 서로 호환되지 않습니다.
+이것이 [spec-kit](https://github.com/github/spec-kit)이 제공하는 것입니다. Feature 하나, spec 하나, 파이프라인 한 번 — 잘 동작합니다.
 
-이건 Feature 10에서나 드러나는 확장성 문제가 아닙니다. Feature 2 — 소프트웨어가 실제가 되는 순간 — 바로 나타납니다.
+### 문제: Spec끼리 대화하지 않는다
 
-[spec-kit](https://github.com/github/spec-kit)은 에이전트에게 엄격한 Feature별 파이프라인(specify → plan → tasks → analyze → implement → verify)을 제공합니다. 하지만 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 기억 없이, 프로젝트 유형 인식 없이, 의도 검증 없이. 세 가지 gap이 남아 있고, spec-kit-skills는 이를 메우기 위해 세 가지 개념을 추가합니다:
+문제는 **실제 소프트웨어가 Feature 하나가 아니라는 것**입니다. 간단한 할 일 앱조차 인증, 할 일 관리, UI — 세 개의 Feature, 세 개의 spec, 세 번의 별도 파이프라인 실행이 있습니다. 그리고 각 spec은 독립적으로 작성됩니다.
+
+이는 Feature 2를 만드는 에이전트가 Feature 1에서 뭘 결정했는지 전혀 모른다는 의미입니다. 같은 `User` 엔티티를 다른 필드명으로 정의하고, 이미 선택된 인증 패턴을 모른 채 API를 설계하고, "프로필 관리 추가해줘"라는 모호한 설명을 그것이 실제로 무엇을 의미하는지 묻지 않고 수용합니다. 각 spec은 내부적으로 탄탄하지만 서로 맞지 않습니다 — 이건 Feature 10이 아니라 Feature 2에서 바로 깨집니다.
+
+근본 원인은 단일 spec 워크플로우가 해결할 수 없는 세 가지 gap입니다: Feature 간 기억 부재, 프로젝트 유형 인식 부재, 사용자 의도 검증 부재. spec-kit-skills는 이를 메우기 위해 세 가지 개념을 추가합니다:
 
 #### Global Evolution Layer
 
