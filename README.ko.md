@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:09 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:13 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -68,48 +68,15 @@ cd spec-kit-skills
 
 ## 해결하는 문제
 
-### 문제: "Spec 하나 잘 쓰면 되는 거 아닌가?"
+### 문제: 실제 소프트웨어는 Spec 하나로 만들 수 없다
 
-SDD 데모는 보통 하나의 Feature가 specify → plan → implement을 거치는 모습을 보여줍니다. 깔끔하게 동작합니다 — spec이 명확하고, plan이 정확하고, 구현이 spec대로 나옵니다. 그래서 **좋은 spec 하나만 잘 쓰면 된다**는 인상을 줍니다.
+SDD 데모는 하나의 Feature가 specify → plan → implement을 거치는 모습을 보여줍니다. 깔끔하게 동작합니다. 하지만 **실제 소프트웨어는 Feature 하나가 아닙니다.** 간단한 할 일 앱조차 인증, CRUD, UI — 최소 세 개의 Feature가 서로를 알아야 합니다.
 
-문제는 Feature 2부터 시작됩니다. 현실적인 시나리오를 보겠습니다:
+단일 spec 데모는 근본적인 문제를 감춥니다: **각 spec이 격리된 상태로 작성된다는 것.** Feature 2는 Feature 1이 뭘 결정했는지 모릅니다. 에이전트는 같은 엔티티를 다른 필드명으로 정의하고, 인증 패턴을 모른 채 API를 설계하고, 모호한 Feature 설명을 질문 없이 수용합니다. 개별 spec은 내부적으로 정확하지만 서로 호환되지 않습니다.
 
----
+이건 Feature 10에서나 드러나는 확장성 문제가 아닙니다. Feature 2 — 소프트웨어가 실제가 되는 순간 — 바로 나타납니다.
 
-**Feature 1** — User Authentication. 에이전트가 탄탄한 spec을 쓰고 구현했습니다.
-- 엔티티: `User { id, name, email, passwordHash }`
-- API: `POST /api/auth/login → { token, user }`
-- 결정: JWT를 localStorage에 저장
-
-**Feature 2** — 에이전트에게 "프로필 관리 추가해줘"라고 말합니다. 에이전트가 또 다른 탄탄한 spec을 작성합니다:
-- `User { id, userName, mail, avatar }`를 정의 — 같은 엔티티인데 필드명이 다름
-- `PUT /api/users/:id`를 설계 — 요청의 인증 방식에 대한 언급 없음
-
-세 가지가 잘못되었고, 각각은 서로 다른 구조적 gap을 보여줍니다:
-
-**엔티티 충돌** (`name` vs `userName`, `email` vs `mail`)은 에이전트가 Feature 1의 spec을 읽은 적이 없기 때문에 발생했습니다. 다른 Feature에서 내린 결정에 대한 기억이 없습니다. → **Feature 간 기억 부재**
-
-**API의 인증 누락**은 에이전트가 이것이 JWT 기반 웹 앱이라는 것을 모르기 때문에 발생했습니다. Public REST API라면 API 키 검증이 필요하고, 데스크톱 앱이라면 OS 수준 인증이 필요하고, 이 앱은 Bearer 토큰 헤더가 필요합니다. 에이전트는 모든 프로젝트를 같은 방식으로 처리하기 때문에 어느 것도 적용하지 않았습니다. → **프로젝트 유형 인식 부재**
-
-**모호한 Feature 정의** — "프로필 관리 추가해줘" — 는 질문 없이 수용되었습니다. 에이전트는 묻지 않았습니다: 본인 프로필만 수정 가능한가, 관리자도 다른 사람 것을 수정할 수 있는가? 아바타 업로드가 필요한가? 어떤 필드가 수정 가능한가? 이 누락된 차원들은 spec에 박힌 무언의 가정이 되었습니다. → **의도 검증 부재**
-
----
-
-Feature 5가 되면 이 세 가지 gap이 복합됩니다. 프로젝트에는 4개 Feature에 걸쳐 20개 이상의 아키텍처 결정이 누적되어 있고 — 어떤 DB, 어떤 인증 패턴, 어떤 공유 컴포넌트, 어떤 API convention — 에이전트는 그 어느 것도 볼 수 없습니다. 매 새 spec은 **내부적으로는 완벽하지만 나머지와 호환되지 않습니다.**
-
-```
-1 Feature:   specify → implement ✅  (충돌 불가능)
-3 Features:  엔티티 스키마, API 패턴이 spec마다 다르게 정의됨
-5 Features:  Foundation 결정(DB, 인증, 프레임워크)이 spec마다 다르게 가정됨
-```
-
-### spec-kit이 하는 일 — 그리고 거기서 멈추는 지점
-
-[spec-kit](https://github.com/github/spec-kit)은 파이프라인 문제를 해결합니다: **Specification-Driven Development (SDD)** — 프로젝트를 Feature로 나누고, 각각에 spec을 쓰고, 그에 맞춰 코딩합니다. 에이전트에게 즉흥적 코딩 대신 구조화된 파이프라인(specify → plan → tasks → analyze → implement → verify)을 줍니다.
-
-이것은 의미 있는 개선입니다. 하지만 spec-kit은 **한 번에 하나의 Feature만** 처리합니다. *각* spec을 위한 엄격한 프로세스를 제공하지만 — spec과 spec을 연결하는 방법, 어떤 종류의 프로젝트를 만들고 있는지에 대한 인식, Feature 정의가 애초에 충분히 완전한지에 대한 검증은 제공하지 않습니다.
-
-위 시나리오의 세 가지 gap이 그대로 남아 있습니다. spec-kit-skills는 이를 메우기 위해 세 가지 개념을 추가합니다:
+[spec-kit](https://github.com/github/spec-kit)은 에이전트에게 엄격한 Feature별 파이프라인(specify → plan → tasks → analyze → implement → verify)을 제공합니다. 하지만 **한 번에 하나의 Feature만** 처리합니다 — Feature 간 기억 없이, 프로젝트 유형 인식 없이, 의도 검증 없이. 세 가지 gap이 남아 있고, spec-kit-skills는 이를 메우기 위해 세 가지 개념을 추가합니다:
 
 #### Global Evolution Layer
 
