@@ -5,6 +5,20 @@
 
 ---
 
+## 세 가지 핵심 개념
+
+spec-kit-skills는 규모 있는 Agentic Coding의 세 가지 구조적 gap을 해결하는 세 가지 개념 위에 구축되었습니다:
+
+| 개념 | 해결하는 문제 | 구현 |
+|------|-------------|------|
+| **Global Evolution Layer (GEL)** | 에이전트마다 컨텍스트 관리 방식이 다르고, 어느 것도 Feature 간 관계를 체계적으로 추적하지 않음 | 프로젝트 수준 아티펙트(roadmap, 레지스트리, pre-context) + 파이프라인 단계별 자동 컨텍스트 주입 |
+| **Domain Profile** | 에이전트가 프로젝트 유형에 관계없이 동일한 범용 접근을 적용 | 합성형 4축 모듈 시스템(Interface × Concern × Archetype × Scenario)으로 프로젝트 유형별 규칙 로드 |
+| **Brief** | 에이전트가 받은 Feature 설명을 그대로 수용하며 품질 gate가 없음 | spec 생성 전 핵심 차원의 완전성을 검증하는 구조화된 Feature 정의 프로세스 |
+
+**연결 방식**: Brief가 완전한 Feature 정의를 생성 → GEL에 pre-context로 저장 → spec-kit 파이프라인에 주입 → Domain Profile 규칙이 각 단계의 동작을 형성. 이 가이드는 세 개념 중 가장 확장성이 높은 **Domain Profile** 모듈 시스템을 집중적으로 다룹니다.
+
+---
+
 ## 목차
 
 1. [모듈 시스템 개요](#1-모듈-시스템-개요)

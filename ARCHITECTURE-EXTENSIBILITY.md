@@ -5,6 +5,20 @@
 
 ---
 
+## Three Core Concepts
+
+spec-kit-skills is built on three concepts, each addressing a structural gap in agentic coding at scale:
+
+| Concept | Problem It Solves | Implementation |
+|---------|------------------|----------------|
+| **Global Evolution Layer (GEL)** | Agents manage context differently; none track cross-Feature relationships systematically | Project-wide artifacts (roadmap, registries, pre-contexts) + automatic context injection per pipeline step |
+| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 4-axis module system (Interface × Concern × Archetype × Scenario) that loads project-type-specific rules |
+| **Brief** | Agents accept whatever Feature description they receive, with no quality gate | Structured Feature intake process that validates completeness across key dimensions before spec generation |
+
+**How they connect**: Brief produces complete Feature definitions → stored as pre-contexts in the GEL → injected into the spec-kit pipeline → where Domain Profile rules shape each step's behavior. This guide focuses on the **Domain Profile** module system — the most extensible of the three concepts.
+
+---
+
 ## Table of Contents
 
 1. [Module System Overview](#1-module-system-overview)

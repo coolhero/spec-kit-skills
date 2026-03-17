@@ -5,6 +5,46 @@
 
 ---
 
+## [2026-03-17] Three Core Concepts Framework — GEL, Domain Profile, Brief
+
+Established a unified conceptual framework for spec-kit-skills built on three core concepts, each addressing a structural gap in agentic coding at scale.
+
+### Design Decision
+
+Consolidated the project's numerous internal concepts into three user-facing core concepts:
+
+1. **Global Evolution Layer (GEL)** — Solves fragmented context management across agents. Each AI agent (Claude Code, Cursor, Windsurf) manages context differently; none track cross-Feature relationships systematically. GEL provides agent-agnostic structured context artifacts.
+
+2. **Domain Profile** — Solves generic project-type treatment. Composable 4-axis module system (Interface × Concern × Archetype × Scenario) that loads project-type-specific rules for spec generation, bug prevention, and verification.
+
+3. **Brief** — Solves unvalidated Feature intake. Structured Feature definition process that ensures completeness across key dimensions before spec generation, regardless of input source (PRD, conversation, code gap analysis).
+
+### Key Terminology Decision
+
+- Evaluated alternatives: "Expert" (rejected — names an actor, not an artifact), "Guru" (same issue), "Canvas" (close but Brief is more established), "Forge" (process name, not artifact name)
+- **"Brief"** selected — matches industry precedent (design brief, project brief), works as both noun and verb, clearly sits above "Spec" in the resolution hierarchy
+
+### Problem Framing
+
+Reframed the core narrative from "spec-kit processes one Feature at a time" to three structural gaps:
+- Agents manage context differently (not "stateless" — each has memory, but fragmented)
+- Agents have no project-type awareness (domain-agnostic)
+- Agents accept whatever input they get (no quality gate)
+
+### Changes
+
+- **README.md**: Rewrote "What It Solves" with problem-first framing (3 gaps → 3 concepts). Restructured "Architecture" around concept collaboration diagram instead of 3 pillars. Aligned Design Philosophy with concepts. Added concept framing to Domain Module System and Extensibility sections.
+- **README.ko.md**: Synchronized all changes.
+- **ARCHITECTURE-EXTENSIBILITY.md** + **.ko.md**: Added "Three Core Concepts" overview section at the top.
+
+### Future Work
+
+- B1 section schema for Brief completion criteria in domain modules
+- add.md Phase 1 restructure as "Briefing" process
+- pre-context-template.md Brief section format
+
+---
+
 ## [2026-03-17] README.ko.md Structure Sync with README.md (c541674)
 
 Synchronized README.ko.md structure with README.md changes from commit c541674.

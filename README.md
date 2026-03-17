@@ -2,9 +2,9 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 10:56 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 13:50 KST
 
-**Claude Code skills that make [spec-kit](https://github.com/github/spec-kit) work across Features — so Feature 3 knows what Feature 1 already decided**
+**Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
 - **Reverse-Spec** analyzes an existing codebase and extracts everything the SDD pipeline needs to know: what the app does, how it's structured, what data models and APIs exist. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
@@ -70,13 +70,31 @@ cd spec-kit-skills
 
 ## What It Solves
 
-AI coding agents write great code — until the project gets big enough. Then things start falling apart: code written last week contradicts code written today, bugs you already fixed come back, and you spend more time correcting the agent than building.
+### The Problem: Why Agentic Coding Breaks at Scale
 
-This is a **harness engineering** problem. Like harnessing a horse, the goal isn't to limit the agent's power but to make it directed and reliable. [spec-kit](https://github.com/github/spec-kit) provides the first layer of harness through Specification-Driven Development: break the project into Features, write specs for each one, then code against them. The agent gets a clear target and a structured pipeline (specify → plan → implement → verify) instead of winging it.
+AI coding agents are powerful — they write functions, build components, fix bugs. But as a project grows beyond a few files, three structural gaps emerge:
 
-But spec-kit processes **one Feature at a time** — it has no mechanism for tracking shared entities, API contracts, or dependencies across Features. When you run `/speckit-plan` for Feature 3, it doesn't know what data models Feature 1 defined or what APIs Feature 2 expects.
+**1. Every agent manages context differently.** Claude Code uses CLAUDE.md, Cursor uses .cursorrules, Windsurf uses its own memory system. None of them provide a structured way to track how Features relate to each other — which data models are shared, which API contracts must stay compatible, what architectural decisions were already made. The result: Feature 3 contradicts what Feature 1 decided, because nothing connects them.
 
-**spec-kit-skills** strengthens the harness by adding a **Global Evolution Layer** — project-wide artifacts that sit above spec-kit's per-Feature scope:
+**2. Agents have no project-type awareness.** A REST API project and a desktop Electron app need fundamentally different rules — different testing strategies, different verification checks, different bug patterns to watch for. But agents treat every project the same way, producing generic specs and missing domain-specific failure modes.
+
+**3. Agents accept whatever input they get.** Whether a Feature starts from a detailed PRD, a casual conversation, or a gap in existing code, the agent takes whatever description it receives and starts coding. There's no structured process to ensure the Feature definition is complete — missing edge cases, undefined data models, and unclear boundaries only surface during implementation, when fixing them is expensive.
+
+### What spec-kit Does
+
+[spec-kit](https://github.com/github/spec-kit) addresses the first layer: it introduces **Specification-Driven Development (SDD)** — break the project into Features, write specs for each one, then code against them. The agent gets a structured pipeline (specify → plan → implement → verify) instead of winging it.
+
+But spec-kit processes **one Feature at a time**. It doesn't track what other Features decided, doesn't know what kind of project you're building, and doesn't validate whether the Feature definition is complete enough to produce good specs.
+
+### Three Concepts That Fill the Gaps
+
+spec-kit-skills adds three concepts on top of spec-kit, each addressing one gap:
+
+#### Global Evolution Layer
+
+**The gap**: Each agent manages context its own way, and none track cross-Feature relationships systematically.
+
+**The solution**: A set of project-wide artifacts that sit above spec-kit's per-Feature scope — so every Feature is built with full knowledge of the whole project, regardless of which agent or session is running.
 
 | Artifact | What it tracks |
 |----------|---------------|
@@ -86,6 +104,45 @@ But spec-kit processes **one Feature at a time** — it has no mechanism for tra
 | **Per-Feature Pre-contexts** | What each Feature needs to know about the rest of the project |
 | **Source Behavior Inventory** | Function-level coverage tracking (for existing codebases) |
 | **Constitution** | Project-wide principles and architectural decisions |
+
+Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated. The agent doesn't need to remember — the artifacts remember for it.
+
+#### Domain Profile
+
+**The gap**: Agents apply the same generic approach regardless of project type.
+
+**The solution**: A composable rule system that detects your project type and loads only the relevant rules — so a REST API gets endpoint validation checks, a desktop app gets window management safety rules, and an AI chatbot gets streaming-first design principles.
+
+A Domain Profile is composed from four axes: **Interface** (what the app exposes — GUI, API, CLI), **Concern** (cross-cutting patterns — auth, IPC, i18n), **Archetype** (domain philosophy — AI assistant, public API, microservice), and **Scenario** (why we're building — greenfield, rebuild, adoption). Each axis contributes rules that shape spec generation, bug prevention, and verification. See [Domain Module System](#domain-module-system) for details.
+
+#### Brief
+
+**The gap**: Agents start coding from whatever description they receive, with no quality gate on Feature definitions.
+
+**The solution**: A structured Feature intake process — implemented in `/smart-sdd add` — that normalizes any input into a consistently complete Feature definition before entering the spec-kit pipeline.
+
+A Brief is **not** the same as a PRD. A PRD is one possible *input* to the Brief process; a casual conversation or a gap analysis result are equally valid inputs. The Brief is the *output* — a normalized, quality-checked Feature definition that has been validated for completeness across key dimensions: identity, purpose, capabilities, data requirements, interfaces, dependencies, quality criteria, and boundaries.
+
+```
+/smart-sdd init                      /smart-sdd add (= Briefing)
+Sets up the PROJECT:                 Defines each FEATURE:
+- name, stack, principles            - capabilities, data, interfaces
+- Domain Profile detection           - quality criteria, boundaries
+- Feature candidates (names only)    - normalized Brief per Feature
+         │                                      │
+         └──── chains into ────────→            │
+                                                ▼
+                                         pre-context (GEL)
+                                                │
+                                                ▼
+                                         spec-kit pipeline
+```
+
+`init` may accept a PRD to understand the *project* — extracting stack hints, Domain Profile signals, and a rough Feature list. But it stops at Feature *names*. The actual Feature *definition* — ensuring each Feature has complete capabilities, data requirements, interface contracts — happens in `add` through the Brief process.
+
+Domain Profile rules add project-type-specific completion criteria — an API project's Brief must define endpoint contracts; a GUI project's Brief must specify user interactions. Incomplete inputs trigger targeted questions rather than proceeding with gaps.
+
+The result: specs generated from a well-formed Brief are more complete, more testable, and require fewer mid-implementation corrections.
 
 ---
 
@@ -282,29 +339,59 @@ All journeys converge to **incremental mode** as the steady state.
 
 ## Architecture
 
-Beyond connecting Features, spec-kit-skills strengthens the harness in three ways — keeping the agent's memory alive across Features, making verification gates that can't be skipped, and checking that the software doesn't just have the right structure but actually *behaves* correctly:
+### How the Three Concepts Work Together
 
-| Pillar | What It Does | Without It |
-|--------|-------------|------------|
-| **Context Injection** | Feeds each step the knowledge it needs — what other Features decided, how the existing app works, what rules apply | Agent works from incomplete information, re-invents what was already decided |
-| **Gate Enforcement** | Checkpoints that stop the pipeline when output doesn't meet criteria — not "should check" but "cannot proceed" | Agent skips verification, wrong assumptions propagate uncaught |
-| **Behavioral Fidelity** | Captures not just *what* to build but *how it should work* — how users interact, how data flows, how the app responds | Agent builds something that looks right but works wrong |
+The three concepts aren't independent features — they form a layered system where each concept feeds the next:
 
-These pillars are implemented through 7 Pipeline Integrity Guards — protection patterns extracted from real-world failures. Each guard covers a class of problems with clear trigger conditions and enforcement rules. When new failures are discovered, they extend existing guards rather than pile up as one-off fixes. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Brief                                    │
+│  Structured intake: ensure Feature definition is complete        │
+│  Domain Profile adds project-type-specific completion criteria   │
+│                           │                                      │
+│                           ▼                                      │
+│                    Global Evolution Layer                         │
+│  Cross-Feature memory: roadmap, registries, pre-contexts         │
+│  Brief output becomes pre-context for spec-kit pipeline          │
+│                           │                                      │
+│                           ▼                                      │
+│                      Domain Profile                              │
+│  Per-step rules: SC generation, bug prevention, verification     │
+│  Shapes every pipeline step based on project type                │
+│                           │                                      │
+│                           ▼                                      │
+│                    spec-kit Pipeline                              │
+│  specify → plan → tasks → implement → verify → merge             │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Brief** produces a complete Feature definition → stored as **pre-context** in the **GEL** → injected into the **spec-kit pipeline** → where **Domain Profile** rules shape every step's behavior.
+
+### Implementation: Pipeline Integrity Guards
+
+The three concepts are enforced through 7 Pipeline Integrity Guards — protection patterns extracted from real-world failures. Each guard covers a class of problems with clear trigger conditions and enforcement rules. When new failures are discovered, they extend existing guards rather than pile up as one-off fixes. See [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md).
+
+These guards implement three enforcement mechanisms:
+
+| Mechanism | What It Does | Which Concept It Serves |
+|-----------|-------------|------------------------|
+| **Context Injection** | Feeds each step the knowledge it needs — what other Features decided, how the existing app works, what rules apply | Global Evolution Layer |
+| **Gate Enforcement** | Checkpoints that stop the pipeline when output doesn't meet criteria — not "should check" but "cannot proceed" | Brief (intake gates) + GEL (review gates) |
+| **Behavioral Fidelity** | Captures not just *what* to build but *how it should work* — how users interact, how data flows, how the app responds | Domain Profile (domain-aware verification) |
 
 ### Design Philosophy
 
-Five principles shape every design decision in spec-kit-skills:
+Five principles shape every design decision:
 
-1. **Define what "done" means, upfront** — Instead of hoping the agent writes correct code, every Feature has explicit success criteria and contracts. Verification checks against these criteria — not against a vague feeling of "looks right."
+1. **Structured input produces better output** (Brief) — Instead of accepting vague Feature descriptions, the system ensures every Feature is defined completely before specs begin. Missing dimensions trigger questions, not assumptions.
 
-2. **Give each step the context it needs** — An agent working on Feature 3 has no memory of what it decided for Feature 1. So before each step, the system automatically feeds in the relevant data models, API contracts, and project rules. The agent sees exactly what it needs — no more, no less.
+2. **Give each step only the context it needs** (GEL) — Before each pipeline step, the relevant cross-Feature knowledge is automatically injected — data models, API contracts, project rules. The agent sees exactly what it needs, no more, no less.
 
-3. **Load only relevant rules** — A REST API project doesn't need GUI testing rules. An AI chat app doesn't need CRUD validation rules. The system auto-detects your project type and loads only the modules that apply — keeping the agent focused and the context window lean.
+3. **Load only relevant rules** (Domain Profile) — A REST API project doesn't need GUI testing rules. An AI chat app doesn't need CRUD validation rules. The system auto-detects your project type and loads only the modules that apply.
 
 4. **Humans approve before anything is final** — The agent runs autonomously through research, planning, and coding. But before specs are created and before code is accepted, you review and approve. The agent does the work; you make the decisions.
 
-5. **Start broad, drill deep** — Analysis begins with tech stack and project structure, then progressively zooms into function signatures, UI components, micro-interactions, and edge cases. Each level builds on the one above, so nothing is analyzed out of context.
+5. **Start broad, drill deep** — Analysis begins with tech stack and project structure, then progressively zooms into function signatures, UI components, micro-interactions, and edge cases. Each level builds on the one above.
 
 ### How the Pipeline Works
 
@@ -380,7 +467,7 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 
 ## Domain Module System
 
-The system automatically selects which rules to load based on your project type. This section explains how that selection works.
+This section explains how the **Domain Profile** concept is implemented — how the system selects which rules to load and how those rules shape the pipeline.
 
 ### How Rules Are Selected for Your Project
 
@@ -503,15 +590,15 @@ T0 Features are auto-generated from Foundation categories with Critical items re
 
 ## Extensibility & Customization
 
-The system is designed so you can start with defaults and progressively customize:
+Each of the three core concepts can be extended independently. The system is designed so you can start with defaults and progressively customize:
 
-**Level 0 — Out of the box**: Run `/smart-sdd init` or `/reverse-spec` with no customization. The agent auto-detects your profile, framework, interfaces, and concerns. Works for most projects immediately.
+**Level 0 — Out of the box**: All three concepts work automatically. Domain Profile is auto-detected, Brief completion criteria use built-in defaults, GEL artifacts are generated and injected without configuration. Works for most projects immediately.
 
-**Level 1 — Domain profile tuning**: Edit `sdd-state.md` to add/remove active Interfaces and Concerns. Loading `auth` adds authentication-specific SC rules; removing `i18n` skips internationalization checks.
+**Level 1 — Tune Domain Profile**: Edit `sdd-state.md` to add/remove active Interfaces and Concerns. Loading `auth` adds authentication-specific SC rules and Brief completion criteria; removing `i18n` skips internationalization checks.
 
 **Level 2 — Project-specific rules**: Create `specs/reverse-spec/domain-custom.md` in your project. Add rules using the same S1/S5/S7 schema (e.g., "all payment endpoints require idempotency SC", "dark mode must be tested in verify"). This file loads last with highest priority — no skill files modified.
 
-**Level 3 — New domain modules**: Create custom Interface or Concern files (e.g., `domains/interfaces/grpc.md`, `domains/concerns/caching.md`). Follow `domains/_schema.md` for the module format. Your modules compose automatically with built-in ones.
+**Level 3 — New Domain Profile modules**: Create custom Interface or Concern files (e.g., `domains/interfaces/grpc.md`, `domains/concerns/caching.md`). Follow `domains/_schema.md` for the module format. Your modules compose automatically with built-in ones.
 
 **Level 4 — New Foundation checklists**: Create `reverse-spec/domains/foundations/{framework}.md` for frameworks not yet covered. The system gracefully degrades without it (Case B: universal categories + agent probes), but a dedicated checklist ensures nothing is missed.
 
@@ -564,7 +651,7 @@ Long pipeline sessions face two systemic risks: **context window loss** (agent f
 
 **Source Modification Gate** — During verify, every source edit must be classified (Minor / Major-Implement / Major-Plan / Major-Spec) *before* any code is touched. The classification determines whether the fix happens inline or routes back to the correct pipeline stage. A Minor Fix Accumulator tracks inline fixes per Feature — if the count reaches 3, the system auto-escalates to Major, preventing structural drift disguised as minor patches.
 
-**Pipeline Integrity Guards** — The 7 guards introduced in the [Harness Engineering](#what-is-harness-engineering) section above are the concrete implementation of the three pillars. Each guard covers a specific failure class: G1 Guideline→Gate escalation, G2 Static≠Runtime 5-level verification, G3 Cross-Stage Trust Breakers, G4 Granularity Alignment, G5 Environment Parity (dual-mode), G6 Cross-Feature Interface verification, G7 Rebuild Fidelity Chain (Component Tree + Data Lifecycle → Source Mapping → Source-First gates). New failures extend existing guards rather than accumulate as ad-hoc rules.
+**Pipeline Integrity Guards** — 7 guards enforce the three concepts at runtime. Each guard covers a specific failure class: G1 Guideline→Gate escalation, G2 Static≠Runtime 5-level verification, G3 Cross-Stage Trust Breakers, G4 Granularity Alignment, G5 Environment Parity (dual-mode), G6 Cross-Feature Interface verification, G7 Rebuild Fidelity Chain (Component Tree + Data Lifecycle → Source Mapping → Source-First gates). New failures extend existing guards rather than accumulate as ad-hoc rules.
 
 **Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
 
