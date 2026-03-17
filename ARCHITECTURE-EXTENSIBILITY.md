@@ -82,12 +82,12 @@ Signal keywords (S0/A0 for init inference, R1/A0 for source analysis) are **shar
 ```
 
 Each shared module file contains:
-- **Semantic keywords (S0/A0)** — used by `smart-sdd init` for Proposal Mode signal extraction. Matched via the [Matching Algorithm](smart-sdd/reference/clarity-index.md) (case-insensitive, compound-first, whole-token-only).
+- **Semantic keywords (S0/A0)** — used by `smart-sdd init` for Proposal Mode signal extraction. Matched via the [Matching Algorithm](.claude/skills/smart-sdd/reference/clarity-index.md) (case-insensitive, compound-first, whole-token-only).
 - **Code pattern keywords (R1/A0)** — used by `reverse-spec` for source code analysis and module auto-detection.
 
 **How skill modules reference shared keywords**: Each skill-local domain module (e.g., `smart-sdd/domains/concerns/auth.md`) replaces its S0/R1 section with a cross-reference:
 ```
-> See [shared/domains/concerns/auth.md](../../../shared/domains/concerns/auth.md) § Signal Keywords
+> See [shared/domains/concerns/auth.md](.claude/skills/shared/domains/concerns/auth.md) § Signal Keywords
 ```
 
 This ensures a **single source of truth** — keyword updates in `shared/` automatically apply to both skills.
@@ -338,7 +338,7 @@ Add a new interface when a project has a distinct interaction surface not covere
 
 5. **Update profiles**: If the new interface should be part of a profile (e.g., `web-api` might include `graphql`), update the profile manifest.
 
-5. **Test**: Run through an init → specify flow with a project that uses this interface. Verify S0 keywords trigger detection and S1 rules produce meaningful SCs. For signal matching mechanics (case-insensitive, compound-first, whole-token-only), see [`clarity-index.md` § 3 Matching Algorithm](smart-sdd/reference/clarity-index.md).
+5. **Test**: Run through an init → specify flow with a project that uses this interface. Verify S0 keywords trigger detection and S1 rules produce meaningful SCs. For signal matching mechanics (case-insensitive, compound-first, whole-token-only), see [`clarity-index.md` § 3 Matching Algorithm](.claude/skills/smart-sdd/reference/clarity-index.md).
 
 ### Section Checklist
 
@@ -378,7 +378,7 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 
 4. **Update profiles**: If the concern should be default for a profile, update the profile manifest.
 
-5. **Test**: Verify S0 keywords trigger module activation during `init` Proposal Mode. For matching mechanics, see [`clarity-index.md` § 3 Matching Algorithm](smart-sdd/reference/clarity-index.md).
+5. **Test**: Verify S0 keywords trigger module activation during `init` Proposal Mode. For matching mechanics, see [`clarity-index.md` § 3 Matching Algorithm](.claude/skills/smart-sdd/reference/clarity-index.md).
 
 ### Existing Concern Modules
 

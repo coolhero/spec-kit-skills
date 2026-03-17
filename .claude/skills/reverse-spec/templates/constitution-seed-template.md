@@ -169,7 +169,11 @@ Quality (No tests→Characterization Tests, Complex state→State Diagrams, Exte
 - Respect existing code style and maintain consistency
 - **Verification criterion**: `Every changed line must be directly traceable to the current task`
 
-### V. Demo-Ready Delivery
+### V. Goal-Driven Execution
+- Verifiable completion criteria required
+- **Verification criterion**: `Every task must have a clear, objectively verifiable definition of done`
+
+### VI. Demo-Ready Delivery
 - Each Feature must be demonstrable upon completion — not just passing tests, but **the user must be able to see and use the real, working Feature**
 - A demo is NOT a test suite. Tests belong in `verify` Phase 1. A demo **launches the Feature** so the user can experience it firsthand
 - Maintain a centralized `demos/` directory at the project root with **executable demo scripts** per Feature:
@@ -215,13 +219,6 @@ Quality (No tests→Characterization Tests, Complex state→State Diagrams, Exte
   - During subsequent Feature implementation, check `demos/` for demo-only components marked for removal and clean them up
 - **Limited verification**: If a Feature cannot be fully verified (e.g., tests depend on unmerged Feature, no frontend for pure library), the user may acknowledge "limited verification" with a mandatory reason. This is recorded as ⚠️ in progress tracking — merge is allowed, but re-verification is expected when the limitation is resolved
 - **Verification criterion**: `Running ./demos/F00N-name.sh launches the Feature and the user can experience it — "npm test passes" alone does NOT satisfy this criterion`
-
-### VI. Runtime-First Verification
-- "Build passes" is necessary but NOT sufficient. A Feature is verified when the **app actually works at runtime** — renders correctly, responds to user interaction, and produces zero console errors
-- For any Feature with a user-facing interface: at least **one integration/render test** that mounts a real component with real store/state is REQUIRED. Pure unit tests with mocked stores do not catch selector instability, layout timing, or rendering loops
-- Every route/page-level component MUST be wrapped with an **Error Boundary** (or framework equivalent). Uncaught render errors must be caught and reported, not crash the entire application
-- When runtime verification tools (browser automation / MCP) are unavailable during implement, this MUST be explicitly acknowledged and compensated for during verify
-- **Verification criterion**: `The app must render, respond to interaction, and produce zero console errors — "npm test passes" and "build succeeds" alone do NOT satisfy this criterion`
 
 ---
 

@@ -62,6 +62,19 @@ Display before each API-related task: `📋 API Compatibility Matrix: [N] provid
 
 ## Source Reference Injection (rebuild/adoption mode) — BLOCKING for rebuild+GUI
 
+> Guard 1: Guideline → Gate Escalation. Source Reference Injection is a BLOCKING gate
+> (not a guideline) because its violation causes Major+ quality regression in rebuild projects.
+> See pipeline-integrity-guards.md § Guard 1.
+>
+> Guard 3: Cross-Stage Trust Breakers — Gate 2 (implement entry). Read Interaction Surface
+> Inventory + analyze source layout structure independently — do not blindly trust previous
+> stage assumptions about runtime defaults or UI structure.
+> See pipeline-integrity-guards.md § Guard 3.
+>
+> Guard 7: Rebuild Fidelity Chain. Source-First: read source BEFORE writing code.
+> Source structure is a first-class artifact at every pipeline stage, not a one-time
+> reverse-spec input. See pipeline-integrity-guards.md § Guard 7.
+
 If the Feature's `pre-context.md` has a non-empty Source Reference section AND `sdd-state.md` Source Path ≠ `N/A`:
 
 1. Read `Source Path` from `sdd-state.md` (Source Root)
@@ -184,6 +197,10 @@ Even when the source app cannot be launched (dependency issues, missing env, etc
 4. Display: `📂 Visual References (static): [N] screenshots loaded from visual-references/`
 
 ### Rebuild Visual Reference Checkpoint (MANDATORY — rebuild + GUI)
+
+> Guard 1: Guideline → Gate Escalation. This checkpoint was promoted from guideline to
+> BLOCKING gate because prior violations (SKF-024) caused Major+ quality regression.
+> See pipeline-integrity-guards.md § Guard 1.
 
 > **Why this is a HARD STOP, not a read instruction**: Prior failures (SKF-024) show agents skip visual references despite "MUST consult" prose. This gate ensures visual reference is loaded and confirmed before any UI task begins.
 
@@ -399,6 +416,10 @@ After each task that creates/modifies UI files:
 4. Display: `🌐 i18n: [N] keys checked, [N] added to [locale list]`
 
 **Step 2 — Runtime Check** (when Playwright CLI or MCP available):
+
+> Guard 2: Static ≠ Runtime — Level 1. App launches without crash (smoke check).
+> Static build pass alone is insufficient for GUI projects.
+> See pipeline-integrity-guards.md § Guard 2.
 
 **CLI mode** (primary — RUNTIME_BACKEND = cli):
 1. If app not running: start app (dev server or Electron via `_electron.launch()`)
@@ -904,6 +925,10 @@ This rule prevents the class of bugs where "data works during session but vanish
 - **Module Import Graph**: Prevent circular imports, check tree-shaking impact when using barrel exports
 
 ### Interaction Surface Preservation (UI Features — when modifying/replacing previous Feature components)
+
+> Guard 1: Guideline → Gate Escalation. Reading the Interaction Surface Inventory before
+> modifying shared components is BLOCKING — not advisory.
+> See pipeline-integrity-guards.md § Guard 1.
 
 When a task modifies or replaces a UI component created by a **previously completed Feature** (e.g., replacing App.tsx, restructuring layout, swapping navigation):
 

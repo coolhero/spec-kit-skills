@@ -494,6 +494,10 @@ Pattern Constraints identify framework+library interaction patterns known to cau
 
 ## Source → Target Component Mapping (rebuild mode, BLOCKING)
 
+> Guard 1: Guideline → Gate Escalation. Plan Review rejects if source components are
+> unmapped — this is a BLOCKING gate, not a guideline.
+> See pipeline-integrity-guards.md § Guard 1.
+>
 > (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
 > **Skip for**: greenfield, add mode, or backend-only Features.
 

@@ -756,12 +756,22 @@ After `speckit-specify` completes and the user approves the Review, **automatica
 2. **Scan for vague qualifiers**: Check for ambiguous adjectives without measurable criteria (e.g., "fast", "scalable", "intuitive", "robust")
 3. **If ambiguities found**:
    - Display: "⚠️ Ambiguities detected in spec.md. Running speckit-clarify to resolve them."
-   - Execute `speckit-clarify` via the Common Protocol (Assemble → Checkpoint → Execute+Review → Update)
+   - Execute `speckit-clarify` via Inline Execution (NOT Skill tool)
    - `speckit-clarify` will ask the user up to 5 questions interactively and update spec.md directly
    - After clarify completes, re-scan to verify ambiguities are resolved
    - If unresolved ambiguities remain, display them and ask if the user wants to run clarify again or proceed
 4. **If no ambiguities found**: Skip clarify and proceed directly to plan
    - Display: "✅ No critical ambiguities detected in spec.md. Proceeding to plan."
+
+#### Clarify Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-clarify` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+
+1. Execute `speckit-clarify` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any navigation output from speckit-clarify. Do NOT show these to the user.
+3. Read the updated `SPEC_PATH/{NNN-feature}/spec.md` and assemble Review Display (show clarification results: questions asked, answers received, spec sections updated)
+4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-clarify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to plan.
 
 #### Per-Feature Environment Variable Check (implement step)
 
@@ -852,6 +862,16 @@ Before assembling the implement Checkpoint, check:
 If "Proceed with awareness": record `⚠️ STUB-DEPENDENT — [stub list]` in sdd-state.md Feature Detail Log. verify Phase 2 will re-check these stubs.
 
 **Skip if**: No dependency Features have stubs.md, or no stubs reference the current Feature.
+
+#### Implement Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-implement` returns, do NOT show its raw output ("Suggested commit", "Implementation complete", etc.). You MUST suppress it, read the artifacts, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+
+1. Execute `speckit-implement` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any "Suggested commit", "Implementation complete", or navigation output from speckit-implement. Do NOT show these to the user.
+3. Read the implementation artifacts (source files created/modified, test files, demo scripts) and assemble Review Display — show implementation summary (files created/modified, stubs status, demo script status). See `reference/injection/implement.md` for detailed Review content.
+4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-implement executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to verify.
 
 #### Implement Checkpoint Display
 
@@ -1054,7 +1074,17 @@ When new architectural principles or conventions are discovered during Feature p
 1. **Checkpoint indication**: "Proposing a Constitution update: [principle content]"
 2. **User approval**: Uses AskUserQuestion with options: "Approve constitution update", "Reject — keep current version", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1)
 3. **Execute update**: If approved, performs a MINOR version update via `speckit-constitution`
-4. **Impact analysis**: Displays a warning if already completed Features are affected
+
+#### Constitution Incremental Update Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-constitution` (incremental update) returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+
+1. Execute `speckit-constitution` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any navigation output from speckit-constitution. Do NOT show these to the user.
+3. Read the updated `.specify/memory/constitution.md` and assemble Review Display (show diff summary: what principles were added/modified, version bump)
+4. **Impact analysis**: Display a warning if already completed Features are affected by the updated principles
+5. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+6. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-constitution (incremental update) executed.\n💡 Type "continue" to review the results.` — Do NOT end silently.
 
 ---
 

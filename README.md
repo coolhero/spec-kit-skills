@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 15:26 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 16:55 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1078,7 +1078,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/case-study ~/.claude/skills/case-s
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd state file | `specs/reverse-spec/sdd-state.md` |
 | Decision history | `history.md` |
-| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 16 gap patterns + 22 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
+| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 16 gap patterns + 33 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
 
 ### Feature Naming Convention
 
@@ -1178,7 +1178,7 @@ Each skill follows the same internal directory convention:
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for browser automation and Electron CDP configuration |
 | `TODO.md` | Project task tracker (all planned tasks completed as of 2026-03-08) |
 | `history.md` | Design decision history extracted from git history |
-| `lessons-learned.md` | AI agent pipeline failure patterns (G1–G16) and specific lessons (L1–L22) — universal takeaways for agent skill builders |
+| `lessons-learned.md` | AI agent pipeline failure patterns (G1–G16) and specific lessons (L1–L33) — universal takeaways for agent skill builders |
 | `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |
 | `uninstall.sh` | Uninstaller — removes symlinks from `~/.claude/skills/` |
 

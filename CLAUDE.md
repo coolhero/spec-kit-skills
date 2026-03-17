@@ -100,3 +100,9 @@
    - (b) artifact 읽기 + Review 표시 + AskUserQuestion 호출 (HARD STOP)
    - (c) 컨텍스트 한계 시 fallback 메시지 (`💡 Type "continue"`)
    - 누락 시 해당 지점에 인라인으로 추가 (reference 파일 참조만으로는 에이전트가 무시하는 경향 — Do NOT Modify #1과 같은 이유)
+6. **Cross-Reference Integrity (참조 링크 무결성)**: 모든 `See [file] §N`, `[text](path)` 링크가 실제 존재하는 파일/섹션을 가리키는지 검증. 파일 이동/이름 변경 시 깨지기 쉬움. 검증 방법: `See`, `](` 패턴으로 grep → 대상 파일 존재 확인.
+7. **Numeric Consistency (숫자/카운트 일관성)**: "7-step loading order", "9 injection files", "4-tier severity" 등 여러 파일에서 동일한 숫자를 언급할 때 실제 개수와 일치하는지 검증. 모듈 추가/삭제 시 한 곳만 업데이트하고 나머지를 놓치는 패턴이 빈번. 예: `_resolver.md`에서 7단계라고 하면 `_schema.md`, `SKILL.md`, `ARCHITECTURE-EXTENSIBILITY.md`도 모두 7이어야 함.
+8. **Template↔Schema Alignment (템플릿-스키마 정합성)**: `templates/*.md`의 필드가 `_schema.md`, `state-schema.md` 등 정의된 스키마와 일치하는지 검증. 스키마에 필드를 추가했는데 템플릿에 반영 안 된 경우, 또는 그 반대. 검증 방법: 스키마 파일의 필드 목록 추출 → 템플릿의 placeholder 비교.
+9. **Graceful Degradation Coverage (우아한 퇴보 테이블 완전성)**: `context-injection-rules.md`의 graceful degradation 테이블이 모든 optional artifact를 커버하는지 검증. 새로운 optional artifact(예: org-convention, Brief Summary)를 추가하면 degradation 규칙도 함께 추가해야 하는데, 누락되기 쉬움. 검증 방법: injection 파일들에서 "if absent/missing/none" 조건 추출 → degradation 테이블과 대조.
+10. **README File Table Completeness (파일 테이블 완전성)**: README 말미의 파일 설명 테이블이 실제 프로젝트 파일과 1:1 매칭되는지 검증. 파일 추가/삭제 후 테이블 업데이트를 잊는 패턴. 검증 방법: `glob **/*.md` 결과와 테이블 항목 비교 → 누락/잉여 식별.
+11. **Guard↔Pipeline Step Binding (가드-파이프라인 바인딩 검증)**: `pipeline-integrity-guards.md`의 7개 가드(G1~G7)가 실제로 올바른 파이프라인 step에 바인딩되어 있는지 검증. 가드 정의는 있지만 실제 injection 파일에서 참조하지 않으면 사실상 미적용. 검증 방법: 각 Guard ID로 grep → injection/*.md, pipeline.md, verify-phases.md에서 참조 확인.

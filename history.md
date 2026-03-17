@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-17] Full Review Protocol Verification (11-point) — Integrity Fixes
+
+### Context
+
+Performed comprehensive 11-point Review Protocol verification (expanded from 5 to 11 items). Added 6 new review checks to CLAUDE.md: Cross-Reference Integrity, Numeric Consistency, Template↔Schema Alignment, Graceful Degradation Coverage, README File Table Completeness, Guard↔Pipeline Step Binding.
+
+### Findings and Fixes (17 issues resolved)
+
+| Category | Issue | Fix |
+|----------|-------|-----|
+| Protocol 5: Execute+Review | speckit-clarify, speckit-implement, speckit-constitution (incremental) missing inline sections | Added 3 inline Execute+Review sections to pipeline.md |
+| Protocol 6: Broken links | ARCHITECTURE-EXTENSIBILITY.md wrong path depth; history.md dead v2-design.md link | Fixed 3 broken links across 4 files |
+| Protocol 7: Numeric mismatch | Lessons count 22→33; Best Practice V/VI naming; _resolver.md merge rules incomplete | Updated READMEs, template, added _schema.md cross-reference |
+| Protocol 9: Degradation table | 17 optional artifacts missing from graceful degradation table | Added 17 entries to context-injection-rules.md |
+| Protocol 11: Guard binding | G3 completely unbound; G1/G2/G6/G7 partially bound | Added Guard cross-references to 5 injection/command files |
+
+### Design Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Review Protocol expansion (5→11) | Added to CLAUDE.md permanently | Catches drift that manual review misses; numeric/link/guard gaps recur on every module change |
+| Merge rules Single Source of Truth | _schema.md is authoritative; _resolver.md cross-references it | Prevents 2-file sync drift (was already out of sync: 5 vs 15 rules) |
+| Guard attributions via `> Guard N:` blockquotes | Inline in injection files | Matches existing convention; enables grep-based binding verification |
+
+---
+
 ## [2026-03-17] Self-Assessment Gap Resolution — Intent Verification, GEL Enforcement, Org Convention
 
 ### Context
@@ -2777,7 +2803,7 @@ Root cause: F005-chat-ui passed full pipeline but app didn't work (Zustand selec
 
 ## [2026-03-06] v2 Redesign — User Intent Model + Adoption + Demo + Coverage + Scripts
 
-> Full design document: [`v2-design.md`](v2-design.md)
+> Full design document: `v2-design.md` (removed)
 
 ### User Intent Redesign
 

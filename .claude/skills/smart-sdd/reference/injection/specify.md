@@ -151,6 +151,10 @@ Feature: [FID] - [Feature Name]
 [If section empty, absent, or "None": skip this block entirely]
 
 ── Runtime-Verified Defaults ──────────────────────
+> Guard 3: Cross-Stage Trust Breakers — Gate 1 (specify entry). Runtime config defaults
+> must be independently verified at specify entry, not blindly trusted from code analysis.
+> See pipeline-integrity-guards.md § Guard 3.
+
 [If rebuild mode AND Feature involves settings/modes/configuration
  AND runtime-exploration.md has relevant default values:]
   ⚠️ The following defaults were verified by running the source app (reverse-spec Phase 1.5):
@@ -281,6 +285,10 @@ If spec.md FR-### descriptions mention 2+ external API providers:
 **Skip if**: < 2 providers detected, or Feature does not call external APIs.
 
 ### Runtime Default Coverage Check (rebuild mode)
+
+> Guard 7: Rebuild Fidelity Chain. Source app defaults must flow into FR/SC at specify —
+> not be invented or assumed. This check is part of the fidelity chain from reverse-spec
+> through specify. See pipeline-integrity-guards.md § Guard 7.
 
 > **Purpose**: Ensure that settings/mode/configuration Features specify the correct runtime defaults. Code analysis can misidentify defaults (e.g., a constant `'left'` in code while the app actually defaults to `'top'` mode at runtime). Runtime-verified defaults from reverse-spec Phase 1.5 Step 5 take precedence over code analysis.
 

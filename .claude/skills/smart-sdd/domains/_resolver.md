@@ -99,12 +99,14 @@ Organization-level conventions provide shared rules that apply across all projec
 
 > **Signal Keywords resolution**: Each module's S0/A0 section references `shared/domains/` for signal keywords. During S0/A0 aggregation (init inference), read keywords from `../../shared/domains/{type}/{name}.md § Signal Keywords` instead of the skill-local module. See `shared/domains/_taxonomy.md` for the complete module registry.
 
-**Merge rule**: Later modules extend earlier ones. For same-section content:
-- **S5 Elaboration Probes**: Append (accumulate all probes)
+**Merge rule**: Later modules extend earlier ones. For same-section content (summary — 5 of 15 rules):
 - **S1 SC Rules**: Append (accumulate all rules)
-- **S7 Bug Prevention**: Append (accumulate all activation conditions)
 - **S2 Parity Dimensions**: Append (add module-specific dimensions)
 - **S3 Verify Steps**: Override only if module explicitly overrides (otherwise inherit _core)
+- **S5 Elaboration Probes**: Append (accumulate all probes)
+- **S7 Bug Prevention**: Append (accumulate all activation conditions)
+
+> See `_schema.md` § Section Merge Rules for the complete merge rule table (15 rules covering S0–S9, A0–A5).
 
 ### Step 4. Cache in Working Memory
 

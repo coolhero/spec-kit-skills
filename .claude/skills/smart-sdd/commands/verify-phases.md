@@ -635,6 +635,10 @@ Verification is BLOCKED — merge will not be allowed until all checks pass.
 
 **Step 1a — Feature Contract Compliance Check** (skip if pre-context.md has no "Feature Contracts" section):
 
+> Guard 6a: Provides Interface Verification. Each `Provides →` interface must be verified
+> from the consumer's perspective — not just the provider's.
+> See pipeline-integrity-guards.md § Guard 6.
+
 1. **Guarantee verification**: For each Guarantee this Feature provides (C-[FID]-G## entries):
    - Grep the Feature's code for the interface/function/API described in the Guarantee
    - Verify the interface returns/provides what the Guarantee promises (type check, not runtime)
@@ -904,6 +908,10 @@ If `plan.md` contains a `## UX Behavior Contract` section:
 
 **Step 4 — Enablement Interface Smoke Test** (if Functional Enablement Chain exists):
 
+> Guard 6b: Interaction Surface Inventory. Playwright checks each interaction surface
+> from the inventory still works after this Feature's implementation.
+> See pipeline-integrity-guards.md § Guard 6.
+
 If `pre-context.md` contains a "Functional Enablement Chain" section with "Enables →" entries:
 
 > This Feature provides runtime interfaces that downstream Features depend on.
@@ -996,6 +1004,11 @@ Verifies that the data shape contracts defined in plan.md are actually implement
    Display: `⚠️ Integration Contracts not defined in plan.md — cross-Feature data shape compatibility not verified. Consider running /smart-sdd plan [FID] to add contracts.`
 
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if Demo-Ready Delivery is active)
+
+> Guard 2: Static ≠ Runtime — Level 3. Interactions produce correct state (functional
+> verification via Playwright). Static checks + smoke launch are insufficient — Playwright
+> SC verification confirms runtime behavior matches specification.
+> See pipeline-integrity-guards.md § Guard 2.
 
 > **Interface conditional**: Phase 3 UI verification only executes when `gui` is in the active Interfaces (from sdd-state.md Domain Profile).
 > For pure API/CLI/data-io projects, skip Phase 3 entirely and proceed to Phase 3b.
@@ -1553,6 +1566,15 @@ After executing each SC's verification, record the **Reached Depth** and compare
 
 **Step 3e — Source App Comparative Verification** (rebuild mode only):
 
+> Guard 3: Cross-Stage Trust Breakers — Gate 3 (verify Phase 3e). MANDATORY source app
+> comparison for rebuild+GUI — independently verifies runtime-configurable settings against
+> the source app, catching trust breaker errors that propagated through earlier stages.
+> See pipeline-integrity-guards.md § Guard 3.
+>
+> Guard 7: Rebuild Fidelity Chain. Final verification in the fidelity chain — source app
+> comparison confirms the rebuild matches the original. This is the BLOCKING endpoint of
+> the chain that started at reverse-spec. See pipeline-integrity-guards.md § Guard 7.
+
 > In rebuild mode, compare the rebuilt app against the original running app for behavioral parity.
 > Only when Origin=`rebuild` AND `source_available: running` in sdd-state.md scenario config.
 > See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) § Source App Access.
@@ -1908,6 +1930,11 @@ B. **Seeded Environment** (non-default, real-world state):
   - Display: `✅ Registry drift resolved: [N] entity entries and [M] API entries updated to match implementation`
 
 **Step 4b. Dependency Stub Status Check**:
+
+> Guard 6c: Dependency Stub Resolution. Verify that stubs recorded during preceding
+> Features' implement are resolved by this Feature's implementation.
+> See pipeline-integrity-guards.md § Guard 6.
+
 - If this Feature resolves stubs from a preceding Feature: verify the stubs are actually resolved (real implementation replaces placeholder)
 - If this Feature has `⚠️ STUB-DEPENDENT` flag: verify the stubs it depends on are still present and compatible
 - Update stubs.md of affected Features if resolution status changed
