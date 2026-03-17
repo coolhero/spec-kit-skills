@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:26 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:35 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -80,9 +80,9 @@ This is the approach that [spec-kit](https://github.com/github/spec-kit) provide
 
 The challenge is that **real software is never just one Feature.** Even a simple todo app has auth, task management, and a UI — three Features, three specs, three separate pipeline runs. And each spec is written independently.
 
-The agent building Feature 2 *might* figure out what Feature 1 decided — but that depends on the agent's capability and context window, not on any systematic guarantee. It may define the same `User` entity with different field names, design APIs without knowing the auth pattern already chosen, or accept a vague description like "add profile management" without asking what it actually means. Each spec is internally solid, but without a structured mechanism, cross-Feature consistency is left to chance — and things can break as early as Feature 2.
+The agent building Feature 2 *might* figure out what Feature 1 decided — but that depends on the agent's capability and context window, not on any systematic guarantee. It may define the same `User` entity with different field names, or design APIs without knowing the auth pattern already chosen. Even within a single spec, the agent may lack sufficient understanding of the user's environment — the same "add authentication" means very different things for a multi-tenant SaaS platform versus an internal admin tool. And when the user's description is vague, like "add profile management," the agent may just accept it without asking what it actually means.
 
-The root cause is three gaps that single-spec workflows can't address: no memory across Features, no awareness of project type, and no verification of user intent. spec-kit-skills adds three concepts to close them:
+Each spec is internally solid, but these gaps — no memory across Features, insufficient understanding of the project's context, and no verification of user intent — are not things a single-spec workflow can address. spec-kit-skills adds three concepts to close them:
 
 #### Global Evolution Layer
 
