@@ -2,11 +2,11 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:38 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:42 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
-- **Code-Explore** — 기존 코드베이스를 인터랙티브하게 탐색하며 이해할 수 있게 도와줍니다. 프로젝트를 스캔하여 아키텍처 맵을 얻고, 특정 흐름을 소스 레벨에서 end-to-end로 트레이싱합니다. 각 탐색 세션은 호출 체인, 엔티티 맵, Mermaid 다이어그램이 포함된 문서화된 trace를 생성합니다. 충분히 이해했으면, trace들을 Feature 후보로 합성하여 SDD 파이프라인에 직접 연결합니다. *(개발 중)*
+- **Code-Explore** — 기존 코드베이스를 인터랙티브하게 탐색하며 이해할 수 있게 도와줍니다. 프로젝트를 스캔하여 아키텍처 맵을 얻고, 특정 흐름을 소스 레벨에서 end-to-end로 트레이싱합니다. 각 탐색 세션은 호출 체인, 엔티티 맵, 흐름도가 포함된 trace를 생성합니다. 충분히 이해했으면, trace들을 Feature 후보로 합성하여 SDD 파이프라인에 직접 연결합니다. *(개발 중)*
 - **Reverse-Spec** — 기존 코드베이스를 분석하여 SDD 파이프라인에 필요한 모든 정보를 추출합니다: 앱이 무엇을 하는지, 어떻게 구조화되어 있는지, 어떤 데이터 모델과 API가 존재하는지. 기존 앱을 처음부터 재구축하거나, 이미 작성된 코드에 SDD 문서를 추가할 때 사용합니다. smart-sdd 없이 spec-kit만 사용할 수 있는 독립 프롬프트(`speckit-prompt.md`)도 함께 생성합니다.
 - **Smart-SDD** — 각 spec-kit 명령에 프로젝트 전체 맥락을 자동으로 주입합니다. Feature 3에 대해 `/speckit-plan`을 실행하면, Feature 1의 데이터 모델과 Feature 2의 API 계약이 자동으로 전달되어 — 가정이 아닌 실제 존재하는 것에 기반하여 계획을 세울 수 있습니다.
 
