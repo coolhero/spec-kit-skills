@@ -2,10 +2,11 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:23 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:34 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
+- **Code-Explore** helps you understand an existing codebase through interactive, source-level exploration. Scan a project to get an architecture map, then trace specific flows end-to-end — each exploration session produces documented traces with call chains, entity maps, and Mermaid diagrams. When you've understood enough, synthesize your traces into Feature candidates that feed directly into the SDD pipeline. *(Under development)*
 - **Reverse-Spec** analyzes an existing codebase and extracts everything the SDD pipeline needs to know: what the app does, how it's structured, what data models and APIs exist. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
 
@@ -52,6 +53,7 @@ cd spec-kit-skills
 
 | Your situation | Command | What happens |
 |------|---------|------|
+| **Want to understand a codebase first** | `/code-explore ./path/to/source` | Explore the code interactively, build understanding, then define specs |
 | **Starting from scratch** | `/smart-sdd init` | Set up a new project, define Features, run the pipeline |
 | **Have existing code, want to rebuild it** | `/reverse-spec ./path/to/source` | Analyze the code → rebuild with SDD |
 | **Have existing code, want to keep it** | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs, no rewrite |
@@ -182,6 +184,12 @@ flowchart TD
         CODE["📦 Existing Code"]
     end
 
+    subgraph explore["Understand"]
+        CE["/code-explore
+        Interactive source tracing
+        Documented understanding"]
+    end
+
     subgraph analyze["Analyze"]
         INIT["/smart-sdd init
         Domain Profile detection
@@ -218,6 +226,9 @@ flowchart TD
     from project type"]
 
     IDEA --> INIT
+    CODE --> CE
+    CE --> RS
+    CE --> ADD
     CODE --> RS
     CODE --> ADOPT_RS
     INIT --> ADD
@@ -1083,6 +1094,7 @@ Shell scripts in `.claude/skills/smart-sdd/scripts/` let you inspect project pro
 
 ```bash
 mkdir -p .claude/skills
+cp -r /path/to/spec-kit-skills/.claude/skills/code-explore .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
 ```
@@ -1090,6 +1102,7 @@ cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
 **Manual Symlinks**:
 
 ```bash
+ln -s /path/to/spec-kit-skills/.claude/skills/code-explore ~/.claude/skills/code-explore
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
 ```
@@ -1173,7 +1186,7 @@ Each skill follows the same internal directory convention:
 │       ├── concerns/              Per-concern signal keywords
 │       └── archetypes/            Per-archetype signal keywords
 │
-├── {skill}/                       Per-skill directory (reverse-spec, smart-sdd)
+├── {skill}/                       Per-skill directory (code-explore, reverse-spec, smart-sdd)
 │   ├── SKILL.md                   Entry point — command routing and mandatory rules
 │   ├── commands/                  User commands — one file per command workflow
 │   ├── domains/                   Skill-specific behavioral rules (S1-S8 or R3-R7)
@@ -1205,6 +1218,16 @@ Each skill follows the same internal directory convention:
 | `lessons-learned.md` | AI agent pipeline failure patterns (G1–G16) and specific lessons (L1–L33) — universal takeaways for agent skill builders |
 | `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |
 | `uninstall.sh` | Uninstaller — removes symlinks from `~/.claude/skills/` |
+
+### code-explore (`.claude/skills/code-explore/`)
+
+| File | Description |
+|------|-------------|
+| `SKILL.md` | Skill router — entry point and command routing for code-explore |
+| `commands/orient.md` | Codebase orientation — scan and generate architecture map |
+| `commands/trace.md` | End-to-end flow tracing — source-level call chain documentation |
+| `commands/synthesis.md` | Trace aggregation — Feature candidates and spec-kit handoff |
+| `commands/status.md` | Exploration coverage — trace index and readiness check |
 
 ### reverse-spec (`.claude/skills/reverse-spec/`)
 
