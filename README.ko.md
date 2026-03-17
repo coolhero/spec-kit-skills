@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:21 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:26 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -70,15 +70,15 @@ cd spec-kit-skills
 
 ### 배경: Spec-Driven Development
 
-Spec-driven development에서는 AI 에이전트에게 "할 일 앱 만들어줘"라고 하지 않습니다. 앱을 **Feature** 단위로 나눕니다 — 인증, 할 일 CRUD, 대시보드 UI처럼 독립적인 기능 단위입니다. 각 Feature는 정확히 하나의 **spec**을 갖고, 이 spec이 에이전트가 코드를 쓰기 *전에* 해당 Feature가 *무엇을 하는지* (기능 요구사항, 성공 기준, 데이터 모델)를 정의합니다. 에이전트는 이 spec에 맞춰 구조화된 파이프라인을 따릅니다: specify → plan → tasks → analyze → implement → verify.
+Spec-driven development에서는 AI 에이전트에게 "TO-DO 앱 만들어줘"라고 하지 않습니다. 앱을 **Feature** 단위로 나눕니다 — 인증, TO-DO CRUD, 대시보드 UI처럼 독립적인 기능 단위입니다. 각 Feature는 정확히 하나의 **spec**을 갖고, 이 spec이 에이전트가 코드를 쓰기 *전에* 해당 Feature가 *무엇을 하는지* (기능 요구사항, 성공 기준, 데이터 모델)를 정의합니다. 에이전트는 이 spec에 맞춰 구조화된 파이프라인을 따릅니다: specify → plan → tasks → analyze → implement → verify.
 
 이 접근법을 제공하는 것이 [spec-kit](https://github.com/github/spec-kit)입니다. Feature 하나, spec 하나, 파이프라인 한 번 — 잘 동작합니다.
 
 ### 문제: Spec끼리 대화하지 않는다
 
-문제는 **실제 소프트웨어가 Feature 하나가 아니라는 것**입니다. 간단한 할 일 앱조차 인증, 할 일 관리, UI — 세 개의 Feature, 세 개의 spec, 세 번의 별도 파이프라인 실행이 있습니다. 그리고 각 spec은 독립적으로 작성됩니다.
+문제는 **실제 소프트웨어가 Feature 하나가 아니라는 것**입니다. 간단한 TO-DO 앱조차 인증, TO-DO 관리, UI — 세 개의 Feature, 세 개의 spec, 세 번의 별도 파이프라인 실행이 있습니다. 그리고 각 spec은 독립적으로 작성됩니다.
 
-이는 Feature 2를 만드는 에이전트가 Feature 1에서 뭘 결정했는지 전혀 모른다는 의미입니다. 같은 `User` 엔티티를 다른 필드명으로 정의하고, 이미 선택된 인증 패턴을 모른 채 API를 설계하고, "프로필 관리 추가해줘"라는 모호한 설명을 그것이 실제로 무엇을 의미하는지 묻지 않고 수용합니다. 각 spec은 내부적으로 탄탄하지만 서로 맞지 않습니다 — 이건 Feature 10이 아니라 Feature 2에서 바로 깨집니다.
+Feature 2를 만드는 에이전트가 Feature 1의 결정을 스스로 파악*할 수도* 있지만 — 그건 에이전트의 역량과 컨텍스트 윈도우에 달린 것이지, 체계적으로 보장되는 것이 아닙니다. 같은 `User` 엔티티를 다른 필드명으로 정의할 수 있고, 이미 선택된 인증 패턴을 모른 채 API를 설계할 수 있고, "프로필 관리 추가해줘"라는 모호한 설명을 그것이 실제로 무엇을 의미하는지 묻지 않고 수용할 수 있습니다. 각 spec은 내부적으로 탄탄하지만, 구조화된 메커니즘 없이는 Feature 간 일관성이 운에 맡겨집니다 — Feature 2에서부터 깨질 수 있습니다.
 
 근본 원인은 단일 spec 워크플로우가 해결할 수 없는 세 가지 gap입니다: Feature 간 기억 부재, 프로젝트 유형 인식 부재, 사용자 의도 검증 부재. spec-kit-skills는 이를 메우기 위해 세 가지 개념을 추가합니다:
 
