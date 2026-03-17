@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 16:55 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 17:09 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -70,25 +70,48 @@ cd spec-kit-skills
 
 ## What It Solves
 
-### The Problem: Why Agentic Coding Breaks at Scale
+### The Problem: Why "One Good Spec" Isn't Enough
 
-AI coding agents are powerful — they write functions, build components, fix bugs. But as a project grows beyond a few files, three structural gaps emerge:
+SDD demos typically show a single Feature flowing through specify → plan → implement. That works perfectly — the spec is clean, the plan is clear, the implementation matches. It creates the impression that **writing one good spec is all it takes.**
 
-**1. Every agent manages context differently.** Claude Code uses CLAUDE.md, Cursor uses .cursorrules, Windsurf uses its own memory system. None of them provide a structured way to track how Features relate to each other — which data models are shared, which API contracts must stay compatible, what architectural decisions were already made. The result: Feature 3 contradicts what Feature 1 decided, because nothing connects them.
+The problem starts with Feature 2. Here's a realistic scenario:
 
-**2. Agents have no project-type awareness.** A REST API project and a desktop Electron app need fundamentally different rules — different testing strategies, different verification checks, different bug patterns to watch for. Every project and every organization has its own conventions, constraints, and quality criteria. But agents treat every project the same way, producing generic specs and missing project-specific failure modes — whether that's a missing authentication check for a public API or a missing window management rule for an Electron app.
+---
 
-**3. Agents don't verify that they understood the user's intent.** Whether a Feature starts from a detailed PRD, a casual conversation, or a gap in existing code, the agent takes whatever description it receives and starts coding. There's no structured process to confirm the agent's understanding is complete and accurate — is the scope clear? are the data models defined? are interface contracts specified? Missing dimensions don't trigger questions; they become assumptions that surface as bugs during implementation, when fixing them is expensive.
+**Feature 1** — User Authentication. The agent writes a solid spec and implements it.
+- Entity: `User { id, name, email, passwordHash }`
+- API: `POST /api/auth/login → { token, user }`
+- Decision: JWT stored in localStorage
 
-### What spec-kit Does
+**Feature 2** — You tell the agent: "Add profile management." The agent writes another solid spec:
+- It defines `User { id, userName, mail, avatar }` — same entity, different field names
+- It designs `PUT /api/users/:id` — with no mention of how requests are authenticated
 
-[spec-kit](https://github.com/github/spec-kit) addresses the first layer: it introduces **Specification-Driven Development (SDD)** — break the project into Features, write specs for each one, then code against them. The agent gets a structured pipeline (specify → plan → tasks → analyze → implement → verify) instead of winging it.
+Three things just went wrong, and each reveals a different structural gap:
 
-But spec-kit processes **one Feature at a time**. It doesn't track what other Features decided, doesn't know what kind of project you're building, and doesn't validate whether the Feature definition is complete enough to produce good specs.
+**The entity collision** (`name` vs `userName`, `email` vs `mail`) happened because the agent never read Feature 1's spec. It has no memory of decisions made in other Features. → **No cross-Feature memory**
 
-### Three Concepts That Fill the Gaps
+**The missing auth on the API** happened because the agent doesn't know this is a JWT-based web app. A public REST API would need API key validation; a desktop app would need OS-level auth; this app needs Bearer token headers. The agent applied none of these because it treats every project the same. → **No project-type awareness**
 
-spec-kit-skills adds three concepts on top of spec-kit, each addressing one gap:
+**The vague Feature definition** — "add profile management" — was accepted without question. The agent didn't ask: Can users only edit their own profile, or can admins edit anyone's? Is avatar upload required? What fields are editable? These missing dimensions became silent assumptions baked into the spec. → **No intent verification**
+
+---
+
+By Feature 5, these three gaps compound. The project has accumulated 20+ architectural decisions across 4 Features — which database, which auth pattern, which shared components, which API conventions — and the agent can't see any of them. Each new spec is **internally perfect but incompatible with everything else.**
+
+```
+1 Feature:  specify → implement ✅  (no conflicts possible)
+3 Features: entity schemas and API patterns diverge across specs
+5 Features: foundation decisions (DB, auth, framework) assumed differently per spec
+```
+
+### What spec-kit Does — And Where It Stops
+
+[spec-kit](https://github.com/github/spec-kit) solves the pipeline problem: it introduces **Specification-Driven Development (SDD)** — break the project into Features, write specs for each one, then code against them. The agent gets a structured pipeline (specify → plan → tasks → analyze → implement → verify) instead of ad-hoc coding.
+
+This is a significant improvement. But spec-kit processes **one Feature at a time**. It gives the agent a rigorous process for *each* spec — but no way to connect specs to each other, no awareness of what kind of project it's building, and no validation of whether the Feature definition was complete enough to begin with.
+
+The three gaps from the scenario above remain open. spec-kit-skills adds three concepts to close them:
 
 #### Global Evolution Layer
 
