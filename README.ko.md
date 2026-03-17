@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:34 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:38 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -182,13 +182,26 @@ flowchart TD
         CODE["📦 기존 코드"]
     end
 
-    subgraph explore["이해"]
-        CE["/code-explore
-        인터랙티브 소스 트레이싱
-        문서화된 이해"]
+    subgraph explore["1. 이해 — /code-explore"]
+        CE_ORIENT["Orient
+        아키텍처 맵
+        모듈 탐색"]
+        CE_TRACE["Trace (×N)
+        End-to-end 흐름 트레이싱
+        Entity/API/Rule 관찰"]
+        CE_SYNTH["Synthesis
+        Feature 후보 (C001...)
+        축적된 인사이트"]
+        CE_ORIENT --> CE_TRACE --> CE_SYNTH
     end
 
-    subgraph analyze["분석"]
+    subgraph explore_out["specs/explore/"]
+        EO["orientation.md
+        traces/*.md
+        synthesis.md"]
+    end
+
+    subgraph analyze["2. 분석"]
         INIT["/smart-sdd init
         Domain Profile 감지
         Feature 후보 도출"]
@@ -199,18 +212,19 @@ flowchart TD
         기존 코드 문서화"]
     end
 
-    subgraph define["정의"]
-        ADD["/smart-sdd add
-        Brief: 6관점 검증
-        Intent Verification Gate"]
+    subgraph define["3. 정의"]
+        ADD["/smart-sdd add (Brief)
+        6관점 검증
+        Intent Verification Gate
+        C001 → F001 확정"]
     end
 
-    subgraph artifacts["Global Evolution Layer"]
+    subgraph gel["Global Evolution Layer — specs/reverse-spec/"]
         GEL["roadmap · entity registry · API registry
         pre-contexts · constitution · sdd-state"]
     end
 
-    subgraph build["구축 / 도입"]
+    subgraph build["4. 구축"]
         PIPELINE["/smart-sdd pipeline
         Feature별: specify → plan → tasks
         → analyze → implement → verify"]
@@ -223,10 +237,14 @@ flowchart TD
     프로젝트 유형에서
     단계별 규칙 로드"]
 
+    CODE --> CE_ORIENT
+    CE_TRACE --> EO
     IDEA --> INIT
-    CODE --> CE
-    CE --> RS
-    CE --> ADD
+
+    CE_SYNTH -- "--from-explore" --> RS
+    CE_SYNTH -- "--from-explore" --> ADD
+    CE_SYNTH -- "--from-explore" --> ADOPT_RS
+
     CODE --> RS
     CODE --> ADOPT_RS
     INIT --> ADD
@@ -237,7 +255,10 @@ flowchart TD
     GEL --> ADOPT_P
     DP -.- PIPELINE
     DP -.- ADOPT_P
+    DP -.- ADD
 ```
+
+다이어그램은 전체 생명주기를 보여줍니다: code-explore로 기존 코드를 **이해**하고, reverse-spec으로 **분석**하거나 init으로 새로 시작하고, Brief 프로세스를 통해 Feature를 **정의**한 다음, spec-kit 파이프라인을 통해 **구축**합니다. 각 단계는 다음 단계에 공급되는 아티펙트를 생성합니다 — explore trace가 Feature 후보가 되고, 후보가 GEL 아티펙트가 되고, GEL 아티펙트가 파이프라인을 구동합니다.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:34 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:38 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -184,13 +184,26 @@ flowchart TD
         CODE["📦 Existing Code"]
     end
 
-    subgraph explore["Understand"]
-        CE["/code-explore
-        Interactive source tracing
-        Documented understanding"]
+    subgraph explore["1. UNDERSTAND — /code-explore"]
+        CE_ORIENT["Orient
+        Architecture map
+        Module discovery"]
+        CE_TRACE["Trace (×N)
+        End-to-end flow tracing
+        Entity/API/Rule observations"]
+        CE_SYNTH["Synthesis
+        Feature candidates (C001...)
+        Accumulated insights"]
+        CE_ORIENT --> CE_TRACE --> CE_SYNTH
     end
 
-    subgraph analyze["Analyze"]
+    subgraph explore_out["specs/explore/"]
+        EO["orientation.md
+        traces/*.md
+        synthesis.md"]
+    end
+
+    subgraph analyze["2. ANALYZE"]
         INIT["/smart-sdd init
         Domain Profile detection
         Feature candidates"]
@@ -201,18 +214,19 @@ flowchart TD
         Document existing code"]
     end
 
-    subgraph define["Define"]
-        ADD["/smart-sdd add
-        Brief: 6-perspective validation
-        Intent verification gate"]
+    subgraph define["3. DEFINE"]
+        ADD["/smart-sdd add (Brief)
+        6-perspective validation
+        Intent verification gate
+        C001 → F001 confirmation"]
     end
 
-    subgraph artifacts["Global Evolution Layer"]
+    subgraph gel["Global Evolution Layer — specs/reverse-spec/"]
         GEL["roadmap · entity registry · API registry
         pre-contexts · constitution · sdd-state"]
     end
 
-    subgraph build["Build / Adopt"]
+    subgraph build["4. BUILD"]
         PIPELINE["/smart-sdd pipeline
         Per Feature: specify → plan → tasks
         → analyze → implement → verify"]
@@ -225,10 +239,14 @@ flowchart TD
     Per-step rules loaded
     from project type"]
 
+    CODE --> CE_ORIENT
+    CE_TRACE --> EO
     IDEA --> INIT
-    CODE --> CE
-    CE --> RS
-    CE --> ADD
+
+    CE_SYNTH -- "--from-explore" --> RS
+    CE_SYNTH -- "--from-explore" --> ADD
+    CE_SYNTH -- "--from-explore" --> ADOPT_RS
+
     CODE --> RS
     CODE --> ADOPT_RS
     INIT --> ADD
@@ -239,7 +257,10 @@ flowchart TD
     GEL --> ADOPT_P
     DP -.- PIPELINE
     DP -.- ADOPT_P
+    DP -.- ADD
 ```
+
+The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (or start fresh with init), **define** Features through the Brief process, then **build** through the spec-kit pipeline. Each stage produces artifacts that feed the next — explore traces become Feature candidates, candidates become GEL artifacts, GEL artifacts drive the pipeline.
 
 ---
 
