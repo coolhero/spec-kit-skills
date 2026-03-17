@@ -819,12 +819,47 @@ When using background agents (Agent tool) to parallelize implement tasks:
 3. **Conflict detection**: After all agents complete, run `git diff --name-only` per agent. If any file appears in multiple agents' diffs → the main agent must manually reconcile before proceeding
 4. **Sequential fallback**: If clean file separation is not feasible (too many shared files), execute tasks sequentially instead of in parallel. Note: sequential is the default — parallel is an optimization, not a requirement
 
+#### Dependency Stub Enforcement Gate
+
+> **Purpose**: Prevent implementing a Feature when its dependencies have unresolved stubs that this Feature depends on. Without this gate, the agent builds on placeholder implementations that will break when the dependency Feature is completed and stubs are replaced with real code.
+
+Before assembling the implement Checkpoint, check:
+
+1. Read `sdd-state.md` → Feature Progress to identify preceding Features that the current Feature depends on (from roadmap.md Dependency Graph)
+2. For each dependency Feature that has completed implement: check if `specs/{NNN-dep}/stubs.md` exists
+3. If stubs.md exists, scan for entries where **Depends On** matches the current Feature ID
+4. For each such entry, check if the dependency Feature's stub has been resolved (stub file references actual implementation)
+
+**If unresolved stubs found that BLOCK the current Feature**:
+
+```
+🚫 Dependency Stub Block for [FID]:
+
+  F001-auth has unresolved stubs that [FID] depends on:
+    ❌ getUserProfile() — stub returns mock data, real implementation pending
+    ❌ validateToken() — stub always returns true
+
+  These stubs will cause [FID] to build against fake implementations.
+  When F001's stubs are resolved, [FID]'s code will break.
+
+  Options:
+    - "Resolve stubs first" — implement the real code in F001 before proceeding
+    - "Proceed with awareness" — acknowledge stub dependency, record ⚠️ STUB-DEPENDENT
+```
+
+**HARD STOP** — Use AskUserQuestion with the options above. **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+If "Proceed with awareness": record `⚠️ STUB-DEPENDENT — [stub list]` in sdd-state.md Feature Detail Log. verify Phase 2 will re-check these stubs.
+
+**Skip if**: No dependency Features have stubs.md, or no stubs reference the current Feature.
+
 #### Implement Checkpoint Display
 
 The implement Checkpoint MUST show the following before user approval:
 - **File plan**: List of files to create/modify (derived from tasks.md), grouped by module/layer
 - **Parallel execution plan** (if using background agents): Which agent handles which files, and which files are reserved for post-agent integration
 - **Dependency install plan**: Packages to be added
+- **Dependency stub status**: Stubs from preceding Features that affect this Feature (if any — from Dependency Stub Enforcement Gate above)
 
 If tasks are executed sequentially (default), the parallel execution plan is omitted.
 

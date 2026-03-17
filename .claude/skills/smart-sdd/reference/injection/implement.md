@@ -1007,4 +1007,36 @@ When implementing hover, click, or popup interactions, check the following befor
    - If this Feature modified a previous Feature's surfaces, update the previous Feature's inventory file too (append `Relocated to: [new-component]` note)
    - Display summary: `🎯 Interaction Surfaces: [N] surfaces inventoried ([C] critical, [H] high, [M] medium)`
 
+4. **Post-Update Consistency Verification** — GEL artifact cross-check:
+   After updating entity-registry.md and api-registry.md (rule #1), verify consistency:
+
+   **Entity-Registry Cross-Check**:
+   - For each entity this Feature owns in entity-registry.md: verify the actual schema file exists at the specified path
+   - For each entity this Feature references: verify the owning Feature has completed implement (or has a stub)
+   - Flag inconsistencies:
+     ```
+     ⚠️ Entity-Registry Consistency:
+       ❌ entity-registry.md lists "Notification" owned by F009,
+          but no schema/model file found at src/models/notification.*
+       ⚠️ entity-registry.md references "User" from F001-auth,
+          but F001's actual schema has field "email" not listed in registry
+     ```
+
+   **API-Registry Cross-Check**:
+   - For each API this Feature provides in api-registry.md: verify an actual route/handler exists in the implementation
+   - For each API this Feature consumes: verify the providing Feature's API actually exists and matches the expected signature
+   - Flag inconsistencies:
+     ```
+     ⚠️ API-Registry Consistency:
+       ❌ api-registry.md lists POST /notifications/send for F009,
+          but no route handler found in implementation
+       ⚠️ F009 consumes GET /users/:id from F001, but F001's actual
+          response includes "role" field not in registry
+     ```
+
+   **Action on inconsistencies**:
+   - Auto-update registry entries when implementation differs from draft (e.g., field name changes, path changes)
+   - Display summary of updates made
+   - If structural differences are found (missing entities/APIs entirely): record as `⚠️ REGISTRY-DRIFT` in sdd-state.md and flag for verify Phase 4
+
 > **Note**: Feature Progress Status remains `in_progress` after implement. Status transitions to `completed` only after all steps including merge are ✅ (per state-schema.md).

@@ -180,3 +180,14 @@ A Feature definition (Brief) is ready for Phase 2 when:
 
 > If no domain modules define S9/A5, only base criteria apply.
 > See `domains/_schema.md` for the S9/A5 schema definition.
+
+### Intent Verification Gate
+
+After completion criteria are met, the agent presents a **Brief Summary** to the user for explicit approval (HARD STOP — see `commands/add.md` § 1e). This gate ensures:
+
+1. **Completeness** is confirmed by the criteria above (structural check)
+2. **Accuracy** is confirmed by the user reviewing the agent's interpretation (intent check)
+
+The Brief Summary shows the agent's understanding of: description, actors, capabilities, data, interfaces, quality, and boundaries. The user can approve, correct misunderstandings, or request more detail.
+
+> Without this gate, the agent may structurally satisfy all criteria while misunderstanding the user's actual intent. The Brief↔Spec Alignment Check (see `injection/specify.md`) provides a second-layer verification after spec generation.

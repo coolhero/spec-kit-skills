@@ -61,11 +61,12 @@ Modules are loaded at skill invocation based on the project's `sdd-state.md` con
 2. interfaces/{name}.md        (for EACH listed interface)
 3. concerns/{name}.md          (for EACH listed concern)
 4. archetypes/{name}.md        (for EACH listed archetype)
-5. scenarios/{scenario}.md     (ONE scenario)
-6. domain-custom.md            (if specified)
+5. org-convention.md           (if specified — org-level shared conventions)
+6. scenarios/{scenario}.md     (ONE scenario)
+7. domain-custom.md            (if specified — project-level customization)
 ```
 
-Later modules extend earlier ones. Merge rules vary by section — see `_schema.md` in each skill for details.
+Three levels of customization (Skill → Org → Project), where later levels override earlier ones. Org conventions share rules across projects in an organization; project conventions are specific to one project. Merge rules vary by section — see `_schema.md` in each skill for details.
 
 ### Signal Keywords: Shared Architecture
 

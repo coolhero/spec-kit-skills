@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 14:11 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 14:40 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -115,11 +115,11 @@ Domain Profile은 네 축으로 합성됩니다: **Interface** (앱이 노출하
 
 #### Brief
 
-**Gap**: 에이전트가 받은 Feature 설명을 그대로 수용하며, Feature 정의에 대한 품질 gate가 없다.
+**Gap**: 에이전트가 받은 Feature 설명을 그대로 수용하며, Feature 정의에 대한 품질 gate가 없다. 에이전트는 사용자의 의도를 정확히 파악했는지 검증하지 않는다 — 입력을 받아 해석하고 확인 없이 진행한다.
 
-**해결**: `/smart-sdd add`에서 구현되는 구조화된 Feature 정의 프로세스 — 어떤 입력이든 spec-kit 파이프라인에 진입하기 전에 일관된 수준의 완전성을 갖춘 Feature 정의로 정규화합니다.
+**해결**: `/smart-sdd add`에서 구현되는 구조화된 Feature 정의 프로세스 — 어떤 입력이든 일관된 수준의 완전성을 갖춘 Feature 정의로 정규화한 후, **에이전트의 이해가 사용자의 실제 의도와 일치하는지 확인**하고 나서 spec-kit 파이프라인에 진입합니다.
 
-Brief는 PRD와 같은 것이 **아닙니다**. PRD는 Brief 프로세스의 가능한 *입력* 중 하나이고, 캐주얼한 대화나 gap 분석 결과도 동일하게 유효한 입력입니다. Brief는 *출력* — 핵심 차원에 걸쳐 완전성이 검증된, 정규화된 Feature 정의입니다.
+Brief는 PRD와 같은 것이 **아닙니다**. PRD는 Brief 프로세스의 가능한 *입력* 중 하나이고, 캐주얼한 대화나 gap 분석 결과도 동일하게 유효한 입력입니다. Brief는 *출력* — **완전성**(모든 핵심 차원이 커버됨)과 **정확성**(에이전트의 해석이 사용자의 명시적 승인으로 확인됨) 모두 검증된, 정규화된 Feature 정의입니다.
 
 ```
 /smart-sdd init                      /smart-sdd add (= Briefing)
@@ -140,7 +140,9 @@ Brief는 PRD와 같은 것이 **아닙니다**. PRD는 Brief 프로세스의 가
 
 Domain Profile 규칙이 프로젝트 유형별 완성 기준을 추가합니다 — API 프로젝트의 Brief는 엔드포인트 계약을 정의해야 하고, GUI 프로젝트의 Brief는 사용자 인터랙션을 명시해야 합니다. 불완전한 입력은 gap을 안고 진행하는 대신 타겟 질문을 트리거합니다.
 
-결과: 잘 구성된 Brief에서 생성된 spec은 더 완전하고, 더 테스트 가능하며, 구현 중 수정이 적습니다.
+완전성 기준이 충족되면, 에이전트는 자신의 해석을 보여주는 **Brief Summary**를 제시합니다. 사용자가 명시적으로 승인하거나 오해를 수정합니다 — 해석 오류가 파이프라인을 통해 전파되기 전에 잡는 **Intent Verification Gate**입니다. `specify` 단계에서의 **Brief↔Spec Alignment Check**가 생성된 spec이 승인된 Brief를 충실히 반영하는지 2차 검증합니다.
+
+결과: 잘 구성되고 사용자가 검증한 Brief에서 생성된 spec은 더 완전하고, 더 테스트 가능하며, 구현 중 수정이 적습니다.
 
 ---
 

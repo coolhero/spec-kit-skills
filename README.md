@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 14:11 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-17 14:40 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -117,11 +117,11 @@ A Domain Profile is composed from four axes: **Interface** (what the app exposes
 
 #### Brief
 
-**The gap**: Agents start coding from whatever description they receive, with no quality gate on Feature definitions.
+**The gap**: Agents start coding from whatever description they receive, with no quality gate on Feature definitions. Agents don't verify that they understood the user's intent — they accept input, interpret it, and proceed without confirmation.
 
-**The solution**: A structured Feature intake process — implemented in `/smart-sdd add` — that normalizes any input into a consistently complete Feature definition before entering the spec-kit pipeline.
+**The solution**: A structured Feature intake process — implemented in `/smart-sdd add` — that normalizes any input into a consistently complete Feature definition, then **verifies the agent's understanding matches the user's actual intent** before entering the spec-kit pipeline.
 
-A Brief is **not** the same as a PRD. A PRD is one possible *input* to the Brief process; a casual conversation or a gap analysis result are equally valid inputs. The Brief is the *output* — a normalized, quality-checked Feature definition that has been validated for completeness across key dimensions: identity, purpose, capabilities, data requirements, interfaces, dependencies, quality criteria, and boundaries.
+A Brief is **not** the same as a PRD. A PRD is one possible *input* to the Brief process; a casual conversation or a gap analysis result are equally valid inputs. The Brief is the *output* — a normalized, quality-checked Feature definition that has been validated for both **completeness** (all key dimensions covered) and **accuracy** (the agent's interpretation confirmed by the user through an explicit approval gate).
 
 ```
 /smart-sdd init                      /smart-sdd add (= Briefing)
@@ -142,7 +142,9 @@ Sets up the PROJECT:                 Defines each FEATURE:
 
 Domain Profile rules add project-type-specific completion criteria — an API project's Brief must define endpoint contracts; a GUI project's Brief must specify user interactions. Incomplete inputs trigger targeted questions rather than proceeding with gaps.
 
-The result: specs generated from a well-formed Brief are more complete, more testable, and require fewer mid-implementation corrections.
+After completeness criteria are met, the agent presents a **Brief Summary** showing its interpretation. The user explicitly approves it or corrects misunderstandings — an **intent verification gate** that catches interpretation errors before they propagate through the pipeline. A second-layer **Brief↔Spec alignment check** during `specify` verifies that the generated spec faithfully reflects the approved Brief.
+
+The result: specs generated from a well-formed, user-verified Brief are more complete, more testable, and require fewer mid-implementation corrections.
 
 ---
 

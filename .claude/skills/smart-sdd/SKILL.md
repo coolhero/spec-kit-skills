@@ -203,10 +203,12 @@ The `--profile` argument (or `--domain` for backward compatibility) selects the 
 1. `domains/_core.md` — Universal rules (always loaded)
 2. `domains/interfaces/{interface}.md` — For each active interface (see `shared/domains/_taxonomy.md` for complete list)
 3. `domains/concerns/{concern}.md` — For each active concern (see `shared/domains/_taxonomy.md` for complete list)
-4. `domains/scenarios/{scenario}.md` — One scenario (greenfield, rebuild, incremental, adoption)
-5. User customization file (if specified in sdd-state.md `**Custom**` field)
+4. `domains/archetypes/{archetype}.md` — For each active archetype
+5. Organization convention file (if specified in sdd-state.md `**Org Convention**` field)
+6. `domains/scenarios/{scenario}.md` — One scenario (greenfield, rebuild, incremental, adoption)
+7. Project customization file (if specified in sdd-state.md `**Custom**` field)
 
-Loaded modules provide: **SC Generation Rules** (S1), **Parity Dimensions** (S2), **Verify Steps** (S3), **Elaboration Probes** (S5), **UI Testing** (S6), **Bug Prevention Rules** (S7).
+Loaded modules provide: **SC Generation Rules** (S1), **Parity Dimensions** (S2), **Verify Steps** (S3), **Elaboration Probes** (S5), **UI Testing** (S6), **Bug Prevention Rules** (S7), **Brief Completion Criteria** (S9/A5).
 
 For reverse-spec domain modules (analysis axes, detection signals), see `../reverse-spec/domains/_core.md` and `../reverse-spec/domains/_schema.md`.
 

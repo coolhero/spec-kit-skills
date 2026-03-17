@@ -339,6 +339,38 @@ If rebuild mode AND source project has build config files (vite.config, webpack.
 
 **Skip if**: Not rebuild mode, or no build config files in source.
 
+### Brief↔Spec Alignment Check
+
+> **Purpose**: Verify that the generated spec.md faithfully reflects the user's approved Brief. Without this check, the agent's interpretation in specify may silently diverge from the user's intent — the user approved a Brief about X, but the spec emphasizes Y.
+
+After the post-execution checks above, read the Brief Summary from `BASE_PATH/features/{FID}-{name}/pre-context.md` § Brief Summary (or from `specs/add-draft.md` if pre-context doesn't have it yet for greenfield).
+
+**Cross-check**:
+1. **Capability coverage**: Each capability listed in the Brief should map to at least one FR in spec.md. Flag capabilities with no corresponding FR.
+2. **Entity alignment**: Entities mentioned in the Brief's Data section should appear in spec.md scope or FR definitions. Flag missing entities.
+3. **Interface consistency**: APIs/UI touchpoints from the Brief should be reflected in spec.md. Flag Brief interfaces absent from spec.
+4. **Scope drift**: Check if spec.md introduces significant capabilities NOT mentioned in the Brief. These aren't necessarily wrong, but the user should be aware.
+
+**Display (if misalignments found)**:
+```
+── ⚠️ Brief↔Spec Alignment ────────────────────
+Brief capabilities not reflected in spec:
+  ❌ "export notification history as CSV" — no FR covers this
+  ✅ "send push notifications" — covered by FR-002
+
+Brief entities not in spec scope:
+  ❌ "NotificationTemplate" — not mentioned in any FR
+
+Spec additions beyond Brief:
+  ➕ FR-005 "notification analytics dashboard" — not in Brief
+     (may be valid — confirm with user)
+────────────────────────────────────────────────
+```
+
+**Enforcement**: ⚠️ Warning (not blocking). Include in the Review Display so the user sees the alignment status before approving the spec. The user may approve the drift ("yes, the spec correctly expanded the scope") or request corrections.
+
+**Skip if**: No Brief Summary exists in pre-context (legacy projects without Phase 1e).
+
 ### Review Display Content
 
 After `speckit-specify` completes and post-execution checks above have run:

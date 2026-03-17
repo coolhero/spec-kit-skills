@@ -298,7 +298,12 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
 4. **`api-registry.md`**: Empty registry with headers only
    - Note: "Endpoints will be populated as Features are planned via speckit-plan."
 
-5. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Feature Progress table empty (no Features defined yet — Features will be added via `/smart-sdd add`)
+5. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Feature Progress table empty (no Features defined yet — Features will be added via `/smart-sdd add`).
+   - **Org Convention**: Ask via AskUserQuestion: "Do you have an organization convention file?" with options:
+     - "Yes — specify path" → record path in `**Org Convention**` field
+     - "No" → set `**Org Convention**: none`
+   - **If response is empty → re-ask** (per MANDATORY RULE 1)
+   - Common path pattern: `~/.claude/domain-conventions/{org-name}.md`
 
 6. **Not generated**: `business-logic-map.md` (no existing logic to map), `stack-migration.md` (no existing stack), per-Feature `pre-context.md` (created by `/smart-sdd add`)
 

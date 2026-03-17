@@ -1896,8 +1896,23 @@ B. **Seeded Environment** (non-default, real-world state):
 > **⚠️ Source Modification Gate reminder** — Between Phase 3b and Phase 4 (Global Evolution Update), the pipeline displays Review results to the user. If the user requests fixes based on Review, or if the agent identifies issues to fix before committing results, the **Source Modification Gate MUST be executed** before touching ANY source file. This is the most common point where agents violate the Bug Fix Severity Rule — user feedback triggers a "fix it now" bias that bypasses severity classification. **STOP → List changes → Classify → Aggregate file count → If Major: HARD STOP regression, not inline fix.**
 
 ### Phase 4: Global Evolution Update
+
+**Step 4a. Registry Consistency Verification**:
 - entity-registry.md: Verify that the actually implemented entity schemas match the registry; update if discrepancies are found
 - api-registry.md: Verify that the actually implemented API contracts match the registry; update if discrepancies are found
+- **REGISTRY-DRIFT resolution**: If implement marked this Feature with `⚠️ REGISTRY-DRIFT` in sdd-state.md, this phase MUST resolve all flagged inconsistencies:
+  - Read the REGISTRY-DRIFT details from Feature Detail Log
+  - Cross-check each flagged item against the actual implementation
+  - Update registry entries to match reality (implementation is the source of truth at this point)
+  - Remove the `⚠️ REGISTRY-DRIFT` flag after resolution
+  - Display: `✅ Registry drift resolved: [N] entity entries and [M] API entries updated to match implementation`
+
+**Step 4b. Dependency Stub Status Check**:
+- If this Feature resolves stubs from a preceding Feature: verify the stubs are actually resolved (real implementation replaces placeholder)
+- If this Feature has `⚠️ STUB-DEPENDENT` flag: verify the stubs it depends on are still present and compatible
+- Update stubs.md of affected Features if resolution status changed
+
+**Step 4c. State Update**:
 - sdd-state.md: Record verification results — **status MUST be one of `success`, `limited`, or `failure`**, plus test pass/fail counts, build result, and verification timestamp. The merge step checks this status as a gate condition.
   - `success`: All phases passed normally
   - `limited`: User acknowledged limited verification in Phase 1 or Phase 3 (⚠️ marker). Merge is allowed with a reminder

@@ -217,9 +217,22 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 2. interfaces/{interface}.md             (for EACH listed interface)
 3. concerns/{concern}.md                 (for EACH listed concern)
 4. archetypes/{archetype}.md             (for EACH listed archetype)
-5. scenarios/{scenario}.md               (ONE scenario)
-6. {Custom path}/domain-custom.md        (if specified and file exists)
+5. {Org convention path}                 (if specified — organization-level shared conventions)
+6. scenarios/{scenario}.md               (ONE scenario)
+7. {Custom path}/domain-custom.md        (if specified — project-level customization)
 ```
+
+### Convention Hierarchy
+
+Three levels of customization, from broadest to most specific:
+
+| Level | File | Scope | Example |
+|-------|------|-------|---------|
+| **Skill-level** | `_core.md` + modules | Universal — all projects of this type | "HTTP API SCs must include status code" |
+| **Org-level** | `org-convention.md` | Shared across projects in an organization | "All APIs must use our standard error envelope" |
+| **Project-level** | `domain-custom.md` | Specific to one project | "This project uses GraphQL subscriptions for real-time" |
+
+Later levels override earlier ones. Org conventions override module defaults; project conventions override org conventions.
 
 **Merge rule**: Later modules extend earlier ones. For same-section content:
 - **S0 Signal Keywords**: Aggregated per-module (each module's keywords are independent; see `reference/clarity-index.md` § 5)

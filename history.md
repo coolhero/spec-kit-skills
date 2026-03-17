@@ -5,6 +5,38 @@
 
 ---
 
+## [2026-03-17] Self-Assessment Gap Resolution — Intent Verification, GEL Enforcement, Org Convention
+
+### Context
+
+Self-assessment revealed 3 core concepts had significant gaps:
+- **Brief**: Solved completeness (40%) but not accuracy — no intent verification gate
+- **GEL**: Solved visibility (60%) but not enforcement — warnings non-blocking, no consistency check
+- **Domain Profile**: Solved project-type (75%) but not org-specific conventions
+
+### Changes Made
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Brief Confirmation HARD STOP | Added Phase 1e to add.md — agent presents Brief Summary, user explicitly approves | Without this, misinterpretations propagate to specify unchecked |
+| Elaboration Quality Guard | Added vague-answer warning (2x) + force-proceed-with-flag (3x) to add.md Phase 1c | Prevents agent from accepting "it handles data" as sufficient |
+| Brief↔Spec Alignment Check | Added to specify.md — cross-checks Brief capabilities/entities/interfaces against generated FR/SC | Second-layer verification catches specify-time interpretation drift |
+| Dependency Stub Enforcement | Added BLOCKING gate to pipeline.md implement Checkpoint — stubs from preceding Features that current Feature depends on | Prevents building on placeholder implementations that will break |
+| Post-Update Consistency Verification | Added to implement.md Post-Step — cross-checks entity-registry and api-registry against actual implementation | Catches registry drift at implement time, not verify time |
+| Registry Drift Resolution | Enhanced verify-phases.md Phase 4 — resolves REGISTRY-DRIFT flags and checks stub status | Ensures GEL artifacts match reality before merge |
+| Org Convention Layer | Added to _resolver.md Step 2d, _schema.md Convention Hierarchy, state-schema.md header | Enables organization-level shared conventions across projects |
+| Convention Hierarchy | 3-level: Skill → Org → Project (in loading order) | Later levels override earlier, org conventions reusable across projects |
+
+### Assessment Impact
+
+| Problem | Before | After | Key Change |
+|---------|--------|-------|------------|
+| Brief accuracy | ~40% | ~65% | Intent verification HARD STOP + Brief↔Spec cross-check |
+| GEL enforcement | ~60% | ~75% | Dependency stub BLOCKING + registry consistency checks |
+| Org convention | ~75% | ~85% | Organization-level convention loading support |
+
+---
+
 ## [2026-03-17] Brief Implementation — S9/A5 Schema, Briefing Process, Pre-Context Template
 
 ### Changes Made

@@ -26,7 +26,7 @@ This is the **universal Feature definition path** for all project modes:
 ## 6-Phase Briefing Overview
 
 ```
-Phase 1: Briefing             — Adaptive consultation + completeness validation (no HARD STOP)
+Phase 1: Briefing             — Adaptive consultation + completeness validation + intent verification (HARD STOP)
 Phase 2: Overlap & Impact     — Overlap check + constitution impact (HARD STOP)
 Phase 3: Scope Negotiation    — Single vs multiple Feature, Tier assignment (HARD STOP)
 Phase 4: SBI Match + Expand   — Link/create source behaviors (HARD STOP, conditional)
@@ -127,8 +127,8 @@ If the user selects "Review and clean up":
 
 ## Phase 1: Briefing (Adaptive Consultation)
 
-> The **Briefing** phase — structured Feature intake that validates completeness before proceeding.
-> Conversational phase — no HARD STOP (elaboration continues until Brief completion criteria are met).
+> The **Briefing** phase — structured Feature intake that validates completeness and intent accuracy before proceeding.
+> Elaboration continues until Brief completion criteria are met, then a HARD STOP confirms the agent's understanding matches the user's intent.
 > Uses [feature-elaboration-framework.md](../reference/feature-elaboration-framework.md) for the six-perspective quality evaluation.
 > Uses `domains/_core.md` § S5 + active interface/concern modules § S5 for domain-specific elaboration probes.
 > Uses active module § S9 / § A5 for domain-specific **Brief Completion Criteria** (see `domains/_schema.md`).
@@ -248,6 +248,16 @@ After initial gathering, evaluate the Feature definition against the **Feature E
 
 If domain criteria are not met but base perspectives are covered, ask targeted questions using the module's S5 probes for the missing S9/A5 elements.
 
+**Elaboration Quality Guard**:
+- If a user gives a vague answer twice for the same perspective (e.g., "it just handles data" for Perspective 3), display an explicit warning:
+  ```
+  ⚠️ Perspective 3 (Data) is still unclear after two attempts.
+     Without clear entity ownership, specify may produce incorrect FR/SC.
+     Please provide at least: what data this Feature creates/owns.
+  ```
+- If after 3 attempts the answer is still vague, record as `⚠️ VAGUE — [perspective]` in the draft and proceed — but flag it in the Brief Summary (Phase 1e) so the user is aware this area may cause issues downstream.
+- For S9/A5 criteria: if a required element cannot be determined, record as `⚠️ UNDETERMINED — [element]` and include in Brief Summary.
+
 **Do NOT propose Feature structure yet** — just ensure the definition is rich enough to scope in Phase 3.
 
 ### 1d. Create Draft
@@ -279,7 +289,53 @@ Entry type: [Type 1 / Type 2 / Type 3]
 ## Status: Phase 1 complete
 ```
 
-**Transition**: Move to Phase 2. The user does not need to explicitly approve — this phase is exploratory.
+### 1e. Brief Confirmation (HARD STOP)
+
+Before proceeding to Phase 2, present the Brief Summary for user approval. This is the **intent verification gate** — ensuring the agent's understanding matches the user's actual intent.
+
+Display the Brief Summary extracted from the draft:
+
+```
+📋 Brief Summary — [Feature Name]
+
+  Description: [1-2 sentence description as understood by agent]
+
+  User & Purpose:
+    Actor(s): [identified actors]
+    Problem:  [core problem as understood]
+    Scenario: [key scenario]
+
+  Capabilities:
+    - [capability 1]
+    - [capability 2]
+    - ...
+
+  Data:
+    Owned:      [entities this Feature owns]
+    Referenced: [entities from other Features]
+
+  Interfaces:
+    APIs:       [provided/consumed]
+    UI:         [touchpoints — or "N/A"]
+    External:   [integrations — or "none"]
+
+  Quality: [key NFRs — or "TBD"]
+  Boundaries: [exclusions/constraints — or "TBD"]
+
+  ── Domain-Specific ──────────────────────────
+  [S9/A5 criteria status — which items were satisfied and how]
+```
+
+**HARD STOP** — Use AskUserQuestion with options:
+- **"Approve Brief — this is accurate"** → Proceed to Phase 2
+- **"Correct misunderstandings"** → Agent asks what was misunderstood, adjusts the draft, and re-displays Brief Summary for re-approval
+- **"Add more detail"** → Return to Elaboration (1c) for additional questions
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**Why this gate matters**: Phase 1 gathers information, but the agent's *interpretation* of that information may differ from the user's *intent*. Without this confirmation, misunderstandings propagate through the entire pipeline — the user only sees them at specify Review, when correction is expensive. This gate catches interpretation errors early.
+
+**Transition**: After approval, proceed to Phase 2.
 
 ### Existing Feature Extension
 

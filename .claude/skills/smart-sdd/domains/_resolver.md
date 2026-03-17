@@ -51,6 +51,40 @@ Look for the Domain Profile fields in `sdd-state.md` header:
 - Treat as `"none"` — no archetypes loaded
 - Do NOT write the field retroactively (only set during init/pipeline Phase 0)
 
+### Step 2d. Resolve Organization Conventions (optional)
+
+Organization-level conventions provide shared rules that apply across all projects in an organization. Unlike `domain-custom.md` (project-specific), org conventions are reusable and versioned.
+
+1. Read `**Org Convention**` from sdd-state.md header (path or `"none"`)
+2. If `"none"` or field is missing → skip org convention loading
+3. Resolution order:
+   a. If path is absolute → load directly
+   b. If path is relative → resolve from CWD
+   c. If path starts with `~` → expand home directory (e.g., `~/.claude/domain-conventions/my-org.md`)
+4. Validate: file must be valid markdown with at least one S-section or A-section
+5. Org conventions are loaded AFTER archetypes but BEFORE scenarios, allowing them to override archetype defaults while respecting scenario-specific rules
+
+**Typical org convention file structure**:
+```markdown
+# Org Convention: {org-name}
+
+> Organization-specific coding standards and architectural patterns.
+> Version: 1.0.0
+
+## S1. SC Generation Rules (org overrides)
+[Org-specific SC patterns — e.g., "all APIs must return standard error envelope"]
+
+## S7. Bug Prevention Rules (org additions)
+[Org-specific anti-patterns — e.g., "never use ORM lazy loading in API endpoints"]
+
+## Custom Rules
+[Any org-specific rules not covered by S-sections]
+```
+
+**When Org Convention field is missing** (backward compatibility):
+- Treat as `"none"` — no org conventions loaded
+- Do NOT write the field retroactively (only set during init)
+
 ### Step 3. Load Modules in Order
 
 ```
@@ -58,8 +92,9 @@ Look for the Domain Profile fields in `sdd-state.md` header:
 2. domains/interfaces/{interface}.md              (for EACH listed interface)
 3. domains/concerns/{concern}.md                  (for EACH listed concern)
 4. domains/archetypes/{archetype}.md              (for EACH listed archetype)
-5. domains/scenarios/{scenario}.md                (ONE scenario)
-6. {Custom path}/domain-custom.md                 (if specified and file exists)
+5. {Org convention path}/org-convention.md        (if specified and file exists)
+6. domains/scenarios/{scenario}.md                (ONE scenario)
+7. {Custom path}/domain-custom.md                 (if specified and file exists)
 ```
 
 > **Signal Keywords resolution**: Each module's S0/A0 section references `shared/domains/` for signal keywords. During S0/A0 aggregation (init inference), read keywords from `../../shared/domains/{type}/{name}.md § Signal Keywords` instead of the skill-local module. See `shared/domains/_taxonomy.md` for the complete module registry.
@@ -80,7 +115,7 @@ Once loaded, the merged domain profile is used for the entire command session. N
 ## Worked Example: `desktop-app` Rebuild with Electron
 
 Traces the full resolution chain for a project with:
-- **Domain Profile**: `desktop-app` | **Origin**: `rebuild` | **Framework**: `electron` | **Archetype**: `ai-assistant` | **Custom**: `none`
+- **Domain Profile**: `desktop-app` | **Origin**: `rebuild` | **Framework**: `electron` | **Archetype**: `ai-assistant` | **Org Convention**: `none` | **Custom**: `none`
 
 ### Step 1 → 2: Profile Expansion
 
