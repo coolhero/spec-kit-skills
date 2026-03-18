@@ -196,6 +196,48 @@
 
 ---
 
+### G17. Context Continuity Failure — Information Dies Between Pipeline Stages
+
+**The trap**: Each pipeline stage produces valuable analysis, but the next stage only sees the output artifact, not the underlying evidence. By the time implement runs, the original source code — which reverse-spec thoroughly analyzed — has been distilled into SBI text summaries that lose all UI interaction detail.
+
+**Real example**: Source app's `AddKnowledgeBasePopup.tsx` had a `ModelSelector` dropdown with auto-dimensions. SBI recorded "create KB with name, model, dimensions." Plan said "create dialog." Tasks said "build form with inputs." Implement agent — seeing only task text — created 3 plain text inputs. The dropdown, auto-fill, and provider filtering were all lost through 4 stages of abstraction.
+
+**Why it happens**: Each stage abstracts the previous stage's output into a more compact form. This is efficient for context windows but lossy for implementation detail. The pipeline assumes "reverse-spec extracted everything needed" — but SBI captures *what* functions do, not *how* they do it at the UI control level.
+
+**How we catch it**: Source Code Reference Injection at implement (BLOCKING gate for rebuild+GUI), Background Agent Source Injection (agent prompts must include actual source code), Entry Point Extraction in reverse-spec.
+
+**Coverage**: ~70% — improves significantly for rebuild projects; greenfield has no source to lose.
+
+---
+
+### G18. Reflected ≠ Enforced — Rules Exist But Agents Don't Follow Them
+
+**The trap**: You write a detailed rule in a reference file. You mark the SKF as "Reflected." But the agent never reads that file, or reads it and skips the rule because there's no blocking gate.
+
+**Real example**: `verify-phases.md` contained 400+ lines of detailed Phase 0-4 verification procedures. Pipeline.md's verify section was one line: "verify → Checkpoint → Test/Build/Lint → Review." Agent read pipeline.md, ran build+TS, displayed "verify ✅", and moved to merge. All 400 lines of verification logic were never executed. 10 SCs went unverified. Feature was unreachable from the UI.
+
+**Why it happens**: Agents optimize for completion. If the immediately visible instruction says "run build and lint," the agent does that and reports success. A reference to another file ("see verify-phases.md for details") is treated as optional reading, not mandatory prerequisite. The agent has no intrinsic motivation to seek out harder work.
+
+**How we catch it**: Three-layer enforcement: (1) Inline instruction at execution point ("🚨 CRITICAL: read verify-phases.md before proceeding"), (2) BLOCKING gate in Review ("Verify Execution Checklist with blank rows = cannot approve"), (3) Anti-pattern ban with explicit ❌/✅ examples.
+
+**Coverage**: ~85% — high when all 3 layers are present; drops when any layer is missing.
+
+---
+
+### G19. Domain Profile Set-and-Forget — Project Context Doesn't Flow Through Pipeline
+
+**The trap**: You detect the project type (GUI + async-state + ai-assistant) during init, store it in sdd-state.md, and assume it influences the entire pipeline. But individual pipeline steps don't actually load or reference it — the Domain Profile sits in state while agents apply generic rules.
+
+**Real example**: Project had `gui` + `realtime` active, triggering Cross-Concern Integration Rules for "optimistic update + reconnection UI." But specify never checked whether these integration patterns were reflected in SCs. Plan never loaded the combined rules. Implement never saw the streaming-specific requirements. The Domain Profile was correctly detected but never actually influenced behavior — it was documented, not operationalized.
+
+**Why it happens**: Module loading happens once at session start. But in a multi-step pipeline, each step may run in a different context window or session. If the loading protocol isn't explicitly called at each step's entry point, the cached profile is lost. Even within a session, agents may not connect "the profile says gui+realtime" to "this SC needs reconnection handling."
+
+**How we catch it**: Domain Module Loading Protocol as a shared reference in context-injection-rules.md (single source of truth for how/when to load), Domain Profile display in status commands (user can verify it's active), per-step Section→Pipeline mapping (S1→specify, S7→plan/implement/verify), Scale modifier with explicit depth adjustment rules.
+
+**Coverage**: ~75% — strongest where explicit gates exist; weakest in implicit "agent should know to apply this rule" situations.
+
+---
+
 ## Countermeasure Evolution
 
 How defenses were added over time, each triggered by a real failure:
@@ -214,6 +256,7 @@ Gates:       Completeness Gate → Visual Reference Checkpoint → Pre-Approval 
 Freshness:   Pre-context check (specify reads actual impl vs stale assumptions)
 Proximity:   Inline Execute+Review sections (per-step instruction placement)
 Safety:      Catch-all fallback (unconditional continue prompt)
+Philosophy:  3 Foundational Principles → Context Continuity + Enforcement over Documentation + File over Memory
 ```
 
 ---
@@ -461,3 +504,28 @@ Safety:      Catch-all fallback (unconditional continue prompt)
 **What happened** (SKF-045): Guard 7's Fidelity Chain captured component structure (Component Tree, Source→Target Mapping) perfectly — every UI component was mapped. But the source app's model management was opt-in (user explicitly adds models via ManageModelsPopup), while the rebuild implemented opt-out (all models auto-enabled). The implementation was structurally correct but behaviorally wrong — users saw 50+ models including embedding/tts/whisper instead of a curated selection.
 
 **Universal takeaway**: Structural analysis (what components exist, how they're arranged) is necessary but insufficient for rebuild fidelity. **Behavioral paradigms** — how entities enter, activate, and exit a system — are orthogonal to structure and must be captured separately. In any system where entities have lifecycles (opt-in/opt-out, CRUD sequences, enable/disable patterns), the lifecycle paradigm must be an explicit, first-class artifact. Otherwise, agents default to the simplest implementation (typically "fetch all, enable all"), which is structurally valid but experientially wrong.
+
+### Theme F: Foundational Architecture Principles
+
+#### L34. Three Foundational Philosophies — The Minimum Viable Governance
+
+**What happened**: After 55 SKF items, 19 gap patterns, and 33 specific lessons, we identified that every failure traces back to one of exactly three root causes: information loss between stages (Context Continuity), rules that exist but aren't enforced (Enforcement over Documentation), or state stored in agent memory instead of files (File over Memory).
+
+**Universal takeaway**: Any AI agent pipeline needs exactly three governance layers, no more and no less:
+1. **Context Continuity** — ensure information flows without loss through every stage. This includes domain context (what kind of project), source fidelity (what the original code does), and cross-unit memory (what other units decided). If any of these break, the agent makes decisions in a vacuum.
+2. **Enforcement over Documentation** — a rule that isn't enforced doesn't exist. Every critical rule needs inline visibility (at the execution point), blocking power (can't proceed without compliance), and negative examples (what NOT to do). Documentation alone is decoration.
+3. **File over Memory** — agent memory is ephemeral; files are permanent. Every intermediate result, every state transition, every decision must be persisted to a file that survives context window limits, session breaks, and agent handoffs.
+
+These three are MECE for agent pipeline governance: P1 defines *what* to protect, P2 defines *how* to protect it, P3 defines *where* to store the evidence.
+
+#### L35. "Reflected" Is the Most Dangerous Status — It Creates False Confidence
+
+**What happened** (SKF-046~055): All 55 SKF items were marked "✅ Reflected" after rules were added to documentation. On deep re-verification, 5 critical gaps remained — rules existed in reference files but had no BLOCKING gates, no inline instructions, and no anti-pattern examples. Agents read the immediately visible instruction ("run build + TS") and declared success, completely bypassing 400+ lines of verification procedures.
+
+**Universal takeaway**: In agent skill engineering, "I added the rule" is the beginning, not the end. After adding any rule, verify: (1) Is there a code path where the agent can complete the step WITHOUT encountering this rule? If yes, the rule is unenforceable. (2) Can the agent satisfy the rule's literal text without achieving its intent? If yes, the rule needs anti-patterns. (3) Does the rule produce observable evidence that it was followed? If no, the rule is unverifiable. A rule that fails any of these tests is "reflected but not enforced" — worse than having no rule at all, because it creates false confidence that the problem is solved.
+
+#### L36. Domain Profile Must Be a Living Context, Not a Configuration Setting
+
+**What happened** (G19, SKF first-class citizen audit): Domain Profile was detected during init and stored in sdd-state.md. But 6 of 11 pipeline touchpoints either didn't load it, loaded it shallowly, or loaded it but didn't use it to modify behavior. status commands didn't display it. trace commands didn't use it for guidance. The profile was correctly inferred but operationally inert.
+
+**Universal takeaway**: In any system with project-type-specific behavior, the type context must be **actively consumed** at every decision point, not just **passively available** in a config file. Design test: for each pipeline step, answer "what would this step do differently for a CLI tool vs a GUI app?" If the answer is "nothing" but it should be "different SC patterns, different verification strategies, different bug checks," then the type context isn't actually flowing. Make it a first-class citizen: loaded explicitly, displayed to users, used to gate/filter behavior, and checked in reviews.

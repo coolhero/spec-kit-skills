@@ -27,13 +27,60 @@
 
 9. **pipeline.md — Inter-step Continuity**: Feature 내 step 간 전환(예: plan Update → tasks Checkpoint)은 자동으로 이어져야 합니다. step 완료 후 "completed" 메시지만 표시하고 멈추지 마세요. 멈출 수 있는 유일한 지점은 HARD STOP(사용자 승인 대기), BLOCK 조건, Feature 완료, 복구 불가 에러뿐입니다. **HARD STOP 없이 다음 step으로 건너뛰는 것은 "continuity"가 아니라 "HARD STOP 위반"입니다.**
 
-## Design Principles
+## Design Principles — 3 Foundational Philosophies
 
-- **Domain Profile은 First-Class Citizen**: 규칙, 게이트, 검증 로직, 새 명령을 추가할 때 반드시 "이 변경이 Domain Profile(5축 + 1 modifier)과 어떻게 연결되는가?"를 확인해야 합니다. Domain Profile은 한번 설정하고 잊는 구성이 아니라, code-explore → init → add → specify → plan → implement → verify 전 단계에서 적극적으로 동작하는 살아 있는 컨텍스트입니다. 새로운 규칙이 Domain Profile의 어떤 축(Interface, Concern, Archetype, Foundation, Scenario)이나 modifier(Scale)에 의해 **조건부로 활성화되거나 깊이가 조절되어야 하는지** 반드시 판단하세요. Domain Profile과 무관한 범용 규칙은 명시적으로 "Domain Profile independent"로 표시합니다.
+모든 설계 결정과 구현은 아래 3가지 철학에 근거합니다. 새로운 규칙, 게이트, 명령, 스킬을 추가할 때 반드시 이 3가지 관점에서 검증하세요.
 
-- **"Reflected" ≠ "Enforced"**: 규칙이 문서에 존재하는 것만으로는 에이전트가 따르지 않습니다. 모든 critical 규칙에는 3가지가 갖춰져야 합니다: (1) **Explicit inline instruction** — 참조 파일이 아닌 실행 시점에 직접 보이는 지시, (2) **BLOCKING enforcement** — ⚠️ 경고가 아닌 🚫 차단 게이트, (3) **Anti-pattern examples** — ❌ WRONG / ✅ RIGHT 패턴. SKF 피드백에서 반복적으로 확인된 원칙입니다.
+```
+            P1. Context Continuity (무엇을 지키는가)
+           /          |           \
+  Domain Profile   Source Code    Cross-Feature
+  전 단계 흐름     파이프라인 보존   GEL 기억
+          \           |           /
+         P2. Enforcement over Documentation (어떻게 지키는가)
+                      |
+         P3. File over Memory (어디에 저장하는가)
+```
 
-- **에이전트 워킹 메모리 대신 파일에 기록**: Phase 간 전달되는 중간 산출물은 에이전트 메모리에 보관하지 않고 반드시 파일로 저장합니다. 에이전트 메모리는 컨텍스트 윈도우 한계, 세션 단절, Phase 간 정보 손실에 취약합니다. 파일로 저장하면 언제든 다시 읽을 수 있고, 사용자가 내용을 직접 확인·수정할 수 있으며, 다른 세션에서도 활용 가능합니다.
+### P1. Context Continuity (컨텍스트 연속성)
+
+> **정보는 파이프라인의 모든 단계에서 연속적으로 흘러야 하며, 단계 간 전환에서 손실되면 안 된다.**
+
+이 원칙은 3가지 핵심 영역으로 구체화됩니다:
+
+**P1-a. Domain Profile은 First-Class Citizen**: Domain Profile(5축 + 1 modifier)은 한번 설정하고 잊는 구성이 아니라, code-explore → init → add → specify → plan → implement → verify 전 단계에서 적극적으로 동작하는 살아 있는 컨텍스트입니다. 새로운 규칙을 추가할 때 반드시 "이 규칙이 Domain Profile의 어떤 축(Interface, Concern, Archetype, Foundation, Scenario)이나 modifier(Scale)에 의해 조건부로 활성화되거나 깊이가 조절되어야 하는지" 판단하세요. Domain Profile과 무관한 범용 규칙은 명시적으로 "Domain Profile independent"로 표시합니다.
+
+**P1-b. Source Code Fidelity**: 특히 rebuild 모드에서, source app의 정보(UI 구조, 데이터 흐름 패러다임, 유입 경로, 컴포넌트 간 연동)가 reverse-spec → specify → plan → implement 과정에서 소실되면 안 됩니다. SBI 텍스트만으로는 UI 디테일이 전달되지 않으므로, implement 단계에서 source 코드 자체를 참조하는 것이 필수입니다.
+
+**P1-c. Cross-Feature Memory (GEL)**: entity/API registry, pre-context, stubs, interaction surfaces 등 Global Evolution Layer 아티펙트가 Feature 간 정보를 전달합니다. Feature 2가 Feature 1의 결정을 체계적으로 알 수 있어야 하며, 이는 에이전트 역량에 기대하는 것이 아니라 아티펙트 구조로 보장해야 합니다.
+
+### P2. Enforcement over Documentation (문서가 아닌 강제)
+
+> **규칙은 "존재"하는 것이 아니라 "강제"되어야 한다. Reflected ≠ Enforced.**
+
+규칙이 문서에 존재하는 것만으로는 에이전트가 따르지 않습니다. 모든 critical 규칙에는 3가지가 갖춰져야 합니다:
+1. **Explicit inline instruction** — 참조 파일이 아닌 실행 시점에 직접 보이는 지시
+2. **BLOCKING enforcement** — ⚠️ 경고가 아닌 🚫 차단 게이트
+3. **Anti-pattern examples** — ❌ WRONG / ✅ RIGHT 패턴
+
+SKF 피드백에서 반복적으로 확인된 원칙입니다: verify-phases.md에 400줄의 상세 규칙이 있어도 pipeline.md에 "반드시 읽어라"는 인라인 지시가 없으면 에이전트는 읽지 않습니다.
+
+### P3. File over Memory (메모리가 아닌 파일)
+
+> **모든 중간 산출물과 상태는 파일로 저장하며, 에이전트 메모리에 의존하지 않는다.**
+
+Phase 간 전달되는 중간 산출물은 에이전트 메모리에 보관하지 않고 반드시 파일로 저장합니다. 에이전트 메모리는 컨텍스트 윈도우 한계, 세션 단절, Phase 간 정보 손실에 취약합니다. 파일로 저장하면 언제든 다시 읽을 수 있고, 사용자가 내용을 직접 확인·수정할 수 있으며, 다른 세션에서도 활용 가능합니다.
+
+### 적용 체크리스트
+
+새로운 변경사항을 추가할 때 아래 질문에 답하세요:
+
+| # | 질문 | 해당 원칙 |
+|---|------|----------|
+| 1 | 이 규칙은 Domain Profile의 어떤 축에 의해 조건부 활성화되는가? 아니면 범용인가? | P1-a |
+| 2 | 이 정보가 다음 파이프라인 단계로 전달될 때 손실되는 부분은 없는가? | P1-b, P1-c |
+| 3 | 이 규칙에 BLOCKING gate + 인라인 지시 + anti-pattern이 있는가? | P2 |
+| 4 | 이 규칙의 결과/상태가 파일에 기록되는가, 에이전트 메모리에만 남는가? | P3 |
 
 ## Language
 
