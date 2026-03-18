@@ -16,6 +16,8 @@
 | 3 | **Semantic Stub Detection** | Math.random(), placeholder, external call bypass | § Semantic Stub Detection |
 | 4 | **Integration Contract Fulfillment** | plan "Consumes ←" 실제 호출 없으면 BLOCKING | § Integration Contract Fulfillment Check |
 | 5 | **UI Control Type Audit** | Source Select → Target Input = UX downgrade | § UI Control Type Audit |
+| 6 | **API Endpoint Smoke Test** (http-api) | implement 완료 후 서버 시작 → 각 엔드포인트 호출 → 200 확인 | § API Post-Implement Smoke |
+| 7 | **Error Response Actionability** (all) | 에러 메시지에 해결 방법 포함 안 되면 WARNING | § Error Response Actionability |
 
 ```
 ❌ WRONG: tasks.md 텍스트만 보고 UI 생성 → "create dialog with inputs"
@@ -652,6 +654,60 @@ After all tasks complete, compare source app's UI controls with implemented cont
    ```
 
 > **Rationale (SKF-060/063)**: Build and type checks cannot distinguish `Math.random()` from a real embedding call, or a text input from a dropdown. Both compile and run without errors. These semantic checks catch the gap between "code that runs" and "code that works."
+
+### API Post-Implement Smoke Test (http-api interface — 🚫 BLOCKING)
+
+> **Skip if**: `http-api` is NOT in active Interfaces.
+> **Domain Profile condition**: Axis 1 (Interface) = http-api
+
+After all API endpoint tasks are implemented and before Review:
+
+1. Start the server (`npm start`, `uvicorn`, etc.)
+2. Wait for health check endpoint (`GET /health` → 200, max 30s)
+3. For EACH endpoint implemented in this Feature:
+   - Send a basic request (GET for read endpoints, POST with minimal valid body for write)
+   - Verify: non-error status code (2xx)
+   - If ANY endpoint returns 404 (route not registered) or 500 (crash) → 🚫 BLOCKING
+4. Stop the server
+
+```
+❌ WRONG: "빌드 통과 → implement 완료" (서버가 실제로 뜨는지 안 확인)
+✅ RIGHT: "서버 시작 → GET /api/users → 200 → POST /api/users → 201 → implement 완료"
+```
+
+**Evidence in Review** (MANDATORY):
+```
+── API Smoke Test ────────────────────
+Server: started on :3000 (1.2s)
+  GET  /api/users       → 200 (15ms)
+  POST /api/users       → 201 (23ms)
+  GET  /api/users/:id   → 200 (8ms)
+  GET  /health          → 200 (3ms)
+Server: stopped cleanly
+```
+
+### Error Response Actionability (all interfaces — ⚠️ WARNING)
+
+> **Domain Profile independent** — applies to all project types.
+
+After implement, scan all implemented error responses for actionability:
+
+1. Search implemented code for error message strings (throw, res.status(4xx), error responses)
+2. For each user-facing error message, check:
+   - Does it explain **what went wrong**? (not just "Error" or "Failed")
+   - Does it suggest **how to fix it**? (e.g., "Go to Settings > Provider to add your API key")
+   - Is the suggestion **actionable**? (user can actually follow it)
+
+```
+❌ "Failed to generate embeddings" — no guidance
+❌ {error: "internal server error"} — raw server error
+✅ "Embedding generation failed: API key not configured. Go to Settings > Model Provider to add your OpenAI API key."
+✅ {error: "Validation failed", details: [{field: "email", message: "must be a valid email address"}]}
+```
+
+**Enforcement**: ⚠️ WARNING (not blocking). Display non-actionable error messages in Review. Agent SHOULD improve them before Review if simple (adding a guidance string to existing error). Complex changes (new error handling architecture) = defer to next cycle.
+
+---
 
 ### CSS Value Map Compliance Scan (rebuild mode with utility CSS)
 

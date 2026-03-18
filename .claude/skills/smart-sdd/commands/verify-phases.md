@@ -1516,13 +1516,62 @@ If visual references don't exist or no screens match this Feature: skip silently
 3. This extends Step 3 SC-level verification with flow-level verification — Step 3 verifies individual SCs, Step 3d verifies connected flows
 
 **HTTP-API Features** (`RUNTIME_BACKEND = http-client`):
-1. Group `api-auto` SCs by endpoint
-2. For each endpoint:
+
+> API verification is **fully automatable** — unlike GUI, every check produces deterministic evidence (status code + response body). There is NO excuse for "build passes so verify passes" on API Features.
+
+1. **Server startup + health check**:
+   - Start server (background process)
+   - Wait for health check (`GET /health` or root endpoint → 200, max 30s)
+   - If health check fails → 🚫 BLOCKING (server doesn't start = Feature doesn't work)
+
+2. **Group `api-auto` SCs by endpoint, then execute ALL**:
+   For each endpoint:
    - Send request with test data (from demo fixtures or spec.md examples)
    - Verify response status code matches SC expectation
    - Verify response body shape (key fields present, correct types)
-   - For mutation endpoints: send mutation → verify response → send follow-up GET → verify side effect persists
-   - For auth-protected: verify 401 without auth, 200 with auth (if test credentials available)
+   - **Evidence format** (MANDATORY in Review):
+     ```
+     GET /api/users → 200 [{id:1,name:"test",email:"test@example.com"}] (42ms)
+     POST /api/users {name:""} → 422 {errors:[{field:"name",message:"required"}]} (15ms)
+     GET /api/users/999 → 404 {error:"Not found"} (8ms)
+     ```
+
+3. **CRUD round-trip verification** (for entities with full CRUD):
+   - POST (create) → verify 201 + response contains created resource
+   - GET (read) → verify 200 + response matches what was created
+   - PUT/PATCH (update) → verify 200 + response reflects changes
+   - DELETE → verify 204 or 200
+   - GET (re-read) → verify 404 (actually deleted)
+   - If ANY step fails → the CRUD chain is broken → 🚫 BLOCKING
+
+4. **Auth enforcement verification**:
+   - Send request WITHOUT auth token → verify 401 + actionable error message
+   - Send request WITH invalid/expired token → verify 401 + specific error
+   - Send request WITH valid token → verify 200 + expected response
+   - If auth endpoint exists: test login flow → receive token → use token
+   - **BLOCKING** if auth-protected endpoint returns 200 without token
+
+5. **Input validation verification**:
+   - Send request with missing required fields → verify 400/422 + error specifies which field
+   - Send request with wrong types → verify 400/422
+   - Send request with boundary values (empty string, max length, negative number)
+   - Verify error response format is **consistent** across all endpoints
+
+6. **Error response consistency check**:
+   - Collect all error responses from steps 2-5
+   - Verify they all use the same envelope format (e.g., `{error, code, message}`)
+   - Inconsistent error format = ⚠️ WARNING
+
+7. **Integration Contract verification** (if Feature provides API for other Features):
+   - For each "Provides →" in plan.md Integration Contracts:
+     - Call the endpoint with the consumer's expected input
+     - Verify response contains ALL fields the consumer needs
+     - This is NOT just "endpoint returns 200" — it's "response has fields X, Y, Z"
+
+8. **Server cleanup**:
+   - Kill server process (graceful SIGTERM first, SIGKILL after 5s)
+   - Verify port is released (`lsof -i :PORT` shows nothing)
+   - If server process leaks → ⚠️ WARNING (future port conflicts)
 
 **CLI Features** (`RUNTIME_BACKEND = process-runner`):
 1. Group `cli-auto` SCs by command
