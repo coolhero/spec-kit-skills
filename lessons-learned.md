@@ -24,6 +24,8 @@
 
 **Coverage**: ~80% — drops to build-only verification when Playwright is unavailable.
 
+**Related lessons**: L5, L19
+
 ---
 
 ### G2. Foundation Absence
@@ -52,6 +54,8 @@
 
 **Coverage**: ~85% — weakens when runtime exploration (Phase 1.5) is skipped.
 
+**Related lessons**: L22, L30, L31
+
 ---
 
 ### G4. Async/Temporal Pattern Omission
@@ -72,7 +76,7 @@
 
 **Real example**: During F006 verify, context compaction erased the verify-phases.md reference. The agent skipped Playwright UI verification entirely — despite completing it successfully for F001~F005.
 
-**Why it's a meta-problem**: Every other countermeasure (G1-G4, G6-G16) assumes the agent reads its skill files. G5 breaks that assumption — if the skill file is compacted out of context, no rule in it matters.
+**Why it's a meta-problem**: Every other countermeasure (G1-G4, G6-G19) assumes the agent reads its skill files. G5 breaks that assumption — if the skill file is compacted out of context, no rule in it matters.
 
 **How we catch it**: Verify progress is written to sdd-state.md at every phase boundary. A resumption protocol reads persisted state and resumes from the exact phase after compaction.
 
@@ -148,13 +152,21 @@
 
 **Coverage**: ~85% — external-dependency SCs still require manual verification.
 
+**Related lessons**: L23, L24
+
 ---
 
 ### G12. Ad-hoc Domain Philosophy
 
 **The trap**: Domain-specific principles (e.g., "Streaming-First" for AI apps) are generated ad-hoc by the agent's general knowledge — different sessions produce different principles for the same domain.
 
-**How we catch it**: Archetype modules provide structured, reusable principle extraction per application domain. The agent loads domain-specific philosophy from files, not from its training data.
+**Real example**: Two different sessions analyzed the same AI chat app. Session 1 produced "Model Agnosticism" as a principle. Session 2 produced "Provider Flexibility." Same concept, different names, different scopes — no consistency guarantee.
+
+**Why it happens**: Without structured principle files, agents rely on training data to infer domain philosophy. Training data is broad but not project-specific — it produces plausible but inconsistent principles across sessions.
+
+**How we catch it**: Archetype modules (A1 Philosophy sections) provide structured, reusable principle extraction per application domain. The agent loads domain-specific philosophy from files, not from its training data. (See L36)
+
+**Coverage**: ~90% — robust for domains with archetype modules; falls back to agent inference for domains without one.
 
 ---
 
@@ -164,7 +176,11 @@
 
 **Real example**: "Main process must survive renderer crashes" (Electron philosophy) was a checklist item alongside "CORS policy: config" (operational setting). The philosophical principle's importance was invisible.
 
-**How we catch it**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists.
+**Why it happens**: Traditional checklists flatten all items to the same priority level. A safety-critical design principle looks identical to a config toggle.
+
+**How we catch it**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists (F2). Philosophy principles guide *why*; checklists guide *what*.
+
+**Coverage**: ~85% — effective for the 21 frameworks with Foundation files; frameworks without F7 sections have no philosophy separation.
 
 ---
 
@@ -172,7 +188,13 @@
 
 **The trap**: Reports show *what* was built (FR count, SC coverage %, lines of code) but not *why* decisions were made.
 
-**How we catch it**: Philosophy-aware report generation traces each architectural decision back to the principle that motivated it.
+**Real example**: Case study showed "8 Features, 47 FRs, 92% SC coverage" but couldn't explain why a provider abstraction layer was chosen over direct API calls. The architectural decision was invisible in the metrics.
+
+**Why it happens**: Quantitative metrics are easy to extract automatically. Qualitative rationale requires tracing decisions back to principles — a fundamentally different operation.
+
+**How we catch it**: Philosophy-aware report generation (`/case-study`) traces each architectural decision back to the principle that motivated it. Section 4.2 (Architecture Philosophy) + Section 4.3 (Principle-to-Decision Mapping).
+
+**Coverage**: ~75% — captures decisions that are traceable to explicit principles; implicit "it seemed right" decisions are harder to capture.
 
 ---
 
@@ -182,9 +204,11 @@
 
 **Real example**: `speckit-constitution` returned "Constitution finalized." The agent showed this raw output and jumped to the next pipeline step — without reading the generated artifact, showing a review, or asking for user approval.
 
-**Why it's hard to fix**: The failure happens *between* tool execution and the next instruction. Unlike other gaps where you can add a verification gate, this one requires behavioral change at the agent level. No single fix was sufficient — it took 4 layers of defense (see L14, L20, L21).
+**Why it happens**: The Skill tool creates a response boundary — the sub-skill's completion message becomes the final output. The orchestrator cannot append post-processing steps because its turn ended when the sub-skill returned.
 
-**Coverage**: Improved from ~uncertain to ~moderate with multi-layer defense.
+**How we catch it**: 4-layer defense: (1) Inline Execution instead of Skill tool calls (L14), (2) MANDATORY RULE 3 in always-loaded SKILL.md, (3) per-step inline Execute+Review sections (L21), (4) catch-all fallback prompt (L20). Additionally, a Stop hook (`stop-speckit-intercept.sh`) detects when spec-kit navigation messages leak through.
+
+**Coverage**: ~85% — improved from ~uncertain with multi-layer defense. Remaining gap: novel spec-kit output patterns not yet in the Stop hook filter.
 
 ---
 
@@ -192,7 +216,13 @@
 
 **The trap**: Instructions say "write to `{target-directory}`" but "target" means different things in different contexts — the source being analyzed vs the project being built.
 
-**How we catch it**: Explicit `(CWD root)` annotations on every file path instruction. No ambiguous path references.
+**Real example**: reverse-spec was analyzing `/Users/dev/legacy-app` while building in `/Users/dev/new-app`. Instruction "write to target directory" → agent wrote analysis artifacts into the source directory, polluting the original codebase.
+
+**Why it happens**: In rebuild mode, two directories are active simultaneously. Relative references like "target" are ambiguous without explicit anchoring.
+
+**How we catch it**: Explicit `(CWD root)` annotations on every file path instruction. BASE_PATH and SPEC_PATH constants defined once in context-injection-rules.md. No ambiguous path references.
+
+**Coverage**: ~95% — highly effective once all path references are annotated.
 
 ---
 
@@ -208,6 +238,8 @@
 
 **Coverage**: ~70% — improves significantly for rebuild projects; greenfield has no source to lose.
 
+**Related lessons**: L31, L33
+
 ---
 
 ### G18. Enforce, Don't Reference — Rules Exist But Agents Don't Follow Them
@@ -221,6 +253,8 @@
 **How we catch it**: Three-layer enforcement: (1) Inline instruction at execution point ("🚨 CRITICAL: read verify-phases.md before proceeding"), (2) BLOCKING gate in Review ("Verify Execution Checklist with blank rows = cannot approve"), (3) Anti-pattern ban with explicit ❌/✅ examples.
 
 **Coverage**: ~85% — high when all 3 layers are present; drops when any layer is missing.
+
+**Related lessons**: L1, L10, L21, L35
 
 ---
 
@@ -236,6 +270,8 @@
 
 **Coverage**: ~75% — strongest where explicit gates exist; weakest in implicit "agent should know to apply this rule" situations.
 
+**Related lessons**: L36
+
 ---
 
 ## Countermeasure Evolution
@@ -250,13 +286,16 @@ i18n/SDK:    i18n Lint → SDK Contract Gap → Type Trust Classification
 UX:          Interaction Surface Audit → Runtime multi-backend architecture
 Governance:  BLOCKING gates → Completeness verification → MANDATORY RULE 3
 Instruction: Standalone sections → Dependency rules → CWD annotations
-Pipeline:    Console filter → Feature numbering → Inline Execution
+Pipeline:    Console filter → Feature numbering → Inline Execution → Stop Hook
 Build:       CSS verification → Build Output Fidelity (generalized)
 Gates:       Completeness Gate → Visual Reference Checkpoint → Pre-Approval Validation
 Freshness:   Pre-context check (specify reads actual impl vs stale assumptions)
 Proximity:   Inline Execute+Review sections (per-step instruction placement)
 Safety:      Catch-all fallback (unconditional continue prompt)
 Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't Reference + File over Memory
+Domain:      4-axis detection → 5-axis + modifier model → Domain Module Loading Protocol → S1 Compliance Check
+Fidelity:    Component Tree → Source Mapping → Data Lifecycle Paradigm → Entry Point Extraction
+Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase file reading
 ```
 
 ---
@@ -311,30 +350,6 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 
 ### Theme B: Context Window and Instruction Placement
 
-#### L14. Sub-Skill Calls Break Multi-Step Orchestration
-
-**What happened**: Orchestrator skill called `speckit-plan` via the Skill tool. The sub-skill's completion message terminated the orchestrator's turn. Post-execution review was structurally impossible.
-
-**Fix**: (1) Changed to Inline Execution (read sub-skill's instructions → execute as inline steps). (2) Added MANDATORY RULE 3 to always-loaded SKILL.md. (3) Per-step inline Execute+Review sections.
-
-**Universal takeaway**: When an orchestrator needs to do post-processing after a sub-skill, the Skill tool is structurally incompatible — it creates a response boundary. Use inline execution instead. Place critical behavioral rules in always-loaded files, not on-demand files.
-
-#### L20. Safety Nets Must Be Unconditional
-
-**What happened**: Agent stopped after showing raw spec-kit output. No review, no prompt, no fallback — user had no idea what to do next. The fallback was scoped to "if context limit prevents..." but the failure wasn't a context limit.
-
-**Fix**: Changed fallback from condition-specific to catch-all: "if this response ends without AskUserQuestion, for ANY reason, show the continue prompt."
-
-**Universal takeaway**: Define safety nets as INVARIANTS ("every response after X must end with Y"), not CONDITIONS ("if error Z occurs, show fallback"). If you enumerate failure conditions, you'll always miss one.
-
-#### L21. Instruction Proximity Determines Compliance
-
-**What happened**: Execute+Review instructions existed in two places: (1) file top (~150 lines away), (2) a separate injection file. By execution time, both were pushed out of context. The agent only had a compressed one-liner saying WHAT to do, not HOW.
-
-**Fix**: Added dedicated inline sections immediately adjacent to each execution point.
-
-**Universal takeaway**: The probability of an instruction being followed is inversely proportional to its distance from the execution point. File-top instructions are "documentation" by execution time. Adjacent instructions are "working memory." Same principle as L1 and L14, generalized.
-
 #### L13. Rule Changes Require Re-execution to Validate
 
 **What happened**: Applied 4 fixes. Code review said they looked correct. Re-execution showed fixes 1-3 worked, fix 4 failed completely — the agent simply ignored it.
@@ -342,6 +357,30 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 **Fix**: Established a feedback loop: apply fix → re-run pipeline → observe behavior → fix again if needed.
 
 **Universal takeaway**: You cannot validate agent behavior rules by reading the rules. Only re-execution reveals whether the rule actually changes agent behavior. Budget time for at least 2 iterations.
+
+#### L14. Sub-Skill Calls Break Multi-Step Orchestration
+
+**What happened**: Orchestrator skill called `speckit-plan` via the Skill tool. The sub-skill's completion message terminated the orchestrator's turn. Post-execution review was structurally impossible. (See G15)
+
+**Fix**: (1) Changed to Inline Execution (read sub-skill's instructions → execute as inline steps). (2) Added MANDATORY RULE 3 to always-loaded SKILL.md. (3) Per-step inline Execute+Review sections.
+
+**Universal takeaway**: When an orchestrator needs to do post-processing after a sub-skill, the Skill tool is structurally incompatible — it creates a response boundary. Use inline execution instead. Place critical behavioral rules in always-loaded files, not on-demand files.
+
+#### L20. Safety Nets Must Be Unconditional
+
+**What happened**: Agent stopped after showing raw spec-kit output. No review, no prompt, no fallback — user had no idea what to do next. The fallback was scoped to "if context limit prevents..." but the failure wasn't a context limit. (See G15)
+
+**Fix**: Changed fallback from condition-specific to catch-all: "if this response ends without AskUserQuestion, for ANY reason, show the continue prompt."
+
+**Universal takeaway**: Define safety nets as INVARIANTS ("every response after X must end with Y"), not CONDITIONS ("if error Z occurs, show fallback"). If you enumerate failure conditions, you'll always miss one.
+
+#### L21. Instruction Proximity Determines Compliance
+
+**What happened**: Execute+Review instructions existed in two places: (1) file top (~150 lines away), (2) a separate injection file. By execution time, both were pushed out of context. The agent only had a compressed one-liner saying WHAT to do, not HOW. (See G18)
+
+**Fix**: Added dedicated inline sections immediately adjacent to each execution point.
+
+**Universal takeaway**: The probability of an instruction being followed is inversely proportional to its distance from the execution point. File-top instructions are "documentation" by execution time. Adjacent instructions are "working memory." Same principle as L1 and L14, generalized.
 
 ---
 
@@ -435,6 +474,8 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 
 ---
 
+---
+
 ### Theme F: Verification Completeness
 
 #### L23. Automation-Impossible ≠ Verification Skip
@@ -472,6 +513,8 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 **What happened** (internal review): Step 3f (User-Assisted SC Completion Gate) was fully implemented in verify-phases.md at line ~1594 with complete logic, but was missing from the Phase 3 checklist at line ~1026. The checklist jumped from 3e to 3f2, making Step 3f invisible to the execution flow.
 
 **Universal takeaway**: When adding a new step to a multi-step process, update BOTH the implementation AND the index/checklist that enumerates the steps. Implementation without checklist entry = invisible step. Checklist entry without implementation = phantom step. Both cause failures.
+
+---
 
 ### Theme G: Pipeline Architecture Patterns
 
