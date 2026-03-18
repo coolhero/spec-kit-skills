@@ -572,7 +572,61 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 
 > **SDK API contract gap rationale**: Passing metadata-only objects (e.g., `{ type: "mcp", serverId: "xxx" }`) where the SDK expects callable objects (e.g., `tool({ execute: async () => {...} })`) causes silent failure — the build succeeds because loose types accept any shape, but the SDK ignores the object at runtime. When implementing SDK integrations, verify that all required fields (especially `execute`, `parameters`, `description` for tool definitions) are present and callable.
 
-**Result classification**: ⚠️ warning (NOT blocking). Violations are reported in the Review Display as a "Pattern Compliance" section. The agent MAY auto-fix simple violations before Review (e.g., wrapping a selector with `useShallow`, changing `useEffect` to `useLayoutEffect`). Stub violations SHOULD be flagged prominently — they indicate under-implementation, not a pattern issue.
+**Result classification**: ⚠️ warning (NOT blocking) for pattern violations. **Exception**: Semantic stubs and Integration Contract violations are 🚫 BLOCKING (see below).
+
+### Semantic Stub Detection (extends hollow implementation check — 🚫 BLOCKING)
+
+The basic stub detection (L567) only catches syntactic patterns (`return null`, `// TODO`). The following **semantic** patterns also indicate fake implementations that pass build/type checks but deliver zero functionality:
+
+| Pattern | Detection Signal | Severity |
+|---------|-----------------|----------|
+| **Random data in business logic** | `Math.random()`, `crypto.randomBytes()`, `uuid()` used to generate business data (embeddings, scores, IDs) instead of calling actual service/API | 🚫 BLOCKING |
+| **External call bypass** | FR specifies "via F004 API", "using LLM", "from provider" → implemented code has no actual IPC/API/SDK call to that service, uses hardcoded/mock data instead | 🚫 BLOCKING |
+| **Comment-acknowledged placeholder** | `// not yet implemented`, `// placeholder`, `// TODO: integrate with`, `// simplified version` in a non-test file's critical business logic path | 🚫 BLOCKING |
+| **Sort/filter substitution** | FR specifies "search by relevance/similarity" → implemented as `sort by date` or `filter by keyword` without actual vector/semantic search | 🚫 BLOCKING |
+
+**Detection procedure** (after all tasks complete, before Completeness Gate):
+1. For each FR that references an external system (provider API, LLM, embedding, external SDK):
+   - Grep implemented code for actual call to that system (IPC channel name, SDK function, API endpoint)
+   - If no call found → 🚫 BLOCKING: `External dependency [system] referenced in [FR] but no actual call in code`
+2. Grep all implemented files for `Math.random()`, `// placeholder`, `// not yet implemented`, `// simplified`
+   - If found in non-test business logic → 🚫 BLOCKING: `Semantic stub detected: [file:line] — [pattern]`
+
+### Integration Contract Fulfillment Check (🚫 BLOCKING)
+
+After all tasks complete, verify that plan.md's Integration Contracts are actually fulfilled in code:
+
+1. Read plan.md § Integration Contracts → extract all "Consumes ← [Feature] [Interface]" entries
+2. For each entry, grep implemented code for the actual call:
+   - IPC: channel name (e.g., `provider:list`, `ai:embed`) in `ipcRenderer.invoke()` or equivalent
+   - Store: import of the consumed store/hook (e.g., `useProviderStore`)
+   - API: fetch/axios call to the consumed endpoint
+3. **BLOCKING**: If a "Consumes ←" entry has no corresponding call in code:
+   ```
+   🚫 Integration Contract Unfulfilled:
+     Consumes ← F004-provider [ai:embed] — no ipcRenderer.invoke('ai:embed') found
+     This Feature claims to use F004's embedding API but never actually calls it.
+   ```
+4. Display all results in implement Review under "Integration Contract Fulfillment" section
+
+### UI Control Type Audit (rebuild + GUI — 🚫 BLOCKING for downgrades)
+
+After all tasks complete, compare source app's UI controls with implemented controls:
+
+1. Read Source→Target Component Mapping from plan.md
+2. For each mapped component, compare control types:
+   - Source: `<Select>` / `<Dropdown>` → Target: `<Input type="text">` → 🚫 BLOCKING (UX downgrade)
+   - Source: `<Slider>` → Target: absent → ⚠️ WARNING (feature omission)
+   - Source: auto-fill/computed field → Target: manual input → ⚠️ WARNING (UX downgrade)
+3. Display comparison in Review:
+   ```
+   ── UI Control Type Audit ────────────────────
+   ✅ ModelList: Select → Select (match)
+   🚫 EmbeddingModel: Select+AutoDimensions → Input[text] (UX downgrade)
+   ⚠️ ChunkSize: Slider(1-50) → absent (missing control)
+   ```
+
+> **Rationale (SKF-060/063)**: Build and type checks cannot distinguish `Math.random()` from a real embedding call, or a text input from a dropdown. Both compile and run without errors. These semantic checks catch the gap between "code that runs" and "code that works."
 
 ### CSS Value Map Compliance Scan (rebuild mode with utility CSS)
 

@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-18] SKF-060~063: Semantic Stub Detection + Regression Protocol
+
+### Context
+
+SKF-060~063 revealed that build/type-passing code can contain completely non-functional implementations (Math.random() embeddings, keyword-only search, text inputs replacing dropdowns). Existing gates only caught syntactic stubs (return null, TODO).
+
+### Fixes
+
+| SKF | File | Fix |
+|-----|------|-----|
+| 060 | `injection/implement.md` | Semantic Stub Detection (BLOCKING): Math.random in business logic, external call bypass, comment-acknowledged placeholder, sort/filter substitution. Integration Contract Fulfillment Check: verify all "Consumes ←" entries have actual code calls |
+| 061 | `verify-phases.md` | Semantic Correctness Sanity Check in SC Verification Matrix: deterministic embedding test, known-document search test, fact extraction test. BLOCKING when sanity fails |
+| 062 | `pipeline.md` | Regression-Implement Protocol: when re-running from --start specify, implement MUST audit existing code (semantic stubs + integration contracts + UI control types) before applying delta. Scale modifier adjusts audit severity |
+| 063 | `injection/implement.md` | UI Control Type Audit (BLOCKING for rebuild+GUI): Source Select → Target Input = UX downgrade = BLOCKING |
+
+---
+
 ## [2026-03-18] Stop Hook — spec-kit Output Interception
 
 ### Context

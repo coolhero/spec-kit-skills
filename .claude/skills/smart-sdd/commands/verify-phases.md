@@ -1138,6 +1138,28 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 
    If an SC's planned verification is ONLY Tier 1 (presence) but Required Depth is Tier 2: `⚠️ SC-### verification is presence-only but SC requires behavioral verification — upgrading to Tier 2`. Agent MUST auto-upgrade to Tier 2. Record the Required Depth in the SC Verification Matrix for enforcement in Step 3d.
 
+6. **Semantic Correctness Sanity Check** (data pipeline / external integration Features):
+   For SCs that reference data processing correctness (embedding, search, extraction, ML inference), build/type/smoke success does NOT prove functional correctness. Add sanity checks to the SC Verification Matrix:
+
+   | SC Pattern | Sanity Check Method | Failure Indicates |
+   |-----------|-------------------|-------------------|
+   | "search...and receive relevant results" | Insert known document, search for its content → result must contain that document | Search is stub/random |
+   | "generate embeddings" | Same input twice → same vector output (deterministic) AND vector ≠ all zeros | Embedding is Math.random() |
+   | "extract facts/memories" | Input "I prefer dark mode" → output must contain "dark" or "prefer" or "mode" | Extraction is keyword-only stub |
+   | "via [provider] API" / "using LLM" | Actual network/IPC call must occur (check logs/network) → no call = stub | External call bypassed |
+
+   **Enforcement**: If any sanity check fails → classify as `🚫 Semantic Stub` in SC Verification Matrix. This is BLOCKING — the Feature's core functionality is not actually working, regardless of build/type pass.
+
+   ```
+   SC Verification Matrix (sanity checks):
+   | SC | Sanity Check | Result |
+   |----|-------------|--------|
+   | SC-001 | KB embed → deterministic vector | 🚫 FAIL: Math.random() detected |
+   | SC-002 | Search known doc → relevant result | 🚫 FAIL: returns by recency, not relevance |
+   ```
+
+   > **Rationale (SKF-061)**: `Math.random()` embeddings, keyword-only extraction, and sort-by-date "search" all pass build, type, smoke, and even state-transition SCs (status goes pending→completed). Only semantic sanity checks catch the difference between "code that runs" and "code that works."
+
    **Code-Level Cross-Reference Rule** (applies when runtime verification is unavailable and code-level grep is the fallback):
    Verifying "function X exists" (Tier 1) is insufficient for behavioral SCs. When verifying "A changes B" at code level:
    - Identify A's **action target** (what DOM element / data store / file does it operate on?)

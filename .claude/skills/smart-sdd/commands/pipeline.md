@@ -267,6 +267,30 @@ Running `/smart-sdd pipeline` processes **one Feature at a time** by default. Us
 /smart-sdd constitution                    → finalize constitution (standalone)
 ```
 
+### Regression-Implement Protocol (`--start specify` or `--start plan`)
+
+When pipeline is re-run from a mid-point (`--start specify`, `--start plan`, etc.), existing code already exists for this Feature. The implement step MUST handle this differently from a fresh run:
+
+1. **Delta analysis**: Compare new spec/plan/tasks against existing code → identify what changed
+2. **Existing Code Audit** (🚫 MANDATORY for regression):
+   - Run **Semantic Stub Detection** (see `injection/implement.md`): grep for `Math.random()`, placeholder comments, external call bypasses in ALL existing Feature files (not just new/changed files)
+   - Run **Integration Contract Fulfillment Check**: verify all "Consumes ←" entries have actual calls in code
+   - Run **UI Control Type Audit** (rebuild+GUI): verify source→target control type parity
+3. **Audit results in Checkpoint**: Display existing code audit results BEFORE implementing delta changes. If audit finds issues in existing code → those become additional implementation tasks.
+
+```
+❌ WRONG: "Existing code already implements F006. Only applying SC-011/SC-012 delta."
+  → Misses Math.random() embeddings, missing IPC calls, text inputs replacing dropdowns
+
+✅ RIGHT: "Existing code audit found 3 issues:
+  🚫 KnowledgeService.ts:272 — Math.random() embeddings (semantic stub)
+  🚫 No ai:embed IPC call (Integration Contract unfulfilled)
+  🚫 AddKnowledgeBasePopup: Input[text] instead of Select (UX downgrade)
+  These will be fixed alongside the SC-011/SC-012 delta."
+```
+
+> **Domain Profile condition**: The audit depth is adjusted by Scale modifier — `prototype` mode may classify semantic stubs as ⚠️ WARNING instead of 🚫 BLOCKING if the external service is intentionally deferred. `mvp` and `production` modes treat all semantic stubs as BLOCKING.
+
 ### Pipeline Initialization
 
 Before Feature processing, initialize the state and validate the source path.
