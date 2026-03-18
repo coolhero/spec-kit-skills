@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-18] Stop Hook — spec-kit Output Interception
+
+### Context
+
+Agents stop with spec-kit raw output ("Next Actions: Proceed to /speckit.implement") instead of continuing to the Review step. This is a MANDATORY RULE 3 violation — Execute+Review continuity is broken. The rule exists inline but agents still violate it.
+
+### Solution
+
+Claude Code Stop hook that detects spec-kit navigation patterns in `last_assistant_message` and forces continuation:
+
+- **Hook script**: `.claude/hooks/stop-speckit-intercept.sh`
+- **Settings**: `.claude/settings.json` registers the hook on Stop event
+- **install.sh**: Updated to install hook in target projects (creates `.claude/settings.json` with hook config)
+- **Mechanism**: If `last_assistant_message` matches spec-kit patterns AND no Review/AskUserQuestion is present → `{"decision": "block", "reason": "..."}` forces agent to continue to Review
+- **Safety**: `stop_hook_active` check prevents infinite loops
+
+### Design Note (P2 — Enforce, Don't Reference)
+
+This is a concrete example of P2: the inline instruction "SUPPRESS spec-kit output" exists in 6+ locations, but agents still stop. The Stop hook is a **system-level enforcement** that operates below the instruction layer — the agent literally cannot stop when spec-kit output is the last thing shown.
+
+---
+
 ## [2026-03-18] SKF Deep Verification — 5 Critical Enforcement Gaps Fixed
 
 ### Context

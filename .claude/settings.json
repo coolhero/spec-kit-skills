@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/stop-speckit-intercept.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
