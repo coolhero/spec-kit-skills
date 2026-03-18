@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 13:04 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 13:12 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -107,7 +107,17 @@ Before each pipeline step, the relevant artifacts are automatically injected int
 
 **The solution**: A composable rule system that detects your project type and loads only the relevant rules — so a REST API gets endpoint validation checks, a desktop app gets window management safety rules, and an AI chatbot gets streaming-first design principles. Organization-level conventions can be shared across projects, and project-specific rules can override both.
 
-A Domain Profile is composed from four axes: **Interface** (what the app exposes — GUI, API, CLI), **Concern** (cross-cutting patterns — auth, IPC, i18n), **Archetype** (domain philosophy — AI assistant, public API, microservice), and **Scenario** (why we're building — greenfield, rebuild, adoption). Each axis contributes rules that shape spec generation, bug prevention, and verification. See [Domain Module System](#domain-module-system) for details.
+A Domain Profile is composed from four axes: **Interface** (what the app exposes — GUI, API, CLI), **Concern** (cross-cutting patterns — auth, IPC, i18n), **Archetype** (domain philosophy — AI assistant, public API, microservice), and **Scenario** (why we're building — greenfield, rebuild, adoption). Each axis contributes rules that shape spec generation, bug prevention, and verification.
+
+Domain Profile is a **first-class citizen** — not a configuration that's set once and forgotten, but a living context that actively influences every step of every skill:
+
+- **code-explore**: detects the source project's profile during orientation, guides which flows to trace, and derives your target profile during synthesis
+- **init**: infers your profile from a text description or inherits it from code-explore, writes it to project state
+- **add**: uses profile rules to determine what makes a Feature definition "complete" (an API project must define endpoints; a GUI project must specify interactions)
+- **specify → plan → implement → verify**: each step loads profile-specific rules — SC quality criteria, bug prevention patterns, verification strategies — so a desktop app with IPC gets process boundary safety checks, while a microservice with message queues gets dead-letter handling enforcement
+- When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns (e.g., `gui` + `realtime` triggers optimistic update and reconnection UI rules)
+
+See [Domain Module System](#domain-module-system) for details.
 
 #### Brief
 

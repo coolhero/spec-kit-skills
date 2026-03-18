@@ -18,8 +18,13 @@ All content from constitution-seed.md is provided as context when executing `spe
 - Extracted architecture principles
 - Extracted technical constraints
 - Extracted coding conventions
-- Archetype-specific principles (if archetype detected — from A4 Constitution Injection sections)
-- Framework philosophy (if Foundation F7 section exists)
+- **Archetype-specific principles**: If `sdd-state.md` Archetype field ≠ `"none"`:
+  1. Read `domains/archetypes/{archetype}.md` § A4 (Constitution Injection)
+  2. Extract each principle with its description
+  3. Inject as `## Archetype-Specific Principles` section in the constitution-seed content
+  4. Example: Archetype `ai-assistant` → A4 principles about Streaming-First, Model Agnosticism, Token Awareness, etc.
+  5. If multiple archetypes (comma-separated): merge all A4 sections by append
+- **Framework philosophy**: If Foundation F7 section exists in `foundations/{framework}.md`
 - Recommended development principles (Best Practices)
 - Global Evolution Layer operational principles
 

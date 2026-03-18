@@ -39,6 +39,42 @@ The following patterns apply to ALL commands:
 
 ---
 
+## Domain Module Loading Protocol
+
+Every pipeline command that uses Domain Profile rules (specify, plan, tasks, implement, verify) must load active modules **once per command session**. If modules are already cached from a previous step in the same session, skip reloading.
+
+```
+1. Read sdd-state.md header → extract Domain Profile fields:
+   - **Interfaces**: [comma-separated list]
+   - **Concerns**: [comma-separated list]
+   - **Archetype**: [name or "none"]
+   - **Framework**: [name or "none"]
+
+2. Resolve via domains/_resolver.md Steps 1–4:
+   - Load domains/_core.md (always)
+   - Load domains/interfaces/{name}.md for each Interface
+   - Load domains/concerns/{name}.md for each Concern
+   - Load domains/archetypes/{name}.md if Archetype ≠ "none"
+   - Load org convention if specified
+   - Load domains/scenarios/{scenario}.md
+   - Apply Cross-Concern Integration Rules (Step 3.5)
+
+3. Cache merged profile in working memory.
+
+4. Sections available to injection files:
+   - S1 SC Rules → specify (SC compliance check), verify (SC verification)
+   - S5 Elaboration Probes → add (Brief elaboration)
+   - S6 Pattern Rules → plan (Pattern Constraints), implement (implementation patterns)
+   - S7 Bug Prevention → plan (prevention rules), implement (anti-patterns), verify (regression check)
+   - S9 Brief Completion → add (completeness criteria)
+   - A4 Constitution → constitution (archetype principles)
+   - A5 Brief Completion → add (archetype completeness criteria)
+```
+
+> Per-command injection files reference sections like "active modules' S1 rules" — this protocol defines exactly how those modules are loaded. Each injection file does NOT need to repeat the loading steps; they reference this protocol.
+
+---
+
 **BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
 **SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
 

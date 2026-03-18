@@ -30,9 +30,26 @@ Derive a slug for the filename: kebab-case, max 30 chars.
 - "context management" → `context-management`
 - "how does auth work" → `auth-flow`
 
-### Step 2 — Entry Point Discovery
+### Step 2 — Domain-Guided Entry Point Discovery
 
-Read `orientation.md` to identify relevant modules, then:
+Read `orientation.md` to identify relevant modules and **Detected Domain Profile** to prioritize search, then:
+
+**Domain Profile guidance**: Before keyword searching, check the Detected Domain Profile from orientation.md. Use active interfaces and concerns to focus entry point discovery:
+
+| Active Module | Priority search targets |
+|---------------|----------------------|
+| `gui` | Component files, event handlers, state management, routing |
+| `http-api` | Route/endpoint definitions, request handlers, middleware chain |
+| `cli` | Command definitions, argument parsing, subcommand dispatch |
+| `async-state` | Store/reducer files, state machine definitions, subscription patterns |
+| `auth` | Authentication middleware, token management, session handling |
+| `realtime` | WebSocket/SSE handlers, streaming endpoints, event emitters |
+| `ipc` | Message channels, process communication, event bridges |
+| `external-sdk` | API client wrappers, provider abstractions, SDK initialization |
+
+If the user's topic aligns with a detected module (e.g., "auth flow" and `auth` is detected), prioritize that module's typical file patterns. If the topic is cross-cutting, use multiple module patterns.
+
+Then:
 
 1. **Keyword search**: Grep the codebase for topic-related terms
 2. **Import analysis**: Find files that import/are imported by matched files

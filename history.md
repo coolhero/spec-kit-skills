@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-18] Domain Profile First-Class Citizen Audit — 5 Gap Fixes
+
+### Context
+
+Full audit of Domain Profile as first-class citizen across all skills. Found that Domain Profile was deeply integrated in init/pipeline/reverse-spec but shallow or missing in status commands, trace guidance, injection resolver protocol, and constitution archetype extraction.
+
+### Fixes
+
+| # | Gap | Severity | Fix |
+|---|-----|----------|-----|
+| 1 | smart-sdd status omits Domain Profile | CRITICAL | Added Domain Profile section to both full/core scope output |
+| 2 | code-explore trace has no Domain guidance | MAJOR | Added Domain-Guided Entry Point Discovery with module-specific search targets |
+| 3 | code-explore status omits Domain Profile | MAJOR | Added Detected Domain Profile + per-axis exploration coverage |
+| 4 | Injection files don't show how to load modules | MAJOR | Added Domain Module Loading Protocol to context-injection-rules.md as single source |
+| 5 | Constitution doesn't explicitly extract Archetype A4 | MAJOR | Added explicit 5-step A4 extraction instructions to constitution.md |
+
+### README Update
+
+Expanded Domain Profile section in both READMEs to explain first-class citizen philosophy with per-skill bullet points showing how Domain Profile actively influences each step.
+
+---
+
 ## [2026-03-18] Domain Profile Fusion — code-explore ↔ smart-sdd Full Integration
 
 ### Context

@@ -26,6 +26,20 @@ Display current exploration coverage, trace index, and readiness for synthesis.
 Project: [name] ([language] / [framework])
 Source:  [target path]
 
+── Detected Domain Profile ──────────────────
+Interfaces: [gui(TUI), cli]
+Concerns:   [async-state, ipc]
+Archetype:  [ai-assistant]
+Foundation: [Go stdlib]
+
+Exploration by Domain Axis:
+  gui(TUI):      ████░░░░░░ 40% — Traces: 008
+  async-state:   ████████░░ 80% — Traces: 001, 002
+  ipc:           ██░░░░░░░░ 20% — Traces: 008
+  ai-assistant:  ██████░░░░ 60% — Traces: 001, 002, 005
+  (unexplored):  auth? realtime? — not detected, but consider tracing
+─────────────────────────────────────────────
+
 ── Coverage ───────────────────────────────────
 | Module              | Coverage | Traces     |
 |---------------------|----------|------------|

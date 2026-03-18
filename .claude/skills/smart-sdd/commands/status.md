@@ -23,6 +23,14 @@ Output format varies by scope:
 Origin: [greenfield | rebuild | adoption]
 Constitution: ✅ v1.0.0 (2024-01-15)
 
+── Domain Profile ────────────────────
+Interfaces: [gui, http-api, cli, ...]
+Concerns:   [async-state, auth, realtime, ...]
+Archetype:  [ai-assistant | none]
+Foundation: [nextjs, bun | none]
+Cross-Concern: [N] integration rules active
+──────────────────────────────────────
+
 Feature         | specify | plan | tasks | analyze | implement | verify | merge | Status
 ----------------|---------|------|-------|---------|-----------|--------|-------|----------
 F001-auth       |   ✅    |  ✅  |  ✅   |   ✅    |    ✅     |   ✅   |  ✅  | completed
@@ -40,6 +48,14 @@ Active: 1/4 completed, 1/4 in progress | Restructured: 1 (🔀 = needs re-execut
 Origin: [greenfield | rebuild | adoption]
 Scope: core | Active Tiers: [T1 | T1,T2 | T1,T2,T3]
 Constitution: ✅ v1.0.0 (2024-01-15)
+
+── Domain Profile ────────────────────
+Interfaces: [gui, http-api, cli, ...]
+Concerns:   [async-state, auth, realtime, ...]
+Archetype:  [ai-assistant | none]
+Foundation: [nextjs, bun | none]
+Cross-Concern: [N] integration rules active
+──────────────────────────────────────
 
 Feature         | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status
 ----------------|------|---------|------|-------|---------|-----------|--------|-------|----------
