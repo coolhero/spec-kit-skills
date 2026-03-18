@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 16:24 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 05:38 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -580,37 +580,40 @@ This section explains how the **Domain Profile** concept is implemented — how 
 
 ### How Rules Are Selected for Your Project
 
-Different projects need different rules. A REST API needs status code checks; a desktop app needs window management safety; a rebuild needs to match the original; an AI app needs streaming-first design. Instead of loading every rule for every project, the system picks what's relevant based on **four questions about your project**:
+Different projects need different rules. A REST API needs status code checks; a desktop app needs window management safety; a rebuild needs to match the original; an AI app needs streaming-first design. Instead of loading every rule for every project, the system picks what's relevant based on **5 axes + 1 modifier**:
 
 ```
-Interface                    Concern                      Archetype                    Scenario
-(what the app exposes)       (cross-cutting patterns)     (domain philosophy)          (why we're building)
-├── http-api                 ├── async-state              ├── ai-assistant             ├── greenfield
-├── gui                      ├── auth                     ├── public-api               ├── rebuild
-├── cli                      ├── authorization            ├── microservice             ├── incremental
-├── data-io                  ├── codegen                  └── sdk-framework            └── adoption
-└── tui                      ├── external-sdk
-                             ├── i18n
-                             ├── infra-as-code
-                             ├── ipc
-                             ├── message-queue
-                             ├── multi-tenancy
-                             ├── plugin-system
-                             ├── polyglot
-                             ├── protocol-integration
-                             ├── realtime
-                             └── task-worker
+Axis 1: Interface       Axis 2: Concern              Axis 3: Archetype       Axis 4: Foundation
+(what the app exposes)  (cross-cutting patterns)      (domain philosophy)     (framework constraints)
+├── http-api            ├── async-state               ├── ai-assistant        ├── electron
+├── gui                 ├── auth                      ├── public-api          ├── nextjs
+├── cli                 ├── authorization             ├── microservice        ├── express
+├── data-io             ├── codegen                   └── sdk-framework       ├── django
+└── tui                 ├── external-sdk                                      ├── spring-boot
+                        ├── i18n                                              └── ... (21 total)
+                        ├── infra-as-code
+                        ├── ipc                       Axis 5: Scenario        Modifier: Scale
+                        ├── llm-agents                (project lifecycle)     (rigor level)
+                        ├── message-queue             ├── greenfield          ├── prototype
+                        ├── multi-tenancy             ├── rebuild             ├── mvp
+                        ├── plugin-system             ├── incremental         └── production
+                        ├── polyglot                  └── adoption            × solo / small-team
+                        ├── protocol-integration                                / large-team
+                        ├── realtime
+                        └── task-worker
 ```
 
-Each axis answers a different question:
-- **Interface**: _What surface_ does the app expose? (HTTP endpoints, GUI windows, CLI commands)
-- **Concern**: _What internal patterns_ cut across Features? (Auth flows, state management, IPC)
-- **Archetype**: _What domain philosophy_ guides architectural decisions? (Streaming-first for AI, contract stability for public APIs)
-- **Scenario**: _Why_ is this project being built? (New from scratch, rebuilding existing, adopting existing code)
+Each axis answers a different question, and the modifier adjusts enforcement depth:
+- **Interface** (Axis 1): _What surface_ does the app expose? (HTTP endpoints, GUI windows, CLI commands)
+- **Concern** (Axis 2): _What internal patterns_ cut across Features? (Auth flows, state management, IPC, LLM agents)
+- **Archetype** (Axis 3): _What domain philosophy_ guides architectural decisions? (Streaming-first for AI, contract stability for public APIs)
+- **Foundation** (Axis 4): _What framework constraints_ apply? (Electron's process model, Next.js rendering strategy, Django's middleware chain)
+- **Scenario** (Axis 5): _Why_ is this project being built? (New from scratch, rebuilding existing, adopting existing code)
+- **Scale** (Modifier): _How much rigor_ to apply? (Prototype gets functional-only SCs; production gets full edge-case coverage with observability)
 
-A **Domain Profile** = selected Interfaces + selected Concerns + Archetype + Scenario. For example: `desktop-app + [gui] + [async-state, ipc] + ai-assistant + rebuild`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, an AI project gets streaming verification that a CRUD app doesn't need.
+A **Domain Profile** = 5 axes (Interfaces + Concerns + Archetype + Foundation + Scenario) + Scale modifier. For example: `[gui] + [async-state, ipc] + ai-assistant + electron + rebuild` at `mvp × solo`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, an AI project gets streaming verification that a CRUD app doesn't need, and a prototype skips observability rules that a production project requires.
 
-> **Why Archetype?** The original 3-axis model covered _what_ the app exposes (Interface), _how_ it handles cross-cutting patterns (Concern), and _why_ it's being built (Scenario). But **domain-specific philosophy** — principles like "streaming-first" for AI apps or "contract stability" for public APIs — had no structured guidance. Archetype modules make these principles **structured, reusable, and extensible**.
+When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns — for example, `gui` + `realtime` triggers optimistic update and reconnection UI rules that neither module produces alone.
 
 Conventions can be customized at three levels: **Skill-level** (built-in module defaults), **Org-level** (shared across projects via `org-convention.md`), and **Project-level** (per-project via `domain-custom.md`). Later levels override earlier ones — so an organization can enforce "all APIs must use our standard error envelope" across all projects, while individual projects can add project-specific rules on top.
 
@@ -1304,6 +1307,7 @@ Each skill follows the same internal directory convention:
 | `domains/concerns/codegen.md` | Codegen concern — generated marker scan, repetition analysis, generator config detection, R3 generated code extraction |
 | `domains/concerns/multi-tenancy.md` | Multi-tenancy concern — tenant identification and query filtering detection |
 | `domains/concerns/infra-as-code.md` | Infra-as-Code concern — IaC directory patterns, first-class infrastructure detection |
+| `domains/concerns/llm-agents.md` | LLM agents concern — LLM SDK imports, prompt template detection, multi-agent coordination patterns |
 | `domains/concerns/_TEMPLATE.md` | Contributor template for adding new reverse-spec concern modules (R1 detection signals) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0 signal keywords (LLM SDKs, streaming), A1 philosophy extraction (Streaming-First, Model Agnosticism, Token Awareness) |
@@ -1388,6 +1392,7 @@ Each skill follows the same internal directory convention:
 | `domains/concerns/codegen.md` | Codegen — generated code integrity SC, source-of-truth tracking, Feature boundary rules, bug prevention (CGN-001–005) |
 | `domains/concerns/multi-tenancy.md` | Multi-tenancy — tenant isolation SC, context propagation, cache isolation, bug prevention (MTN-001–005) |
 | `domains/concerns/infra-as-code.md` | Infra-as-Code — IaC validity SC, app-infra sync, secret management, bug prevention (IAC-001–005) |
+| `domains/concerns/llm-agents.md` | LLM agents — non-deterministic output handling SC, multi-agent coordination, prompt versioning, token budget enforcement, bug prevention (LLM-001–005) |
 | `domains/concerns/_TEMPLATE.md` | Contributor template for adding new smart-sdd concern modules (S0/S1/S5/S7 structure) |
 | `domains/archetypes/ai-assistant.md` | AI assistant archetype — A0–A4: signal keywords, philosophy (Streaming-First, Model Agnosticism), SC extensions, probes, constitution injection |
 | `domains/archetypes/public-api.md` | Public API archetype — A0–A4: signal keywords, philosophy (Contract Stability, Rate Limit Transparency), SC extensions, probes, constitution injection |
@@ -1464,6 +1469,7 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/concerns/codegen.md` | Codegen — S0 + R1 (generated markers, template files, generator configs, repetitive file groups) |
 | `domains/concerns/multi-tenancy.md` | Multi-tenancy — S0 + R1 (tenant_id patterns, RLS policies, tenant middleware) |
 | `domains/concerns/infra-as-code.md` | Infra-as-Code — S0 + R1 (Terraform, Helm, K8s manifests, Docker Compose, CI/CD, operators) |
+| `domains/concerns/llm-agents.md` | LLM agents — S0 + R1 (LLM SDKs, prompt templates, agent frameworks, multi-agent patterns) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant — A0 semantic + code patterns (LLM SDKs, streaming, RAG) |
 | `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |

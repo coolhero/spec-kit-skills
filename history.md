@@ -5,6 +5,19 @@
 
 ---
 
+## [2026-03-19] Post-Pull Consistency Audit — 5-Axis Model Sync + llm-agents Module Completeness
+
+| Change | File | Rationale |
+|--------|------|-----------|
+| **Domain Module System → 5-axis + modifier** | `README.md` L583-615 | Section still described old 4-axis model ("four questions"). Updated to 5-axis + 1 modifier with Foundation (Axis 4), Scale (Modifier), Cross-Concern Integration Rules |
+| **Concern tree: add llm-agents** | `README.md` L586-602 | New concern added to _taxonomy.md and skill files but missing from README concern tree |
+| **Domain Profile definition updated** | `README.md` L611 | Old "= Interface + Concern + Archetype + Scenario" → includes Foundation + Scale |
+| **Same changes in Korean** | `README.ko.md` | Mirror all structural updates |
+| **llm-agents in File Map** | `README.md`, `README.ko.md` | Added to all 3 sections: reverse-spec, smart-sdd, shared |
+| **reverse-spec llm-agents module** | `reverse-spec/domains/concerns/llm-agents.md` | Created — was missing from reverse-spec (shared + smart-sdd had it). Follows authorization.md pattern with R1 cross-ref to shared/ |
+
+---
+
 ## [2026-03-18] SKF-065~069 — Verification Evidence + Wiring Check + API Dependency Enforcement
 
 ### Context
