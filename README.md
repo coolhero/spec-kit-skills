@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 05:38 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 08:50 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -638,6 +638,7 @@ Each module isn't just a tag that says "this project uses auth." It's a file con
 | **S0** | Signal keywords for auto-detection | `init` (profile inference) |
 | **S1** | Success criteria rules and anti-patterns | `specify` (what "done" means for this module) |
 | **S3** | Verification steps and gates | `verify` (what to check and what blocks progress) |
+| **S4** | Data integrity principles (authority, empty input, pipeline trace) | All steps (universal engineering principles) |
 | **S5** | Consultation questions | `clarify` / `add` (what to ask the user about this module) |
 | **S7** | Bug prevention rules with detection + fix | `plan` / `implement` / `verify` (known failure patterns) |
 
