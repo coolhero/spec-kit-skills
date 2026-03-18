@@ -505,7 +505,7 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 
 **Universal takeaway**: Structural analysis (what components exist, how they're arranged) is necessary but insufficient for rebuild fidelity. **Behavioral paradigms** — how entities enter, activate, and exit a system — are orthogonal to structure and must be captured separately. In any system where entities have lifecycles (opt-in/opt-out, CRUD sequences, enable/disable patterns), the lifecycle paradigm must be an explicit, first-class artifact. Otherwise, agents default to the simplest implementation (typically "fetch all, enable all"), which is structurally valid but experientially wrong.
 
-### Theme F: Context Efficiency & Scalability
+### Theme H: Context Efficiency & Scalability
 
 #### L37. Context Budget Is a Hard Ceiling — Framework Growth Must Account for It
 
@@ -524,7 +524,7 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 
 ---
 
-### Theme G: Foundational Architecture Principles
+### Theme I: Foundational Architecture Principles
 
 #### L34. Three Foundational Philosophies — The Minimum Viable Governance
 
