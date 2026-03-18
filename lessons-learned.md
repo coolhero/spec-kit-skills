@@ -210,7 +210,7 @@
 
 ---
 
-### G18. Reflected ≠ Enforced — Rules Exist But Agents Don't Follow Them
+### G18. Enforce, Don't Reference — Rules Exist But Agents Don't Follow Them
 
 **The trap**: You write a detailed rule in a reference file. You mark the SKF as "Reflected." But the agent never reads that file, or reads it and skips the rule because there's no blocking gate.
 
@@ -256,7 +256,7 @@ Gates:       Completeness Gate → Visual Reference Checkpoint → Pre-Approval 
 Freshness:   Pre-context check (specify reads actual impl vs stale assumptions)
 Proximity:   Inline Execute+Review sections (per-step instruction placement)
 Safety:      Catch-all fallback (unconditional continue prompt)
-Philosophy:  3 Foundational Principles → Context Continuity + Enforcement over Documentation + File over Memory
+Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't Reference + File over Memory
 ```
 
 ---
@@ -513,7 +513,7 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforcement over
 
 **Universal takeaway**: Any AI agent pipeline needs exactly three governance layers, no more and no less:
 1. **Context Continuity** — ensure information flows without loss through every stage. This includes domain context (what kind of project), source fidelity (what the original code does), and cross-unit memory (what other units decided). If any of these break, the agent makes decisions in a vacuum.
-2. **Enforcement over Documentation** — a rule that isn't enforced doesn't exist. Every critical rule needs inline visibility (at the execution point), blocking power (can't proceed without compliance), and negative examples (what NOT to do). Documentation alone is decoration.
+2. **Enforce, Don't Reference** — "see X.md" has zero behavioral force. Every critical rule needs inline visibility (at the execution point), blocking power (can't proceed without compliance), and negative examples (what NOT to do). Documentation alone is decoration.
 3. **File over Memory** — agent memory is ephemeral; files are permanent. Every intermediate result, every state transition, every decision must be persisted to a file that survives context window limits, session breaks, and agent handoffs.
 
 These three are MECE for agent pipeline governance: P1 defines *what* to protect, P2 defines *how* to protect it, P3 defines *where* to store the evidence.

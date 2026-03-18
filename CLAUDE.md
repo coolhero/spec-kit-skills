@@ -37,7 +37,7 @@
   Domain Profile   Source Code    Cross-Feature
   전 단계 흐름     파이프라인 보존   GEL 기억
           \           |           /
-         P2. Enforcement over Documentation (어떻게 지키는가)
+         P2. Enforce, Don't Reference (어떻게 지키는가)
                       |
          P3. File over Memory (어디에 저장하는가)
 ```
@@ -54,16 +54,22 @@
 
 **P1-c. Cross-Feature Memory (GEL)**: entity/API registry, pre-context, stubs, interaction surfaces 등 Global Evolution Layer 아티펙트가 Feature 간 정보를 전달합니다. Feature 2가 Feature 1의 결정을 체계적으로 알 수 있어야 하며, 이는 에이전트 역량에 기대하는 것이 아니라 아티펙트 구조로 보장해야 합니다.
 
-### P2. Enforcement over Documentation (문서가 아닌 강제)
+### P2. Enforce, Don't Reference (참조가 아닌 강제)
 
-> **규칙은 "존재"하는 것이 아니라 "강제"되어야 한다. Reflected ≠ Enforced.**
+> **"See X for details"는 행동 강제력이 없다. 규칙은 참조시키는 것이 아니라 실행 시점에서 직접 강제해야 한다.**
 
-규칙이 문서에 존재하는 것만으로는 에이전트가 따르지 않습니다. 모든 critical 규칙에는 3가지가 갖춰져야 합니다:
-1. **Explicit inline instruction** — 참조 파일이 아닌 실행 시점에 직접 보이는 지시
-2. **BLOCKING enforcement** — ⚠️ 경고가 아닌 🚫 차단 게이트
-3. **Anti-pattern examples** — ❌ WRONG / ✅ RIGHT 패턴
+다른 파일을 참조하라는 지시만으로는 에이전트가 따르지 않습니다. 에이전트는 즉시 보이는 지시만 실행하고, 참조는 "선택적 읽기"로 취급합니다. 모든 critical 규칙에는 3가지가 갖춰져야 합니다:
+1. **Inline instruction** — "See X.md"가 아니라, 실행 시점에 규칙 자체가 직접 보여야 함
+2. **BLOCKING gate** — ⚠️ 경고가 아닌 🚫 차단. 규칙을 따르지 않으면 다음 단계로 진행 불가
+3. **Anti-pattern examples** — ❌ WRONG / ✅ RIGHT. 잘못된 패턴을 명시적으로 금지
 
-SKF 피드백에서 반복적으로 확인된 원칙입니다: verify-phases.md에 400줄의 상세 규칙이 있어도 pipeline.md에 "반드시 읽어라"는 인라인 지시가 없으면 에이전트는 읽지 않습니다.
+```
+❌ "See verify-phases.md for details"
+   → 에이전트: "참고 사항이구나" → 안 읽고 build+TS만 수행 → "verify ✅"
+
+✅ "🚨 verify-phases.md를 읽지 않고 build+TS만 수행하는 것은 verify가 아닙니다"
+   → 에이전트: "안 읽으면 위반이구나" → 읽고 Phase 0-4 전체 실행
+```
 
 ### P3. File over Memory (메모리가 아닌 파일)
 
