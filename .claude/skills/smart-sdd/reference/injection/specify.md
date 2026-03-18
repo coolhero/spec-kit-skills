@@ -204,8 +204,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 6. **Build-Time Plugin FR Check** (if applicable — rebuild mode + source has build config with plugins)
 7. **Domain Rule Compliance Check (S1)** (always — see § Domain Rule Compliance Check below)
 8. **External API Dependency Edge Cases** (if Feature consumes external APIs — see below)
-9. **Assemble Review Display** (include any ⚠️/❌ from steps 1-8)
-9. **HARD STOP** (ReviewApproval)
+9. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
+10. **Assemble Review Display** (include any ⚠️/❌ from steps 1-9)
+11. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -437,6 +438,38 @@ If any FR references an external API/service (keywords: "via API", "using provid
 3. For rebuild mode: check how source app handles these cases (e.g., Cherry Studio only shows authenticated providers in ModelSelector). If source app has a UX pattern for this, the FR MUST specify that same pattern or an explicit alternative.
 
 **Skip if**: Feature has no external API dependencies (pure local functionality).
+
+### Data Pipeline Completeness Check
+
+> **Purpose (S4c — Data Pipeline Traceability)**: Features that process data through multiple stages (input→transform→store→query→display) must have each stage represented in FRs. Writing "file embedding" as a single FR hides 6+ pipeline stages, each of which can fail independently.
+
+If the Feature involves data processing (keywords: "process", "import", "embed", "index", "search", "extract", "transform", "parse", "convert", "analyze"):
+
+1. **Identify the data pipeline stages**: Trace the full data path from input to output. Example:
+   - File upload → format detection → text extraction (txt/md/pdf/docx) → chunking → embedding → vector storage → search → ranking → citation display
+   - Each `→` is a pipeline stage that needs its own FR or is covered by another FR
+
+2. **Check FR coverage per stage**: For each identified stage, verify at least one FR addresses it:
+   ```
+   ── 🚫 Data Pipeline Coverage Gap (BLOCKING) ────────
+   Pipeline: [input] → [extract] → [chunk] → [embed] → [store] → [search] → [display]
+
+   Missing FR coverage:
+     ⚠️ [extract] stage: No FR for text extraction from PDF/DOCX (only plain text mentioned)
+     ⚠️ [display] stage: No FR for citation rendering (only "inject into AI context" mentioned)
+
+   Each uncovered stage is a potential silent failure during implement.
+   ──────────────────────────────────────────────────────
+   ```
+
+3. **For rebuild mode**: Read source app's pipeline implementation and verify every stage in source is covered by an FR in the spec. Source stages not covered = **BLOCKING**.
+
+4. **Check empty/invalid input SCs (S4b)**: For each pipeline stage, verify an SC exists for the "empty or invalid input" case:
+   - Empty file → explicit error (not "completed with 0 results")
+   - Unsupported format → explicit error with supported formats list
+   - Extraction failure → status reflects failure, not success
+
+**Skip if**: Feature is purely UI/config with no data processing pipeline.
 
 ### Domain Rule Compliance Check (S1)
 

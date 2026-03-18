@@ -5,6 +5,25 @@
 
 ---
 
+## [2026-03-19] SKF-070 — Extensible Data Integrity Framework (S4) + Source Deep Analysis
+
+### Context
+
+SKF-070 documented 18 failures in F006 Knowledge-Memory pipeline. Instead of adding Electron-specific fixes, designed an extensible architecture: Universal rules (_core.md S4) for ALL projects, concern-specific rules (ipc.md) for IPC projects, scenario-specific rules (rebuild.md) for rebuild projects.
+
+### Changes
+
+| Layer | File | Rules Added |
+|-------|------|-------------|
+| Universal | `_core.md` § S4a-c | Data Authority, Empty Input, Pipeline Traceability |
+| Concern | `ipc.md` § S7 | IPC N-Layer Completeness + Channel Audit |
+| Scenario | `rebuild.md` § S4d | Source Feature Deep Analysis (3-level: pipeline, UI, rendering) |
+| specify | `specify.md` | Data Pipeline Completeness Check (BLOCKING) |
+| plan | `plan.md` | Technology Compatibility Pre-Research |
+| implement | `implement.md` | Data Authority + Edge Case Completeness (Wiring Check #6-7) |
+
+---
+
 ## [2026-03-19] Post-Pull Consistency Audit — 5-Axis Model Sync + llm-agents Module Completeness
 
 | Change | File | Rationale |

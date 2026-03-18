@@ -93,6 +93,45 @@ Group the six values into three categories for probe and rule selection:
 
 ---
 
+## S4d. Source Feature Deep Analysis Protocol (rebuild-specific — extends S4c)
+
+> **Purpose**: In rebuild mode, the source app IS the specification. Every FR must trace back to a real source behavior, and every source behavior must be covered by an FR. This 3-level analysis ensures no source capability is silently dropped.
+
+### When applied
+- **specify**: Before Review, verify spec.md covers all 3 levels from the source Feature
+- **plan**: Before Review, verify plan.md maps all source components and their interactions
+- **implement**: Before each task, read the corresponding source file(s)
+
+### Level 1: Data Pipeline Analysis
+- Trace the full data path in the source app: input → processing → storage → retrieval → display
+- Identify each library/technology used at each pipeline stage
+- Each source pipeline stage must map to at least one FR in the spec
+- **Missing stage = BLOCKING**: `Source has [stage] (using [library]) but spec has no FR covering this`
+
+### Level 2: UI Interaction Pattern Analysis
+- Identify every UI entry point for the Feature in the source app (buttons, menu items, toolbar actions, keyboard shortcuts)
+- Record: component name, location in UI hierarchy, triggered action
+- Each source UI entry point must have a corresponding FR in the spec
+- **Missing entry point = BLOCKING**: `Source has [component] at [location] but spec has no FR for this access path`
+
+### Level 3: Output Rendering Pattern Analysis
+- Identify how the Feature's results are displayed to the user (list items, citations, badges, popovers, notifications)
+- Record: rendering component, data format, interaction behavior
+- Each rendering pattern must have a corresponding FR/SC in the spec
+- **Missing rendering = BLOCKING**: `Source renders [pattern] via [component] but spec has no FR for result display`
+
+```
+❌ "파일 임베딩을 구현한다" (pipeline = 1 FR)
+   → PDF 처리 누락, citation 렌더링 누락, chunking 전략 불명
+
+✅ Level 1: FileLoader(txt/md/pdf/docx) → Chunker(overlap strategy) → Embedder(model selection) → VectorStore(similarity search) → Citation display
+   Level 2: Chat toolbar KB button, Assistant settings KB panel, Sidebar KB manager
+   Level 3: CitationsList with inline [N] badges, citation popover, "N references" summary
+   → 각 단계가 별도 FR로 커버됨
+```
+
+---
+
 ## S5. Elaboration Probes (extends _core)
 
 ### Generic Probes (all rebuild cases)

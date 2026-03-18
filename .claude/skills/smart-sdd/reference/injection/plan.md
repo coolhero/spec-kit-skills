@@ -651,6 +651,34 @@ Active S7 rules not addressed in plan architecture:
 
 ---
 
+## Technology Compatibility Pre-Research (plan Review — ⚠️ WARNING)
+
+> **Purpose**: Libraries and platform APIs change between versions. plan.md's architecture decisions must account for the actual runtime environment, not assume latest-stable behavior. This check surfaces compatibility risks before implement.
+
+After plan.md is generated, check for technology compatibility risks:
+
+1. **Platform Version Breaking Changes**: Read the project's framework/platform version (from package.json, Cargo.toml, pyproject.toml, etc.) and check if plan.md references any APIs deprecated or removed in that version.
+   - Example: Electron 40+ removed `File.path` → must use `webUtils.getPathForFile()`
+   - Example: React 19 changed `forwardRef` behavior → wrapper patterns may break
+   - Example: Python 3.12 removed `distutils` → must use `setuptools`
+   - If plan.md references a deprecated API → ⚠️ WARNING in Review: `plan uses [API] which is deprecated in [platform] v[version]. Consider [alternative].`
+
+2. **Library Import Verification**: For each new library added in plan.md's dependencies:
+   - Check ESM/CJS compatibility with the project's module system
+   - Check if the library has native bindings that need build-time compilation
+   - Check version-specific API differences (v1 vs v2 may have different export shapes)
+   - ⚠️ WARNING if any compatibility risk is identified
+
+3. **Data Processing Defaults**: For libraries that process data (embedding models, search engines, ML frameworks):
+   - Check default parameter values (similarity thresholds, batch sizes, dimension counts)
+   - Verify defaults are appropriate for the project's data characteristics
+   - Example: cosine similarity threshold 0.7 is too high for most embedding models — text-embedding-3-small typically produces 0.2–0.5 for relevant matches
+   - ⚠️ WARNING if plan uses library defaults without explicit validation
+
+**Skip if**: Feature adds no new dependencies and uses no platform-specific APIs.
+
+---
+
 ## Post-Step Update Rules
 
 > **Pre-condition**: The Entity Ownership Conflict Gate (see pipeline.md § Plan Execute+Review step 5) must have passed before these updates run. All ownership conflicts must be resolved first.

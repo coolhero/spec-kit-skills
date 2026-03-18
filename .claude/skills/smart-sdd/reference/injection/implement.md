@@ -1171,12 +1171,27 @@ When implementing hover, click, or popup interactions, check the following befor
 - **Missing error handling → ⚠️ WARNING** (not blocking, but flagged in Review)
 - **Missing actionable guidance → ⚠️ WARNING**: `Error message for [service] says "Failed" but should say "API key not configured. Go to Settings > [path] to add your key."`
 
+### 6. Data Authority Compliance (S4a)
+- For each persistent data store created/modified in this Feature:
+  - Identify the authority source (server/main-process vs client/renderer)
+  - If client-side persistence (localStorage, Zustand persist, IndexedDB) stores authority-owned data:
+    - Verify explicit invalidation/sync strategy exists (hydrate on mount, TTL, version check)
+    - If no sync strategy → 🚫 **BLOCKING**: `Data authority violation: [store] persists [data] which is owned by [authority]. Stale data will accumulate.`
+- **Skip if**: Feature has no persistent state (pure UI rendering)
+
+### 7. Edge Case Completeness (S4b)
+- For each data processing function implemented:
+  - Verify empty/invalid input produces explicit error, not silent success
+  - Grep for status transitions: if `"completed"` or `"success"` is set, trace backward to confirm the input was actually processed (not empty)
+  - **If `status = "completed"` is reachable with zero processed items → 🚫 BLOCKING**: `Empty input treated as success in [function]. Add input validation.`
+
 ```
 ❌ WRONG: All tasks done → build passes → "implement complete" → proceed to verify
    → Store not hydrated, IPC channel not in preload, no UI button → all code exists but nothing works
 
-✅ RIGHT: All tasks done → Wiring Check → fix gaps → build passes → "implement complete"
-   → Every new store hydrates, every IPC channel has 3 layers, every FR has a UI entry point
+✅ RIGHT: All tasks done → Wiring Check (7 checks) → fix gaps → build passes → "implement complete"
+   → Every new store hydrates, every IPC channel has 3 layers, every FR has a UI entry point,
+     data authority is respected, empty inputs are rejected
 ```
 
 ---

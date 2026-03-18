@@ -172,6 +172,52 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 
 ---
 
+## S4. Data Integrity Principles (Universal)
+
+> These principles apply to ALL projects regardless of interface, concern, or scenario.
+> They are checked at multiple pipeline stages: specify (FR coverage), plan (architecture), implement (code), verify (runtime).
+
+### S4a. Data Authority (Single Source of Truth)
+
+Every piece of persistent data must have exactly ONE authoritative source. All other copies are caches with explicit invalidation strategies.
+
+**Pipeline impact**:
+- **plan**: data-model.md must designate authority per entity (e.g., "server-owned", "client-owned", "shared with conflict resolution")
+- **implement**: if authority is server/main-process, client-side persistence (localStorage, Zustand persist) must NOT include authority-owned fields — or must have explicit sync/invalidation
+- **verify**: data round-trip test must confirm authority source is consistent after restart
+
+```
+❌ WRONG: Main process owns KB list, but Zustand persist stores bases[] in localStorage
+   → App restart: localStorage has stale KB list, main process has fresh one → conflict
+✅ RIGHT: Main process owns KB list, renderer calls hydrate() on mount → always fresh
+```
+
+### S4b. Empty/Invalid Input Handling
+
+No pipeline stage should treat empty or invalid input as success.
+
+**Pipeline impact**:
+- **specify**: Each data-processing FR must have an SC for "empty input → explicit error, not silent success"
+- **implement**: Every processing function must check input validity before marking status as "completed"
+- **verify**: Sanity check with empty/minimal input must produce error or skip, never "success with 0 results"
+
+```
+❌ WRONG: File has 0 extractable text → 0 chunks → embedding skipped → status: "completed" ✅
+✅ RIGHT: File has 0 extractable text → status: "failed" with reason "No text extracted"
+```
+
+### S4c. Data Pipeline Traceability
+
+For any Feature that processes data through multiple stages, every stage must be identifiable and verifiable independently.
+
+**Pipeline impact**:
+- **specify**: FRs must cover each pipeline stage, not just the end result. "File embedding" is not one FR — it's input→extract→chunk→embed→store→search→display, each a verifiable step.
+- **plan**: Architecture must show the data flow with each transformation stage named.
+- **implement**: Each stage should produce observable output (logs, status, intermediate results).
+- **verify**: E2E verification traces data through all stages, not just "input → final output OK".
+
+---
+
 ## S5. Feature Elaboration Probes (Universal)
 
 > Domain-specific additions to the base [Feature Elaboration Framework](../reference/feature-elaboration-framework.md).
