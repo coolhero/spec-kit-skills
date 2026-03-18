@@ -17,6 +17,7 @@ This is the **universal Feature definition path** for all project modes:
 ### Input Sources
 
 - **`--prd path/to/prd.md`**: Reads the PRD/requirements document and extracts Feature candidates (triggers Phase 1 Type 1). Each `add` invocation can reference a different PRD.
+- **`--from-explore path/to/specs/explore/`**: Reads code-explore synthesis and trace artifacts to seed Feature candidates with pre-validated understanding (triggers Phase 1 Type 4 — Explore-Driven). See § Phase 1 Type 4 below.
 - **`--gap`**: Starts in gap-driven mode — analyzes unmapped SBI behaviors and parity gaps to auto-propose Feature candidates (triggers Phase 1 Type 3). Only meaningful for rebuild/adoption projects with SBI data.
 - **Conversational input** (default): Gathers Feature information through interactive Q&A (Phase 1 Type 2). Auto gap detection may suggest switching to Type 3 if unmapped behaviors are found.
 - **Chained from init**: When init chains into add, the same `--prd` path is automatically passed if it was provided to init
@@ -220,6 +221,60 @@ Determine entry type from the user's input and arguments:
 **Type 3 → Phase 4 optimization**: Features built from SBI entries arrive at Phase 4 **pre-mapped**. Phase 4 confirms the mapping and allows expansion (NEW B### entries) only — no re-selection needed.
 
 **Cross-cutting → Feature promotion**: When a cluster contains cross-cutting items and the user approves the Feature, Phase 6 (Finalization) updates `coverage-baseline.md` — changing the Classification of promoted items from `cross-cutting` to `assigned:F00N` with the new Feature ID. This ensures the coverage baseline stays in sync.
+
+#### Type 4 — Explore-Driven (`--from-explore`)
+
+> Triggered when `--from-explore <path>` is provided. Seeds Feature candidates from code-explore synthesis — the user has already studied the source and documented their understanding.
+
+1. **Read explore artifacts**:
+   - Read `{path}/synthesis.md` — extract Feature Candidates table, Entity/API Consolidation, Business Rule Consolidation, and Accumulated Insights
+   - Read `{path}/orientation.md` — extract tech stack, module map, and exploration coverage
+   - Read all `{path}/traces/*.md` — extract Observations sections for elaboration context
+2. **Convert C-IDs to Feature candidates**:
+   - Each row in synthesis § Feature Candidates → one Feature candidate
+   - Map fields: `C###` ID → display only (will become F### after confirmation), `Name` → Feature name, `Description` → Feature description, `Differentiation` → user's planned changes (critical elaboration context), `Source Traces` → reference links
+3. **Pre-populate elaboration context from explore artifacts**:
+   - Entity Consolidation → Perspective 3 (Data) pre-filled with known entities and fields
+   - API Consolidation → Perspective 4 (Interfaces) pre-filled with known APIs and contracts
+   - Business Rules → Perspective 5 (Quality) pre-filled with rules to preserve or modify
+   - Observations (💡 adopt / ❓ improve / ⚠️ fix) → Perspective 6 (Boundaries) pre-filled with design decisions
+   - Dependency Graph (from synthesis) → Phase 3 Tier/ordering input
+4. **Display explore-sourced candidates** (HARD STOP):
+   ```
+   📋 Explore-Driven Feature Candidates (from code-explore synthesis)
+
+   Source: [orientation.md project name] ([coverage]% explored)
+   Traces: [N] traces analyzed
+
+   | # | Candidate | Description | Differentiation | Confidence |
+   |---|-----------|-------------|-----------------|------------|
+   | 1 | C001-context-engine | Token-aware context window... | Configurable weights, ... | High (2 traces) |
+   | 2 | C002-tool-runtime | Tool dispatch and execution... | Docker sandboxing, ... | High (1 trace) |
+   | ... | | | | |
+
+   Pre-populated from explore:
+     Entities: [N] observed across traces
+     APIs: [M] interfaces documented
+     Business Rules: [K] rules cataloged
+     Design Decisions: [J] observations recorded
+   ```
+   AskUserQuestion:
+   - **"Accept all candidates"** → proceed to Elaboration (1c) with pre-populated context
+   - **"Select/modify candidates"** → user picks subset, renames, adjusts descriptions
+   - **"Add more candidates"** → user adds Features not in synthesis (e.g., from unexplored modules)
+
+   **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+5. **Proceed to Elaboration (1c)** with explore context:
+   - Elaboration Framework perspectives are pre-populated but NOT auto-completed — the user must still confirm or expand each perspective
+   - `Differentiation` column provides critical context: "the user wants to CHANGE this from the source" — elaboration should focus on the changes, not re-describe the source behavior
+   - Observations with ❓ markers → auto-generate elaboration questions
+
+**Type 4 → Phase 2 optimization**: Entity/API Consolidation from synthesis is compared against existing registries. Overlaps are flagged with source evidence from traces.
+
+**Type 4 → Phase 4**: No SBI mapping needed — explore traces serve as the user's source understanding. Phase 4 is skipped for explore-sourced Features.
+
+**Type 4 → Phase 6 enhancement**: When generating pre-context.md, include explore trace references in the "For /speckit.specify" section so the specify step can reference the user's documented understanding of the source.
 
 ### 1c. Elaboration (COMMON — all types converge here)
 

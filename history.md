@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-18] code-explore Sample Artifacts + --from-explore Handoff
+
+### Context
+
+Created realistic sample code-explore artifacts simulating an opencode exploration, then implemented the `--from-explore` handoff protocol in smart-sdd add.
+
+### Artifacts
+
+- `samples/code-explore-opencode/specs/explore/orientation.md` — architecture map with Mermaid, module coverage
+- `samples/code-explore-opencode/specs/explore/traces/001-context-assembly.md` — token window management flow
+- `samples/code-explore-opencode/specs/explore/traces/002-priority-scoring.md` — priority scoring with LSP integration
+- `samples/code-explore-opencode/specs/explore/traces/003-tool-execution.md` — tool dispatch and execution pipeline
+- `samples/code-explore-opencode/specs/explore/synthesis.md` — Feature candidates (C001-C005), entity/API/rule consolidation
+
+### Handoff Implementation
+
+- `add.md`: Added Phase 1 Type 4 (Explore-Driven) — reads synthesis.md, converts C→F candidates, pre-populates elaboration context from entities/APIs/rules/observations. Phase 4 skip for explore-sourced Features.
+- `SKILL.md`: Added `--from-explore <path>` to argument parsing and usage examples
+
+---
+
 ## [2026-03-18] External Agent Analysis — Enforcement Upgrades
 
 ### Context

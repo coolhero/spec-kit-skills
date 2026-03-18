@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec.
-argument-hint: "<command> [feature-id] [--from path|step] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path|step] [--from-explore path] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -76,6 +76,7 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 # Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
 /smart-sdd add --prd path/to/requirements.md  # Define from a PRD/requirements document
+/smart-sdd add --from-explore specs/explore/  # Define from code-explore synthesis
 /smart-sdd add --gap                     # Gap-driven: cover unmapped SBI/parity gaps
 
 # Adoption — Wrap existing code with SDD documentation (after reverse-spec)
@@ -164,6 +165,7 @@ $ARGUMENTS parsing rules:
   --from <path|step> → artifacts path (for pipeline/init/adopt, defaults to ./specs/reverse-spec/) OR reset step name (for reset command: specify/plan/tasks/implement/verify)
   --delete        → Permanent Feature deletion (only for reset command: reset --delete F007)
   --prd <path>    → Path to PRD document (for init and add commands)
+  --from-explore <path> → Path to code-explore artifacts directory (for add command — seeds Features from synthesis)
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
   --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify

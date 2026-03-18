@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 09:55 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 10:05 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1239,6 +1239,7 @@ Each skill follows the same internal directory convention:
 | `lessons-learned.md` | AI agent pipeline failure patterns (G1–G16) and specific lessons (L1–L33) — universal takeaways for agent skill builders |
 | `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |
 | `uninstall.sh` | Uninstaller — removes symlinks from `~/.claude/skills/` |
+| `samples/code-explore-opencode/` | Sample code-explore artifacts — simulated opencode exploration (orientation, 3 traces, synthesis) for testing `--from-explore` handoff |
 
 ### code-explore (`.claude/skills/code-explore/`)
 
