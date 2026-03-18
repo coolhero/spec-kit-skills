@@ -132,6 +132,23 @@ dependencies (e.g., requires another Feature's code), you may
 
 After verification execution completes:
 
+**Execution Evidence Requirement** (🚫 BLOCKING — Review without evidence is invalid):
+
+Every verify Review MUST contain **execution evidence, not agent claims**. The distinction:
+- ❌ **Claim**: "Cross-Feature: No regressions" (agent's assertion without proof)
+- ✅ **Evidence**: "Cross-Feature: ran `vitest --filter F001` — 12/12 passed (exit code 0)"
+- ❌ **Claim**: "Smoke Launch ✅" (may be `pnpm run dev & sleep; kill`)
+- ✅ **Evidence**: "Playwright `_electron.launch()` → `accessibility.snapshot()` returned 47 nodes, ChatHeader element found"
+- ❌ **Claim**: "Demo ✅" (may be file creation only)
+- ✅ **Evidence**: "Demo `--ci` exit code 0, 12s elapsed, 3/3 checks passed"
+
+If a Phase was **actually executed**, the Review entry MUST include:
+1. **What command/API was called** (Playwright launch, vitest, bash script)
+2. **What the result was** (exit code, element count, pass/fail count)
+3. **How long it took** (establishes that it actually ran, not instant-returned)
+
+If a Phase was **skipped**, the Review entry MUST include `Skip Reason` (not just omitted).
+
 **Display format**:
 ```
 📋 Review: Verification results for [FID] - [Feature Name]

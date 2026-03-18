@@ -101,7 +101,37 @@ If the Feature's `pre-context.md` has a non-empty Source Reference section AND `
 **Skip if**: Source Path = `N/A` (greenfield) or Source Reference = "N/A".
 **Incremental (add)**: Source Path = `.` — files are in the current project. Read them for context but do not copy.
 
-> **Rationale**: The specify and plan steps read original source files via `injection/specify.md` Source Reference Path Resolution. But implement — the step that actually writes code — had no equivalent. This gap meant agents implemented code without ever seeing the original implementation, leading to behavioral and visual divergence in rebuild projects. Field observation (SKF-038) confirmed that even with this rule present, agents skip it unless it is a BLOCKING gate with explicit per-task enforcement.
+### Background Agent Source Injection (rebuild + GUI — MANDATORY)
+
+When delegating UI implementation to background agents, the main agent MUST include source app code in the agent prompt. Reading source for display is insufficient — the source insights must be **carried into the execution context**.
+
+**Procedure**:
+1. Before spawning a background agent for UI tasks, identify the source files from the Source→Target Component Mapping (plan.md)
+2. Read each source file
+3. Include the **actual source code** (not a summary) in the agent prompt:
+   ```
+   ✅ RIGHT:
+     "This is a rebuild project. Here is the source app's AddKnowledgeBasePopup.tsx:
+      [full source code]
+      Reproduce the same UX flow in the new stack (React + shadcn/ui + Tailwind).
+      Key patterns to preserve: ModelSelector dropdown, auto-dimensions on model select."
+
+   ❌ WRONG:
+     "Create a dialog with name input, embedding model input, dimensions input."
+     → SBI-level abstraction loses all UX detail. Agent creates text inputs instead of dropdowns.
+   ```
+4. If context limits prevent including full source, include at minimum:
+   - Component structure (what sub-components exist)
+   - UI control types (dropdown vs input vs slider)
+   - Inter-control dependencies (model select → dimensions auto-fill)
+
+**BLOCKING**: For rebuild+GUI tasks delegated to background agents, the agent prompt MUST contain either:
+- Full source code of the corresponding component(s), OR
+- Explicit `⚠️ Source code omitted due to context limit` with the 3 minimum items above
+
+An agent prompt for UI implementation that contains **neither source code nor source summary** is a gate violation.
+
+> **Rationale (SKF-053)**: Source Reference Injection (above) requires the main agent to read source files and display them. But when UI tasks are delegated to background agents, the source insights stay with the main agent — the background agent sees only task descriptions from tasks.md. This creates a second information gap: even though source was read, it wasn't transmitted to the agent that actually writes the code.
 
 ## CSS Value Map Generation (rebuild mode with utility CSS)
 

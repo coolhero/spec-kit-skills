@@ -1051,6 +1051,49 @@ If there were notable decisions during this Feature's pipeline (specify → veri
 
 > **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
 
+#### Verify Execute (MANDATORY — verify-phases.md Required Reading)
+
+> **🚨 CRITICAL: verify의 상세 절차는 이 파일(pipeline.md)이 아닌 `commands/verify-phases.md`에 있습니다.**
+> **verify를 시작하기 전에 반드시 `commands/verify-phases.md`를 읽어야 합니다.**
+> **verify-phases.md를 읽지 않고 "build + TS + lint"만 수행하는 것은 verify가 아닙니다.**
+>
+> 1. Read `commands/verify-phases.md` — Phase 0 (Runtime Readiness), Phase 1 (Static),
+>    Phase 2 (Cross-Feature), Phase 3 (SC Verification), Phase 3b (Bug Prevention)
+> 2. Read `reference/injection/verify.md` — Checkpoint/Review content rules
+> 3. Execute ALL Phases in order per verify-phases.md
+> 4. Display Verify Execution Checklist in Review
+
+**Verify Execution Checklist** (MUST be displayed in verify Review — blank "Executed?" = BLOCKING):
+
+```
+| Phase | Required? | Executed? | Result | Skip Reason |
+|-------|-----------|-----------|--------|-------------|
+| 0-2 App Launch (Playwright) | Yes (GUI) | | | |
+| 0-4b Reachability Gate | Yes (GUI) | | | |
+| 1 Build/TS/Lint | Yes | | | |
+| 1 Tests | Yes (if test runner exists) | | | |
+| 2 Cross-Feature Regression | Yes (if F002+) | | | |
+| 3 SC Verification (Playwright) | Yes | | | |
+| 3b Bug Prevention (B-4) | Yes | | | |
+| 3e Source Comparison | Yes (rebuild+GUI) | | | |
+| Demo --ci | Yes (if demo exists) | | | |
+```
+
+**Rules**:
+- Every row with "Required? = Yes" MUST have "Executed?" filled (✅, ⚠️, or ❌)
+- To skip a required phase, "Skip Reason" MUST be non-empty (e.g., "No test runner configured", "CLI-only Feature")
+- Verify Review with **any blank Required row** is BLOCKING — cannot approve
+- "Executed?" = ❌ (failed) is acceptable IF the failure is classified by severity (Minor/Major) per verify-phases.md Bug Fix Severity Rule
+
+**Anti-pattern ban**:
+```
+❌ WRONG: pnpm run dev & sleep N; kill $PID → "Smoke Launch ✅"
+  → This is NOT Playwright verification. It's a process existence check.
+
+✅ RIGHT: const app = await _electron.launch({args: ['out/main/index.js']})
+  → Playwright accessibility.snapshot() + Feature-specific element verification
+```
+
 #### Feature Completion
 
 **Single-Feature mode (default)**:

@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-03-18] SKF Deep Verification — 5 Critical Enforcement Gaps Fixed
+
+### Context
+
+Re-verified all 55 SKF items. Found 5 items marked ✅ Reflected but with insufficient enforcement — rules existed but agents could bypass them.
+
+### Fixes
+
+| Gap | SKF Source | File | Fix |
+|-----|-----------|------|-----|
+| Agent Prompt Source Injection | SKF-053 | `injection/implement.md` | Added MANDATORY rule: background agent prompts MUST include source app code (not SBI summaries). Anti-pattern with ❌/✅ examples. |
+| Verify mandatory read | SKF-051 | `pipeline.md` | Added 🚨 CRITICAL inline instruction: "verify-phases.md를 읽지 않고 build+TS만 수행하는 것은 verify가 아닙니다" |
+| Verify Execution Checklist | SKF-046 | `pipeline.md` | Added 9-row checklist table — blank Required rows BLOCK Review approval |
+| Entry Point BLOCKING gate | SKF-054 | `injection/specify.md` | Upgraded Reachability from ⚠️ warning to 🚫 BLOCKING. Each source entry point = separate FR required |
+| Verify evidence format | SKF-049 | `injection/verify.md` | Added Execution Evidence Requirement: claims vs evidence distinction with concrete examples. BLOCKING. |
+
+### Design Principle
+
+**"Reflected" ≠ "Enforced"**. A rule that exists in documentation but has no BLOCKING gate is effectively optional for agents. Every critical rule must have:
+1. Explicit inline instruction (not just file reference)
+2. BLOCKING enforcement (not just ⚠️ warning)
+3. Anti-pattern examples (❌ WRONG / ✅ RIGHT)
+
+---
+
 ## [2026-03-18] Domain Profile Architecture: 4-axis → 5-axis + 1 modifier
 
 ### Context

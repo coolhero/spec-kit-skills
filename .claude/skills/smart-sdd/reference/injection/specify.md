@@ -133,13 +133,32 @@ Feature: [FID] - [Feature Name]
   ⚠️ This Feature should resolve these stubs. Ensure requirements/SCs cover the target behavior.
 [If no preceding stubs target this Feature: skip this block entirely]
 
-── Feature Reachability Path (GUI Features) ────
+── Feature Reachability Path (GUI Features) — 🚫 BLOCKING ────
 [If GUI interface is active:]
-  ⚠️ Every GUI Feature spec MUST include at least one FR or Acceptance Scenario
-  describing how the user navigates to this Feature from the app's home screen.
-  If accessing this Feature requires modifying another Feature's UI (e.g., adding
-  a settings gear icon to the Navbar), declare it as an Integration Contract.
-  Example: "FR-001: User clicks the Settings gear icon in the Navbar to open Settings page"
+  🚫 Every GUI Feature spec MUST include **separate FRs for EACH user entry point**
+  describing how the user navigates to this Feature from the app.
+
+  [If rebuild mode AND pre-context § Entry Points exists:]
+    Source app entry points for this Feature:
+    [Display all rows from pre-context § Entry Points table]
+
+    **BLOCKING**: Each source entry point MUST have a corresponding FR in spec.md.
+    Missing entry points = missing FRs = spec Review cannot be approved.
+
+    Example (3 entry points = 3 FRs):
+      FR-035: User clicks Knowledge icon in sidebar → /knowledge page
+      FR-036: User clicks KB button in chat inputbar → KB selection panel
+      FR-037: User configures KB in assistant settings → KB linked to assistant
+
+  [If greenfield mode:]
+    ⚠️ Define at least one FR describing how the user navigates to this Feature.
+    If accessing this Feature requires modifying another Feature's UI (e.g., adding
+    an icon to the Navbar), declare it as an Integration Contract.
+
+  [If entry points not in pre-context:]
+    ⚠️ No entry points extracted. Ensure at least one navigation FR is defined.
+    For rebuild: consider running `/reverse-spec` Entry Point Extraction first.
+
 [If not GUI: skip this block entirely]
 
 ── Functional Enablement Chain ─────────────────
