@@ -509,7 +509,7 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 
 #### L34. Three Foundational Philosophies — The Minimum Viable Governance
 
-**What happened**: After 55 SKF items, 19 gap patterns, and 33 specific lessons, we identified that every failure traces back to one of exactly three root causes: information loss between stages (Context Continuity), rules that exist but aren't enforced (Enforcement over Documentation), or state stored in agent memory instead of files (File over Memory).
+**What happened**: After 55 SKF items, 19 gap patterns, and 33 specific lessons, we identified that every failure traces back to one of exactly three root causes: information loss between stages (Context Continuity), rules that exist but aren't enforced (Enforce, Don't Reference), or state stored in agent memory instead of files (File over Memory).
 
 **Universal takeaway**: Any AI agent pipeline needs exactly three governance layers, no more and no less:
 1. **Context Continuity** — ensure information flows without loss through every stage. This includes domain context (what kind of project), source fidelity (what the original code does), and cross-unit memory (what other units decided). If any of these break, the agent makes decisions in a vacuum.
