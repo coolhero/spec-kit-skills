@@ -505,7 +505,26 @@ Philosophy:  3 Foundational Principles → Context Continuity + Enforce, Don't R
 
 **Universal takeaway**: Structural analysis (what components exist, how they're arranged) is necessary but insufficient for rebuild fidelity. **Behavioral paradigms** — how entities enter, activate, and exit a system — are orthogonal to structure and must be captured separately. In any system where entities have lifecycles (opt-in/opt-out, CRUD sequences, enable/disable patterns), the lifecycle paradigm must be an explicit, first-class artifact. Otherwise, agents default to the simplest implementation (typically "fetch all, enable all"), which is structurally valid but experientially wrong.
 
-### Theme F: Foundational Architecture Principles
+### Theme F: Context Efficiency & Scalability
+
+#### L37. Context Budget Is a Hard Ceiling — Framework Growth Must Account for It
+
+**What happened**: After 65+ SKF items, the framework grew to 174 .md files / 27,574 lines. The 2 largest files (analyze.md: 2207, verify-phases.md: 2087) alone consume ~40% of a typical agent's context budget. Adding domain modules (currently 1400-1800 lines per command) means that a project with 5+ active concerns could exhaust 70%+ of context before any project-specific content loads.
+
+**Universal takeaway**: In any multi-file agent instruction system, there is a **hard ceiling** — the agent's context window. Every file added, every rule expanded, every inline gate duplicated competes for this finite resource. Framework designers must track total instruction size the way engineers track memory usage: monitor, budget, and optimize. Specific techniques:
+- **Lazy section loading**: Load only the S-sections needed for the current command (specify needs S1/S5/S9; implement needs S7/S6). Estimated 40% reduction in per-command domain load.
+- **Per-phase file reading**: For mega files (2000+ lines), read only the relevant phase section when executing that phase, not the entire file upfront.
+- **Deduplication monitoring**: Intentional inline duplication (P2) is necessary, but track its growth. If the same rule appears in 5+ locations, consider whether all locations are actually read by agents.
+
+#### L38. Simulation-Driven Gap Detection Finds What Reviews Cannot
+
+**What happened**: A systematic review audit (11-point protocol) found 17 issues across the framework. But simulating code-explore → rebuild on a real Python/LLM/Streamlit project (ai-data-science-team) found **6 entirely new gap categories** that reviews couldn't discover: LLM non-determinism testing, multi-agent coordination, sandbox execution, Streamlit-specific testing, Python dependency management, and data pipeline validation.
+
+**Universal takeaway**: Static review (reading files, checking cross-references, verifying numeric consistency) finds **internal inconsistencies**. It cannot find **missing coverage** — rules that should exist but don't. To find missing coverage, simulate actual project scenarios. Pick a real project that differs from your current test projects (different language, different architecture, different domain) and trace the full pipeline. Where the framework has no answer is where the gap is. Schedule simulation audits after every 10 SKF items or when entering a new project domain.
+
+---
+
+### Theme G: Foundational Architecture Principles
 
 #### L34. Three Foundational Philosophies — The Minimum Viable Governance
 

@@ -3,6 +3,10 @@
 > Read after `/smart-sdd verify [FID]` is invoked. For Common Protocol (Checkpoint, Review), see `pipeline.md`.
 > For per-command injection rules, see `reference/injection/verify.md`.
 >
+> **⚠️ Context Budget Note**: This file is ~2000 lines. Read the full file once at verify start,
+> then reference specific Phase sections as needed during execution. Do NOT re-read the entire file
+> for each Phase — read Phase 0 when executing Phase 0, Phase 3 when executing Phase 3, etc.
+>
 > **Adoption mode**: If `sdd-state.md` Origin is `adoption`, read `reference/injection/adopt-verify.md` instead of `reference/injection/verify.md`. Key differences: Phase 1 failures are **non-blocking** (pre-existing issues), Phase 3 is **skipped** (adoption has no per-Feature demos), and Feature status is `adopted` (not `completed`).
 
 ---

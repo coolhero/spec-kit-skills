@@ -417,7 +417,9 @@ Concern은 여러 Feature에 영향을 미치는 내부 횡단 패턴입니다.
 
 4. **프로필 업데이트**: Concern이 프로필의 기본값이어야 하면, 프로필 매니페스트를 업데이트.
 
-5. **테스트**: S0 키워드가 `init` Proposal Mode에서 모듈 활성화를 트리거하는지 확인. 매칭 메커니즘은 [`clarity-index.md` § 3 매칭 알고리즘](.claude/skills/smart-sdd/reference/clarity-index.md) 참고.
+5. **Cross-Concern Integration Rules**: 새 concern이 기존 concern과 결합될 때 발생하는 emergent pattern이 있는지 확인. 있으면 `_resolver.md` § Step 3.5 테이블에 행 추가. 예: `llm-agents` + `gui` → "동기 LLM 호출 중 UI 프리즈" 방지.
+
+6. **테스트**: S0 키워드가 `init` Proposal Mode에서 모듈 활성화를 트리거하는지 확인. 매칭 메커니즘은 [`clarity-index.md` § 3 매칭 알고리즘](.claude/skills/smart-sdd/reference/clarity-index.md) 참고.
 
 ### 기존 Concern 모듈
 
@@ -432,6 +434,7 @@ Concern은 여러 Feature에 영향을 미치는 내부 횡단 패턴입니다.
 | `protocol-integration` | LSP/MCP/커스텀 프로토콜 구현 | 메시지 생명주기, 기능 협상, 전송 추상화 |
 | `plugin-system` | 플러그인 아키텍처 패턴 | 플러그인 생명주기, 격리, API 표면, 버저닝 |
 | `authorization` | RBAC/ABAC/ACL 접근 제어 | 권한 모델, 역할 계층, 정책 시행 |
+| `llm-agents` | LLM 에이전트 조정, 비결정적 출력 | 구조적/행동적 테스트, 샌드박스 실행, 멀티 에이전트 라우팅, Golden Fixture |
 | `message-queue` | 메시지 브로커 / 이벤트 버스 패턴 | Publish/consume 생명주기, DLQ, 전달 보장, 멱등성 |
 | `task-worker` | 백그라운드 작업 / 스케줄 태스크 패턴 | 태스크 디스패치, 재시도, 타임아웃, 주기 스케줄링, 워커 생명주기 |
 | `polyglot` | 다국어 코드베이스와 언어 간 브릿지 | FFI (PyO3, cgo, JNI), Protobuf/gRPC, WASM, 빌드 오케스트레이션 |

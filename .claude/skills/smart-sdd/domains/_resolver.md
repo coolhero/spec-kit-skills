@@ -186,9 +186,32 @@ The Scale modifier does NOT produce rules — it **adjusts** rules from the 5 ax
 
 > **Where Scale is consumed**: See `scenarios/greenfield.md` § Configuration Parameters for the full parameter definitions and per-maturity SC depth rules. The Scale modifier is loaded alongside the Scenario axis but conceptually separate — Scenario defines the lifecycle context, Scale defines the rigor level within that context.
 
-### Step 5. Cache in Working Memory
+### Step 5. Per-Command Lazy Loading (Context Optimization)
 
-Once loaded, the merged domain profile (5 axes + modifier) is used for the entire command session. No need to re-read module files mid-command.
+Not every pipeline command needs every S-section. To optimize context budget, load only the sections relevant to the current command:
+
+| Command | Sections Needed | Sections Skippable |
+|---------|----------------|-------------------|
+| `specify` | S0, S1, S5, S9, A2, A3, A5 | S2, S3, S6, S7, S8 |
+| `plan` | S7 (B-1 only), Foundation F2/F3 | S0, S1, S2, S3, S5, S6, S8, S9 |
+| `tasks` | (minimal — plan.md is primary input) | S0–S9 (domain rules already embedded in spec/plan) |
+| `implement` | S7 (B-3 only), S6, Foundation F8 | S0, S1, S2, S3, S5, S8, S9 |
+| `verify` | S1 (for SC compliance check), S3, S7 (B-4), S8, Foundation F8 | S0, S2, S5, S6, S9 |
+| `add` (Brief) | S5, S9, A3, A5 | S0, S1, S2, S3, S6, S7, S8 |
+
+**Loading protocol**:
+1. Full-load all module files (Step 3) — needed for merge
+2. After merge, **extract only the sections needed for the current command** into working memory
+3. Discard (do not retain) sections not in the "Needed" column
+4. This reduces per-command domain context from ~1400-1800 lines to ~600-900 lines
+
+**When to skip lazy loading**: If the agent's context window is large enough to hold all sections (>100K tokens available after project-specific content), lazy loading is unnecessary — load everything for maximum rule coverage.
+
+> **Context budget heuristic**: If total assembled context (domain modules + project artifacts + injection rules) exceeds ~80% of usable context window, activate lazy loading. See `context-injection-rules.md` § Context Budget Protocol for overflow handling.
+
+### Step 6. Cache in Working Memory
+
+Once loaded (and optionally filtered by lazy loading), the merged domain profile is used for the entire command session. No need to re-read module files mid-command.
 
 ---
 

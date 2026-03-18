@@ -417,7 +417,9 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 
 4. **Update profiles**: If the concern should be default for a profile, update the profile manifest.
 
-5. **Test**: Verify S0 keywords trigger module activation during `init` Proposal Mode. For matching mechanics, see [`clarity-index.md` § 3 Matching Algorithm](.claude/skills/smart-sdd/reference/clarity-index.md).
+5. **Cross-Concern Integration Rules**: Check if the new concern, combined with existing concerns, produces emergent patterns. If so, add rows to `_resolver.md` § Step 3.5 Cross-Concern Integration Rules table. Example: `llm-agents` + `gui` → "UI frozen during sync LLM call" prevention.
+
+6. **Test**: Verify S0 keywords trigger module activation during `init` Proposal Mode. For matching mechanics, see [`clarity-index.md` § 3 Matching Algorithm](.claude/skills/smart-sdd/reference/clarity-index.md).
 
 ### Existing Concern Modules
 
@@ -432,6 +434,7 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 | `protocol-integration` | LSP/MCP/custom protocol implementations | Message lifecycle, capability negotiation, transport abstraction |
 | `plugin-system` | Plugin architecture patterns | Plugin lifecycle, isolation, API surface, versioning |
 | `authorization` | RBAC/ABAC/ACL access control | Permission models, role hierarchy, policy enforcement |
+| `llm-agents` | LLM agent coordination, non-deterministic outputs | Structural/behavioral testing, sandbox execution, multi-agent routing, golden fixtures |
 | `message-queue` | Message broker / event bus patterns | Publish/consume lifecycle, DLQ, delivery guarantees, idempotency |
 | `task-worker` | Background job / scheduled task patterns | Task dispatch, retry, timeout, periodic scheduling, worker lifecycle |
 | `polyglot` | Multi-language codebases with cross-language bridges | FFI (PyO3, cgo, JNI), Protobuf/gRPC, WASM, build orchestration |
