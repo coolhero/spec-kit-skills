@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-18] SKF-065~069 — Verification Evidence + Wiring Check + API Dependency Enforcement
+
+### Context
+
+5 new SKF items (065-069) identified a critical 3-stage verification evasion pattern: agents substitute code review for runtime verification, then surface UI checks, then only after user complaints perform actual data flow verification.
+
+### Fixes
+
+| SKF | Fix | File |
+|-----|-----|------|
+| 068 | **SC Verification Evidence Gate** (🚫 BLOCKING): Review cannot be approved without runtime evidence per SC. Level 1 (code review) alone cannot pass any SC. Anti-pattern examples added. | verify-phases.md |
+| 069 | **App Lifecycle Wiring Check** (🚫 BLOCKING): 5-point checklist (store hydration, IPC 3-layer, UI entry point, parameter cross-check, external dependency config) blocks verify entry until wiring is confirmed. | implement.md |
+| 066 | **External API Edge Cases** upgraded to BLOCKING: spec cannot be approved without FR/SC for API key missing, provider not activated, call failure. | specify.md |
+| 065 | Already implemented: Test Environment Alignment in verify-phases.md Step 0 item 8. |  |
+| 067 | Already implemented: Manual Verification Fallback Protocol in verify-phases.md Step 0 item 7. |  |
+
+---
+
 ## [2026-03-18] Python/LLM/Data-Science Domain Support — Simulation-Driven Gap Analysis
 
 ### Context

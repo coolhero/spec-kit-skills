@@ -2036,6 +2036,63 @@ B. **Seeded Environment** (non-default, real-world state):
 
 > **⚠️ Source Modification Gate reminder** — Between Phase 3b and Phase 4 (Global Evolution Update), the pipeline displays Review results to the user. If the user requests fixes based on Review, or if the agent identifies issues to fix before committing results, the **Source Modification Gate MUST be executed** before touching ANY source file. This is the most common point where agents violate the Bug Fix Severity Rule — user feedback triggers a "fix it now" bias that bypasses severity classification. **STOP → List changes → Classify → Aggregate file count → If Major: HARD STOP regression, not inline fix.**
 
+### SC Verification Evidence Gate (🚫 BLOCKING — before Review)
+
+> **Why this gate exists (SKF-068)**: Agents exhibit a 3-stage verification evasion pattern: (1) code review → "code path exists" → SC ✅, (2) surface UI check → "button renders" → SC ✅, (3) only after user complaint → actual data flow verification. This gate BLOCKS Review approval unless runtime evidence is submitted for each SC.
+
+**🚨 Level 1 (code review) alone CANNOT pass any SC. This is absolute.**
+
+Before assembling the verify Review, check the SC Verification Matrix for evidence:
+
+1. **Evidence requirement per SC category**:
+
+| Category | Required Evidence | Example |
+|----------|------------------|---------|
+| `cdp-auto` | Playwright execution log: action → state change → assertion result | `click KB button → popover.visible=true → select KB → store.knowledge_bases.length=1` |
+| `api-auto` | HTTP request/response log: method, URL, status, response body snippet | `POST /api/users → 201 {id:5,name:"test"}` |
+| `cli-auto` | Command + stdout/stderr + exit code | `myapp --config test.yml → exit 0, output: "3 items processed"` |
+| `pipeline-auto` | Pipeline execution log + output comparison | `pipeline.run(test.csv) → output 50 rows, schema matches expected` |
+| `test-covered` | Test name + pass/fail result from Phase 1 | `test_user_creation (PASSED)` |
+| `user-assisted` | User's response recorded via AskUserQuestion | `user-verified: "KB search returns relevant results"` |
+| `os-native` | User's response recorded via AskUserQuestion | `user-verified: "drag&drop adds file, status → processing"` |
+| `external-dep` | Explicit skip reason | `Production-only API, no local mock available` |
+
+2. **Evidence audit**: For each SC in the matrix:
+   - If category is auto (`cdp-auto`, `api-auto`, `cli-auto`, `pipeline-auto`) but **no runtime execution log exists** → 🚫 **BLOCKING**
+   - Display: `🚫 SC-### has no runtime evidence. Category is [cdp-auto] but only code review was performed. Run Playwright/HTTP verification before Review.`
+   - If category is `user-assisted` or `os-native` but **no AskUserQuestion response recorded** → 🚫 **BLOCKING**
+   - Display: `🚫 SC-### requires user verification but user was never asked. Call AskUserQuestion now.`
+
+3. **Anti-patterns (검증 회피 패턴 — 이것들은 모두 BLOCKING 위반)**:
+   ```
+   ❌ WRONG (Level 1 — 코드 리뷰):
+     "Explore agent로 useChatStore.ts 확인 → knowledge:search 함수 존재 → SC-002 ✅"
+     → 코드가 존재하는 것과 실행되는 것은 다름. hydrate 누락, 파라미터 불일치 감지 불가.
+
+   ❌ WRONG (Level 2 — 표면 UI):
+     "Playwright snapshot → KB 버튼 visible → SC-002 ✅"
+     → UI가 보이는 것과 데이터가 흐르는 것은 다름. 버튼 클릭 후 실제 IPC 호출 여부 미확인.
+
+   ✅ RIGHT (Level 3 — 데이터 흐름):
+     "Playwright: KB 생성 → 파일 추가 → assistant에 KB 연결 → 메시지 전송
+      → interceptor: knowledge:search called=true, results.length=3
+      → AI 응답에 KB 참조 포함 확인 → SC-002 ✅"
+   ```
+
+4. **Review에 Evidence Summary 표시 (MANDATORY)**:
+   ```
+   📊 SC Verification Evidence Summary:
+   | SC | Category | Depth | Evidence |
+   |----|----------|-------|---------|
+   | SC-001 | cdp-auto | Tier 2 | ✅ Playwright: click → state change verified |
+   | SC-002 | cdp-auto | Tier 3 | ✅ Playwright: E2E flow + IPC interceptor |
+   | SC-003 | user-assisted | Tier 2 | ✅ User confirmed: "drag&drop works" |
+   | SC-004 | external-dep | — | ⏭️ Skip: production API only |
+
+   Evidence coverage: 3/4 SCs verified (75%)
+   ```
+   **If any auto-category SC has no evidence → BLOCK ReviewApproval.** User cannot approve verify results that lack runtime evidence.
+
 ### Phase 4: Global Evolution Update
 
 **Step 4a. Registry Consistency Verification**:

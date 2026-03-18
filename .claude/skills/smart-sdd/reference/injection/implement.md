@@ -1131,6 +1131,56 @@ When implementing hover, click, or popup interactions, check the following befor
 
 ---
 
+## App Lifecycle Wiring Check (🚫 BLOCKING — after ALL implement tasks complete, before Post-Step Update)
+
+> **Why this gate exists (SKF-069)**: Agents write "feature code" (services, stores, handlers, components) but miss "wiring code" — the glue that connects features to the app's lifecycle. Result: all code exists, build passes, but the feature is unreachable or non-functional at runtime.
+
+**After all implement tasks are complete, execute this checklist mechanically (grep/read — 2 minutes max):**
+
+### 1. Store Hydration Check
+- Scan for new state stores created in this Feature (Zustand `create()`, Pinia `defineStore()`, Redux `createSlice()`, Svelte `writable()`, etc.)
+- For each new store: grep the app entry point (App.tsx, main.ts, _app.tsx, etc.) for `hydrate()` or equivalent initialization call
+- **Missing → 🚫 BLOCKING**: `Store [name] created but not hydrated at app startup. Add hydrate() call to [entry point].`
+
+### 2. IPC/API Registration Check (Electron, Tauri, desktop apps)
+- Scan for new IPC handlers registered in this Feature (`ipcMain.handle`, `tauri::command`, etc.)
+- For each handler: verify the 3-layer chain exists:
+  1. Handler registered (main process) — grep `ipcMain.handle('[channel]')` or equivalent
+  2. Preload exposed (bridge) — grep channel name in preload/INVOKE_CHANNELS or equivalent
+  3. Renderer invoked — grep `window.api.invoke('[channel]')` or equivalent
+- **Any layer missing → 🚫 BLOCKING**: `IPC channel [name] has [N]/3 layers. Missing: [layer].`
+
+### 3. UI Entry Point Check
+- For each FR in spec.md that requires a user action to initiate:
+  - Verify a UI element exists in the render tree that allows that action
+  - Examples: navigation menu item, toolbar button, context menu entry, settings toggle
+- **Missing → 🚫 BLOCKING**: `FR-### "[description]" has no UI entry point. User cannot access this feature.`
+
+### 4. Parameter Shape Cross-Check
+- For each IPC channel or API call created in this Feature:
+  - Compare the caller's parameter object with the handler's expected parameter interface
+  - Field names must match exactly (`content` vs `source` = mismatch)
+  - Required fields in handler must be provided by caller
+- **Mismatch → 🚫 BLOCKING**: `Channel [name]: caller sends {content} but handler expects {source}. Runtime failure.`
+
+### 5. External Dependency Configuration Check
+- For each external service used by this Feature (LLM API, database, third-party SDK):
+  - Verify error handling for "not configured" case exists (API key missing, service unreachable)
+  - Verify error message includes actionable guidance ("Go to Settings > Provider to configure")
+  - Verify pre-check exists where possible (check config before attempting operation)
+- **Missing error handling → ⚠️ WARNING** (not blocking, but flagged in Review)
+- **Missing actionable guidance → ⚠️ WARNING**: `Error message for [service] says "Failed" but should say "API key not configured. Go to Settings > [path] to add your key."`
+
+```
+❌ WRONG: All tasks done → build passes → "implement complete" → proceed to verify
+   → Store not hydrated, IPC channel not in preload, no UI button → all code exists but nothing works
+
+✅ RIGHT: All tasks done → Wiring Check → fix gaps → build passes → "implement complete"
+   → Every new store hydrates, every IPC channel has 3 layers, every FR has a UI entry point
+```
+
+---
+
 ## Post-Step Update Rules
 
 1. Subsequent Feature impact analysis:

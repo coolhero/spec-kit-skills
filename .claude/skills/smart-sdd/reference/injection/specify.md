@@ -420,18 +420,21 @@ If any FR references an external API/service (keywords: "via API", "using provid
    - **API call failure**: Retry + user-visible status
    - **Provider not activated**: UI disables dependent functionality or shows setup guide
 
-2. If missing → add to Review as:
+2. If missing → 🚫 **BLOCKING** (not just warning). Add to Review as:
    ```
-   ⚠️ External API Dependency Edge Cases Missing:
+   🚫 External API Dependency Edge Cases Missing (BLOCKING):
      Feature consumes [provider/LLM/embedding API] but spec has no FR/SC for:
      - API key not configured → user sees cryptic error, no guidance to Settings
      - Provider not activated → user can select non-functional options
 
-     Recommended: Add FR for "When API key is not configured, display
+     REQUIRED: Add FR for "When API key is not configured, display
      actionable error: 'Go to Settings > Provider to add your API key'"
-   ```
 
-3. For rebuild mode: check how source app handles these cases (e.g., Cherry Studio only shows authenticated providers in ModelSelector)
+     Cannot approve spec without external API error handling coverage.
+   ```
+   **Rationale (SKF-066)**: Without these FRs, the implement step produces features that silently fail when API keys are missing. Users see only a red X status icon with no guidance. Source apps (Cherry Studio) handle this gracefully — our rebuild must too.
+
+3. For rebuild mode: check how source app handles these cases (e.g., Cherry Studio only shows authenticated providers in ModelSelector). If source app has a UX pattern for this, the FR MUST specify that same pattern or an explicit alternative.
 
 **Skip if**: Feature has no external API dependencies (pure local functionality).
 
