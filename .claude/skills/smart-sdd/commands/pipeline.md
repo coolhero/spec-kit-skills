@@ -1085,6 +1085,14 @@ If there were notable decisions during this Feature's pipeline (specify → veri
 - Verify Review with **any blank Required row** is BLOCKING — cannot approve
 - "Executed?" = ❌ (failed) is acceptable IF the failure is classified by severity (Minor/Major) per verify-phases.md Bug Fix Severity Rule
 
+**Domain Profile conditions** (determines "Required?" value):
+- `(GUI)` = active when `gui` or `tui` is in Interfaces (Axis 1)
+- `(rebuild+GUI)` = active when Scenario (Axis 5) = `rebuild` AND GUI is active
+- `(if F002+)` = active when current Feature is not the first Feature
+- Scale modifier (project_maturity) affects enforcement WITHIN phases (SC depth, test coverage thresholds) but does NOT allow skipping entire phases. Even `prototype` mode must execute all Required phases — the difference is in pass/fail criteria, not in whether the phase runs.
+
+> **Domain Profile independent**: The Checklist structure itself (must display, blank=BLOCKING) applies regardless of Domain Profile. This is a pipeline integrity rule, not a domain-specific rule.
+
 **Anti-pattern ban**:
 ```
 ❌ WRONG: pnpm run dev & sleep N; kill $PID → "Smoke Launch ✅"

@@ -29,6 +29,10 @@
 
 ## Design Principles
 
+- **Domain Profile은 First-Class Citizen**: 규칙, 게이트, 검증 로직, 새 명령을 추가할 때 반드시 "이 변경이 Domain Profile(5축 + 1 modifier)과 어떻게 연결되는가?"를 확인해야 합니다. Domain Profile은 한번 설정하고 잊는 구성이 아니라, code-explore → init → add → specify → plan → implement → verify 전 단계에서 적극적으로 동작하는 살아 있는 컨텍스트입니다. 새로운 규칙이 Domain Profile의 어떤 축(Interface, Concern, Archetype, Foundation, Scenario)이나 modifier(Scale)에 의해 **조건부로 활성화되거나 깊이가 조절되어야 하는지** 반드시 판단하세요. Domain Profile과 무관한 범용 규칙은 명시적으로 "Domain Profile independent"로 표시합니다.
+
+- **"Reflected" ≠ "Enforced"**: 규칙이 문서에 존재하는 것만으로는 에이전트가 따르지 않습니다. 모든 critical 규칙에는 3가지가 갖춰져야 합니다: (1) **Explicit inline instruction** — 참조 파일이 아닌 실행 시점에 직접 보이는 지시, (2) **BLOCKING enforcement** — ⚠️ 경고가 아닌 🚫 차단 게이트, (3) **Anti-pattern examples** — ❌ WRONG / ✅ RIGHT 패턴. SKF 피드백에서 반복적으로 확인된 원칙입니다.
+
 - **에이전트 워킹 메모리 대신 파일에 기록**: Phase 간 전달되는 중간 산출물은 에이전트 메모리에 보관하지 않고 반드시 파일로 저장합니다. 에이전트 메모리는 컨텍스트 윈도우 한계, 세션 단절, Phase 간 정보 손실에 취약합니다. 파일로 저장하면 언제든 다시 읽을 수 있고, 사용자가 내용을 직접 확인·수정할 수 있으며, 다른 세션에서도 활용 가능합니다.
 
 ## Language
