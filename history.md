@@ -5,6 +5,43 @@
 
 ---
 
+## [2026-03-18] Domain Profile Architecture: 4-axis → 5-axis + 1 modifier
+
+### Context
+
+MECE analysis revealed the original 4-axis model (Interface, Concern, Archetype, Scenario) was neither mutually exclusive (Archetype ↔ Concern overlap) nor collectively exhaustive (Foundation operating as de facto axis, Scale defined but unwired).
+
+### Design Decision: 5 axes + 1 modifier
+
+**5 Axes** (rule producers):
+1. Interface — what the app exposes
+2. Concern — cross-cutting patterns
+3. Archetype — domain philosophy (clarified: extends Concern rules, not duplicates)
+4. Foundation — framework-specific constraints (promoted from separate system to formal axis)
+5. Scenario — project lifecycle context
+
+**1 Modifier** (rule filter):
+- Scale = project_maturity × team_context (adjusts enforcement depth, not rule content)
+
+### Key Distinction
+- **Axis**: produces rules ("check for IPC timeout handling")
+- **Modifier**: adjusts depth ("in prototype mode, this SC is optional")
+- **Archetype → Concern**: Archetype A2/A3 sections EXTEND Concern S1/S5, not duplicate
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `_schema.md` | Rewrote Module Types with 5-axis + modifier model, Archetype↔Concern relationship |
+| `_resolver.md` | Step 1 updated for 5-axis fields, Step 3 shows 5-axis loading, new Step 4 Scale modifier application |
+| `context-injection-rules.md` | Domain Module Loading Protocol updated for 5+1 |
+| `status.md` | Domain Profile display updated with Scale |
+| `orient.md` | Step 3 updated for 5-axis + Scale detection |
+| `synthesis.md` | Step 5 Target Domain Profile updated for 5-axis + Scale |
+| `README.md/ko.md` | Domain Profile section rewritten with axis table + modifier explanation |
+
+---
+
 ## [2026-03-18] Domain Profile First-Class Citizen Audit — 5 Gap Fixes
 
 ### Context

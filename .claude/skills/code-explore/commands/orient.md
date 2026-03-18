@@ -42,9 +42,9 @@ For each module, record:
 - **Dependencies**: Which other modules it imports from
 - **File count**: Number of source files
 
-### Step 3 — Domain Profile Analysis
+### Step 3 — Domain Profile Analysis (5 axes + Scale)
 
-Analyze the detected tech stack, architecture patterns, and module structure to infer the **source project's Domain Profile**. This uses the same module vocabulary as smart-sdd's Domain Profile system (see `../../smart-sdd/domains/_resolver.md` § Profile Selection).
+Analyze the detected tech stack, architecture patterns, and module structure to infer the **source project's Domain Profile** across all 5 axes + the Scale modifier. This uses the same module vocabulary as smart-sdd's Domain Profile system (see `../../smart-sdd/domains/_resolver.md` § Profile Selection, `../../smart-sdd/domains/_schema.md` § Domain Profile Model).
 
 1. **Interface detection**: Map project characteristics to Interface modules
    - GUI indicators (UI framework, component files, styles) → `gui`
@@ -66,9 +66,20 @@ Analyze the detected tech stack, architecture patterns, and module structure to 
    - Plugin/extension architecture → `sdk-framework`
    - Microservice indicators (service mesh, service discovery) → `microservice`
 
-4. **Foundation detection**: Identify frameworks from dependency files
+4. **Foundation detection** (Axis 4): Identify frameworks from dependency files
    - Read `package.json` dependencies, `go.mod` requires, `Cargo.toml` dependencies, etc.
-   - Match against known Foundation files in `../../smart-sdd/domains/foundations/` or `../../reverse-spec/domains/foundations/`
+   - Match against known Foundation files in `../../reverse-spec/domains/foundations/`
+   - Record primary framework + notable libraries
+
+5. **Scale inference**: Estimate project maturity and team context from observable signals
+   - **Project maturity**: Infer from code characteristics:
+     - CI/CD config present + comprehensive tests + monitoring → `production`
+     - Tests present but sparse + basic config → `mvp`
+     - No tests + minimal config + experimental code patterns → `prototype`
+   - **Team context**: Infer from collaboration signals:
+     - `.github/CODEOWNERS`, PR templates, multiple git authors → `large-team`
+     - Basic PR template, 2-3 git authors → `small-team`
+     - Single author, no PR process → `solo`
 
 Record in orientation.md as a structured section (see Step 5 template below).
 
@@ -107,20 +118,26 @@ flowchart TD
     [Module dependency diagram — top-level modules with arrows showing imports]
 ` ``
 
-## Detected Domain Profile
+## Detected Domain Profile (5 axes + Scale)
 
 > Inferred from source code analysis. Used by synthesis to recommend a Domain Profile for your project.
 
-| Axis | Detected | Evidence |
-|------|----------|----------|
-| **Interfaces** | [e.g., gui, cli] | [e.g., Bubble Tea TUI framework, cobra CLI] |
-| **Concerns** | [e.g., async-state, ipc] | [e.g., goroutine-based state, LSP protocol] |
-| **Archetype** | [e.g., ai-assistant] | [e.g., LLM provider abstraction, token counting] |
-| **Foundation** | [e.g., Go stdlib] | [e.g., go.mod dependencies] |
+| # | Axis | Detected | Evidence |
+|---|------|----------|----------|
+| 1 | **Interfaces** | [e.g., gui(TUI), cli] | [e.g., Bubble Tea TUI framework, cobra CLI] |
+| 2 | **Concerns** | [e.g., async-state, ipc] | [e.g., goroutine-based state, LSP protocol] |
+| 3 | **Archetype** | [e.g., ai-assistant] | [e.g., LLM provider abstraction, token counting] |
+| 4 | **Foundation** | [e.g., Go stdlib] | [e.g., go.mod dependencies] |
+| 5 | **Scenario** | [inferred from context] | [e.g., code-explore → likely greenfield for your project] |
+
+| Modifier | Detected | Evidence |
+|----------|----------|----------|
+| **Project Maturity** | [e.g., production] | [e.g., comprehensive tests, CI/CD, monitoring] |
+| **Team Context** | [e.g., small-team] | [e.g., 3 git authors, PR templates present] |
 
 > This profile describes the **source project** you are studying, not the project you will build.
 > During `/code-explore synthesis`, this is combined with your "What I'd Do Differently" decisions
-> to derive a **recommended Domain Profile for your project**.
+> to derive a **recommended Domain Profile for your project** (all 5 axes + Scale).
 
 ## Module Map
 

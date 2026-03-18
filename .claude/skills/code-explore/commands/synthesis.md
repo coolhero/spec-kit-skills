@@ -89,22 +89,24 @@ Group observations by icon type:
 | catch-all error handling | Trace 003 | Need specific error types |
 ```
 
-### Step 5 — Target Domain Profile Derivation
+### Step 5 — Target Domain Profile Derivation (5 axes + Scale)
 
 Derive the **user's target project Domain Profile** by combining the source project's Detected Domain Profile (from orientation.md) with differentiation decisions accumulated across traces.
 
-1. **Read source profile**: Extract the Detected Domain Profile section from `orientation.md`
+1. **Read source profile**: Extract the full Detected Domain Profile (5 axes + Scale) from `orientation.md`
 2. **Analyze differentiation signals**: Scan all traces' Observations for domain-relevant changes:
-   - 🔧 "Change from TUI to Web" → Interface changes (`gui` stays, but qualifier changes)
-   - 🔧 "Add Docker sandboxing" → new Concern (`containerization`)
-   - 🔧 "Add streaming support" → new Concern (`realtime`)
-   - 🔧 "Database instead of file storage" → Concern change (`persistence` characteristics)
-   - 💡 "Keep provider abstraction pattern" → Archetype confirmation (`ai-assistant` stays)
+   - 🔧 "Change from TUI to Web" → Axis 1 Interface change
+   - 🔧 "Add streaming support" → Axis 2 Concern addition (`realtime`)
+   - 💡 "Keep provider abstraction" → Axis 3 Archetype confirmation
+   - 🔧 "TypeScript + React" → Axis 4 Foundation change
+   - (Axis 5 Scenario is not inherited — it's determined by the user's project mode)
+   - 🔧 "This should be production-grade" → Scale modifier change
 3. **Build target profile**:
-   - Start from source profile
+   - Start from source profile axes 1-4 (Scenario is always user-determined)
    - Apply differentiation: additions, removals, modifications
    - Flag uncertain items (where the user hasn't explicitly decided)
-4. **Check Cross-Concern Integration**: Using the target profile's active modules, look up `_resolver.md` § Step 3.5 Cross-Concern Integration Rules. If any combination triggers, note the activated integration patterns.
+4. **Check Cross-Concern Integration**: Using the target profile's active modules, look up `_resolver.md` § Step 3.5. If any combination triggers, note the activated integration patterns.
+5. **Derive Scale**: If the user expressed scale preferences in Observations, use them. Otherwise, flag as unresolved.
 
 ```markdown
 ## Recommended Domain Profile (target project)
@@ -112,16 +114,25 @@ Derive the **user's target project Domain Profile** by combining the source proj
 > Derived from source analysis + your differentiation decisions.
 > This profile will be passed to `/smart-sdd init --from-explore` to seed project setup.
 
-| Axis | Source | Target | Change | Evidence |
-|------|--------|--------|--------|----------|
-| **Interfaces** | gui (TUI) | gui (Web) | Changed | 🔧 Trace 004: "Web-based UI instead of TUI" |
-| **Concerns** | async-state, ipc | async-state, ipc, realtime | Added | 🔧 Trace 001: "Add streaming for LLM responses" |
-| **Archetype** | ai-assistant | ai-assistant | Kept | 💡 Trace 002: "Provider abstraction pattern is solid" |
-| **Foundation** | Go stdlib | — (TBD) | Changed | 🔧 Trace 004: "TypeScript + React instead of Go" |
+| # | Axis | Source | Target | Change | Evidence |
+|---|------|--------|--------|--------|----------|
+| 1 | **Interfaces** | gui (TUI) | gui (Web) | Changed | 🔧 Trace 004: "Web-based UI instead of TUI" |
+| 2 | **Concerns** | async-state, ipc | async-state, ipc, realtime | Added | 🔧 Trace 001: "Add streaming for LLM responses" |
+| 3 | **Archetype** | ai-assistant | ai-assistant | Kept | 💡 Trace 002: "Provider abstraction pattern is solid" |
+| 4 | **Foundation** | Go stdlib | — (TBD) | Changed | 🔧 Trace 004: "TypeScript + React instead of Go" |
+| 5 | **Scenario** | — | greenfield | User-determined | (new project inspired by source) |
+
+| Modifier | Source | Target | Evidence |
+|----------|--------|--------|----------|
+| **Project Maturity** | production | mvp | 🔧 Trace 005: "Start as MVP, scale later" |
+| **Team Context** | small-team | solo | (user's current context) |
 
 ### Activated Cross-Concern Integration Rules
 - `gui` + `realtime` → Real-time UI sync (S1: optimistic update + reconnection UI)
 - `ai-assistant` + `realtime` → Streaming AI responses (S1: stream interruption + partial display)
+
+### Scale Implications
+- mvp + solo: Tests for critical paths only, no PR process, skip observability
 
 ### Unresolved Domain Decisions
 - [ ] Foundation framework not yet chosen (React? Next.js? Electron?)

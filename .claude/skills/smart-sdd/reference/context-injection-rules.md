@@ -39,36 +39,46 @@ The following patterns apply to ALL commands:
 
 ---
 
-## Domain Module Loading Protocol
+## Domain Module Loading Protocol (5 axes + 1 modifier)
 
 Every pipeline command that uses Domain Profile rules (specify, plan, tasks, implement, verify) must load active modules **once per command session**. If modules are already cached from a previous step in the same session, skip reloading.
 
 ```
-1. Read sdd-state.md header → extract Domain Profile fields:
-   - **Interfaces**: [comma-separated list]
-   - **Concerns**: [comma-separated list]
-   - **Archetype**: [name or "none"]
-   - **Framework**: [name or "none"]
+1. Read sdd-state.md header → extract 5 axes + 1 modifier:
+   Axis 1 — **Interfaces**: [comma-separated list]
+   Axis 2 — **Concerns**: [comma-separated list]
+   Axis 3 — **Archetype**: [name or "none"]
+   Axis 4 — **Framework**: [name or "none"] (Foundation)
+   Axis 5 — **Scenario**: [greenfield | rebuild | incremental | adoption]
+   Modifier — **Project Maturity**: [prototype | mvp | production]
+   Modifier — **Team Context**: [solo | small-team | large-team]
 
-2. Resolve via domains/_resolver.md Steps 1–4:
-   - Load domains/_core.md (always)
-   - Load domains/interfaces/{name}.md for each Interface
-   - Load domains/concerns/{name}.md for each Concern
-   - Load domains/archetypes/{name}.md if Archetype ≠ "none"
+2. Resolve via domains/_resolver.md Steps 1–5:
+   - Load _core.md (always)
+   - Load Axis 1: interfaces/{name}.md for each Interface
+   - Load Axis 2: concerns/{name}.md for each Concern
+   - Load Axis 3: archetypes/{name}.md if Archetype ≠ "none"
+   - Load Axis 4: foundations/{framework}.md § F2 + _foundation-core.md § F3
    - Load org convention if specified
-   - Load domains/scenarios/{scenario}.md
-   - Apply Cross-Concern Integration Rules (Step 3.5)
+   - Load Axis 5: scenarios/{scenario}.md
+   - Apply Step 3.5: Cross-Concern Integration Rules
+   - Apply Step 4: Scale Modifier (adjusts rule depth per maturity/team)
 
-3. Cache merged profile in working memory.
+3. Cache merged profile (5 axes + modifier) in working memory.
 
 4. Sections available to injection files:
    - S1 SC Rules → specify (SC compliance check), verify (SC verification)
+     └ Scale: prototype=functional-only, mvp=+error-paths, production=full
    - S5 Elaboration Probes → add (Brief elaboration)
-   - S6 Pattern Rules → plan (Pattern Constraints), implement (implementation patterns)
-   - S7 Bug Prevention → plan (prevention rules), implement (anti-patterns), verify (regression check)
+     └ Scale: large-team adds collaboration/ownership probes
+   - S6 Pattern Rules → plan (Pattern Constraints), implement (patterns)
+   - S7 Bug Prevention → plan (prevention), implement (anti-patterns), verify (regression)
+     └ Scale: prototype=disabled, production=all+observability
    - S9 Brief Completion → add (completeness criteria)
    - A4 Constitution → constitution (archetype principles)
    - A5 Brief Completion → add (archetype completeness criteria)
+   - F2 Foundation Items → pipeline (T0 Feature generation)
+   - F3 T0 Rules → pipeline (Foundation ordering + verification gate)
 ```
 
 > Per-command injection files reference sections like "active modules' S1 rules" — this protocol defines exactly how those modules are loaded. Each injection file does NOT need to repeat the loading steps; they reference this protocol.

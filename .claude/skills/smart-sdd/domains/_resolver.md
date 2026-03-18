@@ -2,6 +2,8 @@
 
 > Defines how the agent loads domain modules for the current project.
 > Read this file once at skill invocation (referenced from SKILL.md § Domain Profile).
+>
+> **Architecture**: 5-axis + 1 modifier model. See `_schema.md` § Domain Profile Model for the conceptual framework.
 
 ---
 
@@ -12,11 +14,21 @@
 Look for the Domain Profile fields in `sdd-state.md` header:
 
 ```
+# 5 Axes
 **Domain Profile**: <profile-name>
-**Interfaces**: <comma-separated list>
-**Concerns**: <comma-separated list>
-**Scenario**: <greenfield | rebuild | incremental | adoption>
+**Interfaces**: <comma-separated list>              ← Axis 1
+**Concerns**: <comma-separated list>                ← Axis 2
+**Archetype**: <comma-separated list or "none">     ← Axis 3 (extends Concern rules with domain philosophy)
+**Framework**: <name or "none">                     ← Axis 4 (Foundation — framework-specific rules)
+**Scenario**: <greenfield | rebuild | incremental | adoption>  ← Axis 5
+
+# 1 Modifier
+**Project Maturity**: <prototype | mvp | production> ← Scale modifier (adjusts rule depth)
+**Team Context**: <solo | small-team | large-team>   ← Scale modifier (adjusts collaboration rules)
+
+# Optional overrides
 **Custom**: <path to domain-custom.md or "none">
+**Org Convention**: <path to org-convention.md or "none">
 ```
 
 ### Step 2. Resolve Profile (if needed)
@@ -85,15 +97,30 @@ Organization-level conventions provide shared rules that apply across all projec
 - Treat as `"none"` — no org conventions loaded
 - Do NOT write the field retroactively (only set during init)
 
-### Step 3. Load Modules in Order
+### Step 3. Load Modules in Order (5 axes)
 
 ```
+Axis 1 (Interface):     domains/interfaces/{interface}.md          (for EACH)
+Axis 2 (Concern):       domains/concerns/{concern}.md              (for EACH)
+Axis 3 (Archetype):     domains/archetypes/{archetype}.md          (for EACH)
+Axis 4 (Foundation):    ../../reverse-spec/domains/foundations/{framework}.md § F2 + _foundation-core.md § F3
+Axis 5 (Scenario):      domains/scenarios/{scenario}.md            (ONE)
+
+Plus:
+  Base:                 domains/_core.md                            (ALWAYS — universal rules)
+  Org convention:       {path}/org-convention.md                    (if specified)
+  Custom:               {path}/domain-custom.md                    (if specified)
+```
+
+**Loading order** (later modules extend earlier):
+```
 1. domains/_core.md                              (ALWAYS — universal rules)
-2. domains/interfaces/{interface}.md              (for EACH listed interface)
-3. domains/concerns/{concern}.md                  (for EACH listed concern)
-4. domains/archetypes/{archetype}.md              (for EACH listed archetype)
+2. domains/interfaces/{interface}.md              (Axis 1 — for EACH listed interface)
+3. domains/concerns/{concern}.md                  (Axis 2 — for EACH listed concern)
+4. domains/archetypes/{archetype}.md              (Axis 3 — for EACH listed archetype)
+4b. ../../reverse-spec/domains/foundations/{framework}.md  (Axis 4 — Foundation F2 items + F3 T0 rules)
 5. {Org convention path}/org-convention.md        (if specified and file exists)
-6. domains/scenarios/{scenario}.md                (ONE scenario)
+6. domains/scenarios/{scenario}.md                (Axis 5 — ONE scenario)
 7. {Custom path}/domain-custom.md                 (if specified and file exists)
 ```
 
@@ -129,9 +156,35 @@ After loading all individual modules (Step 3), apply integration rules for conce
 
 **Extensibility**: To add new integration rules, append rows to this table. Each row must specify: the combination trigger, the emergent pattern name, and the concrete rules injected.
 
-### Step 4. Cache in Working Memory
+### Step 4. Apply Scale Modifier
 
-Once loaded, the merged domain profile is used for the entire command session. No need to re-read module files mid-command.
+Read the Scale modifier fields from sdd-state.md:
+- `**Project Maturity**`: `prototype` | `mvp` | `production` (default: `mvp`)
+- `**Team Context**`: `solo` | `small-team` | `large-team` (default: `solo`)
+
+The Scale modifier does NOT produce rules — it **adjusts** rules from the 5 axes:
+
+| Maturity | Effect on Rules |
+|----------|----------------|
+| `prototype` | S1: Functional SCs only, skip performance/edge-case SCs. S3: Tests optional (encourage but don't block). S7: Disable over-engineering guards |
+| `mvp` | S1: Functional + key error-path SCs. S3: Tests required for critical paths. S7: Standard guards |
+| `production` | S1: Full SC coverage (edge cases, performance, concurrency). S3: Comprehensive tests required. S7: All guards active + observability requirements |
+
+| Team Context | Effect on Rules |
+|-------------|----------------|
+| `solo` | S5: Skip collaboration probes (code review, PR process). No branch protection requirements |
+| `small-team` | S5: Add basic collaboration probes. Branch protection recommended |
+| `large-team` | S5: Add code ownership probes. S7: Add "undocumented API contract change" prevention. Branch protection + PR review required |
+
+**Application**: Scale modifier is applied AFTER all 5 axes are loaded and merged. It acts as a filter that adjusts depth — NOT by removing rules, but by changing their enforcement level:
+- `prototype` + S1 "IPC timeout handling": rule still visible in context, but marked `(optional for prototype)` in Checkpoint display
+- `production` + S7 "observability": rule escalated from ⚠️ warning to 🚫 blocking
+
+> **Where Scale is consumed**: See `scenarios/greenfield.md` § Configuration Parameters for the full parameter definitions and per-maturity SC depth rules. The Scale modifier is loaded alongside the Scenario axis but conceptually separate — Scenario defines the lifecycle context, Scale defines the rigor level within that context.
+
+### Step 5. Cache in Working Memory
+
+Once loaded, the merged domain profile (5 axes + modifier) is used for the entire command session. No need to re-read module files mid-command.
 
 ---
 

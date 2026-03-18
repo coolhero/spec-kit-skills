@@ -1,8 +1,47 @@
 # Domain Module Schema (smart-sdd)
 
-> Defines the section schema for domain modules in the modular 3-axis architecture.
-> Every module (interface, concern, scenario) follows this schema. Omit sections that don't apply.
+> Defines the section schema for domain modules in the **5-axis + 1 modifier** architecture.
+> Every module (interface, concern, archetype, foundation, scenario) follows this schema. Omit sections that don't apply.
 > For reverse-spec module sections (R1-R6), see `../reverse-spec/domains/_schema.md`.
+
+---
+
+## Domain Profile Model: 5 Axes + 1 Modifier
+
+Domain Profile is a **first-class citizen** — a living context that actively influences every step of every skill.
+
+### 5 Axes (rule producers)
+
+Each axis contributes rules (S-sections or F-sections) that are merged and applied throughout the pipeline.
+
+| Axis | Location | Purpose | Rule Sections |
+|------|----------|---------|---------------|
+| **Interface** | `interfaces/{name}.md` | What the app exposes to users/consumers | S0–S9 |
+| **Concern** | `concerns/{name}.md` | Cross-cutting patterns that span multiple Features | S0–S9 |
+| **Archetype** | `archetypes/{name}.md` | Domain philosophy — WHY certain decisions matter | A0–A5 |
+| **Foundation** | `foundations/{name}.md` | Framework-specific rules, constraints, and toolchain | F0–F9 |
+| **Scenario** | `scenarios/{name}.md` | Project lifecycle context (greenfield, rebuild, adoption) | S1, S3, S5, S7 |
+
+### 1 Modifier (rule filter)
+
+The modifier does not produce rules — it **adjusts the depth and rigor** of rules from the 5 axes.
+
+| Modifier | Fields | Purpose | Effect |
+|----------|--------|---------|--------|
+| **Scale** | `project_maturity` × `team_context` | How big/serious is this project? | Dials rule depth up or down |
+
+> **Axis vs Modifier**: An axis produces rules ("check for IPC timeout handling"). A modifier adjusts how strictly those rules apply ("in prototype mode, timeout SCs are optional").
+
+### Archetype ↔ Concern Relationship
+
+Archetypes and Concerns occupy different abstraction levels:
+
+- **Concern**: *What* cross-cutting pattern to handle (e.g., realtime → WebSocket management)
+- **Archetype**: *Why* certain patterns matter more (e.g., ai-assistant → streaming is non-negotiable because LLM responses are inherently streaming)
+
+Archetypes **extend** Concern rules via A2 (SC extensions) and A3 (probes). They do NOT duplicate Concern rules — they add domain-specific emphasis. Example:
+- `realtime` concern S1: "WebSocket SCs must cover reconnection"
+- `ai-assistant` archetype A2: "Streaming SCs must cover token budget mid-stream" ← adds to realtime's S1
 
 ---
 
@@ -10,9 +49,10 @@
 
 | Type | Location | Purpose |
 |------|----------|---------|
-| **Interface** | `interfaces/{name}.md` | What the app exposes (http-api, gui, cli, data-io) |
-| **Concern** | `concerns/{name}.md` | Internal cross-cutting patterns (async-state, ipc, external-sdk, i18n, realtime, auth) |
-| **Archetype** | `archetypes/{name}.md` | Application-domain philosophical principles and pipeline behavior (ai-assistant, public-api, microservice) |
+| **Interface** | `interfaces/{name}.md` | What the app exposes (http-api, gui, cli, data-io, tui) |
+| **Concern** | `concerns/{name}.md` | Cross-cutting patterns (async-state, ipc, external-sdk, i18n, realtime, auth, ...) |
+| **Archetype** | `archetypes/{name}.md` | Domain philosophy — principles that transcend framework/interface choices (ai-assistant, public-api, microservice, sdk-framework) |
+| **Foundation** | `../../reverse-spec/domains/foundations/{name}.md` | Framework-specific constraints and toolchain (React, Next.js, Electron, ...) |
 | **Scenario** | `scenarios/{name}.md` | Why we're building (greenfield, rebuild, incremental, adoption) |
 | **Profile** | `profiles/{name}.md` | Preset composition of interfaces + concerns (~10 line manifest) |
 | **Core** | `_core.md` | Universal rules loaded for ALL projects |

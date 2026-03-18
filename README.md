@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 13:12 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 13:24 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -107,15 +107,27 @@ Before each pipeline step, the relevant artifacts are automatically injected int
 
 **The solution**: A composable rule system that detects your project type and loads only the relevant rules — so a REST API gets endpoint validation checks, a desktop app gets window management safety rules, and an AI chatbot gets streaming-first design principles. Organization-level conventions can be shared across projects, and project-specific rules can override both.
 
-A Domain Profile is composed from four axes: **Interface** (what the app exposes — GUI, API, CLI), **Concern** (cross-cutting patterns — auth, IPC, i18n), **Archetype** (domain philosophy — AI assistant, public API, microservice), and **Scenario** (why we're building — greenfield, rebuild, adoption). Each axis contributes rules that shape spec generation, bug prevention, and verification.
+A Domain Profile consists of **5 axes** that produce rules and **1 modifier** that adjusts their depth:
+
+| | Component | What it determines | Example |
+|-|-----------|-------------------|---------|
+| Axis 1 | **Interface** | What the app exposes to users | GUI, HTTP API, CLI, TUI |
+| Axis 2 | **Concern** | Cross-cutting patterns that span Features | auth, async-state, IPC, realtime, i18n |
+| Axis 3 | **Archetype** | Domain philosophy — *why* certain decisions matter | AI assistant, microservice, public API |
+| Axis 4 | **Foundation** | Framework-specific constraints and toolchain | React, Electron, Next.js (21 frameworks) |
+| Axis 5 | **Scenario** | Project lifecycle context | greenfield, rebuild, adoption |
+| Modifier | **Scale** | How much rigor to apply | prototype / mvp / production × solo / small-team / large-team |
+
+Each axis contributes rules (SC quality criteria, bug prevention patterns, verification strategies). The Scale modifier doesn't add rules — it adjusts their enforcement: a prototype gets functional-only SCs with optional tests, while a production project gets full edge-case coverage with mandatory observability.
+
+When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns — for example, `gui` + `realtime` triggers optimistic update and reconnection UI rules that neither module produces alone.
 
 Domain Profile is a **first-class citizen** — not a configuration that's set once and forgotten, but a living context that actively influences every step of every skill:
 
-- **code-explore**: detects the source project's profile during orientation, guides which flows to trace, and derives your target profile during synthesis
+- **code-explore**: detects the source project's profile (all 5 axes + Scale) during orientation, guides which flows to trace, and derives your target profile during synthesis
 - **init**: infers your profile from a text description or inherits it from code-explore, writes it to project state
 - **add**: uses profile rules to determine what makes a Feature definition "complete" (an API project must define endpoints; a GUI project must specify interactions)
-- **specify → plan → implement → verify**: each step loads profile-specific rules — SC quality criteria, bug prevention patterns, verification strategies — so a desktop app with IPC gets process boundary safety checks, while a microservice with message queues gets dead-letter handling enforcement
-- When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns (e.g., `gui` + `realtime` triggers optimistic update and reconnection UI rules)
+- **specify → plan → implement → verify**: each step loads profile-specific rules, filtered by Scale — so a production desktop app with IPC gets mandatory process boundary safety checks, while an MVP microservice with message queues gets dead-letter handling as a recommended (not blocking) pattern
 
 See [Domain Module System](#domain-module-system) for details.
 
