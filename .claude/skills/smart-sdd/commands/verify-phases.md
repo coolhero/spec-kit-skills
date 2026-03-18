@@ -1067,6 +1067,7 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 | `test-covered` | Behavior already verified by unit/integration tests in Phase 1 | Reference passing test name |
 | `user-assisted` | Automatable AFTER user provides a dependency (API key, local service, config) | Step 3d — after user cooperation (see [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3) |
 | `external-dep` | Truly inaccessible — production-only API, specific hardware, rate-limited service | Skip with explicit reason |
+| `os-native` | OS-level interaction that Playwright cannot simulate (drag&drop files, system dialogs, clipboard, tray menu, keyboard shortcuts conflicting with OS) | Step 3f — user performs action, reports result |
 | `manual` | Requires visual/subjective judgment that automation cannot evaluate | User-assisted manual verification in Step 3f2 |
 
    > **`user-assisted` vs `external-dep`**: If the user CAN provide the dependency locally (API key in .env, start a local service, test credentials), classify as `user-assisted`. If truly inaccessible (production-only, hardware, rate-limited quota), classify as `external-dep`. See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3.
@@ -1175,7 +1176,50 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
    | SC-022 | cdp-auto | Navigate settings → add server → verify status | Tier 2 | — |
    | SC-023a | cdp-auto | Navigate settings → open tool panel → verify list | Tier 2 | — |
    | SC-024 | cdp-auto | Enable built-in server → verify tool list loads | Tier 1 | — |
+   | SC-025 | os-native | Drag file to KB area → status pending | Tier 2 | Synthetic DragEvent cannot carry real File paths |
    ```
+
+7. **Manual Verification Fallback Protocol** (🚨 자동화 불가 = 사용자에게 위임, 건너뛰기 아님):
+
+   에이전트의 도구 한계가 곧 검증의 한계가 아니다. 자동화할 수 없는 것을 사용자는 할 수 있다.
+
+   **자동화 불가능한 검증을 만나면** (OS-native, 외부 API 키, 하드웨어, 주관적 판단):
+   1. **포기하거나 "skip" 하지 않는다**
+   2. AskUserQuestion으로 수동 확인 요청:
+      ```
+      ⚠️ 자동 테스트 불가: [기능명]
+      이유: [Playwright synthetic DragEvent / API key 필요 / ...]
+
+      직접 확인해주세요:
+        동작: [파일을 KB 영역에 드래그앤드롭]
+        기대 결과: [파일이 추가되고 상태가 pending → processing으로 전이]
+        실패 시: [파일이 추가되지 않거나 에러 표시]
+      ```
+   3. 사용자 응답을 SC Verification Matrix에 기록:
+      - "확인됨" → `✅ user-verified`
+      - "실패함" → `❌ user-reported-failure` (bug fix severity 적용)
+      - "확인 불가" → `⚠️ unverified: [reason]`
+
+   ```
+   ❌ WRONG: "Playwright 한계로 드래그앤드롭 skip" → 사용자도 모르게 미검증
+   ❌ WRONG: "external-dep로 분류 → skip" → 사용자가 설정하면 테스트 가능한데 안 물어봄
+   ✅ RIGHT: "자동 테스트 불가 → 사용자에게 구체적 확인 요청 → 결과 기록"
+   ```
+
+   | 기능 유형 | 자동화 가능? | 올바른 분류 |
+   |----------|------------|-----------|
+   | 파일 드래그앤드롭 | ❌ (synthetic event 한계) | `os-native` → 사용자 확인 |
+   | 시스템 트레이 메뉴 | ❌ (OS-level) | `os-native` → 사용자 확인 |
+   | API 키 필요 기능 | ⚠️ (사용자가 .env 설정하면 가능) | `user-assisted` → 사용자에게 설정 요청 후 자동 테스트 |
+   | 파일 다이얼로그 | ❌ (OS native dialog) | `os-native` → 사용자 확인 |
+   | 키보드 단축키 (OS 충돌) | ❌ (OS 단축키와 충돌 가능) | `os-native` → 사용자 확인 |
+
+8. **Test Environment Alignment**:
+
+   에이전트의 자동 테스트 환경과 사용자 환경이 최대한 동일해야 한다:
+   - **dev 모드 프로젝트**: `pnpm run dev` (또는 해당 dev 명령)으로 앱 실행 후 Playwright 연결. 프로덕션 빌드(`out/main/index.js`)만 테스트하면 dev 모드 전용 문제를 놓침.
+   - **Electron 프로젝트**: `_electron.launch()` 시 dev 서버가 실행 중이면 dev 서버에 연결, 아니면 빌드 결과물 사용.
+   - **synthetic event 한계 명시**: Playwright의 synthetic event(`DragEvent`, `ClipboardEvent`)는 실제 OS 이벤트와 다름. `DataTransfer.files`에 실제 파일 경로가 포함되지 않는 등. 이런 SC는 `os-native`로 분류.
 
 6. **Coverage assessment**:
    - Auto-verifiable (`cdp-auto` + `api-auto` + `cli-auto` + `pipeline-auto`): [N] SCs → will be verified in Step 3/3d

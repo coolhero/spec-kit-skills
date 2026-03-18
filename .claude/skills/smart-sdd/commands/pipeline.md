@@ -1111,6 +1111,18 @@ If there were notable decisions during this Feature's pipeline (specify → veri
 
 > **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
 
+#### Delegate, Don't Skip (파이프라인 전 단계 공통 — 자동화 불가 시 사용자 위임)
+
+> **🚨 에이전트의 도구 한계가 곧 검증의 한계가 아니다.**
+> 자동화할 수 없는 검증을 만나면 "skip"이 아니라 AskUserQuestion으로 사용자에게 구체적 수동 확인을 요청한다.
+>
+> ❌ "Playwright 한계로 skip" → 미검증이 조용히 통과
+> ✅ "자동 테스트 불가합니다. 직접 [구체적 동작]을 수행하고 [기대 결과]를 확인해주세요"
+>
+> 이 원칙은 implement smoke launch, verify Phase 3, demo 검증 등 모든 검증 단계에 적용.
+
+---
+
 #### Runtime Error Triage Protocol (파이프라인 전 단계 공통)
 
 > **🚨 이 프로토콜은 verify뿐 아니라 파이프라인의 어느 시점에서든 사용자가 런타임 에러를 보고하거나 기능 미동작을 지적할 때 적용됩니다.**

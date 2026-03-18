@@ -203,7 +203,8 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 5. **Runtime Default Coverage Check** (if applicable — rebuild mode + Feature has settings/mode/configuration)
 6. **Build-Time Plugin FR Check** (if applicable — rebuild mode + source has build config with plugins)
 7. **Domain Rule Compliance Check (S1)** (always — see § Domain Rule Compliance Check below)
-8. **Assemble Review Display** (include any ⚠️/❌ from steps 1-7)
+8. **External API Dependency Edge Cases** (if Feature consumes external APIs — see below)
+9. **Assemble Review Display** (include any ⚠️/❌ from steps 1-8)
 9. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
@@ -406,6 +407,33 @@ Spec additions beyond Brief:
 > **Rationale for blocking capability gaps**: The Brief represents the user's verified intent. If the spec silently drops a capability the user explicitly defined, it defeats the purpose of intent verification. Entity/interface gaps and scope drift are softer signals that benefit from user awareness but don't represent clear intent violations.
 
 **Skip if**: No Brief Summary exists in pre-context (legacy projects without Phase 1e).
+
+### External API Dependency Edge Cases
+
+> **Purpose**: Features that consume external APIs (LLM, embedding, payment, etc.) MUST spec error handling and user guidance for API unavailability. Without this, the app silently fails when API keys are missing.
+
+If any FR references an external API/service (keywords: "via API", "using provider", "LLM", "embedding", "external service", "third-party"):
+
+1. Check if spec.md includes edge case FRs/SCs for:
+   - **API key not configured**: Actionable error message guiding user to Settings
+   - **API key expired/invalid**: Re-authentication flow
+   - **API call failure**: Retry + user-visible status
+   - **Provider not activated**: UI disables dependent functionality or shows setup guide
+
+2. If missing → add to Review as:
+   ```
+   ⚠️ External API Dependency Edge Cases Missing:
+     Feature consumes [provider/LLM/embedding API] but spec has no FR/SC for:
+     - API key not configured → user sees cryptic error, no guidance to Settings
+     - Provider not activated → user can select non-functional options
+
+     Recommended: Add FR for "When API key is not configured, display
+     actionable error: 'Go to Settings > Provider to add your API key'"
+   ```
+
+3. For rebuild mode: check how source app handles these cases (e.g., Cherry Studio only shows authenticated providers in ModelSelector)
+
+**Skip if**: Feature has no external API dependencies (pure local functionality).
 
 ### Domain Rule Compliance Check (S1)
 
