@@ -779,10 +779,19 @@ Executes the following steps **strictly in order** for each Feature.
 
 > **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-specify` returns, do NOT show its raw output ("Spec created and validated", "Ready for /speckit.clarify or /speckit.plan", "Coverage: N functional requirements", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A** — see SKILL.md Rule 3.
 
+> **🚨 rebuild + GUI 필수 게이트** (specify Review 전 반드시 확인):
+> - **Entry Point BLOCKING**: pre-context § Entry Points의 **각** 유입 경로가 별도 FR로 정의되었는지 확인. 누락 = BLOCKING.
+>   ❌ WRONG: FR-035 "accessible from navigation" (추상적 1개)
+>   ✅ RIGHT: FR-035 "Sidebar icon → /knowledge", FR-036 "Inputbar KB button", FR-037 "Assistant settings KB link" (구체적 3개)
+> - **Domain Rule Compliance (S1)**: 활성 도메인 모듈의 S1 SC 규칙이 spec.md에 반영됐는지 확인. 커버리지 < 50% = BLOCKING.
+> - **Source app UI 컨트롤**: rebuild일 때 source app의 UI 컨트롤 종류(dropdown, slider, auto-fill)가 FR에 반영되었는지 확인.
+>   ❌ WRONG: FR "create KB with name, model, dimensions" (텍스트 수준)
+>   ✅ RIGHT: FR "create KB: select embedding model from provider dropdown, dimensions auto-filled" (UI 컨트롤 수준)
+
 1. **CI Pre-check (greenfield only)**: Read `Clarity Index` and `CI Low-confidence` from sdd-state.md. If CI < 40%: insert an inline clarify sub-step — ask 1–2 targeted questions for the lowest-confidence dimensions, re-score, then proceed. If Core Purpose confidence ≤ 1: **HARD STOP** — "Purpose unclear, clarify before proceeding to specify."
 2. Execute `speckit-specify` via Inline Execution (NOT Skill tool)
 3. **In the SAME response** — SUPPRESS any "Ready for", "Coverage:", "No [NEEDS CLARIFICATION]", "Spec created" or navigation output from speckit-specify. Do NOT show these to the user.
-4. Run Post-Execution Verification Sequence from `injection/specify.md` (SBI Accuracy, Platform Constraints, Edge Cases, etc.)
+4. Run Post-Execution Verification Sequence from `injection/specify.md` (SBI Accuracy, Platform Constraints, Edge Cases, Entry Point check, Domain Rule Compliance, etc.)
 5. **CI Coverage Check (greenfield, CI 40–69% only)**: After reading spec.md, verify every CI dimension with confidence ≤ 1 has at least one FR or SC addressing it. If gaps found, list them in the Review as "⚠️ CI Coverage Gaps" section. Also: if Target Users confidence ≤ 1, add "user role identification" note. If Key Capabilities confidence ≤ 1, add "completeness gap" warnings.
 6. Read `SPEC_PATH/{NNN-feature}/spec.md` and assemble Review Display
 7. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
@@ -791,6 +800,11 @@ Executes the following steps **strictly in order** for each Feature.
 #### Plan Execute+Review (HARD STOP)
 
 > **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-plan` returns, do NOT show its raw output ("Plan created", "architecture decisions", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+
+> **🚨 rebuild + GUI 필수 게이트** (plan Review 전 반드시 확인):
+> - **Source Component Mapping** (🚫 BLOCKING): plan.md에 Source→Target Component Mapping 테이블이 있어야 함. source app의 각 컴포넌트가 target에 매핑됨. 매핑 없는 source 컴포넌트 = BLOCKING.
+> - **Entity Ownership Conflict** (🚫 BLOCKING): data-model.md의 엔티티가 entity-registry에서 다른 Feature 소유 = 충돌. 해결 전 승인 불가.
+> - **Data Lifecycle Mapping**: source app의 데이터 패러다임(opt-in/opt-out/CRUD 순서)이 plan에 명시. 미명시 = WARNING.
 
 1. Execute `speckit-plan` via Inline Execution (NOT Skill tool)
 2. **In the SAME response** — SUPPRESS any navigation output from speckit-plan. Do NOT show these to the user.
@@ -942,15 +956,37 @@ If "Proceed with awareness": record `⚠️ STUB-DEPENDENT — [stub list]` in s
 
 **Skip if**: No dependency Features have stubs.md, or no stubs reference the current Feature.
 
-#### Implement Execute+Review (HARD STOP)
+#### Implement Execute (MANDATORY — injection/implement.md Required Reading)
+
+> **🚨 CRITICAL: implement의 핵심 게이트들은 이 파일(pipeline.md)이 아닌 `reference/injection/implement.md`에 있습니다.**
+> **implement를 시작하기 전에 반드시 `reference/injection/implement.md`를 읽어야 합니다.**
+> **injection/implement.md를 읽지 않고 코드를 생성하는 것은 CRITICAL 위반입니다.**
+>
+> 특히 rebuild + GUI 프로젝트에서 반드시 실행해야 하는 게이트:
+>
+> 1. **Source Reference Injection** (🚫 BLOCKING): 각 UI 태스크 전에 source app 코드를 실제로 읽어야 함.
+>    `📂 Source Reference` 없는 UI 태스크 = gate 위반.
+>    ❌ WRONG: tasks.md 텍스트만 보고 UI 생성
+>    ✅ RIGHT: source의 AddKnowledgeBasePopup.tsx 읽기 → ModelSelector + auto-dimensions 재현
+>
+> 2. **Background Agent Source Injection** (🚫 BLOCKING): background agent에 source 코드 원문 포함 필수.
+>    ❌ WRONG: "Create a dialog with name, model, dims inputs"
+>    ✅ RIGHT: source 코드 붙여넣기 + "이 UX flow를 새 스택으로 재현하세요"
+>
+> 3. **Post-Implement Gates** (implement 완료 후, Review 전):
+>    - Semantic Stub Detection: Math.random(), placeholder, external call bypass → 🚫 BLOCKING
+>    - Integration Contract Fulfillment: plan의 "Consumes ←" 실제 호출 확인 → 🚫 BLOCKING
+>    - UI Control Type Audit: Source Select → Target Input = UX downgrade → 🚫 BLOCKING
 
 > **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-implement` returns, do NOT show its raw output ("Suggested commit", "Implementation complete", etc.). You MUST suppress it, read the artifacts, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
 
-1. Execute `speckit-implement` via Inline Execution (NOT Skill tool)
-2. **In the SAME response** — SUPPRESS any "Suggested commit", "Implementation complete", or navigation output from speckit-implement. Do NOT show these to the user.
-3. Read the implementation artifacts (source files created/modified, test files, demo scripts) and assemble Review Display — show implementation summary (files created/modified, stubs status, demo script status). See `reference/injection/implement.md` for detailed Review content.
-4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
-5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-implement executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to verify.
+1. **Read `reference/injection/implement.md`** — Source Reference, Background Agent Injection, Post-Implement Gates
+2. Execute `speckit-implement` via Inline Execution (NOT Skill tool)
+3. **In the SAME response** — SUPPRESS any navigation output from speckit-implement.
+4. Run Post-Implement Gates (Semantic Stub Detection + Integration Contract + UI Control Audit). Display results.
+5. Read the implementation artifacts and assemble Review Display — show implementation summary + gate results.
+6. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+7. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-implement executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to verify.
 
 #### Implement Checkpoint Display
 
