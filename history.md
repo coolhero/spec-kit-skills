@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-18] External Agent Analysis — Enforcement Upgrades
+
+### Context
+
+Re-evaluated 5 items from external agent analysis (1f, 1g, 2f, 2g, 3g). Found 2g (greenfield params) and 3g (Brief↔Spec alignment) already resolved. Implemented 3 remaining.
+
+### Changes
+
+| Item | Fix |
+|------|-----|
+| **1f** Entity schema consistency | Schema Drift Warning + Naming Collision Warning (edit distance ≤ 2) in plan Post-Step |
+| **1g** Registry update atomicity | Step 3b Registry Freshness Verification — auto-repair stale registries per Feature |
+| **2f** Domain rule enforcement | S1: BLOCKING when <50% coverage. S7: Bug Prevention Compliance Check in plan |
+
+Also: inline Feature definition added to README first mention (EN/KO).
+
+---
+
 ## [2026-03-17] Enforcement Gap Closure — 4 Fixes (from external analysis)
 
 ### Context

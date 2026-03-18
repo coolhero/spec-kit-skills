@@ -614,12 +614,61 @@ During plan Review HARD STOP:
 - **implement**: Source-First Implementation Gate verifies data flow logic matches declared paradigm
 - **verify**: Round-trip verification checks lifecycle behavior (e.g., "new model is NOT auto-enabled" for opt-in)
 
+## Domain Bug Prevention Compliance Check (S7)
+
+> **Purpose**: Domain modules load S7 Bug Prevention rules into context. These rules describe known failure patterns for the project's domain (e.g., "CSS rendering: avoid inline style recalculation in scroll handlers"). If the plan's architecture doesn't account for these patterns, bugs are likely to surface during implement — where they're far more expensive to fix.
+
+After plan.md is generated, cross-check the active domain modules' S7 rules against the plan's architecture:
+
+**Procedure**:
+1. Recall the active S7 Bug Prevention rules from the cached domain profile
+2. For each S7 rule applicable to this Feature's scope:
+   - Check if plan.md's architecture, patterns, or explicit notes address this rule's concern
+   - Example: S7 rule "MQ-003: message queue dead letter handling" → check if plan.md architecture includes DLQ component
+   - Example: S7 rule "CSS-001: avoid inline style recalc in scroll" → check if plan.md mentions CSS/rendering strategy
+3. Classify:
+   - **✅ Addressed**: Plan architecture accounts for this failure pattern
+   - **⚠️ Not addressed**: Plan has no mitigation for this known failure pattern
+
+**Display (if gaps found)**:
+```
+── ⚠️ Bug Prevention Compliance (S7) ──────────
+Active S7 rules not addressed in plan architecture:
+  ⚠️ [async-state] "Selector instability — memoize selectors"
+     → Plan uses global store but doesn't mention selector strategy
+  ⚠️ [ipc] "IPC boundary safety — validate payloads"
+     → Plan has IPC layer but no validation strategy noted
+  ✅ [gui] "CSS rendering — avoid inline style recalc"
+     → Plan specifies CSS-only hover states (§ Component Patterns)
+
+[N] of [M] applicable S7 rules addressed by plan.
+────────────────────────────────────────────────
+```
+
+**Enforcement**: ⚠️ Warning (not blocking) — S7 gaps are design-level risks, not specification errors. Included in plan Review Display so the user is aware. If the user approves with S7 gaps, they accept the risk of encountering these patterns during implement.
+
+**Skip if**: No domain modules loaded, or only `_core.md` is active.
+
+---
+
 ## Post-Step Update Rules
 
 > **Pre-condition**: The Entity Ownership Conflict Gate (see pipeline.md § Plan Execute+Review step 5) must have passed before these updates run. All ownership conflicts must be resolved first.
 
 1. Read `SPEC_PATH/[NNN-feature-name]/data-model.md`
-2. Compare with `BASE_PATH/entity-registry.md`:
+2. **Entity Schema Consistency Check**: Before updating the registry, compare each entity in data-model.md against `BASE_PATH/entity-registry.md`:
+   - **Same name, same owner** → normal update (proceed to step 2a)
+   - **Same name, different owner** → caught by Ownership Conflict Gate (should not reach here)
+   - **Same name, referencing (not owning), different fields** → ⚠️ **Schema Drift Warning**: the current Feature references entity `[name]` but assumes fields that differ from the registry definition. Display:
+     ```
+     ⚠️ Schema Drift: [EntityName]
+       Registry (owned by [other FID]): fields [a, b, c]
+       This Feature's data-model assumes: fields [a, b, d]
+       Mismatched: [c] missing, [d] added
+       → Align data-model.md with registry, or coordinate with [other FID] to update the entity
+     ```
+   - **New entity, name similar to existing** (edit distance ≤ 2 or plural/singular variant) → ⚠️ **Naming Collision Warning**: "Entity `Users` is very similar to existing `User` (owned by [FID]). Is this intentional or should it reference the existing entity?"
+2a. Update `BASE_PATH/entity-registry.md`:
    - Newly defined entities → Add to entity-registry with `Owner Feature` = current FID
    - Field/relationship changes in existing entities **owned by current FID** → Update entity-registry
    - Field/relationship changes in entities **owned by another FID** → Do NOT update directly. Instead, add a `⚠️ Schema Divergence` note in the entity's section: "[current FID] plan proposes different fields — coordinate with owner [other FID]"

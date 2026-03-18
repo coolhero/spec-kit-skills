@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 08:42 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-18 09:55 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -70,7 +70,7 @@ cd spec-kit-skills
 
 ### 배경: Spec-Driven Development
 
-Spec-driven development에서는 AI 에이전트에게 "TO-DO 앱 만들어줘"라고 하지 않습니다. 앱을 **Feature** 단위로 나눕니다 — 인증, TO-DO CRUD, 대시보드 UI처럼 독립적인 기능 단위입니다. 각 Feature는 정확히 하나의 **spec**을 갖고, 이 spec이 에이전트가 코드를 쓰기 *전에* 해당 Feature가 *무엇을 하는지* (기능 요구사항, 성공 기준, 데이터 모델)를 정의합니다. 에이전트는 이 spec에 맞춰 구조화된 파이프라인을 따릅니다: specify → plan → tasks → analyze → implement → verify.
+Spec-driven development에서는 AI 에이전트에게 "TO-DO 앱 만들어줘"라고 하지 않습니다. 앱을 **Feature** (독립적으로 정의, 구현, 검증 가능한 기능 단위 — 예: 인증, TO-DO CRUD, 대시보드 UI) 단위로 나눕니다. 각 Feature는 정확히 하나의 **spec**을 갖고, 이 spec이 에이전트가 코드를 쓰기 *전에* 해당 Feature가 *무엇을 하는지* (기능 요구사항, 성공 기준, 데이터 모델)를 정의합니다. 에이전트는 이 spec에 맞춰 구조화된 파이프라인을 따릅니다: specify → plan → tasks → analyze → implement → verify.
 
 이 접근법을 제공하는 것이 [spec-kit](https://github.com/github/spec-kit)입니다. Feature 하나, spec 하나, 파이프라인 한 번 — 잘 동작합니다.
 

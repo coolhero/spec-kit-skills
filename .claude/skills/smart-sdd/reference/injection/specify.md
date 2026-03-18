@@ -419,7 +419,12 @@ Active S1 rules not reflected in spec SCs:
 ────────────────────────────────────────────────
 ```
 
-**Enforcement**: ⚠️ Warning (not blocking) — included in Review Display. The user decides whether uncovered rules need additional SCs. If all rules are covered, display a single line in Review: `✅ Domain Rules (S1): [M]/[M] applicable rules covered by SCs`.
+**Enforcement** — tiered by coverage ratio:
+- **Coverage ≥ 80%**: ✅ Pass — display single line in Review: `✅ Domain Rules (S1): [M]/[M] applicable rules covered by SCs`
+- **Coverage 50–79%**: ⚠️ Warning (not blocking) — included in Review Display. The user decides whether uncovered rules need additional SCs.
+- **Coverage < 50%**: 🚫 **BLOCKING** — majority of domain rules are not reflected in SCs. This indicates the spec was generated without meaningful domain awareness. The user must either add SCs to cover the gaps or explicitly waive each uncovered rule before approving.
+  - Display: `🚫 Domain Rule Coverage Critical: only [N]/[M] ([P]%) applicable S1 rules covered. Resolve before approving.`
+  - AskUserQuestion options per uncovered rule: "Add SC for this rule" / "Not applicable to this Feature" / "Defer to plan phase"
 
 **Skip if**: No domain modules loaded (e.g., `--skip-domain`), or only `_core.md` is active (core rules are too generic for meaningful compliance checking).
 

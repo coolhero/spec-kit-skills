@@ -338,7 +338,31 @@ Read `Clarity Index` from `sdd-state.md`. If CI is not `N/A`, apply verification
 
 This step is informational only — no user confirmation required.
 
-### Step 3b — Foundation Verification Gate (first Feature only)
+### Step 3b — Registry Freshness Verification (per Feature)
+
+> Runs at the START of each Feature's pipeline, before specify Checkpoint.
+> **Skip for**: The first Feature in the pipeline (no preceding Features to verify against), or greenfield projects with no completed Features.
+
+**Purpose**: Detect registry staleness from preceding Features whose Post-Step updates may have been incomplete (due to context limits, session breaks, or errors). Without this check, a Feature could build on stale entity/API definitions.
+
+**Verification**:
+1. Read `sdd-state.md` Feature Progress — identify all preceding Features with status `completed`, `adopted`, or `verified`
+2. For each completed preceding Feature, quick-check:
+   - Does `entity-registry.md` contain entries with `Owner Feature` = that FID? If that Feature's `data-model.md` exists but no registry entries reference it → **stale**
+   - Does `api-registry.md` contain entries with `Provider` = that FID? If that Feature's `contracts/` exists but no registry entries reference it → **stale**
+3. **If staleness detected**:
+   ```
+   ⚠️ Registry Staleness Detected
+     [FID]-[name]: data-model.md has [N] entities but entity-registry has [M] entries for this Feature
+     [FID]-[name]: contracts/ has [N] APIs but api-registry has [M] entries for this Feature
+
+   Auto-repairing: reading missing artifacts and updating registries...
+   ```
+   - Auto-repair: read the stale Feature's data-model.md / contracts/ and update registries
+   - Display repair summary: `✅ Registry repaired: added [N] entities, [M] APIs from [FID]`
+4. **If no staleness**: proceed silently (no message needed)
+
+### Step 3c — Foundation Verification Gate (first Feature only)
 
 > Runs ONCE before the first Feature enters the pipeline.
 > **Skip for**: greenfield projects (no Foundation exists yet — nothing to validate), OR the current Feature IS a T0 (Foundation) Feature (cannot verify Foundation before building it), OR if `sdd-state.md` records `Foundation Verified: [date]` with no Foundation-affecting changes since.
@@ -469,7 +493,7 @@ Foundation status: PASS (N warnings)
 
 **On subsequent Features**: Skip if `Foundation Verified` exists in `sdd-state.md` AND no Foundation-affecting changes since last verification. Foundation-affecting changes = modifications to files outside `specs/` that touch cross-cutting systems (styling/theme config, state management definitions, layout/navigation components, inter-process communication handlers, build config — varies by stack).
 
-### Step 3c — Dependency Cycle Detection
+### Step 3d — Dependency Cycle Detection
 
 1. Read roadmap.md Dependency Graph
 2. Run topological sort (Kahn's algorithm conceptual):
