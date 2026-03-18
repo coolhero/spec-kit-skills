@@ -12,7 +12,7 @@ spec-kit-skills is built on three concepts, each addressing a structural gap in 
 | Concept | Problem It Solves | Implementation |
 |---------|------------------|----------------|
 | **Global Evolution Layer (GEL)** | Agents manage context differently; none track cross-Feature relationships systematically | Project-wide artifacts (roadmap, registries, pre-contexts) + automatic context injection per pipeline step |
-| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 4-axis module system (Interface × Concern × Archetype × Scenario) that loads project-type-specific rules |
+| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 5-axis + 1 modifier system (Interface × Concern × Archetype × Foundation × Scenario + Scale) that loads project-type-specific rules |
 | **Brief** | Agents accept whatever Feature description they receive, with no quality gate | Structured Feature intake process that validates completeness across key dimensions before spec generation |
 
 **How they connect**: Brief produces complete Feature definitions → stored as pre-contexts in the GEL → injected into the spec-kit pipeline → where Domain Profile rules shape each step's behavior. This guide focuses on the **Domain Profile** module system — the most extensible of the three concepts.
@@ -23,7 +23,7 @@ spec-kit-skills is built on three concepts, each addressing a structural gap in 
 
 1. [Module System Overview](#1-module-system-overview)
    - [Signal Keywords: Shared Architecture](#signal-keywords-shared-architecture)
-2. [4-Axis Domain Composition](#2-4-axis-domain-composition)
+2. [5-Axis + 1 Modifier Domain Composition](#2-5-axis--1-modifier-domain-composition)
 2b. [How Composed Modules Drive the Pipeline](#2b-how-composed-modules-drive-the-pipeline)
 3. [Adding a New Interface](#3-adding-a-new-interface)
 4. [Adding a New Concern](#4-adding-a-new-concern)
@@ -101,55 +101,88 @@ See `shared/domains/_TEMPLATE.md` for the contributor template and `shared/domai
 
 ---
 
-## 2. 4-Axis Domain Composition
+## 2. 5-Axis + 1 Modifier Domain Composition
 
-The domain composition system has 4 orthogonal axes. Each axis answers a different question:
+The domain composition system has **5 axes** that produce rules and **1 modifier** that adjusts their depth. Each component answers a different question:
 
 ```
-                    ┌─────────────────────────────────┐
-                    │       Project Domain            │
-                    │                                 │
-  INTERFACE ────────┤  What does the app expose?      │──── http-api, gui, cli, data-io
-                    │                                 │
-  CONCERN ──────────┤  What cross-cutting patterns?   │──── auth, async-state, ipc, i18n, realtime
-                    │                                 │
-  ARCHETYPE ────────┤  What domain philosophy?        │──── ai-assistant, public-api, microservice
-                    │                                 │
-  SCENARIO ─────────┤  Why are we building?           │──── greenfield, rebuild, incremental, adoption
-                    └─────────────────────────────────┘
+                    ┌─────────────────────────────────────┐
+                    │       Domain Profile                │
+                    │                                     │
+                    │  5 AXES (rule producers)             │
+  INTERFACE ────────┤  What does the app expose?          │──── http-api, gui, cli, tui, data-io
+                    │                                     │
+  CONCERN ──────────┤  What cross-cutting patterns?       │──── auth, async-state, ipc, i18n, realtime
+                    │                                     │
+  ARCHETYPE ────────┤  What domain philosophy?            │──── ai-assistant, public-api, microservice
+                    │                                     │
+  FOUNDATION ───────┤  What framework constraints?        │──── React, Electron, Next.js (21 frameworks)
+                    │                                     │
+  SCENARIO ─────────┤  Why are we building?               │──── greenfield, rebuild, incremental, adoption
+                    │                                     │
+                    │  1 MODIFIER (rule filter)            │
+  SCALE ────────────┤  How much rigor?                    │──── prototype/mvp/production × solo/small-team/large-team
+                    └─────────────────────────────────────┘
 ```
 
-### How the Axes Differ
+### Axis vs Modifier
 
-| Axis | Defines | Example |
-|------|---------|---------|
-| **Interface** | The _surface_ — how users or systems interact | HTTP API defines endpoints, status codes, request/response shapes |
-| **Concern** | The _mechanism_ — internal cross-cutting patterns | Auth defines authentication flows, token management, session handling |
-| **Archetype** | The _philosophy_ — domain-specific guiding principles | AI Assistant defines Streaming-First, Model Agnosticism, Token Awareness |
-| **Scenario** | The _context_ — why this project exists | Rebuild defines preservation rules, migration gates, parity checks |
+- An **axis** produces rules: "IPC calls must have timeout handling SCs"
+- A **modifier** adjusts depth: "in prototype mode, timeout SCs are optional"
+
+Scale doesn't add rules — it dials enforcement up or down. A `production` + `large-team` project gets mandatory observability, code ownership, and full edge-case coverage. A `prototype` + `solo` project gets functional-level SCs with optional tests.
+
+### How the 5 Axes Differ
+
+| # | Axis | Defines | Example |
+|---|------|---------|---------|
+| 1 | **Interface** | The _surface_ — how users or systems interact | HTTP API defines endpoints, status codes, request/response shapes |
+| 2 | **Concern** | The _mechanism_ — internal cross-cutting patterns | Auth defines authentication flows, token management, session handling |
+| 3 | **Archetype** | The _philosophy_ — domain-specific guiding principles | AI Assistant defines Streaming-First, Model Agnosticism, Token Awareness |
+| 4 | **Foundation** | The _toolchain_ — framework-specific constraints | Electron defines process model, IPC patterns, security boundaries |
+| 5 | **Scenario** | The _context_ — why this project exists | Rebuild defines preservation rules, migration gates, parity checks |
+
+### Archetype ↔ Concern Relationship
+
+Archetypes and Concerns occupy different abstraction levels — they are not competing classifications:
+
+- **Concern** defines _what_ pattern to handle: `realtime` → WebSocket reconnection, message ordering
+- **Archetype** defines _why_ it matters more: `ai-assistant` → streaming is non-negotiable because LLM responses are inherently streaming
+
+Archetypes **extend** Concern rules (via A2/A3), they don't duplicate them. The `ai-assistant` archetype's A2 adds "streaming SCs must cover token budget mid-stream" — this augments the `realtime` concern's S1 reconnection rules, not replaces them.
+
+### Cross-Concern Integration Rules
+
+When multiple concerns are active together, **emergent patterns** arise that neither module produces alone. These are explicitly defined in `_resolver.md` § Step 3.5:
+
+| Active Combination | Emergent Pattern |
+|-------------------|-----------------|
+| `gui` + `realtime` | Optimistic update + reconnection UI |
+| `gui` + `async-state` + `realtime` | Live state synchronization with conflict resolution |
+| `microservice` + `message-queue` | Message contract versioning + dead-letter handling |
+| `ai-assistant` + `realtime` | Stream interruption + partial response display + token budget |
 
 ### Composition Example
 
-An AI-powered desktop app being rebuilt:
+An AI-powered desktop app being rebuilt (MVP, solo developer):
 
 ```
-Profile:    desktop-app
-Interfaces: [gui]
-Concerns:   [async-state, ipc]
-Archetype:  ai-assistant
-Scenario:   rebuild
-Framework:  electron
+Profile:     desktop-app
+Interfaces:  [gui]                    ← Axis 1
+Concerns:    [async-state, ipc]       ← Axis 2
+Archetype:   ai-assistant             ← Axis 3
+Foundation:  electron                 ← Axis 4
+Scenario:    rebuild                  ← Axis 5
+Scale:       mvp / solo              ← Modifier
 ```
 
-This loads 6 domain modules + 2 Foundation files = 8 file reads, all cached for the session.
+This loads 6 domain modules + 2 Foundation files = 8 file reads, all cached for the session. The Scale modifier then adjusts: MVP means full SC coverage for critical paths but optional for edge cases; solo means no code review requirements.
 
-### Why Archetype Was Added (3-Axis → 4-Axis)
+### Evolution History
 
-The original 3-Axis model (Interface × Concern × Scenario) covered _what_ the app exposes, _how_ it handles cross-cutting patterns, and _why_ it's being built. But it lacked structured guidance for _domain-specific philosophy_.
+**3-Axis → 4-Axis (Archetype addition)**: The original model (Interface × Concern × Scenario) lacked structured domain philosophy. Principles like "Streaming-First" were generated ad-hoc. Archetype modules standardized these into reusable, versionable vocabularies.
 
-**Before (3-Axis)**: When reverse-spec analyzed an AI desktop app, it generated principles like "Streaming-First" and "Model Agnosticism" ad-hoc in the constitution-seed. These principles were valuable but unstandardized — different analysis runs might extract different principles with different names.
-
-**After (4-Axis)**: Archetype modules provide a structured vocabulary of domain principles. The `ai-assistant` archetype defines exactly which principles to extract (A1), how they affect SC generation (A2), what questions to ask during consultation (A3), and what to inject into the constitution (A4). This makes domain philosophy **reusable, consistent, and extensible**.
+**4-Axis → 5-Axis + Modifier (Foundation promotion + Scale)**: MECE analysis revealed Foundation was operating as a de facto axis (21 files, own resolver step, own verification gate) without formal recognition. Scale parameters existed in `greenfield.md` but weren't wired into the pipeline. Promoting Foundation to an axis and operationalizing Scale as a modifier completed the model.
 
 ---
 
@@ -277,7 +310,8 @@ With modules: verify runs **5 phases** — test/build/lint → Playwright UI tes
 When multiple modules contribute to the same section, the merge follows a simple rule:
 
 ```
-Load order: _core → interfaces → concerns → archetypes → scenarios → custom
+Load order: _core → interfaces → concerns → archetypes → foundations → org-convention → scenarios → custom
+Then apply: Scale modifier (adjusts depth)
 
 Merge behavior:
   S1 (SC Rules)        → APPEND  (accumulate all rules)
@@ -292,22 +326,27 @@ No conflicts arise because each module contributes **additive** domain knowledge
 ### Summary: What Composition Actually Produces
 
 ```
-Modules in:   [_core, gui, async-state, ipc, ai-assistant, rebuild, electron]
+5 Axes in:    [_core, gui, async-state, ipc, ai-assistant, electron, rebuild]
                                     │
                                     ▼
 Merged output:  NOT a file — a behavioral ruleset in agent memory
+                                    │
+                              Scale modifier
+                         (mvp/solo → adjust depth)
                                     │
                     ┌───────────────┼───────────────┐
                     ▼               ▼               ▼
               SC Rules ×18    Probes ×30+     Bug Checks ×15
               (S1+A2)         (S5+A3)         (S7 B1-B4)
+              + Foundation    + Scale-adj.    + Foundation
+                (F2,F7)                        (F8)
                     │               │               │
                     ▼               ▼               ▼
               Shapes          Shapes          Shapes
               specify         clarify         plan/impl/verify
 ```
 
-The agent doesn't "generate" a composition artifact. It **behaves differently** at each step because the merged rules tell it: "when writing SCs, also check for IPC patterns" or "during verify, also run Playwright UI tests." The modules are invisible infrastructure — the user sees better specs, more thorough plans, and more reliable implementations.
+The agent doesn't "generate" a composition artifact. It **behaves differently** at each step because the merged rules tell it: "when writing SCs, also check for IPC patterns" or "during verify, also run Playwright UI tests." The Scale modifier then adjusts: in `prototype` mode, non-critical checks become optional; in `production` mode, all checks are blocking. The modules are invisible infrastructure — the user sees better specs, more thorough plans, and more reliable implementations.
 
 ---
 
