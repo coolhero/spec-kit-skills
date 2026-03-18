@@ -413,7 +413,8 @@ Concern은 여러 Feature에 영향을 미치는 내부 횡단 패턴입니다.
 
 3. **smart-sdd 모듈 생성**: `.claude/skills/smart-sdd/domains/concerns/{name}.md`
    - S0은 shared/ 참조: `See [shared/domains/concerns/{name}.md] § Signal Keywords`
-   - S1, S5, S7 추가 (선택: S3 — 검증 오버라이드용)
+   - S1, S5, S7 추가 (선택: S3 — 검증 오버라이드용, S4x — 데이터 무결성 확장용)
+   - **S4 확장**: concern이 보편 S4a-c를 넘어서는 구체적 데이터 무결성 패턴을 추가할 경우 (예: `ipc`의 N-Layer 완전성 체크 = S4c Pipeline Traceability의 구체화), S4x 하위 섹션으로 추가
 
 4. **프로필 업데이트**: Concern이 프로필의 기본값이어야 하면, 프로필 매니페스트를 업데이트.
 

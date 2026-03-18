@@ -413,7 +413,8 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 
 3. **Create smart-sdd module**: `.claude/skills/smart-sdd/domains/concerns/{name}.md`
    - Reference shared/ for S0: `See [shared/domains/concerns/{name}.md] § Signal Keywords`
-   - Add S1, S5, S7 (optional: S3 for verification overrides)
+   - Add S1, S5, S7 (optional: S3 for verification overrides, S4x for data integrity extensions)
+   - **S4 extensions**: If the concern adds specific data integrity patterns beyond universal S4a-c (e.g., `ipc` adds N-Layer completeness check as a concretization of S4c Pipeline Traceability), add as S4x subsection
 
 4. **Update profiles**: If the concern should be default for a profile, update the profile manifest.
 
