@@ -5,6 +5,31 @@
 
 ---
 
+## 🚨 BLOCKING Gates Summary (rebuild + GUI — read this FIRST)
+
+> **이 섹션의 게이트들은 파일 하단에 상세하게 정의되어 있지만, 에이전트가 하단까지 읽지 않을 수 있으므로 여기에 요약합니다. 각 게이트의 상세 절차는 해당 섹션을 참조하세요.**
+
+| # | Gate | BLOCKING 조건 | 상세 위치 |
+|---|------|-------------|----------|
+| 1 | **Source Reference Injection** | UI 태스크에 `📂 Source Reference` 없으면 gate 위반 | § Source Reference Injection |
+| 2 | **Background Agent Source Injection** | agent prompt에 source 코드 없으면 gate 위반 | § Background Agent Source Injection |
+| 3 | **Semantic Stub Detection** | Math.random(), placeholder, external call bypass | § Semantic Stub Detection |
+| 4 | **Integration Contract Fulfillment** | plan "Consumes ←" 실제 호출 없으면 BLOCKING | § Integration Contract Fulfillment Check |
+| 5 | **UI Control Type Audit** | Source Select → Target Input = UX downgrade | § UI Control Type Audit |
+
+```
+❌ WRONG: tasks.md 텍스트만 보고 UI 생성 → "create dialog with inputs"
+✅ RIGHT: source app 코드 읽기 → ModelSelector dropdown + auto-dimensions 재현
+
+❌ WRONG: Math.random()으로 임베딩 생성 → build 통과 → "implement 완료"
+✅ RIGHT: F004 provider API 실제 호출 → 진짜 임베딩 생성
+
+❌ WRONG: background agent에 "create KB form" 지시 (source 코드 없이)
+✅ RIGHT: background agent에 source AddKnowledgeBasePopup.tsx 원문 포함
+```
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

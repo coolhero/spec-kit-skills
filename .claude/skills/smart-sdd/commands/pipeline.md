@@ -1111,6 +1111,42 @@ If there were notable decisions during this Feature's pipeline (specify → veri
 
 > **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
 
+#### Runtime Error Triage Protocol (파이프라인 전 단계 공통)
+
+> **🚨 이 프로토콜은 verify뿐 아니라 파이프라인의 어느 시점에서든 사용자가 런타임 에러를 보고하거나 기능 미동작을 지적할 때 적용됩니다.**
+
+사용자가 "에러가 나잖아", "안 돼", "제대로 안 됨" 등으로 문제를 보고하면:
+
+```
+1. 에러 분석: 원인 추적 (crash log, undefined 접근, 빈 데이터 등)
+2. 범위 확인: 이 문제만 있는가? 같은 패턴의 다른 문제가 있는가?
+   → Semantic Stub Detection 실행 (Math.random, placeholder, external call bypass)
+   → Integration Contract 실제 호출 확인
+3. Bug Fix Severity Rule 적용 (verify-phases.md와 동일 기준):
+   | Severity | 조건 | Action |
+   |----------|------|--------|
+   | Minor | ≤2 파일, API 변경 없음 | Fix inline OK |
+   | Major-Implement | 3+ 파일 OR 새 컴포넌트 필요 | Return to implement |
+   | Major-Plan | Architecture/contracts 변경 필요 | Return to plan |
+   | Major-Spec | 요구사항 자체가 잘못됨 | Return to specify |
+4. Major인 경우 → HARD STOP (AskUserQuestion):
+   "🔴 Major-[level] issue detected — [N] files affected.
+    Pipeline regression to [level] recommended. Proceed?"
+   Options: "Return to [level]", "Fix inline anyway (risk acknowledged)"
+5. 사용자의 "바로 고쳐" 요청이 있어도 Major-Implement 이상이면
+   regression을 먼저 제안. 사용자가 "그냥 인라인 수정해" 선택 시에만 직접 수정.
+```
+
+```
+❌ WRONG: 사용자 "에러 나잖아" → 에이전트가 바로 코드 수정 시작 (severity 판단 없이)
+✅ RIGHT: 사용자 "에러 나잖아" → 에이전트가 분석 → "6개 파일 수정 필요, Major-Implement입니다.
+          implement 단계로 돌아가서 체계적으로 수정할까요?"
+```
+
+> **절대 Major issue를 인라인으로 수정하면서 pipeline regression을 건너뛰지 않는다.** verify는 FINDING 단계이지 REWRITING 단계가 아니다.
+
+---
+
 #### Verify Execute (MANDATORY — verify-phases.md Required Reading)
 
 > **🚨 CRITICAL: verify의 상세 절차는 이 파일(pipeline.md)이 아닌 `commands/verify-phases.md`에 있습니다.**
