@@ -125,14 +125,29 @@ If user ignores, re-suggest after 3 more traces. Never more than twice.
 ```
 code-explore (understand)
     │
-    ├──→ /reverse-spec --from-explore    (enhance auto-extraction with human insights)
+    ├──→ /smart-sdd init --from-explore  (Domain Profile + project identity seed)
+    │       └──→ auto-chains to add --from-explore
+    │
     ├──→ /smart-sdd add --from-explore   (Feature candidates → Brief input)
+    ├──→ /reverse-spec --from-explore    (enhance auto-extraction with human insights)
     └──→ /smart-sdd adopt --from-explore (adoption with pre-understanding)
 ```
 
-The `--from-explore` flag tells the receiving skill to read `specs/explore/synthesis.md`:
-- **Entity observations** → seed entity-registry.md
-- **API observations** → seed api-registry.md
-- **Business rules** → seed business-logic-map.md
-- **Feature candidates (C###)** → pre-populate Feature list for Brief
-- **Unresolved questions** → feed into Brief elaboration
+The `--from-explore` flag tells the receiving skill to read `specs/explore/` artifacts:
+
+| Receiving Skill | Reads From | Seeds Into |
+|----------------|-----------|-----------|
+| **init** | synthesis § Recommended Domain Profile | sdd-state.md Domain Profile, Proposal |
+| **init** | synthesis § Cross-Concern Integration Rules | Domain resolver active rules |
+| **init** | orientation § Architecture Overview | Constitution principle candidates |
+| **init** | synthesis § Unresolved Domain Decisions | Proposal Open Questions |
+| **add** (Type 4) | synthesis § Feature Candidates (C###) | Brief input with pre-populated perspectives |
+| **add** (Type 4) | synthesis § Entity/API Consolidation | entity-registry.md, api-registry.md seeds |
+| **add** (Type 4) | synthesis § Business Rules | business-logic-map.md seeds |
+| **add** (Type 4) | synthesis § Unresolved Questions | Brief elaboration questions |
+| **reverse-spec** | orientation § Module Map | Phase 1 code pattern hints |
+| **reverse-spec** | traces § Flow/Entity/API data | Phase 2 SBI pre-validation |
+| **adopt** | traces § per-Feature understanding | adopt-specify source knowledge |
+
+**Primary flow**: `explore → init --from-explore → add --from-explore` (continuous handoff)
+**Domain Profile continuity**: orient detects source profile → synthesis derives target profile → init seeds sdd-state.md → add/pipeline uses it throughout

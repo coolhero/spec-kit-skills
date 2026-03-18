@@ -89,9 +89,48 @@ Group observations by icon type:
 | catch-all error handling | Trace 003 | Need specific error types |
 ```
 
-### Step 5 — Feature Candidate Derivation
+### Step 5 — Target Domain Profile Derivation
 
-Analyze the consolidated entities, APIs, and module coverage to derive Feature candidates:
+Derive the **user's target project Domain Profile** by combining the source project's Detected Domain Profile (from orientation.md) with differentiation decisions accumulated across traces.
+
+1. **Read source profile**: Extract the Detected Domain Profile section from `orientation.md`
+2. **Analyze differentiation signals**: Scan all traces' Observations for domain-relevant changes:
+   - 🔧 "Change from TUI to Web" → Interface changes (`gui` stays, but qualifier changes)
+   - 🔧 "Add Docker sandboxing" → new Concern (`containerization`)
+   - 🔧 "Add streaming support" → new Concern (`realtime`)
+   - 🔧 "Database instead of file storage" → Concern change (`persistence` characteristics)
+   - 💡 "Keep provider abstraction pattern" → Archetype confirmation (`ai-assistant` stays)
+3. **Build target profile**:
+   - Start from source profile
+   - Apply differentiation: additions, removals, modifications
+   - Flag uncertain items (where the user hasn't explicitly decided)
+4. **Check Cross-Concern Integration**: Using the target profile's active modules, look up `_resolver.md` § Step 3.5 Cross-Concern Integration Rules. If any combination triggers, note the activated integration patterns.
+
+```markdown
+## Recommended Domain Profile (target project)
+
+> Derived from source analysis + your differentiation decisions.
+> This profile will be passed to `/smart-sdd init --from-explore` to seed project setup.
+
+| Axis | Source | Target | Change | Evidence |
+|------|--------|--------|--------|----------|
+| **Interfaces** | gui (TUI) | gui (Web) | Changed | 🔧 Trace 004: "Web-based UI instead of TUI" |
+| **Concerns** | async-state, ipc | async-state, ipc, realtime | Added | 🔧 Trace 001: "Add streaming for LLM responses" |
+| **Archetype** | ai-assistant | ai-assistant | Kept | 💡 Trace 002: "Provider abstraction pattern is solid" |
+| **Foundation** | Go stdlib | — (TBD) | Changed | 🔧 Trace 004: "TypeScript + React instead of Go" |
+
+### Activated Cross-Concern Integration Rules
+- `gui` + `realtime` → Real-time UI sync (S1: optimistic update + reconnection UI)
+- `ai-assistant` + `realtime` → Streaming AI responses (S1: stream interruption + partial display)
+
+### Unresolved Domain Decisions
+- [ ] Foundation framework not yet chosen (React? Next.js? Electron?)
+- [ ] `multi-tenancy` concern — will this be multi-user?
+```
+
+### Step 6 — Feature Candidate Derivation
+
+Analyze the consolidated entities, APIs, module coverage, and target Domain Profile to derive Feature candidates:
 
 1. **Module clustering**: Group related modules that frequently appear together in traces
 2. **Entity ownership**: Assign entities to the Feature candidate that primarily manages them
@@ -116,7 +155,7 @@ Analyze the consolidated entities, APIs, and module coverage to derive Feature c
 | C003 | No payment rollback | Saga pattern for distributed tx |
 ```
 
-### Step 6 — Handoff Readiness Check
+### Step 7 — Handoff Readiness Check
 
 Evaluate whether the exploration is sufficient for handoff:
 
@@ -128,30 +167,39 @@ Evaluate whether the exploration is sufficient for handoff:
 | Core modules explored | ✅/⚠️ | [X]% coverage, [N] unexplored core modules |
 | Entity map complete | ✅/⚠️ | [N] entities identified, [M] with incomplete fields |
 | API map complete | ✅/⚠️ | [N] APIs documented |
+| Domain Profile resolved | ✅/⚠️ | [N] unresolved domain decisions |
 | Critical questions resolved | ✅/⚠️ | [N] unresolved ❓ items |
 | Feature candidates defined | ✅/⚠️ | [N] candidates covering [X]% of traced modules |
 
 ### Recommended Next Steps
 - [ ] Explore [unexplored module] — likely contains [X]
+- [ ] Resolve [domain decision] before project setup
 - [ ] Resolve [critical question] before defining Features
 - [ ] Trace [missing flow] for complete coverage
 
 ### Ready for Handoff
-→ /reverse-spec --from-explore     (entities + APIs seed registries)
-→ /smart-sdd add --from-explore    (candidates → Brief input)
-→ /smart-sdd adopt --from-explore  (candidates + traces → adoption)
+
+**Primary flow** (recommended for building a new project inspired by source):
+→ /smart-sdd init --from-explore specs/explore/
+  (sets up project identity + Domain Profile, then auto-chains to add)
+
+**Alternative flows**:
+→ /smart-sdd add --from-explore specs/explore/   (skip init, add Features to existing project)
+→ /reverse-spec --from-explore specs/explore/     (enhance reverse-spec with human insights)
+→ /smart-sdd adopt --from-explore specs/explore/  (adopt existing code with pre-understanding)
 ```
 
-### Step 7 — Write synthesis.md
+### Step 8 — Write synthesis.md
 
-Write `specs/explore/synthesis.md` with all sections from Steps 2-6.
+Write `specs/explore/synthesis.md` with all sections from Steps 2-7.
 
-### Step 8 — HARD STOP
+### Step 9 — HARD STOP
 
 Present the synthesis summary via AskUserQuestion:
 
-- **"Ready for handoff"** → Display the three handoff options and let user choose
-- **"Need more exploration"** → Show recommended next steps from Step 6
+- **"Ready — start project setup"** → Execute `/smart-sdd init --from-explore specs/explore/` (primary flow)
+- **"Need more exploration"** → Show recommended next steps from Step 7
 - **"Edit candidates"** → User adjusts Feature candidates (rename, split, merge, remove). Agent updates synthesis.md.
+- **"Choose different handoff"** → Display alternative flow options
 
 **If response is empty → re-ask** (per MANDATORY RULE).

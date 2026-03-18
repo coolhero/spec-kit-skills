@@ -10,7 +10,8 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 
 1. **Idea string** (positional argument): `init "Build a task management app with Kanban boards"` — brief natural language description triggers Proposal Mode
 2. **PRD document** (`--prd path/to/prd.md`): Reads the PRD file and extracts project description and requirements. If the PRD is sufficiently detailed, triggers Proposal Mode
-3. **Conversational input**: If no idea string and no `--prd` is specified, gathers all information through interactive Q&A with the user (original flow)
+3. **Code-explore artifacts** (`--from-explore path/to/specs/explore/`): Reads code-explore synthesis to seed project identity, Domain Profile, and Feature candidates. Triggers Explore-Informed Mode. See § Explore-Informed Mode below.
+4. **Conversational input**: If no idea string, no `--prd`, and no `--from-explore` is specified, gathers all information through interactive Q&A with the user (original flow)
 
 ### Mode Selection
 
@@ -19,6 +20,7 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 | Idea string present | **Proposal Mode** | Signal Extraction → CI scoring → Proposal → auto-chain |
 | `--prd` with rich detail (CI ≥ 40%) | **Proposal Mode** | PRD signals → CI scoring → Proposal → auto-chain |
 | `--prd` with sparse detail (CI < 40%) | **Standard Mode** | Fall back to Phase 1 Q&A with PRD as seed |
+| `--from-explore` | **Explore-Informed Mode** | Synthesis artifacts → Domain Profile seed → Proposal → auto-chain to add |
 | No arguments | **Standard Mode** | Full interactive Phase 1 Q&A |
 
 ### Proposal Mode
@@ -125,6 +127,90 @@ After Proposal approval:
 3. **Phase 2**: Constitution Seed Definition — use Proposal's Domain Profile + tech stack to pre-fill recommended principles. Continue with standard Phase 2 flow (user selection + checkpoint)
 4. **Phase 3**: Artifact Generation — use Proposal data. Write CI fields to sdd-state.md (see `reference/state-schema.md`)
 5. **Phase 4**: Completion — if Proposal included Features, auto-chain to `add` with the Feature list pre-populated
+
+---
+
+### Explore-Informed Mode (`--from-explore`)
+
+> Activated when `--from-explore <path>` is provided. The user has already studied a reference codebase with `/code-explore` and wants to build a new project inspired by it. This mode seeds the Proposal with insights from exploration — Domain Profile, tech stack understanding, architectural patterns, and Feature candidates.
+
+#### Explore Step 1: Read Explore Artifacts
+
+1. Read `{path}/synthesis.md`:
+   - Extract **Recommended Domain Profile** (target project's Interfaces, Concerns, Archetype)
+   - Extract **Activated Cross-Concern Integration Rules**
+   - Extract **Unresolved Domain Decisions**
+   - Extract **Feature Candidates** (C### table)
+   - Extract **What I'd Do Differently** table
+2. Read `{path}/orientation.md`:
+   - Extract **Detected Domain Profile** (source project — for reference display)
+   - Extract **Architecture Overview** (source project structure — for constitution hints)
+   - Extract **Exploration Coverage** (how thoroughly the user studied the source)
+
+#### Explore Step 2: Build Explore-Informed Proposal
+
+Generate a Proposal (same format as Proposal Mode Step 3) with explore-derived content:
+
+| Proposal Section | Source | Explore Derivation |
+|-----------------|--------|-------------------|
+| Overview | synthesis § Feature Candidates | Infer project purpose from candidate descriptions + differentiation |
+| Domain Profile | synthesis § Recommended Domain Profile | Use target profile directly (already accounts for differentiation) |
+| Archetype | synthesis § Recommended Domain Profile | Use target archetype |
+| Features | synthesis § Feature Candidates | C### → proposed Features (names + descriptions) |
+| Quality Rules | Domain Profile → active modules | Load S1/S7 from resolved modules (same as Proposal Mode) |
+| CI Score | Explore coverage + candidate completeness | Higher explore coverage → higher CI dimensions |
+| Constitution Hints | orientation § Architecture Overview + synthesis § Patterns to Adopt | Source project patterns the user explicitly chose to adopt → constitution principle candidates |
+| Unresolved Questions | synthesis § Unresolved Domain Decisions + Unresolved Questions | Items the user hasn't decided yet → explicit Open Questions |
+
+**Key difference from Proposal Mode**: Instead of inferring from a text description, explore-informed mode builds from **structured, source-validated understanding**. The user has already traced the code, observed patterns, and made deliberate differentiation decisions. CI is typically higher because understanding is deeper.
+
+#### Explore Step 3: Domain Profile Confirmation (HARD STOP)
+
+Present the explore-derived Domain Profile with source ↔ target comparison:
+
+```
+📋 Domain Profile (from code-explore synthesis)
+
+Source project: [orientation project name]
+Your project: [inferred from differentiation]
+
+| Axis | Source | Your Project | Change |
+|------|--------|-------------|--------|
+| Interfaces | [source] | [target] | [kept/changed/added] |
+| Concerns | [source] | [target] | [kept/changed/added] |
+| Archetype | [source] | [target] | [kept/changed] |
+| Foundation | [source] | [TBD or chosen] | [changed] |
+
+Cross-Concern Integration Rules activated:
+  • [rule 1]: [description]
+  • [rule 2]: [description]
+
+Unresolved decisions:
+  • [decision 1] — needs your input
+  • [decision 2] — needs your input
+```
+
+AskUserQuestion:
+- **"Approve Domain Profile"** → Proceed to Proposal display (Step 4)
+- **"Modify"** → User adjusts axes. Agent re-checks Cross-Concern Integration Rules after modification.
+- **"Resolve decisions"** → Agent asks targeted questions for each unresolved item, then re-presents.
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+#### Explore Step 4: Proposal Display and Auto-Chain
+
+After Domain Profile confirmation:
+1. Display the full Proposal (same format as Proposal Mode Step 3)
+2. **HARD STOP**: Same approval flow (Approve / Modify / Switch to standard)
+3. On approval: Auto-chain to Standard Flow (same as Proposal Step 4)
+4. **Auto-chain to add**: Pass `--from-explore` through so `add` activates Type 4 (Explore-Driven) with the same explore path. Feature candidates from synthesis are pre-populated.
+
+> **The complete explore-informed flow**:
+> ```
+> /code-explore synthesis  →  /smart-sdd init --from-explore  →  /smart-sdd add --from-explore
+>   (Domain Profile hint)      (project setup + profile)           (Feature definition)
+> ```
+> Each step consumes explore artifacts AND passes them forward. The user's exploration understanding flows continuously from code-explore through init to add, with no information loss.
 
 ---
 

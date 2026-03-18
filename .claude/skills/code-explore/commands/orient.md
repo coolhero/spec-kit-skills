@@ -42,7 +42,37 @@ For each module, record:
 - **Dependencies**: Which other modules it imports from
 - **File count**: Number of source files
 
-### Step 3 — Suggested Exploration Topics
+### Step 3 — Domain Profile Analysis
+
+Analyze the detected tech stack, architecture patterns, and module structure to infer the **source project's Domain Profile**. This uses the same module vocabulary as smart-sdd's Domain Profile system (see `../../smart-sdd/domains/_resolver.md` § Profile Selection).
+
+1. **Interface detection**: Map project characteristics to Interface modules
+   - GUI indicators (UI framework, component files, styles) → `gui`
+   - HTTP server indicators (router, handlers, middleware) → `http-api`
+   - CLI indicators (flag parsing, command structure) → `cli`
+   - Library indicators (no entry point, exported API surface only) → `library`
+
+2. **Concern detection**: Map cross-cutting patterns to Concern modules
+   - Auth files/middleware → `auth`
+   - State management (stores, reducers, context) → `async-state`
+   - IPC/messaging (channels, events, message passing) → `ipc`
+   - i18n files (locales, translations) → `i18n`
+   - Database/ORM files → `persistence`
+   - Queue/worker files → `message-queue` or `task-worker`
+   - Real-time indicators (WebSocket, SSE, streaming) → `realtime`
+
+3. **Archetype detection**: Infer from project-level patterns
+   - AI/LLM integration (provider abstraction, prompt management, token counting) → `ai-assistant`
+   - Plugin/extension architecture → `sdk-framework`
+   - Microservice indicators (service mesh, service discovery) → `microservice`
+
+4. **Foundation detection**: Identify frameworks from dependency files
+   - Read `package.json` dependencies, `go.mod` requires, `Cargo.toml` dependencies, etc.
+   - Match against known Foundation files in `../../smart-sdd/domains/foundations/` or `../../reverse-spec/domains/foundations/`
+
+Record in orientation.md as a structured section (see Step 5 template below).
+
+### Step 4 — Suggested Exploration Topics
 
 Based on the module map, suggest 5-10 exploration topics as concrete questions:
 
@@ -57,7 +87,7 @@ Suggested explorations:
 
 Order by: entry points first, then core business logic, then infrastructure.
 
-### Step 4 — Generate orientation.md
+### Step 5 — Generate orientation.md
 
 Write `specs/explore/orientation.md` using the following structure:
 
@@ -72,10 +102,25 @@ Write `specs/explore/orientation.md` using the following structure:
 
 [2-3 sentence summary of what this project does and how it's structured]
 
-```mermaid
+` ``mermaid
 flowchart TD
     [Module dependency diagram — top-level modules with arrows showing imports]
-```
+` ``
+
+## Detected Domain Profile
+
+> Inferred from source code analysis. Used by synthesis to recommend a Domain Profile for your project.
+
+| Axis | Detected | Evidence |
+|------|----------|----------|
+| **Interfaces** | [e.g., gui, cli] | [e.g., Bubble Tea TUI framework, cobra CLI] |
+| **Concerns** | [e.g., async-state, ipc] | [e.g., goroutine-based state, LSP protocol] |
+| **Archetype** | [e.g., ai-assistant] | [e.g., LLM provider abstraction, token counting] |
+| **Foundation** | [e.g., Go stdlib] | [e.g., go.mod dependencies] |
+
+> This profile describes the **source project** you are studying, not the project you will build.
+> During `/code-explore synthesis`, this is combined with your "What I'd Do Differently" decisions
+> to derive a **recommended Domain Profile for your project**.
 
 ## Module Map
 
@@ -106,7 +151,7 @@ flowchart TD
 | (none yet) | | | |
 ```
 
-### Step 5 — HARD STOP
+### Step 6 — HARD STOP
 
 Present the orientation summary to the user via AskUserQuestion:
 

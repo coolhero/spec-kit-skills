@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-03-18] Domain Profile Fusion — code-explore ↔ smart-sdd Full Integration
+
+### Context
+
+code-explore's Domain Profile analysis was disconnected from smart-sdd's Domain Profile system. orient detected tech stack and patterns, but there was no path to flow this into init → add → pipeline.
+
+### Design Decision
+
+Made Domain Profile a first-class citizen across the entire explore → init → add flow:
+
+| Component | Change |
+|-----------|--------|
+| `orient.md` | Added Step 3 Domain Profile Analysis — detects source project's Interfaces, Concerns, Archetype, Foundation using same vocabulary as smart-sdd's `_resolver.md` |
+| `synthesis.md` | Added Step 5 Target Domain Profile Derivation — combines source profile with user's differentiation decisions, checks Cross-Concern Integration Rules |
+| `init.md` | Added Explore-Informed Mode (`--from-explore`) — reads synthesis Domain Profile, generates Proposal with explore-derived content, auto-chains to add |
+| `SKILL.md` | Updated Relationship section with complete artifact flow table showing what each receiving skill reads and where it seeds |
+| `synthesis.md` | Updated handoff readiness to include Domain Profile resolution status and primary flow recommendation |
+
+### Key Insight
+
+The `--from-explore` flag needed to exist on `init` (not just `add`) because init is where Domain Profile gets written to sdd-state.md. Without init support, the profile inference from code exploration was lost.
+
+---
+
 ## [2026-03-18] code-explore Sample Artifacts + --from-explore Handoff
 
 ### Context
