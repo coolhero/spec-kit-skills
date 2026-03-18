@@ -34,6 +34,7 @@
 | protocol-integration | `concerns/protocol-integration.md` | Bidirectional protocols (LSP, MCP) | — |
 | realtime | `concerns/realtime.md` | WebSocket, SSE, live updates | gui, http-api |
 | task-worker | `concerns/task-worker.md` | Background jobs, scheduled tasks | message-queue |
+| llm-agents | `concerns/llm-agents.md` | LLM-based agents, multi-agent coordination, non-deterministic outputs | ai-assistant, external-sdk |
 
 ## Archetypes
 

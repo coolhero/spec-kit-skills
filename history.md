@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-03-18] Python/LLM/Data-Science Domain Support — Simulation-Driven Gap Analysis
+
+### Context
+
+Simulated code-explore → rebuild of `ai-data-science-team` (Python + LangChain + Streamlit + H2O). Discovered 6 structural gaps in the current framework for non-JS/TS project types.
+
+### Changes
+
+| Component | Change |
+|-----------|--------|
+| `concerns/llm-agents.md` | **NEW** — Full concern module for LLM agent projects: S0 (signal keywords), S1 (non-deterministic SC patterns), S3 (verify steps with structural/behavioral/threshold testing), S5 (8 probe categories), S7 (B-1/B-3/B-4 bug prevention: token budget, sandbox, infinite loop, prompt injection), S9 (Brief completion: provider, pattern, non-determinism strategy) |
+| `shared/domains/concerns/llm-agents.md` | **NEW** — Signal keywords for init Proposal Mode detection |
+| `shared/domains/_taxonomy.md` | Added `llm-agents` to concern registry |
+| `domains/_resolver.md` | Added 4 Cross-Concern Integration Rules: llm-agents+gui, llm-agents+http-api, llm-agents+persistence, llm-agents+external-sdk |
+| `domains/data-science.md` | Extended with LLM Agent Testing Patterns (§4), Streamlit Testing Patterns (§5), Python-Specific Implement Rules (§6). Cross-references llm-agents concern |
+
+### Design Decision
+
+`llm-agents` is a **concern** (not an archetype) because:
+- Archetype = domain philosophy (ai-assistant: "streaming-first, model-agnostic")
+- Concern = cross-cutting pattern (llm-agents: "non-deterministic output, sandbox execution, multi-agent coordination")
+- A project can be archetype `ai-assistant` WITH concern `llm-agents` — they're orthogonal
+
+---
+
 ## [2026-03-18] SKF-060~063: Semantic Stub Detection + Regression Protocol
 
 ### Context

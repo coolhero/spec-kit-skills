@@ -151,6 +151,10 @@ After loading all individual modules (Step 3), apply integration rules for conce
 | archetype:`ai-assistant` + `realtime` | Streaming AI responses | S1: SC must cover stream interruption + partial response display + token budget mid-stream. S5: Add probe "Stream backpressure when UI can't keep up?" |
 | archetype:`ai-assistant` + `external-sdk` | Multi-provider LLM | S5: Add probe "Provider failover strategy? Response format normalization across providers?" |
 | archetype:`microservice` + `task-worker` | Distributed job processing | S1: SC must cover cross-service job ownership + progress tracking. S7: Add "orphaned job after service restart" prevention |
+| `llm-agents` + `gui` | AI-assisted UI workflows | S1: SC must cover loading states during LLM calls + streaming result display + error recovery in UI. S7: Add "UI frozen during sync LLM call" prevention |
+| `llm-agents` + `http-api` | LLM-powered API endpoints | S1: SC must cover request timeout for LLM calls + streaming response format + cost tracking. S7: Add "unbounded LLM call without timeout" prevention |
+| `llm-agents` + `persistence` | Agent state persistence | S1: SC must cover conversation history serialization + checkpoint recovery + cache invalidation. S5: Add probe "How is agent state persisted across sessions?" |
+| `llm-agents` + `external-sdk` | Multi-provider LLM agents | S1: SC must cover provider failover + response format normalization + model capability detection. S7: Add "provider-specific code in business logic" prevention |
 
 **Application**: Integration rules are appended to the merged profile after Step 3 completes. They follow the same merge rules (S1 append, S5 append, S7 append). Only combinations where ALL listed modules are active trigger their rules.
 
