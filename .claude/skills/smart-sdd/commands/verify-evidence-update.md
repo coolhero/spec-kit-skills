@@ -63,6 +63,31 @@ Before assembling the verify Review, check the SC Verification Matrix for eviden
    ```
    **If any auto-category SC has no evidence → BLOCK ReviewApproval.** User cannot approve verify results that lack runtime evidence.
 
+5. **Cosmetic Test Detection (🚫 BLOCKING — SKF-046)**:
+
+   After collecting evidence, audit each auto-category SC's evidence for **cosmetic patterns** — tests that appear to verify but only check presence/navigation:
+
+   | Cosmetic Pattern (❌ REJECTED) | Why It Fails | Functional Alternative (✅) |
+   |-------------------------------|-------------|---------------------------|
+   | `page.goto('#/route')` → "page accessible" | Only checks routing, not feature | Click feature button → verify state change |
+   | `page.textContent('body').toContain('keyword')` | Only checks text exists somewhere | Click → fill → submit → verify new element created |
+   | `expect(true).toBeTruthy()` | Always passes, verifies nothing | Actual assertion on app state |
+   | `page.waitForSelector('.component')` → "component rendered" | Only checks DOM presence | Interact with component → verify behavior |
+   | Console error count = 0 → "no errors" | Only checks stability, not functionality | Execute user flow → verify expected outcome |
+
+   **Minimum functional test requirement** for each auto-category SC:
+   - At least 1 **user action** (click, fill, select, drag) — not just navigation
+   - At least 1 **state change assertion** (new element, text change, status icon change) — not just existence
+   - The test must **exercise the SC's described behavior**, not just prove the page loads
+
+   **If ANY auto-category SC has only cosmetic evidence** → BLOCKING:
+   ```
+   🚫 Cosmetic Test Detected:
+     SC-001: Test only navigates to KB page and checks it renders.
+     Missing: KB creation flow (click "New KB" → fill form → submit → verify KB appears in list)
+     → Rewrite test to include user action + state change assertion.
+   ```
+
 ### Phase 4: Global Evolution Update
 
 **Step 4a. Registry Consistency Verification**:

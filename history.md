@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-03-19] SKF-046~047 — Cosmetic Test Detection + Cross-Feature Wiring Runtime
+
+| SKF | Fix | File |
+|-----|-----|------|
+| 046 | Cosmetic Test Detection Rule (BLOCKING): Tests checking only navigation/existence rejected. Min: 1 user action + 1 state change assertion per SC. | verify-evidence-update.md |
+| 047 | Cross-Feature Wiring Runtime Confirmation: After static check, launch app and confirm element visible. | implement.md |
+
+---
+
 ## [2026-03-19] SKF-053~056 — Structural Verification Gates + Semantic Stub Detection + Functional Smoke Test
 
 ### Context

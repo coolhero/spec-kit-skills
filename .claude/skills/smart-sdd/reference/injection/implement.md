@@ -16,8 +16,10 @@
 | 3 | **Semantic Stub Detection** | Math.random(), placeholder, external call bypass | § Semantic Stub Detection |
 | 4 | **Integration Contract Fulfillment** | BLOCKING if plan "Consumes ←" has no actual invocation | § Integration Contract Fulfillment Check |
 | 5 | **UI Control Type Audit** | Source Select → Target Input = UX downgrade | § UI Control Type Audit |
-| 6 | **API Endpoint Smoke Test** (http-api) | After implement completes: start server → call each endpoint → verify 200 | § API Post-Implement Smoke |
-| 7 | **Error Response Actionability** (all) | WARNING if error messages don't include resolution guidance | § Error Response Actionability |
+| 6 | **Data Mapping Pattern Audit** (rebuild+GUI) | Source data-attribute → Target array index = instability | § Data Mapping Pattern Audit |
+| 7 | **API Endpoint Smoke Test** (http-api) | After implement completes: start server → call each endpoint → verify 200 | § API Post-Implement Smoke |
+| 8 | **Wiring Runtime Confirmation** (GUI) | Static check passes but element not visible at runtime | § Cross-Feature Wiring Runtime Confirmation |
+| 9 | **Error Response Actionability** (all) | WARNING if error messages don't include resolution guidance | § Error Response Actionability |
 
 ```
 ❌ WRONG: Generate UI based only on tasks.md text → "create dialog with inputs"
@@ -1336,7 +1338,31 @@ If the script is not available, execute this checklist mechanically (grep/read �
   - Required fields in handler must be provided by caller
 - **Mismatch → 🚫 BLOCKING**: `Channel [name]: caller sends {content} but handler expects {source}. Runtime failure.`
 
-### 5. External Dependency Configuration Check
+### 5. Cross-Feature Wiring Runtime Confirmation (GUI Features — if runtime backend available)
+
+> **Skip if**: `gui` is NOT in active Interfaces, OR no runtime backend available (build-only mode).
+
+After static checks (1-4) pass, confirm wiring actually works at runtime:
+1. Launch the app (or connect to running dev server)
+2. For each cross-feature UI element added in this Feature:
+   - Navigate to the host screen (e.g., chat input bar for a KB button)
+   - Verify the element is **visible** (not just in source code)
+   - If clickable: click → verify the expected response (popover opens, navigation occurs, etc.)
+3. If any element is **not visible** at runtime despite passing static checks:
+   - Read the host component's source → find where rendering occurs → identify the gap
+   - Fix and re-verify
+   - Display: `🔧 Wiring fix: [component] was imported but not rendered in [host]. Added to [location].`
+
+```
+❌ WRONG: Static check passes (import exists, JSX tag exists) → "wiring complete"
+   → Component may be behind a conditional render, wrong route, or unmounted parent
+
+✅ RIGHT: Static check passes → app launched → element visible in UI → click works → "wiring complete"
+```
+
+**If runtime backend is unavailable**: Record as `⚠️ static-only wiring check — runtime confirmation deferred to verify`.
+
+### 6. External Dependency Configuration Check
 - For each external service used by this Feature (LLM API, database, third-party SDK):
   - Verify error handling for "not configured" case exists (API key missing, service unreachable)
   - Verify error message includes actionable guidance ("Go to Settings > Provider to configure")
@@ -1344,7 +1370,7 @@ If the script is not available, execute this checklist mechanically (grep/read �
 - **Missing error handling → ⚠️ WARNING** (not blocking, but flagged in Review)
 - **Missing actionable guidance → ⚠️ WARNING**: `Error message for [service] says "Failed" but should say "API key not configured. Go to Settings > [path] to add your key."`
 
-### 6. Data Authority Compliance (S4a)
+### 7. Data Authority Compliance (S4a)
 - For each persistent data store created/modified in this Feature:
   - Identify the authority source (server/main-process vs client/renderer)
   - If client-side persistence (localStorage, Zustand persist, IndexedDB) stores authority-owned data:
@@ -1352,7 +1378,7 @@ If the script is not available, execute this checklist mechanically (grep/read �
     - If no sync strategy → 🚫 **BLOCKING**: `Data authority violation: [store] persists [data] which is owned by [authority]. Stale data will accumulate.`
 - **Skip if**: Feature has no persistent state (pure UI rendering)
 
-### 7. Edge Case Completeness (S4b)
+### 8. Edge Case Completeness (S4b)
 - For each data processing function implemented:
   - Verify empty/invalid input produces explicit error, not silent success
   - Grep for status transitions: if `"completed"` or `"success"` is set, trace backward to confirm the input was actually processed (not empty)
