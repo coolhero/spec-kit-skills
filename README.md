@@ -34,20 +34,6 @@
 
 ## Quick Start
 
-### Key Terms
-
-Before diving in, here are terms used throughout this document:
-
-| Term | Meaning |
-|------|---------|
-| **Feature** | A self-contained unit of functionality (e.g., authentication, task CRUD, dashboard UI). Each Feature gets one spec and one pipeline run. |
-| **Spec** | A document defining *what* a Feature does — functional requirements (FRs), success criteria (SCs), data models — written before any code. |
-| **Pipeline** | The sequence: specify → plan → tasks → analyze → implement → verify. Each step produces an artifact that feeds the next. |
-| **HARD STOP** | A mandatory pause where the agent displays results and waits for your approval before proceeding. You review and approve, request changes, or edit. Cannot be auto-skipped (use `--auto` only for batch runs). |
-| **GEL** | Global Evolution Layer — project-wide artifacts (roadmap, registries, pre-contexts) that give every Feature visibility into the whole project. |
-| **Domain Profile** | Your project's type signature (5 axes + 1 modifier) that determines which rules are loaded. |
-| **Brief** | The normalized, user-verified Feature definition produced by `/smart-sdd add`. Not a PRD — it's the *output* of the intake process. |
-
 ### Prerequisites
 
 - [Claude Code](https://claude.ai/claude-code) CLI — the AI coding agent that runs these skills

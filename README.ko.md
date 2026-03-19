@@ -32,20 +32,6 @@
 
 ## 빠른 시작
 
-### 핵심 용어
-
-이 문서에서 사용되는 주요 용어:
-
-| 용어 | 의미 |
-|------|------|
-| **Feature** | 독립적으로 정의·구현·검증 가능한 기능 단위 (예: 인증, TO-DO CRUD, 대시보드 UI). 각 Feature는 하나의 spec과 하나의 파이프라인 실행을 가짐 |
-| **Spec** | Feature가 *무엇을 하는지* 정의하는 문서 — 기능 요구사항(FR), 성공 기준(SC), 데이터 모델. 코드 작성 전에 작성됨 |
-| **Pipeline** | specify → plan → tasks → analyze → implement → verify 순서. 각 단계가 다음 단계에 입력되는 아티펙트를 생산 |
-| **HARD STOP** | 에이전트가 결과를 표시하고 사용자 승인을 기다리는 필수 정지점. 승인, 수정 요청, 또는 직접 편집 가능. 자동 건너뛰기 불가 (`--auto`는 배치 실행 전용) |
-| **GEL** | Global Evolution Layer — 프로젝트 전체 아티펙트(roadmap, registry, pre-context)로 모든 Feature에 프로젝트 전체 가시성 제공 |
-| **Domain Profile** | 프로젝트의 유형 서명 (5축 + 1 modifier). 어떤 규칙이 로드될지 결정 |
-| **Brief** | `/smart-sdd add`가 생산하는 정규화된, 사용자 검증 완료 Feature 정의. PRD가 아님 — 입력 프로세스의 *출력* |
-
 ### 사전 요구사항
 
 - [Claude Code](https://claude.ai/claude-code) CLI — 이 스킬을 실행하는 AI 코딩 에이전트
