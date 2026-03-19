@@ -806,7 +806,8 @@ flowchart LR
         SC Testability
         Data Pipeline Coverage
         Source Deep Analysis
-        API Dependency Edge Cases"]
+        API Dependency Edge Cases
+        UI Flow Spec (GUI)"]
     end
 
     subgraph plan["plan"]
@@ -850,7 +851,7 @@ flowchart LR
 
 | 단계 | 게이트가 잡는 것 | 예시 |
 |------|----------------|------|
-| **specify** | 모호하거나 불완전한 요구사항 | "파일 임베딩" → 5개 파이프라인 단계 FR로 분할 |
+| **specify** | 모호한 요구사항, UI 인터랙션 디테일 누락 | "파일 임베딩" → 5개 파이프라인 단계 FR; "KB 생성" → 폼 필드, 유효성 검증, 에러 경로가 포함된 단계별 UI Flow Spec |
 | **plan** | 아키텍처 gap, 누락된 컴포넌트 | FR은 citation 표시 요구하는데 plan에 CitationBlock 없음 |
 | **tasks** | 누락된 구현 작업 | cross-boundary Feature인데 wiring task 없음 |
 | **analyze** | spec↔plan↔tasks 간 커버리지 구멍 | SC가 동작을 기술하지만 이를 구현하는 task 없음 |
@@ -1572,6 +1573,7 @@ specs/
 | `reference/restructure-guide.md` | Feature 구조 변경 체크리스트 (분할, 병합, 이동, 순서 변경, 삭제) |
 | `reference/runtime-verification.md` | 런타임 검증 백엔드 레지스트리 — Playwright CLI/MCP 감지, 백엔드 분류 |
 | `reference/state-schema.md` | `sdd-state.md` 스키마 — Feature 상태, Toolchain, Demo Groups, Special Flags |
+| `reference/ui-flow-spec.md` | UI Flow Specification 포맷 — GUI Feature용 단계별 인터랙션 시퀀스 |
 | `reference/ui-testing-integration.md` | Playwright MCP 통합 가이드 — UI 검증용 |
 | `reference/user-cooperation-protocol.md` | HARD STOP 인터랙션을 위한 사용자 협력 패턴 |
 | `reference/pipeline-integrity-guards.md` | 44건의 SKF 현장 실패에서 추출한 7가지 일반화된 가드 패턴 — 확장 가능한 파이프라인 보호 시스템 |

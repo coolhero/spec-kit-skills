@@ -806,7 +806,8 @@ flowchart LR
         SC Testability
         Data Pipeline Coverage
         Source Deep Analysis
-        API Dependency Edge Cases"]
+        API Dependency Edge Cases
+        UI Flow Spec (GUI)"]
     end
 
     subgraph plan["plan"]
@@ -850,7 +851,7 @@ flowchart LR
 
 | Stage | What gates catch | Example |
 |-------|-----------------|---------|
-| **specify** | Vague or incomplete requirements | "file embedding" → split into 5 pipeline-stage FRs |
+| **specify** | Vague requirements, missing UI interaction detail | "file embedding" → 5 pipeline-stage FRs; "create KB" → step-by-step UI Flow Spec with form fields, validation, error paths |
 | **plan** | Architecture gaps, missing components | No citation component in plan but FR requires citation display |
 | **tasks** | Missing implementation work items | Cross-boundary Feature with no wiring task |
 | **analyze** | Coverage holes between spec↔plan↔tasks | SC describes behavior but no task implements it |
@@ -1577,6 +1578,7 @@ Each skill follows the same internal directory convention:
 | `reference/restructure-guide.md` | Feature restructure checklist (split, merge, move, reorder, delete) |
 | `reference/runtime-verification.md` | Runtime verification backend registry — Playwright CLI/MCP detection, backend classification |
 | `reference/state-schema.md` | `sdd-state.md` schema — Feature status, Toolchain, Demo Groups, Special Flags |
+| `reference/ui-flow-spec.md` | UI Flow Specification format — step-by-step interaction sequences for GUI Features |
 | `reference/ui-testing-integration.md` | Playwright MCP integration guide for UI verification |
 | `reference/user-cooperation-protocol.md` | User assistance patterns for HARD STOP interactions |
 | `reference/pipeline-integrity-guards.md` | 7 generalized guard patterns from 44 SKF field failures — extensible pipeline protection system |
