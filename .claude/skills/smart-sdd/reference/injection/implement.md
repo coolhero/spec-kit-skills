@@ -463,7 +463,22 @@ After each `speckit-implement` task completes (before starting the next task):
 **Step 1 — Build Gate**:
 - Run build command (`npm run build`, `cargo build`, etc.)
 - **Build failure**: Enter Auto-Fix Loop (see below)
-- **Build success**: Proceed to Step 2
+- **Build success**: Proceed to Step 1b
+
+**Step 1b — New Library Validation** (when this task added a new dependency — skip if no new imports):
+> **Why (SKF-070 #13)**: `npm install pdf-parse` succeeds and build passes, but `require('pdf-parse')` at runtime throws ESM/CJS incompatibility or v2 API breaking change. Build success ≠ runtime import success.
+
+If this task introduced a new library/package dependency:
+1. **Import probe**: Run a minimal script that imports the library and calls its primary API:
+   ```bash
+   # Node.js example
+   node -e "const lib = require('new-library'); console.log(typeof lib.mainFunction)"
+   # Python example
+   python -c "from new_library import main_function; print(type(main_function))"
+   ```
+2. **If import fails**: Fix immediately (ESM/CJS mismatch, wrong version, missing peer dependency). Do NOT proceed to next task with a broken dependency.
+3. **If import succeeds but API shape is wrong** (function doesn't exist, different signature): Check library version — v1 vs v2 API differences are common. Pin the correct version.
+4. Display: `📦 Library validation: [library] v[version] — import ✅, API shape ✅`
 
 **Step 1c — i18n Completeness Check** (when project uses i18n — skip otherwise):
 After each task that creates/modifies UI files:

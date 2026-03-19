@@ -762,7 +762,7 @@ Executes the following steps **strictly in order** for each Feature.
 3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP) → Update
 4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
 5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → **Completeness Gate(BLOCK)** → Demo-Ready Delivery → Review(STOP)
-6. verify     → Checkpoint(STOP) → Test/Build/Lint(BLOCK on fail) → Cross-Feature → Demo-Ready → SC UI Verify → Phase 3b (B-4) → Review(STOP) → Update
+6. verify     → Checkpoint(STOP) → Phase 1(BLOCK) → Phase 2 → Phase 3(SC Verify) → Evidence Gate(BLOCK) → Review(STOP) → Phase 4(Update)
 7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
@@ -1288,6 +1288,22 @@ When new architectural principles or conventions are discovered during Feature p
 1. **Checkpoint indication**: "Proposing a Constitution update: [principle content]"
 2. **User approval**: Uses AskUserQuestion with options: "Approve constitution update", "Reject — keep current version", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1)
 3. **Execute update**: If approved, performs a MINOR version update via `speckit-constitution`
+
+#### Verify Critical Gates (inline — always in context)
+
+> **🚨 These gates are inlined here because verify-phases.md and phase files may be pushed out of context. These 3 rules MUST be followed regardless of which phase files are loaded.**
+
+1. **🚫 코드 리뷰만으로 SC 통과 금지**: Explore agent로 "코드 경로 존재" 확인 → SC ✅는 절대 불가. SC 통과에는 런타임 증거(Playwright 로그, HTTP 응답, 사용자 확인)가 필수. 증거 없는 SC는 Review에서 BLOCKING.
+   ```
+   ❌ "useChatStore에 knowledge:search 있다" → SC-002 ✅
+   ✅ "Playwright: KB 연결 → 메시지 전송 → kbSearchCalled=true" → SC-002 ✅
+   ```
+
+2. **🚫 rebuild fix 시 source 코드 읽기 필수**: verify에서 코드를 수정할 때 source app의 해당 파일을 먼저 읽어야 함. 에러 메시지만 보고 즉흥 패치 → 패치 위의 패치 → "처음부터 다시" 루프 방지.
+
+3. **🚫 같은 SC 2번 실패 → Major 에스컬레이션**: 같은 SC가 fix 후에도 2번 연속 실패하면 verify에서 패치하지 말고 implement로 되돌린다.
+
+> For full gate details: [verify-phases.md](verify-phases.md) (Source Modification Gate, Evidence Gate), [verify-sc-verification.md](verify-sc-verification.md) (SC Matrix, depth requirements)
 
 #### Constitution Incremental Update Execute+Review (HARD STOP)
 

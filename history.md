@@ -20,6 +20,33 @@ F006 citation UI implementation entered a fix → re-fix → re-re-fix loop duri
 
 ---
 
+## [2026-03-19] Verify WHAT/HOW Separation + Context Budget Split + Implement Library Validation
+
+### Context
+
+verify-sc-verification.md (1030 lines) was too large — agents couldn't keep it in context. Additionally, Playwright-specific HOW content was mixed with verification logic WHAT, making it impossible for non-GUI projects to use the file efficiently.
+
+### Architecture Change: WHAT/HOW Separation
+
+| Before | After | Lines |
+|--------|-------|-------|
+| verify-sc-verification.md (monolith) | verify-sc-verification.md (WHAT: SC Matrix, orchestration, gates) | 1030 → 639 |
+| (embedded in above) | verify-sc-rebuild.md (rebuild-only: Visual Fidelity, Source Comparison) | NEW: 114 |
+| runtime-verification.md (partial HOW) | runtime-verification.md (complete HOW: § 8 GUI detail, § 9 Failure Recovery) | 387 → 577 |
+
+### Other Changes
+
+| File | Change |
+|------|--------|
+| pipeline.md | Added Verify Critical Gates inline (3 rules always in context) |
+| implement.md | Added Step 1b New Library Validation (import probe after new dependency) |
+
+### Design Decision: Why inline pipeline.md gates
+
+Even after splitting verify into 6 files, the agent might not read the right phase file at the right time. Three most-violated rules are now in pipeline.md (always loaded): no code-review-only SC pass, source reference for rebuild fixes, SC re-fix loop detection.
+
+---
+
 ## [2026-03-19] SKF-070 — Extensible Data Integrity Framework (S4) + Source Deep Analysis
 
 ### Context

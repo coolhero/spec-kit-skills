@@ -385,3 +385,193 @@ Port convention:
 - Max 10 seconds per library mode script
 - If script times out, skip and log: `⚠️ CLI script timeout — skipping browser check`
 - Do not block implement progress on browser access failures
+
+---
+
+## 8. GUI Verification Execution Detail
+
+> Absorbed from verify-sc-verification.md. This section provides the HOW for GUI SC verification.
+> verify-sc-verification.md Step 3 delegates here for GUI-specific execution detail.
+> For the WHAT (what to verify, SC classification, depth tracking), see verify-sc-verification.md Steps 0 and 3.
+
+### 8a. Runtime Degradation Flag Check
+
+Read sdd-state.md Feature Progress for this Feature. If Detail column shows `⚠️ RUNTIME-DEGRADED`:
+- Display: `⚠️ This Feature was implemented without runtime verification. Runtime bugs (selector instability, layout timing, infinite re-renders) may exist undetected.`
+- If `RUNTIME_BACKEND` is now `mcp`, `cli`, or `cli-limited`: proceed with full UI verification (this is the **recovery path** — extra scrutiny)
+- If `RUNTIME_BACKEND` is STILL `build-only`: **BLOCKING HARD STOP** — this Feature has NEVER had any runtime verification. Use AskUserQuestion:
+  - "Install Playwright CLI and retry verify"
+  - "Acknowledge NO runtime verification" — requires reason via "Other" input. Sets verify to `limited` status with `⚠️ NEVER-RUNTIME-VERIFIED — [reason]`
+- **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+### 8b. Runtime Backend Check
+
+Use the `RUNTIME_BACKEND` from the Pre-flight detection (run before Phase 1).
+- If `RUNTIME_BACKEND = build-only` AND user chose "Continue without UI verification": skip to Step 4. Display: `⏭️ UI verification skipped (no runtime backend available — acknowledged in Pre-flight)`
+- If `RUNTIME_BACKEND = demo-only`: skip to Step 6 (demo --ci only). Display: `⏭️ Interactive UI verification skipped — using demo --ci for runtime check.`
+- If `RUNTIME_BACKEND = cli` or `cli-limited`:
+  - **Playwright CLI verification (standard path)**: If `demos/verify/F00N-name.spec.ts` exists, run SC verification via CLI:
+    ```
+    npx playwright test demos/verify/F00N-name.spec.ts --reporter=list
+    ```
+  - If test file does not exist → use library mode (compose `node -e` scripts per SC — see § 7 CLI Script Patterns)
+  - **Both modes verify the same SCs** — test file is preferred because it's reproducible; library mode is fallback
+- If `RUNTIME_BACKEND = mcp`:
+  - Use Playwright MCP tools (`browser_navigate`, `browser_click`, `browser_snapshot`, etc.) for SC verification
+  - Navigate to Feature pages, execute SC actions, verify states via snapshots
+
+### 8c. Electron CDP Configuration Check
+
+**Case A — Playwright CLI available** (preferred):
+- Use `_electron.launch()` — connects directly to Electron, NO CDP port needed
+- No `--remote-debugging-port` flag, no port configuration
+- Launch: `_electron.launch({ args: ['./out/main/index.js'] })`
+- This eliminates ALL CDP session ordering issues
+
+**Case B — Playwright MCP only** (fallback):
+- Electron must be started with `--remote-debugging-port=9222`
+- The app must be started BEFORE the MCP session connects
+- Start app: modify the dev script or start command to include the CDP flag
+- Verify CDP is accessible: `curl -s http://localhost:9222/json/version` → should return JSON
+- If CDP is not accessible → see § 9b for recovery
+
+### 8d. App Launch Protocol
+
+> **App Session Management**: The agent manages the entire app lifecycle — start, verify, shut down.
+> Do NOT ask the user to start or restart the app manually.
+
+1. Determine app type from sdd-state.md Domain Profile:
+   - Web app → start dev server (`npm run dev` / quickstart.md command)
+   - Electron app → use `_electron.launch()` (CLI) or start with CDP flag (MCP)
+2. Wait for app to be ready:
+   - Web: health check on dev server URL (max 30s)
+   - Electron: `firstWindow()` resolves (max 30s)
+3. If app fails to start → see § 9d for recovery
+4. After all verification complete → shut down:
+   - Web: kill dev server process
+   - Electron CLI: `app.close()`
+   - Electron MCP: kill process
+
+### 8e. SC-Level UI Verification Execution
+
+For each `cdp-auto` SC in the SC Verification Matrix:
+
+**Tier 1 — Presence verification**:
+- Navigate to the page containing the SC's UI element
+- Snapshot → check element exists (by selector, role, or text)
+- Record: `✅ Tier 1 — element present` or `❌ Tier 1 — element not found`
+
+**Tier 2 — State change verification**:
+- Perform the user action (click button, fill input, toggle switch)
+- Wait for DOM update (max 5s)
+- Snapshot → check attribute/text/class changed to expected value
+- Record: `✅ Tier 2 — state changed to [value]` or `❌ Tier 2 — state unchanged after action`
+
+**Tier 3 — Side effect verification**:
+- After action, navigate to or check downstream element
+- Verify propagation: did the change reach the target? (different component, storage, API call)
+- Record: `✅ Tier 3 — side effect confirmed` or `❌ Tier 3 — side effect not observed`
+
+**Console error scan** (after each SC flow):
+- Read console logs for errors that occurred during the flow
+- Filter out platform noise (see § 7 Electron Console Noise)
+- Any `TypeError`, `ReferenceError`, unhandled rejection → record as `⚠️ Console error during SC-### verification`
+
+### 8f. CSS Theme Token Rendering Check
+
+When the Feature involves theming (dark mode, custom colors, font settings):
+1. Identify theme-related SCs from the SC Verification Matrix
+2. For each theme SC:
+   - Apply the theme change (toggle dark mode, change accent color)
+   - Extract computed CSS values for key elements:
+     - Background color, text color, border color
+     - Font size, font family
+   - Verify values match the theme token definitions (from spec.md or design system)
+3. Report:
+   ```
+   🎨 Theme Token Rendering:
+     Dark mode background: ✅ #1a1a2e (expected: #1a1a2e)
+     Dark mode text: ✅ #e0e0e0 (expected: #e0e0e0)
+     Accent color: ⚠️ #007bff (expected: #6366f1) — theme token mismatch
+   ```
+
+### 8g. Result Classification
+
+After all GUI SC verification:
+- Element not found: `❌ SC-### — element not found (selector: [selector])`
+- State not changed: `❌ SC-### — interaction did not produce expected state change`
+- Console error during verification: `⚠️ SC-### — console error detected during verification`
+- Timeout: `⚠️ SC-### — verification timed out (element/state not ready within 10s)`
+- Page load failure: `⚠️ SC-### — page failed to load`
+- **UI verification failures do NOT block the overall verify result** — they are included as warnings in Review. However, this does NOT mean UI verification can be skipped without user consent.
+- See [ui-testing-integration.md](ui-testing-integration.md) for full guide
+
+---
+
+## 9. Failure Recovery & User Cooperation Integration
+
+> When runtime verification encounters failures, follow this escalation path before giving up.
+> All recovery paths that reach "AskUserQuestion" follow the Canonical Flow from
+> [user-cooperation-protocol.md](user-cooperation-protocol.md) §2.
+
+### 9a. Playwright Installation Failure Recovery
+
+1. `npx playwright install chromium` fails → check disk space, permissions
+2. Still fails → AskUserQuestion: "Playwright installation failed: [error]. Can you install it manually? Run: `npx playwright install chromium`"
+3. User confirms installed → re-probe (`npx playwright --version` + library import)
+4. User cannot install → fall back to demo --ci only, record as `limited`
+
+### 9b. CDP Connection Failure Recovery (Electron + MCP)
+
+1. CDP port 9222 ECONNREFUSED → app not running, start it
+2. CDP port 9222 already in use → `lsof -i :9222` → kill stale process → restart app
+3. Still fails → AskUserQuestion: "CDP connection failed. Can you close any other Electron instances?"
+4. User confirms → retry
+5. All retries fail → fall back to Playwright CLI (`_electron.launch()` — no CDP needed)
+
+### 9c. _electron.launch() Failure Recovery (CLI mode)
+
+1. Launch fails → check if electron binary exists: `npx electron --version`
+2. Not found → `npm install electron` → retry
+3. Launch fails with "GPU process" → add `--disable-gpu` flag → retry:
+   ```js
+   _electron.launch({ args: ['./out/main/index.js', '--disable-gpu'] })
+   ```
+4. Still fails → fall back to MCP (if available) with CDP
+5. All fallbacks fail → AskUserQuestion: "Cannot launch Electron programmatically. Can you start the app manually? I'll connect via CDP."
+6. User starts app → agent connects via MCP CDP → proceed
+
+### 9d. App Won't Start Recovery
+
+1. Dev server fails → check port in use: `lsof -i :[port]` → kill if stale
+2. Build required first → run build → retry dev start
+3. Missing dependencies → `npm install` → retry
+4. Still fails → AskUserQuestion: "App cannot be started: [error]. Can you start it manually and provide the URL?"
+5. User provides URL → agent connects via Playwright navigate
+
+### 9e. User Cooperation Integration
+
+All recovery paths that reach "AskUserQuestion" follow these principles:
+
+1. **Batch all pending requests into ONE prompt** — don't ask multiple times for related dependencies
+2. **Provide concrete commands** the user can run (not generic "please fix this")
+3. **After user confirms → verify the dependency is actually available** (re-probe, don't trust the claim)
+4. **If still not available → provide specific next step**, not generic retry
+5. **Record the recovery path taken** in the SC verification report:
+   ```
+   Recovery: Playwright CLI failed → MCP fallback → CDP connection established → SC verification via MCP
+   ```
+
+**Recovery escalation summary**:
+
+```
+GUI Verification Recovery Ladder:
+  1. Playwright CLI (_electron.launch / chromium.launch)     ← preferred
+  2. Playwright CLI library mode (node -e scripts)           ← no test file
+  3. Playwright MCP (browser_* tools via CDP)                ← CLI unavailable
+  4. AskUserQuestion (user starts app manually)              ← all auto-start failed
+  5. demo --ci only (health check, no interactive verify)    ← no Playwright at all
+  6. build-only (no runtime verification)                    ← last resort, requires user ack
+```
+
+Each level automatically falls to the next when it fails. The agent MUST attempt all applicable levels before asking the user for help. Jumping directly to "user starts app" when CLI is available is a protocol violation.
