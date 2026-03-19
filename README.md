@@ -63,7 +63,7 @@ cd spec-kit-skills
 # ./uninstall.sh  # removes symlinks (to uninstall)
 ```
 
-The installer creates symlinks from `~/.claude/skills/` to this repository. This means skill updates are applied by `git pull` — no reinstallation needed.
+The installer creates symlinks from `~/.claude/skills/` to this repository.
 
 ### Which Command Should I Use?
 
