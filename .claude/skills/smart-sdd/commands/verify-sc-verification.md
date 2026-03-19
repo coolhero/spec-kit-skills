@@ -121,42 +121,69 @@ SC Verification Matrix for [FID]:
    - External services mocked
    - Record prerequisites for Step 3 execution
 
-8. **Early Cooperation Request (🚫 BLOCKING — do NOT defer to Step 3f)**:
+8. **Early Cooperation Overview (🚫 BLOCKING — do NOT defer to Step 3f/3g)**:
 
-   If ANY SC is classified as `user-assisted` in the Matrix above, **request cooperation NOW**, not later:
+   If ANY SC is classified as non-auto (`user-assisted`, `os-native`, `manual`), present the **full cooperation overview** to the user NOW — not later. This gives the user the complete picture of what they'll need to do, and lets them prepare in advance.
 
+   **Display format** — group by timing:
    ```
-   📋 API Key / Configuration Required for [FID] Verification:
+   📋 User Cooperation Required for [FID] Verification:
 
-   The following SCs need your environment configured before testing:
-     SC-003: Embedding pipeline — requires API key for embedding model
-     SC-005: RAG search — requires API key + KB with embedded data
+   🔑 CONFIGURE NOW (needed before auto-tests can cover these SCs):
+     SC-003: Embedding pipeline — requires API key
+       → Go to Settings > Model Provider > [provider] > Enter API key
+     SC-005: RAG search — requires API key + at least 1 embedded document
+       → After API key: create KB, add file, wait for embedding completion
 
-   Please configure the required API key now:
-     → Settings > Model Provider > [provider name] > Enter API key
+   🖱️ MANUAL ACTIONS (I'll ask you after auto-tests complete):
+     SC-004: Drag & drop file to KB area
+       → Action: drag a file onto the KB content area
+       → Expected: file appears in list, status changes to "processing"
+     SC-009: System tray menu
+       → Action: right-click system tray icon
+       → Expected: menu shows "Show/Hide" and "Quit" options
 
-   After you've set it up, confirm and I'll run the full verification
-   including these SCs.
+   👁️ VISUAL JUDGMENT (I'll ask you after auto-tests complete):
+     SC-012: Animation smoothness
+       → I'll trigger the animation, you judge if it's smooth
+
+   First: please configure the items under "CONFIGURE NOW".
+   Auto-tests will run after configuration. Manual items come last.
    ```
 
    **Use AskUserQuestion**:
-   - **"API key configured — proceed with full verification"** → Run ALL SCs including user-assisted ones
-   - **"Skip — verify without API key"** → Record as `⚠️ user-skipped` and proceed
-
+   - **"Configuration done — start testing"** → Run ALL auto + user-assisted SCs
+   - **"Skip configuration — test what you can"** → Record config-dependent SCs as `⚠️ user-skipped`, run remaining auto SCs
+   - **"No manual items needed — skip all"** → Record ALL non-auto as `⚠️ user-skipped`
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-   **🚫 Anti-pattern — this is what MUST NOT happen**:
+   **After auto-tests complete, present manual items one at a time**:
+   For each `os-native` or `manual` SC, use AskUserQuestion:
    ```
-   ❌ WRONG: Classify SC-003 as "user-assisted" → test other SCs → report "⚠️ API key needed"
-      → User never gets asked → SCs silently remain unverified → verify "completes"
+   🖱️ Manual verification — SC-004: Drag & Drop
+     Please drag a file onto the KB content area.
+     Expected result: file appears in list, status → "processing"
 
-   ✅ RIGHT: Classify SC-003 as "user-assisted" → IMMEDIATELY ask user for API key
-      → User provides key → test SC-003 with real API → report PASS/FAIL
+     What happened?
+   ```
+   Options: "Works as expected ✅", "Failed — [describe]", "Cannot test right now"
+
+   **🚫 Anti-patterns — ALL are BLOCKING violations**:
+   ```
+   ❌ Classify as "user-assisted" → never ask → report "⚠️ API key needed"
+   ❌ Classify as "os-native" → skip silently → report "⚠️ Playwright limitation"
+   ❌ Defer all cooperation to Step 3f/3g → agent skips to Review before reaching them
+   ❌ Ask user to configure but don't re-test after configuration
+
+   ✅ Show full cooperation overview at Step 0
+   ✅ User configures API key → re-test with real API → PASS/FAIL
+   ✅ After auto-tests → ask manual items one by one → record results
+   ✅ Every non-auto SC has either user-verified result or explicit user-skip
    ```
 
-   **Why early, not deferred**: Step 3f exists as a safety net, but agents consistently skip to Review
-   before reaching Step 3f. By requesting cooperation at Step 0 (before any tests run), the user
-   has time to configure while auto-category tests execute.
+   **Why early, not deferred**: Step 3f/3g exist as safety nets, but agents consistently skip to Review
+   before reaching them. By presenting the full overview at Step 0, the user knows what's coming,
+   can prepare configuration, and the agent has no excuse to skip cooperation.
 
 9. **Coverage Assessment**: Calculate expected coverage:
    - `auto-verifiable` = count(`cdp-auto` + `api-auto` + `cli-auto` + `pipeline-auto` + `test-covered`)
