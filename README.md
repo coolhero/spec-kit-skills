@@ -706,6 +706,70 @@ T0 Features are auto-generated from Foundation categories with Critical items re
 
 ---
 
+## Pipeline Quality Gates
+
+Each pipeline step has built-in checks that catch problems **before** they cascade downstream. These gates work automatically — no configuration needed.
+
+```mermaid
+flowchart LR
+    subgraph specify["specify"]
+        S1["FR Granularity
+        SC Testability
+        Data Pipeline Coverage
+        Source Deep Analysis
+        API Dependency Edge Cases"]
+    end
+
+    subgraph plan["plan"]
+        P1["Interaction Chain
+        Integration Contract
+        Architecture↔FR Coverage
+        Entity Ownership
+        Tech Compatibility"]
+    end
+
+    subgraph tasks["tasks"]
+        T1["Integration Wiring Task
+        Stub Resolution Task
+        Demo Task
+        Source Complexity"]
+    end
+
+    subgraph analyze["analyze"]
+        A1["FR→Task Coverage
+        SC→Task Mapping
+        FR Element Decomposition"]
+    end
+
+    subgraph implement["implement"]
+        I1["Library Validation
+        Wiring Check (7-point)
+        E2E Integration Smoke
+        Task Completion Evidence"]
+    end
+
+    subgraph verify["verify"]
+        V1["SC Evidence Gate
+        Source Reference for Fixes
+        Re-Fix Loop Detection"]
+    end
+
+    specify --> plan --> tasks --> analyze --> implement --> verify
+```
+
+**Key principle**: Problems are cheapest to fix where they originate. A missing FR in specify costs minutes to add; the same gap discovered in verify costs hours of rework. The gates shift detection **left** — toward the earliest possible pipeline step.
+
+| Stage | What gates catch | Example |
+|-------|-----------------|---------|
+| **specify** | Vague or incomplete requirements | "file embedding" → split into 5 pipeline-stage FRs |
+| **plan** | Architecture gaps, missing components | No citation component in plan but FR requires citation display |
+| **tasks** | Missing implementation work items | Cross-boundary Feature with no wiring task |
+| **analyze** | Coverage holes between spec↔plan↔tasks | SC describes behavior but no task implements it |
+| **implement** | Broken dependencies, disconnected modules | Library import fails at runtime; IPC handler exists but preload missing |
+| **verify** | No evidence of runtime verification | Agent claims "12/12 SC ✅" but only read code, never ran the app |
+
+---
+
 ## Extensibility & Customization
 
 Each of the three core concepts can be extended independently. The system is designed so you can start with defaults and progressively customize:

@@ -706,6 +706,70 @@ T0 Feature는 코드가 필요한 Critical 항목이 있는 Foundation 카테고
 
 ---
 
+## Pipeline Quality Gates
+
+각 파이프라인 단계에는 문제가 하류로 전파되기 **전에** 잡는 내장 검증 게이트가 있습니다. 별도 설정 없이 자동으로 작동합니다.
+
+```mermaid
+flowchart LR
+    subgraph specify["specify"]
+        S1["FR Granularity
+        SC Testability
+        Data Pipeline Coverage
+        Source Deep Analysis
+        API Dependency Edge Cases"]
+    end
+
+    subgraph plan["plan"]
+        P1["Interaction Chain
+        Integration Contract
+        Architecture↔FR Coverage
+        Entity Ownership
+        Tech Compatibility"]
+    end
+
+    subgraph tasks["tasks"]
+        T1["Integration Wiring Task
+        Stub Resolution Task
+        Demo Task
+        Source Complexity"]
+    end
+
+    subgraph analyze["analyze"]
+        A1["FR→Task Coverage
+        SC→Task Mapping
+        FR Element Decomposition"]
+    end
+
+    subgraph implement["implement"]
+        I1["Library Validation
+        Wiring Check (7-point)
+        E2E Integration Smoke
+        Task Completion Evidence"]
+    end
+
+    subgraph verify["verify"]
+        V1["SC Evidence Gate
+        Source Reference for Fixes
+        Re-Fix Loop Detection"]
+    end
+
+    specify --> plan --> tasks --> analyze --> implement --> verify
+```
+
+**핵심 원칙**: 문제는 발생 지점에서 수정하는 것이 가장 저렴합니다. specify에서 빠진 FR을 추가하는 데는 몇 분이면 되지만, 같은 gap을 verify에서 발견하면 몇 시간의 재작업이 필요합니다. 게이트는 감지를 **왼쪽으로** — 가능한 가장 이른 파이프라인 단계로 이동시킵니다.
+
+| 단계 | 게이트가 잡는 것 | 예시 |
+|------|----------------|------|
+| **specify** | 모호하거나 불완전한 요구사항 | "파일 임베딩" → 5개 파이프라인 단계 FR로 분할 |
+| **plan** | 아키텍처 gap, 누락된 컴포넌트 | FR은 citation 표시 요구하는데 plan에 CitationBlock 없음 |
+| **tasks** | 누락된 구현 작업 | cross-boundary Feature인데 wiring task 없음 |
+| **analyze** | spec↔plan↔tasks 간 커버리지 구멍 | SC가 동작을 기술하지만 이를 구현하는 task 없음 |
+| **implement** | 깨진 의존성, 연결되지 않은 모듈 | 라이브러리 import 런타임 실패; IPC handler 있지만 preload 누락 |
+| **verify** | 런타임 검증 증거 없음 | 에이전트가 "12/12 SC ✅" 주장하지만 코드만 읽고 앱 실행 안 함 |
+
+---
+
 ## 확장성 & 커스터마이징
 
 세 가지 핵심 개념은 각각 독립적으로 확장할 수 있습니다. 기본값에서 시작하여 점진적으로 커스터마이즈할 수 있도록 설계되었습니다:
