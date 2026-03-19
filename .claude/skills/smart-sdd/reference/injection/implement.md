@@ -675,6 +675,8 @@ After Post-Implement Full Verification, run a grep-based anti-pattern scan on fi
 
 ### Semantic Stub Detection (extends hollow implementation check — 🚫 BLOCKING)
 
+**Automated detection available**: Run `bash scripts/semantic-stub-check.sh <project-root>` to detect all 5 stub patterns automatically. Script exit code 1 = stubs found = BLOCKING.
+
 The basic stub detection (L567) only catches syntactic patterns (`return null`, `// TODO`). The following **semantic** patterns also indicate fake implementations that pass build/type checks but deliver zero functionality:
 
 | Pattern | Detection Signal | Severity |
@@ -1251,7 +1253,13 @@ When implementing hover, click, or popup interactions, check the following befor
 
 > **Why this gate exists (SKF-069)**: Agents write "feature code" (services, stores, handlers, components) but miss "wiring code" — the glue that connects features to the app's lifecycle. Result: all code exists, build passes, but the feature is unreachable or non-functional at runtime.
 
-**After all implement tasks are complete, execute this checklist mechanically (grep/read — 2 minutes max):**
+**After all implement tasks are complete, run the automated wiring check script:**
+
+```bash
+bash scripts/wiring-check.sh <project-root> --feature <FID>
+```
+
+If the script is not available, execute this checklist mechanically (grep/read — 2 minutes max):
 
 ### 1. Store Hydration Check
 - Scan for new state stores created in this Feature (Zustand `create()`, Pinia `defineStore()`, Redux `createSlice()`, Svelte `writable()`, etc.)
