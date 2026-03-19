@@ -272,10 +272,10 @@ After `speckit-plan` completes, if the Feature has Functional Enablement Chain e
 ```markdown
 ## Integration Contracts
 
-| Direction | Target Feature | Interface | Provider Shape | Consumer Shape | Bridge |
-|-----------|---------------|-----------|---------------|---------------|--------|
-| Provides → | F005-chat | getActiveTools() | `Tool[]` `{name, description, inputSchema}` | — | — |
-| Consumes ← | F003-chat-core | ParameterBuilder.build(assistant) | — | `{mcpMode: string, mcpServers: MCPServer[]}` | adapter: mapMCPStoreToAssistant() |
+| Direction | Target Feature | Interface | Provider Shape | Consumer Shape | Bridge | Architecture |
+|-----------|---------------|-----------|---------------|---------------|--------|-------------|
+| Provides → | F005-chat | getActiveTools() | `Tool[]` `{name, description, inputSchema}` | — | — | AI Tool |
+| Consumes ← | F003-chat-core | ParameterBuilder.build(assistant) | — | `{mcpMode: string, mcpServers: MCPServer[]}` | adapter: mapMCPStoreToAssistant() | Plugin Hook |
 ```
 
 **Column definitions**:
@@ -285,8 +285,24 @@ After `speckit-plan` completes, if the Feature has Functional Enablement Chain e
 - **Provider Shape**: The data structure the providing Feature outputs (type signature or field list)
 - **Consumer Shape**: The data structure the consuming Feature expects as input
 - **Bridge**: If Provider Shape ≠ Consumer Shape, the adapter/transform needed. `—` if shapes are directly compatible
+- **Architecture**: The integration pattern. Values: `AI Tool` | `Plugin Hook` | `System Message Injection` | `Direct Import` | `Event/PubSub` | `Middleware`
 
-**Why this matters**: Without explicit shape contracts, integration mismatches (e.g., `mcpMode` vs `mcp.mode`, `Tool[]` vs `{tools: Tool[]}`) slip through spec/plan/tasks/implement and are only discovered at runtime. This section makes the contract explicit so implement can build the bridge and verify can check it.
+**Architecture column enforcement (rebuild — 🚫 BLOCKING)**:
+
+In rebuild mode, the Architecture column must match the source app's integration pattern (from SBI `-INT` entries):
+```
+🚫 Integration Architecture Mismatch (BLOCKING):
+  Source B194-INT: "Memory as AI Tool via Plugin hook"
+  Plan Architecture: "System Message Injection"
+
+  Source provides memory as an AI Tool (AI decides when to use).
+  Plan uses system message injection (forced every message).
+  These are fundamentally different patterns with different UX.
+
+  → Change Architecture to "AI Tool" and redesign integration accordingly.
+```
+
+**Why this matters**: Without explicit shape contracts AND architecture patterns, integration mismatches (e.g., `mcpMode` vs `mcp.mode`, forced injection vs AI Tool) slip through spec/plan/tasks/implement and are only discovered at runtime. This section makes both the contract and the pattern explicit.
 
 **If `## Integration Contracts` is missing from plan.md** (Feature with Enablement Chain):
 - Display in Review: `🚫 Integration Contracts section missing — cross-Feature data shape contracts not defined. BLOCKING.`

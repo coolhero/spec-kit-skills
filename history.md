@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-03-19] SKF-075 — Integration Architecture Extraction + Method Specificity + Architecture Pattern
+
+### Context
+
+Memory Feature (F006) implemented as "system message injection" when source app (Cherry Studio) uses "AI Tool via Plugin hook" — fundamentally different architecture producing different UX. Root cause: SBI extracts service files only, misses integration/orchestration layer.
+
+### Fixes (3 new rules)
+
+| Fix | File |
+|-----|------|
+| Integration Architecture Extraction — SBI `-INT` entries for plugin/hook/tool patterns | reverse-spec analyze.md |
+| Integration Method Specificity (🚫 BLOCKING) — FR verbs must match source integration pattern | specify.md |
+| Architecture column in Integration Contract (🚫 BLOCKING) — AI Tool vs Injection vs Plugin | plan.md |
+
+---
+
 ## [2026-03-19] SKF-073~074 — AI Reference Pipeline + Source Parity + Cross-Feature Rendering + UX Flow
 
 ### Context

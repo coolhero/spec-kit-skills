@@ -1083,6 +1083,41 @@ AFTER (with UX Flow):
 
 This extension feeds into specify (each `-UX` entry becomes an FR candidate) and plan (Interaction Chain rows derived from the UX trace).
 
+#### Integration Architecture Extraction (all Features)
+
+> **Why this matters (SKF-075)**: SBI extracts service-level functions (MemoryService.search, KnowledgeService.query) but misses HOW these services integrate with the main application flow. Source app may use Plugin hooks, AI Tool registration, Event/PubSub, or Middleware — patterns invisible at the service file level. Missing integration patterns → implement uses "simplest method" (if-statements + system message injection) → architecture mismatch.
+
+After function-level SBI extraction, for each Feature that **integrates with another Feature's processing pipeline**:
+
+1. **Identify integration files**: Search for files that connect services to the application lifecycle:
+   - Plugin/Hook systems: `*plugin*.ts`, `*hook*.ts`, `*middleware*.ts`, `*orchestrat*.ts`
+   - AI Tool registration: files that add tools to `params.tools`, `function_declarations`, `tool_choice`
+   - Event systems: `*event*.ts`, `*bus*.ts`, `*emitter*.ts`
+   - Interceptors: `*interceptor*.ts`, request/response transformers
+
+2. **Read integration files**: For each integration file, extract:
+   - Integration pattern: Plugin Hook / AI Tool / Direct Import / Event / Middleware
+   - Hook points: When in the lifecycle does integration happen? (request start, params build, response end)
+   - Control: Who decides when to use the Feature? (AI decides via Tool, app forces via injection, user toggles)
+
+3. **Add `-INT` suffix SBI entries**:
+   ```
+   B194     Search relevant memories        P1  MemoryService.search()
+   B194-INT Memory as AI Tool via Plugin    P1  searchOrchestrationPlugin.transformParams()
+            → "Memory provided as builtin_memory_search tool.
+               AI decides when to invoke. Plugin hook on requestStart."
+   ```
+
+4. **Integration Pattern Summary**: For the project as a whole, record the dominant integration pattern:
+   ```
+   Integration Architecture: Plugin Hook Pattern
+   - Memory, Knowledge, WebSearch all registered as AI Tools via plugin hooks
+   - AI request lifecycle: onRequestStart → transformParams → onRequestEnd
+   - NOT direct injection — AI has agency over tool usage
+   ```
+
+This feeds into specify (FR must use correct integration verbs) and plan (Integration Contract must specify architecture pattern).
+
 ### 2-7. UI Component Feature Extraction (Frontend/Fullstack Projects Only)
 
 > Skip this step entirely for backend-only, library, or CLI projects.

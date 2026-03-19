@@ -204,7 +204,8 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 6. **Build-Time Plugin FR Check** (if applicable — rebuild mode + source has build config with plugins)
 7. **Domain Rule Compliance Check (S1)** (always — see § Domain Rule Compliance Check below)
 8. **External API Dependency Edge Cases** (if Feature consumes external APIs — see below)
-9. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
+9. **Integration Method Specificity Check** (if Feature integrates with AI/LLM pipeline — rebuild only — see below)
+10. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
 10. **FR Granularity Check** (always — see below)
 11. **SC Testability Check** (always — see below)
 12. **Assemble Review Display** (include any ⚠️/❌ from steps 1-11)
@@ -440,6 +441,42 @@ If any FR references an external API/service (keywords: "via API", "using provid
 3. For rebuild mode: check how source app handles these cases (e.g., Cherry Studio only shows authenticated providers in ModelSelector). If source app has a UX pattern for this, the FR MUST specify that same pattern or an explicit alternative.
 
 **Skip if**: Feature has no external API dependencies (pure local functionality).
+
+### Integration Method Specificity Check (rebuild — 🚫 BLOCKING)
+
+> **Skip if**: Not rebuild mode, or Feature does not integrate with AI/LLM processing pipeline.
+> **Triggered by**: FR containing "inject", "add to context", "provide as context", "search and inject", or any integration with AI/LLM pipeline.
+
+**Purpose (SKF-075)**: FR verbs like "inject results as context" pre-commit to an architecture (system message injection) without checking how the source app actually integrates. Source app may use AI Tool registration, Plugin hooks, or Event systems — fundamentally different patterns that produce different UX.
+
+Check each FR that describes Feature integration with the AI/LLM pipeline:
+
+1. **Read SBI `-INT` entries** (from pre-context): What integration pattern does the source app use?
+   - AI Tool: AI decides when to invoke (`tools[builtin_memory_search]`)
+   - Plugin Hook: lifecycle hooks transform request/response (`onRequestStart`, `transformParams`)
+   - System Message Injection: forced content prepended to conversation
+   - Direct Import: synchronous function call in request handler
+
+2. **Compare FR verb with source pattern**:
+   ```
+   🚫 Integration Method Mismatch (BLOCKING):
+     SBI B194-INT: "Memory as AI Tool via Plugin hook"
+     FR-027: "inject relevant results as context"
+
+     Source uses AI Tool pattern (AI decides when to search).
+     FR uses injection verb (forced every message).
+     These are architecturally incompatible.
+
+     → Rewrite FR: "provide memory search as AI tool.
+        AI invokes when relevant to conversation."
+   ```
+
+3. **Forbidden verbs for AI Tool pattern**: When source uses AI Tool/Plugin pattern, these FR verbs are BLOCKING:
+   - "inject" → implies forced insertion, not AI choice
+   - "prepend to system message" → implies always-on, not selective
+   - "search and add" → implies synchronous forced flow
+
+   **Allowed verbs**: "provide as tool", "register as capability", "make available to AI", "AI may invoke"
 
 ### Data Pipeline Completeness Check
 
