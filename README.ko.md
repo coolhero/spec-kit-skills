@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 13:30 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 13:49 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -478,22 +478,39 @@ flowchart TD
 ## 빠른 예시
 
 **기존 앱 재구축**:
-```
+```bash
 /reverse-spec ./legacy-app --scope core --stack new
+# → 소스 코드 스캔, Domain Profile 감지, Feature 추출
+# → 생성: roadmap.md, entity-registry.md, api-registry.md, pre-context
+# → HARD STOP에서 Feature 목록을 검토하고 승인
+
 /smart-sdd pipeline
+# → 각 Feature 처리: specify → plan → tasks → analyze → implement → verify
+# → 각 Checkpoint(전)과 Review(후)에서 HARD STOP
+# → target 앱이 source 앱의 UX 패턴을 새 스택으로 재현
 ```
 
 **그린필드 프로젝트**:
-```
-/smart-sdd init
-/smart-sdd add        # Feature를 대화형으로 정의
-/smart-sdd pipeline   # specify → plan → tasks → analyze → implement → verify
+```bash
+/smart-sdd init "팀 워크스페이스가 있는 작업 관리 앱을 만들고 싶어"
+# → Domain Profile 감지: [gui, http-api] + [auth, async-state]
+# → 5개 Feature 제안 → 승인 → /smart-sdd add로 자동 연결
+
+/smart-sdd add
+# → Briefing: Feature별 6관점 검증
+# → 각 Brief Summary를 HARD STOP에서 승인
+
+/smart-sdd pipeline
+# → GEL의 cross-Feature 컨텍스트로 각 Feature 구현
 ```
 
 **기존 프로젝트에 Feature 추가**:
-```
-/smart-sdd add        # "실시간 알림 기능이 필요합니다"
-/smart-sdd pipeline   # 새로운/대기 중인 Feature만 처리
+```bash
+/smart-sdd add
+# → "실시간 알림이 필요합니다" → Briefing → Brief Summary → 승인
+
+/smart-sdd pipeline
+# → 완료된 Feature는 건너뛰고, 새로운/대기 중인 Feature만 처리
 ```
 
 ---
@@ -572,6 +589,23 @@ flowchart TD
    런타임 SC 검증 → Demo-Ready 확인 → Foundation 준수성
 ```
 
+**HARD STOP에서 실제로 보이는 것**: 각 Checkpoint와 Review에서 에이전트가 일시 정지하고, 조립했거나 생산한 내용의 요약을 보여준 뒤 결정을 요청합니다:
+
+```
+📋 Checkpoint — F002-task-crud specify 컨텍스트:
+
+  Entity 컨텍스트: User (F001-auth), Session (F001-auth)
+  API 컨텍스트: POST /api/auth/login (F001-auth)
+  Domain Profile: [gui, http-api] + [auth, async-state] + mvp/solo
+
+  승인하고 specify를 진행할까요?
+  ├─ "Approve" — 이 컨텍스트로 speckit-specify 실행
+  ├─ "Modify context" — 주입 내용 조정
+  └─ "Skip Feature" — F002를 연기하고 다음으로 이동
+```
+
+spec-kit 실행 후에는 Review HARD STOP이 출력물을 보여주고 다음 단계 진행 전에 승인을 요청합니다. 에이전트가 무엇을 생산했는지 항상 확인하고 충분한지 결정할 수 있습니다.
+
 각 Feature는 **6단계 생명주기**를 거칩니다. verify에서 버그를 발견하면 조용히 패치하지 않고 적절한 단계로 되돌립니다:
 
 ```mermaid
@@ -591,12 +625,14 @@ verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 
 
 상황에 맞는 모드를 선택하세요:
 
-| 모드 | 진입점 | 사용 사례 |
-|------|--------|----------|
-| 그린필드 | `/smart-sdd init` → `add` → `pipeline` | 처음부터 새 프로젝트 |
-| 점진적 추가 | `/smart-sdd add` → `pipeline` | 기존 smart-sdd 프로젝트에 Feature 추가 |
-| 재구축 | `/reverse-spec` → `/smart-sdd pipeline` | 기존 코드베이스를 SDD로 재구축 |
-| 도입 | `/reverse-spec --adopt` → `/smart-sdd adopt` | 기존 코드에 SDD 문서 래핑 |
+| 모드 | 진입점 | 사용 사례 | 코드 변경? |
+|------|--------|----------|-----------|
+| 그린필드 | `/smart-sdd init` → `add` → `pipeline` | 처음부터 새 프로젝트 | 예 — 새 코드 생성 |
+| 점진적 추가 | `/smart-sdd add` → `pipeline` | 기존 smart-sdd 프로젝트에 Feature 추가 | 예 — 새 코드 추가 |
+| 재구축 | `/reverse-spec` → `/smart-sdd pipeline` | 기존 코드베이스를 SDD로 재구축 | 예 — 새 스택으로 재작성, source 앱 UX 재현 목표 |
+| 도입 | `/reverse-spec --adopt` → `/smart-sdd adopt` | 기존 코드에 SDD 문서 래핑 | **아니오** — 기존 코드를 재작성하지 않고 문서화. `tasks`와 `implement` 건너뜀 |
+
+> **재구축 vs 도입**: 재구축은 source 앱을 새 스택으로 다시 구현합니다 — 새 코드가 작성되며, target이 source 앱의 UX 패턴을 일치시켜야 합니다. 도입은 기존 코드를 건드리지 않고 SDD spec과 plan으로 래핑합니다 — 기존 프로젝트를 SDD 워크플로우에 온보딩하여 향후 변경이 파이프라인을 따르게 할 때 유용합니다.
 
 기존 소프트웨어를 재구축할 때(스택 마이그레이션, 프레임워크 업그레이드 등), reverse-spec Phase 0에서 네 가지 구성 파라미터를 수집합니다:
 

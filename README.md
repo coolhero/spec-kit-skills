@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 13:30 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 13:49 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -480,22 +480,39 @@ All journeys converge to **incremental mode** as the steady state. In every jour
 ## Quick Examples
 
 **Rebuild an existing app**:
-```
+```bash
 /reverse-spec ./legacy-app --scope core --stack new
+# → Scans source code, detects Domain Profile, extracts Features
+# → Produces: roadmap.md, entity-registry.md, api-registry.md, pre-contexts
+# → You review and approve the Feature list at a HARD STOP
+
 /smart-sdd pipeline
+# → Processes each Feature: specify → plan → tasks → analyze → implement → verify
+# → HARD STOP at each Checkpoint (before) and Review (after)
+# → Target app reproduces source app's UX patterns in the new stack
 ```
 
 **Greenfield project**:
-```
-/smart-sdd init
-/smart-sdd add        # define Features interactively
-/smart-sdd pipeline   # specify → plan → tasks → analyze → implement → verify
+```bash
+/smart-sdd init "Build a task management app with team workspaces"
+# → Detects Domain Profile: [gui, http-api] + [auth, async-state]
+# → Proposes 5 Features → you approve → chains into /smart-sdd add
+
+/smart-sdd add
+# → Briefing: 6-perspective validation per Feature
+# → You approve each Brief Summary at a HARD STOP
+
+/smart-sdd pipeline
+# → Builds each Feature with cross-Feature context from GEL
 ```
 
 **Add a Feature to an existing project**:
-```
-/smart-sdd add        # "I need real-time notifications"
-/smart-sdd pipeline   # processes only new/pending Features
+```bash
+/smart-sdd add
+# → "I need real-time notifications" → Briefing → Brief Summary → approval
+
+/smart-sdd pipeline
+# → Skips completed Features, processes only new/pending ones
 ```
 
 ---
@@ -574,6 +591,23 @@ The pipeline runs in three phases. First, the project is analyzed (or defined fr
    Runtime SC Verification → Demo-Ready Check → Foundation Compliance
 ```
 
+**What a HARD STOP looks like in practice**: At each Checkpoint and Review, the agent pauses and shows you a summary of what it assembled or produced, then asks for your decision:
+
+```
+📋 Checkpoint — Context for F002-task-crud specify:
+
+  Entity context: User (from F001-auth), Session (from F001-auth)
+  API context: POST /api/auth/login (from F001-auth)
+  Domain Profile: [gui, http-api] + [auth, async-state] + mvp/solo
+
+  Approve and proceed to specify?
+  ├─ "Approve" — run speckit-specify with this context
+  ├─ "Modify context" — adjust what's injected
+  └─ "Skip Feature" — defer F002 and move to next
+```
+
+After spec-kit runs, a Review HARD STOP shows the output and asks you to approve before moving on. You always see what the agent produced and decide whether it's good enough.
+
 Each Feature goes through a **6-step lifecycle**. If verify finds bugs, they loop back to the right step instead of being patched silently:
 
 ```mermaid
@@ -593,12 +627,14 @@ Verify discovers bugs and classifies them into 4 severity levels. Only Minor iss
 
 Choose the mode that matches your situation:
 
-| Mode | Entry Point | Use Case |
-|------|-------------|----------|
-| Greenfield | `/smart-sdd init` → `add` → `pipeline` | New project from scratch |
-| Incremental | `/smart-sdd add` → `pipeline` | Add features to existing smart-sdd project |
-| Rebuild | `/reverse-spec` → `/smart-sdd pipeline` | Rebuild existing codebase with SDD |
-| Adoption | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs |
+| Mode | Entry Point | Use Case | Code Changes? |
+|------|-------------|----------|--------------|
+| Greenfield | `/smart-sdd init` → `add` → `pipeline` | New project from scratch | Yes — generates new code |
+| Incremental | `/smart-sdd add` → `pipeline` | Add features to existing smart-sdd project | Yes — adds new code |
+| Rebuild | `/reverse-spec` → `/smart-sdd pipeline` | Rebuild existing codebase with SDD | Yes — rewrites in new stack, targeting UX equivalence with the source app |
+| Adoption | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs | **No** — documents existing code without rewriting. Skips `tasks` and `implement` |
+
+> **Rebuild vs Adoption**: Rebuild re-implements the source app in a new stack — new code is written, and the target must match the source app's UX patterns. Adoption wraps your existing code with SDD specs and plans without touching the source — useful for onboarding an existing project into the SDD workflow so future changes follow the pipeline.
 
 When rebuilding existing software (stack migration, framework upgrade, etc.), reverse-spec Phase 0 collects four configuration parameters:
 
