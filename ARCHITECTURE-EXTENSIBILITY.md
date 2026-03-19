@@ -224,6 +224,7 @@ Every section from every module routes to a specific pipeline step. This is the 
 | **S1** | SC Generation Rules | `specify` | Adds mandatory Success Criteria patterns; rejects anti-patterns |
 | **S2** | Parity Dimensions | `parity` | Defines structural/logic comparison axes (old vs new) |
 | **S3** | Verify Steps | `verify` | Adds/extends verification gates (test, build, lint, demo + module-specific) |
+| **S4** | Data Integrity Principles | All steps | Universal engineering rules (data authority, empty input, pipeline trace). Concerns extend (e.g., IPC N-Layer) |
 | **S5** | Elaboration Probes | `specify` (clarify) | Adds domain-specific questions during Feature consultation |
 | **S6** | UI Testing Strategy | `verify` Phase 2-3 | Defines how to test UI rendering (Playwright, screenshots) |
 | **S7** | Bug Prevention Rules | `plan` / `analyze` / `implement` / `verify` | Activates stage-specific checks (split into B-1, B-2, B-3, B-4) |
@@ -753,7 +754,39 @@ After running `public-api` on 3+ real projects:
 
 ---
 
-## 11. Cross-Reference Map
+## 11. Rebuild Architecture — Source Analysis → Spec-Draft → Pipeline
+
+In rebuild mode, the system follows a three-phase architecture designed to preserve source app fidelity:
+
+### Phase 1: Source Analysis (reverse-spec)
+
+reverse-spec is the **sole producer** of source analysis artifacts. It:
+1. Scans source code (Phase 1-2)
+2. **Runs the source app** and records UI flows (Phase 1.5 — BLOCKING for rebuild)
+3. Classifies Features (Phase 3)
+4. Generates **spec-draft.md** per Feature (Phase 4) — detailed FR/SC with exact UI controls
+
+### Phase 2: Spec Refinement (smart-sdd specify)
+
+speckit-specify receives spec-draft.md as a **seed** and refines it — NOT generates from scratch. Post-execution cross-check ensures no UI control downgrade (Dropdown → TextInput = BLOCKING).
+
+### Phase 3: Pipeline Execution (smart-sdd plan → verify)
+
+Pipeline artifacts (`spec.md`, `plan.md`, `tasks.md`) contain **requirements only** — no source code references. Source details live exclusively in `specs/reverse-spec/` (pre-context, spec-draft). This **Artifact Separation** ensures specs are reusable and source analysis has a single source of truth.
+
+```
+Source Code → reverse-spec  → specs/reverse-spec/    → smart-sdd  → specs/NNN-feature/
+               (analysis)      pre-context.md            (pipeline)    spec.md (clean)
+                               spec-draft.md (detailed)                plan.md (clean)
+                               UI Flow Specs                           tasks.md (clean)
+                               SBI, registries
+```
+
+When smart-sdd discovers new source insights during pipeline execution, it updates `specs/reverse-spec/` artifacts (not its own). This ensures all source knowledge accumulates in one place.
+
+---
+
+## 12. Cross-Reference Map
 
 Which files touch which concepts — use this when modifying a concept to find all affected files.
 
@@ -785,6 +818,13 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Verify file split** | `smart-sdd/commands/verify-phases.md` (hub + common gates), `verify-preflight.md` (Phase 0), `verify-build-test.md` (Phase 1), `verify-cross-feature.md` (Phase 2), `verify-sc-verification.md` (Phase 3 WHAT), `verify-sc-rebuild.md` (rebuild-only), `verify-evidence-update.md` (Evidence + Phase 4-5), `smart-sdd/reference/runtime-verification.md` (Phase 3 HOW) |
 | **Pipeline Integrity Guards** | `smart-sdd/reference/pipeline-integrity-guards.md` (7 guard patterns), `smart-sdd/reference/injection/implement.md` (Guards 1,2,5,6,7), `smart-sdd/reference/injection/plan.md` (Guard 7), `smart-sdd/reference/injection/analyze.md` (Guard 4), `smart-sdd/commands/verify-phases.md` (Guards 2,3,5,6), `reverse-spec/commands/analyze.md` (Guards 4,7) |
 | **Component Tree flow** | `reverse-spec/commands/analyze.md` § Phase 2-7c, `reverse-spec/templates/pre-context-template.md` § Component Tree, `smart-sdd/reference/injection/plan.md` § Source Component Mapping, `smart-sdd/reference/injection/implement.md` § Source-First Implementation |
+| **spec-draft.md** | `reverse-spec/templates/spec-draft-template.md` (format), `reverse-spec/commands/analyze.md` § Phase 4 spec-draft generation (conversion rules), `smart-sdd/reference/injection/specify.md` § Spec-Draft Seeding Protocol (consumption), `smart-sdd/reference/context-injection-rules.md` § Missing/Sparse (degradation) |
+| **UI Flow Spec** | `reverse-spec/commands/analyze.md` § Phase 1.5-D (generation), `reverse-spec/templates/pre-context-template.md` § UI Flow Specifications (storage), `smart-sdd/reference/injection/specify.md` § Read Targets (consumption) |
+| **Artifact Separation** | `CLAUDE.md` § P1-b (principle), `reverse-spec/` (source analysis artifacts), `specs/NNN-feature/` (pipeline artifacts — no source references) |
+| **Cross-Concern Integration** | `smart-sdd/domains/_resolver.md` § Step 3.5 (rule table), `ARCHITECTURE-EXTENSIBILITY.md` § 2 (pattern list) |
+| **Lazy Loading** | `smart-sdd/domains/_resolver.md` § Step 5 (per-command section filtering) |
+| **Wiring Check** | `smart-sdd/reference/injection/implement.md` § App Lifecycle Wiring Check (7-point gate), `smart-sdd/scripts/wiring-check.sh` (automation) |
+| **SC Evidence Gate** | `smart-sdd/commands/verify-evidence-update.md` § SC Verification Evidence Gate (BLOCKING), `smart-sdd/commands/verify-sc-verification.md` § Step 0 SC Verification Planning |
 | **FR Element Decomposition** | `smart-sdd/reference/injection/analyze.md` § FR Element Decomposition, `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 4b |
 | **Data Round-trip Verification** | `smart-sdd/reference/injection/implement.md` § Data Persistence Round-Trip, `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 2 Level 4 |
 | **Data Lifecycle Paradigm Mapping** | `reverse-spec/commands/analyze.md` § Phase 2-7d, `reverse-spec/templates/pre-context-template.md` § Data Lifecycle Patterns, `smart-sdd/reference/injection/plan.md` § Data Lifecycle Mapping, `smart-sdd/reference/injection/implement.md` § Source Reference Injection (lifecycle compliance), `smart-sdd/reference/pipeline-integrity-guards.md` § Guard 7 |
