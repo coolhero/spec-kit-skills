@@ -259,9 +259,17 @@ flowchart TD
         INIT["/smart-sdd init
         Domain Profile detection
         Feature candidates"]
-        RS["/reverse-spec
-        Source analysis
-        Behavior extraction"]
+
+        subgraph rs_detail["/reverse-spec"]
+            RS_RUN["Phase 1.5: Run source app
+            Capture UI flows, controls, error paths"]
+            RS_CODE["Phase 2-3: Code analysis
+            SBI, entities, APIs, Features"]
+            RS_DRAFT["Phase 4: Generate per Feature
+            pre-context + spec-draft.md"]
+            RS_RUN --> RS_CODE --> RS_DRAFT
+        end
+
         ADOPT_RS["/reverse-spec --adopt
         Document existing code"]
     end
@@ -274,17 +282,26 @@ flowchart TD
     end
 
     subgraph gel["Global Evolution Layer — specs/reverse-spec/"]
-        GEL["roadmap · entity registry · API registry
-        pre-contexts · constitution · sdd-state"]
+        GEL_PROJ["Project-wide:
+        roadmap · registries · constitution"]
+        GEL_FEAT["Per Feature:
+        pre-context · UI Flow Spec · spec-draft"]
     end
 
     subgraph build["4. BUILD"]
-        PIPELINE["/smart-sdd pipeline
-        Per Feature: specify → plan → tasks
-        → analyze → implement → verify"]
+        subgraph pipeline_detail["/smart-sdd pipeline"]
+            SPECIFY["specify
+            Refines spec-draft (not from scratch)
+            UI control downgrade = BLOCKING"]
+            PLAN["plan → tasks → analyze"]
+            IMPL["implement
+            Wiring Check (7-point)"]
+            VERIFY["verify
+            SC Evidence Gate (runtime proof required)"]
+            SPECIFY --> PLAN --> IMPL --> VERIFY
+        end
         ADOPT_P["/smart-sdd adopt
-        Per Feature: specify → plan
-        → analyze → verify"]
+        specify → plan → analyze → verify"]
     end
 
     DP["⚙️ Domain Profile
@@ -295,24 +312,26 @@ flowchart TD
     CE_TRACE --> EO
     IDEA --> INIT
 
-    CE_SYNTH -- "--from-explore" --> RS
+    CE_SYNTH -- "--from-explore" --> RS_RUN
     CE_SYNTH -- "--from-explore" --> ADD
     CE_SYNTH -- "--from-explore" --> ADOPT_RS
 
-    CODE --> RS
+    CODE --> RS_RUN
     CODE --> ADOPT_RS
     INIT --> ADD
-    RS --> GEL
-    ADOPT_RS --> GEL
-    ADD --> GEL
-    GEL --> PIPELINE
-    GEL --> ADOPT_P
-    DP -.- PIPELINE
+    RS_DRAFT --> GEL_PROJ
+    RS_DRAFT --> GEL_FEAT
+    ADOPT_RS --> GEL_PROJ
+    ADD --> GEL_PROJ
+    GEL_FEAT -- "spec-draft seeds specify" --> SPECIFY
+    GEL_PROJ --> pipeline_detail
+    GEL_PROJ --> ADOPT_P
+    DP -.- pipeline_detail
     DP -.- ADOPT_P
     DP -.- ADD
 ```
 
-The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (or start fresh with init), **define** Features through the Brief process, then **build** through the spec-kit pipeline. Each stage produces artifacts that feed the next — explore traces become Feature candidates, candidates become GEL artifacts, GEL artifacts drive the pipeline.
+The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (which runs the source app and generates spec-drafts per Feature), **define** Features through the Brief process, then **build** through the spec-kit pipeline (where specify refines spec-drafts instead of generating from scratch). Source analysis artifacts live in `specs/reverse-spec/`, pipeline output lives in `specs/NNN-feature/` — clean separation.
 
 ---
 

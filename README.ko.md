@@ -254,9 +254,17 @@ flowchart TD
         INIT["/smart-sdd init
         Domain Profile 감지
         Feature 후보 도출"]
-        RS["/reverse-spec
-        소스 분석
-        행동 추출"]
+
+        subgraph rs_detail["/reverse-spec"]
+            RS_RUN["Phase 1.5: 소스 앱 실행
+            UI 흐름, 컨트롤, 에러 경로 캡처"]
+            RS_CODE["Phase 2-3: 코드 분석
+            SBI, 엔티티, API, Feature"]
+            RS_DRAFT["Phase 4: Feature별 생성
+            pre-context + spec-draft.md"]
+            RS_RUN --> RS_CODE --> RS_DRAFT
+        end
+
         ADOPT_RS["/reverse-spec --adopt
         기존 코드 문서화"]
     end
@@ -269,17 +277,26 @@ flowchart TD
     end
 
     subgraph gel["Global Evolution Layer — specs/reverse-spec/"]
-        GEL["roadmap · entity registry · API registry
-        pre-contexts · constitution · sdd-state"]
+        GEL_PROJ["프로젝트 전체:
+        roadmap · registries · constitution"]
+        GEL_FEAT["Feature별:
+        pre-context · UI Flow Spec · spec-draft"]
     end
 
     subgraph build["4. 구축"]
-        PIPELINE["/smart-sdd pipeline
-        Feature별: specify → plan → tasks
-        → analyze → implement → verify"]
+        subgraph pipeline_detail["/smart-sdd pipeline"]
+            SPECIFY["specify
+            spec-draft 보완 (처음부터 생성 아님)
+            UI 컨트롤 다운그레이드 = BLOCKING"]
+            PLAN["plan → tasks → analyze"]
+            IMPL["implement
+            Wiring Check (7-point)"]
+            VERIFY["verify
+            SC Evidence Gate (런타임 증거 필수)"]
+            SPECIFY --> PLAN --> IMPL --> VERIFY
+        end
         ADOPT_P["/smart-sdd adopt
-        Feature별: specify → plan
-        → analyze → verify"]
+        specify → plan → analyze → verify"]
     end
 
     DP["⚙️ Domain Profile
@@ -290,24 +307,26 @@ flowchart TD
     CE_TRACE --> EO
     IDEA --> INIT
 
-    CE_SYNTH -- "--from-explore" --> RS
+    CE_SYNTH -- "--from-explore" --> RS_RUN
     CE_SYNTH -- "--from-explore" --> ADD
     CE_SYNTH -- "--from-explore" --> ADOPT_RS
 
-    CODE --> RS
+    CODE --> RS_RUN
     CODE --> ADOPT_RS
     INIT --> ADD
-    RS --> GEL
-    ADOPT_RS --> GEL
-    ADD --> GEL
-    GEL --> PIPELINE
-    GEL --> ADOPT_P
-    DP -.- PIPELINE
+    RS_DRAFT --> GEL_PROJ
+    RS_DRAFT --> GEL_FEAT
+    ADOPT_RS --> GEL_PROJ
+    ADD --> GEL_PROJ
+    GEL_FEAT -- "spec-draft가 specify에 seed" --> SPECIFY
+    GEL_PROJ --> pipeline_detail
+    GEL_PROJ --> ADOPT_P
+    DP -.- pipeline_detail
     DP -.- ADOPT_P
     DP -.- ADD
 ```
 
-다이어그램은 전체 생명주기를 보여줍니다: code-explore로 기존 코드를 **이해**하고, reverse-spec으로 **분석**하거나 init으로 새로 시작하고, Brief 프로세스를 통해 Feature를 **정의**한 다음, spec-kit 파이프라인을 통해 **구축**합니다. 각 단계는 다음 단계에 공급되는 아티펙트를 생성합니다 — explore trace가 Feature 후보가 되고, 후보가 GEL 아티펙트가 되고, GEL 아티펙트가 파이프라인을 구동합니다.
+다이어그램은 전체 생명주기를 보여줍니다: code-explore로 기존 코드를 **이해**하고, reverse-spec으로 **분석**(소스 앱 실행 + Feature별 spec-draft 생성)하거나 init으로 새로 시작하고, Brief 프로세스를 통해 Feature를 **정의**한 다음, spec-kit 파이프라인을 통해 **구축**(specify는 spec-draft를 보완, 처음부터 생성하지 않음)합니다. 소스 분석 아티펙트는 `specs/reverse-spec/`에, 파이프라인 산출물은 `specs/NNN-feature/`에 — 깨끗한 분리.
 
 ---
 
