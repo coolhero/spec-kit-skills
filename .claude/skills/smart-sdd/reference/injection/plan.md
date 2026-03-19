@@ -651,6 +651,28 @@ Active S7 rules not addressed in plan architecture:
 
 ---
 
+## Architecture→Spec FR Coverage Check (plan Review — rebuild ⚠️ WARNING)
+
+> **Purpose**: In rebuild mode, the plan's architecture (project structure, component list, file layout) should cover every FR from the spec. If a spec FR mentions "citation display" but the plan's component structure has no CitationBlock or equivalent, the FR will be implemented ad-hoc without architectural guidance.
+
+**Skip if**: Not rebuild mode, or Feature has no GUI components.
+
+After plan.md is generated (rebuild + GUI):
+
+1. Read spec.md → extract all FR-### that describe UI behavior
+2. Read plan.md → extract the Project Structure / component list / file layout
+3. For each UI-behavioral FR: verify at least one component/file in the plan covers this behavior
+   ```
+   ⚠️ Architecture→Spec FR Coverage Gaps:
+     FR-008 "citation display with inline numbers" → No component in plan.md covers citation rendering
+     FR-012 "drag-and-drop file upload" → No component in plan.md for drag-drop handling
+   ```
+4. For rebuild: cross-reference with Source→Target Component Mapping. If source has a component for this FR but the plan mapping doesn't include it → explicit gap.
+
+**Enforcement**: ⚠️ WARNING — included in Review. The user should review whether the plan needs component additions before approval.
+
+---
+
 ## Technology Compatibility Pre-Research (plan Review — ⚠️ WARNING)
 
 > **Purpose**: Libraries and platform APIs change between versions. plan.md's architecture decisions must account for the actual runtime environment, not assume latest-stable behavior. This check surfaces compatibility risks before implement.

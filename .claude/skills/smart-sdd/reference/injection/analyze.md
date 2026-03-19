@@ -63,6 +63,33 @@ FR-003: "Chat header with assistant name, model selector dropdown, and topic inf
 
 This rule prevents coarse FR→Task mapping from hiding missing interactive components.
 
+### SC→Task Reverse Mapping
+
+> **Purpose**: FR→Task coverage checks that every requirement has implementation tasks. But SCs define the **verification criteria** — and if an SC has no task that would produce the testable behavior, verify will fail. This reverse mapping catches SCs that are "orphaned" from implementation.
+
+After FR→Task coverage analysis:
+
+1. Read ALL SC-### from spec.md
+2. For each SC, check if at least one task in tasks.md would produce the behavior described by the SC:
+   - SC says "search returns results with citations" → is there a task for citation rendering? For search result formatting?
+   - SC says "KB status transitions from pending to completed" → is there a task for status tracking logic?
+3. Classification:
+
+| Situation | Severity | Example |
+|-----------|----------|---------|
+| SC has no task producing its behavior | **HIGH** | SC: "citations displayed" but no task for CitationBlock component |
+| SC has task but task scope is too broad to verify SC independently | **MEDIUM** | SC: "similarity search returns top-K results" but task is "implement search" with no threshold/ranking mention |
+
+4. Display:
+```
+── SC→Task Reverse Mapping ──────────────────
+  SC-005: "search returns relevant results" → ⚠️ HIGH — no task specifies relevance algorithm or threshold
+  SC-008: "citations displayed with source name" → ⚠️ HIGH — no task for CitationBlock rendering
+  SC-012: "status transitions to completed" → ✅ Task 3 covers status lifecycle
+```
+
+**Enforcement**: ⚠️ WARNING (not blocking) — SC→Task gaps are flagged in Review. If combined with FR→Task CRITICAL gaps, the pattern suggests systematic under-scoping.
+
 ---
 
 ## Review Display Content

@@ -460,6 +460,17 @@ After `speckit-implement` completes, if Demo-Ready Delivery is **active** (const
 
 After each `speckit-implement` task completes (before starting the next task):
 
+**Step 0 — Task Completion Evidence**:
+- Display which files were created or modified for this task:
+  ```
+  📝 Task [N] "[task name]" — files touched:
+    Created: src/services/KnowledgeService.ts (245 lines)
+    Modified: src/main/index.ts (+12 lines — IPC handler registration)
+    Modified: src/preload/index.ts (+1 line — channel registration)
+  ```
+- If the task description mentions creating a component/service/handler but NO new files were created and NO existing files were modified → ⚠️ WARNING: `Task [N] claims to create [component] but no files were touched. Was the task actually implemented?`
+- This is informational (not blocking) but makes it visible when a task was "completed" without actual code changes.
+
 **Step 1 — Build Gate**:
 - Run build command (`npm run build`, `cargo build`, etc.)
 - **Build failure**: Enter Auto-Fix Loop (see below)
