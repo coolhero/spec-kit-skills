@@ -205,8 +205,10 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 7. **Domain Rule Compliance Check (S1)** (always — see § Domain Rule Compliance Check below)
 8. **External API Dependency Edge Cases** (if Feature consumes external APIs — see below)
 9. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
-10. **Assemble Review Display** (include any ⚠️/❌ from steps 1-9)
-11. **HARD STOP** (ReviewApproval)
+10. **FR Granularity Check** (always — see below)
+11. **SC Testability Check** (always — see below)
+12. **Assemble Review Display** (include any ⚠️/❌ from steps 1-11)
+13. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -470,6 +472,86 @@ If the Feature involves data processing (keywords: "process", "import", "embed",
    - Extraction failure → status reflects failure, not success
 
 **Skip if**: Feature is purely UI/config with no data processing pipeline.
+
+### FR Granularity Check
+
+> **Purpose**: A single FR that covers too much scope produces vague implementations. When an FR contains multiple independent capabilities, each capability should be a separate FR so it can be individually tested and tracked.
+
+For each FR in spec.md:
+
+1. **Multi-verb detection**: If an FR description contains 3+ independent verbs connected by "and" or commas (e.g., "create, manage, search, and display"), it likely covers multiple capabilities:
+   ```
+   ❌ "FR-010: User can create, manage, search, and display knowledge bases"
+   → 4 independent capabilities in 1 FR — implement will miss some, verify can't test individually
+
+   ✅ "FR-010: User can create a knowledge base with name and embedding model"
+      "FR-011: User can add/remove files from a knowledge base"
+      "FR-012: User can search a knowledge base and see results with citations"
+      "FR-013: Knowledge base list is displayed in sidebar with status indicators"
+   → Each FR is independently implementable and testable
+   ```
+
+2. **Multi-layer detection**: If an FR spans multiple architectural layers (UI + backend + external API), it should be split unless the layers are trivially connected:
+   ```
+   ❌ "FR-015: Files are embedded using the selected provider's embedding API"
+   → Hides: file format detection, text extraction (per format), chunking strategy,
+     embedding API call, vector storage, error handling per layer
+
+   ✅ "FR-015: Supported file formats are detected (txt, md, pdf, docx)"
+      "FR-016: Text is extracted from each format using appropriate parser"
+      "FR-017: Extracted text is chunked with configurable overlap"
+      "FR-018: Chunks are embedded using the selected provider's API"
+      "FR-019: Embeddings are stored in the vector database"
+   ```
+
+3. **Threshold**: If any single FR would require 5+ implementation tasks in tasks.md, it's too broad. Flag for splitting.
+
+**Display (if issues found)**:
+```
+⚠️ FR Granularity Issues:
+  FR-010: 4 verbs (create, manage, search, display) → recommend split into 4 FRs
+  FR-015: Spans 3 layers (UI → service → external API) → recommend split by layer
+```
+**Enforcement**: ⚠️ WARNING — included in Review. Not blocking, but splitting is recommended before approval.
+
+### SC Testability Check
+
+> **Purpose**: SCs that cannot be verified produce "12/12 ✅" results based on code review, not runtime evidence. Every SC must have a clear, mechanical verification method.
+
+For each SC in spec.md:
+
+1. **Verification method check**: Can this SC be verified by a specific, repeatable action?
+   ```
+   ❌ "SC-005: Knowledge base search returns relevant results"
+   → "Relevant" is subjective. How does the agent verify this?
+
+   ✅ "SC-005: Searching 'test content' in a KB containing a file with 'test content' returns at least 1 result with similarity > 0"
+   → Concrete: known input, measurable output, specific threshold
+   ```
+
+2. **Observable output check**: Does the SC specify what is observable?
+   ```
+   ❌ "SC-008: Citations are displayed correctly"
+   → "Correctly" is undefined. What does the agent check?
+
+   ✅ "SC-008: Each search result renders as a numbered badge [N]. Clicking the badge shows a tooltip with the source file name and matched text snippet."
+   → Observable: badge visible, tooltip appears, content matches
+   ```
+
+3. **For rebuild mode**: If the SC describes behavior that exists in the source app, the SC MUST reference the source pattern:
+   ```
+   ✅ "SC-008: Citations render as inline [N] badges with hover tooltip (matching source CitationsList.tsx pattern)"
+   ```
+
+**Display (if issues found)**:
+```
+🚫 SC Testability Issues (BLOCKING):
+  SC-005: No concrete expected output — "relevant" is subjective
+    → Recommend: "returns at least 1 result with similarity > 0 for known input"
+  SC-008: No observable criteria — "correctly" is undefined
+    → Recommend: specify visible elements and interaction behavior
+```
+**Enforcement**: 🚫 BLOCKING for SCs without any testable criteria. ⚠️ WARNING for SCs with weak but present criteria.
 
 ### Domain Rule Compliance Check (S1)
 
