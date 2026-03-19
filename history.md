@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-20] spec-draft.md — reverse-spec generates initial spec for each Feature
+
+### Design Decision
+
+**Problem**: speckit-specify compresses UI details. "Dropdown with auto-fill" → "select model", "7-stage pipeline" → "process files". Two-step conversion (source → pre-context → spec.md) loses information at each step.
+
+**Solution**: reverse-spec Phase 4 generates `spec-draft.md` per Feature — detailed FR/SC with explicit UI controls, error paths, data pipelines. speckit-specify refines this draft instead of generating from scratch.
+
+**Name alignment**: "reverse-spec" now literally means "reverse-engineer the spec" — from source code to spec.md draft.
+
+### Files
+
+| File | Change |
+|------|--------|
+| `reverse-spec/templates/spec-draft-template.md` | NEW — template with FR groups, SC categories, conversion traceability |
+| `reverse-spec/commands/analyze.md` | Phase 4: spec-draft generation logic with 5 conversion rules + completeness check |
+| `smart-sdd/injection/specify.md` | Spec-Draft Seeding Protocol — refine instead of generate, UI control downgrade detection |
+| `context-injection-rules.md` | Graceful degradation for absent spec-draft.md |
+
+---
+
 ## [2026-03-20] Rebuild Fidelity — Runtime Exploration BLOCKING + UI Flow Spec + Artifact Separation
 
 ### Context

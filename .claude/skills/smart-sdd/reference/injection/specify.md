@@ -11,8 +11,9 @@
 
 | File | Section | Filtering |
 |------|---------|-----------|
+| `BASE_PATH/features/[FID]-[name]/spec-draft.md` | Entire file | **If present (rebuild mode)** — THIS IS THE PRIMARY INPUT. spec-draft contains detailed FR/SC with UI control types, interaction patterns, error paths, and data pipeline stages. speckit-specify should **refine** this draft, not generate from scratch. See "Spec-Draft Seeding Protocol" below |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Flow Specifications" section | **If present (rebuild with Runtime Exploration)** — each flow step maps to FR, each error path maps to edge case SC. This is the primary source for rebuild FR/SC generation — NOT direct source code reading |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Flow Specifications" section | **If present (rebuild with Runtime Exploration)** — cross-reference against spec-draft FR/SC for completeness. If spec-draft is absent, this becomes the primary source for FR/SC generation |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild/adoption/add mode with SBI)** — ensure FR-### cover all P1/P2 behaviors |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |
@@ -35,6 +36,25 @@ To resolve file paths at runtime:
 | **reverse-spec (rebuild)** | Absolute path (e.g., `/Users/dev/old-project`) | Prepend Source Path to each relative file in Source Reference |
 | **add (incremental)** | `.` (CWD) | Files are in the current working directory — resolve relative to CWD. Read the existing source to understand current implementation before specifying changes |
 | **greenfield** | `N/A` | Skip Source Reference entirely — no existing source to reference |
+
+### Spec-Draft Seeding Protocol (rebuild mode)
+
+> **Why this protocol exists**: speckit-specify generates spec.md from scratch using context injection. When it generates from scratch, it compresses UI details — "Dropdown with auto-fill" becomes "select model", "7-stage data pipeline" becomes "process files". By providing a spec-draft.md as seed, speckit-specify REFINES instead of GENERATES, preserving the detail reverse-spec captured.
+
+**When spec-draft.md exists** (rebuild mode):
+
+1. **Read spec-draft.md in full** — this contains detailed FR/SC with UI control types, error paths, data pipeline stages
+2. **Inject as seed content** for speckit-specify:
+   - Include spec-draft FR/SC in the context before spec generation
+   - Instruct speckit-specify: "Use these draft requirements as the baseline. Refine wording, fill gaps, add domain-specific SC patterns (from S1 rules), but do NOT compress or abstract. A Dropdown MUST stay a Dropdown. An auto-fill MUST stay an auto-fill."
+3. **Post-execution cross-check** (added to Post-Execution Verification Sequence):
+   - Compare generated spec.md FR count against spec-draft FR count
+   - If spec.md has FEWER FRs than spec-draft → ⚠️ WARNING: "spec.md has [N] FRs but spec-draft had [M]. [M-N] requirements may have been compressed or dropped."
+   - For each spec-draft FR with explicit UI control (Dropdown, Slider, etc.): verify spec.md preserves the control type → if abstracted to generic "input" → 🚫 BLOCKING: "FR-### was 'Dropdown' in spec-draft but 'input' in spec.md. UI control downgrade."
+
+**When spec-draft.md does NOT exist** (greenfield, add, adopt without runtime exploration):
+- No seed — speckit-specify generates from pre-context drafts as before
+- No cross-check applies
 
 ### Feature Section Filtering Rules (business-logic-map.md)
 

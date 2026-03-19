@@ -2087,7 +2087,64 @@ Contents to include in each pre-context.md (see [pre-context-template.md](templa
 - **Naming Remapping** (only if Phase 0 Question 3 established a new project name): Per-Feature catalog of code-level identifiers containing the original project name, with suggested new identifiers. Populated from Phase 3-1 scan results. Omit this section entirely if project name is unchanged or no old-name identifiers were found in this Feature
 - **Static Resources**: List of non-code files (images, fonts, i18n, etc.) used by this Feature, with source/target paths (source paths relative to target directory) and usage context. Based on Phase 1-5 inventory, filtered to this Feature's associated files. If none, write "None"
 - **Environment Variables**: Variables this Feature requires at runtime, from Phase 2-5 extraction. Distinguishes Feature-owned vars from shared vars referenced from other Features. If none, write "None"
-- **For /speckit.specify**: Existing feature summary, existing user scenarios, draft requirements (FR-###), draft success criteria (SC-###), edge cases
+- **For /speckit.specify**: Existing feature summary, existing user scenarios, edge cases. (Draft FR/SC are now in spec-draft.md — see below)
+
+#### Per-Feature Spec Draft Generation (rebuild mode — MANDATORY)
+
+> **Why spec-draft.md exists**: Previously, Draft FR/SC were 1-line bullet points in pre-context's "For /speckit.specify" section. speckit-specify would read these and generate spec.md — but it consistently compressed UI details (dropdowns → "input", auto-fill → omitted, error paths → ignored). By generating a detailed spec-draft.md during reverse-spec (when source context is fully loaded), the conversion from source behavior → requirements happens ONCE with full context, instead of twice with progressive loss.
+
+For each Feature, generate `BASE_PATH/features/[FID]-[name]/spec-draft.md` using the [spec-draft-template.md](templates/spec-draft-template.md):
+
+**Conversion Rules (Source → spec-draft)**:
+
+1. **UI Flow Spec → FR**: Each flow step becomes an FR with explicit UI control type, trigger, and result:
+   ```
+   Flow Step: | 3 | Select model | Dropdown(configured only) | Dimensions auto-fills |
+   → FR-003: Select embedding model from Dropdown (shows ONLY configured providers' models).
+             Selecting a model auto-fills the Dimensions field with the model's vector dimension count.
+   ```
+   - **NEVER abstract UI controls**: Dropdown stays Dropdown, Slider stays Slider, auto-fill stays auto-fill
+   - **NEVER merge flow steps**: Each step that involves a distinct user action → separate FR
+
+2. **UI Flow Spec Error Paths → Edge Case FR/SC**:
+   ```
+   Error: Empty name → red border, Create disabled
+   → FR-E01: When name field is empty, show validation error (red border). Create button stays disabled.
+   → SC-E01: Clear name field → red border appears on name input, Create button is disabled.
+   ```
+
+3. **SBI Behaviors → FR with [source: B###] tag**:
+   ```
+   B105: CitationsList.tsx — renders inline citation badges with data-citation attribute
+   → FR-008: Chat response displays numbered citation badges [1][2][3].
+             Clicking badge [N] shows tooltip with source #N's preview. [source: B105]
+   ```
+
+4. **Cross-Feature Interactions → SC-X### (cross-feature SC)**:
+   ```
+   Cross-feature flow observed: KB attached to chat → message sent → citations in response
+   → SC-X01: Attach KB to assistant → send message → response contains citation badges
+             → click badge [2] → tooltip shows source file #2's name and content preview
+   ```
+
+5. **Data Pipeline → Pipeline-stage FRs**:
+   ```
+   Pipeline observed: file → extract text → chunk → embed → store → search → display
+   → FR-010: Text extraction from uploaded files (PDF, TXT, MD, DOCX)
+   → FR-011: Text chunking with configurable chunk size
+   → FR-012: Vector embedding generation via configured provider's embedding model
+   → FR-013: Vector storage in local database
+   → FR-014: Similarity search against stored vectors
+   → FR-015: Search result display as citation badges in chat response
+   ```
+
+**Completeness Check (BLOCKING)**:
+After generating spec-draft.md, verify:
+- Every P1/P2 SBI behavior has a corresponding FR → if not, add it
+- Every UI Flow Spec step has a corresponding FR → if not, add it
+- Every UI Flow Spec error path has a corresponding SC-E### → if not, add it
+- Every cross-feature interaction has a corresponding SC-X### → if not, add it
+- No FR uses generic verbs ("input", "configure", "manage") where specific controls were observed ("Dropdown", "Slider", "auto-fill")
 - **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts (owned + referenced entities, provided + consumed APIs), technical decisions
 - **Feature Contracts** (populated from Phase 3-1d interaction data and Phase 2-3 cross-Feature rules): Explicit guarantees this Feature provides to consumers, dependencies it requires from providers, and failure modes when contracts are violated. See [pre-context-template.md](templates/pre-context-template.md) § Feature Contracts. If this Feature has no cross-Feature interactions (Interaction Score = 0), write "None — this Feature operates independently."
 - **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
