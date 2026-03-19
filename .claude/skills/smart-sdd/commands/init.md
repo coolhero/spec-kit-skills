@@ -12,6 +12,7 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 2. **PRD document** (`--prd path/to/prd.md`): Reads the PRD file and extracts project description and requirements. If the PRD is sufficiently detailed, triggers Proposal Mode
 3. **Code-explore artifacts** (`--from-explore path/to/specs/explore/`): Reads code-explore synthesis to seed project identity, Domain Profile, and Feature candidates. Triggers Explore-Informed Mode. See § Explore-Informed Mode below.
 4. **Conversational input**: If no idea string, no `--prd`, and no `--from-explore` is specified, gathers all information through interactive Q&A with the user (original flow)
+5. **Artifact language** (`--lang <code>`): Sets the language for all pipeline-generated artifacts (spec.md, plan.md, tasks.md, roadmap.md, registries, etc.). Default: `en`. Stored in `sdd-state.md` as `**Artifact Language**: <code>`. Examples: `--lang ko` (Korean), `--lang ja` (Japanese). Skill source files (SKILL.md, commands/, reference/) are always English regardless of this setting.
 
 ### Mode Selection
 

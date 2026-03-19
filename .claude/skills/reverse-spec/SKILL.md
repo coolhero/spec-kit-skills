@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. Use this skill whenever the user wants to analyze an existing codebase, extract Features from source code, generate a roadmap from existing code, or prepare an existing project for spec-driven rebuild or adoption.
-argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt] [--skip-to <phase>]"
+argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt] [--skip-to <phase>] [--lang <code>]"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
 
@@ -48,6 +48,7 @@ $ARGUMENTS parsing rules:
   --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
   --adopt       → SDD Adoption mode: forces --scope full --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
   --skip-to <phase> → (DEV/TEST) Jump directly to a specific phase. Skips all preceding phases with sensible defaults. Valid values: "1.5", "2", "3", "4". Example: --skip-to 1.5 to test Runtime Exploration.
+  --lang <code>     → Artifact language for generated files (roadmap.md, registries, pre-context, etc.). Default: "en". Stored in sdd-state.md as Artifact Language. Examples: --lang ko, --lang ja.
 ```
 
 ---

@@ -1,7 +1,7 @@
 ---
 name: code-explore
 description: Interactive source code exploration that produces documented understanding — architecture maps, flow traces with Mermaid diagrams, and Feature candidates — feeding directly into spec-kit SDD workflows. Use this skill when the user wants to study, understand, or learn an unfamiliar codebase, trace how a feature works at the source level, or explore code architecture before building something similar.
-argument-hint: "[path] | trace \"topic\" | synthesis | status"
+argument-hint: "[path] [--lang <code>] | trace \"topic\" | synthesis | status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, AskUserQuestion]
 ---
 

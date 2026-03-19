@@ -38,6 +38,7 @@ If validation fails:
 **Scenario**: [greenfield | rebuild | incremental | adoption]
 **Custom**: [path to domain-custom.md | "none"]
 **Org Convention**: [path to org-convention.md | "none"]
+**Artifact Language**: [en | ko | ja | zh | es | fr | de | pt | ... ] ← Language for pipeline-generated artifacts (spec.md, plan.md, tasks.md, etc.). Default: en. Set via --lang argument during init/reverse-spec/add.
 **Source Path**: [Absolute path to original source code | "N/A" for greenfield | "." for incremental (add)]
 **Clarity Index**: [XX% | "N/A" for rebuild/adoption]
 **CI Dimensions**: [Core:N, Cap:N, Type:N, Stack:N, Users:N, Scale:N, Constraints:N]
