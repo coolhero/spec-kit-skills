@@ -65,17 +65,40 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 | `os-native` | OS-level interaction that Playwright cannot simulate (drag&drop files, system dialogs, clipboard, tray menu, keyboard shortcuts conflicting with OS) | Step 3f — user performs action, reports result |
 | `manual` | Requires visual/subjective judgment that automation cannot evaluate | User-assisted manual verification in Step 3g |
 
-3. Build the **SC Verification Matrix**:
+3. Build the **SC Verification Matrix** with **Specific Test Scenarios**:
+
+   For each auto-category SC, derive a step-by-step test scenario from the SC description + plan.md Interaction Chains. Each step must be a concrete Playwright action or assertion — not a vague description.
 
 ```
 SC Verification Matrix for [FID]:
-| SC-### | Category | Required Depth | Verification Method | Test Reference |
-|--------|----------|---------------|---------------------|---------------|
-| SC-001 | cdp-auto | Tier 2 | Click → verify state change | — |
-| SC-002 | test-covered | Tier 3 | — | settings.test.ts:L45 |
-| SC-003 | user-assisted | Tier 2 | After API key setup | — |
-| SC-004 | os-native | Tier 1 | User drag & drop | — |
+| SC-### | Category | Depth | Specific Test Scenario |
+|--------|----------|-------|----------------------|
+| SC-001 | cdp-auto | Tier 2 | 1. Click "Create KB" button  2. Fill name="Test KB"  3. Select embedding model from dropdown  4. Click Create  5. ASSERT: KB appears in list with name "Test KB"  6. ASSERT: status icon shows ready |
+| SC-002 | cdp-auto | Tier 3 | 1. Navigate to KB "Test KB"  2. Click "Add file"  3. Upload test.txt  4. ASSERT: file appears with status "processing"  5. Wait for status → "completed"  6. ASSERT: file count = 1 |
+| SC-003 | user-assisted | Tier 3 | 1. [user sets API key]  2. Navigate to chat  3. Click KB button → select "Test KB"  4. Send message "what is in the file?"  5. ASSERT: response contains citation badge [1]  6. ASSERT: clicking [1] shows source preview |
+| SC-004 | os-native | Tier 2 | 1. [user drags file to KB area]  2. ASSERT: file appears in list  3. ASSERT: status changes to "processing" |
 ```
+
+   **🚫 VAGUE SCENARIOS ARE REJECTED**:
+   ```
+   ❌ "Click → verify state change" — what click? what state change?
+   ❌ "Navigate KB page → verify" — verify what exactly?
+   ❌ "Check button exists" — existence ≠ functionality
+
+   ✅ "Click 'Create KB' → fill name → select model → click Create → ASSERT: KB in list"
+   ✅ "Send message with KB attached → ASSERT: response has citation [1] → click [1] → ASSERT: tooltip shows source"
+   ```
+
+   **Scenario derivation sources** (in priority order):
+   1. spec.md SC description → Given/When/Then extraction
+   2. plan.md Interaction Chains → User Action → Handler → DOM Effect → Visual Result
+   3. Demo script "Try it" section → manual steps → automate each step
+   4. Source app behavior (rebuild mode) → what does the source app do for this SC?
+
+   **Each scenario MUST have**:
+   - At least 2 user actions (click, fill, select — NOT just navigate)
+   - At least 2 assertions (ASSERT — NOT just "verify" or "check")
+   - The assertions must verify the SC's **described behavior**, not just page stability
 
 4. **SC Minimum Depth Rule**: Every `cdp-auto`, `api-auto`, `cli-auto`, `pipeline-auto` SC must have a minimum Required Depth based on the SC's nature:
    - **Presence SCs** (element exists, page renders, data displays): Tier 1 minimum
@@ -108,6 +131,19 @@ SC Verification Matrix for [FID]:
 **Step 1 — Check demo script exists** at `demos/F00N-name.sh`:
 - Must exist and be executable
 - Must include a Coverage header mapping FR-###/SC-### from spec.md
+
+**Step 1b — Demo "Try It" → Test Scenario Cross-Reference** (🚫 BLOCKING):
+If the demo script has a "Try it" / "📋 Try it" section with numbered manual steps:
+1. Read each manual step from the demo script
+2. Map each step to an SC in the SC Verification Matrix
+3. For each step that CAN be automated (click, fill, navigate — not drag&drop or visual judgment):
+   - The corresponding SC's Specific Test Scenario MUST include this step
+   - If missing → add to the scenario
+4. **BLOCKING if demo has 5+ manual steps but Matrix has 0 automated equivalents**
+   ```
+   🚫 Demo script has 12 manual "Try it" steps but SC Matrix automates 0 of them.
+   The Matrix scenarios must automate at least the basic CRUD steps from the demo.
+   ```
 
 **Step 2 — Demo launches real Feature**:
 - The demo must start the actual Feature (not a mock or test-only harness)
