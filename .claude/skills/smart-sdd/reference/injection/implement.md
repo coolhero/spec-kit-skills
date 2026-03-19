@@ -128,6 +128,28 @@ If the Feature's `pre-context.md` has a non-empty Source Reference section AND `
 **Skip if**: Source Path = `N/A` (greenfield) or Source Reference = "N/A".
 **Incremental (add)**: Source Path = `.` — files are in the current project. Read them for context but do not copy.
 
+### Cross-Feature Rendering Path (rebuild + GUI — 🚫 BLOCKING)
+
+> **Why this matters (SKF-074)**: Source Reference only lists files within the current Feature's scope. But Feature outputs are often consumed by OTHER Features' rendering systems. Example: F006 KB search produces citations → F005 chat TextBlock renders them. If implement only reads F006's source files, it misses how citations are actually rendered in the chat UI.
+
+When the Feature's output is displayed/consumed by **another Feature's** UI components:
+
+1. **Identify cross-Feature rendering files**: From plan.md Integration Contracts (`Consumes ←`) and Interaction Chain (`cross-feature` rows), identify source app files that render this Feature's output.
+   - Example: F006 output → citations rendered by `citation.ts`, `Link.tsx`, `CitationTooltip.tsx` (F005 chat system files)
+
+2. **Add to Source Reference for this implement session**: These files are NOT in F006's Source Reference table, but they MUST be read before implementing tasks that produce output consumed by other Features.
+
+3. **BLOCKING**: If plan.md has `cross-feature` Interaction Chain rows but the corresponding source rendering files have NOT been read → gate violation. Display: `🚫 Cross-Feature Rendering Path: plan defines cross-feature output to [Feature] but source rendering files not loaded.`
+
+```
+❌ WRONG: Read F006 source files only → implement citation data store → done
+   → TextBlock/CitationBlock rendered without reading source's rendering pattern
+   → Array index lookup, raw DOM tooltip, layout shift
+
+✅ RIGHT: Read F006 source files + F005 citation rendering files → implement both data + rendering
+   → data-citation attribute pattern replicated, Portal tooltip, stable lookup
+```
+
 ### Background Agent Source Injection (rebuild + GUI — MANDATORY)
 
 When delegating UI implementation to background agents, the main agent MUST include source app code in the agent prompt. Reading source for display is insufficient — the source insights must be **carried into the execution context**.
@@ -1176,6 +1198,17 @@ When implementing hover, click, or popup interactions, check the following befor
 - **Scroll-through interference**: Does scrolling through a list trigger hover effects on every item passed? → CSS transitions naturally handle this; framework state hover does not
 
 > **Rationale**: Applying hover/click handlers (e.g., `onMouseEnter/Leave`) to items in a scrollable list causes UI flicker as the cursor passes through each item during scroll. CSS-only solutions (`:hover` pseudo-classes with `transition-opacity`) resolve this with zero re-renders. Prefer CSS for pure visibility toggles; reserve framework state for interactions that require data loading or complex logic.
+
+### Message/Block Content Immutability (streaming/AI-generated content)
+
+| Constraint | Rationale |
+|---|---|
+| 🚫 Do NOT modify completed block content via `updateBlock`/`setContent` | `updateBlock` after streaming → React state inconsistency + markdown re-parsing corruption (regex replaces `[text](link)` syntax alongside `[N]` citations) |
+| ✅ Display-time transformations ONLY via `useMemo`/computed | Stored data = AI original text. Displayed data = transformed version. Separation maintained. |
+| 🚫 Do NOT insert dynamic overlays (tooltip, popover, context menu) inside the render tree | Conditional DOM insertion changes parent height → layout shift → scroll position jump |
+| ✅ Use Portal or `position: fixed` for overlays | Renders outside the document flow, no impact on existing layout |
+
+> **Rationale (SKF-073)**: 7 sequential failures on citation UI traced to: (1) `updateBlock` corrupting markdown, (2) inline tooltip causing layout shift, (3) `useStore` selector returning new array on every render → infinite loop. All three are violations of immutability and render isolation principles.
 
 ### Data Persistence Safety
 

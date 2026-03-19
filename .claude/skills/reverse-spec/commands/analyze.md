@@ -1055,6 +1055,34 @@ This inventory feeds into each Feature's `pre-context.md` → "Source Behavior I
 
 > **SBI Generation Timing**: Phase 2-6 generates the project-wide global SBI. At this point, Feature classification has not yet been performed (done in Phase 3), so no per-Feature filtering is applied. Per-Feature filtering and B### ID assignment are performed in Phase 4-2.
 
+#### SBI UX Flow Extension (GUI Features)
+
+> **Why this extension exists (SKF-074)**: Function-level SBI captures "what the code does" but not "how the user experiences the result." `B171: Search knowledge base (RAG query)` describes the search function but loses the 8-stage rendering pipeline (inject → AI cite → extract → filter → renumber → embed → tooltip → click-to-open). This missing UX context causes specify to write vague SCs and implement to use minimal rendering patterns.
+
+After function-level SBI extraction, for each P1/P2 SBI entry that produces **user-visible output** (GUI Features only):
+
+1. **Trace the rendering path**: Follow the function's return value → through store/state → to the component that renders it → to the DOM element the user sees
+2. **Identify user interactions**: If the rendered output has clickable/hoverable/draggable elements, trace the interaction handler
+3. **Add `-UX` suffix SBI entries**: For each significant UX step discovered in the trace, add a companion SBI entry
+
+```
+BEFORE (function-level only):
+  B171  Search knowledge base (RAG query)          P1  KnowledgeService.search()
+
+AFTER (with UX Flow):
+  B171  Search knowledge base (RAG query)          P1  KnowledgeService.search()
+  B171a Inject search results into AI prompt       P1  useChatStore.buildPrompt()
+  B171b Extract citation numbers from AI response  P1  citation.ts:extractCitations()
+  B171c Filter to cited-only + renumber by order   P2  citation.ts:processCitations()
+  B171d Render citation badges in message text     P1  TextBlock → CitationBadge
+  B171e Citation click opens source file           P1  Link.tsx:onCitationClick()
+```
+
+**When to apply**: SBI entry output is rendered in UI AND has user interaction (click, hover, drag) on the rendered element.
+**When to skip**: SBI entry is backend-only, or output is displayed as plain text with no interaction.
+
+This extension feeds into specify (each `-UX` entry becomes an FR candidate) and plan (Interaction Chain rows derived from the UX trace).
+
 ### 2-7. UI Component Feature Extraction (Frontend/Fullstack Projects Only)
 
 > Skip this step entirely for backend-only, library, or CLI projects.

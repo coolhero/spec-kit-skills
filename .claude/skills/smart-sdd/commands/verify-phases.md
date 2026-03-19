@@ -98,6 +98,22 @@ The Bug Fix Severity Rule above handles **bugs** (wrong behavior). But verify ma
    - 3+ files OR API change → **Major-Implement** regression
 3. Is this adding behavior **beyond** existing FR/task scope? → **Design Change** → Major-* regression
 
+**Inline Fix Pattern Constraint Re-check** (🚫 BLOCKING — applies to ALL inline fixes):
+
+Even "minor" inline fixes can introduce new bugs if they violate plan.md Pattern Constraints. Before committing ANY inline fix, check these 4 items:
+
+1. **New `useStore(selector)` added** → Does the selector return a new array/object on every call (`.filter()`, `.map()`, spread)? → YES = infinite re-render loop. Use string/number/boolean selectors or `useShallow`.
+2. **New `useEffect` added** → Is there a cleanup function? Are dependencies stable (no inline objects/arrays)?
+3. **New conditional rendering** → Does the inserted element change parent height/layout? → YES = layout shift. Use Portal or `position: fixed`.
+4. **Block/message content modified** → Using `updateBlock`/`setContent` on completed blocks? → YES = rendering corruption. Use render-time `useMemo` transformation instead.
+
+```
+❌ WRONG: Fix citation display → add .filter() selector → infinite loop → another fix needed
+✅ RIGHT: Fix citation display → check Pattern Constraints → use string selector → one fix, done
+```
+
+> **Rationale (SKF-073 failure 7)**: Original code had a stable selector (`citationCount` returning a number). A "fix" replaced it with `.filter()` returning a new array → infinite re-render. The fix introduced a worse bug than the one it solved.
+
 **Recording requirement** (in sdd-state.md Notes after verify completes):
 All inline changes (Minor bug fixes + Implementation gap fills) must be summarized in the Notes column. This recording ensures:
 - **Transparency**: user sees what was changed during verify beyond the planned verification

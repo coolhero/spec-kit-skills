@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-19] SKF-073~074 — AI Reference Pipeline + Source Parity + Cross-Feature Rendering + UX Flow
+
+### Context
+
+7 sequential citation UI failures (SKF-073) revealed "AI-generated text with dynamic references" as an uncovered category. SKF-074 identified 3 structural root causes: SBI stops at function signatures, implement reads Feature-local files only, rebuild SCs verify existence not quality.
+
+### Fixes (7 new rules across 6 files)
+
+| Fix | File |
+|-----|------|
+| AI-Generated Reference Pipeline (🚫 BLOCKING) — 8-stage pipeline for RAG/citation | plan.md |
+| Message Block Immutability — no updateBlock on completed blocks; Portal for overlays | implement.md |
+| Inline Fix Pattern Constraint Re-check — 4-item check before verify inline fix | verify-phases.md |
+| Source Parity Clause (🚫 BLOCKING) — rebuild SCs must reference source pattern | specify.md |
+| Cross-Feature Rendering Path (🚫 BLOCKING) — read consuming Feature's rendering files | implement.md |
+| Source Behavior Depth Check (🚫 BLOCKING) — source 8 stages vs plan 3 = 5 missing = block | plan.md |
+| SBI UX Flow Extension — trace function output to rendered UI + interaction | analyze.md |
+
+---
+
 ## [2026-03-19] SKF-070~072 — Source Analysis + Tech Verification + Data Mapping + Agent Rules
 
 ### Fixes

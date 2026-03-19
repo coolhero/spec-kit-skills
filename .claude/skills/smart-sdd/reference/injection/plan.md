@@ -227,6 +227,39 @@ When the Feature displays inline references (citations, footnotes, tagged items)
 **If Integration Contracts have `Consumes ←` entries but NO cross-feature Interaction Chain rows**:
 - Display in Review: `🚫 Integration Contracts define cross-Feature dependencies but Interaction Chains have no cross-feature rows. Without explicit chains, implement will create isolated modules that are never wired into existing code. BLOCKING.`
 
+## AI-Generated Reference Pipeline (Features with RAG, web search, tool results — 🚫 BLOCKING)
+
+> **Skip if**: Feature does not involve AI/LLM generating text that references external data.
+> **Triggered by**: FR/SC containing "citation", "reference", "RAG", "web search results", "tool call results", "knowledge base search", or any pattern where AI output contains numbered/linked references to external data.
+
+When AI generates text that references external data sources, plan.md MUST include a complete reference pipeline section. Without this, implement uses the simplest approach (array index lookup, no filtering, no renumbering) which breaks in real-world usage.
+
+**Required pipeline stages** (plan.md must address ALL):
+
+| Stage | Design Item | Example | Anti-Pattern |
+|-------|-----------|---------|-------------|
+| 1. Injection | How search results are formatted in the AI prompt | `[1] "filename.pdf"\ncontent...` | No numbering in prompt → AI can't reference by number |
+| 2. AI Rules | Instructions to AI for how to cite | `"Use [N] inline when referencing source material"` | No citation instruction → AI may or may not cite |
+| 3. Extraction | How citation numbers are parsed from AI response | `Regex \[(\d+)\]` → `Set<number>` | No extraction → all search results shown as citations |
+| 4. Filtering | Only cited results become citation blocks | `searchResults.filter(r => citedNums.has(r.refNumber))` | ❌ All search results → "5 refs" when AI only cited 2 |
+| 5. Renumbering | Display number assignment strategy | First-appearance order in text (not search rank order) | ❌ Search rank order → text [3] appears before [1] |
+| 6. Storage | Citation block data structure | `{ refNumber(display), originalRefNumber, filePath, text }` | ❌ Array index → breaks when citations reordered |
+| 7. Rendering | How numbers in text are transformed for display | Render-time `useMemo` (stored text untouched) | ❌ `updateBlock` to modify text → rendering corruption |
+| 8. Interaction | Badge/link click behavior | `shell:openPath(filePath)` or `window.open(url)` | ❌ Raw DOM tooltip → layout shift, no rich preview |
+
+**🚫 BLOCKING**: If the Feature involves AI-referenced external data and plan.md lacks this pipeline → cannot approve plan.
+
+**Anti-pattern summary** (from SKF-073 — 7 failures in one Feature):
+```
+❌ citations[num - 1]           → breaks when AI cites out of order
+❌ all search results as refs   → "5 references" when only 2 were cited
+❌ updateBlock to renumber text → React state corruption + markdown parsing failure
+❌ inline DOM tooltip           → layout shift, no rich preview
+❌ useStore selector .filter()  → new array every render → infinite loop
+```
+
+---
+
 ## Integration Contract Verification (Features with cross-Feature dependencies)
 
 > **Skip for**: Features with no Functional Enablement Chain entries (no "Enables →" or "Blocked by ←" in pre-context).
@@ -690,6 +723,37 @@ After plan.md is generated (rebuild + GUI):
 4. For rebuild: cross-reference with Source→Target Component Mapping. If source has a component for this FR but the plan mapping doesn't include it → explicit gap.
 
 **Enforcement**: ⚠️ WARNING — included in Review. The user should review whether the plan needs component additions before approval.
+
+---
+
+## Source Behavior Depth Check (rebuild + GUI — plan Review 🚫 BLOCKING)
+
+> **Purpose (SKF-074)**: Source app features often have multi-stage pipelines (8+ steps) that SBI reduces to 1 line and plan reduces to 3 steps. The missing 5 steps become "implement surprises" — citation numbering, filtering, rendering patterns that were never designed.
+
+**Skip if**: Not rebuild mode, or Feature has no GUI components.
+
+After plan.md is generated (rebuild + GUI):
+
+1. For each FR with a Source Parity Clause (from specify):
+   - Read the source app code for this behavior
+   - Count the **number of processing stages** in the source implementation
+   - Count the **number of stages** covered by plan.md's architecture + Interaction Chains + AI-Generated Reference Pipeline (if applicable)
+
+2. **Stage count comparison**:
+   ```
+   ⚠️ Source Behavior Depth Check:
+     FR-008 "citation display":
+       Source stages: inject→AI-cite→extract→filter→renumber→embed→tooltip→click = 8
+       Plan stages:   inject→display = 2
+       Gap: 6 stages missing (filter, renumber, embed, tooltip, click, extract)
+   ```
+
+3. **Enforcement**:
+   - **Gap ≤ 1 stage**: ⚠️ WARNING — plan may be summarizing (acceptable)
+   - **Gap ≥ 2 stages**: 🚫 BLOCKING — plan is missing significant processing steps
+   - Agent must add the missing stages to plan.md (Interaction Chain rows, AI-Generated Reference Pipeline stages, or Architecture components) before Review approval
+
+> **Rationale**: A plan that covers 2 of 8 source stages will produce an implement that handles 2 stages. The other 6 become ad-hoc fixes during verify, each potentially introducing new bugs (SKF-073: 7 sequential failures from missing pipeline stages).
 
 ---
 

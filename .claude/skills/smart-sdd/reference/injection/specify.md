@@ -587,6 +587,31 @@ For each UI element in the Feature that maps an ID to data (citations, reference
     → Recommend: "after attaching KB, refreshing page preserves the attachment"
 ```
 
+### Source Parity Clause (rebuild SC — 🚫 BLOCKING)
+
+> **Skip if**: Not rebuild mode.
+
+Every SC in a rebuild Feature MUST include a **Source Parity Clause** — an explicit reference to the source app's behavior pattern that the SC is expected to match.
+
+**Purpose**: Without parity clauses, SCs verify "does the feature exist?" but not "does it match the source app's quality?". The agent implements the **minimum** that passes the SC, which is often far below the source app's UX level.
+
+**Format**: Append to each SC one of:
+- `Matches source [ComponentName] behavior.` — when the target should replicate source exactly
+- `Matches source [ComponentName] pattern: [specific behavior description].` — when you want to call out a specific pattern
+- `Diverges from source: [reason].` — when intentionally different (must be explicit)
+
+```
+❌ "SC-002: Citations are visible in the response"
+   → "visible" = minimum bar. Agent shows raw text, no badges, no click behavior.
+
+✅ "SC-002: Citations render as [N] badges, click opens source file,
+   numbered by first appearance. Matches source CitationsList pattern:
+   inline sup badges + Ant Tooltip preview + click-to-open."
+   → Specific, verifiable, source-referenced.
+```
+
+**🚫 BLOCKING**: Rebuild SC without Source Parity Clause → cannot approve spec. If source pattern is unknown, the clause should state `Source pattern: [to be analyzed during plan]` — which triggers plan-stage Source Behavior Depth Check.
+
 ### Domain Rule Compliance Check (S1)
 
 > **Purpose**: Domain modules load S1 SC rules into context, but loading ≠ application. This check verifies that active S1 rules actually influenced the generated spec.md. Without this gate, domain rules are "trusted implicitly" — the agent may silently ignore rules buried in long context.
