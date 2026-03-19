@@ -90,10 +90,11 @@ SC Verification Matrix for [FID]:
    ```
 
    **Scenario derivation sources** (in priority order):
-   1. spec.md SC description → Given/When/Then extraction
-   2. plan.md Interaction Chains → User Action → Handler → DOM Effect → Visual Result
-   3. Demo script "Try it" section → manual steps → automate each step
-   4. Source app behavior (rebuild mode) → what does the source app do for this SC?
+   1. **ui-flows.md** (if exists) → Happy Path steps = test scenario. **This is the PRIMARY source for GUI Features.** Each flow step maps directly to a test action + assertion.
+   2. spec.md SC description → Given/When/Then extraction
+   3. plan.md Interaction Chains → User Action → Handler → DOM Effect → Visual Result
+   4. Demo script "Try it" section → manual steps → automate each step
+   5. Source app behavior (rebuild mode) → what does the source app do for this SC?
 
    **Each scenario MUST have**:
    - At least 2 user actions (click, fill, select — NOT just navigate)

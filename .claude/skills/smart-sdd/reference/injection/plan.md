@@ -16,6 +16,7 @@
 | `BASE_PATH/api-registry.md` | Related API sections | See rules below |
 | `BASE_PATH/stack-migration.md` | Category Details + Per-Feature row | **Only if New Stack strategy**. See rules below |
 | `SPEC_PATH/[NNN-feature]/spec.md` | Entire file | Finalized spec for the current Feature |
+| `SPEC_PATH/[NNN-feature]/ui-flows.md` | Entire file | **If exists (GUI Features)** — UI Flow Specs drive Interaction Chain design. Each flow step should map to a chain row. See [ui-flow-spec.md](../ui-flow-spec.md) § Pipeline Integration |
 
 ## Entity Registry Filtering Rules
 

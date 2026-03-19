@@ -208,8 +208,9 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 10. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
 10. **FR Granularity Check** (always — see below)
 11. **SC Testability Check** (always — see below)
-12. **Assemble Review Display** (include any ⚠️/❌ from steps 1-11)
-13. **HARD STOP** (ReviewApproval)
+12. **UI Flow Spec Generation** (GUI Features — see § UI Flow Spec Generation below)
+13. **Assemble Review Display** (include any ⚠️/❌ from steps 1-12)
+14. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 
@@ -820,6 +821,55 @@ You can open and edit this file directly, then select
 **If remaining ambiguities exist**: Offer to re-run clarify or proceed.
 
 **HARD STOP** (ReviewApproval): Options: "Approve", "Run clarify again", "I've finished editing". **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+---
+
+## UI Flow Spec Generation (GUI Features — after spec.md approved)
+
+> **Skip if**: `gui` and `tui` are NOT in active Interfaces (pure API/CLI/data-io Feature).
+> **Reference**: See [ui-flow-spec.md](../ui-flow-spec.md) for full format, rules, and examples.
+> **Domain Profile condition**: Axis 1 (Interface) includes `gui` or `tui`.
+
+After spec.md is approved in the Review HARD STOP, generate `ui-flows.md`:
+
+1. **Identify interactive FRs**: Scan spec.md for all FR-### that involve user interaction (forms, dialogs, navigation, CRUD, selections, toggles). Keywords: "click", "select", "enter", "drag", "toggle", "open", "create", "edit", "delete", "submit".
+
+2. **Generate one flow per interactive FR** (or group tightly related FRs):
+
+   **Rebuild mode**:
+   - Read source component files referenced in pre-context Source Reference
+   - Trace each interaction: entry point → event handler → state mutation → UI update
+   - Extract: form field types, validation rules, conditional UI, error handling
+   - Each flow step must reference the source file:line
+
+   **Greenfield mode**:
+   - Derive from FR/SC descriptions
+   - If FR mentions a form/dialog but doesn't specify fields → this should have been caught during Brief elaboration. If still vague, add ⚠️ WARNING in Review.
+
+3. **Completeness check (🚫 BLOCKING for rebuild)**:
+   - Every interactive FR has a flow → if not, BLOCKING
+   - Every flow has ≥2 steps → single-step = too vague
+   - Every form has field definitions (type, required, validation, default)
+   - At least 1 error path per flow
+   - Preconditions explicit (API key, login, data exists)
+
+4. **Write to** `SPEC_PATH/{NNN-feature}/ui-flows.md`
+
+5. **Display summary in Review**:
+   ```
+   📋 UI Flow Specs Generated:
+     Flow 1: Create Knowledge Base (5 steps, 3 error paths) — source: AddKnowledgeBasePopup.tsx
+     Flow 2: Add Files to KB (4 steps, 2 error paths) — source: KnowledgeContent.tsx
+     Flow 3: Search with Citations (6 steps, 2 error paths) — source: CitationsList.tsx
+   ```
+
+```
+❌ WRONG: spec.md approved → proceed to plan without ui-flows.md
+   → Agent improvises UI during implement → always simpler than source
+
+✅ RIGHT: spec.md approved → generate ui-flows.md → show in Review → user approves both
+   → implement follows ui-flows.md step by step → matches source app
+```
 
 ---
 

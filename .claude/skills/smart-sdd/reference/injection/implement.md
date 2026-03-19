@@ -47,6 +47,7 @@
 | `SPEC_PATH/[NNN-feature]/plan.md` | "Interaction Chains" section | **If present (UI Features)** — inject chain propagation context for each task |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "UX Behavior Contract" section | **If present (async UI Features)** — inject temporal UX expectations for each task |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "API Compatibility Matrix" section | **If present (multi-provider)** — inject per-provider contracts for each task |
+| `SPEC_PATH/[NNN-feature]/ui-flows.md` | Entire file | **If exists (GUI Features)** — follow each flow's Happy Path step-by-step during implementation. Each step's UI Response and State Change must be implemented. See [ui-flow-spec.md](../ui-flow-spec.md) § Pipeline Integration |
 | `specs/reverse-spec/visual-references/manifest.md` | Relevant screens | **Rebuild mode only, if exists** — inject as visual target reference |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** (Source Path ≠ N/A). Resolve file paths per specify.md Source Reference Path Resolution rules |
 | `specs/reverse-spec/visual-references/style-tokens.md` | Entire file | **Rebuild mode only, if exists** — inject as CSS reference for matching original styles |
