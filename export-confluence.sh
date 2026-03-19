@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# export-confluence.sh — Render Mermaid blocks in README as SVG images for Confluence
+# export-confluence.sh — Generate Confluence-ready README with Mermaid → inline SVG
 #
 # Usage:
 #   ./export-confluence.sh                  # Both README.md + README.ko.md
@@ -7,23 +7,26 @@
 #   ./export-confluence.sh --clean          # Remove generated files
 #
 # Output:
-#   dist/confluence/README.md               # Mermaid blocks replaced with ![diagram](img/...)
-#   dist/confluence/README.ko.md
-#   dist/confluence/img/README-1.svg ...    # Rendered SVG diagrams
+#   README.confluence.md                    # Single self-contained file (SVGs inlined as base64 <img>)
+#   README.ko.confluence.md
 #
 # Prerequisites:
 #   npm install -g @mermaid-js/mermaid-cli   (or: npx handles it automatically)
+#
+# Confluence workflow:
+#   1. Open .confluence.md in a Markdown previewer (e.g., VS Code preview)
+#   2. Select All → Copy → Paste into Confluence editor
+#   Done. No image uploads needed — everything is in one file.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-OUT_DIR="$SCRIPT_DIR/dist/confluence"
-IMG_DIR="$OUT_DIR/img"
 
 # --- Clean mode ---
 if [[ "${1:-}" == "--clean" ]]; then
-  rm -rf "$OUT_DIR"
-  echo "✅ Cleaned $OUT_DIR"
+  rm -f "$SCRIPT_DIR"/*.confluence.md
+  rm -rf "$SCRIPT_DIR/dist"
+  echo "✅ Cleaned *.confluence.md and dist/"
   exit 0
 fi
 
@@ -48,15 +51,12 @@ MMDC_CONFIG=$(mktemp /tmp/mmdc-config.XXXXXX.json)
 cat > "$MMDC_CONFIG" <<'JSONEOF'
 {
   "theme": "default",
-  "themeVariables": {
-    "fontSize": "14px"
-  },
+  "themeVariables": { "fontSize": "14px" },
   "flowchart": { "useMaxWidth": false },
   "sequence": { "useMaxWidth": false }
 }
 JSONEOF
 
-# Puppeteer config for headless rendering
 PUPPETEER_CONFIG=$(mktemp /tmp/puppeteer-config.XXXXXX.json)
 cat > "$PUPPETEER_CONFIG" <<'JSONEOF'
 {
@@ -65,12 +65,13 @@ cat > "$PUPPETEER_CONFIG" <<'JSONEOF'
 }
 JSONEOF
 
-mkdir -p "$IMG_DIR"
+TMPDIR_WORK=$(mktemp -d /tmp/confluence-export.XXXXXX)
 
 # --- Process each README ---
 for FILE in "${FILES[@]}"; do
   BASENAME="$(basename "$FILE" .md)"
   INPUT="$SCRIPT_DIR/$FILE"
+  OUTPUT="$SCRIPT_DIR/${BASENAME}.confluence.md"
 
   if [[ ! -f "$INPUT" ]]; then
     echo "⚠️  $FILE not found, skipping"
@@ -79,59 +80,47 @@ for FILE in "${FILES[@]}"; do
 
   echo "📄 Processing $FILE..."
 
-  # Extract mermaid blocks and render each to SVG
+  # Pass 1: Render all Mermaid blocks to SVG, then base64-encode
+  declare -a SVG_BASE64=()
   BLOCK_NUM=0
-  OUTPUT="$OUT_DIR/$FILE"
-  TEMP_FILE=$(mktemp)
-  cp "$INPUT" "$TEMP_FILE"
 
-  # Find all mermaid blocks, extract, render, replace
   while IFS= read -r LINE_NUM; do
     BLOCK_NUM=$((BLOCK_NUM + 1))
-    SVG_NAME="${BASENAME}-${BLOCK_NUM}.svg"
-    SVG_PATH="$IMG_DIR/$SVG_NAME"
+    SVG_FILE="$TMPDIR_WORK/${BASENAME}-${BLOCK_NUM}.svg"
 
-    # Find the end of this mermaid block
+    # Find end of mermaid block
     END_NUM=$(tail -n "+$((LINE_NUM + 1))" "$INPUT" | grep -n '^```$' | head -1 | cut -d: -f1)
     END_NUM=$((LINE_NUM + END_NUM))
 
-    # Extract mermaid content (between ```mermaid and ```)
-    MERMAID_CONTENT=$(sed -n "$((LINE_NUM + 1)),$((END_NUM - 1))p" "$INPUT")
+    # Extract mermaid content
+    MMD_FILE="$TMPDIR_WORK/block-${BLOCK_NUM}.mmd"
+    sed -n "$((LINE_NUM + 1)),$((END_NUM - 1))p" "$INPUT" > "$MMD_FILE"
 
-    # Write to temp .mmd file
-    MMD_FILE=$(mktemp /tmp/mermaid-XXXXXX.mmd)
-    echo "$MERMAID_CONTENT" > "$MMD_FILE"
-
-    # Render to SVG
-    if $MMDC -i "$MMD_FILE" -o "$SVG_PATH" -c "$MMDC_CONFIG" -p "$PUPPETEER_CONFIG" --quiet 2>/dev/null; then
-      echo "  ✅ Block $BLOCK_NUM → $SVG_NAME"
+    # Render
+    if $MMDC -i "$MMD_FILE" -o "$SVG_FILE" -c "$MMDC_CONFIG" -p "$PUPPETEER_CONFIG" --quiet 2>/dev/null; then
+      B64=$(base64 < "$SVG_FILE" | tr -d '\n')
+      SVG_BASE64[$BLOCK_NUM]="$B64"
+      echo "  ✅ Block $BLOCK_NUM rendered"
     else
-      echo "  ⚠️  Block $BLOCK_NUM render failed, keeping as code block"
-      rm -f "$MMD_FILE"
-      continue
+      SVG_BASE64[$BLOCK_NUM]=""
+      echo "  ⚠️  Block $BLOCK_NUM render failed, keeping code block"
     fi
-
-    rm -f "$MMD_FILE"
   done < <(grep -n '```mermaid' "$INPUT" | cut -d: -f1)
 
-  # Now build the output file with replacements
+  # Pass 2: Build output file — replace mermaid blocks with inline <img>
   BLOCK_NUM=0
+  IN_MERMAID=false
   {
-    CURRENT_LINE=0
-    IN_MERMAID=false
     while IFS= read -r LINE; do
-      CURRENT_LINE=$((CURRENT_LINE + 1))
-
       if [[ "$LINE" == '```mermaid' ]]; then
         IN_MERMAID=true
         BLOCK_NUM=$((BLOCK_NUM + 1))
-        SVG_NAME="${BASENAME}-${BLOCK_NUM}.svg"
 
-        if [[ -f "$IMG_DIR/$SVG_NAME" ]]; then
-          echo "![Diagram ${BLOCK_NUM}](img/${SVG_NAME})"
+        if [[ -n "${SVG_BASE64[$BLOCK_NUM]:-}" ]]; then
+          # Inline SVG as base64 <img> — self-contained, no external files
+          echo "<img src=\"data:image/svg+xml;base64,${SVG_BASE64[$BLOCK_NUM]}\" alt=\"Diagram ${BLOCK_NUM}\" />"
           echo ""
         else
-          # Render failed — keep original block
           echo "$LINE"
         fi
         continue
@@ -140,12 +129,11 @@ for FILE in "${FILES[@]}"; do
       if $IN_MERMAID; then
         if [[ "$LINE" == '```' ]]; then
           IN_MERMAID=false
-          SVG_NAME="${BASENAME}-${BLOCK_NUM}.svg"
-          if [[ ! -f "$IMG_DIR/$SVG_NAME" ]]; then
+          if [[ -z "${SVG_BASE64[$BLOCK_NUM]:-}" ]]; then
             echo "$LINE"
           fi
         else
-          if [[ ! -f "$IMG_DIR/${BASENAME}-${BLOCK_NUM}.svg" ]]; then
+          if [[ -z "${SVG_BASE64[$BLOCK_NUM]:-}" ]]; then
             echo "$LINE"
           fi
         fi
@@ -156,22 +144,31 @@ for FILE in "${FILES[@]}"; do
     done < "$INPUT"
   } > "$OUTPUT"
 
-  rm -f "$TEMP_FILE"
-  echo "  📝 $OUTPUT ($(grep -c 'img/' "$OUTPUT") diagrams embedded)"
+  DIAGRAM_COUNT=$(grep -c 'data:image/svg+xml;base64' "$OUTPUT" || true)
+  echo "  📝 → ${BASENAME}.confluence.md ($DIAGRAM_COUNT diagrams inlined)"
+
+  unset SVG_BASE64
 done
 
-rm -f "$MMDC_CONFIG" "$PUPPETEER_CONFIG"
+# --- Cleanup ---
+rm -rf "$TMPDIR_WORK" "$MMDC_CONFIG" "$PUPPETEER_CONFIG"
 
 echo ""
 echo "═══════════════════════════════════════════"
-echo "✅ Export complete → $OUT_DIR/"
+echo "✅ Export complete"
+echo ""
+for FILE in "${FILES[@]}"; do
+  BASENAME="$(basename "$FILE" .md)"
+  OUTFILE="${BASENAME}.confluence.md"
+  if [[ -f "$SCRIPT_DIR/$OUTFILE" ]]; then
+    SIZE=$(du -h "$SCRIPT_DIR/$OUTFILE" | cut -f1 | xargs)
+    echo "  📄 $OUTFILE ($SIZE)"
+  fi
+done
 echo ""
 echo "Confluence workflow:"
-echo "  1. Open dist/confluence/README.md in a Markdown previewer"
-echo "  2. Copy rendered content → Paste into Confluence editor"
-echo "  3. SVG images are in dist/confluence/img/ — upload to Confluence page"
-echo "     or drag-drop them into the editor"
-echo ""
-echo "💡 Tip: For inline images in Confluence, upload SVGs as attachments"
-echo "   then use !filename.svg! in wiki markup, or drag-drop in the editor."
+echo "  1. Open .confluence.md in VS Code → Preview (Cmd+Shift+V)"
+echo "  2. Select All (Cmd+A) → Copy (Cmd+C)"
+echo "  3. Paste (Cmd+V) into Confluence editor"
+echo "  Done — all diagrams are embedded. No image uploads needed."
 echo "═══════════════════════════════════════════"
