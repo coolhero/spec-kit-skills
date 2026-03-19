@@ -409,14 +409,35 @@ Each phase is in a separate file to fit within context budget. Read ONLY the pha
 
 **The gates in THIS file (Bug Fix Severity Rule, Source Modification Gate, Verify Initialization, Process Lifecycle) apply to ALL phases.** They are in this hub file because they must always be in context.
 
-### 🚫 PHASE FILE READING GATE (BLOCKING)
+### 🚫 PHASE FILE READING GATE (BLOCKING — structural, not trust-based)
 
 Each Phase MUST begin by reading the corresponding phase file from the table above. **Do NOT substitute with agent knowledge.** The phase files contain execution rules, gates, and checklists that change between versions. An agent's general knowledge of "how to verify" is NOT a substitute.
 
-**Enforcement**: Before each Phase, display:
-```
-📖 Reading [phase-file.md] for Phase [N] execution...
-```
+**Enforcement (structural — L39 principle)**:
+
+1. Before each Phase, **read the file** using the Read tool and display:
+   ```
+   📖 Reading [phase-file.md] for Phase [N] execution...
+   ```
+
+2. **Quote the first heading** from the file to prove it was actually read:
+   ```
+   📖 Reading verify-sc-verification.md for Phase 3...
+   → First section: "## Phase 3 Checklist"
+   ```
+
+3. **Verify Review must include a Phase File Audit table** (structural check):
+   ```
+   | Phase | File Read? | First Heading Quoted |
+   |-------|-----------|---------------------|
+   | 0     | ✅ verify-preflight.md | "## Pre-flight Checks" |
+   | 1     | ✅ verify-build-test.md | "## Phase 1: Build/Test/Lint" |
+   | 3     | ✅ verify-sc-verification.md | "## Phase 3 Checklist" |
+   | 4-5   | ✅ verify-evidence-update.md | "## SC Verification Evidence Gate" |
+   ```
+   **Any row with blank "First Heading" → BLOCKING.** The phase was not read.
+
+**Why structural, not trust-based**: An agent that didn't read the file cannot quote its first heading. This is a count/content-based gate, not a self-report gate. (See lessons-learned.md L39.)
 If this message is absent in the verify output → that Phase was NOT properly executed → verify result is INVALID.
 
 ```

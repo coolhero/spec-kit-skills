@@ -5,7 +5,32 @@
 
 ---
 
-## [2026-03-19] SKF-053 — 7 Structural Causes of Shallow Verification
+## [2026-03-19] SKF-053~056 — Structural Verification Gates + Semantic Stub Detection + Functional Smoke Test
+
+### Context
+
+SKF-053 identified 7 structural causes of shallow verification. SKF-054 found Integration Contract stubs pass static gates. SKF-055 found Foundation pattern enforcement gap. SKF-056 found 7 runtime bugs all passing build+tsc.
+
+### Fixes
+
+| SKF | Fix | File |
+|-----|-----|------|
+| 053-1 | Phase File Reading Gate: structural proof (quote first heading) | verify-phases.md |
+| 053-2 | SC Matrix Gate: count-based structural check (SC count, category distribution, depth column) | verify-sc-verification.md |
+| 053-3 | Verify Depth Structural Check: behavioral_count == 0 → BLOCKING | pipeline.md Gate #4 |
+| 053-6 | Evidence-Based Completeness Gate: git diff cross-check for cross-feature tasks | pipeline.md Gate #5 |
+| 054 | Integration Contract argument-level verification: trace apiKey/baseURL source | implement.md |
+| 055 | Foundation Pattern Constraint Enforcement: platform bridge layer check | implement.md |
+| 056 | Functional Smoke Test Gate V5: Integration + Library + Platform API tests | pipeline.md |
+
+### Lessons Added
+
+- L41: Semantic Stubs Pass All Static Gates — Only Argument Tracing Catches Them
+- L42: Build ✅ + TypeScript ✅ ≠ Feature Works — The Runtime Gap Is Systematic
+
+---
+
+## [2026-03-19] SKF-053 — 7 Structural Causes of Shallow Verification (initial analysis)
 
 ### Fixes
 

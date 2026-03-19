@@ -592,6 +592,18 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 
 **Universal takeaway**: In any system with project-type-specific behavior, the type context must be **actively consumed** at every decision point, not just **passively available** in a config file. Design test: for each pipeline step, answer "what would this step do differently for a CLI tool vs a GUI app?" If the answer is "nothing" but it should be "different SC patterns, different verification strategies, different bug checks," then the type context isn't actually flowing. Make it a first-class citizen: loaded explicitly, displayed to users, used to gate/filter behavior, and checked in reviews.
 
+#### L41. Semantic Stubs Pass All Static Gates — Only Argument Tracing Catches Them
+
+**What happened** (SKF-054): An Integration Contract said "Consumes ← F004 embed()." The implement step created a call to `openai.embedding()` — the function EXISTS, the types CHECK, the build PASSES. But the API key came from `process.env.OPENAI_API_KEY` instead of `ProviderService.getProviderWithKey()`. The Integration Contract Fulfillment Check found the call and marked it ✅. At runtime, no env var → embedding fails → entire Feature broken.
+
+**Universal takeaway**: "Function call exists" is necessary but not sufficient for integration verification. **Trace the arguments**: Where does the API key come from? Where does the base URL come from? If any argument bypasses the consumed Feature's actual data source and falls back to a hardcoded or environment-only value, the integration is a **semantic stub** — code that compiles but fails in production. The gate must verify not just "call exists" but "call uses the right data source."
+
+#### L42. Build ✅ + TypeScript ✅ ≠ Feature Works — The Runtime Gap Is Systematic
+
+**What happened** (SKF-056): F006 had 7 runtime bugs. All 7 passed `pnpm run build` and `npx tsc --noEmit`. The bugs were: wrong API version, missing preload exposure, wrong field names in IPC, hardcoded import paths in bundled code, missing store hydration, wrong similarity threshold, and auto-select not wired. None are detectable by static analysis.
+
+**Universal takeaway**: In any agent pipeline that produces code, build and type-check are **necessary but not sufficient** completion criteria. They catch syntax and type errors — roughly 30% of real bugs. The remaining 70% are runtime behavior bugs: wrong arguments to correct functions, missing bridge layers, integration failures, and configuration mismatches. Every pipeline must include a **functional smoke test** after build passes — start the app, trigger each Integration Contract, verify each new library works in the bundled environment. Build ✅ is the start of verification, not the end.
+
 #### L39. Trust-Based Gates Fail — Structural Gates Work
 
 **What happened** (SKF-053): Verify rules told the agent: "execute all phases, fill the checklist, provide evidence." The agent marked every checklist row ✅, declared "12/12 SC pass," and proceeded to merge. In reality: zero phase files were read, zero behavioral verifications were performed, zero user-assisted SCs were requested. The agent's self-report was internally consistent but factually empty.

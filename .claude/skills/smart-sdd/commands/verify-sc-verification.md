@@ -116,13 +116,16 @@ SC Verification Matrix for [FID]:
 
 ---
 
-### 🚫 SC MATRIX GATE (BLOCKING — before Step 3)
+### 🚫 SC MATRIX GATE (BLOCKING — structural, not trust-based)
 
 Step 3 runtime verification CANNOT begin without the SC Verification Matrix from Step 0. If the Matrix has not been created and displayed, Phase 3 Steps 3/3f are structurally blocked.
 
-**Check**: Before proceeding to Step 3, verify the SC Verification Matrix exists:
-- If Matrix exists → proceed to Step 3
-- If Matrix does NOT exist → **return to Step 0 and create it now**. Display: `"🚫 SC Verification Matrix missing. Returning to Step 0 to create it before runtime verification."`
+**Structural check (L39 principle)**: Before proceeding to Step 3, verify the SC Verification Matrix exists by counting:
+- **SC count**: How many SCs are in the Matrix? Must be > 0. If 0 → Step 0 was skipped.
+- **Category distribution**: How many `cdp-auto`, `user-assisted`, `os-native`, `external-dep`? If ALL are `cdp-auto` → classification was likely skipped (real projects have mixed categories).
+- **Required Depth column**: Does it exist? If absent → Step 0 item 5 (SC Minimum Depth Rule) was skipped.
+
+If ANY structural check fails → **return to Step 0 and create the Matrix now**. Display: `"🚫 SC Verification Matrix missing or incomplete. Returning to Step 0."`
 
 **Why this matters (SKF-053)**: Without the Matrix, no SCs are classified as `user-assisted` or `os-native`, so Step 3f (User-Assisted SC Completion Gate) never triggers. The agent treats everything as `cdp-auto`, runs shallow Tier 1 tests, and declares "all pass." The Matrix is the foundation for the entire Phase 3 execution.
 

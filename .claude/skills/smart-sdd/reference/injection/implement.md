@@ -57,6 +57,30 @@ Display before each task: `📋 Pattern Constraints (from plan.md): [constraint 
 
 This prevents the scenario where parallel agents independently generate code with inconsistent patterns (e.g., one agent uses stable selectors while another creates new arrays per selector call).
 
+## Foundation Pattern Constraint Enforcement (Axis 4 — platform-specific)
+
+When plan.md Pattern Constraints contain **platform-specific API patterns** (from Foundation F2 items), verify the pattern is **fully implemented** — not just the API call but all required layers:
+
+**Enforcement rule**: For each Pattern Constraint that mentions a platform bridge layer (preload, middleware, plugin registration, service worker), check that BOTH sides are implemented:
+- The API call in application code ✅
+- The bridge/exposure in the platform layer ✅
+
+**Common patterns (auto-detect from Pattern Constraint keywords)**:
+
+| Keyword in Constraint | Check | Example |
+|---|---|---|
+| `preload`, `contextBridge`, `exposeInMainWorld` | Renderer call + preload exposure exist | `webUtils.getPathForFile()` → preload must expose it |
+| `middleware`, `use()` | Route handler + middleware registration exist | Express `app.use(cors())` → middleware file exists |
+| `plugin`, `vite.config`, `webpack.config` | Import in code + plugin registration in build config | Tailwind classes → `@tailwindcss/vite` in vite.config |
+| `service-worker`, `registerSW` | SW registration + SW file exist | PWA cache → `registerSW()` call + `sw.js` file |
+
+```
+❌ Pattern Constraint says "Use webUtils.getPathForFile()" → renderer calls it → but preload doesn't expose webUtils → undefined at runtime (SKF-055)
+✅ Pattern Constraint says "Use webUtils.getPathForFile()" → renderer calls window.api.getPathForFile() → preload exposes it → works
+```
+
+**Skip if**: No platform-specific Pattern Constraints in plan.md.
+
 ## Parallel Agent File Ownership Injection
 
 When the implement Checkpoint plan includes parallel agents, inject the file ownership partition into each agent's prompt:
@@ -702,13 +726,31 @@ After all tasks complete, verify that plan.md's Integration Contracts are actual
    - IPC: channel name (e.g., `provider:list`, `ai:embed`) in `ipcRenderer.invoke()` or equivalent
    - Store: import of the consumed store/hook (e.g., `useProviderStore`)
    - API: fetch/axios call to the consumed endpoint
-3. **BLOCKING**: If a "Consumes ←" entry has no corresponding call in code:
+3. **BLOCKING if call missing**: If a "Consumes ←" entry has no corresponding call in code:
    ```
    🚫 Integration Contract Unfulfilled:
      Consumes ← F004-provider [ai:embed] — no ipcRenderer.invoke('ai:embed') found
      This Feature claims to use F004's embedding API but never actually calls it.
    ```
-4. Display all results in implement Review under "Integration Contract Fulfillment" section
+
+4. **Argument-level verification** (SKF-054 — prevents semantic stubs):
+   When the call EXISTS, trace the arguments back to their source:
+   - **API key / credentials**: Is the key coming from the consumed Feature's service (e.g., `ProviderService.getProviderWithKey()`), or is it hardcoded / read from environment variable only?
+     - `❌ Semantic stub`: `require('@ai-sdk/openai').embedding()` — uses env var only, ignores F004's stored keys
+     - `✅ Real integration`: `ProviderService.getProviderWithKey('openai') → createOpenAI({ apiKey })` — uses F004's data
+   - **Base URL / endpoint**: Is the URL constructed using the consumed Feature's transform logic, or hardcoded?
+   - **Model/config resolution**: Is the model name resolved from the consumed Feature's model list, or hardcoded?
+
+   If any argument bypasses the consumed Feature's actual data → `🚫 Semantic stub detected`:
+   ```
+   🚫 Semantic Stub — Integration Call Exists but Arguments Bypass Provider:
+     Consumes ← F004-provider [embed()]
+     Call: openai.embedding('text-embedding-3-small')
+     apiKey source: process.env.OPENAI_API_KEY (NOT ProviderService)
+     → F004 provider data is never read. Embedding fails when no env var set.
+   ```
+
+5. Display all results in implement Review under "Integration Contract Fulfillment" section
 
 ### Control Capability Audit (rebuild — 🚫 BLOCKING for downgrades)
 

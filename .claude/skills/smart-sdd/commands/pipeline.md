@@ -1282,6 +1282,26 @@ The Verify Execution Checklist (above) MUST include an "Evidence" column. Each P
 
 This prevents agents from marking ✅ without having actually performed the verification step.
 
+**Gate V5 — Functional Smoke Test (🚫 BLOCKING — after build passes, before verify)**:
+
+Build ✅ + TypeScript ✅ does NOT mean implement is complete. After static checks pass, perform 3 functional tests:
+
+1. **Integration Contract Functional Test**: For each "Consumes ←" in plan.md, trigger the integration in the running app and confirm it succeeds. User-assisted dependencies (API keys) → ask user to configure first.
+
+2. **External Library Functional Test**: For each new library added, verify it works in the bundled environment (not just dev). Import failures in Electron/webpack/vite bundles are invisible to `tsc`.
+
+3. **Platform API Functional Test**: For Electron preload-exposed APIs, IPC channels, or platform-specific APIs — verify the call works end-to-end (renderer → preload → main → response).
+
+```
+❌ Build passes + tsc clean → "implement complete"
+   → 7/7 runtime bugs in F006 passed build+tsc (SKF-056)
+
+✅ Build passes + tsc clean + 3 functional tests pass → "implement complete"
+   → Integration calls verified, libraries import in bundle, platform APIs respond
+```
+
+If ANY functional test fails → remain in implement and fix before proceeding to verify.
+
 ---
 
 #### Feature Completion
@@ -1376,6 +1396,14 @@ When new architectural principles or conventions are discovered during Feature p
 2. **🚫 Reading source code is mandatory for rebuild fixes**: When modifying code during verify, the corresponding source app file must be read first. Prevents the pattern of improvising patches based on error messages → patch on top of patch → "start from scratch" loop.
 
 3. **🚫 Same SC fails 2 times → Major escalation**: If the same SC fails 2 consecutive times after fixes, do NOT patch in verify — return to implement.
+
+4. **🚫 Verify Depth Structural Check (count-based, not trust-based)**: Before verify Review, count the number of **Tier 2+** (behavioral) SC verifications performed:
+   - Tier 2 = click/interact → state change confirmed
+   - Tier 3 = action in Feature A → effect in Feature B confirmed
+   - **If behavioral_count == 0 AND total_auto_SCs > 0**: `🚫 Zero behavioral verifications performed. All checks were Tier 1 (existence only). Pipeline Completion Bias detected. Must re-run Phase 3 with Tier 2+ depth.`
+   - This is a **structural gate** (count-based) — the agent cannot self-report Tier 2 without actually performing a click→state change sequence that produces a different snapshot/state than before the click.
+
+5. **🚫 Evidence-Based Completeness Gate (diff-based, not checkbox-based)**: For cross-feature tasks in tasks.md, verify the target file appears in `git diff --name-only`. If tasks.md says "modify Inputbar.tsx to add KB button" but Inputbar.tsx is NOT in the diff → task was NOT implemented, regardless of checkbox state.
 
 > For full gate details: [verify-phases.md](verify-phases.md) (Source Modification Gate, Evidence Gate), [verify-sc-verification.md](verify-sc-verification.md) (SC Matrix, depth requirements)
 
