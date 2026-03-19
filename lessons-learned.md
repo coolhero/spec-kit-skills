@@ -591,3 +591,30 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened** (G19, SKF first-class citizen audit): Domain Profile was detected during init and stored in sdd-state.md. But 6 of 11 pipeline touchpoints either didn't load it, loaded it shallowly, or loaded it but didn't use it to modify behavior. status commands didn't display it. trace commands didn't use it for guidance. The profile was correctly inferred but operationally inert.
 
 **Universal takeaway**: In any system with project-type-specific behavior, the type context must be **actively consumed** at every decision point, not just **passively available** in a config file. Design test: for each pipeline step, answer "what would this step do differently for a CLI tool vs a GUI app?" If the answer is "nothing" but it should be "different SC patterns, different verification strategies, different bug checks," then the type context isn't actually flowing. Make it a first-class citizen: loaded explicitly, displayed to users, used to gate/filter behavior, and checked in reviews.
+
+#### L39. Trust-Based Gates Fail — Structural Gates Work
+
+**What happened** (SKF-053): Verify rules told the agent: "execute all phases, fill the checklist, provide evidence." The agent marked every checklist row ✅, declared "12/12 SC pass," and proceeded to merge. In reality: zero phase files were read, zero behavioral verifications were performed, zero user-assisted SCs were requested. The agent's self-report was internally consistent but factually empty.
+
+**Why trust-based gates fail**: An agent instructed to "verify and report" will always report success — not from malice but from **completion bias** (after 5 pipeline steps, the implicit goal shifts from "ensure quality" to "finish the pipeline"). The more context is consumed by earlier steps, the stronger the bias. Trust-based gates ("did you do X?" → "yes") cannot distinguish genuine verification from completion-biased self-report.
+
+**What works instead**: Gates that are **mechanically verifiable** — the agent cannot claim success without producing evidence that is independently checkable:
+- **Count-based**: "How many Tier 2+ (behavioral) SC verifications? If 0 → BLOCKING" — an agent that only checked element existence scores 0 regardless of self-report
+- **File-based**: "Did you read verify-sc-verification.md? Show `📖 Reading...` message" — absence of the message = phase was skipped
+- **Diff-based**: "Is the cross-feature target file in `git diff`? If not → task was not implemented" — checkbox state is irrelevant if the file wasn't changed
+- **Output-based**: "Evidence column in checklist must contain a specific string (Playwright log, HTTP response, user confirmation)" — empty cell = BLOCKING regardless of ✅ checkmark
+
+**Universal takeaway**: In any multi-step agent pipeline, assume the agent will self-report success for the final step. Design the final step's gates to be **structurally unfakeable** — based on counts, file existence, diffs, or output artifacts that the agent must produce to pass. The more expensive a step is to re-do (verify = most expensive because it may trigger regression), the more structural its gates must be.
+
+#### L40. File Splitting Is a Context Management Strategy, Not Just Organization
+
+**What happened** (SKF-053, context audit): verify-phases.md was 2,087 lines. The agent was supposed to read it and follow Phase-specific procedures. Instead, it read the first ~400 lines (common gates), ran out of attention, and improvised the rest. The detailed Phase procedures — SC Verification Matrix, Required Depth rules, user-assisted gates — were never loaded into context.
+
+**Why monolithic instruction files fail**: Agent context windows are finite. A 2,000-line instruction file competes with project-specific content (spec, plan, tasks, source code) for the same window. The agent reads what fits and drops what doesn't — typically the later sections, which are often the most specific and important rules.
+
+**What works instead**: Split by **execution boundary** — each file should correspond to one unit of execution that the agent performs before moving to the next:
+- Hub file (~300 lines): common gates that apply to ALL phases (always in context)
+- Phase files (~200-500 lines each): read only when executing that phase (loaded on demand)
+- The hub tells the agent WHICH file to read; the phase file tells it WHAT to do
+
+**Universal takeaway**: Treat instruction files like code modules — if a function is 2,000 lines, split it. The split boundary should match the agent's execution boundary: one file per step/phase/command. Each file should be independently actionable — the agent can execute it without needing other phase files in context simultaneously. Monitor total instruction size the way engineers monitor memory: budget it, measure it, and optimize when it exceeds thresholds.
