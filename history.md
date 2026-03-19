@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-03-19] Rule Extensibility Audit — Generalize React/Electron-specific rules to universal principles
+
+### Context
+
+Audit revealed 11 OVER-SPECIFIC rules hardcoded to React/Electron/Cherry Studio. Rules were extracted from real failures (valuable) but not abstracted to universal principles (problematic). A Django or Go project reading these rules would see React-specific instructions that don't apply.
+
+### Fix Strategy
+
+Separate **principle** (universal) from **implementation** (framework-specific):
+- Principle in injection files: "stored data immutable, display-time transform only"
+- Implementation examples: "React: useMemo, Vue: computed, Django: template filter"
+
+### Changes
+
+| File | Rules Generalized |
+|------|------------------|
+| implement.md | Content Immutability (useMemo→universal), Message Passing Layer (IPC→all architectures), Control Capability Audit (HTML→all interfaces) |
+| verify-phases.md | Inline Fix Re-check (useStore/useEffect→universal state/effect patterns) |
+| plan.md | Cross-Feature Integration rows (React component→all interfaces with per-interface examples) |
+| CLAUDE.md | Added Review Protocol #12: Rule Extensibility Check |
+
+---
+
 ## [2026-03-19] SKF-075 — Integration Architecture Extraction + Method Specificity + Architecture Pattern
 
 ### Context

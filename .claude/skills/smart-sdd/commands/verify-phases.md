@@ -100,19 +100,34 @@ The Bug Fix Severity Rule above handles **bugs** (wrong behavior). But verify ma
 
 **Inline Fix Pattern Constraint Re-check** (🚫 BLOCKING — applies to ALL inline fixes):
 
-Even "minor" inline fixes can introduce new bugs if they violate plan.md Pattern Constraints. Before committing ANY inline fix, check these 4 items:
+Even "minor" inline fixes can introduce new bugs if they violate plan.md Pattern Constraints. Before committing ANY inline fix, check these 4 universal principles:
 
-1. **New `useStore(selector)` added** → Does the selector return a new array/object on every call (`.filter()`, `.map()`, spread)? → YES = infinite re-render loop. Use string/number/boolean selectors or `useShallow`.
-2. **New `useEffect` added** → Is there a cleanup function? Are dependencies stable (no inline objects/arrays)?
-3. **New conditional rendering** → Does the inserted element change parent height/layout? → YES = layout shift. Use Portal or `position: fixed`.
-4. **Block/message content modified** → Using `updateBlock`/`setContent` on completed blocks? → YES = rendering corruption. Use render-time `useMemo` transformation instead.
+1. **New state/store selector added** → Does it return a new reference (array/object) on every call? → YES = infinite re-render/re-computation loop.
+   - React: `.filter()`/`.map()` in `useStore` selector → use primitive or `useShallow`
+   - Vue: computed returning new object → use `shallowRef`
+   - Backend: query returning new collection per call → cache/memoize
+
+2. **New side effect handler added** → Does it have cleanup? Are dependencies/triggers stable?
+   - React: `useEffect` without cleanup → memory leak
+   - Vue: `watch` without `watchEffect` stop → leak
+   - Python: context manager without `__exit__` → resource leak
+   - Go: goroutine without done channel → goroutine leak
+
+3. **New conditional element insertion** → Does it change parent dimensions/layout?
+   - GUI: inline element → layout shift. Use overlay outside document flow
+   - API: conditional middleware → response timing change. Ensure non-blocking
+
+4. **Completed data modified** → Are you mutating data that downstream code assumes is immutable?
+   - GUI: modifying rendered content → state inconsistency
+   - API: modifying response after serialization → client confusion
+   - DB: updating a record used as cache key → stale cache
 
 ```
-❌ WRONG: Fix citation display → add .filter() selector → infinite loop → another fix needed
-✅ RIGHT: Fix citation display → check Pattern Constraints → use string selector → one fix, done
+❌ WRONG: Fix display → add unstable selector → infinite loop → another fix needed
+✅ RIGHT: Fix display → check Pattern Constraints → use stable selector → one fix, done
 ```
 
-> **Rationale (SKF-073 failure 7)**: Original code had a stable selector (`citationCount` returning a number). A "fix" replaced it with `.filter()` returning a new array → infinite re-render. The fix introduced a worse bug than the one it solved.
+> **Rationale (SKF-073)**: A "fix" replaced a stable selector (returning number) with `.filter()` (returning new array) → infinite re-render. The fix introduced a worse bug than the one it solved. This pattern applies across all frameworks.
 
 **Recording requirement** (in sdd-state.md Notes after verify completes):
 All inline changes (Minor bug fixes + Implementation gap fills) must be summarized in the Notes column. This recording ensures:

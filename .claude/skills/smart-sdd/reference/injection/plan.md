@@ -191,13 +191,17 @@ Without async-flow rows, the agent implements the handler but may skip: auto-scr
 When Integration Contracts (see below) contain `Consumes ←` entries that require modifying another Feature's source file, add `cross-feature` rows to the Interaction Chains table. These rows trace the data path from the existing Feature's entry point through the new integration code to the end result.
 
 ```markdown
-| FR | User Action | Handler | Store Mutation | DOM Effect | Visual Result | Verify Method |
-|----|-------------|---------|---------------|------------|---------------|---------------|
-| FR-034 | cross-feature: Send message with KB | F005/Inputbar:handleSend() | knowledgePicker.selectedIds read | message.content modified with KB refs | Citation blocks in response | grep handleSend for knowledgePicker |
-| FR-027 | cross-feature: Render citation | F005/MessageContent:render() | — | CitationBlock component inserted | KB source shown in message | grep MessageContent for CitationBlock |
+| FR | User Action | Handler | Store/State Mutation | Effect | Visual/Output Result | Verify Method |
+|----|-------------|---------|---------------------|--------|---------------------|---------------|
+| FR-034 | cross-feature: Action in Feature A triggers Feature B behavior | FeatureA/entrypoint:handler() | FeatureB state read/updated | Output reflects FeatureB data | Combined result visible | grep entrypoint for FeatureB reference |
 ```
 
-**Why cross-feature rows matter**: Without them, the agent creates new services and components (KnowledgeService, KnowledgePicker) that individually work, but never modifies the existing code (Inputbar.tsx handleSend(), MessageContent renderer) to actually use them. The `cross-feature` prefix signals that these chains require **modifying existing Feature files**, not creating new ones.
+**Per-interface examples**:
+- **GUI (React)**: `FR-034 | cross-feature: Send with KB | Inputbar:handleSend() | knowledgePicker.selectedIds | CitationBlock inserted | KB source in message`
+- **HTTP-API**: `FR-034 | cross-feature: Order triggers payment | POST /orders → PaymentService.charge() | order.status=paid | 201 + payment confirmation`
+- **CLI**: `FR-034 | cross-feature: Deploy triggers notify | deploy --notify → NotificationService.send() | deployment.notified=true | "Notification sent to #channel"`
+
+**Why cross-feature rows matter**: Without them, the agent creates new services and components that individually work, but never modifies the existing code to actually use them. The `cross-feature` prefix signals that these chains require **modifying existing Feature code**, not just creating new modules.
 
 **Inline reference/citation rows** (🚫 BLOCKING — for Features with clickable data references):
 

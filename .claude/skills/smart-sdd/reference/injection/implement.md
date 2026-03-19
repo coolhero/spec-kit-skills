@@ -684,24 +684,28 @@ After all tasks complete, verify that plan.md's Integration Contracts are actual
    ```
 4. Display all results in implement Review under "Integration Contract Fulfillment" section
 
-### UI Control Type Audit (rebuild + GUI — 🚫 BLOCKING for downgrades)
+### Control Capability Audit (rebuild — 🚫 BLOCKING for downgrades)
 
-After all tasks complete, compare source app's UI controls with implemented controls:
+> **Skip if**: Not rebuild mode.
 
-1. Read Source→Target Component Mapping from plan.md
-2. For each mapped component, compare control types:
-   - Source: `<Select>` / `<Dropdown>` → Target: `<Input type="text">` → 🚫 BLOCKING (UX downgrade)
-   - Source: `<Slider>` → Target: absent → ⚠️ WARNING (feature omission)
-   - Source: auto-fill/computed field → Target: manual input → ⚠️ WARNING (UX downgrade)
-3. Display comparison in Review:
-   ```
-   ── UI Control Type Audit ────────────────────
-   ✅ ModelList: Select → Select (match)
-   🚫 EmbeddingModel: Select+AutoDimensions → Input[text] (UX downgrade)
-   ⚠️ ChunkSize: Slider(1-50) → absent (missing control)
-   ```
+After all tasks complete, compare source app's **user-facing control capabilities** with implemented controls. This applies to all interfaces, not just GUI:
 
-> **Rationale (SKF-060/063)**: Build and type checks cannot distinguish `Math.random()` from a real embedding call, or a text input from a dropdown. Both compile and run without errors. These semantic checks catch the gap between "code that runs" and "code that works."
+| Interface | Source Control | Target Control | Classification |
+|---|---|---|---|
+| **GUI** | `<Select>` / dropdown | `<Input type="text">` | 🚫 UX downgrade (constrained choice → free text) |
+| **GUI** | Slider (1-50) | absent | ⚠️ Feature omission |
+| **GUI** | auto-fill / computed | manual input | ⚠️ UX downgrade |
+| **HTTP-API** | enum parameter (`status: "active"\|"inactive"`) | string parameter (`status: string`) | 🚫 Validation downgrade |
+| **CLI** | `--format {json,csv,table}` (choices) | `--format <string>` (free input) | 🚫 UX downgrade |
+| **Desktop** | Combobox with autocomplete | Plain text entry | ⚠️ UX downgrade |
+
+1. Read Source→Target mapping from plan.md
+2. For each mapped component/endpoint/command, compare control capability:
+   - Source offers **constrained choice** → Target offers **free input** = 🚫 BLOCKING (capability downgrade)
+   - Source has control → Target missing = ⚠️ WARNING (feature omission)
+   - Source has auto-computed → Target requires manual input = ⚠️ WARNING
+
+> **Rationale (SKF-060/063)**: Build and type checks pass regardless of control type. A text input compiles the same as a dropdown. Only semantic comparison catches the gap between "code that runs" and "code that provides the intended UX."
 
 ### Data Mapping Pattern Audit (rebuild + GUI — 🚫 BLOCKING for instability)
 
@@ -1199,16 +1203,18 @@ When implementing hover, click, or popup interactions, check the following befor
 
 > **Rationale**: Applying hover/click handlers (e.g., `onMouseEnter/Leave`) to items in a scrollable list causes UI flicker as the cursor passes through each item during scroll. CSS-only solutions (`:hover` pseudo-classes with `transition-opacity`) resolve this with zero re-renders. Prefer CSS for pure visibility toggles; reserve framework state for interactions that require data loading or complex logic.
 
-### Message/Block Content Immutability (streaming/AI-generated content)
+### Content Immutability (streaming/AI-generated content — all interfaces)
 
-| Constraint | Rationale |
-|---|---|
-| 🚫 Do NOT modify completed block content via `updateBlock`/`setContent` | `updateBlock` after streaming → React state inconsistency + markdown re-parsing corruption (regex replaces `[text](link)` syntax alongside `[N]` citations) |
-| ✅ Display-time transformations ONLY via `useMemo`/computed | Stored data = AI original text. Displayed data = transformed version. Separation maintained. |
-| 🚫 Do NOT insert dynamic overlays (tooltip, popover, context menu) inside the render tree | Conditional DOM insertion changes parent height → layout shift → scroll position jump |
-| ✅ Use Portal or `position: fixed` for overlays | Renders outside the document flow, no impact on existing layout |
+> **Universal principle**: Stored data MUST NOT be mutated after creation. All transformations happen at display/render time only.
 
-> **Rationale (SKF-073)**: 7 sequential failures on citation UI traced to: (1) `updateBlock` corrupting markdown, (2) inline tooltip causing layout shift, (3) `useStore` selector returning new array on every render → infinite loop. All three are violations of immutability and render isolation principles.
+| Principle | Rationale | Per-Framework Implementation |
+|---|---|---|
+| 🚫 Do NOT mutate completed content in storage | Post-creation mutation → state inconsistency, re-parsing corruption, observer notification loops | React: no `updateBlock`/`setContent`. Vue: no `v-model` rebind. Django: no `Model.save()` on display-time transforms. Go: no mutation of response structs after creation |
+| ✅ Display-time transformations ONLY | Stored data = original. Displayed data = transformed version. Separation maintained. | React: `useMemo`. Vue: `computed`. Svelte: `$:` reactive. Django: template filter/`@property`. Go: serializer transform |
+| 🚫 Do NOT insert dynamic overlays inside the document flow | Conditional element insertion changes parent dimensions → layout shift → scroll jump | React: Portal. Vue: `<Teleport>`. Vanilla: `position: fixed/absolute` + `z-index`. Desktop: separate window/popup |
+| ✅ Render overlays outside normal document flow | Renders without affecting existing layout | See per-framework approach above |
+
+> **Rationale (SKF-073)**: 7 sequential failures traced to storage mutation, inline overlay layout shift, and unstable state selectors. These are universal engineering principles — the framework-specific implementation varies, but the principle does not.
 
 ### Data Persistence Safety
 
@@ -1228,13 +1234,20 @@ When implementing hover, click, or popup interactions, check the following befor
 - For each new store: grep the app entry point (App.tsx, main.ts, _app.tsx, etc.) for `hydrate()` or equivalent initialization call
 - **Missing → 🚫 BLOCKING**: `Store [name] created but not hydrated at app startup. Add hydrate() call to [entry point].`
 
-### 2. IPC/API Registration Check (Electron, Tauri, desktop apps)
-- Scan for new IPC handlers registered in this Feature (`ipcMain.handle`, `tauri::command`, etc.)
-- For each handler: verify the 3-layer chain exists:
-  1. Handler registered (main process) — grep `ipcMain.handle('[channel]')` or equivalent
-  2. Preload exposed (bridge) — grep channel name in preload/INVOKE_CHANNELS or equivalent
-  3. Renderer invoked — grep `window.api.invoke('[channel]')` or equivalent
-- **Any layer missing → 🚫 BLOCKING**: `IPC channel [name] has [N]/3 layers. Missing: [layer].`
+### 2. Message Passing Layer Completeness Check
+- Scan for new inter-boundary communication registered in this Feature
+- For each communication channel: verify the **full chain** exists (all layers connected):
+
+| Architecture | Layers to verify | Example grep patterns |
+|---|---|---|
+| **Electron IPC** | Handler (main) → Preload (bridge) → Renderer (client) | `ipcMain.handle` → `INVOKE_CHANNELS` → `window.api.invoke` |
+| **Tauri Command** | Command (Rust) → JS binding (bridge) → Frontend (client) | `#[tauri::command]` → `invoke()` |
+| **HTTP API** | Route registered → Middleware applied → Controller connected | `router.post('/api/...')` → middleware stack → handler function |
+| **GraphQL** | Resolver registered → Schema defined → Client query exists | `resolvers.Query.xxx` → `type Query { xxx }` → `useQuery(XXX)` |
+| **Event/PubSub** | Publisher emits → Channel exists → Subscriber listens | `emit('event')` → channel config → `on('event')` |
+| **CLI** | Command registered → Parser configured → Handler connected | `program.command('xxx')` → options defined → handler function |
+
+- **Any layer missing → 🚫 BLOCKING**: `Channel [name] has [N]/[total] layers. Missing: [layer].`
 
 ### 3. UI Entry Point Check
 - For each FR in spec.md that requires a user action to initiate:
