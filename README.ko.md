@@ -325,7 +325,7 @@ flowchart TD
     DP -.- ADD
 ```
 
-다이어그램은 전체 생명주기를 보여줍니다: code-explore로 기존 코드를 **이해**하고, reverse-spec으로 **분석**(소스 앱 실행 + Feature별 spec-draft 생성)하거나 init으로 새로 시작하고, Brief 프로세스를 통해 Feature를 **정의**한 다음, spec-kit 파이프라인을 통해 **구축**(specify는 spec-draft를 보완, 처음부터 생성하지 않음)합니다. 소스 분석 아티펙트는 `specs/_global/`에, 파이프라인 산출물은 `specs/NNN-feature/`에 — 깨끗한 분리.
+다이어그램은 전체 생명주기를 보여줍니다: code-explore로 기존 코드를 **이해**하고, reverse-spec으로 **분석**(소스 앱 실행 + Feature별 spec-draft 생성)하거나 init으로 새로 시작하고, Brief 프로세스를 통해 Feature를 **정의**한 다음, spec-kit 파이프라인을 통해 **구축**(specify는 spec-draft를 보완, 처음부터 생성하지 않음)합니다. 프로젝트 전체 아티펙트는 `specs/_global/`에, 각 Feature의 모든 아티펙트(분석 + 파이프라인)는 `specs/NNN-feature/`에 — 깨끗한 구조.
 
 ---
 
@@ -625,7 +625,8 @@ verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 
 | Entity Registry | `specs/_global/entity-registry.md` | 공유 데이터 모델 정의 |
 | API Registry | `specs/_global/api-registry.md` | API 계약 명세 |
 | Business Logic Map | `specs/_global/business-logic-map.md` | 교차 Feature 비즈니스 규칙 |
-| Pre-context | `specs/_global/features/F00N-*/pre-context.md` | Feature별 spec-kit 컨텍스트 |
+| Pre-context | `specs/NNN-feature/pre-context.md` | Feature별 spec-kit 컨텍스트 |
+| Spec Draft | `specs/NNN-feature/spec-draft.md` | reverse-spec의 초기 spec (rebuild 모드) |
 | Constitution | `.specify/memory/constitution.md` | 프로젝트 전역 원칙 및 Best Practices |
 | State | `specs/_global/sdd-state.md` | 파이프라인 진행, 툴체인, Foundation 결정 |
 

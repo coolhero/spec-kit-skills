@@ -129,7 +129,7 @@ my-project/
 
 Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
 
-**Artifact Separation**: Source analysis lives exclusively in `specs/_global/` (pre-context, registries, spec-drafts). Pipeline output lives in `specs/NNN-feature/` (spec.md, plan.md, tasks.md). The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." This separation means specs are reusable across different source projects, and source analysis has a single source of truth.
+**Artifact Separation**: Project-wide analysis (roadmap, registries, state) lives in `specs/_global/`. Each Feature's artifacts — both analysis (pre-context, spec-draft from reverse-spec) and pipeline output (spec.md, plan.md, tasks.md from smart-sdd) — live together in `specs/NNN-feature/`. The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." Source details stay in pre-context.md (analysis layer), keeping specs clean and reusable.
 
 #### Domain Profile
 
@@ -629,7 +629,8 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 | Entity Registry | `specs/_global/entity-registry.md` | Shared data model definitions |
 | API Registry | `specs/_global/api-registry.md` | API contract specifications |
 | Business Logic Map | `specs/_global/business-logic-map.md` | Cross-Feature business rules |
-| Pre-context | `specs/_global/features/F00N-*/pre-context.md` | Per-Feature context for spec-kit |
+| Pre-context | `specs/NNN-feature/pre-context.md` | Per-Feature context for spec-kit |
+| Spec Draft | `specs/NNN-feature/spec-draft.md` | Initial spec from reverse-spec (rebuild mode) |
 | Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
 | State | `specs/_global/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
 

@@ -772,14 +772,16 @@ speckit-specify receives spec-draft.md as a **seed** and refines it — NOT gene
 
 ### Phase 3: Pipeline Execution (smart-sdd plan → verify)
 
-Pipeline artifacts (`spec.md`, `plan.md`, `tasks.md`) contain **requirements only** — no source code references. Source details live exclusively in `specs/_global/` (pre-context, spec-draft). This **Artifact Separation** ensures specs are reusable and source analysis has a single source of truth.
+Pipeline artifacts (`spec.md`, `plan.md`, `tasks.md`) contain **requirements only** — no source code references. Source details stay in the analysis layer (`pre-context.md`, `spec-draft.md`) within the same Feature directory. This **Artifact Separation** keeps specs clean and reusable.
 
 ```
-Source Code → reverse-spec  → specs/_global/    → smart-sdd  → specs/NNN-feature/
-               (analysis)      pre-context.md            (pipeline)    spec.md (clean)
-                               spec-draft.md (detailed)                plan.md (clean)
-                               UI Flow Specs                           tasks.md (clean)
-                               SBI, registries
+Source Code → reverse-spec  → specs/_global/          + specs/NNN-feature/
+               (analysis)      roadmap, registries       pre-context.md (analysis)
+                               sdd-state.md              spec-draft.md (initial spec)
+                                                       ↓
+                             → smart-sdd pipeline     → specs/NNN-feature/
+                               (builds on analysis)     spec.md (refined, clean)
+                                                        plan.md, tasks.md
 ```
 
 When smart-sdd discovers new source insights during pipeline execution, it updates `specs/_global/` artifacts (not its own). This ensures all source knowledge accumulates in one place.
