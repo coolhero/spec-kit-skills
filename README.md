@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 13:09 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 13:30 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -34,11 +34,25 @@
 
 ## Quick Start
 
+### Key Terms
+
+Before diving in, here are terms used throughout this document:
+
+| Term | Meaning |
+|------|---------|
+| **Feature** | A self-contained unit of functionality (e.g., authentication, task CRUD, dashboard UI). Each Feature gets one spec and one pipeline run. |
+| **Spec** | A document defining *what* a Feature does — functional requirements (FRs), success criteria (SCs), data models — written before any code. |
+| **Pipeline** | The sequence: specify → plan → tasks → analyze → implement → verify. Each step produces an artifact that feeds the next. |
+| **HARD STOP** | A mandatory pause where the agent displays results and waits for your approval before proceeding. You review and approve, request changes, or edit. Cannot be auto-skipped (use `--auto` only for batch runs). |
+| **GEL** | Global Evolution Layer — project-wide artifacts (roadmap, registries, pre-contexts) that give every Feature visibility into the whole project. |
+| **Domain Profile** | Your project's type signature (5 axes + 1 modifier) that determines which rules are loaded. |
+| **Brief** | The normalized, user-verified Feature definition produced by `/smart-sdd add`. Not a PRD — it's the *output* of the intake process. |
+
 ### Prerequisites
 
-- [Claude Code](https://claude.ai/claude-code) CLI
-- [spec-kit](https://github.com/github/spec-kit) skill (for `/smart-sdd`)
-- [Playwright](https://playwright.dev) — `npm install -D @playwright/test && npx playwright install` (primary). Optional: [Playwright MCP](https://github.com/microsoft/playwright-mcp) for interactive acceleration — see [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md)
+- [Claude Code](https://claude.ai/claude-code) CLI — the AI coding agent that runs these skills
+- [spec-kit](https://github.com/github/spec-kit) skill — the SDD pipeline engine (required for `/smart-sdd`, not needed for `/reverse-spec` alone)
+- [Playwright](https://playwright.dev) — for runtime verification during `verify` step. Install: `npm install -D @playwright/test && npx playwright install`. Optional: [Playwright MCP](https://github.com/microsoft/playwright-mcp) for interactive acceleration — see [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md)
 
 ### Installation
 
@@ -49,21 +63,36 @@ cd spec-kit-skills
 # ./uninstall.sh  # removes symlinks (to uninstall)
 ```
 
-### First Commands
+The installer creates symlinks from `~/.claude/skills/` to this repository. This means skill updates are applied by `git pull` — no reinstallation needed.
 
-| Your situation | Command | What happens |
-|------|---------|------|
-| **Want to understand a codebase first** | `/code-explore ./path/to/source` | Explore the code interactively, build understanding, then define specs |
-| **Starting from scratch** | `/smart-sdd init` | Set up a new project, define Features, run the pipeline |
-| **Have existing code, want to rebuild it** | `/reverse-spec ./path/to/source` | Analyze the code → rebuild with SDD |
-| **Have existing code, want to keep it** | `/reverse-spec --adopt` → `/smart-sdd adopt` | Wrap existing code with SDD docs, no rewrite |
-| **Already running smart-sdd, need more Features** | `/smart-sdd add` | Add new Features to an existing project |
+### Which Command Should I Use?
 
-### Verify
+```mermaid
+flowchart TD
+    Start["I want to build software with AI"] --> HasCode{"Do you have\nexisting code?"}
+    HasCode -- "No" --> Init["/smart-sdd init\nSet up new project"]
+    Init --> Add["/smart-sdd add\nDefine each Feature"]
+    Add --> Pipeline["/smart-sdd pipeline\nBuild Features"]
 
+    HasCode -- "Yes" --> Goal{"What's your goal?"}
+    Goal -- "Understand it first" --> Explore["/code-explore ./source\nStudy the code"]
+    Explore --> Goal
+
+    Goal -- "Rebuild from scratch" --> ReverseSpec["/reverse-spec ./source\nExtract project structure"]
+    ReverseSpec --> Pipeline
+
+    Goal -- "Document it (keep code)" --> Adopt["/reverse-spec --adopt\nthen /smart-sdd adopt"]
+
+    Goal -- "Add new features to it" --> AddIncr["/smart-sdd add\nDefine new Features"]
+    AddIncr --> Pipeline
 ```
-/reverse-spec --help
-/smart-sdd status
+
+### Verify Installation
+
+```bash
+# In Claude Code, type:
+/reverse-spec --help     # Should show command help
+/smart-sdd status        # Should show status or ask to initialize
 ```
 
 ---
@@ -98,6 +127,30 @@ Each spec is internally solid, but these gaps — no memory across Features, ins
 | **Per-Feature Pre-contexts** | What each Feature needs to know about the rest of the project |
 | **Source Behavior Inventory** | Function-level coverage tracking (for existing codebases) |
 | **Constitution** | Project-wide principles and architectural decisions |
+
+These artifacts live in your project directory:
+
+```
+my-project/
+├── specs/
+│   ├── reverse-spec/              ← GEL (project-wide)
+│   │   ├── roadmap.md             ← Feature dependency graph
+│   │   ├── entity-registry.md     ← Shared data models
+│   │   ├── api-registry.md        ← Inter-Feature API contracts
+│   │   ├── sdd-state.md           ← Pipeline state + Domain Profile
+│   │   └── features/
+│   │       └── F001-auth/
+│   │           └── pre-context.md ← What F001 needs to know
+│   ├── 001-auth/                  ← spec-kit output (per-Feature)
+│   │   ├── spec.md
+│   │   ├── plan.md
+│   │   └── tasks.md
+│   └── 002-task-crud/
+│       └── ...
+└── .specify/
+    └── memory/
+        └── constitution.md        ← Project-wide principles
+```
 
 Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
 
