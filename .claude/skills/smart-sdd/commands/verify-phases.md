@@ -408,3 +408,23 @@ Each phase is in a separate file to fit within context budget. Read ONLY the pha
 **Do NOT read all phase files at once.** Read one phase file, execute it, then read the next. This keeps context budget under control.
 
 **The gates in THIS file (Bug Fix Severity Rule, Source Modification Gate, Verify Initialization, Process Lifecycle) apply to ALL phases.** They are in this hub file because they must always be in context.
+
+### 🚫 PHASE FILE READING GATE (BLOCKING)
+
+Each Phase MUST begin by reading the corresponding phase file from the table above. **Do NOT substitute with agent knowledge.** The phase files contain execution rules, gates, and checklists that change between versions. An agent's general knowledge of "how to verify" is NOT a substitute.
+
+**Enforcement**: Before each Phase, display:
+```
+📖 Reading [phase-file.md] for Phase [N] execution...
+```
+If this message is absent in the verify output → that Phase was NOT properly executed → verify result is INVALID.
+
+```
+❌ WRONG: Agent does build+tsc+Playwright from general knowledge without reading any phase file
+   → Misses SC Verification Matrix, Reachability Gate, Evidence requirements, user-assisted gate
+
+✅ RIGHT: "📖 Reading verify-preflight.md..." → execute Phase 0
+          "📖 Reading verify-build-test.md..." → execute Phase 1
+          "📖 Reading verify-sc-verification.md..." → execute Phase 3
+          Each phase follows the file's specific rules, not agent improvisation
+```

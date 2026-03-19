@@ -1220,6 +1220,70 @@ When the user reports a problem with phrases like "there's an error", "it doesn'
   → Playwright accessibility.snapshot() + Feature-specific element verification
 ```
 
+#### Verify Structural Enforcement Gates (SKF-053)
+
+> These gates address the structural root cause of shallow verification: agents skip detailed phase files and improvise with general knowledge. Each gate is **count-based or evidence-based**, not trust-based — the agent's self-report is insufficient.
+
+**Gate V1 — Verify Depth Structural Check (🚫 BLOCKING)**:
+
+Before verify Review, count the number of Tier 2+ (behavioral) SC verifications actually performed:
+- Tier 2 = click/interact → state change confirmed
+- Tier 3 = action in A → effect in B confirmed
+
+```
+If behavioral_count == 0 AND total_SCs > 3:
+  🚫 "Zero behavioral verifications performed. All checks were Tier 1
+  (existence only). Pipeline Completion Bias detected."
+  → MUST re-run Phase 3 with Tier 2+ depth.
+```
+
+This gate is **structural** (count-based), not **trust-based** (agent self-report). An agent that only checks "button exists" without clicking it scores behavioral_count = 0.
+
+**Gate V2 — Smoke Launch Minimum Bar (🚫 BLOCKING for GUI Features)**:
+
+Process alive check (e.g., `kill -0 $PID`) does NOT constitute Smoke Launch. At minimum 1 GUI interaction must succeed:
+
+```
+For each Interface type:
+  gui/tui:  Launch app → navigate to Feature page → verify page content is non-empty
+  http-api: Start server → health check endpoint returns 200 with body
+  cli:      Run command with --help → verify output contains expected subcommands
+  data-io:  Run pipeline with test input → verify output file exists and is non-empty
+
+❌ kill -0 $PID → "alive" → ✅  (process check only — NOT acceptable)
+✅ _electron.launch() → navigate → textContent.length > 0 → ✅  (GUI content verified)
+✅ curl localhost:3000/health → 200 {"status":"ok"} → ✅  (API health verified)
+```
+
+**Gate V3 — Evidence-Based Task Verification (🚫 BLOCKING for cross-feature tasks)**:
+
+For tasks involving cross-Feature integration (marked with `cross-feature:` in Interaction Chains or `Consumes ←` in Integration Contracts):
+1. Identify the target file(s) from the task description
+2. Check `git diff --name-only` for those files
+3. If file NOT in diff → task was NOT implemented regardless of checkbox state
+
+```
+❌ tasks.md checkbox [x] but file not in git diff → task declared done but code unchanged
+✅ tasks.md checkbox [x] AND file appears in git diff → task actually implemented
+```
+
+**Gate V4 — Evidence Column in Verify Checklist (🚫 BLOCKING)**:
+
+The Verify Execution Checklist (above) MUST include an "Evidence" column. Each Phase's `Executed?` field requires a supporting evidence string:
+
+```
+| Phase | Required? | Executed? | Evidence | Result |
+|-------|-----------|-----------|----------|--------|
+| 0-4b Reachability | Yes (GUI) | ✅ | Playwright: click .sidebar-knowledge → /knowledge loaded (2.1s) | pass |
+| 3 SC Verify | Yes | ✅ | Matrix: 12 SCs, 8 cdp-auto (Tier 2), 2 user-assisted, 2 ext-dep | 10/12 verified |
+
+"Evidence" column empty → Executed? ✅ is INVALID → BLOCKING
+```
+
+This prevents agents from marking ✅ without having actually performed the verification step.
+
+---
+
 #### Feature Completion
 
 **Single-Feature mode (default)**:

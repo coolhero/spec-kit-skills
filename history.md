@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-19] SKF-053 — 7 Structural Causes of Shallow Verification
+
+### Fixes
+
+| Cause | Fix | File |
+|-------|-----|------|
+| 1. Phase files not read | Phase File Reading Gate (BLOCKING) — `📖 Reading [file]...` required | verify-phases.md |
+| 2. SC Matrix not created | SC Matrix Gate (BLOCKING) — Step 3 blocked without Matrix | verify-sc-verification.md |
+| 3. Pipeline Completion Bias | Verify Depth Structural Check — 0 behavioral = BLOCKING | pipeline.md Gate V1 |
+| 5. Smoke Launch = process check | Smoke Launch Minimum Bar — GUI content required | pipeline.md Gate V2 |
+| 6. Completeness Gate self-report | Evidence-Based Task Verification — git diff cross-check | pipeline.md Gate V3 |
+| 7. Checklist no evidence | Evidence Column mandatory | pipeline.md Gate V4 |
+
+All gates are **structural** (count/file/diff-based), not trust-based (agent self-report).
+
+---
+
 ## [2026-03-19] SKF-076 — Rebuild UX Equivalence + UI Screen Inventory + Source-First UI
 
 ### Context
