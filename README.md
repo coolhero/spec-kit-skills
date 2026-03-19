@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 15:54 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 06:20 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1586,6 +1586,8 @@ Each skill follows the same internal directory convention:
 | `scripts/pipeline-status.sh` | Dashboard — pipeline progress overview |
 | `scripts/sbi-coverage.sh` | Dashboard — SBI coverage mapping |
 | `scripts/validate.sh` | Cross-file consistency validator (exit code indicates pass/fail) |
+| `scripts/semantic-stub-check.sh` | Semantic stub detector — finds Math.random(), placeholder text, hardcoded fallbacks in implementation |
+| `scripts/wiring-check.sh` | Wiring integrity checker — IPC/API registration audit, parameter shape cross-check, orphan handler detection |
 
 ### shared (`.claude/skills/shared/`)
 

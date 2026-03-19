@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 15:54 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 06:20 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -1581,6 +1581,8 @@ specs/
 | `scripts/pipeline-status.sh` | 대시보드 — 파이프라인 진행 개요 |
 | `scripts/sbi-coverage.sh` | 대시보드 — SBI 커버리지 매핑 |
 | `scripts/validate.sh` | 교차 파일 일관성 검증기 (종료 코드로 pass/fail 표시) |
+| `scripts/semantic-stub-check.sh` | 시맨틱 스텁 탐지기 — Math.random(), 플레이스홀더 텍스트, 하드코딩된 폴백 등 구현체 검출 |
+| `scripts/wiring-check.sh` | 와이어링 무결성 검사기 — IPC/API 등록 감사, 파라미터 Shape 교차 검증, 미사용 핸들러 탐지 |
 
 ### shared (`.claude/skills/shared/`)
 

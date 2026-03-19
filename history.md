@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-20] Post-pull Audit — 6 Issues Fixed (verify gate headings, ipc.md schema, README scripts)
+
+Post-pull analysis of 30-commit update (36 files, +4559/-2073 lines). Found and fixed 6 issues:
+
+| # | Issue | Severity | Fix |
+|---|-------|----------|-----|
+| 1 | README file tables missing `semantic-stub-check.sh` and `wiring-check.sh` | HIGH | Added to both README.md and README.ko.md |
+| 2 | `ipc.md` IPC N-Layer was under S7 but `_schema.md` referenced it as S4 extension | MEDIUM | Added proper S4 section in ipc.md, S7 now cross-references S4 |
+| 3 | `ipc.md` missing S3 (Verify Steps) — IPC channel verification steps needed | MEDIUM | Added S3 with 3 steps: channel-audit, n-layer-check, payload-shape |
+| 4 | `ipc.md` missing S9 (Brief Completion Criteria) | LOW | Added S9 with IPC boundary, channel inventory, error handling criteria |
+| 5 | verify-phases.md PHASE FILE READING GATE example headings didn't match actual file headings | LOW | Updated all 4 Phase heading examples to match actual first headings |
+| 6 | README `Last updated` timestamps stale | LOW | Updated to 2026-03-20 06:20 KST |
+
+Key finding: The 30-commit update itself (verify refactor, SKF-053 structural gates, agent behavioral rules, Korean→English translation, S4 Data Integrity, runtime-verification.md, ui-flow-spec.md, scripts) was well-executed overall. Issues were limited to propagation gaps (README tables, schema-implementation alignment).
+
+---
+
 ## [2026-03-19] SKF-046~047 — Cosmetic Test Detection + Cross-Feature Wiring Runtime
 
 | SKF | Fix | File |

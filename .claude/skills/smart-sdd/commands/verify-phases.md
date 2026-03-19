@@ -430,10 +430,10 @@ Each Phase MUST begin by reading the corresponding phase file from the table abo
    ```
    | Phase | File Read? | First Heading Quoted |
    |-------|-----------|---------------------|
-   | 0     | ✅ verify-preflight.md | "## Pre-flight Checks" |
-   | 1     | ✅ verify-build-test.md | "## Phase 1: Build/Test/Lint" |
-   | 3     | ✅ verify-sc-verification.md | "## Phase 3 Checklist" |
-   | 4-5   | ✅ verify-evidence-update.md | "## SC Verification Evidence Gate" |
+   | 0     | ✅ verify-preflight.md | "### Phase 0: Runtime Environment Readiness" |
+   | 1     | ✅ verify-build-test.md | "## Phase 1: Execution Verification (BLOCKING)" |
+   | 3     | ✅ verify-sc-verification.md | "### Phase 3: Demo-Ready Verification" |
+   | 4-5   | ✅ verify-evidence-update.md | "### SC Verification Evidence Gate" |
    ```
    **Any row with blank "First Heading" → BLOCKING.** The phase was not read.
 
