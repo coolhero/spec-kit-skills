@@ -334,6 +334,16 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 >
 > **For rebuild mode**: This phase is **BLOCKING** — skipping it produces specs that miss UI control types (dropdown vs text input), interaction patterns (drag&drop, auto-fill, inline editing), data flow paths (citation rendering, file processing pipelines), and entry points (toolbar buttons, context menus, keyboard shortcuts). These gaps cause 70%+ of rebuild implementation failures (see lessons-learned.md L39).
 >
+> ```
+> ❌ WRONG: Phase 1.5 skip → specify gets "FR: create KB" (one line)
+>    → implement creates TextInput for model selection
+>    → source app has Dropdown with auto-fill → UX mismatch
+>
+> ✅ RIGHT: Phase 1.5 runs source app → records "Dropdown(configured only), auto-fill Dimensions"
+>    → spec-draft FR-003: "Select from Dropdown, Dimensions auto-fills"
+>    → implement creates Dropdown with auto-fill → matches source
+> ```
+>
 > **For adopt mode**: Skip entirely — adoption documents existing code in-place, no need to explore the app you're already running.
 >
 > **Rationale**: Code analysis reveals WHAT components exist. Runtime exploration reveals HOW they work — form field types, interaction patterns, visual feedback, error states, data flow through UI. Without runtime exploration, the agent must guess these details during implement, producing simplified versions that don't match the source app.
@@ -1079,6 +1089,8 @@ Perform deep analysis using patterns appropriate to the tech stack identified in
 
 > **F9 Scan Target Loading**: If the active Foundation file(s) declare an `### F9. Scan Targets` section (see `domains/foundations/_foundation-core.md` § F9), load those scan targets and MERGE them with the universal scan targets from `_core.md`. F9 targets supplement — not replace — universal targets. This ensures framework-specific patterns (e.g., Drizzle ORM `table()` for Bun, `createSignal()` for Solid.js, Hono route handlers) are included in Phase 2-1 (Data Model), 2-2 (API Endpoint), and 2-6 (SBI) extraction without modifying `_core.md`.
 
+> **Phase 1.5 Completeness Gate (rebuild mode)**: Before starting Phase 2, verify that Phase 1.5 produced UI Flow Specs. Check if `specs/reverse-spec/runtime-exploration.md` contains at least one `### Flow:` section. If absent AND mode is rebuild → 🚫 **BLOCKING**: "Phase 1.5 Runtime Exploration did not produce UI Flow Specs. Return to Phase 1.5 or acknowledge limited spec quality."
+>
 > **Phase 1.5 Cross-Reference**: If `specs/reverse-spec/runtime-exploration.md` exists, read the file and use the observations to enrich analysis:
 > - Validate route definitions against actually observed screens (Screen Inventory)
 > - Enrich entity extraction with observed data display patterns — tables, forms, card views (UI Patterns)
@@ -2105,6 +2117,13 @@ For each Feature, generate `BASE_PATH/features/[FID]-[name]/spec-draft.md` using
    ```
    - **NEVER abstract UI controls**: Dropdown stays Dropdown, Slider stays Slider, auto-fill stays auto-fill
    - **NEVER merge flow steps**: Each step that involves a distinct user action → separate FR
+   ```
+   ❌ WRONG: "FR-003: User selects embedding model" (UI control abstracted away)
+   ✅ RIGHT: "FR-003: Select embedding model from Dropdown (configured providers only). Selecting a model auto-fills Dimensions." (exact control + behavior)
+
+   ❌ WRONG: "FR-001: User can create a Knowledge Base" (entire flow merged into 1 FR)
+   ✅ RIGHT: FR-001 (click Create button), FR-002 (fill name), FR-003 (select model), FR-004 (click Create) — one FR per user action
+   ```
 
 2. **UI Flow Spec Error Paths → Edge Case FR/SC**:
    ```
