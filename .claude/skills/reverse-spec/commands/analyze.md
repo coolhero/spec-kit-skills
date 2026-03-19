@@ -328,11 +328,15 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 ---
 
-## Phase 1.5 — Runtime Exploration (Optional)
+## Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild, Optional for adopt)
 
 > **Purpose**: Run the original application and explore it interactively before deep code analysis. This provides visual and behavioral context (UI layout, user flows, actual states) that code reading alone cannot capture. The observations enrich Phase 2 analysis and Phase 4 deliverables.
 >
-> **When to skip**: This phase is relevant only for **rebuild mode**. Skip entirely when `--adopt` is specified (adoption documents existing code in-place — no need to explore the app you're already running).
+> **For rebuild mode**: This phase is **BLOCKING** — skipping it produces specs that miss UI control types (dropdown vs text input), interaction patterns (drag&drop, auto-fill, inline editing), data flow paths (citation rendering, file processing pipelines), and entry points (toolbar buttons, context menus, keyboard shortcuts). These gaps cause 70%+ of rebuild implementation failures (see lessons-learned.md L39).
+>
+> **For adopt mode**: Skip entirely — adoption documents existing code in-place, no need to explore the app you're already running.
+>
+> **Rationale**: Code analysis reveals WHAT components exist. Runtime exploration reveals HOW they work — form field types, interaction patterns, visual feedback, error states, data flow through UI. Without runtime exploration, the agent must guess these details during implement, producing simplified versions that don't match the source app.
 
 ### 1.5-0. Playwright Availability Check + User Choice (HARD STOP)
 
@@ -680,13 +684,45 @@ For each discovered route (in navigation order):
    - **Interactive elements**: form inputs, dropdowns, toggles, drag targets
 3. If console errors appear (via `page.on('console', ...)` listener) → record them (continue exploration)
 
-**Phase D — Key Flow Identification** (observation only):
-Based on screens discovered, identify apparent user flows:
-- Authentication flow (if login form exists)
-- CRUD patterns (list → detail → edit)
-- Wizard/multi-step flows
-- Settings/configuration pages
-- Record flows as route sequences, **without performing data entry or state-changing actions**
+**Phase D — Interactive Flow Execution** (rebuild: MANDATORY, adopt: skip):
+
+> Code analysis tells you a dropdown exists. Runtime execution tells you what's IN the dropdown, what happens when you select an option, and what auto-fills afterward.
+
+For each major Feature area discovered in Phase C, **execute the primary user flow**:
+
+1. **CRUD flow** (if list + create UI exists):
+   - Click "Create/Add/New" → record dialog/form structure
+   - Record each form field: type (text/dropdown/slider/checkbox), options, validation, auto-fill behavior
+   - Fill with test data → submit → record success feedback + where new item appears
+
+2. **Configuration flow** (if settings UI exists):
+   - Navigate to settings → record all sections and controls
+   - For each dropdown: record available options
+   - For API key inputs: record validation behavior
+
+3. **Data pipeline flow** (if file upload/processing exists):
+   - Upload test file → record formats, progress, status transitions
+   - Track data through: upload → processing → stored → queryable → displayed
+
+4. **Cross-feature interaction** (if features interact):
+   - Execute flow spanning 2+ features → record the full chain
+
+**Output**: Generate **UI Flow Spec** per flow (saved to pre-context):
+```markdown
+### Flow: [Flow Name]
+| Step | User Action | UI Control | Response | State Change |
+|------|------------|------------|----------|-------------|
+| 1 | Click [+ Create] | Button | Dialog opens | — |
+| 2 | Enter name | TextInput (required) | — | form.name |
+| 3 | Select model | Dropdown (configured providers only) | Dimensions auto-fills | form.model |
+| 4 | Click [Create] | Button (enabled when valid) | Dialog closes, item in list | list += new |
+
+Error paths observed:
+- Empty name → red border, Create disabled
+- No providers → dropdown empty, helper "Configure a provider first"
+```
+
+Budget: Max 5 flows per Feature area, max 30 minutes total
 
 ---
 
@@ -716,13 +752,45 @@ For each discovered route (in navigation order):
    - **Interactive elements**: form inputs, dropdowns, toggles, drag targets
 4. If console errors appear → record them (continue exploration)
 
-**Phase D — Key Flow Identification** (observation only):
-Based on screens discovered, identify apparent user flows:
-- Authentication flow (if login form exists)
-- CRUD patterns (list → detail → edit)
-- Wizard/multi-step flows
-- Settings/configuration pages
-- Record flows as route sequences, **without performing data entry or state-changing actions**
+**Phase D — Interactive Flow Execution** (rebuild: MANDATORY, adopt: skip):
+
+> Code analysis tells you a dropdown exists. Runtime execution tells you what's IN the dropdown, what happens when you select an option, and what auto-fills afterward.
+
+For each major Feature area discovered in Phase C, **execute the primary user flow**:
+
+1. **CRUD flow** (if list + create UI exists):
+   - Click "Create/Add/New" → record dialog/form structure
+   - Record each form field: type (text/dropdown/slider/checkbox), options, validation, auto-fill behavior
+   - Fill with test data → submit → record success feedback + where new item appears
+
+2. **Configuration flow** (if settings UI exists):
+   - Navigate to settings → record all sections and controls
+   - For each dropdown: record available options
+   - For API key inputs: record validation behavior
+
+3. **Data pipeline flow** (if file upload/processing exists):
+   - Upload test file → record formats, progress, status transitions
+   - Track data through: upload → processing → stored → queryable → displayed
+
+4. **Cross-feature interaction** (if features interact):
+   - Execute flow spanning 2+ features → record the full chain
+
+**Output**: Generate **UI Flow Spec** per flow (saved to pre-context):
+```markdown
+### Flow: [Flow Name]
+| Step | User Action | UI Control | Response | State Change |
+|------|------------|------------|----------|-------------|
+| 1 | Click [+ Create] | Button | Dialog opens | — |
+| 2 | Enter name | TextInput (required) | — | form.name |
+| 3 | Select model | Dropdown (configured providers only) | Dimensions auto-fills | form.model |
+| 4 | Click [Create] | Button (enabled when valid) | Dialog closes, item in list | list += new |
+
+Error paths observed:
+- Empty name → red border, Create disabled
+- No providers → dropdown empty, helper "Configure a provider first"
+```
+
+Budget: Max 5 flows per Feature area, max 30 minutes total
 
 ---
 

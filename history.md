@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-03-20] Rebuild Fidelity — Runtime Exploration BLOCKING + UI Flow Spec + Artifact Separation
+
+### Context
+
+angdu-studio rebuild repeatedly failed on complex UI (51 SKF items). Root cause: reverse-spec analyzed code statically but never ran the source app. Agent guessed UI control types, interaction patterns, and data flows during implement — always producing simplified versions.
+
+### Fixes
+
+| Change | File |
+|--------|------|
+| Phase 1.5 → BLOCKING for rebuild | reverse-spec/analyze.md |
+| Phase D Interactive Flow Execution (CRUD/config/pipeline flows) | reverse-spec/analyze.md |
+| UI Flow Spec section in pre-context template | reverse-spec/templates/pre-context-template.md |
+| Artifact Separation Principle (P1-b) | CLAUDE.md |
+| specify reads UI Flow Spec as primary FR/SC source | smart-sdd/injection/specify.md |
+| Graceful degradation for missing UI Flow Spec | context-injection-rules.md |
+
+### Design Decision: Artifact Separation
+
+Source analysis → reverse-spec artifacts only. smart-sdd artifacts (spec/plan/tasks) contain NO source code references. If smart-sdd discovers new source insights, it updates reverse-spec artifacts (pre-context.md).
+
+---
+
 ## [2026-03-20] Post-pull Audit — 6 Issues Fixed (verify gate headings, ipc.md schema, README scripts)
 
 Post-pull analysis of 30-commit update (36 files, +4559/-2073 lines). Found and fixed 6 issues:

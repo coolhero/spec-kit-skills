@@ -50,7 +50,7 @@
 
 **P1-a. Domain Profile은 First-Class Citizen**: Domain Profile(5축 + 1 modifier)은 한번 설정하고 잊는 구성이 아니라, code-explore → init → add → specify → plan → implement → verify 전 단계에서 적극적으로 동작하는 살아 있는 컨텍스트입니다. 새로운 규칙을 추가할 때 반드시 "이 규칙이 Domain Profile의 어떤 축(Interface, Concern, Archetype, Foundation, Scenario)이나 modifier(Scale)에 의해 조건부로 활성화되거나 깊이가 조절되어야 하는지" 판단하세요. Domain Profile과 무관한 범용 규칙은 명시적으로 "Domain Profile independent"로 표시합니다.
 
-**P1-b. Source Code Fidelity**: 특히 rebuild 모드에서, source app의 정보(UI 구조, 데이터 흐름 패러다임, 유입 경로, 컴포넌트 간 연동)가 reverse-spec → specify → plan → implement 과정에서 소실되면 안 됩니다. SBI 텍스트만으로는 UI 디테일이 전달되지 않으므로, implement 단계에서 source 코드 자체를 참조하는 것이 필수입니다.
+**P1-b. Source Code Fidelity (Artifact Separation Principle)**: Source app의 정보(UI 구조, 데이터 흐름, 유입 경로, 인터랙션 패턴)는 **reverse-spec 아티펙트에만 저장**되고, smart-sdd 파이프라인 아티펙트(spec.md, plan.md, tasks.md)에는 **소스 코드 내용이 보이지 않아야** 합니다. spec.md는 "무엇을 만드는지"만 정의하고, "어디서 왔는지"는 pre-context에 남깁니다. smart-sdd가 추가 소스 분석을 하면, 결과는 reverse-spec 아티펙트(pre-context.md)를 업데이트하는 방식으로 축적합니다. 이렇게 하면: (1) spec이 source에 종속되지 않음, (2) 소스 분석의 단일 출처가 보장됨, (3) implement/verify는 pre-context를 참조하여 소스 패턴을 따름.
 
 **P1-c. Cross-Feature Memory (GEL)**: entity/API registry, pre-context, stubs, interaction surfaces 등 Global Evolution Layer 아티펙트가 Feature 간 정보를 전달합니다. Feature 2가 Feature 1의 결정을 체계적으로 알 수 있어야 하며, 이는 에이전트 역량에 기대하는 것이 아니라 아티펙트 구조로 보장해야 합니다.
 

@@ -12,6 +12,7 @@
 | File | Section | Filtering |
 |------|---------|-----------|
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
+| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Flow Specifications" section | **If present (rebuild with Runtime Exploration)** — each flow step maps to FR, each error path maps to edge case SC. This is the primary source for rebuild FR/SC generation — NOT direct source code reading |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild/adoption/add mode with SBI)** — ensure FR-### cover all P1/P2 behaviors |
 | `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |

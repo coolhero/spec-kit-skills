@@ -302,6 +302,34 @@
 
 ---
 
+## UI Flow Specifications (from Runtime Exploration)
+
+> **Source**: Generated during reverse-spec Phase 1.5-D (Interactive Flow Execution).
+> **Purpose**: Provides the exact interaction patterns the source app uses. specify uses these to generate detailed FR/SC. implement uses these to match source behavior. verify uses these as the ground truth for testing.
+> **If absent**: Runtime Exploration was skipped or unavailable. specify/implement must compensate by reading source code directly (less reliable).
+
+### Flow: [Flow Name 1]
+
+| Step | User Action | UI Control | Response | State Change |
+|------|------------|------------|----------|-------------|
+| 1 | [action] | [control type + position] | [what happens] | [state] |
+| 2 | [action] | [control type + options] | [what happens] | [state] |
+
+Error paths observed:
+- [trigger] → [UI feedback]
+
+### Flow: [Flow Name 2]
+
+[Same format]
+
+> **Downstream consumption**:
+> - **specify**: Each flow step maps to at least one FR. Each error path maps to an edge case SC.
+> - **plan**: Flow steps inform Interaction Chain rows. UI controls inform component architecture.
+> - **implement**: Flow steps are the implementation target. UI controls dictate component choice (Dropdown, not TextInput).
+> - **verify**: Flow steps are the test scenario. Each step = one Playwright action + assertion.
+
+---
+
 ## For /speckit.specify
 
 > Use the content of this section as a draft when writing spec.md.
