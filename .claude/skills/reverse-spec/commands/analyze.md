@@ -2404,7 +2404,7 @@ After displaying the Completion Report, create a git checkpoint so the user can 
 
 1. **Stage all reverse-spec artifacts**:
    ```bash
-   git add specs/_global/ specs/history.md case-study-log.md .env.example .gitignore
+   git add specs/ case-study-log.md .env.example .gitignore
    ```
 
 2. **Commit**:

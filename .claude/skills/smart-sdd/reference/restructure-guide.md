@@ -44,7 +44,7 @@ Update these artifacts in order after any restructure operation:
 | 2 | `entity-registry.md` | Owner Feature column for affected entities |
 | 3 | `api-registry.md` | Owner Feature column for affected APIs |
 | 4 | `business-logic-map.md` | Feature-assigned business rules (if file exists) |
-| 5 | `features/F00N-name/pre-context.md` | Affected Feature(s) + all dependents |
+| 5 | `specs/F00N-name/pre-context.md` | Affected Feature(s) + all dependents |
 | 6 | `sdd-state.md` | Feature Progress rows (add/remove/modify), mark affected steps with 🔀, Feature Mapping, Restructure Log |
 | 7 | `specs/NNN-name/` | **Never auto-delete** — preserve for reference. Flag dirs needing re-execution |
 

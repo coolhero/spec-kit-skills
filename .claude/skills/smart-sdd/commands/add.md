@@ -755,7 +755,7 @@ Update `specs/add-draft.md` with Demo Group assignment.
 
 ### 6a. Generate Artifacts
 
-1. **Create `features/F00N-name/pre-context.md`** per new Feature:
+1. **Create `specs/F00N-name/pre-context.md`** per new Feature:
    - Source Reference: `.` (current project) for incremental/adoption, or `N/A` if greenfield with no source
    - Source Behavior Inventory:
      - **If SBI entries selected in Phase 4**: Include selected entries (with B### IDs and Origin), plus generate FR draft entries for each mapped behavior
@@ -826,7 +826,7 @@ Update `specs/add-draft.md` with Demo Group assignment.
     Est. FRs: ~7 | Est. SCs: ~9
 
 ── Artifacts Created/Updated ────────────────────
-  Created: features/F009-notifications/pre-context.md
+  Created: specs/F009-notifications/pre-context.md
   Updated: roadmap.md (Feature Catalog, Dependency Graph, Demo Groups)
   Updated: sdd-state.md (Feature Progress, SBI Coverage, Demo Group Progress)
   Deleted: specs/add-draft.md
