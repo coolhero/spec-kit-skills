@@ -1400,6 +1400,7 @@ specs/
 | `lessons-learned.md` | AI 에이전트 파이프라인 실패 패턴(G1–G19)과 구체적 교훈(L1–L42) — 에이전트 스킬 설계자를 위한 범용 takeaway |
 | `install.sh` | 설치 스크립트 — `~/.claude/skills/`에 심링크 생성 |
 | `uninstall.sh` | 제거 스크립트 — `~/.claude/skills/`에서 심링크 제거 |
+| `export-confluence.sh` | Confluence 내보내기 — Mermaid 블록을 SVG로 렌더링하여 복사-붙여넣기 가능한 README 생성 |
 | `samples/code-explore-opencode/` | code-explore 샘플 아티펙트 — 가상 opencode 탐색 결과 (orientation, trace 3개, synthesis)로 `--from-explore` 핸드오프 테스트용 |
 
 ### code-explore (`.claude/skills/code-explore/`)

@@ -1405,6 +1405,7 @@ Each skill follows the same internal directory convention:
 | `lessons-learned.md` | AI agent pipeline failure patterns (G1–G19) and specific lessons (L1–L42) — universal takeaways for agent skill builders |
 | `install.sh` | Installer — creates symlinks in `~/.claude/skills/` |
 | `uninstall.sh` | Uninstaller — removes symlinks from `~/.claude/skills/` |
+| `export-confluence.sh` | Confluence export — renders Mermaid blocks to SVG and produces a copy-paste-ready README |
 | `samples/code-explore-opencode/` | Sample code-explore artifacts — simulated opencode exploration (orientation, 3 traces, synthesis) for testing `--from-explore` handoff |
 
 ### code-explore (`.claude/skills/code-explore/`)
