@@ -885,7 +885,7 @@ Environment variables are checked **per Feature, at implement time** — not agg
 Before running `speckit-implement`, read the current Feature's `pre-context.md` → "Environment Variables" section and check for required variables:
 
 **Step 1 — Collect this Feature's required env vars**:
-Read `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Environment Variables" section.
+Read `SPEC_PATH/{NNN-feature}/pre-context.md` → "Environment Variables" section.
 Include both Feature-owned variables AND shared variables listed in the "Shared variables" sub-table.
 
 **Step 2 — Check .env file**:
@@ -1075,7 +1075,7 @@ After Smoke Launch passes, verify implementation completeness:
      **If response is empty → re-ask** (per MANDATORY RULE 1)
 
 2. **Rebuild parity check** (rebuild mode + GUI only):
-   - If visual references exist (`specs/reverse-spec/visual-references/manifest.md`): verify that the Visual Reference Checkpoint (see `injection/implement.md`) was executed (check sdd-state.md for `📂 Visual References` or `📂 Source App Reference` entry)
+   - If visual references exist (`specs/_global/visual-references/manifest.md`): verify that the Visual Reference Checkpoint (see `injection/implement.md`) was executed (check sdd-state.md for `📂 Visual References` or `📂 Source App Reference` entry)
    - If NO visual reference was consulted for a GUI Feature in rebuild mode → **HARD STOP**:
      ```
      ⚠️ Completeness Gate — No visual reference consulted for rebuild GUI Feature:

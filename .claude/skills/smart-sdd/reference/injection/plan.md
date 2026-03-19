@@ -9,9 +9,9 @@
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference layout patterns and Component Library for component architecture decisions. **If section says "Skipped"**, proceed without runtime context |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in data models and API contracts |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference layout patterns and Component Library for component architecture decisions. **If section says "Skipped"**, proceed without runtime context |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in data models and API contracts |
 | `BASE_PATH/entity-registry.md` | Related entity sections | See rules below |
 | `BASE_PATH/api-registry.md` | Related API sections | See rules below |
 | `BASE_PATH/stack-migration.md` | Category Details + Per-Feature row | **Only if New Stack strategy**. See rules below |
@@ -375,7 +375,7 @@ After `speckit-plan` completes:
 1. `specs/{NNN-feature}/plan.md` — Read the **entire file** and extract architecture decisions, implementation phases
 2. `specs/{NNN-feature}/data-model.md` — Read the **entire file** and extract entity schemas (fields, types, relationships)
 3. `specs/{NNN-feature}/contracts/*.md` — Read **all contract files** and extract endpoints (method, path, request/response)
-4. `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Related Entities", "Related API Contracts", "Technical Decisions" sections (for diff comparison)
+4. `SPEC_PATH/{NNN-feature}/pre-context.md` → "Related Entities", "Related API Contracts", "Technical Decisions" sections (for diff comparison)
 
 **Display format**:
 ```
@@ -587,7 +587,7 @@ Pattern Constraints identify framework+library interaction patterns known to cau
 - **Error Boundary requirement**: Every route/page-level component MUST be wrapped with an Error Boundary (or framework equivalent). Uncaught render errors must not crash the entire application — they must be caught, reported, and display a fallback UI.
 
 ### Visual Reference context (rebuild mode only):
-- If `specs/reverse-spec/visual-references/` exists and contains reference screenshots for screens this Feature covers, note the relevant screenshot paths in Pattern Constraints. These serve as visual targets for implementation fidelity.
+- If `specs/_global/visual-references/` exists and contains reference screenshots for screens this Feature covers, note the relevant screenshot paths in Pattern Constraints. These serve as visual targets for implementation fidelity.
 
 ### How Pattern Constraints flow downstream:
 1. **plan.md** → Pattern Constraints section documents the constraints
@@ -867,7 +867,7 @@ After plan.md is generated, check for technology compatibility risks:
    - Contract changes in existing APIs → Update api-registry
    - Update "Cross-Feature Consumers" information
 5. **Rebuild Target Update** (rebuild/adoption mode only — skip if Source Path = `N/A`):
-   Read `SPEC_PATH/[NNN-feature-name]/plan.md` architecture/file structure → Update `BASE_PATH/features/[FID]-[name]/pre-context.md` "Related Original File List" table:
+   Read `SPEC_PATH/[NNN-feature-name]/plan.md` architecture/file structure → Update `SPEC_PATH/[NNN-feature]/pre-context.md` "Related Original File List" table:
    - For each original source file, populate the `Rebuild Target` column with the expected new path from the plan's architecture
    - Match by component role/functionality (e.g., original `ChatPanel.vue` → new `src/components/ChatPanel.tsx`)
    - If a 1:1 mapping is unclear, set `Rebuild Target` to `[multiple]` or `[see plan.md]`

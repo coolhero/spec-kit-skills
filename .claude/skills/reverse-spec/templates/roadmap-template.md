@@ -38,7 +38,7 @@
 
 ### Tech Stack Strategy: [Same / New]
 - [If Same] Use the same tech stack as existing. Implementation patterns can be reused.
-- [If New] Migrate to an optimal modern tech stack. See `specs/reverse-spec/stack-migration.md`.
+- [If New] Migrate to an optimal modern tech stack. See `specs/_global/stack-migration.md`.
 
 ---
 

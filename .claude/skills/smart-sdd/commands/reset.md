@@ -71,21 +71,21 @@ Read `sdd-state.md` and display:
   In-progress: {FID}-{name} at step {step} (if any)
 
   ── Artifacts to be REMOVED ─────────────────────────
-    📄 specs/reverse-spec/sdd-state.md          — Pipeline state tracking
+    📄 specs/_global/sdd-state.md          — Pipeline state tracking
     📄 .specify/memory/constitution.md           — Finalized constitution
     📁 specs/{NNN-*/}                            — Feature spec directories ({count} found)
     📄 specs/add-draft.md                        — Add draft (if exists)
     🌿 Feature branches                          — {list of branches matching NNN-* pattern}
 
   ── Artifacts PRESERVED (reverse-spec) ──────────────
-    📄 specs/reverse-spec/roadmap.md
-    📄 specs/reverse-spec/constitution-seed.md
-    📄 specs/reverse-spec/entity-registry.md
-    📄 specs/reverse-spec/api-registry.md
-    📄 specs/reverse-spec/business-logic-map.md  (if exists)
-    📄 specs/reverse-spec/coverage-baseline.md   (if exists)
-    📄 specs/reverse-spec/stack-migration.md     (if exists)
-    📁 specs/reverse-spec/features/              (pre-context.md files)
+    📄 specs/_global/roadmap.md
+    📄 specs/_global/constitution-seed.md
+    📄 specs/_global/entity-registry.md
+    📄 specs/_global/api-registry.md
+    📄 specs/_global/business-logic-map.md  (if exists)
+    📄 specs/_global/coverage-baseline.md   (if exists)
+    📄 specs/_global/stack-migration.md     (if exists)
+    📁 specs/_global/features/              (pre-context.md files)
 
   ── Optional (choose below) ─────────────────────────
     📄 case-study-log.md                         — Case study observations
@@ -116,7 +116,7 @@ In this exact order:
 
 1. **Delete `sdd-state.md`**:
    ```bash
-   rm -f specs/reverse-spec/sdd-state.md
+   rm -f specs/_global/sdd-state.md
    ```
 
 2. **Delete `.specify/memory/constitution.md`** (if exists):
@@ -149,8 +149,8 @@ In this exact order:
 ```bash
 # If reverse-spec-complete tag exists, restore registries from that point
 if git tag -l "reverse-spec-complete" | grep -q "reverse-spec-complete"; then
-  git checkout reverse-spec-complete -- specs/reverse-spec/entity-registry.md
-  git checkout reverse-spec-complete -- specs/reverse-spec/api-registry.md
+  git checkout reverse-spec-complete -- specs/_global/entity-registry.md
+  git checkout reverse-spec-complete -- specs/_global/api-registry.md
 fi
 ```
 
@@ -233,7 +233,7 @@ For each target Feature, read and display:
     📄 demos/F[NNN]-[name].*  [will be deleted / kept]
 
   ── PRESERVED ──────────────────────────────────────
-    📄 specs/reverse-spec/features/[FID]-[name]/pre-context.md
+    📄 specs/_global/features/[FID]-[name]/pre-context.md
     📋 roadmap.md entry
     📋 entity-registry.md ownership
     📋 api-registry.md ownership
@@ -370,7 +370,7 @@ For each target Feature, scan all dependency surfaces:
 1. **Status & Progress**: Read status, current step, branch name, merge status from sdd-state.md
 2. **Dependency Scan — Who depends on THIS Feature?**:
    - roadmap.md Dependency Graph: Find Features listing this FID as a dependency
-   - pre-context.md files: Grep all `specs/reverse-spec/features/*/pre-context.md` for references
+   - pre-context.md files: Grep all `specs/_global/features/*/pre-context.md` for references
    - entity-registry.md: Find entities owned by this Feature → check if other Features reference them
    - api-registry.md: Find APIs owned by this Feature → check if other Features consume them
 3. **Owned Artifacts**: Entities, APIs, SBI entries, Demo Group memberships
@@ -386,7 +386,7 @@ Display for each target Feature:
   Branch: [NNN]-[name] ([merged to main / not merged])
 
   ── Will be PERMANENTLY DELETED ───────────────────
-    📄 specs/reverse-spec/features/[FID]-[name]/  (pre-context.md)
+    📄 specs/_global/features/[FID]-[name]/  (pre-context.md)
     📁 specs/[NNN]-[name]/                        (spec directory)
     🌿 [NNN]-[name] branch
     📄 demos/[FID]-[name].*                       (demo scripts)
@@ -437,7 +437,7 @@ Update artifacts in this order (based on [restructure-guide.md](../reference/res
    - SBI Coverage: Clear Feature column, set status → `unmapped`
    - Demo Group Progress: Remove this Feature from group members
    - Restructure Log: `| [date] | delete | [FID]-[name] | User requested via /smart-sdd reset --delete |`
-6. **Pre-context directory**: `rm -rf specs/reverse-spec/features/[FID]-[name]/`
+6. **Pre-context directory**: `rm -rf specs/_global/features/[FID]-[name]/`
 7. **Spec directory**: `rm -rf specs/[NNN]-[name]/`
 8. **Demo files**: `rm -f demos/[FID]-[name].*` and `rm -f demos/F[NNN]-[name].*`
 9. **Feature branch**: `git branch -D [NNN]-[name]` (skip silently if not found)
@@ -465,7 +465,7 @@ For multiple Features: `"chore: delete Features [FID1], [FID2]"`
 
   Permanently removed:
     - specs/[NNN]-[name]/ (spec directory)
-    - specs/reverse-spec/features/[FID]-[name]/ (pre-context)
+    - specs/_global/features/[FID]-[name]/ (pre-context)
     - roadmap.md entries
     - [NNN]-[name] branch
     - [N] demo files
@@ -498,7 +498,7 @@ For multiple Features: `"chore: delete Features [FID1], [FID2]"`
 - Proceed normally if user confirms.
 
 ### Greenfield project (no reverse-spec artifacts) — Mode A only
-- `specs/reverse-spec/` files were created by `smart-sdd init`, not reverse-spec
+- `specs/_global/` files were created by `smart-sdd init`, not reverse-spec
 - Preserved: roadmap.md, entity-registry.md, api-registry.md (they define project structure)
 
 ### Partial pipeline (some completed, some pending) — Mode A only

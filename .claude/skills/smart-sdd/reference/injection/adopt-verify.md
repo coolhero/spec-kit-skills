@@ -19,8 +19,8 @@ Same as standard verify:
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.analyze" section | Cross-Feature verification points |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | For SBI coverage check |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "For /speckit.analyze" section | Cross-Feature verification points |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Behavior Inventory" section | For SBI coverage check |
 | `BASE_PATH/entity-registry.md` | Entities modified by the Feature | Change tracking |
 | `BASE_PATH/api-registry.md` | APIs modified by the Feature | Change tracking |
 | `SPEC_PATH/[NNN-feature]/spec.md` | FR-### list | For SBI → FR mapping verification |

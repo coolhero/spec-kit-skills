@@ -30,10 +30,10 @@ HELP
 [[ -z "${1:-}" ]] && { echo "Usage: pipeline-status.sh <target-path>"; exit 1; }
 
 TARGET="$1"
-STATE="$TARGET/specs/reverse-spec/sdd-state.md"
+STATE="$TARGET/specs/_global/sdd-state.md"
 
 if [[ ! -f "$STATE" ]]; then
-  echo "N/A — no sdd-state.md found at $TARGET/specs/reverse-spec/"
+  echo "N/A — no sdd-state.md found at $TARGET/specs/_global/"
   exit 0
 fi
 

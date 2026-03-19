@@ -47,7 +47,7 @@ No Checkpoint/Review cycle. The parity command displays progress after each of i
    - Record all changes in Global Evolution Log
 3. **If new Features created**:
    - Update `BASE_PATH/roadmap.md` (Feature Catalog, Dependency Graph)
-   - Generate `BASE_PATH/features/F00N-name/pre-context.md` per new Feature
+   - Generate `SPEC_PATH/[NNN-feature]/pre-context.md` per new Feature
 4. **If cross-cutting gaps trigger constitution update**:
    - Follow Constitution Incremental Update procedure (SKILL.md)
    - Create infrastructure Feature via `add` workflow

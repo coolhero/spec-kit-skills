@@ -11,15 +11,15 @@
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `BASE_PATH/features/[FID]-[name]/spec-draft.md` | Entire file | **If present (rebuild mode)** — THIS IS THE PRIMARY INPUT. spec-draft contains detailed FR/SC with UI control types, interaction patterns, error paths, and data pipeline stages. speckit-specify should **refine** this draft, not generate from scratch. See "Spec-Draft Seeding Protocol" below |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Flow Specifications" section | **If present (rebuild with Runtime Exploration)** — cross-reference against spec-draft FR/SC for completeness. If spec-draft is absent, this becomes the primary source for FR/SC generation |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild/adoption/add mode with SBI)** — ensure FR-### cover all P1/P2 behaviors |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
+| `SPEC_PATH/[NNN-feature]/spec-draft.md` | Entire file | **If present (rebuild mode)** — THIS IS THE PRIMARY INPUT. spec-draft contains detailed FR/SC with UI control types, interaction patterns, error paths, and data pipeline stages. speckit-specify should **refine** this draft, not generate from scratch. See "Spec-Draft Seeding Protocol" below |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "UI Flow Specifications" section | **If present (rebuild with Runtime Exploration)** — cross-reference against spec-draft FR/SC for completeness. If spec-draft is absent, this becomes the primary source for FR/SC generation |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Behavior Inventory" section | **If present (rebuild/adoption/add mode with SBI)** — ensure FR-### cover all P1/P2 behaviors |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "UI Component Features" section | **If present (frontend/fullstack rebuild)** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID. **If file does not exist (greenfield/add), skip entirely** |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference observed UI layouts, user flows, and errors when drafting FR/SC. **If section says "Skipped"**, proceed without runtime context |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in requirements |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference observed UI layouts, user flows, and errors when drafting FR/SC. **If section says "Skipped"**, proceed without runtime context |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in requirements |
 
 ### Source Reference Path Resolution
 
@@ -252,7 +252,7 @@ If pre-context has SBI entries AND Source Reference files:
    → Recommend updating FR-012 before approval.
    ────────────────────────────────────────────────────
    ```
-4. **If visual references exist** (`specs/reverse-spec/visual-references/`): Cross-reference UI structure claims in FRs against reference screenshots. Visual references are the ground truth for tab counts, layout structure, and visible elements.
+4. **If visual references exist** (`specs/_global/visual-references/`): Cross-reference UI structure claims in FRs against reference screenshots. Visual references are the ground truth for tab counts, layout structure, and visible elements.
 
 5. **Enforcement**: If discrepancies are found → **BLOCKING**. SBI mismatches represent silent functionality loss in rebuild — the rebuilt Feature will have wrong behavior (e.g., wrong tab count, missing conditional views). The user must correct FRs or acknowledge the gap before approval.
 
@@ -398,7 +398,7 @@ If rebuild mode AND source project has build config files (vite.config, webpack.
 
 > **Purpose**: Verify that the generated spec.md faithfully reflects the user's approved Brief. Without this check, the agent's interpretation in specify may silently diverge from the user's intent — the user approved a Brief about X, but the spec emphasizes Y.
 
-After the post-execution checks above, read the Brief Summary from `BASE_PATH/features/{FID}-{name}/pre-context.md` § Brief Summary (or from `specs/add-draft.md` if pre-context doesn't have it yet for greenfield).
+After the post-execution checks above, read the Brief Summary from `SPEC_PATH/{NNN-feature}/pre-context.md` § Brief Summary (or from `specs/add-draft.md` if pre-context doesn't have it yet for greenfield).
 
 **Cross-check**:
 1. **Capability coverage**: Each capability listed in the Brief should map to at least one FR in spec.md. Flag capabilities with no corresponding FR.
@@ -717,7 +717,7 @@ After `speckit-specify` completes and post-execution checks above have run:
 
 **Files to read**:
 1. `specs/{NNN-feature}/spec.md` — Read the **entire file** and extract FR-###, SC-###, scope sections
-2. `BASE_PATH/features/{FID}-{name}/pre-context.md` → "Draft Requirements" and "Draft Success Criteria" sections (for diff comparison)
+2. `SPEC_PATH/{NNN-feature}/pre-context.md` → "Draft Requirements" and "Draft Success Criteria" sections (for diff comparison)
 
 **Display format**:
 ```

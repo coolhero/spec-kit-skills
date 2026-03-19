@@ -28,7 +28,7 @@
 ## Runtime Exploration Results
 
 > Observations from running the original application during `/reverse-spec` Phase 1.5.
-> Extracted from `specs/reverse-spec/runtime-exploration.md` — only the `## Screen:` sections belonging to this Feature are included here.
+> Extracted from `specs/_global/runtime-exploration.md` — only the `## Screen:` sections belonging to this Feature are included here.
 > These provide visual and behavioral context that code reading alone cannot capture.
 > If runtime exploration was skipped, write: "Skipped — [reason: environment issues | user choice]"
 

@@ -14,7 +14,7 @@
 
 ## Artifact Map
 
-reverse-spec generated the following Global Evolution Layer artifacts in `specs/reverse-spec/`:
+reverse-spec generated the following Global Evolution Layer artifacts in `specs/_global/`:
 
 | Artifact | Role | When to Read |
 |----------|------|--------------|
@@ -23,7 +23,7 @@ reverse-spec generated the following Global Evolution Layer artifacts in `specs/
 | `entity-registry.md` | All entities with fields, relationships, validation rules | During `specify`, `plan` — shared data contracts |
 | `api-registry.md` | All API endpoints with request/response schemas | During `specify`, `plan` — API contracts |
 | `business-logic-map.md` | Business rules per Feature, cross-Feature rules | During `specify` — ensure rules are captured in requirements |
-| `features/F00N-name/pre-context.md` | Per-Feature source behavior, draft requirements, technical decisions | During every command — Feature-specific context |
+| `../[NNN-feature]/pre-context.md` | Per-Feature source behavior, draft requirements, technical decisions | During every command — Feature-specific context |
 | `stack-migration.md` | Tech migration guidance (New Stack only) | During `plan` — migration-aware task design |
 | `coverage-baseline.md` | Source coverage metrics | Reference — verify nothing was missed |
 
@@ -38,8 +38,8 @@ reverse-spec generated the following Global Evolution Layer artifacts in `specs/
 | Artifact | Section to Read | Purpose |
 |----------|----------------|---------|
 | `constitution-seed.md` | Entire file | Project-wide constraints and architecture principles |
-| `features/F00N-name/pre-context.md` | "For /speckit.specify" | Draft requirements (FR-###), success criteria (SC-###), edge cases |
-| `features/F00N-name/pre-context.md` | "Source Behavior Inventory" | P1/P2 behaviors that MUST map to requirements (rebuild/adoption) |
+| `../[NNN-feature]/pre-context.md` | "For /speckit.specify" | Draft requirements (FR-###), success criteria (SC-###), edge cases |
+| `../[NNN-feature]/pre-context.md` | "Source Behavior Inventory" | P1/P2 behaviors that MUST map to requirements (rebuild/adoption) |
 | `entity-registry.md` | Entities related to this Feature | Shared entity definitions to reference in requirements |
 | `api-registry.md` | APIs related to this Feature | API contracts to reference in requirements |
 | `business-logic-map.md` | This Feature's section | Business rules that must be captured as requirements |
@@ -58,7 +58,7 @@ reverse-spec generated the following Global Evolution Layer artifacts in `specs/
 | Artifact | Section to Read | Purpose |
 |----------|----------------|---------|
 | `roadmap.md` | Dependencies for this Feature | Know which Features must complete first |
-| `features/F00N-name/pre-context.md` | "For /speckit.plan" | Draft entity/API contracts, technical decisions |
+| `../[NNN-feature]/pre-context.md` | "For /speckit.plan" | Draft entity/API contracts, technical decisions |
 | `entity-registry.md` | Related entities | Owned entities: full schema; Referenced entities: summary |
 | `api-registry.md` | Related APIs | Provided APIs: full contract; Consumed APIs: summary |
 | `stack-migration.md` | Migration notes for this Feature | New Stack only — migration-aware task design |
@@ -133,7 +133,7 @@ These rules apply throughout the entire development process:
 - **Scope**: [core | full] — [FEATURE_COUNT] Features ([TIER_BREAKDOWN])
 - **Stack**: [DETECTED_STACK]
 - **Release Groups**: [RG_COUNT] groups
-- **Artifacts location**: `specs/reverse-spec/`
+- **Artifacts location**: `specs/_global/`
 - **Feature specs location**: `specs/{NNN-feature}/`
 
 ### Feature Catalog

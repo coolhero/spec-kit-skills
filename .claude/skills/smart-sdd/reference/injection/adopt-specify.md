@@ -17,12 +17,12 @@ Adopt specify: **"Extract what exists"** — documents the current code's behavi
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Behavior Inventory" section | **REQUIRED** — each P1/P2 SBI entry must map to at least one FR-### |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Source files to read for behavior extraction |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "UI Component Features" section | **If present** — ensure FR-### cover all UI features |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "For /speckit.specify" section | Relevant Feature only |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Behavior Inventory" section | **REQUIRED** — each P1/P2 SBI entry must map to at least one FR-### |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | Source files to read for behavior extraction |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "UI Component Features" section | **If present** — ensure FR-### cover all UI features |
 | `BASE_PATH/business-logic-map.md` | Relevant Feature section | Filtered by Feature ID |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
 
 ### Source File Reading
 
@@ -107,7 +107,7 @@ After `speckit-specify` completes:
 
 **Files to read**:
 1. `specs/{NNN-feature}/spec.md` — Read the entire file
-2. `BASE_PATH/features/{FID}-{name}/pre-context.md` → SBI table (for B### coverage check)
+2. `SPEC_PATH/{NNN-feature}/pre-context.md` → SBI table (for B### coverage check)
 
 **Display format**:
 ```

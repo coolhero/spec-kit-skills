@@ -44,10 +44,10 @@ if [[ "${1:-}" == "--filter" ]]; then
   FILTER="$*"
 fi
 
-STATE="$TARGET/specs/reverse-spec/sdd-state.md"
+STATE="$TARGET/specs/_global/sdd-state.md"
 
 if [[ ! -f "$STATE" ]]; then
-  echo "N/A — no sdd-state.md found at $TARGET/specs/reverse-spec/"
+  echo "N/A — no sdd-state.md found at $TARGET/specs/_global/"
   exit 0
 fi
 

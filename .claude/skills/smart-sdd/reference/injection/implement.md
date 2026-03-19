@@ -40,17 +40,17 @@
 |------|---------|-----------|
 | `SPEC_PATH/[NNN-feature]/tasks.md` | Entire file | Current Feature |
 | `SPEC_PATH/[NNN-feature]/quickstart.md` | Entire file | **If exists** — run instructions for the Feature |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Static Resources" section | **If present and non-empty** |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Static Resources" section | **If present and non-empty** |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Environment Variables" section | **If present and non-empty** |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "Pattern Constraints" section | **If present** — inject as mandatory reference for every task execution |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "Interaction Chains" section | **If present (UI Features)** — inject chain propagation context for each task |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "UX Behavior Contract" section | **If present (async UI Features)** — inject temporal UX expectations for each task |
 | `SPEC_PATH/[NNN-feature]/plan.md` | "API Compatibility Matrix" section | **If present (multi-provider)** — inject per-provider contracts for each task |
 | `SPEC_PATH/[NNN-feature]/ui-flows.md` | Entire file | **If exists (GUI Features)** — follow each flow's Happy Path step-by-step during implementation. Each step's UI Response and State Change must be implemented. See [ui-flow-spec.md](../ui-flow-spec.md) § Pipeline Integration |
-| `specs/reverse-spec/visual-references/manifest.md` | Relevant screens | **Rebuild mode only, if exists** — inject as visual target reference |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** (Source Path ≠ N/A). Resolve file paths per specify.md Source Reference Path Resolution rules |
-| `specs/reverse-spec/visual-references/style-tokens.md` | Entire file | **Rebuild mode only, if exists** — inject as CSS reference for matching original styles |
+| `specs/_global/visual-references/manifest.md` | Relevant screens | **Rebuild mode only, if exists** — inject as visual target reference |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** (Source Path ≠ N/A). Resolve file paths per specify.md Source Reference Path Resolution rules |
+| `specs/_global/visual-references/style-tokens.md` | Entire file | **Rebuild mode only, if exists** — inject as CSS reference for matching original styles |
 
 ## Pattern Constraints Injection
 
@@ -235,12 +235,12 @@ An agent prompt for UI implementation that contains **neither source code nor so
 
 ## CSS Value Map Generation (rebuild mode with utility CSS)
 
-> **Skip if**: `specs/reverse-spec/visual-references/style-tokens.md` does not exist, OR the project does not use a build-time CSS framework (detected from constitution tech stack — if plain inline styles only → skip).
+> **Skip if**: `specs/_global/visual-references/style-tokens.md` does not exist, OR the project does not use a build-time CSS framework (detected from constitution tech stack — if plain inline styles only → skip).
 > Applies to: rebuild mode with build-time CSS frameworks (utility-first: Tailwind/UnoCSS/WindiCSS; CSS-in-JS: styled-components/Emotion/Vanilla Extract; Atomic: Pico/Open Props).
 
 Before the first UI-related `speckit-implement` task (one-time):
 
-1. Read `specs/reverse-spec/visual-references/style-tokens.md` → extract CSS property-value pairs organized by category (colors, spacing, typography, layout)
+1. Read `specs/_global/visual-references/style-tokens.md` → extract CSS property-value pairs organized by category (colors, spacing, typography, layout)
 2. Read the CSS framework config (e.g., `tailwind.config.js`, `uno.config.ts`, theme file, design tokens) → identify available utility classes/theme values
 3. Generate `specs/{NNN-feature}/css-value-map.md`:
 
@@ -320,8 +320,8 @@ Record the analysis in a brief comment block at the top of the Feature's main la
 
 ### Visual References Fallback (rebuild mode, when source app cannot start)
 
-Even when the source app cannot be launched (dependency issues, missing env, etc.), if `specs/reverse-spec/visual-references/` directory exists with screenshots:
-1. Read `specs/reverse-spec/visual-references/manifest.md` to identify screens relevant to this Feature
+Even when the source app cannot be launched (dependency issues, missing env, etc.), if `specs/_global/visual-references/` directory exists with screenshots:
+1. Read `specs/_global/visual-references/manifest.md` to identify screens relevant to this Feature
 2. Read each screenshot file referenced in the manifest for the Feature's screens
 3. Use these as the visual reference instead of live source app snapshots
 4. Display: `📂 Visual References (static): [N] screenshots loaded from visual-references/`
@@ -338,7 +338,7 @@ Even when the source app cannot be launched (dependency issues, missing env, etc
 
 1. **Detect available visual references**:
    - Live source app: Source App Visual Reference (§ Protocol above) was executed → `source_ref = true`
-   - Static screenshots: `specs/reverse-spec/visual-references/manifest.md` exists → `static_ref = true`
+   - Static screenshots: `specs/_global/visual-references/manifest.md` exists → `static_ref = true`
    - Neither available → `no_ref = true`
 
 2. **If source_ref OR static_ref**:

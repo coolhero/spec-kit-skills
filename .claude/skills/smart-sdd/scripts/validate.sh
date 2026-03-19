@@ -35,7 +35,7 @@ HELP
 [[ -z "${1:-}" ]] && { echo "Usage: validate.sh <target-path>"; exit 1; }
 
 TARGET="$1"
-BASE="$TARGET/specs/reverse-spec"
+BASE="$TARGET/specs/_global"
 SPECS="$TARGET/specs"
 STATE="$BASE/sdd-state.md"
 ROADMAP="$BASE/roadmap.md"

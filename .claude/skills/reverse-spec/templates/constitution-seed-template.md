@@ -227,8 +227,8 @@ Quality (No tests→Characterization Tests, Complex state→State Diagrams, Exte
 > Include these principles in the constitution to enforce referencing the Global Evolution Layer during spec-kit progression.
 
 ### Cross-Feature Consistency
-- Before running /speckit.specify for any Feature, always read `specs/reverse-spec/roadmap.md` and the Feature's `pre-context.md`
-- When running /speckit.plan for any Feature, reference `specs/reverse-spec/entity-registry.md` and `specs/reverse-spec/api-registry.md` to ensure entity/API compatibility
+- Before running /speckit.specify for any Feature, always read `specs/_global/roadmap.md` and the Feature's `pre-context.md`
+- When running /speckit.plan for any Feature, reference `specs/_global/entity-registry.md` and `specs/_global/api-registry.md` to ensure entity/API compatibility
 - When defining new entities or APIs, update entity-registry.md and api-registry.md
 - When cross-Feature dependencies change, update the Dependency Graph in roadmap.md
 

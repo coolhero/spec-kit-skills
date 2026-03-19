@@ -346,7 +346,7 @@ After the user approves the Phase 2 Checkpoint, **append** to `specs/history.md`
 
 #### Phase 3: Artifact Generation
 
-Generate all artifacts at BASE_PATH (defaults to `./specs/reverse-spec/`):
+Generate all artifacts at BASE_PATH (defaults to `./specs/_global/`):
 
 1. **`roadmap.md`**: Using the roadmap template format
    - Project Overview: From Phase 1 input
@@ -416,11 +416,11 @@ Display the completion report:
 ```
 ✅ Greenfield project initialized:
 
-  specs/reverse-spec/roadmap.md
-  specs/reverse-spec/constitution-seed.md
-  specs/reverse-spec/entity-registry.md (empty — populated during plan)
-  specs/reverse-spec/api-registry.md (empty — populated during plan)
-  specs/reverse-spec/sdd-state.md
+  specs/_global/roadmap.md
+  specs/_global/constitution-seed.md
+  specs/_global/entity-registry.md (empty — populated during plan)
+  specs/_global/api-registry.md (empty — populated during plan)
+  specs/_global/sdd-state.md
   case-study-log.md
 ```
 

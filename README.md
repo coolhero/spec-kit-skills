@@ -109,19 +109,17 @@ These artifacts live in your project directory:
 ```
 my-project/
 ├── specs/
-│   ├── reverse-spec/              ← GEL (project-wide)
+│   ├── _global/                   ← GEL (project-wide)
 │   │   ├── roadmap.md             ← Feature dependency graph
 │   │   ├── entity-registry.md     ← Shared data models
 │   │   ├── api-registry.md        ← Inter-Feature API contracts
-│   │   ├── sdd-state.md           ← Pipeline state + Domain Profile
-│   │   └── features/
-│   │       └── F001-auth/
-│   │           ├── pre-context.md ← What F001 needs to know
-│   │           └── spec-draft.md  ← Initial spec (from source analysis)
-│   ├── 001-auth/                  ← spec-kit output (per-Feature)
-│   │   ├── spec.md
-│   │   ├── plan.md
-│   │   └── tasks.md
+│   │   └── sdd-state.md           ← Pipeline state + Domain Profile
+│   ├── 001-auth/                  ← ALL Feature artifacts in one place
+│   │   ├── pre-context.md         ← What F001 needs to know (from reverse-spec)
+│   │   ├── spec-draft.md          ← Initial spec (from reverse-spec)
+│   │   ├── spec.md                ← Final spec (from speckit-specify)
+│   │   ├── plan.md                ← Architecture (from speckit-plan)
+│   │   └── tasks.md               ← Implementation tasks
 │   └── 002-task-crud/
 │       └── ...
 └── .specify/
@@ -131,7 +129,7 @@ my-project/
 
 Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
 
-**Artifact Separation**: Source analysis lives exclusively in `specs/reverse-spec/` (pre-context, registries, spec-drafts). Pipeline output lives in `specs/NNN-feature/` (spec.md, plan.md, tasks.md). The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." This separation means specs are reusable across different source projects, and source analysis has a single source of truth.
+**Artifact Separation**: Source analysis lives exclusively in `specs/_global/` (pre-context, registries, spec-drafts). Pipeline output lives in `specs/NNN-feature/` (spec.md, plan.md, tasks.md). The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." This separation means specs are reusable across different source projects, and source analysis has a single source of truth.
 
 #### Domain Profile
 
@@ -281,7 +279,7 @@ flowchart TD
         C001 → F001 confirmation"]
     end
 
-    subgraph gel["Global Evolution Layer — specs/reverse-spec/"]
+    subgraph gel["Global Evolution Layer — specs/_global/"]
         GEL_PROJ["Project-wide:
         roadmap · registries · constitution"]
         GEL_FEAT["Per Feature:
@@ -331,7 +329,7 @@ flowchart TD
     DP -.- ADD
 ```
 
-The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (which runs the source app and generates spec-drafts per Feature), **define** Features through the Brief process, then **build** through the spec-kit pipeline (where specify refines spec-drafts instead of generating from scratch). Source analysis artifacts live in `specs/reverse-spec/`, pipeline output lives in `specs/NNN-feature/` — clean separation.
+The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (which runs the source app and generates spec-drafts per Feature), **define** Features through the Brief process, then **build** through the spec-kit pipeline (where specify refines spec-drafts instead of generating from scratch). Source analysis artifacts live in `specs/_global/`, pipeline output lives in `specs/NNN-feature/` — clean separation.
 
 ---
 
@@ -627,13 +625,13 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 
 | Artifact | Location | Purpose |
 |----------|----------|---------|
-| Roadmap | `specs/reverse-spec/roadmap.md` | Feature catalog, dependency graph, release groups |
-| Entity Registry | `specs/reverse-spec/entity-registry.md` | Shared data model definitions |
-| API Registry | `specs/reverse-spec/api-registry.md` | API contract specifications |
-| Business Logic Map | `specs/reverse-spec/business-logic-map.md` | Cross-Feature business rules |
-| Pre-context | `specs/reverse-spec/features/F00N-*/pre-context.md` | Per-Feature context for spec-kit |
+| Roadmap | `specs/_global/roadmap.md` | Feature catalog, dependency graph, release groups |
+| Entity Registry | `specs/_global/entity-registry.md` | Shared data model definitions |
+| API Registry | `specs/_global/api-registry.md` | API contract specifications |
+| Business Logic Map | `specs/_global/business-logic-map.md` | Cross-Feature business rules |
+| Pre-context | `specs/_global/features/F00N-*/pre-context.md` | Per-Feature context for spec-kit |
 | Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
-| State | `specs/reverse-spec/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
+| State | `specs/_global/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
 
 ---
 
@@ -763,7 +761,7 @@ Each of the three core concepts can be extended independently. The system is des
 
 **Level 1 — Tune Domain Profile**: Edit `sdd-state.md` to add/remove active Interfaces and Concerns. Loading `auth` adds authentication-specific SC rules and Brief completion criteria; removing `i18n` skips internationalization checks.
 
-**Level 2 — Project-specific rules**: Create `specs/reverse-spec/domain-custom.md` in your project. Add rules using the same S1/S5/S7 schema (e.g., "all payment endpoints require idempotency SC", "dark mode must be tested in verify"). This file loads last with highest priority — no skill files modified.
+**Level 2 — Project-specific rules**: Create `specs/_global/domain-custom.md` in your project. Add rules using the same S1/S5/S7 schema (e.g., "all payment endpoints require idempotency SC", "dark mode must be tested in verify"). This file loads last with highest priority — no skill files modified.
 
 **Level 3 — New Domain Profile modules**: Create custom Interface or Concern files (e.g., `domains/interfaces/grpc.md`, `domains/concerns/caching.md`). Follow `domains/_schema.md` for the module format. Your modules compose automatically with built-in ones.
 
@@ -796,7 +794,7 @@ Each module is a standalone file with a uniform schema (`S1`: SC generation rule
 4. Without a custom Foundation file, the system still works — it falls back to Case B (universal categories + agent probes)
 
 **Customize per project** — without modifying skill files at all:
-1. Create `specs/reverse-spec/domain-custom.md` in your project directory
+1. Create `specs/_global/domain-custom.md` in your project directory
 2. Add project-specific rules using the same S1/S5/S7 schema (e.g., "payment endpoints require idempotency SC")
 3. This file loads last with highest priority, extending all other modules
 
@@ -851,7 +849,7 @@ flowchart LR
 
 | Step | Description |
 |------|------------|
-| **Assemble** | Reads files/sections required for the given command from `specs/reverse-spec/`, filters and assembles per command-specific injection rules. If a source file is missing or contains only placeholder text, that source is gracefully skipped |
+| **Assemble** | Reads files/sections required for the given command from `specs/_global/`, filters and assembles per command-specific injection rules. If a source file is missing or contains only placeholder text, that source is gracefully skipped |
 | **Checkpoint** | Presents the assembled context to the user with actual content, providing an opportunity to approve or modify before execution |
 | **Execute+Review** | Executes the corresponding spec-kit command and immediately presents the generated artifacts for review. **HARD STOP** — same rules as Checkpoint |
 | **Update** | Updates Global Evolution Layer files to reflect execution results. Records progress in `sdd-state.md` |
@@ -1013,8 +1011,8 @@ After running `/reverse-spec`, you can use plain spec-kit with the generated `sp
 
 **Setup:**
 
-1. Run `/reverse-spec` on your codebase — generates artifacts in `specs/reverse-spec/`
-2. Copy `specs/reverse-spec/speckit-prompt.md` into your project's `CLAUDE.md` (or feed it to the agent at session start)
+1. Run `/reverse-spec` on your codebase — generates artifacts in `specs/_global/`
+2. Copy `specs/_global/speckit-prompt.md` into your project's `CLAUDE.md` (or feed it to the agent at session start)
 3. Run spec-kit commands (`specify`, `plan`, etc.) directly — the prompt tells the agent which artifacts to read before each command
 
 **What the prompt covers:**
@@ -1213,10 +1211,10 @@ ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-s
 
 | Target | Path |
 |--------|------|
-| reverse-spec artifacts | `specs/reverse-spec/` |
+| reverse-spec artifacts | `specs/_global/` |
 | spec-kit Feature artifacts | `specs/{NNN-feature}/` |
 | spec-kit constitution | `.specify/memory/constitution.md` |
-| smart-sdd state file | `specs/reverse-spec/sdd-state.md` |
+| smart-sdd state file | `specs/_global/sdd-state.md` |
 | Decision history | `history.md` |
 | Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 19 gap patterns + 42 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
 

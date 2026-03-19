@@ -32,7 +32,7 @@ HELP
 [[ -z "${1:-}" ]] && { echo "Usage: context-summary.sh <target-path>"; exit 1; }
 
 TARGET="$1"
-BASE="$TARGET/specs/reverse-spec"
+BASE="$TARGET/specs/_global"
 STATE="$BASE/sdd-state.md"
 
 # ── Features ──

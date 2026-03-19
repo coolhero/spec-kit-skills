@@ -16,7 +16,7 @@
 
 ### Step 3-rebuild-a — Visual Fidelity Check (rebuild mode only — skip for greenfield/add)
 
-If `specs/reverse-spec/visual-references/manifest.md` exists AND this Feature covers screens listed in the manifest:
+If `specs/_global/visual-references/manifest.md` exists AND this Feature covers screens listed in the manifest:
 
 1. Read the manifest to identify which reference screenshots apply to this Feature (match by screen name, route, or Feature coverage from pre-context)
 2. For each matching screen:
@@ -63,7 +63,7 @@ If visual references don't exist or no screens match this Feature: skip silently
 2. Probe source app (curl health endpoint or process check)
 3. If not running → **attempt to start** the source app (read the project's script configuration, try the detected dev start command)
 4. If start attempt fails → **Fallback to static visual references**:
-   a. Check if `specs/reverse-spec/visual-references/manifest.md` exists
+   a. Check if `specs/_global/visual-references/manifest.md` exists
    b. If exists → use static screenshots for comparison (same as Step 3-rebuild-a) and record: `⚠️ Source app unavailable — used static visual references as fallback`
    c. If no static references either → **HARD STOP** — Use AskUserQuestion:
       ```

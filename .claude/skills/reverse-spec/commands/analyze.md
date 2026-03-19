@@ -62,7 +62,7 @@ Check if `case-study-log.md` exists at **CWD root** (the project being built, NO
 - **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `./case-study-log.md` (CWD root). Populate header fields: `**Archetype**: none`, `**Framework**: none` (these will be updated in-place after Phase 1-2b framework detection and Phase 3-1e archetype detection). Display: `📝 Case study log initialized: ./case-study-log.md`
 - **If already exists**: Skip silently (user may have manually initialized earlier)
 
-> ⚠️ **Path warning**: The case-study-log.md MUST be at CWD root (`./case-study-log.md`), NOT inside the target directory or `specs/reverse-spec/`. The target directory is the source code being analyzed (read-only). All outputs go to CWD.
+> ⚠️ **Path warning**: The case-study-log.md MUST be at CWD root (`./case-study-log.md`), NOT inside the target directory or `specs/_global/`. The target directory is the source code being analyzed (read-only). All outputs go to CWD.
 
 📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.
 
@@ -821,7 +821,7 @@ When app process termination or Playwright connection loss is detected during ex
 
 ### 1.5-6. Observation Recording + Cleanup
 
-**Step 1 — Write `specs/reverse-spec/runtime-exploration.md`**:
+**Step 1 — Write `specs/_global/runtime-exploration.md`**:
 Compile exploration results into a structured markdown file organized **by route/screen**. Each screen block contains all observed information (UI elements, user flows, behavior, errors) in one place. This file persists across phases and sessions — Phase 2 reads it for cross-referencing, Phase 4-2 distributes its contents to each Feature's `pre-context.md` using route-to-Feature mapping.
 
 Write the file with the following structure:
@@ -934,17 +934,17 @@ After runtime exploration, capture screenshots of key screens as **visual refere
 
 When Playwright CLI is primary (`playwright_cli = true`):
 1. For each screen explored in Step 3 (from the navigation log):
-   - CLI library mode: `page.goto(route)` → `page.waitForTimeout(3000)` → `page.screenshot({ path: 'specs/reverse-spec/visual-references/{screen-name}.png', fullPage: true })`
+   - CLI library mode: `page.goto(route)` → `page.waitForTimeout(3000)` → `page.screenshot({ path: 'specs/_global/visual-references/{screen-name}.png', fullPage: true })`
    - For Electron apps: use `_electron.launch()` → `firstWindow()` to obtain the page object
-2. Generate `specs/reverse-spec/visual-references/manifest.md` (same format as below)
-3. Display: `📸 Visual references captured: [N] screens → specs/reverse-spec/visual-references/`
+2. Generate `specs/_global/visual-references/manifest.md` (same format as below)
+3. Display: `📸 Visual references captured: [N] screens → specs/_global/visual-references/`
 
 When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli = false`):
 1. For each screen explored in Step 3 (from the navigation log):
    - Navigate to the screen URL/route
    - Wait for content to stabilize (~3 seconds)
-   - Take a screenshot via MCP → save to `specs/reverse-spec/visual-references/{screen-name}.png`
-2. Generate `specs/reverse-spec/visual-references/manifest.md`:
+   - Take a screenshot via MCP → save to `specs/_global/visual-references/{screen-name}.png`
+2. Generate `specs/_global/visual-references/manifest.md`:
    ```markdown
    # Visual Reference Manifest
 
@@ -952,17 +952,17 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    |--------|-----------|------------|-----------------|
    | [name] | [route]   | {screen-name}.png | [notable elements: sidebar, nav, form, list...] |
    ```
-3. Display: `📸 Visual references captured: [N] screens → specs/reverse-spec/visual-references/`
+3. Display: `📸 Visual references captured: [N] screens → specs/_global/visual-references/`
 
 **Manifest Verification (after capture)**:
 After generating `manifest.md`, verify completeness:
-1. List all `.png` files in `specs/reverse-spec/visual-references/`
+1. List all `.png` files in `specs/_global/visual-references/`
 2. Check each `.png` file has a corresponding row in `manifest.md`
 3. If any file is missing from the manifest, add it with inferred screen name and `[TBD]` elements
 4. Display: `✅ Manifest verified: [N] screenshots, [N] manifest entries (matched)`
 
 **When Playwright unavailable or app cannot be launched**:
-- Display: `⚠️ Visual reference capture skipped (Playwright/app not available). You can provide screenshots manually at: specs/reverse-spec/visual-references/`
+- Display: `⚠️ Visual reference capture skipped (Playwright/app not available). You can provide screenshots manually at: specs/_global/visual-references/`
 - Create the `visual-references/` directory and an empty `manifest.md` with the template header
 
 **Usage downstream**:
@@ -987,7 +987,7 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    - CSS custom properties from `:root` (e.g., `--color-primary`, `--spacing-md`, `--font-family`)
    - Computed styles from landmark elements: `header`, `nav`, `main`, `aside`, `footer` (background, color, padding, font)
    - Body typography: `fontFamily`, `fontSize`, `lineHeight`, `color`, `backgroundColor`
-3. Save to `specs/reverse-spec/visual-references/style-tokens.md`:
+3. Save to `specs/_global/visual-references/style-tokens.md`:
    ```markdown
    # Style Tokens
 
@@ -1011,7 +1011,7 @@ When Playwright MCP is the only option (`playwright_mcp = true`, `playwright_cli
    | `font-size` | `14px` |
    | ... | ... |
    ```
-4. Display: `🎨 Style tokens extracted → specs/reverse-spec/visual-references/style-tokens.md`
+4. Display: `🎨 Style tokens extracted → specs/_global/visual-references/style-tokens.md`
 5. If extraction fails (cross-origin restrictions, SPA not rendered, or app is server-rendered without client JS):
    - Display: `⚠️ Style token extraction skipped — [reason]. You can add tokens manually.`
    - Create an empty `style-tokens.md` with the template header only
@@ -1067,7 +1067,7 @@ or
    → Executing Step 5 now...
 ```
 
-Runtime exploration results are saved in `specs/reverse-spec/runtime-exploration.md`. Visual references (if captured) are saved in `specs/reverse-spec/visual-references/`. Style tokens (if extracted) are saved in `specs/reverse-spec/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
+Runtime exploration results are saved in `specs/_global/runtime-exploration.md`. Visual references (if captured) are saved in `specs/_global/visual-references/`. Style tokens (if extracted) are saved in `specs/_global/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
 📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
 ```
@@ -1089,9 +1089,9 @@ Perform deep analysis using patterns appropriate to the tech stack identified in
 
 > **F9 Scan Target Loading**: If the active Foundation file(s) declare an `### F9. Scan Targets` section (see `domains/foundations/_foundation-core.md` § F9), load those scan targets and MERGE them with the universal scan targets from `_core.md`. F9 targets supplement — not replace — universal targets. This ensures framework-specific patterns (e.g., Drizzle ORM `table()` for Bun, `createSignal()` for Solid.js, Hono route handlers) are included in Phase 2-1 (Data Model), 2-2 (API Endpoint), and 2-6 (SBI) extraction without modifying `_core.md`.
 
-> **Phase 1.5 Completeness Gate (rebuild mode)**: Before starting Phase 2, verify that Phase 1.5 produced UI Flow Specs. Check if `specs/reverse-spec/runtime-exploration.md` contains at least one `### Flow:` section. If absent AND mode is rebuild → 🚫 **BLOCKING**: "Phase 1.5 Runtime Exploration did not produce UI Flow Specs. Return to Phase 1.5 or acknowledge limited spec quality."
+> **Phase 1.5 Completeness Gate (rebuild mode)**: Before starting Phase 2, verify that Phase 1.5 produced UI Flow Specs. Check if `specs/_global/runtime-exploration.md` contains at least one `### Flow:` section. If absent AND mode is rebuild → 🚫 **BLOCKING**: "Phase 1.5 Runtime Exploration did not produce UI Flow Specs. Return to Phase 1.5 or acknowledge limited spec quality."
 >
-> **Phase 1.5 Cross-Reference**: If `specs/reverse-spec/runtime-exploration.md` exists, read the file and use the observations to enrich analysis:
+> **Phase 1.5 Cross-Reference**: If `specs/_global/runtime-exploration.md` exists, read the file and use the observations to enrich analysis:
 > - Validate route definitions against actually observed screens (Screen Inventory)
 > - Enrich entity extraction with observed data display patterns — tables, forms, card views (UI Patterns)
 > - Cross-reference API endpoints with observed user interactions (User Flows Observed)
@@ -1327,7 +1327,7 @@ After source code extraction, selectively probe runtime to confirm key findings:
 
 #### C. Output
 
-Write findings to `specs/reverse-spec/micro-interactions.md`.
+Write findings to `specs/_global/micro-interactions.md`.
 
 **ID Format**: Use category-prefixed sequential IDs — `H001`/`H002` for Hover, `K001` for Keyboard, `A001` for Animation, `F001` for Focus, `D001` for Drag-and-Drop, `C001` for Context Menu, `S001` for Scroll. These IDs carry into per-Feature `pre-context.md` Interaction Behavior Inventory tables.
 
@@ -1372,7 +1372,7 @@ This inventory feeds into each Feature's `pre-context.md` → "Interaction Behav
 **micro-interactions.md Generation Gate (MANDATORY for frontend/fullstack projects)**:
 
 After completing source code analysis (Part A) and optional runtime probing (Part B):
-1. `specs/reverse-spec/micro-interactions.md` MUST be written, even if no patterns were detected. If no patterns found, write the template header with empty tables and note: "No micro-interaction patterns detected in source analysis."
+1. `specs/_global/micro-interactions.md` MUST be written, even if no patterns were detected. If no patterns found, write the template header with empty tables and note: "No micro-interaction patterns detected in source analysis."
 2. Verify the file exists before proceeding to Phase 2-8.
 3. If this step was skipped (e.g., backend-only project), record: `micro-interactions.md: skipped (backend-only project)` in Phase 2 summary.
 
@@ -1886,7 +1886,7 @@ Record each user modification to the AI's Tier proposals (e.g., "Moved Search fr
 
 ## Phase 4 — Deliverable Generation
 
-Generate hierarchical deliverables in `specs/reverse-spec/` (in CWD — see Output Directory rule in SKILL.md).
+Generate hierarchical deliverables in `specs/_global/` (in CWD — see Output Directory rule in SKILL.md).
 
 > **Scope = Core**: All Features are included in generated artifacts (roadmap.md, pre-context.md, etc.) regardless of Tier. The Tier classification only determines which Features smart-sdd will initially process — Tier 2/3 Features are marked as `deferred` in `sdd-state.md` and skipped by the pipeline until activated via `/smart-sdd expand`. This ensures Tier 2/3 Features are ready for immediate activation without re-running `/reverse-spec`.
 >
@@ -1896,19 +1896,19 @@ Generate hierarchical deliverables in `specs/reverse-spec/` (in CWD — see Outp
 
 Generate the following files in order. Each file follows the template structure found in this skill's `templates/` directory.
 
-1. **`specs/reverse-spec/roadmap.md`** — See [roadmap-template.md](templates/roadmap-template.md)
+1. **`specs/_global/roadmap.md`** — See [roadmap-template.md](templates/roadmap-template.md)
    - Project Overview, Rebuild Strategy, Feature Catalog (by Tier for Core scope / by dependency order for Full scope), Dependency Graph, Release Groups, **Demo Groups** (from Phase 3-1c), Cross-Feature Entity Dependencies, Cross-Feature API Dependencies
 
-2. **`specs/reverse-spec/entity-registry.md`** — See [entity-registry-template.md](templates/entity-registry-template.md)
+2. **`specs/_global/entity-registry.md`** — See [entity-registry-template.md](templates/entity-registry-template.md)
    - Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping
 
-3. **`specs/reverse-spec/api-registry.md`** — See [api-registry-template.md](templates/api-registry-template.md)
+3. **`specs/_global/api-registry.md`** — See [api-registry-template.md](templates/api-registry-template.md)
    - Complete API endpoint index, detailed contracts, cross-Feature dependencies
 
-4. **`specs/reverse-spec/business-logic-map.md`** — See [business-logic-map-template.md](templates/business-logic-map-template.md)
+4. **`specs/_global/business-logic-map.md`** — See [business-logic-map-template.md](templates/business-logic-map-template.md)
    - Business rules per Feature, validation, workflows, cross-Feature rules
 
-5. **`specs/reverse-spec/constitution-seed.md`** — See [constitution-seed-template.md](templates/constitution-seed-template.md)
+5. **`specs/_global/constitution-seed.md`** — See [constitution-seed-template.md](templates/constitution-seed-template.md)
    - Source code reference principles (branching by stack strategy), extracted architecture principles, technical constraints, coding conventions
    - **Naming Conventions** (if project identity changed in Phase 0 Question 3): Include a mapping section documenting original → new naming patterns (e.g., `Cherry` → `Angdu`, `CS` → `AS`). This section guides `speckit-constitution` and `speckit-implement` to use the new project naming consistently.
    - **Recommended Development Principles (Best Practices)**: Test-First, Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Demo-Ready Delivery
@@ -1950,12 +1950,12 @@ Generate the following files in order. Each file follows the template structure 
      3. Copy ALL rows from the Foundation F7 table — do NOT summarize, abbreviate, or omit any principle.
      4. Place this section AFTER "Archetype-Specific Principles" (or after "Project-Specific Recommended Principles" if no archetype was detected).
 
-6. **`specs/reverse-spec/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
+6. **`specs/_global/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations
 
 7. **`.env.example`** (project root, **rebuild mode only** — skip when `--adopt` is specified):
    - **Adoption mode**: `.env.example` already exists in the source project. Do NOT regenerate. Environment variables are documented in each Feature's pre-context.md → "Environment Variables" section only.
-   - **Rebuild mode**: Generated at CWD root (NOT inside `specs/reverse-spec/`)
+   - **Rebuild mode**: Generated at CWD root (NOT inside `specs/_global/`)
    - Lists all detected env vars with category comments and placeholder values
    - Groups by Feature association (shared vars first, then per-Feature)
    - Format:
@@ -1968,7 +1968,7 @@ Generate the following files in order. Each file follows the template structure 
      OAUTH_CLIENT_ID=your-oauth-client-id
      ```
 
-8. **`specs/reverse-spec/speckit-prompt.md` (MANDATORY)** — See [speckit-prompt-template.md](templates/speckit-prompt-template.md)
+8. **`specs/_global/speckit-prompt.md` (MANDATORY)** — See [speckit-prompt-template.md](templates/speckit-prompt-template.md)
    - Standalone prompt for using spec-kit without smart-sdd
    - Per-command context guide: which artifacts to read before each spec-kit command (specify, plan, implement, verify)
    - Cross-Feature awareness rules
@@ -1984,7 +1984,7 @@ Generate the following files in order. Each file follows the template structure 
 
 ### 4-2. Feature-Level Deliverables
 
-For each Feature, generate `specs/reverse-spec/features/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](templates/pre-context-template.md).
+For each Feature, generate `specs/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](templates/pre-context-template.md).
 
 **Path Convention**: All file paths in pre-context.md's Source Reference and Static Resources sections MUST be **relative to the target directory** (the source being analyzed). Do NOT use absolute paths. The `Source Root` header in the template references `$SOURCE_ROOT`, whose actual value is stored as `Source Path` in `sdd-state.md` and resolved at runtime by smart-sdd.
 
@@ -2080,7 +2080,7 @@ After SBI Numbering Verification passes, calculate the SBI coverage ranges for e
 These SBI Coverage values MUST be included when writing the Demo Groups section in `roadmap.md` (Phase 4-1). The `**SBI Coverage**` field in each Demo Group entry uses the ranges calculated here.
 
 Contents to include in each pre-context.md (see [pre-context-template.md](templates/pre-context-template.md) for exact section structure):
-- **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Read `specs/reverse-spec/runtime-exploration.md` and distribute observations to each Feature based on route-to-Feature mapping. For each Feature: extract the `## Screen:` sections whose routes belong to this Feature, include associated user flows and runtime behavior from those screen blocks, and add relevant App-Wide Observations. If Phase 1.5 was skipped or the file does not exist, write "Skipped — [reason]"
+- **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Read `specs/_global/runtime-exploration.md` and distribute observations to each Feature based on route-to-Feature mapping. For each Feature: extract the `## Screen:` sections whose routes belong to this Feature, include associated user flows and runtime behavior from those screen blocks, and add relevant App-Wide Observations. If Phase 1.5 was skipped or the file does not exist, write "Skipped — [reason]"
 
   **Route-to-Feature Mapping Algorithm**:
   1. Feature boundaries are determined by file/module in Phase 3-1
@@ -2105,7 +2105,7 @@ Contents to include in each pre-context.md (see [pre-context-template.md](templa
 
 > **Why spec-draft.md exists**: Previously, Draft FR/SC were 1-line bullet points in pre-context's "For /speckit.specify" section. speckit-specify would read these and generate spec.md — but it consistently compressed UI details (dropdowns → "input", auto-fill → omitted, error paths → ignored). By generating a detailed spec-draft.md during reverse-spec (when source context is fully loaded), the conversion from source behavior → requirements happens ONCE with full context, instead of twice with progressive loss.
 
-For each Feature, generate `BASE_PATH/features/[FID]-[name]/spec-draft.md` using the [spec-draft-template.md](templates/spec-draft-template.md):
+For each Feature, generate `SPEC_PATH/[NNN-feature]/spec-draft.md` using the [spec-draft-template.md](templates/spec-draft-template.md):
 
 **Conversion Rules (Source → spec-draft)**:
 
@@ -2333,7 +2333,7 @@ After classifying ALL unmapped groups:
 
 #### Step 4 — Generate coverage-baseline.md
 
-Generate `specs/reverse-spec/coverage-baseline.md` using the [coverage-baseline-template](templates/coverage-baseline-template.md):
+Generate `specs/_global/coverage-baseline.md` using the [coverage-baseline-template](templates/coverage-baseline-template.md):
 - Populate Surface Metrics table with the **final** measured values (after Step 3b update)
 - Record all unmapped items with their user-assigned classifications from Step 3
 - Record all intentional exclusions with their reasons and descriptions
@@ -2364,19 +2364,19 @@ Report the complete list of generated deliverables and next-step guidance to the
 
 ```
 Generation complete:
-- specs/reverse-spec/roadmap.md
-- specs/reverse-spec/constitution-seed.md
-- specs/reverse-spec/entity-registry.md
-- specs/reverse-spec/api-registry.md
-- specs/reverse-spec/business-logic-map.md
-- specs/reverse-spec/stack-migration.md          (if New Stack strategy)
-- specs/reverse-spec/coverage-baseline.md
-- specs/reverse-spec/features/F001-xxx/pre-context.md
-- specs/reverse-spec/features/F002-xxx/pre-context.md
+- specs/_global/roadmap.md
+- specs/_global/constitution-seed.md
+- specs/_global/entity-registry.md
+- specs/_global/api-registry.md
+- specs/_global/business-logic-map.md
+- specs/_global/stack-migration.md          (if New Stack strategy)
+- specs/_global/coverage-baseline.md
+- specs/F001-xxx/pre-context.md
+- specs/F002-xxx/pre-context.md
 - ...
 - case-study-log.md                                 (observation log for milestone tracking — project root)
 - .env.example                                    (rebuild only — if env vars detected)
-- specs/reverse-spec/speckit-prompt.md             (spec-kit standalone usage prompt)
+- specs/_global/speckit-prompt.md             (spec-kit standalone usage prompt)
 
 SBI: [N] source behaviors tracked (B001–B[N]) across [M] Features
 Demo Groups: [K] groups defined — Integration Demos trigger when all Features in a group are verified
@@ -2387,7 +2387,7 @@ Next steps:
   /smart-sdd parity          — Check implementation parity against original source (after pipeline completes)
 
   Or use spec-kit standalone with the generated prompt:
-  Copy specs/reverse-spec/speckit-prompt.md into CLAUDE.md, then run spec-kit commands directly.
+  Copy specs/_global/speckit-prompt.md into CLAUDE.md, then run spec-kit commands directly.
   The prompt guides which artifacts to read before each command.
 
 smart-sdd will automatically:
@@ -2404,7 +2404,7 @@ After displaying the Completion Report, create a git checkpoint so the user can 
 
 1. **Stage all reverse-spec artifacts**:
    ```bash
-   git add specs/reverse-spec/ specs/history.md case-study-log.md .env.example .gitignore
+   git add specs/_global/ specs/history.md case-study-log.md .env.example .gitignore
    ```
 
 2. **Commit**:

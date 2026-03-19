@@ -27,7 +27,7 @@ This document explains how to utilize the outputs of the `/reverse-spec` skill w
 ### Step 1: Finalize Constitution
 
 ```
-1. Read specs/reverse-spec/constitution-seed.md
+1. Read specs/_global/constitution-seed.md
 2. When running /speckit.constitution, provide the contents of constitution-seed.md as input
 3. Select source code reference principles that match the stack strategy and include them in the constitution
 4. Include Global Evolution Layer operational principles in the constitution
@@ -41,7 +41,7 @@ Follow the Release Group order in roadmap.md:
   Release 1 (Foundation) → Release 2 (Core Business) → Release 3 (Enhancement) → ...
 
 For each Feature:
-  1. Read specs/reverse-spec/features/F00N-xxx/pre-context.md
+  1. Read specs/F00N-xxx/pre-context.md
   2. Run /speckit.specify:
      - Refer to the "For /speckit.specify" section in pre-context.md
      - Read the original files from Source Reference to review existing implementation

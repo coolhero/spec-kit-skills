@@ -103,7 +103,7 @@ If the user selects "Review and clean up":
 3. For each selected Feature, clean up:
    - **`roadmap.md`**: Remove from Feature Catalog, Dependency Graph, Release Groups, Demo Groups
    - **`sdd-state.md`**: Remove from Feature Progress, Feature Mapping, Demo Group Progress
-   - **`pre-context.md`**: Delete `specs/reverse-spec/features/F00N-name/pre-context.md`
+   - **`pre-context.md`**: Delete `specs/F00N-name/pre-context.md`
    - **`entity-registry.md`**: Remove entity ownership entries (keep entities if referenced by other Features)
    - **`api-registry.md`**: Remove API entries owned by this Feature
    - **SBI Coverage**: Unlink SBI entries (set status back to `unmapped`, clear Feature column)

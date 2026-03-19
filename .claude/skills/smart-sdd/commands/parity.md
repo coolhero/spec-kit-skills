@@ -200,8 +200,8 @@ Gaps found: [N total]
   → Intentional exclusions: [N] (recorded in parity-report.md)
   → Deferred: [N] (added to roadmap.md)
 
-Generated: specs/reverse-spec/parity-report.md
-Updated: specs/reverse-spec/sdd-state.md
+Generated: specs/_global/parity-report.md
+Updated: specs/_global/sdd-state.md
 
 💡 Type "continue" to resume the pipeline, or run:
   /smart-sdd pipeline       — Resume pipeline for new/modified Features

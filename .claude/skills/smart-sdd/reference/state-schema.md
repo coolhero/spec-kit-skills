@@ -2,7 +2,7 @@
 
 This document defines the format of the `sdd-state.md` file. smart-sdd automatically creates and manages this file.
 
-**File location**: `./specs/reverse-spec/sdd-state.md` relative to CWD (or under the BASE_PATH specified with `--from`)
+**File location**: `./specs/_global/sdd-state.md` relative to CWD (or under the BASE_PATH specified with `--from`)
 
 ---
 

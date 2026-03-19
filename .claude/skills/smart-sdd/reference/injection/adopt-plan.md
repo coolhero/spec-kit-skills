@@ -17,9 +17,9 @@ Adopt plan: **"Document existing architecture as-is"** — records the current d
 
 | File | Section | Filtering |
 |------|---------|-----------|
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Naming Remapping" section | **If present** — use new identifiers |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | Source files for architecture extraction |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "For /speckit.plan" section | Relevant Feature only |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Naming Remapping" section | **If present** — use new identifiers |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | Source files for architecture extraction |
 | `BASE_PATH/entity-registry.md` | Related entity sections | Filtered per entity registry rules |
 | `BASE_PATH/api-registry.md` | Related API sections | Filtered per API registry rules |
 | `SPEC_PATH/[NNN-feature]/spec.md` | Entire file | Finalized spec for the current Feature |

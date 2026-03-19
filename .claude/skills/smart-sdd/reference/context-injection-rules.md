@@ -85,8 +85,8 @@ Every pipeline command that uses Domain Profile rules (specify, plan, tasks, imp
 
 ---
 
-**BASE_PATH**: `./specs/reverse-spec/` relative to CWD (or the path specified with `--from`)
-**SPEC_PATH**: `./specs/` relative to CWD (spec-kit feature output path. Format: `specs/{NNN-feature}/`)
+**BASE_PATH**: `./specs/_global/` relative to CWD (project-wide GEL artifacts: roadmap, registries, state)
+**SPEC_PATH**: `./specs/` relative to CWD (per-Feature artifacts. Format: `specs/{NNN-feature}/` — contains ALL Feature artifacts: pre-context, spec-draft, spec, plan, tasks)
 
 ---
 

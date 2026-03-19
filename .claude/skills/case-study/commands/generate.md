@@ -9,7 +9,7 @@ Generates a structured Case Study report by aggregating quantitative metrics fro
 - `target-directory`: Path to the project root (default: CWD)
 - `--lang en|ko`: Output language (default: `en`)
 
-Set `BASE_PATH` = `{target-directory}/specs/reverse-spec/`
+Set `BASE_PATH` = `{target-directory}/specs/_global/`
 Set `SPEC_PATH` = `{target-directory}/specs/`
 
 ---

@@ -10,7 +10,7 @@
 | File | Section | Filtering |
 |------|---------|-----------|
 | `SPEC_PATH/[NNN-feature]/plan.md` | Entire file | Current Feature |
-| `BASE_PATH/features/[FID]-[name]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** — for Source Complexity Annotation. Resolve file paths per `injection/specify.md` Source Reference Path Resolution rules |
+| `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** — for Source Complexity Annotation. Resolve file paths per `injection/specify.md` Source Reference Path Resolution rules |
 | Preceding Features' `SPEC_PATH/[NNN-feature]/stubs.md` | Rows where Dependent Feature = current FID | **If exists** — stubs that this Feature should resolve (see `context-injection-rules.md` § Dependency Stub Resolution Injection) |
 
 ## Injected Content
