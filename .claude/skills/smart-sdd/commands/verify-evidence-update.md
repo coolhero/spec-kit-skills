@@ -36,17 +36,17 @@ Before assembling the verify Review, check the SC Verification Matrix for eviden
 3. **Anti-patterns (verification evasion patterns — all are BLOCKING violations)**:
    ```
    ❌ WRONG (Level 1 — code review):
-     "Explore agent로 useChatStore.ts 확인 → knowledge:search 함수 존재 → SC-002 ✅"
-     → 코드가 존재하는 것과 실행되는 것은 다름. hydrate 누락, 파라미터 불일치 감지 불가.
+     "Checked useChatStore.ts via Explore agent → knowledge:search function exists → SC-002 ✅"
+     → Code existing and code executing are different things. Cannot detect missing hydrate or parameter mismatch.
 
    ❌ WRONG (Level 2 — surface UI):
-     "Playwright snapshot → KB 버튼 visible → SC-002 ✅"
-     → UI가 보이는 것과 데이터가 흐르는 것은 다름. 버튼 클릭 후 실제 IPC 호출 여부 미확인.
+     "Playwright snapshot → KB button visible → SC-002 ✅"
+     → UI being visible and data flowing are different things. Whether actual IPC call occurs after button click is unverified.
 
    ✅ RIGHT (Level 3 — data flow):
-     "Playwright: KB 생성 → 파일 추가 → assistant에 KB 연결 → 메시지 전송
+     "Playwright: Create KB → add file → link KB to assistant → send message
       → interceptor: knowledge:search called=true, results.length=3
-      → AI 응답에 KB 참조 포함 확인 → SC-002 ✅"
+      → Confirmed AI response contains KB reference → SC-002 ✅"
    ```
 
 4. **Display Evidence Summary in Review (MANDATORY)**:

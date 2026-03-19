@@ -34,16 +34,16 @@ Before classifying by file count, ask: **"Does spec.md have an SC that defines t
 
 ```
 ❌ WRONG: "citation tooltip doesn't work" → 3+ files → Major-Implement
-   → implement로 돌아가도 spec에 tooltip SC가 없으므로 에이전트가 즉흥으로 구현 → 같은 루프 반복
+   → Even returning to implement, there is no tooltip SC in spec, so the agent improvises the implementation → same loop repeats
 
-✅ RIGHT: "citation tooltip doesn't work" → spec.md에 tooltip SC 없음 → Major-Spec
-   → specify로 돌아가서 SC 추가: "hover 시 제목+파비콘+내용 미리보기, 클릭 시 소스 URL 열기"
-   → 이후 plan → tasks → implement → verify가 명확한 기준으로 진행
+✅ RIGHT: "citation tooltip doesn't work" → No tooltip SC in spec.md → Major-Spec
+   → Return to specify and add SC: "On hover show title+favicon+content preview, on click open source URL"
+   → Subsequent plan → tasks → implement → verify proceeds with clear criteria
 ```
 
-**Rationale**: SDD의 핵심 원칙은 "spec이 완료 기준을 정의한다"입니다. SC가 없는 동작을 implement에서 고치라고 보내는 것은 spec-driven이 아니라 ad-hoc fix입니다. implement는 반드시 spec의 SC를 구현하는 것이어야 합니다.
+**Rationale**: The core principle of SDD is "spec defines the completion criteria." Sending behavior without an SC back to implement for fixing is not spec-driven but an ad-hoc fix. implement must always be about implementing the spec's SCs.
 
-**Step B: File count classification (SC가 존재할 때만)**
+**Step B: File count classification (only when SC exists)**
 
 - **Minor**: Fix touches ≤2 files, no API/interface change, no architectural reasoning needed
 - **Major-Implement**: Fix touches 3+ files OR needs a new component, but spec and plan are correct (SC exists, implementation just doesn't match)
@@ -215,7 +215,7 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
    ❌ WRONG (rebuild verify fix):
      SC-008 citation tooltip not showing → add inline style → still broken
      → add z-index → still broken → refactor CSS → more broken
-     → "처음부터 다시"
+     → "start from scratch"
 
    ✅ RIGHT (rebuild verify fix):
      SC-008 citation tooltip not showing

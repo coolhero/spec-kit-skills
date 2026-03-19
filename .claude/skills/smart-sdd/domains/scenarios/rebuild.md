@@ -121,13 +121,13 @@ Group the six values into three categories for probe and rule selection:
 - **Missing rendering = BLOCKING**: `Source renders [pattern] via [component] but spec has no FR for result display`
 
 ```
-❌ "파일 임베딩을 구현한다" (pipeline = 1 FR)
-   → PDF 처리 누락, citation 렌더링 누락, chunking 전략 불명
+❌ "Implement file embedding" (pipeline = 1 FR)
+   → PDF processing missing, citation rendering missing, chunking strategy undefined
 
 ✅ Level 1: FileLoader(txt/md/pdf/docx) → Chunker(overlap strategy) → Embedder(model selection) → VectorStore(similarity search) → Citation display
    Level 2: Chat toolbar KB button, Assistant settings KB panel, Sidebar KB manager
    Level 3: CitationsList with inline [N] badges, citation popover, "N references" summary
-   → 각 단계가 별도 FR로 커버됨
+   → Each stage covered by a separate FR
 ```
 
 ---

@@ -176,16 +176,16 @@ Assemble the report following the Case Study Agenda. Use `--lang` to determine s
 
 ### Section Headers by Language
 
-| # | English | Korean |
-|---|---------|--------|
-| 1 | Executive Summary | 요약 |
-| 2 | Project Background | 프로젝트 배경 |
-| 3 | Source Analysis | 소스 분석 |
-| 4 | Architecture & Strategy | 아키텍처 및 전략 |
-| 5 | Pipeline Execution | 파이프라인 실행 |
-| 6 | Quality & Parity | 품질 및 패리티 |
-| 7 | Challenges & Solutions | 도전과 해결 |
-| 8 | Outcomes & Lessons Learned | 성과 및 교훈 |
+| # | Section |
+|---|---------|
+| 1 | Executive Summary |
+| 2 | Project Background |
+| 3 | Source Analysis |
+| 4 | Architecture & Strategy |
+| 5 | Pipeline Execution |
+| 6 | Quality & Parity |
+| 7 | Challenges & Solutions |
+| 8 | Outcomes & Lessons Learned |
 
 ### Section 1 — Executive Summary
 

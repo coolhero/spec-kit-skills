@@ -381,7 +381,7 @@ After executing each SC's verification, record the **Reached Depth** and compare
 
 **Step 3g — User-Assisted Manual Verification** (MANDATORY when manual items exist):
 
-> **Principle: "자동화 불가 ≠ 검증 스킵"**. Automation-impossible items must still be verified — through user cooperation, not silent omission. This gate ensures every verification item is either machine-verified, user-verified, or explicitly acknowledged as unverifiable.
+> **Principle: "Automation impossible ≠ verification skip"**. Automation-impossible items must still be verified — through user cooperation, not silent omission. This gate ensures every verification item is either machine-verified, user-verified, or explicitly acknowledged as unverifiable.
 
 **Sources** — accumulate all items that couldn't be auto-verified from prior steps:
 - `manual` SCs from SC Verification Matrix (Step 0)

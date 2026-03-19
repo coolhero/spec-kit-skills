@@ -778,25 +778,25 @@ Executes the following steps **strictly in order** for each Feature.
 >
 > **2. Automate, Don't Delegate**: If the agent CAN do it programmatically, do NOT ask the user. App restart → `pkill + pnpm run dev`. DB state check → `sqlite3 query`. Log review → capture to file + grep. localStorage reset → code-level clear. KB rebuild → script. **Only delegate truly non-automatable actions** (OS-native drag&drop, visual judgment, external API key entry).
 >
-> **3. Empty Results → Investigate, Don't Report**: When a query/search/API returns empty results `[]`, do NOT report "results are empty" to the user. Instead: (1) check data exists in storage, (2) check query was formed correctly, (3) check intermediate processing logs, (4) identify and fix the root cause, (5) THEN report the fix. `❌ "검색 결과가 []입니다" → ✅ "DB에 3건 있으나 threshold 0.7이 너무 높아 0건 반환. 0.3으로 조정하여 3건 반환 확인."`
+> **3. Empty Results → Investigate, Don't Report**: When a query/search/API returns empty results `[]`, do NOT report "results are empty" to the user. Instead: (1) check data exists in storage, (2) check query was formed correctly, (3) check intermediate processing logs, (4) identify and fix the root cause, (5) THEN report the fix. `❌ "Search results are []" → ✅ "DB has 3 records but threshold 0.7 was too high, returning 0. Adjusted to 0.3 and confirmed 3 results returned."`
 >
-> **4. Fix → Runtime Verify → Report**: Every code fix must be followed by runtime verification before reporting to user. `❌ 코드 수정 → build 통과 → "수정 완료" → ✅ 코드 수정 → build → 앱 실행 → 해당 기능 동작 확인 → "수정 완료, 런타임 확인됨"`
+> **4. Fix → Runtime Verify → Report**: Every code fix must be followed by runtime verification before reporting to user. `❌ Code fix → build passes → "Fix complete" → ✅ Code fix → build → run app → verify the specific feature works → "Fix complete, runtime verified"`
 
 > **⚠️ INTER-STEP CONTINUITY — DO NOT STOP BETWEEN STEPS**:
 > After a step's Update completes and there are remaining steps, **IMMEDIATELY begin the next step** (e.g., plan Update done → start tasks Checkpoint). Do NOT display a "completed" summary and wait. Do NOT show "Next steps" commands. The pipeline is a continuous flow within a Feature — the ONLY valid pause points are HARD STOPs (awaiting user approval), BLOCK conditions, Feature completion, or unrecoverable errors. If you find yourself about to generate a response that ends without starting the next step — **STOP, you are breaking continuity. Proceed to the next step.**
 
 #### Specify Execute+Review (HARD STOP)
 
-> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-specify` returns, do NOT show its raw output ("Spec created and validated", "Ready for /speckit.clarify or /speckit.plan", "Coverage: N functional requirements", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A** — see SKILL.md Rule 3.
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-specify` returns, do NOT show its raw output ("Spec created and validated", "Ready for /speckit.clarify or /speckit.plan", "Coverage: N functional requirements", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A** — see SKILL.md Rule 3.
 
-> **🚨 rebuild + GUI 필수 게이트** (specify Review 전 반드시 확인):
-> - **Entry Point BLOCKING**: pre-context § Entry Points의 **각** 유입 경로가 별도 FR로 정의되었는지 확인. 누락 = BLOCKING.
->   ❌ WRONG: FR-035 "accessible from navigation" (추상적 1개)
->   ✅ RIGHT: FR-035 "Sidebar icon → /knowledge", FR-036 "Inputbar KB button", FR-037 "Assistant settings KB link" (구체적 3개)
-> - **Domain Rule Compliance (S1)**: 활성 도메인 모듈의 S1 SC 규칙이 spec.md에 반영됐는지 확인. 커버리지 < 50% = BLOCKING.
-> - **Source app UI 컨트롤**: rebuild일 때 source app의 UI 컨트롤 종류(dropdown, slider, auto-fill)가 FR에 반영되었는지 확인.
->   ❌ WRONG: FR "create KB with name, model, dimensions" (텍스트 수준)
->   ✅ RIGHT: FR "create KB: select embedding model from provider dropdown, dimensions auto-filled" (UI 컨트롤 수준)
+> **🚨 rebuild + GUI mandatory gate** (must verify before specify Review):
+> - **Entry Point BLOCKING**: Verify that **each** entry path from pre-context § Entry Points is defined as a separate FR. Missing = BLOCKING.
+>   ❌ WRONG: FR-035 "accessible from navigation" (1 abstract FR)
+>   ✅ RIGHT: FR-035 "Sidebar icon → /knowledge", FR-036 "Inputbar KB button", FR-037 "Assistant settings KB link" (3 concrete FRs)
+> - **Domain Rule Compliance (S1)**: Verify that active domain module S1 SC rules are reflected in spec.md. Coverage < 50% = BLOCKING.
+> - **Source app UI controls**: In rebuild mode, verify that source app UI control types (dropdown, slider, auto-fill) are reflected in FRs.
+>   ❌ WRONG: FR "create KB with name, model, dimensions" (text-level description)
+>   ✅ RIGHT: FR "create KB: select embedding model from provider dropdown, dimensions auto-filled" (UI control-level description)
 
 1. **CI Pre-check (greenfield only)**: Read `Clarity Index` and `CI Low-confidence` from sdd-state.md. If CI < 40%: insert an inline clarify sub-step — ask 1–2 targeted questions for the lowest-confidence dimensions, re-score, then proceed. If Core Purpose confidence ≤ 1: **HARD STOP** — "Purpose unclear, clarify before proceeding to specify."
 2. Execute `speckit-specify` via Inline Execution (NOT Skill tool)
@@ -809,12 +809,12 @@ Executes the following steps **strictly in order** for each Feature.
 
 #### Plan Execute+Review (HARD STOP)
 
-> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-plan` returns, do NOT show its raw output ("Plan created", "architecture decisions", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-plan` returns, do NOT show its raw output ("Plan created", "architecture decisions", etc.). You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A**.
 
-> **🚨 rebuild + GUI 필수 게이트** (plan Review 전 반드시 확인):
-> - **Source Component Mapping** (🚫 BLOCKING): plan.md에 Source→Target Component Mapping 테이블이 있어야 함. source app의 각 컴포넌트가 target에 매핑됨. 매핑 없는 source 컴포넌트 = BLOCKING.
-> - **Entity Ownership Conflict** (🚫 BLOCKING): data-model.md의 엔티티가 entity-registry에서 다른 Feature 소유 = 충돌. 해결 전 승인 불가.
-> - **Data Lifecycle Mapping**: source app의 데이터 패러다임(opt-in/opt-out/CRUD 순서)이 plan에 명시. 미명시 = WARNING.
+> **🚨 rebuild + GUI mandatory gate** (must verify before plan Review):
+> - **Source Component Mapping** (🚫 BLOCKING): plan.md must contain a Source→Target Component Mapping table. Each source app component must be mapped to a target. Unmapped source component = BLOCKING.
+> - **Entity Ownership Conflict** (🚫 BLOCKING): If an entity in data-model.md is owned by a different Feature in entity-registry = conflict. Cannot approve until resolved.
+> - **Data Lifecycle Mapping**: Source app's data paradigm (opt-in/opt-out/CRUD order) must be specified in the plan. Unspecified = WARNING.
 
 1. Execute `speckit-plan` via Inline Execution (NOT Skill tool)
 2. **In the SAME response** — SUPPRESS any navigation output from speckit-plan. Do NOT show these to the user.
@@ -843,7 +843,7 @@ Executes the following steps **strictly in order** for each Feature.
 
 #### Tasks Execute+Review (HARD STOP)
 
-> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-tasks` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-tasks` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A**.
 
 1. Execute `speckit-tasks` via Inline Execution (NOT Skill tool)
 2. **In the SAME response** — SUPPRESS any navigation output from speckit-tasks. Do NOT show these to the user.
@@ -868,7 +868,7 @@ After `speckit-specify` completes and the user approves the Review, **automatica
 
 #### Clarify Execute+Review (HARD STOP)
 
-> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-clarify` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-clarify` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A**.
 
 1. Execute `speckit-clarify` via Inline Execution (NOT Skill tool)
 2. **In the SAME response** — SUPPRESS any navigation output from speckit-clarify. Do NOT show these to the user.
@@ -968,27 +968,27 @@ If "Proceed with awareness": record `⚠️ STUB-DEPENDENT — [stub list]` in s
 
 #### Implement Execute (MANDATORY — injection/implement.md Required Reading)
 
-> **🚨 CRITICAL: implement의 핵심 게이트들은 이 파일(pipeline.md)이 아닌 `reference/injection/implement.md`에 있습니다.**
-> **implement를 시작하기 전에 반드시 `reference/injection/implement.md`를 읽어야 합니다.**
-> **injection/implement.md를 읽지 않고 코드를 생성하는 것은 CRITICAL 위반입니다.**
+> **🚨 CRITICAL: The core gates for implement are in `reference/injection/implement.md`, NOT in this file (pipeline.md).**
+> **You MUST read `reference/injection/implement.md` before starting implement.**
+> **Generating code without reading injection/implement.md is a CRITICAL violation.**
 >
-> 특히 rebuild + GUI 프로젝트에서 반드시 실행해야 하는 게이트:
+> Gates that MUST be executed especially in rebuild + GUI projects:
 >
-> 1. **Source Reference Injection** (🚫 BLOCKING): 각 UI 태스크 전에 source app 코드를 실제로 읽어야 함.
->    `📂 Source Reference` 없는 UI 태스크 = gate 위반.
->    ❌ WRONG: tasks.md 텍스트만 보고 UI 생성
->    ✅ RIGHT: source의 AddKnowledgeBasePopup.tsx 읽기 → ModelSelector + auto-dimensions 재현
+> 1. **Source Reference Injection** (🚫 BLOCKING): Must actually read source app code before each UI task.
+>    UI task without `📂 Source Reference` = gate violation.
+>    ❌ WRONG: Generate UI based only on tasks.md text
+>    ✅ RIGHT: Read source AddKnowledgeBasePopup.tsx → reproduce ModelSelector + auto-dimensions
 >
-> 2. **Background Agent Source Injection** (🚫 BLOCKING): background agent에 source 코드 원문 포함 필수.
+> 2. **Background Agent Source Injection** (🚫 BLOCKING): Source code original text must be included in agent prompt.
 >    ❌ WRONG: "Create a dialog with name, model, dims inputs"
->    ✅ RIGHT: source 코드 붙여넣기 + "이 UX flow를 새 스택으로 재현하세요"
+>    ✅ RIGHT: Paste source code + "Reproduce this UX flow in the new stack"
 >
-> 3. **Post-Implement Gates** (implement 완료 후, Review 전):
+> 3. **Post-Implement Gates** (after implement completes, before Review):
 >    - Semantic Stub Detection: Math.random(), placeholder, external call bypass → 🚫 BLOCKING
->    - Integration Contract Fulfillment: plan의 "Consumes ←" 실제 호출 확인 → 🚫 BLOCKING
+>    - Integration Contract Fulfillment: Verify actual invocation of plan's "Consumes ←" → 🚫 BLOCKING
 >    - UI Control Type Audit: Source Select → Target Input = UX downgrade → 🚫 BLOCKING
 
-> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-implement` returns, do NOT show its raw output ("Suggested commit", "Implementation complete", etc.). You MUST suppress it, read the artifacts, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-implement` returns, do NOT show its raw output ("Suggested commit", "Implementation complete", etc.). You MUST suppress it, read the artifacts, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A**.
 
 1. **Read `reference/injection/implement.md`** — Source Reference, Background Agent Injection, Post-Implement Gates
 2. Execute `speckit-implement` via Inline Execution (NOT Skill tool)
@@ -1121,59 +1121,59 @@ If there were notable decisions during this Feature's pipeline (specify → veri
 
 > **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
 
-#### Delegate, Don't Skip (파이프라인 전 단계 공통 — 자동화 불가 시 사용자 위임)
+#### Delegate, Don't Skip (common across all pipeline stages — delegate to user when automation is impossible)
 
-> **🚨 에이전트의 도구 한계가 곧 검증의 한계가 아니다.**
-> 자동화할 수 없는 검증을 만나면 "skip"이 아니라 AskUserQuestion으로 사용자에게 구체적 수동 확인을 요청한다.
+> **🚨 The agent's tool limitations are NOT the limits of verification.**
+> When encountering a verification that cannot be automated, do NOT "skip" — use AskUserQuestion to request specific manual confirmation from the user.
 >
-> ❌ "Playwright 한계로 skip" → 미검증이 조용히 통과
-> ✅ "자동 테스트 불가합니다. 직접 [구체적 동작]을 수행하고 [기대 결과]를 확인해주세요"
+> ❌ "Skip due to Playwright limitations" → unverified items pass silently
+> ✅ "Automated testing is not possible. Please perform [specific action] and verify [expected result]"
 >
-> 이 원칙은 implement smoke launch, verify Phase 3, demo 검증 등 모든 검증 단계에 적용.
+> This principle applies to all verification stages including implement smoke launch, verify Phase 3, demo verification, etc.
 
 ---
 
-#### Runtime Error Triage Protocol (파이프라인 전 단계 공통)
+#### Runtime Error Triage Protocol (common across all pipeline stages)
 
-> **🚨 이 프로토콜은 verify뿐 아니라 파이프라인의 어느 시점에서든 사용자가 런타임 에러를 보고하거나 기능 미동작을 지적할 때 적용됩니다.**
+> **🚨 This protocol applies not only to verify but whenever the user reports a runtime error or points out a non-functioning feature at any point in the pipeline.**
 
-사용자가 "에러가 나잖아", "안 돼", "제대로 안 됨" 등으로 문제를 보고하면:
+When the user reports a problem with phrases like "there's an error", "it doesn't work", "it's not working properly":
 
 ```
-1. 에러 분석: 원인 추적 (crash log, undefined 접근, 빈 데이터 등)
-2. 범위 확인: 이 문제만 있는가? 같은 패턴의 다른 문제가 있는가?
-   → Semantic Stub Detection 실행 (Math.random, placeholder, external call bypass)
-   → Integration Contract 실제 호출 확인
-3. Bug Fix Severity Rule 적용 (verify-phases.md와 동일 기준):
-   | Severity | 조건 | Action |
-   |----------|------|--------|
-   | Minor | ≤2 파일, API 변경 없음 | Fix inline OK |
-   | Major-Implement | 3+ 파일 OR 새 컴포넌트 필요 | Return to implement |
-   | Major-Plan | Architecture/contracts 변경 필요 | Return to plan |
-   | Major-Spec | 요구사항 자체가 잘못됨 | Return to specify |
-4. Major인 경우 → HARD STOP (AskUserQuestion):
+1. Error analysis: Trace the root cause (crash log, undefined access, empty data, etc.)
+2. Scope check: Is this the only issue? Are there other issues with the same pattern?
+   → Run Semantic Stub Detection (Math.random, placeholder, external call bypass)
+   → Verify actual invocation of Integration Contracts
+3. Apply Bug Fix Severity Rule (same criteria as verify-phases.md):
+   | Severity | Condition | Action |
+   |----------|-----------|--------|
+   | Minor | ≤2 files, no API change | Fix inline OK |
+   | Major-Implement | 3+ files OR new component needed | Return to implement |
+   | Major-Plan | Architecture/contracts change needed | Return to plan |
+   | Major-Spec | Requirements themselves are wrong | Return to specify |
+4. If Major → HARD STOP (AskUserQuestion):
    "🔴 Major-[level] issue detected — [N] files affected.
     Pipeline regression to [level] recommended. Proceed?"
    Options: "Return to [level]", "Fix inline anyway (risk acknowledged)"
-5. 사용자의 "바로 고쳐" 요청이 있어도 Major-Implement 이상이면
-   regression을 먼저 제안. 사용자가 "그냥 인라인 수정해" 선택 시에만 직접 수정.
+5. Even if the user requests "just fix it now", if it's Major-Implement or above,
+   propose regression first. Only fix inline if the user explicitly selects "fix inline anyway".
 ```
 
 ```
-❌ WRONG: 사용자 "에러 나잖아" → 에이전트가 바로 코드 수정 시작 (severity 판단 없이)
-✅ RIGHT: 사용자 "에러 나잖아" → 에이전트가 분석 → "6개 파일 수정 필요, Major-Implement입니다.
-          implement 단계로 돌아가서 체계적으로 수정할까요?"
+❌ WRONG: User "there's an error" → agent starts code modification immediately (without severity assessment)
+✅ RIGHT: User "there's an error" → agent analyzes → "6 files need modification, this is Major-Implement.
+          Shall we return to the implement stage for systematic fixes?"
 ```
 
-> **절대 Major issue를 인라인으로 수정하면서 pipeline regression을 건너뛰지 않는다.** verify는 FINDING 단계이지 REWRITING 단계가 아니다.
+> **NEVER fix a Major issue inline while skipping pipeline regression.** verify is the FINDING stage, not the REWRITING stage.
 
 ---
 
 #### Verify Execute (MANDATORY — verify-phases.md Required Reading)
 
-> **🚨 CRITICAL: verify의 상세 절차는 이 파일(pipeline.md)이 아닌 `commands/verify-phases.md`에 있습니다.**
-> **verify를 시작하기 전에 반드시 `commands/verify-phases.md`를 읽어야 합니다.**
-> **verify-phases.md를 읽지 않고 "build + TS + lint"만 수행하는 것은 verify가 아닙니다.**
+> **🚨 CRITICAL: The detailed verify procedures are in `commands/verify-phases.md`, NOT in this file (pipeline.md).**
+> **You MUST read `commands/verify-phases.md` before starting verify.**
+> **Performing only "build + TS + lint" without reading verify-phases.md does NOT constitute verify.**
 >
 > 1. Read `commands/verify-phases.md` — Phase 0 (Runtime Readiness), Phase 1 (Static),
 >    Phase 2 (Cross-Feature), Phase 3 (SC Verification), Phase 3b (Bug Prevention)
@@ -1303,21 +1303,21 @@ When new architectural principles or conventions are discovered during Feature p
 
 > **🚨 These gates are inlined here because verify-phases.md and phase files may be pushed out of context. These 3 rules MUST be followed regardless of which phase files are loaded.**
 
-1. **🚫 코드 리뷰만으로 SC 통과 금지**: Explore agent로 "코드 경로 존재" 확인 → SC ✅는 절대 불가. SC 통과에는 런타임 증거(Playwright 로그, HTTP 응답, 사용자 확인)가 필수. 증거 없는 SC는 Review에서 BLOCKING.
+1. **🚫 Code review alone CANNOT pass an SC**: Confirming "code path exists" via Explore agent → SC ✅ is absolutely prohibited. SC pass requires runtime evidence (Playwright logs, HTTP responses, user confirmation). SCs without evidence are BLOCKING in Review.
    ```
-   ❌ "useChatStore에 knowledge:search 있다" → SC-002 ✅
-   ✅ "Playwright: KB 연결 → 메시지 전송 → kbSearchCalled=true" → SC-002 ✅
+   ❌ "knowledge:search exists in useChatStore" → SC-002 ✅
+   ✅ "Playwright: KB linked → message sent → kbSearchCalled=true" → SC-002 ✅
    ```
 
-2. **🚫 rebuild fix 시 source 코드 읽기 필수**: verify에서 코드를 수정할 때 source app의 해당 파일을 먼저 읽어야 함. 에러 메시지만 보고 즉흥 패치 → 패치 위의 패치 → "처음부터 다시" 루프 방지.
+2. **🚫 Reading source code is mandatory for rebuild fixes**: When modifying code during verify, the corresponding source app file must be read first. Prevents the pattern of improvising patches based on error messages → patch on top of patch → "start from scratch" loop.
 
-3. **🚫 같은 SC 2번 실패 → Major 에스컬레이션**: 같은 SC가 fix 후에도 2번 연속 실패하면 verify에서 패치하지 말고 implement로 되돌린다.
+3. **🚫 Same SC fails 2 times → Major escalation**: If the same SC fails 2 consecutive times after fixes, do NOT patch in verify — return to implement.
 
 > For full gate details: [verify-phases.md](verify-phases.md) (Source Modification Gate, Evidence Gate), [verify-sc-verification.md](verify-sc-verification.md) (SC Matrix, depth requirements)
 
 #### Constitution Incremental Update Execute+Review (HARD STOP)
 
-> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-constitution` (incremental update) returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **위반 패턴 A**.
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-constitution` (incremental update) returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A**.
 
 1. Execute `speckit-constitution` via Inline Execution (NOT Skill tool)
 2. **In the SAME response** — SUPPRESS any navigation output from speckit-constitution. Do NOT show these to the user.

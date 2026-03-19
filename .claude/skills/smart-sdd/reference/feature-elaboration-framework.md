@@ -30,7 +30,7 @@ All three Phase 1 entry types (Document-based, Conversational, Gap-driven) conve
 
 ## The Six Perspectives
 
-### 1. User & Purpose (누가, 왜) — REQUIRED
+### 1. User & Purpose (Who, Why) — REQUIRED
 
 Who uses this Feature and why?
 
@@ -41,11 +41,11 @@ Who uses this Feature and why?
 **Gap signals**: No actor identified, no clear problem statement, no usage scenarios described.
 
 **Example questions**:
-- "이 기능을 주로 사용하는 사람은 누구인가요? (일반 사용자, 관리자, 외부 시스템?)"
-- "이 기능이 없으면 사용자가 겪는 불편은 무엇인가요?"
-- "대표적인 사용 시나리오 1–2개를 설명해주실 수 있나요?"
+- "Who primarily uses this feature? (end users, admins, external systems?)"
+- "What inconvenience do users face without this feature?"
+- "Can you describe 1–2 representative usage scenarios?"
 
-### 2. Capabilities (무엇을) — REQUIRED
+### 2. Capabilities (What) — REQUIRED
 
 What does this Feature do?
 
@@ -56,11 +56,11 @@ What does this Feature do?
 **Gap signals**: Only vague description ("handles notifications"), no specific capabilities listed, no business rules.
 
 **Example questions**:
-- "사용자가 이 기능으로 할 수 있는 구체적인 행동을 나열해주실 수 있나요?"
-- "특별한 비즈니스 규칙이나 제약 조건이 있나요? (예: 횟수 제한, 권한 제한)"
-- "주요 상태 변화가 있나요? (예: 초안→제출→승인→완료)"
+- "Can you list the specific actions a user can perform with this feature?"
+- "Are there special business rules or constraints? (e.g., attempt limits, permission restrictions)"
+- "Are there key state transitions? (e.g., draft → submitted → approved → completed)"
 
-### 3. Data (어떤 데이터로) — REQUIRED
+### 3. Data (What data) — REQUIRED
 
 What data does this Feature manage?
 
@@ -72,11 +72,11 @@ What data does this Feature manage?
 **Gap signals**: No entities mentioned, unclear ownership, entity overlaps with existing Features.
 
 **Example questions**:
-- "이 기능이 직접 관리(생성/수정/삭제)하는 데이터는 무엇인가요?"
-- "다른 기능에서 가져와 참조하는 데이터가 있나요?"
-- "주요 데이터 간의 관계는 어떻게 되나요? (1:N, M:N 등)"
+- "What data does this feature directly manage (create/update/delete)?"
+- "Is there data referenced from other features?"
+- "What are the relationships between key data entities? (1:N, M:N, etc.)"
 
-### 4. Interfaces (어떻게 연결) — REQUIRED
+### 4. Interfaces (How it connects) — REQUIRED
 
 How does this Feature connect to users and other Features?
 
@@ -89,12 +89,12 @@ How does this Feature connect to users and other Features?
 **Gap signals**: No APIs mentioned, no UI hints for user-facing Features, unclear dependencies. Feature defines data stores or services that users will configure/view but lists no UI touchpoints — potential horizontal layer instead of vertical slice.
 
 **Example questions**:
-- "이 기능이 제공해야 할 API 엔드포인트가 있나요?"
-- "다른 기능의 API를 호출해야 하나요? 어떤 것들?"
-- "사용자 인터페이스가 필요한가요? (페이지, 모달, 컴포넌트)"
-- "외부 서비스와 연동이 필요한가요? (이메일, 결제, 알림 등)"
+- "Does this feature need to expose API endpoints?"
+- "Does it need to call other features' APIs? Which ones?"
+- "Is a user interface needed? (pages, modals, components)"
+- "Does it need to integrate with external services? (email, payment, notifications, etc.)"
 
-### 5. Quality (얼마나 잘) — OPTIONAL but recommended
+### 5. Quality (How well) — OPTIONAL but recommended
 
 Non-functional requirements.
 
@@ -106,10 +106,10 @@ Non-functional requirements.
 **Gap signals**: Not critical for Phase 1. Note "TBD" if not discussed. Flag security-sensitive Features.
 
 **Example questions**:
-- "성능 요구사항이 있나요? (동시 접속자, 응답시간 등)"
-- "보안 관련 특별한 고려사항이 있나요? (인증, 민감 데이터)"
+- "Are there performance requirements? (concurrent users, response time, etc.)"
+- "Are there special security considerations? (authentication, sensitive data)"
 
-### 6. Boundaries (어디까지) — OPTIONAL but recommended
+### 6. Boundaries (Scope limits) — OPTIONAL but recommended
 
 Scope boundaries.
 
@@ -121,8 +121,8 @@ Scope boundaries.
 **Gap signals**: Feature description is very broad with no boundaries set. Risk of scope creep.
 
 **Example questions**:
-- "이 기능에서 명시적으로 제외할 것이 있나요?"
-- "전제 조건이나 가정하고 있는 것이 있나요?"
+- "Is there anything explicitly excluded from this feature?"
+- "Are there any prerequisites or assumptions?"
 
 ---
 

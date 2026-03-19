@@ -7,27 +7,27 @@
 
 ## 🚨 BLOCKING Gates Summary (rebuild + GUI — read this FIRST)
 
-> **이 섹션의 게이트들은 파일 하단에 상세하게 정의되어 있지만, 에이전트가 하단까지 읽지 않을 수 있으므로 여기에 요약합니다. 각 게이트의 상세 절차는 해당 섹션을 참조하세요.**
+> **The gates in this section are defined in detail at the bottom of the file, but the agent may not read that far, so they are summarized here. See each gate's detailed section for full procedures.**
 
-| # | Gate | BLOCKING 조건 | 상세 위치 |
-|---|------|-------------|----------|
-| 1 | **Source Reference Injection** | UI 태스크에 `📂 Source Reference` 없으면 gate 위반 | § Source Reference Injection |
-| 2 | **Background Agent Source Injection** | agent prompt에 source 코드 없으면 gate 위반 | § Background Agent Source Injection |
+| # | Gate | BLOCKING Condition | Detail Location |
+|---|------|-------------------|----------------|
+| 1 | **Source Reference Injection** | Gate violation if UI task lacks `📂 Source Reference` | § Source Reference Injection |
+| 2 | **Background Agent Source Injection** | Gate violation if agent prompt lacks source code | § Background Agent Source Injection |
 | 3 | **Semantic Stub Detection** | Math.random(), placeholder, external call bypass | § Semantic Stub Detection |
-| 4 | **Integration Contract Fulfillment** | plan "Consumes ←" 실제 호출 없으면 BLOCKING | § Integration Contract Fulfillment Check |
+| 4 | **Integration Contract Fulfillment** | BLOCKING if plan "Consumes ←" has no actual invocation | § Integration Contract Fulfillment Check |
 | 5 | **UI Control Type Audit** | Source Select → Target Input = UX downgrade | § UI Control Type Audit |
-| 6 | **API Endpoint Smoke Test** (http-api) | implement 완료 후 서버 시작 → 각 엔드포인트 호출 → 200 확인 | § API Post-Implement Smoke |
-| 7 | **Error Response Actionability** (all) | 에러 메시지에 해결 방법 포함 안 되면 WARNING | § Error Response Actionability |
+| 6 | **API Endpoint Smoke Test** (http-api) | After implement completes: start server → call each endpoint → verify 200 | § API Post-Implement Smoke |
+| 7 | **Error Response Actionability** (all) | WARNING if error messages don't include resolution guidance | § Error Response Actionability |
 
 ```
-❌ WRONG: tasks.md 텍스트만 보고 UI 생성 → "create dialog with inputs"
-✅ RIGHT: source app 코드 읽기 → ModelSelector dropdown + auto-dimensions 재현
+❌ WRONG: Generate UI based only on tasks.md text → "create dialog with inputs"
+✅ RIGHT: Read source app code → reproduce ModelSelector dropdown + auto-dimensions
 
-❌ WRONG: Math.random()으로 임베딩 생성 → build 통과 → "implement 완료"
-✅ RIGHT: F004 provider API 실제 호출 → 진짜 임베딩 생성
+❌ WRONG: Generate embeddings with Math.random() → build passes → "implement complete"
+✅ RIGHT: Actually call F004 provider API → generate real embeddings
 
-❌ WRONG: background agent에 "create KB form" 지시 (source 코드 없이)
-✅ RIGHT: background agent에 source AddKnowledgeBasePopup.tsx 원문 포함
+❌ WRONG: Instruct background agent "create KB form" (without source code)
+✅ RIGHT: Include source AddKnowledgeBasePopup.tsx original text in background agent prompt
 ```
 
 ---
@@ -774,8 +774,8 @@ After all API endpoint tasks are implemented and before Review:
 4. Stop the server
 
 ```
-❌ WRONG: "빌드 통과 → implement 완료" (서버가 실제로 뜨는지 안 확인)
-✅ RIGHT: "서버 시작 → GET /api/users → 200 → POST /api/users → 201 → implement 완료"
+❌ WRONG: "Build passes → implement complete" (without verifying the server actually starts)
+✅ RIGHT: "Server starts → GET /api/users → 200 → POST /api/users → 201 → implement complete"
 ```
 
 **Evidence in Review** (MANDATORY):
