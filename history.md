@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-19] Bug Fix Severity — Spec Coverage Pre-check Gate
+
+### Context
+
+F006 KB citation: verify가 "번호 불안정, tooltip 미동작"을 Major-Implement로 분류 → implement 돌려보냄 → spec에 SC 없어서 즉흥 구현 → 같은 루프 반복. SDD 원칙 위반: spec이 완료 기준을 정의하지 않으면 implement가 뭘 구현해야 하는지 모름.
+
+### Fix
+
+Bug Fix Severity Rule에 **Step A: Spec Coverage Pre-check** 추가. severity 분류 전에 "SC가 있나?" 먼저 체크. SC 없으면 파일 수 무관하게 Major-Spec.
+
+---
+
 ## [2026-03-19] Verify Fix Degradation Loop Prevention
 
 ### Context

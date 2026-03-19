@@ -22,9 +22,31 @@ When verify discovers a bug (or the user provides feedback during Review), class
 | **Major-Plan** | Wrong architecture pattern, missing data model field, API contract mismatch, component structure redesign needed | ❌ Return to **plan** — re-run speckit-plan with updated constraints |
 | **Major-Spec** | Missing functional requirement, wrong success criteria, scope gap, requirement misinterpretation | ❌ Return to **specify** — re-run speckit-specify with corrected requirements |
 
-**How to classify**:
+**How to classify** — 2-step process:
+
+**Step A: Spec Coverage Pre-check (MANDATORY — do this FIRST)**
+
+Before classifying by file count, ask: **"Does spec.md have an SC that defines the expected behavior for this issue?"**
+
+- Read spec.md → search for SCs covering the specific behavior that failed
+- If **SC exists AND implementation doesn't match it** → proceed to Step B (file count classification)
+- If **NO SC covers this behavior** → **Major-Spec** (regardless of file count)
+
+```
+❌ WRONG: "citation tooltip doesn't work" → 3+ files → Major-Implement
+   → implement로 돌아가도 spec에 tooltip SC가 없으므로 에이전트가 즉흥으로 구현 → 같은 루프 반복
+
+✅ RIGHT: "citation tooltip doesn't work" → spec.md에 tooltip SC 없음 → Major-Spec
+   → specify로 돌아가서 SC 추가: "hover 시 제목+파비콘+내용 미리보기, 클릭 시 소스 URL 열기"
+   → 이후 plan → tasks → implement → verify가 명확한 기준으로 진행
+```
+
+**Rationale**: SDD의 핵심 원칙은 "spec이 완료 기준을 정의한다"입니다. SC가 없는 동작을 implement에서 고치라고 보내는 것은 spec-driven이 아니라 ad-hoc fix입니다. implement는 반드시 spec의 SC를 구현하는 것이어야 합니다.
+
+**Step B: File count classification (SC가 존재할 때만)**
+
 - **Minor**: Fix touches ≤2 files, no API/interface change, no architectural reasoning needed
-- **Major-Implement**: Fix touches 3+ files OR needs a new component, but spec and plan are correct
+- **Major-Implement**: Fix touches 3+ files OR needs a new component, but spec and plan are correct (SC exists, implementation just doesn't match)
 - **Major-Plan**: The plan's architecture, data model, or contracts need revision (spec is correct, but the plan made wrong choices)
 - **Major-Spec**: The requirements themselves are wrong or incomplete (everything downstream — plan, tasks, implement — is built on wrong assumptions)
 
