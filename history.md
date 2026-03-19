@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-19] Verify Fix Degradation Loop Prevention
+
+### Context
+
+F006 citation UI implementation entered a fix → re-fix → re-re-fix loop during verify, ending with user declaring "start from scratch." Root cause: verify-time code modifications don't inherit implement's Source-First rules. Agent patches symptoms without reading the source app's working implementation.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `verify-phases.md` § Source Modification Gate step 7 | Added "Source Reference for Verify Fixes" (rebuild BLOCKING): before any verify fix, read the corresponding source app file. Anti-pattern example included. |
+| `verify-phases.md` § Minor Fix Accumulator | Added "SC Re-Fix Loop Detection": same SC fails Post-Fix verification 2 times → auto-escalate to Major-Implement. Prevents patch-on-patch degradation. |
+
+---
+
 ## [2026-03-19] SKF-070 — Extensible Data Integrity Framework (S4) + Source Deep Analysis
 
 ### Context

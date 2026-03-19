@@ -151,7 +151,31 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
 
    **If Major classification** → Proceed directly to step 8 (Major HARD STOP) for pipeline regression routing.
 
-7. **If user approves Minor/Gap** → Proceed with inline fixes. Record all changes in Notes. **Then execute Post-Fix Runtime Verification** (step 9 below).
+7. **If user approves Minor/Gap** → Before writing code, execute **Source Reference for Verify Fixes** (rebuild mode only), then proceed with inline fixes. Record all changes in Notes. **Then execute Post-Fix Runtime Verification** (step 9 below).
+
+   **Source Reference for Verify Fixes (rebuild mode — BLOCKING)**:
+   > **Why this exists**: In rebuild mode, verify fixes often degrade into "improvise based on error messages" — the agent patches symptoms without understanding the source app's original implementation. This produces a fix → re-fix → re-re-fix loop that eventually requires "start from scratch." The source app already has a working implementation; read it first.
+
+   Before modifying any file during verify in rebuild mode:
+   1. Identify the corresponding source app file(s) from the Source→Target Component Mapping (in plan.md) or pre-context.md Source Reference
+   2. **Read those source files** — not just reference them. Actually open and parse the source code.
+   3. Display: `📂 Verify Source Ref: [source file] → [target file] — reading before fix`
+   4. The fix MUST preserve the source app's patterns unless there's an explicit architectural reason to diverge (documented in plan.md)
+
+   ```
+   ❌ WRONG (rebuild verify fix):
+     SC-008 citation tooltip not showing → add inline style → still broken
+     → add z-index → still broken → refactor CSS → more broken
+     → "처음부터 다시"
+
+   ✅ RIGHT (rebuild verify fix):
+     SC-008 citation tooltip not showing
+     → Read source CitationTooltip.tsx → understand positioning logic
+     → Read source citation.ts → understand data flow
+     → Implement fix based on source pattern → verify → done
+   ```
+
+   **Skip if**: Source Path = `N/A` (greenfield) or fix is in a file with no source counterpart (new file not in Source→Target mapping).
 
 8. **If Major** → **HARD STOP**. Do NOT modify any source files. Trigger the "When any Major issue is found" flow (lines 31-38):
    - Display `🔴 [Severity] issue detected — requires pipeline regression to [target stage]`
@@ -200,6 +224,14 @@ Format: `Inline changes: [N] bug fix, [N] gap fill ([brief descriptions])`
    After auto-escalation → trigger the Major HARD STOP flow (step 8 above).
 
    **Module boundary definition**: Files sharing the same parent directory OR the same service/component name (e.g., `UserService.ts`, `UserLoader.ts`, `UserStore.ts` = same `User` module even if in different directories).
+
+   **SC Re-Fix Loop Detection**: If the same SC fails Post-Fix Runtime Verification (step 9) **2 times** after 2 different fix attempts, auto-escalate to **Major-Implement**:
+   ```
+   🔴 SC Re-Fix Loop detected:
+     SC-008 (citation tooltip) — failed after fix attempt #1 (z-index), failed after fix attempt #2 (CSS refactor)
+     → The fix approach is wrong, not just incomplete. Return to implement with source analysis.
+   ```
+   This prevents the "fix → re-fix → re-re-fix → start from scratch" degradation pattern. Two failed attempts = the problem needs implement-level redesign, not verify-level patching.
 
 **This gate applies to ALL verify phases**: Phase 1 re-fixes, Phase 2 fixes, Phase 3 SC failure fixes, Phase 3b fixes, and post-Review user-requested fixes. There are NO exceptions.
 
