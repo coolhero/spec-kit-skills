@@ -2,12 +2,12 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 06:20 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 08:01 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
 - **Code-Explore** helps you understand an existing codebase through interactive, source-level exploration. Scan a project to get an architecture map, then trace specific flows end-to-end — each session produces documented traces with call chains, entity maps, and flow diagrams. When you've understood enough, synthesize your traces into Feature candidates that feed directly into the SDD pipeline. *(Under development)*
-- **Reverse-Spec** analyzes an existing codebase and extracts everything the SDD pipeline needs to know: what the app does, how it's structured, what data models and APIs exist. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have. Also generates a standalone prompt (`speckit-prompt.md`) for using spec-kit without smart-sdd.
+- **Reverse-Spec** analyzes an existing codebase and reverse-engineers the spec — from source code all the way to draft spec.md per Feature. It runs the source app to capture real UI flows (form fields, dropdowns, auto-fill, error paths), then converts those observations into detailed requirements. The pipeline receives specs that already describe exact interaction patterns, not vague one-liners that the agent has to guess. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
 
 ---
@@ -53,24 +53,14 @@ The installer creates symlinks from `~/.claude/skills/` to this repository.
 
 ### Which Command Should I Use?
 
-```mermaid
-flowchart TD
-    Start["I want to build software with AI"] --> HasCode{"Do you have\nexisting code?"}
-    HasCode -- "No" --> Init["/smart-sdd init\nSet up new project"]
-    Init --> Add["/smart-sdd add\nDefine each Feature"]
-    Add --> Pipeline["/smart-sdd pipeline\nBuild Features"]
-
-    HasCode -- "Yes" --> Goal{"What's your goal?"}
-    Goal -- "Understand it first" --> Explore["/code-explore ./source\nStudy the code"]
-    Explore --> Goal
-
-    Goal -- "Rebuild from scratch" --> ReverseSpec["/reverse-spec ./source\nExtract project structure"]
-    ReverseSpec --> Pipeline
-
-    Goal -- "Document it (keep code)" --> Adopt["/reverse-spec --adopt\nthen /smart-sdd adopt"]
-
-    Goal -- "Add new features to it" --> AddIncr["/smart-sdd add\nDefine new Features"]
-    AddIncr --> Pipeline
+```
+Have existing code?
+  No  → /smart-sdd init → add → pipeline
+  Yes → What's your goal?
+         Understand first  → /code-explore ./source → (then choose below)
+         Rebuild           → /reverse-spec ./source → /smart-sdd pipeline
+         Document (keep)   → /reverse-spec --adopt  → /smart-sdd adopt
+         Add new features  → /smart-sdd add         → /smart-sdd pipeline
 ```
 
 ### Verify Installation
@@ -126,7 +116,8 @@ my-project/
 │   │   ├── sdd-state.md           ← Pipeline state + Domain Profile
 │   │   └── features/
 │   │       └── F001-auth/
-│   │           └── pre-context.md ← What F001 needs to know
+│   │           ├── pre-context.md ← What F001 needs to know
+│   │           └── spec-draft.md  ← Initial spec (from source analysis)
 │   ├── 001-auth/                  ← spec-kit output (per-Feature)
 │   │   ├── spec.md
 │   │   ├── plan.md
@@ -139,6 +130,8 @@ my-project/
 ```
 
 Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
+
+**Artifact Separation**: Source analysis lives exclusively in `specs/reverse-spec/` (pre-context, registries, spec-drafts). Pipeline output lives in `specs/NNN-feature/` (spec.md, plan.md, tasks.md). The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." This separation means specs are reusable across different source projects, and source analysis has a single source of truth.
 
 #### Domain Profile
 
@@ -178,23 +171,19 @@ See [Domain Module System](#domain-module-system) for details.
 
 A Brief is **not** the same as a PRD. A PRD is one possible *input* to the Brief process; a casual conversation or a gap analysis result are equally valid inputs. The Brief is the *output* — a normalized, quality-checked Feature definition that has been validated for both **completeness** (all key dimensions covered) and **accuracy** (the agent's interpretation confirmed by the user through an explicit approval gate).
 
-```mermaid
-flowchart LR
-    subgraph init["/smart-sdd init — PROJECT setup"]
-        I1["name, stack, principles"]
-        I2["Domain Profile detection"]
-        I3["Feature candidates (names only)"]
-    end
-
-    subgraph add["/smart-sdd add — FEATURE definition"]
-        A1["capabilities, data, interfaces"]
-        A2["quality criteria, boundaries"]
-        A3["normalized Brief per Feature"]
-    end
-
-    init -- "chains into" --> add
-    add --> PC["pre-context (GEL)"]
-    PC --> Pipeline["spec-kit pipeline"]
+```
+/smart-sdd init                      /smart-sdd add (= Briefing)
+Sets up the PROJECT:                 Defines each FEATURE:
+- name, stack, principles            - capabilities, data, interfaces
+- Domain Profile detection           - quality criteria, boundaries
+- Feature candidates (names only)    - normalized Brief per Feature
+         │                                      │
+         └──── chains into ────────→            │
+                                                ▼
+                                         pre-context (GEL)
+                                                │
+                                                ▼
+                                         spec-kit pipeline
 ```
 
 `init` may accept a PRD to understand the *project* — extracting stack hints, Domain Profile signals, and a rough Feature list. But it stops at Feature *names*. The actual Feature *definition* — ensuring each Feature has complete capabilities, data requirements, interface contracts — happens in `add` through the Brief process.
@@ -219,7 +208,9 @@ Reads your existing source code and produces the foundation that SDD needs: Feat
 /reverse-spec [target-directory] [--scope core|full] [--stack same|new] [--name new-project-name]
 ```
 
-**Workflow**: Phase 0 (strategy) → Phase 1 (project scan) → Phase 1.5 (runtime exploration via Playwright) → Phase 2 (deep analysis) → Phase 3 (Feature classification) → Phase 4 (artifact generation)
+**Workflow**: Phase 0 (strategy) → Phase 1 (project scan) → Phase 1.5 (runtime exploration — runs the source app, captures UI flows) → Phase 2 (deep analysis) → Phase 3 (Feature classification) → Phase 4 (artifact + spec-draft generation)
+
+In rebuild mode, Phase 1.5 is **required** — it runs the source app and records exactly how each UI flow works (what controls exist, what auto-fills, what error messages appear). Phase 4 then converts these observations into `spec-draft.md` per Feature with detailed FR/SC that preserve every UI detail. The pipeline's `specify` step refines this draft instead of generating from scratch.
 
 ### `/smart-sdd` — spec-kit with Cross-Feature Context
 
@@ -509,27 +500,7 @@ All journeys converge to **incremental mode** as the steady state. In every jour
 
 The three concepts aren't independent features — they form a layered system where each concept feeds the next:
 
-```mermaid
-flowchart TD
-    Brief["🎯 Brief
-    Structured intake: ensure Feature definition is complete
-    Domain Profile adds project-type-specific completion criteria"]
-
-    GEL["📋 Global Evolution Layer
-    Cross-Feature memory: roadmap, registries, pre-contexts
-    Brief output becomes pre-context for spec-kit pipeline"]
-
-    DP["⚙️ Domain Profile
-    Per-step rules: SC generation, bug prevention, verification
-    Shapes every pipeline step based on project type"]
-
-    Pipeline["🔄 spec-kit Pipeline
-    specify → plan → tasks → analyze → implement → verify → merge"]
-
-    Brief --> GEL --> DP --> Pipeline
-```
-
-**Brief** produces a complete Feature definition → stored as **pre-context** in the **GEL** → injected into the **spec-kit pipeline** → where **Domain Profile** rules shape every step's behavior.
+The three concepts chain: **Brief** produces a complete Feature definition → stored as **pre-context** in the **GEL** → injected into the **spec-kit pipeline** → where **Domain Profile** rules shape every step's behavior.
 
 ### Implementation: Pipeline Integrity Guards
 
@@ -596,18 +567,16 @@ After spec-kit runs, a Review HARD STOP shows the output and asks you to approve
 
 Each Feature goes through a **6-step lifecycle**. If verify finds bugs, they loop back to the right step instead of being patched silently:
 
-```mermaid
-flowchart LR
-    specify --> plan --> tasks --> analyze --> implement --> verify --> merge
-
-    verify -. "Minor Fix
-    (inline, ≤2 files)" .-> verify
-    verify -- "Major-Implement" --> implement
-    verify -- "Major-Plan" --> plan
-    verify -- "Major-Spec" --> specify
+```
+specify → plan → tasks → analyze → implement → verify → merge
+                                                  │
+                                    Minor fix ←────┘ (inline, ≤2 files)
+                                    Major-Implement → back to implement
+                                    Major-Plan → back to plan
+                                    Major-Spec → back to specify
 ```
 
-Verify discovers bugs and classifies them into 4 severity levels. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step.
+Verify discovers bugs and classifies them by severity. Only Minor issues are fixed inline; Major issues loop back to the appropriate pipeline step — with a **Spec Coverage Pre-check**: if no SC covers the broken behavior, it's Major-Spec (the spec was incomplete), not Major-Implement.
 
 ### Project Modes
 
@@ -651,56 +620,25 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 
 ## Domain Module System
 
-This section explains how the **Domain Profile** concept is implemented — how the system selects which rules to load and how those rules shape the pipeline.
+The Domain Profile concept from [What It Solves](#domain-profile) is implemented as a **composable module system** — standalone files that merge automatically based on your project's 5-axis configuration.
 
-### How Rules Are Selected for Your Project
-
-Different projects need different rules. A REST API needs status code checks; a desktop app needs window management safety; a rebuild needs to match the original; an AI app needs streaming-first design. Instead of loading every rule for every project, the system picks what's relevant based on **5 axes + 1 modifier**:
+### Available Modules
 
 ```
-Axis 1: Interface       Axis 2: Concern              Axis 3: Archetype       Axis 4: Foundation
-(what the app exposes)  (cross-cutting patterns)      (domain philosophy)     (framework constraints)
-├── http-api            ├── async-state               ├── ai-assistant        ├── electron
-├── gui                 ├── auth                      ├── public-api          ├── nextjs
-├── cli                 ├── authorization             ├── microservice        ├── express
-├── data-io             ├── codegen                   └── sdk-framework       ├── django
-└── tui                 ├── external-sdk                                      ├── spring-boot
-                        ├── i18n                                              └── ... (21 total)
-                        ├── infra-as-code
-                        ├── ipc                       Axis 5: Scenario        Modifier: Scale
-                        ├── llm-agents                (project lifecycle)     (rigor level)
-                        ├── message-queue             ├── greenfield          ├── prototype
-                        ├── multi-tenancy             ├── rebuild             ├── mvp
-                        ├── plugin-system             ├── incremental         └── production
-                        ├── polyglot                  └── adoption            × solo / small-team
-                        ├── protocol-integration                                / large-team
-                        ├── realtime
-                        └── task-worker
+Interfaces (5):   gui, http-api, cli, data-io, tui
+Concerns (16):    auth, authorization, async-state, codegen, external-sdk, i18n,
+                  infra-as-code, ipc, llm-agents, message-queue, multi-tenancy,
+                  plugin-system, polyglot, protocol-integration, realtime, task-worker
+Archetypes (4):   ai-assistant, public-api, microservice, sdk-framework
+Foundations (21): electron, nextjs, express, django, spring-boot, tauri, ...
+Scenarios (4):    greenfield, rebuild, incremental, adoption
 ```
 
-Each axis answers a different question, and the modifier adjusts enforcement depth:
-- **Interface** (Axis 1): _What surface_ does the app expose? (HTTP endpoints, GUI windows, CLI commands)
-- **Concern** (Axis 2): _What internal patterns_ cut across Features? (Auth flows, state management, IPC, LLM agents)
-- **Archetype** (Axis 3): _What domain philosophy_ guides architectural decisions? (Streaming-first for AI, contract stability for public APIs)
-- **Foundation** (Axis 4): _What framework constraints_ apply? (Electron's process model, Next.js rendering strategy, Django's middleware chain)
-- **Scenario** (Axis 5): _Why_ is this project being built? (New from scratch, rebuilding existing, adopting existing code)
-- **Scale** (Modifier): _How much rigor_ to apply? (Prototype gets functional-only SCs; production gets full edge-case coverage with observability)
+### How Detection Works
 
-A **Domain Profile** = 5 axes (Interfaces + Concerns + Archetype + Foundation + Scenario) + Scale modifier. For example: `[gui] + [async-state, ipc] + ai-assistant + electron + rebuild` at `mvp × solo`. The agent loads only modules relevant to the project — an API-only project never sees GUI testing rules, an AI project gets streaming verification that a CRUD app doesn't need, and a prototype skips observability rules that a production project requires.
-
-When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns — for example, `gui` + `realtime` triggers optimistic update and reconnection UI rules that neither module produces alone.
-
-Conventions can be customized at three levels: **Skill-level** (built-in module defaults), **Org-level** (shared across projects via `org-convention.md`), and **Project-level** (per-project via `domain-custom.md`). Later levels override earlier ones — so an organization can enforce "all APIs must use our standard error envelope" across all projects, while individual projects can add project-specific rules on top.
-
-### How Domain Profile Is Determined
-
-The way your Domain Profile is built depends on whether you're starting fresh or working with existing code:
-
-**Greenfield** (`/smart-sdd init`): Profile is inferred from **what you describe**. When you run `init "Build an AI-powered feature store with REST API"`, the system scans each module's signal keywords against your description. "AI" matches the `ai-assistant` archetype, "REST API" matches `http-api` interface, "feature store" matches `data-io` interface and `plugin-system` concern. The result is scored by the **Clarity Index** — a percentage across 7 dimensions (purpose, capabilities, type, stack, users, scale, constraints). High CI (70%+) generates a Proposal directly; low CI triggers targeted questions to fill gaps. The Proposal is section-editable — you can adjust the tech stack without re-answering purpose questions, or modify Feature candidates without affecting architecture decisions. After approval, CI propagates through the pipeline: a lower initial CI triggers more validation checkpoints during `specify` and `plan` to compensate for initial ambiguity. See `reference/clarity-index.md` for the full model.
-
-**Brownfield** (`/reverse-spec`): Profile is detected from **what your code contains**. The system scans your source files for code patterns — `socket.io` imports activate `realtime`, `@Entity` decorators activate `http-api`, `Cargo.toml` alongside `pyproject.toml` activates `polyglot`. Framework-specific patterns (Express middleware, FastAPI decorators) identify the Foundation. The detected profile is recorded automatically and used when the pipeline runs.
-
-In both cases, the result is the same format stored in `sdd-state.md` — the pipeline doesn't care _how_ the profile was determined, only what it says.
+- **Greenfield**: Signal keywords in your description are matched against each module's S0 keywords. Scored by a **Clarity Index** (7 dimensions) — high CI generates a Proposal directly, low CI triggers targeted questions. See `reference/clarity-index.md`.
+- **Brownfield**: Code patterns (imports, decorators, config files) auto-detect which modules apply.
+- Both produce the same format in `sdd-state.md` — the pipeline doesn't care how the profile was determined.
 
 ### What's Inside Each Module — The Section System
 
@@ -784,54 +722,6 @@ T0 Features are auto-generated from Foundation categories with Critical items re
 ## Pipeline Quality Gates
 
 Each pipeline step has built-in checks that catch problems **before** they cascade downstream. These gates work automatically — no configuration needed.
-
-```mermaid
-flowchart LR
-    subgraph specify["specify"]
-        S1["FR Granularity
-        SC Testability
-        Data Pipeline Coverage
-        Source Deep Analysis
-        API Dependency Edge Cases
-        UI Flow Spec (GUI)"]
-    end
-
-    subgraph plan["plan"]
-        P1["Interaction Chain
-        Integration Contract
-        Architecture↔FR Coverage
-        Entity Ownership
-        Tech Compatibility"]
-    end
-
-    subgraph tasks["tasks"]
-        T1["Integration Wiring Task
-        Stub Resolution Task
-        Demo Task
-        Source Complexity"]
-    end
-
-    subgraph analyze["analyze"]
-        A1["FR→Task Coverage
-        SC→Task Mapping
-        FR Element Decomposition"]
-    end
-
-    subgraph implement["implement"]
-        I1["Library Validation
-        Wiring Check (7-point)
-        E2E Integration Smoke
-        Task Completion Evidence"]
-    end
-
-    subgraph verify["verify"]
-        V1["SC Evidence Gate
-        Source Reference for Fixes
-        Re-Fix Loop Detection"]
-    end
-
-    specify --> plan --> tasks --> analyze --> implement --> verify
-```
 
 **Key principle**: Problems are cheapest to fix where they originate. A missing FR in specify costs minutes to add; the same gap discovered in verify costs hours of rework. The gates shift detection **left** — toward the earliest possible pipeline step.
 
@@ -1008,9 +898,13 @@ Two strategic questions determine the direction:
 - Project type classification: backend, frontend, fullstack, mobile, library
 - Module/package boundary identification
 
-### Phase 1.5 — Runtime Exploration (Optional)
+### Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild)
 
-Run the original application and explore it interactively via Playwright (CLI primary, MCP optional) before deep code analysis. Provides visual and behavioral context (UI layout, user flows, actual states). For Electron apps, CLI uses `_electron.launch()` (no CDP needed) — see [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md).
+Runs the source app and interacts with it — clicking through flows, filling forms, observing what controls exist (dropdowns vs text inputs), what auto-fills, what error messages appear. This is **required for rebuild mode** because code analysis alone cannot distinguish a Dropdown from a TextInput, or capture auto-fill behavior.
+
+**What it captures**: For each Feature area, the agent executes the primary user flow (CRUD, configuration, data pipeline, cross-feature interaction) and records a **UI Flow Specification** — a step-by-step table of user actions, UI controls, responses, and state changes. These flow specs become the foundation for spec-draft generation in Phase 4.
+
+For Electron apps, Playwright CLI uses `_electron.launch()` (no CDP needed). See [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md).
 
 ### Phase 2 — Deep Analysis
 
@@ -1060,9 +954,11 @@ Identifies logical Feature boundaries → presents 2-3 granularity options (Coar
 
 Results in Tier 1 (Essential), Tier 2 (Recommended), Tier 3 (Optional) classification.
 
-### Phase 4 — Artifact Generation
+### Phase 4 — Artifact + Spec-Draft Generation
 
-Generates: `roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-registry.md`, `business-logic-map.md`, per-Feature `pre-context.md` files.
+Generates project-level artifacts (`roadmap.md`, `constitution-seed.md`, `entity-registry.md`, `api-registry.md`, `business-logic-map.md`) and per-Feature artifacts (`pre-context.md`, `spec-draft.md`).
+
+**spec-draft.md** (rebuild mode): Converts UI Flow Specs and SBI behaviors into detailed functional requirements and success criteria — with **explicit UI control types** (Dropdown, Slider, auto-fill), **error paths** (empty input → validation error), and **data pipeline stages** (extract → chunk → embed → store → search → display). This draft becomes the seed for `speckit-specify` in the pipeline, which refines it instead of generating from scratch. The name "reverse-spec" literally describes this: reverse-engineering the spec from source code.
 
 **Source Coverage Baseline** (rebuild only): Measures how much of the original source is covered. Unmapped items are grouped for interactive classification — assign to existing Feature, create new Feature, flag as cross-cutting, or mark as intentional exclusion.
 
