@@ -1118,6 +1118,40 @@ After function-level SBI extraction, for each Feature that **integrates with ano
 
 This feeds into specify (FR must use correct integration verbs) and plan (Integration Contract must specify architecture pattern).
 
+#### UI Screen Inventory (GUI Features — rebuild)
+
+> **Skip if**: Not GUI interface, or not rebuild mode.
+> **Why this matters (SKF-076)**: Function-level SBI tells you "what the code does." UI Screen Inventory tells you "what the user sees." Without it, implement produces "functionally correct but visually unrecognizable" results — 857-line source component becomes 200-line simplified version.
+
+For each GUI Feature, inventory **every distinct screen/page/view** the user encounters:
+
+1. **Screen identification**: Find all routes/pages/views in the Feature's source files
+2. **For each screen**, document in layout order (top to bottom, left to right):
+
+```markdown
+## Screen: [Screen Name]
+- **Access path**: [How the user reaches this screen — e.g., "Settings → Memory sidebar link"]
+- **Source file(s)**: [Component file(s) + total line count]
+- **Layout sections** (top to bottom):
+  1. [Header/toolbar]: [elements — toggles, icons, buttons]
+  2. [Selector/filter area]: [elements — dropdown, search input, tabs]
+  3. [Content area]: [list/grid/form — scroll method (pagination/infinite/all)]
+  4. [Footer/actions]: [buttons, menus]
+- **Modals/Dialogs** triggered from this screen:
+  - [Modal name]: [trigger element] → [modal content summary]
+- **Key interactions**:
+  - [element] → [action] (e.g., "gear icon → opens settings modal")
+  - [element] → [action] (e.g., "dropdown change → refreshes list")
+```
+
+3. **Output location**: Stored in pre-context.md `## UI Screen Inventory` section (new section, after Source Behavior Inventory)
+
+This inventory feeds into:
+- **specify**: Each screen section/modal/interaction becomes FR candidates
+- **plan**: Source→Target Mapping includes UI Pattern Summary from this inventory
+- **implement**: Source-First UI Implementation uses this as the structural reference
+- **verify**: Source UI Parity Check compares target against this inventory
+
 ### 2-7. UI Component Feature Extraction (Frontend/Fullstack Projects Only)
 
 > Skip this step entirely for backend-only, library, or CLI projects.

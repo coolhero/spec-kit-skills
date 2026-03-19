@@ -609,15 +609,31 @@ When pre-context.md contains a `## Component Tree` section (populated by reverse
 
 ### Required format
 
-| Source Component | Source File | Target Component | Target File | Notes |
-|---|---|---|---|---|
-| [SourceName] | [source/path.tsx] | [TargetName] | [target/path.tsx] | [1:1 / merged into X / deferred to F00N] |
+| Source Component | Source File | Lines | UI Pattern Summary | Target Component | Target File | Notes |
+|---|---|---|---|---|---|---|
+| [SourceName] | [source/path.tsx] | [N] | [key UI patterns] | [TargetName] | [target/path.tsx] | [1:1 / merged / deferred] |
+
+**UI Pattern Summary column** (🚫 BLOCKING for source components with 300+ lines):
+
+For source components with **300+ lines** (complex UI), this column MUST describe the key UI patterns:
+- Layout structure (sections, panels, tabs)
+- Modal/dialog triggers
+- List rendering method (pagination, infinite scroll, virtualized)
+- Key interactions (icon→modal, dropdown→refresh, menu actions)
+
+```
+Example:
+| MemorySettings | ...settings.tsx | 857 | toggle+gear→modal, user dropdown+add/delete, infinite scroll list, context menu(refresh/reset/delete) | MemorySettings | ...tsx | 1:1 |
+```
+
+**Why this matters (SKF-076)**: Without UI Pattern Summary, an 857-line source component gets mapped as "1:1" with no structural guidance. The agent produces a 200-line simplified version that looks nothing like the source. The pattern summary serves as the **structural contract** for implement — every listed pattern must appear in the target.
 
 ### Construction rules
 
 1. **Enumerate**: List every component from pre-context.md Component Tree (all levels, not just roots)
 2. **Map**: For each source component, identify the target component in plan.md's Project Structure
-3. **Account for all**: Every source component must appear in the table with one of:
+3. **UI Pattern Summary**: For components with 300+ lines, extract key UI patterns from UI Screen Inventory (if available) or from reading the source component
+4. **Account for all**: Every source component must appear in the table with one of:
    - **1:1 mapping**: Direct correspondence (may be renamed)
    - **Merged**: Multiple source components combined into one target (`merged into [TargetName]`)
    - **Split**: One source component split into multiple targets (multiple rows with same source)

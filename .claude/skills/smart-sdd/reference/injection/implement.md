@@ -120,6 +120,30 @@ If the Feature's `pre-context.md` has a non-empty Source Reference section AND `
    - Display: `📂 Lifecycle: [Entity] = [paradigm] — implementing [specific pattern]`
    - Paradigm mismatch (e.g., implementing opt-out when source is opt-in) = **BLOCKING — stop and flag**
 
+6. **Source-First UI Structure Extraction** (rebuild + GUI — 🚫 BLOCKING):
+   After reading source files (step 3), before writing any target code, extract the source's UI structure:
+   - Read the plan's Source→Target Component Mapping **UI Pattern Summary** column
+   - If UI Pattern Summary is present: use it as the structural checklist
+   - If absent (legacy plans): read the source component and extract patterns manually
+   - Create a mental checklist: "source has [N modals, M list patterns, K interaction triggers]"
+   - **Implement each checklist item in the target** — do NOT skip patterns because they seem complex
+   - After implementation: self-verify that each source pattern has a target equivalent
+
+   ```
+   ❌ WRONG: tasks.md says "create memory settings page" → Select + Toggle = done (200 lines)
+   ✅ RIGHT: Source MemorySettings.tsx (857 lines) → extract patterns:
+     □ toggle + gear icon → settings modal
+     □ user dropdown + add/delete user
+     □ search with debounce
+     □ infinite scroll memory list
+     □ edit/delete per card
+     □ context menu (refresh/reset/delete user)
+     □ add memory modal
+     → implement ALL patterns → target is structurally equivalent (may be 400-600 lines)
+   ```
+
+   **🚫 BLOCKING**: If source component has 5+ UI patterns and target implements fewer than 3 → structural gap. Display: `🚫 Source [component] has [N] UI patterns, target has [M]. Missing: [list]. Implement before proceeding.`
+
 **Enforcement level**:
 - **rebuild + GUI Features**: BLOCKING — a UI task without `📂 Source Reference` display is a gate violation. If context limits prevent loading all files, load at minimum the primary component file and display `📂 Source Reference: [N] of [M] files loaded (context-limited)`.
 - **rebuild + backend-only**: WARNING — source reference is strongly recommended but not blocking.

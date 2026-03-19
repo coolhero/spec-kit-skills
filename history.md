@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-19] SKF-076 — Rebuild UX Equivalence + UI Screen Inventory + Source-First UI
+
+### Context
+
+Rebuild produced "functionally correct but visually unrecognizable" results — 857-line source components became 200-line simplified versions. Root cause: rebuild defined as "functional equivalence" not "UX equivalence", and no UI structure extraction procedure.
+
+### Fixes
+
+| Fix | File |
+|-----|------|
+| Rebuild definition: "UX equivalence, not just functional equivalence" | SKILL.md |
+| UI Screen Inventory: screen-by-screen layout documentation in reverse-spec | analyze.md |
+| Source→Target UI Pattern Summary column (BLOCKING for 300+ line components) | plan.md |
+| Source-First UI Structure Extraction: checklist before coding (BLOCKING) | implement.md |
+
+---
+
 ## [2026-03-19] Rule Extensibility Audit — Generalize React/Electron-specific rules to universal principles
 
 ### Context

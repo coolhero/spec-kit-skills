@@ -58,7 +58,7 @@ Wraps spec-kit commands with cross-Feature context injection and Global Evolutio
 
 - **Greenfield**: New project setup via `/smart-sdd init`, then Feature definition via `/smart-sdd add`
 - **Brownfield (incremental)**: Add Features to an existing smart-sdd project via `/smart-sdd add`
-- **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`
+- **Brownfield (rebuild)**: Full re-implementation from reverse-spec artifacts via `/smart-sdd pipeline`. Rebuild targets **UX equivalence**, not just functional equivalence — the target app must reproduce the source app's screen layouts, interaction flows, and UI patterns, implemented with the new stack's component library
 - **Brownfield (adoption)**: Wrap existing code with SDD documentation via `/smart-sdd adopt`
 
 Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Context Assembly → Pre-Execution Checkpoint → spec-kit Execution + Artifact Review → Global Evolution Update**.
