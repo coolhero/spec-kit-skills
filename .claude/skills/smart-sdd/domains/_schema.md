@@ -102,15 +102,19 @@ Additional verification steps when this module is active.
 | **Detection** | How to find/run the relevant tool |
 | **Description** | What this step checks |
 
-### S4. Adoption-Specific Behavior (scenarios/adoption.md only)
+### S4. Data Integrity Principles (Universal — _core.md + extensible by concerns/scenarios)
 
-Behavior differences when wrapping existing code with SDD docs.
+Universal data engineering principles that apply to ALL projects. Defined in `_core.md` as S4a-S4c. Concerns and scenarios can extend with S4x subsections (e.g., `ipc.md` adds IPC N-Layer Completeness as S4 extension; `rebuild.md` adds S4d Source Deep Analysis).
 
-| Field | Description |
-|-------|-------------|
-| **Verify treatment** | How test/build/lint failures are treated (non-blocking vs blocking) |
-| **Injection framing** | How spec-kit command prompts differ |
-| **Feature status** | Post-adoption status value |
+| Sub-section | Scope | Description |
+|-------------|-------|-------------|
+| **S4a** | Universal | Data Authority (Single Source of Truth) — every persistent data entity has one authoritative source |
+| **S4b** | Universal | Empty/Invalid Input Handling — no pipeline stage treats empty input as success |
+| **S4c** | Universal | Data Pipeline Traceability — every processing stage is independently verifiable |
+| **S4d** | Scenario (rebuild) | Source Feature Deep Analysis — 3-level source analysis (pipeline, UI, rendering) |
+| **S4x** | Concern-specific | Extension point — concerns add concrete integrity patterns (e.g., IPC N-Layer) |
+
+> **Note**: Adoption-specific behavior (verify treatment, injection framing, Feature status) is now in `scenarios/adoption.md` § Adoption-Specific Rules, not in S4.
 
 ### S5. Elaboration Probes (interfaces, concerns — additions to _core)
 

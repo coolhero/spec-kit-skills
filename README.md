@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 08:50 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 10:00 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1366,7 +1366,13 @@ Each skill follows the same internal directory convention:
 | `commands/pipeline.md` | Pipeline executor — Common Protocol (Assemble → Checkpoint → Execute+Review → Update) |
 | `commands/reset.md` | Pipeline state reset — restore clean environment preserving reverse-spec artifacts |
 | `commands/status.md` | Status display — project progress from sdd-state.md |
-| `commands/verify-phases.md` | 4-phase verification workflow (Test/Build/Lint → Cross-Feature → Demo-Ready → Global Update) |
+| `commands/verify-phases.md` | Verify hub — common gates (Bug Fix Severity, Source Modification Gate) + phase routing |
+| `commands/verify-preflight.md` | Phase 0: Runtime environment readiness (Playwright backend detection) |
+| `commands/verify-build-test.md` | Phase 1: Build/Test/Lint execution verification (BLOCKING) |
+| `commands/verify-cross-feature.md` | Phase 2: Cross-Feature consistency + behavior completeness |
+| `commands/verify-sc-verification.md` | Phase 3: SC verification planning + runtime execution orchestration |
+| `commands/verify-sc-rebuild.md` | Phase 3 rebuild-only: Visual fidelity + source app comparison |
+| `commands/verify-evidence-update.md` | SC Evidence Gate + Phase 4 (registry update) + Phase 5 (integration demo) |
 | **Domains** | |
 | `domains/_core.md` | Universal rules (S1–S7) — demo-ready delivery, bug prevention index, conditional rules |
 | `domains/_resolver.md` | Profile resolution protocol — profile expansion, backward compatibility, module loading order |

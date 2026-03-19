@@ -253,22 +253,6 @@ For any Feature that processes data through multiple stages, every stage must be
 
 ---
 
-## S9. Brief Completion Criteria (Universal)
-
-> Base Brief completion criteria that apply to ALL projects. Interface, concern, and archetype modules append domain-specific criteria.
-> Checked during `/smart-sdd add` Phase 1 (Briefing) after the six-perspective framework evaluation.
-
-| Required Element | Completion Signal |
-|-----------------|-------------------|
-| Feature name and description | 1-2 sentence description that a new team member could understand |
-| At least one user-facing capability | Concrete verb: "user can create/search/configure/export X" |
-| Owned entity identification | At least one entity this Feature is responsible for (CRUD authority) |
-| Dependency direction | Clear statement of what this Feature depends on and what depends on it (or "standalone") |
-
-> These are the **minimum universal** criteria. Domain modules add project-type-specific criteria via their own S9/A5 sections.
-
----
-
 ## S7. Bug Prevention Rules (Index)
 
 > Per-stage bug prevention rules. See each stage's injection file for details.
@@ -302,3 +286,19 @@ For any Feature that processes data through multiple stages, every stage must be
 | MQ Poison Message Loop | `concerns/message-queue` | `concerns/message-queue.md` § S7 MQ-003 |
 | TW Zombie Task Detection | `concerns/task-worker` | `concerns/task-worker.md` § S7 TW-002 |
 | TW Schedule Overlap | `concerns/task-worker` | `concerns/task-worker.md` § S7 TW-004 |
+
+---
+
+## S9. Brief Completion Criteria (Universal)
+
+> Base Brief completion criteria that apply to ALL projects. Interface, concern, and archetype modules append domain-specific criteria.
+> Checked during `/smart-sdd add` Phase 1 (Briefing) after the six-perspective framework evaluation.
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| Feature name and description | 1-2 sentence description that a new team member could understand |
+| At least one user-facing capability | Concrete verb: "user can create/search/configure/export X" |
+| Owned entity identification | At least one entity this Feature is responsible for (CRUD authority) |
+| Dependency direction | Clear statement of what this Feature depends on and what depends on it (or "standalone") |
+
+> These are the **minimum universal** criteria. Domain modules add project-type-specific criteria via their own S9/A5 sections.

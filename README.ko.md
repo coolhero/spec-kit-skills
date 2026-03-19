@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 08:50 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-19 10:00 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -1361,7 +1361,13 @@ specs/
 | `commands/pipeline.md` | 파이프라인 실행기 — Common Protocol (Assemble → Checkpoint → Execute+Review → Update) |
 | `commands/reset.md` | 파이프라인 상태 초기화 — reverse-spec 아티펙트 보존하며 클린 환경 복원 |
 | `commands/status.md` | 상태 표시 — sdd-state.md에서 프로젝트 진행 상태 읽기 |
-| `commands/verify-phases.md` | 4단계 검증 워크플로우 (Test/Build/Lint → 교차 Feature → Demo-Ready → Global Update) |
+| `commands/verify-phases.md` | Verify 허브 — 공통 게이트 (Bug Fix Severity, Source Modification Gate) + Phase 라우팅 |
+| `commands/verify-preflight.md` | Phase 0: 런타임 환경 준비 (Playwright 백엔드 감지) |
+| `commands/verify-build-test.md` | Phase 1: Build/Test/Lint 실행 검증 (BLOCKING) |
+| `commands/verify-cross-feature.md` | Phase 2: 교차 Feature 일관성 + 동작 완전성 |
+| `commands/verify-sc-verification.md` | Phase 3: SC 검증 계획 + 런타임 실행 오케스트레이션 |
+| `commands/verify-sc-rebuild.md` | Phase 3 rebuild 전용: Visual Fidelity + source app 비교 |
+| `commands/verify-evidence-update.md` | SC Evidence Gate + Phase 4 (레지스트리 업데이트) + Phase 5 (통합 데모) |
 | **Domains** | |
 | `domains/_core.md` | 범용 규칙 (S1–S7) — demo-ready 딜리버리, 버그 방지 인덱스, 조건부 규칙 |
 | `domains/_resolver.md` | 프로필 해석 프로토콜 — 프로필 확장, 하위 호환성, 모듈 로딩 순서 |
