@@ -121,7 +121,44 @@ SC Verification Matrix for [FID]:
    - External services mocked
    - Record prerequisites for Step 3 execution
 
-8. **Coverage Assessment**: Calculate expected coverage:
+8. **Early Cooperation Request (🚫 BLOCKING — do NOT defer to Step 3f)**:
+
+   If ANY SC is classified as `user-assisted` in the Matrix above, **request cooperation NOW**, not later:
+
+   ```
+   📋 API Key / Configuration Required for [FID] Verification:
+
+   The following SCs need your environment configured before testing:
+     SC-003: Embedding pipeline — requires API key for embedding model
+     SC-005: RAG search — requires API key + KB with embedded data
+
+   Please configure the required API key now:
+     → Settings > Model Provider > [provider name] > Enter API key
+
+   After you've set it up, confirm and I'll run the full verification
+   including these SCs.
+   ```
+
+   **Use AskUserQuestion**:
+   - **"API key configured — proceed with full verification"** → Run ALL SCs including user-assisted ones
+   - **"Skip — verify without API key"** → Record as `⚠️ user-skipped` and proceed
+
+   **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+   **🚫 Anti-pattern — this is what MUST NOT happen**:
+   ```
+   ❌ WRONG: Classify SC-003 as "user-assisted" → test other SCs → report "⚠️ API key needed"
+      → User never gets asked → SCs silently remain unverified → verify "completes"
+
+   ✅ RIGHT: Classify SC-003 as "user-assisted" → IMMEDIATELY ask user for API key
+      → User provides key → test SC-003 with real API → report PASS/FAIL
+   ```
+
+   **Why early, not deferred**: Step 3f exists as a safety net, but agents consistently skip to Review
+   before reaching Step 3f. By requesting cooperation at Step 0 (before any tests run), the user
+   has time to configure while auto-category tests execute.
+
+9. **Coverage Assessment**: Calculate expected coverage:
    - `auto-verifiable` = count(`cdp-auto` + `api-auto` + `cli-auto` + `pipeline-auto` + `test-covered`)
    - `total` = count(all SCs)
    - If `auto-verifiable / total < 50%`: Display `⚠️ Less than 50% of SCs are auto-verifiable. Consider reclassifying some external-dep as user-assisted.`
