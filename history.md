@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-19] SKF-070~072 — Source Analysis + Tech Verification + Data Mapping + Agent Rules
+
+### Fixes
+
+| SKF | Fix | File |
+|-----|-----|------|
+| 070-1 | Tech Compatibility Pre-Research: Library Import Smoke Test 🚫 BLOCKING | plan.md |
+| 070-2 | Agent Behavioral Rules: 4 rules (pipeline bias, automate don't delegate, investigate don't report, fix→verify→report) | pipeline.md |
+| 071 | Data Mapping Pattern Audit 🚫 BLOCKING: source data-attr → target array index = instability | implement.md |
+| 072-1 | Interaction Data Flow SC Check 🚫 BLOCKING: clickable references need mapping accuracy SC | specify.md |
+| 072-2 | Inline reference/citation Interaction Chain rows with explicit ID lookup method | plan.md |
+
+---
+
 ## [2026-03-19] Bug Fix Severity — Spec Coverage Pre-check Gate
 
 ### Context

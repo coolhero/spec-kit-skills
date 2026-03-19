@@ -199,6 +199,26 @@ When Integration Contracts (see below) contain `Consumes ←` entries that requi
 
 **Why cross-feature rows matter**: Without them, the agent creates new services and components (KnowledgeService, KnowledgePicker) that individually work, but never modifies the existing code (Inputbar.tsx handleSend(), MessageContent renderer) to actually use them. The `cross-feature` prefix signals that these chains require **modifying existing Feature files**, not creating new ones.
 
+**Inline reference/citation rows** (🚫 BLOCKING — for Features with clickable data references):
+
+When the Feature displays inline references (citations, footnotes, tagged items) that the user can click to see details, each clickable reference MUST have an Interaction Chain row:
+
+```markdown
+| FR | User Action | Handler | Store Mutation | DOM Effect | Visual Result | Verify Method |
+|----|-------------|---------|---------------|------------|---------------|---------------|
+| FR-008 | Click citation [N] | onCitationClick(refNum) | — | Tooltip/Popover shows source #N | Source name + content preview | verify: click [2] → tooltip shows source #2's file name |
+| FR-008 | Hover citation [N] | onCitationHover(refNum) | — | Preview tooltip appears | File name + snippet | verify: hover → tooltip visible |
+| FR-008 | Click tooltip header | onSourceOpen(url) | — | Opens URL in new tab | Source document loaded | verify: new tab opens with correct URL |
+```
+
+**CRITICAL**: The Handler column MUST specify the **ID lookup method** explicitly:
+```
+❌ Handler: "onCitationClick(idx)" — idx is array position (unstable)
+✅ Handler: "onCitationClick(refNum) → citations.find(c => c.refNumber === refNum)" — refNumber match (stable)
+```
+
+**Rationale (SKF-072)**: Without explicit Interaction Chain rows for clickable references, implement uses the simplest possible lookup (`citations[num-1]`). This breaks when: (1) AI cites out of order, (2) citations are deduplicated, (3) the list is filtered. The chain makes the lookup method an architectural decision, not an implementation accident.
+
 **Downstream flow of cross-feature rows**:
 1. **tasks.md** → generates explicit "wire" tasks: "Modify F005/Inputbar.tsx:handleSend() to call getKnowledgeReferencesForMessage()" — with **existing file path** and **modification location** specified
 2. **implement** → agent reads the existing file first, then modifies at the specified location
@@ -673,7 +693,7 @@ After plan.md is generated (rebuild + GUI):
 
 ---
 
-## Technology Compatibility Pre-Research (plan Review — ⚠️ WARNING)
+## Technology Compatibility Pre-Research (plan Review — 🚫 BLOCKING for risks, ⚠️ WARNING for unknowns)
 
 > **Purpose**: Libraries and platform APIs change between versions. plan.md's architecture decisions must account for the actual runtime environment, not assume latest-stable behavior. This check surfaces compatibility risks before implement.
 
@@ -696,6 +716,23 @@ After plan.md is generated, check for technology compatibility risks:
    - Verify defaults are appropriate for the project's data characteristics
    - Example: cosine similarity threshold 0.7 is too high for most embedding models — text-embedding-3-small typically produces 0.2–0.5 for relevant matches
    - ⚠️ WARNING if plan uses library defaults without explicit validation
+
+4. **Library Import Smoke Test** (🚫 BLOCKING if fails):
+   - For each new library in plan.md dependencies, **attempt actual import** in the project environment:
+     ```
+     # Node.js: node -e "require('pdf-parse')" or node -e "import('pdf-parse')"
+     # Python: python -c "import langchain"
+     # Go: go build ./... (with new import)
+     ```
+   - If import fails → 🚫 BLOCKING: `Library [name] cannot be imported in this project environment. [error]. Choose alternative or resolve compatibility before proceeding.`
+   - If import succeeds → ✅ proceed
+   - **Rationale (SKF-070 #13)**: pdf-parse v2 has incompatible ESM/CJS exports that aren't discoverable until actual import. "It should work" ≠ "it does work."
+
+**Enforcement**:
+- Platform breaking changes confirmed → 🚫 BLOCKING (plan must use the correct API)
+- Library import failure → 🚫 BLOCKING (plan cannot depend on non-importable library)
+- Data processing default concerns → ⚠️ WARNING (included in Review for user decision)
+- Unverifiable risks → ⚠️ WARNING
 
 **Skip if**: Feature adds no new dependencies and uses no platform-specific APIs.
 

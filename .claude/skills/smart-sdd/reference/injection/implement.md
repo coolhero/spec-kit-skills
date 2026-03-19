@@ -681,6 +681,33 @@ After all tasks complete, compare source app's UI controls with implemented cont
 
 > **Rationale (SKF-060/063)**: Build and type checks cannot distinguish `Math.random()` from a real embedding call, or a text input from a dropdown. Both compile and run without errors. These semantic checks catch the gap between "code that runs" and "code that works."
 
+### Data Mapping Pattern Audit (rebuild + GUI — 🚫 BLOCKING for instability)
+
+> **Skip if**: Not rebuild mode, or Feature has no "click → lookup → display" interactions.
+
+When the Feature has UI elements that use an ID to look up and display data (citations, references, tabs, list items with detail views), compare the source app's mapping pattern with the target implementation:
+
+1. Read source app code for the mapping pattern:
+   - Array index (`items[num - 1]`) — unstable if ordering changes
+   - Data attribute (`data-citation='{"id","content"}'`) — self-contained, stable
+   - Map/dictionary lookup (`map.get(id)`) — stable by ID
+   - URL parameter (`?ref=123`) — stable by ID
+
+2. Read target implementation for the same mapping:
+
+3. Compare stability:
+   ```
+   ── Data Mapping Pattern Audit ──────────────────
+   ✅ Tab content: Source Map.get(tabId) → Target Map.get(tabId) (stable match)
+   🚫 Citation click: Source data-citation attribute → Target citations[num-1] (INSTABILITY)
+      Source uses self-contained data in HTML attribute (refNumber + content embedded)
+      Target uses array index (breaks if AI cites out of order or duplicates exist)
+   ```
+
+4. **🚫 BLOCKING** if target uses a less stable pattern than source (data attribute → array index, Map → array index)
+
+> **Rationale (SKF-071)**: `citations[num - 1]` works only when citation order matches array order. When AI models cite sources non-sequentially ([3] before [1]), the array index lookup returns the wrong document. Source app's `data-citation` attribute embeds the data directly in the DOM element, making the lookup independent of ordering.
+
 ### API Post-Implement Smoke Test (http-api interface — 🚫 BLOCKING)
 
 > **Skip if**: `http-api` is NOT in active Interfaces.

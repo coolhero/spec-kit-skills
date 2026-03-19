@@ -553,6 +553,40 @@ For each SC in spec.md:
 ```
 **Enforcement**: 🚫 BLOCKING for SCs without any testable criteria. ⚠️ WARNING for SCs with weak but present criteria.
 
+### Interaction Data Flow SC Check (rebuild + GUI — 🚫 BLOCKING)
+
+> **Purpose (SKF-072)**: SCs like "citations are visible" verify presence but not data flow correctness. When the user clicks citation [2], the correct document for reference #2 must be displayed — this is a **data mapping accuracy** requirement that "visible" doesn't cover.
+
+**Skip if**: Not rebuild mode, or Feature has no "click → ID lookup → display" interactions.
+
+For each UI element in the Feature that maps an ID to data (citations, references, tabs, list items with detail views):
+
+1. **SC must include mapping accuracy**, not just presence:
+   ```
+   ❌ "Citations are visible in the response"
+   ✅ "User clicks citation badge [2] → tooltip shows source file name and content snippet matching reference #2. Clicking tooltip header opens source URL in new tab."
+   ```
+
+2. **SC must use interaction verbs** (click, hover, select, drag), not state verbs (is visible, exists, shows):
+   ```
+   ❌ "KB search results are shown"
+   ✅ "User sends message with KB attached → response contains numbered citation badges → clicking badge [N] displays source #N's preview"
+   ```
+
+3. **Each clickable/interactive data reference needs its own SC or sub-SC**:
+   - Citation badge click → tooltip with correct source
+   - Citation list "N references" button → expanded list with all sources
+   - Source link click → opens source URL
+
+**Display (if gaps found)**:
+```
+🚫 Interaction Data Flow SC Gaps (BLOCKING):
+  SC-002: "citations are visible" — no SC for click→correct document mapping
+    → Recommend: "clicking [N] shows source #N's file name and content preview"
+  SC-007: "KB can be attached to assistant" — no SC for attachment persistence
+    → Recommend: "after attaching KB, refreshing page preserves the attachment"
+```
+
 ### Domain Rule Compliance Check (S1)
 
 > **Purpose**: Domain modules load S1 SC rules into context, but loading ≠ application. This check verifies that active S1 rules actually influenced the generated spec.md. Without this gate, domain rules are "trusted implicitly" — the agent may silently ignore rules buried in long context.

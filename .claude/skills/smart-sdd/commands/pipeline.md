@@ -772,6 +772,16 @@ Executes the following steps **strictly in order** for each Feature.
 >
 > **CRITICAL**: After each `speckit-*` command completes, it prints its own "Next phase:" or "Next step:" message. **IGNORE these messages completely — do NOT show them to the user.** smart-sdd controls the flow: after Execute, you MUST immediately proceed to the Review(STOP) step, not follow spec-kit's suggestions.
 
+> **🚫 AGENT BEHAVIORAL RULES** (apply to ALL pipeline steps):
+>
+> **1. Pipeline Completion Bias Prevention**: After specify→plan→tasks→analyze→implement in one session, the agent's implicit goal shifts from "ensure quality" to "finish the pipeline." This manifests as: Level 1 verification (code review only), skipping Playwright launch, declaring "12/12 SC ✅" without evidence. **verify MUST have the same rigor regardless of how many steps preceded it.**
+>
+> **2. Automate, Don't Delegate**: If the agent CAN do it programmatically, do NOT ask the user. App restart → `pkill + pnpm run dev`. DB state check → `sqlite3 query`. Log review → capture to file + grep. localStorage reset → code-level clear. KB rebuild → script. **Only delegate truly non-automatable actions** (OS-native drag&drop, visual judgment, external API key entry).
+>
+> **3. Empty Results → Investigate, Don't Report**: When a query/search/API returns empty results `[]`, do NOT report "results are empty" to the user. Instead: (1) check data exists in storage, (2) check query was formed correctly, (3) check intermediate processing logs, (4) identify and fix the root cause, (5) THEN report the fix. `❌ "검색 결과가 []입니다" → ✅ "DB에 3건 있으나 threshold 0.7이 너무 높아 0건 반환. 0.3으로 조정하여 3건 반환 확인."`
+>
+> **4. Fix → Runtime Verify → Report**: Every code fix must be followed by runtime verification before reporting to user. `❌ 코드 수정 → build 통과 → "수정 완료" → ✅ 코드 수정 → build → 앱 실행 → 해당 기능 동작 확인 → "수정 완료, 런타임 확인됨"`
+
 > **⚠️ INTER-STEP CONTINUITY — DO NOT STOP BETWEEN STEPS**:
 > After a step's Update completes and there are remaining steps, **IMMEDIATELY begin the next step** (e.g., plan Update done → start tasks Checkpoint). Do NOT display a "completed" summary and wait. Do NOT show "Next steps" commands. The pipeline is a continuous flow within a Feature — the ONLY valid pause points are HARD STOPs (awaiting user approval), BLOCK conditions, Feature completion, or unrecoverable errors. If you find yourself about to generate a response that ends without starting the next step — **STOP, you are breaking continuity. Proceed to the next step.**
 
