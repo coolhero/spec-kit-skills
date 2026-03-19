@@ -863,7 +863,7 @@ flowchart LR
 
 Each of the three core concepts can be extended independently. The system is designed so you can start with defaults and progressively customize:
 
-**Level 0 — Out of the box**: All three concepts work automatically. Domain Profile is auto-detected, Brief completion criteria use built-in defaults, GEL artifacts are generated and injected without configuration. Works for most projects immediately.
+**Level 0 — Out of the box**: All three concepts work automatically. Domain Profile is auto-detected, Brief completion criteria use built-in defaults, GEL artifacts are generated and injected without configuration. Works for most projects immediately. All pipeline-generated artifacts (specs, plans, tasks) are in English by default — pass `--lang ko` (or any language code) to `init`, `reverse-spec`, or `add` to generate artifacts in your preferred language.
 
 **Level 1 — Tune Domain Profile**: Edit `sdd-state.md` to add/remove active Interfaces and Concerns. Loading `auth` adds authentication-specific SC rules and Brief completion criteria; removing `i18n` skips internationalization checks.
 
