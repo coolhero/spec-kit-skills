@@ -39,13 +39,24 @@ App name: [from package.json name/productName]
 
 ### Electron/Tauri (Desktop)
 
-1. Read `package.json` → `productName` (packaged app) or `name` (dev mode)
-2. Resolve platform path:
-   - macOS: `~/Library/Application Support/[app-name]/`
-   - Linux: `~/.config/[app-name]/`
-   - Windows: `%APPDATA%/[app-name]/`
-3. **Dev vs prod may differ** — dev uses `name`, prod uses `productName`. Record BOTH.
-4. Verify: `ls [path]` to confirm directory exists
+1. Read `package.json` → `name` field
+2. Read `electron-builder.yml` or equivalent → `productName` field
+3. **Dev vs prod userData paths differ** — this is the #1 cause of "my settings aren't visible":
+   - **Production build**: uses `productName` → `~/Library/Application Support/[productName]/`
+   - **Dev mode**: uses `name` → `~/Library/Application Support/[name]/`
+   - **electron-vite dev mode**: appends `Dev` suffix → `~/Library/Application Support/[productName]Dev/`
+4. **ALWAYS check ALL possible paths** — list `~/Library/Application Support/` and grep for the app name:
+   ```bash
+   ls "/Users/[user]/Library/Application Support/" | grep -i [app-name]
+   ```
+5. **Use the MOST RECENT config.json** — compare timestamps across all matching directories:
+   ```bash
+   stat -f "%Sm" "/Users/[user]/Library/Application Support/[dir]/config.json"
+   ```
+   The most recently modified is the one the user has been using.
+6. Record the correct path as `PLAYWRIGHT_USER_DATA_DIR`
+
+**Common mistake**: Using productName path (`Cherry Studio`) when user configured via `pnpm run dev` (which uses `Cherry StudioDev`). The API keys, model settings, and KB data are in the dev path.
 
 ### Web / API Server
 
