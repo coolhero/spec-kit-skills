@@ -13,6 +13,7 @@
 | [`data-storage-map.md`](data-storage-map.md) | Detect storage locations + userData path | Foundation (Axis 4) determines storage patterns |
 | [`user-assisted-setup.md`](user-assisted-setup.md) | Guide user through app configuration | Interface (Axis 1) determines setup UX |
 | [`app-launch.md`](app-launch.md) | Launch app + connect Playwright | Interface (Axis 1) S8 Runtime Verification Strategy |
+| [`observation-protocol.md`](observation-protocol.md) | **What to observe** per Domain Profile axis (3-layer: Common + Domain-Aware + Skill-Specific) | ALL axes — Interface(UI structure), Concern(auth/realtime), Archetype(AI/SDK), Foundation(lib/theme), Scale(UX quality) |
 
 ---
 
