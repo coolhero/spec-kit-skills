@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-21] Data-IO Interface Module Expansion
+
+### What Changed
+
+- **shared/domains/interfaces/data-io.md**: Expanded from 29-line placeholder to full module with S5 Elaboration Probes, R3 Analysis Axes (DAG Structure, Connector/Source/Sink Inventory, Transformation Lineage, Scheduler/Executor Architecture, SQL-as-Source Detection), R5 Feature Boundary Heuristics, R6 Tier Classification
+- **reverse-spec/domains/interfaces/data-io.md**: Expanded with R3 Pipeline Extraction (DAG Structure, Connector Inventory, SQL-as-Source, Scheduler/Executor Split), R4 Data Flow Extraction, R5 Feature Boundary Heuristics
+
+### Why
+
+Data pipeline and ETL projects (Airflow, dbt, Spark, Prefect, Dagster) had only skeleton detection signals. Without R3 extraction axes, reverse-spec couldn't extract DAG structure, connector inventory, or scheduler/executor boundaries — critical for generating accurate Feature boundaries and SBI entries for data-intensive projects.
+
+---
+
+## [2026-03-21] Documentation Update — 28 New Files in File Tables
+
+### What Changed
+
+- README.md / README.ko.md file tables: Added all 28 new files (12 Foundation stubs, 6 Archetypes, 5+5 Concerns) with descriptions
+- ARCHITECTURE-EXTENSIBILITY.md / .ko.md Cross-Reference Map: Added 14 entries for new Foundation, Archetype, Concern, R2, and R5 modules
+
+### Why
+
+CLAUDE.md Post-Change Propagation Check requires file table updates whenever files are added. The Cross-Reference Map in ARCHITECTURE-EXTENSIBILITY helps contributors find related files when modifying a concept.
+
+---
+
 ## [2026-03-21] Domain Module Mass Expansion — 28 New Files
 
 ### What Changed
