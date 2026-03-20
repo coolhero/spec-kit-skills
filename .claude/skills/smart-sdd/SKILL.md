@@ -177,7 +177,17 @@ $ARGUMENTS parsing rules:
   --all           → For pipeline: process all eligible Features in batch mode. For reset (no FID): include logs in reset. Not valid with other commands.
   --domain <val>  → Project domain profile: "app" (default). Backward-compatible alias for --profile
   --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
+  --lang <code>   → Artifact language (ko, en, ja, etc.). Stored in sdd-state.md as Artifact Language.
 ```
+
+### Language Persistence (--lang)
+
+`--lang` is stored in `sdd-state.md` header: `**Artifact Language**: ko`
+
+- **If `--lang` provided**: update sdd-state.md Artifact Language field. All subsequent artifacts use this language.
+- **If `--lang` not provided**: read from sdd-state.md. If field absent, default to `en`.
+- **Language applies to**: all generated artifacts (spec.md, plan.md, tasks.md, pre-context.md, spec-draft.md, roadmap.md, registries). Also applies to AskUserQuestion option labels and Checkpoint/Review display text.
+- **Language does NOT apply to**: skill files themselves (always English per CLAUDE.md), technical identifiers (FR-001, SC-001, entity names), markdown headings in templates.
 
 **BASE_PATH** determination:
 - If `--from` is specified: use that path
