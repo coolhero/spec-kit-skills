@@ -77,6 +77,22 @@ AskUserQuestion:
 
 **If response is empty → re-ask** (per MANDATORY RULE).
 
+### Step 2.5 — Runtime Context (if runtime was captured during orient)
+
+If `orientation.md` has a `## Runtime Observations` section (from orient Step 4.5):
+
+1. **Check for relevant screenshots**: Look for screens that relate to the trace topic
+   - Example: tracing "auth flow" → check for login screen, settings screen screenshots
+   - If found, note in trace: `> 🖼️ Runtime reference: [screenshot name] — shows [what's visible]`
+
+2. **Consider live runtime tracing**: If the topic involves UI interaction (state changes, data display, user flows):
+   - Use `shared/runtime/app-launch.md` to launch the app
+   - Perform the traced flow LIVE — watch what happens in the UI as the code path executes
+   - This catches things static code reading misses: animations, loading states, error messages, auto-filled values
+   - Record runtime observations alongside code tracing (see "Runtime Observation" column in Flow table below)
+
+3. **Skip if**: Topic is backend-only (no UI), or runtime was not captured during orient
+
 ### Step 3 — Flow Tracing
 
 From the entry point, trace the execution flow by:
@@ -86,6 +102,7 @@ From the entry point, trace the execution flow by:
 3. **Track data transformations**: What goes in, what comes out
 4. **Note branching**: Where does the flow split (conditions, error paths)
 5. **Stop at boundaries**: External APIs, database operations, framework boundaries
+6. **Cross-reference runtime** (if available): For UI-related steps, note what the user sees at this point (from screenshots or live observation)
 
 **Depth control**: Trace deep enough to understand the full flow, but don't recurse into utility functions or framework internals. Rule of thumb: if a function is domain-specific (business logic), trace into it. If it's infrastructure (logging, serialization, HTTP handling), note it but don't recurse.
 
@@ -189,6 +206,16 @@ function processData(raw: RawInput): ProcessedOutput {
 |----|----------------|-----------------|
 | BR-1 | [auth.go:56](../../../src/auth.go) | Token expires after 24h, refresh extends by 1h |
 | BR-2 | [auth.go:78](../../../src/auth.go) | 3 failed attempts → 15min lockout |
+
+## Runtime Observations (if runtime was used during this trace)
+
+> This section records what was **seen in the running app** during tracing.
+> Connects code-level flow (above) with user-visible behavior.
+
+| Step | What User Sees | Screenshot Reference |
+|------|---------------|---------------------|
+| Step 3 | Dropdown shows only configured providers' models | screenshots/create-kb-dialog.png |
+| Step 7 | Citation badge [2] appears inline in response text | screenshots/chat-with-citations.png |
 
 ## Observations
 

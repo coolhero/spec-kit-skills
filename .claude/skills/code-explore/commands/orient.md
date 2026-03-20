@@ -65,6 +65,47 @@ Display a brief summary:
    Size: [N] files, [M] directories
 ```
 
+### Step 1.5 — Runtime Exploration (HARD STOP — ask user before skipping)
+
+> **🚨 DO NOT SKIP THIS STEP without asking the user.**
+> Static scan reveals STRUCTURE. Runtime reveals BEHAVIOR. Without runtime,
+> traces will miss UI patterns, interaction flows, data display, and error states.
+>
+> **Shared protocol**: Uses [`shared/runtime/`](../../shared/runtime/_index.md) modules.
+
+**1. Detect Playwright**: Follow `shared/runtime/playwright-detection.md` protocol
+   - Result: `RUNTIME_BACKEND` (cli_direct / cli_browser / cdp / mcp_browser / none)
+   - If `none` → HARD STOP: ask user to install Playwright or confirm skip
+
+**2. Detect Data Storage**: Follow `shared/runtime/data-storage-map.md` protocol
+   - Scan source for storage patterns → resolve userData path → determine lock constraints
+
+**3. User-Assisted Setup**: Follow `shared/runtime/user-assisted-setup.md` protocol
+   - Present BLOCKING / PARTIAL / OPTIONAL items
+   - For desktop apps: guide user to run app → configure → close
+   - For web apps: guide user to start server → configure
+   - **HARD STOP** — wait for user confirmation
+
+**4. Launch & Capture**: Follow `shared/runtime/app-launch.md` protocol
+   - Launch with correct userData path
+   - Capture screenshots per major route/view → `specs/explore/screenshots/`
+   - Record UI structure (accessibility tree per screen)
+   - Note interactive patterns (dropdowns, auto-fill, drag zones, modals)
+
+**5. Record results** — add to orientation.md as `## Runtime Observations` section
+
+```
+📋 Runtime Exploration Results
+  Screens explored: [N]
+  Screenshots: specs/explore/screenshots/
+  UI patterns: [dropdowns, modals, drag-zones, etc.]
+  Setup requirements: [API key → Settings > Provider, etc.]
+```
+
+**If Playwright unavailable AND user confirms skip**:
+- Display: `⚠️ Runtime exploration skipped. Traces will rely on static code analysis only.`
+- Proceed to Step 2
+
 ### Step 2 — Module Map
 
 Build a hierarchical module map by analyzing:
@@ -135,57 +176,6 @@ Suggested explorations:
 ```
 
 Order by: entry points first, then core business logic, then infrastructure.
-
-### Step 4.5 — Runtime Exploration (Optional but recommended)
-
-> **Shared protocol**: Uses [`shared/runtime/`](../../shared/runtime/_index.md) modules.
-> This step RUNS the source app to capture UI flows, state, and real behavior.
-> Static scan (Steps 1-4) reveals STRUCTURE; runtime reveals BEHAVIOR.
-
-**Skip if**: CLI-only tool, library, or user declines runtime exploration.
-
-**Procedure**:
-
-1. **Detect Playwright**: Follow `shared/runtime/playwright-detection.md` protocol
-   - Result: `RUNTIME_BACKEND` (cli_direct / cli_browser / cdp / mcp_browser / none)
-   - If `none`: display "Runtime exploration unavailable — continuing with static analysis only" and skip to Step 5
-
-2. **Detect Data Storage**: Follow `shared/runtime/data-storage-map.md` protocol
-   - Scan source code for storage patterns (electron-store, SQLite, localStorage, etc.)
-   - Resolve userData path
-   - Determine lock constraints (app close required?)
-   - Result: `PLAYWRIGHT_USER_DATA_DIR`, `REQUIRE_APP_CLOSE`, `AUTO_BLOCKING_ITEMS`
-
-3. **User-Assisted Setup**: Follow `shared/runtime/user-assisted-setup.md` protocol
-   - Present BLOCKING / PARTIAL / OPTIONAL items
-   - For desktop apps: guide user to run app → configure → close
-   - For web apps: guide user to start server → configure
-   - Wait for user confirmation (HARD STOP)
-
-4. **Launch & Explore**: Follow `shared/runtime/app-launch.md` protocol
-   - Launch with correct userData path
-   - Capture screens (screenshot per major route/view)
-   - Record UI structure (accessibility tree per screen)
-   - Note interactive patterns (dropdowns, auto-fill, drag zones, modals)
-   - Detect error states and edge cases visible in UI
-
-5. **Record results** in orientation.md:
-   - Add `## Runtime Observations` section
-   - List screens explored with key UI patterns
-   - Note any setup requirements discovered (API keys, config, etc.)
-   - Reference screenshots in `specs/explore/screenshots/`
-
-```
-📋 Runtime Exploration Results
-
-  Screens explored: [N]
-  Screenshots captured: [N] (specs/explore/screenshots/)
-  UI patterns: [dropdowns, modals, drag-zones, etc.]
-  Setup requirements: [API key → Settings > Provider, etc.]
-  Console errors: [N] ([summary])
-```
-
-If runtime exploration succeeds, orientation.md's Module Map and Suggested Explorations will be enriched with **behavioral observations** — not just "this module exists" but "this module renders a 3-column layout with a sidebar, chat area, and model controls."
 
 ### Step 5 — Generate orientation.md
 
