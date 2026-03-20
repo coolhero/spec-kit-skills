@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:10 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:28 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -18,6 +18,7 @@
 - [What It Solves](#what-it-solves)
 - [Design Discipline](#design-discipline)
 - [Skills](#skills)
+- [Scenario Guide](#scenario-guide)
 - [User Journeys](#user-journeys)
 - [Quick Examples](#quick-examples)
 - [Architecture](#architecture)
@@ -56,13 +57,18 @@ The installer creates symlinks from `~/.claude/skills/` to this repository.
 
 ```
 Have existing code?
-  No  → /smart-sdd init → add → pipeline
+  No  → /smart-sdd init → add → pipeline          (S8: New Project)
   Yes → What's your goal?
-         Understand first  → /code-explore ./source → (then choose below)
-         Rebuild           → /reverse-spec ./source → /smart-sdd pipeline
-         Document (keep)   → /reverse-spec --adopt  → /smart-sdd adopt
-         Add new features  → /smart-sdd add         → /smart-sdd pipeline
+         Understand only    → /code-explore                          (S1: Explore)
+         Document only      → /reverse-spec --adopt → adopt          (S2: Spec Only)
+         Add features       → adopt → /smart-sdd add → pipeline     (S3: Extend)
+         Rebuild (same)     → /reverse-spec → /smart-sdd pipeline   (S4: Rebuild)
+         Rebuild (new stack)→ /reverse-spec --stack new → pipeline   (S5: Migrate)
+         Fix EOL/deprecation→ adopt → add --gap → pipeline          (S6: EOS)
+         Rebuild then extend→ reverse-spec → pipeline → add         (S7: Rebuild+)
 ```
+
+> **Every journey converges to incremental mode** (`/smart-sdd add → pipeline`) as the steady state. See [Scenario Guide](#scenario-guide) for detailed workflows.
 
 ### Verify Installation
 
@@ -370,7 +376,164 @@ The diagram shows the full lifecycle: **understand** existing code with code-exp
 
 ---
 
+## Scenario Guide
+
+Every project falls into one of these scenarios. Find yours and follow the workflow.
+
+| # | Scenario | When to Use | Modifies Code? |
+|---|----------|-------------|---------------|
+| **S1** | [Explore Only](#s1-explore-only) | Understand how a codebase works | No |
+| **S2** | [Spec Only](#s2-spec-only-documentation) | Document existing code with SDD specs, no code changes | No |
+| **S3** | [Extend](#s3-extend-existing-code) | Add new features to an existing, running codebase | New code only |
+| **S4** | [Rebuild (Same Stack)](#s4-rebuild-same-stack) | Rewrite from scratch with the same technology | Full rewrite |
+| **S5** | [Rebuild (New Stack)](#s5-rebuild-new-stack) | Rewrite from scratch with a different technology | Full rewrite |
+| **S6** | [EOS / Migration](#s6-eos--migration) | Replace EOL frameworks, deprecated libraries, or sunset platforms | Affected parts only |
+| **S7** | [Rebuild → Extend](#s7-rebuild--extend) | Rewrite first, then add new features beyond original scope | Full + new |
+| **S8** | [New Project](#s8-new-project) | Start from scratch — no existing code | Full |
+| **S9** | [Explore → Decide](#s9-explore--decide) | Study code first, then decide what to do | Depends on choice |
+
+### S1: Explore Only
+
+```
+Goal: Understand the codebase. No modifications.
+Output: Architecture map, flow traces, Feature candidates
+
+/code-explore ./source          → Orient (architecture map)
+/code-explore trace "auth flow" → Trace (detailed flow analysis)
+/code-explore trace "payments"  → Trace (additional flows)
+/code-explore synthesis         → Synthesis (Feature candidates + summary)
+```
+
+### S2: Spec Only (Documentation)
+
+```
+Goal: Wrap existing code with SDD documentation. Code stays as-is.
+Output: roadmap, registries, constitution-seed, spec.md + plan.md per Feature
+
+/reverse-spec ./source --adopt  → Phase 0-4: analyze code, extract GEL
+/smart-sdd adopt                → Constitution → Feature-by-Feature: specify + plan + verify
+                                  (no tasks/implement — code already exists)
+```
+
+### S3: Extend Existing Code
+
+```
+Goal: Add new features to a working codebase (keep existing code).
+Output: Existing code documented + new Feature code + SDD docs
+Prerequisite: Document existing code first (S2), then add.
+
+Step 1 — Document existing code:
+/reverse-spec ./source --adopt  → Analyze and extract GEL
+/smart-sdd adopt                → Document existing Features
+
+Step 2 — Add new features:
+/smart-sdd add                  → Define new Feature(s) via 6-Phase Briefing
+/smart-sdd pipeline F00X        → Build new Feature(s) on top of existing code
+```
+
+### S4: Rebuild (Same Stack)
+
+```
+Goal: Rewrite legacy code cleanly with the same technology.
+Output: Brand new codebase + SDD docs
+
+/reverse-spec ./old-source --stack same  → Analyze + extract GEL
+/smart-sdd pipeline --all                → Constitution → Feature-by-Feature build
+/smart-sdd parity --source ./old-source  → Verify behavioral parity
+```
+
+### S5: Rebuild (New Stack)
+
+```
+Goal: Migrate to a different technology (e.g., Django → Next.js).
+Output: New codebase in new stack + stack-migration.md + SDD docs
+
+/reverse-spec ./old-source --stack new   → Analyze + extract GEL + stack-migration
+/smart-sdd pipeline --all                → Build with new stack
+/smart-sdd parity --source ./old-source  → Verify behavioral parity
+```
+
+### S6: EOS / Migration
+
+```
+Goal: Replace EOL framework, deprecated library, or sunset platform.
+       Only modify affected code — not a full rewrite.
+Examples: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS
+
+Step 1 — Document the current state:
+/reverse-spec ./source --adopt  → Analyze full codebase
+/smart-sdd adopt                → Document all Features
+
+Step 2 — Identify affected scope and add migration Feature(s):
+/smart-sdd add --gap            → Gap-driven: identifies affected SBI behaviors
+                                  Define migration Feature(s) covering the changes
+
+Step 3 — Implement migration:
+/smart-sdd pipeline F00X        → Implement migration Feature(s)
+```
+
+### S7: Rebuild → Extend
+
+```
+Goal: Rewrite first, then add features beyond the original scope.
+
+Phase 1 — Rebuild:
+/reverse-spec ./old-source → /smart-sdd pipeline --all → /smart-sdd parity
+
+Phase 2 — Extend (now in incremental mode):
+/smart-sdd add                  → Define new Feature(s)
+/smart-sdd pipeline F00X        → Build new Feature(s)
+```
+
+> After rebuild completes, the project is in **incremental mode**. Use `/smart-sdd add` freely — Origin stays `rebuild` but `add` and `pipeline` work transparently.
+
+### S8: New Project
+
+```
+Goal: Build from scratch — no existing code.
+
+/smart-sdd init                          → Project setup + Domain Profile
+  or: /smart-sdd init "task management app with Kanban boards"
+  or: /smart-sdd init --prd requirements.md
+/smart-sdd add                           → Define Features via 6-Phase Briefing
+/smart-sdd pipeline --all                → Build all Features
+```
+
+### S9: Explore → Decide
+
+```
+Goal: Study code first, then choose your path.
+
+/code-explore ./source                         → Understand the codebase
+/code-explore synthesis                        → Synthesize understanding
+
+Then choose:
+  → Rebuild:  /reverse-spec --from-explore specs/explore/ → pipeline
+  → Extend:   /reverse-spec --adopt --from-explore specs/explore/ → adopt → add
+  → Spec only: /reverse-spec --adopt --from-explore specs/explore/ → adopt
+```
+
+### Scenario Convergence
+
+All scenarios converge to **incremental mode** as the steady state:
+
+```
+S1 (Explore) ─────────────────────────────────── understanding only
+S2 (Spec Only) ──────────── adopt ─────────────── docs complete
+S3 (Extend) ─────────────── adopt → add ────┐
+S4 (Rebuild Same) ────────── pipeline ──────┤
+S5 (Rebuild New) ─────────── pipeline ──────┼──→ /smart-sdd add → pipeline (repeat)
+S6 (EOS) ────────────────── adopt → add ────┤
+S7 (Rebuild+) ──────────── pipeline → add ──┤
+S8 (New Project) ─────────── init → add ────┤
+S9 (Explore→Decide) ──────── (any above) ───┘
+```
+
+---
+
 ## User Journeys
+
+The Scenario Guide above shows **what to do**. This section shows **how it works internally** — how Brief, GEL, and Domain Profile participate in each step.
 
 ```
 ── From an Idea (Proposal Mode) ──────────────────────────────────
@@ -395,7 +558,7 @@ The diagram shows the full lifecycle: **understand** existing code with code-exp
 /smart-sdd add          →  updated GEL         →  /smart-sdd pipeline
 (Brief for new Feature)    (pre-context added)    (GEL + Domain Profile)
 
-── Learn & Build (study existing code, then build your own) ──────
+── Learn & Build ─────────────────────────────────────────────────
 /code-explore ./source  →  traces + synthesis  →  /smart-sdd init --from-explore
 (orient + trace × N)       (C001... candidates)    (Domain Profile inherited)
                                                 →  /smart-sdd add → pipeline

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:10 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:28 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -16,6 +16,7 @@
 - [해결하는 문제](#해결하는-문제)
 - [설계 규율](#설계-규율)
 - [스킬](#스킬)
+- [시나리오 가이드](#시나리오-가이드)
 - [사용자 여정](#사용자-여정)
 - [빠른 예시](#빠른-예시)
 - [아키텍처](#아키텍처)
@@ -54,13 +55,18 @@ cd spec-kit-skills
 
 ```
 기존 코드가 있는가?
-  없음 → /smart-sdd init → add → pipeline
+  없음 → /smart-sdd init → add → pipeline            (S8: 새 프로젝트)
   있음 → 목표는?
-          먼저 이해  → /code-explore ./source → (이후 선택)
-          재구축     → /reverse-spec ./source → /smart-sdd pipeline
-          문서화     → /reverse-spec --adopt  → /smart-sdd adopt
-          새 기능    → /smart-sdd add         → /smart-sdd pipeline
+          파악만         → /code-explore                            (S1: 파악)
+          문서화만       → /reverse-spec --adopt → adopt            (S2: Spec만)
+          기능 추가      → adopt → /smart-sdd add → pipeline       (S3: 확장)
+          재구축 (동일)  → /reverse-spec → /smart-sdd pipeline     (S4: 리빌드)
+          재구축 (전환)  → /reverse-spec --stack new → pipeline    (S5: 마이그레이션)
+          EOL/폐기 대응  → adopt → add --gap → pipeline            (S6: EOS)
+          재구축 후 확장 → reverse-spec → pipeline → add           (S7: 리빌드+)
 ```
+
+> **모든 여정은 점진적 추가 모드**(`/smart-sdd add → pipeline`)로 수렴합니다. 상세 워크플로우는 [시나리오 가이드](#시나리오-가이드) 참조.
 
 ### 설치 확인
 
@@ -368,7 +374,164 @@ flowchart TD
 
 ---
 
+## 시나리오 가이드
+
+모든 프로젝트는 아래 시나리오 중 하나에 해당합니다. 본인의 상황을 찾아 워크플로우를 따르세요.
+
+| # | 시나리오 | 사용 시점 | 코드 수정 여부 |
+|---|---------|----------|--------------|
+| **S1** | [파악만](#s1-파악만) | 코드베이스가 어떻게 동작하는지 이해 | 없음 |
+| **S2** | [Spec만 (문서화)](#s2-spec만-문서화) | 기존 코드에 SDD 스펙 문서 추가, 코드 변경 없음 | 없음 |
+| **S3** | [확장](#s3-기존-코드-확장) | 기존 코드에 새 기능 추가 | 새 코드만 |
+| **S4** | [리빌드 (동일 스택)](#s4-리빌드-동일-스택) | 같은 기술로 처음부터 재작성 | 전체 재작성 |
+| **S5** | [리빌드 (새 스택)](#s5-리빌드-새-스택) | 다른 기술로 마이그레이션 + 재작성 | 전체 재작성 |
+| **S6** | [EOS / 마이그레이션](#s6-eos--마이그레이션) | EOL 프레임워크, 폐기 라이브러리, 플랫폼 교체 | 영향 부분만 |
+| **S7** | [리빌드 → 확장](#s7-리빌드--확장) | 먼저 재작성, 그 다음 원본 범위 넘어 새 기능 추가 | 전체 + 추가 |
+| **S8** | [새 프로젝트](#s8-새-프로젝트) | 기존 코드 없이 처음부터 시작 | 전체 |
+| **S9** | [파악 → 결정](#s9-파악--결정) | 코드를 먼저 이해하고 방향 결정 | 선택에 따라 |
+
+### S1: 파악만
+
+```
+목표: 코드베이스 이해. 수정 없음.
+산출물: 아키텍처 맵, 플로우 트레이스, Feature 후보
+
+/code-explore ./source          → Orient (아키텍처 맵)
+/code-explore trace "인증 흐름" → Trace (상세 플로우 분석)
+/code-explore trace "결제 흐름" → Trace (추가 플로우)
+/code-explore synthesis         → Synthesis (Feature 후보 + 종합)
+```
+
+### S2: Spec만 (문서화)
+
+```
+목표: 기존 코드에 SDD 문서 래핑. 코드는 그대로.
+산출물: roadmap, registries, constitution-seed, Feature별 spec.md + plan.md
+
+/reverse-spec ./source --adopt  → Phase 0-4: 코드 분석, GEL 추출
+/smart-sdd adopt                → Constitution → Feature별: specify + plan + verify
+                                  (tasks/implement 없음 — 코드가 이미 존재)
+```
+
+### S3: 기존 코드 확장
+
+```
+목표: 동작 중인 코드베이스에 새 기능 추가 (기존 코드 유지).
+산출물: 기존 코드 문서화 + 새 Feature 코드 + SDD 문서
+전제: 먼저 기존 코드 문서화(S2), 그 다음 추가.
+
+Step 1 — 기존 코드 문서화:
+/reverse-spec ./source --adopt  → 분석 및 GEL 추출
+/smart-sdd adopt                → 기존 Feature 문서화
+
+Step 2 — 새 기능 추가:
+/smart-sdd add                  → 6-Phase Briefing으로 새 Feature 정의
+/smart-sdd pipeline F00X        → 기존 코드 위에 새 Feature 구현
+```
+
+### S4: 리빌드 (동일 스택)
+
+```
+목표: 레거시 코드를 같은 기술로 깔끔하게 재작성.
+산출물: 완전히 새로운 코드 + SDD 문서
+
+/reverse-spec ./old-source --stack same  → 분석 + GEL 추출
+/smart-sdd pipeline --all                → Constitution → Feature별 빌드
+/smart-sdd parity --source ./old-source  → 동작 패리티 검증
+```
+
+### S5: 리빌드 (새 스택)
+
+```
+목표: 다른 기술로 마이그레이션 (예: Django → Next.js).
+산출물: 새 스택의 코드 + stack-migration.md + SDD 문서
+
+/reverse-spec ./old-source --stack new   → 분석 + GEL + 스택 마이그레이션
+/smart-sdd pipeline --all                → 새 스택으로 빌드
+/smart-sdd parity --source ./old-source  → 동작 패리티 검증
+```
+
+### S6: EOS / 마이그레이션
+
+```
+목표: EOL 프레임워크, 폐기 라이브러리, 플랫폼 교체.
+      영향 받는 코드만 수정 — 전체 재작성이 아님.
+예시: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS
+
+Step 1 — 현재 상태 문서화:
+/reverse-spec ./source --adopt  → 전체 코드 분석
+/smart-sdd adopt                → 전체 Feature 문서화
+
+Step 2 — 영향 범위 식별 + 마이그레이션 Feature 추가:
+/smart-sdd add --gap            → Gap-driven: 영향 받는 SBI 동작 식별
+                                  변경 사항을 커버하는 마이그레이션 Feature 정의
+
+Step 3 — 마이그레이션 구현:
+/smart-sdd pipeline F00X        → 마이그레이션 Feature 구현
+```
+
+### S7: 리빌드 → 확장
+
+```
+목표: 먼저 재작성, 그 다음 원본 범위를 넘어 새 기능 추가.
+
+Phase 1 — 리빌드:
+/reverse-spec ./old-source → /smart-sdd pipeline --all → /smart-sdd parity
+
+Phase 2 — 확장 (이제 점진적 추가 모드):
+/smart-sdd add                  → 새 Feature 정의
+/smart-sdd pipeline F00X        → 새 Feature 구현
+```
+
+> 리빌드 완료 후 프로젝트는 **점진적 추가 모드**가 됩니다. `/smart-sdd add`를 자유롭게 사용 — Origin은 `rebuild`로 유지되지만 `add`와 `pipeline`이 투명하게 동작합니다.
+
+### S8: 새 프로젝트
+
+```
+목표: 기존 코드 없이 처음부터 구축.
+
+/smart-sdd init                          → 프로젝트 설정 + Domain Profile
+  또는: /smart-sdd init "칸반 보드가 있는 태스크 관리 앱"
+  또는: /smart-sdd init --prd requirements.md
+/smart-sdd add                           → 6-Phase Briefing으로 Feature 정의
+/smart-sdd pipeline --all                → 전체 Feature 구현
+```
+
+### S9: 파악 → 결정
+
+```
+목표: 코드를 먼저 이해하고, 방향 결정.
+
+/code-explore ./source                         → 코드 이해
+/code-explore synthesis                        → 이해 종합
+
+그 다음 선택:
+  → 리빌드:  /reverse-spec --from-explore specs/explore/ → pipeline
+  → 확장:    /reverse-spec --adopt --from-explore specs/explore/ → adopt → add
+  → Spec만:  /reverse-spec --adopt --from-explore specs/explore/ → adopt
+```
+
+### 시나리오 수렴
+
+모든 시나리오는 **점진적 추가 모드**로 수렴합니다:
+
+```
+S1 (파악) ──────────────────────────────────── 이해만
+S2 (Spec만) ──────────── adopt ────────────── 문서화 완료
+S3 (확장) ───────────── adopt → add ────┐
+S4 (리빌드 동일) ─────── pipeline ──────┤
+S5 (리빌드 전환) ─────── pipeline ──────┼──→ /smart-sdd add → pipeline (반복)
+S6 (EOS) ────────────── adopt → add ────┤
+S7 (리빌드+) ────────── pipeline → add ─┤
+S8 (새 프로젝트) ─────── init → add ────┤
+S9 (파악→결정) ────────── (위 중 선택) ─┘
+```
+
+---
+
 ## 사용자 여정
+
+시나리오 가이드가 **무엇을 해야 하는지**를 보여줬다면, 이 섹션은 **내부적으로 어떻게 동작하는지** — Brief, GEL, Domain Profile이 각 단계에서 어떻게 참여하는지 보여줍니다.
 
 ```
 ── 아이디어에서 시작 (Proposal Mode) ─────────────────────────────
@@ -393,7 +556,7 @@ flowchart TD
 /smart-sdd add            →  갱신된 GEL            →  /smart-sdd pipeline
 (새 Feature Brief)           (pre-context 추가)        (GEL + Domain Profile)
 
-── 학습 후 구축 (기존 코드를 공부하고 나만의 버전 만들기) ──────
+── 학습 후 구축 ──────────────────────────────────────────────────
 /code-explore ./source    →  traces + synthesis    →  /smart-sdd init --from-explore
 (orient + trace × N)         (C001... 후보)           (Domain Profile 상속)
                                                    →  /smart-sdd add → pipeline
