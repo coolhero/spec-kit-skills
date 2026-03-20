@@ -50,17 +50,13 @@ $ARGUMENTS parsing rules:
 
 ### Language Persistence
 
-Language resolution order (first match wins):
-1. `--lang <code>` argument → use this, update storage
-2. `sdd-state.md` Artifact Language field → if exists (post-reverse-spec)
-3. `orientation.md` header `> Artifact Language: ko` → if exists (code-explore only)
-4. Default → `en`
+**Single source**: `specs/_global/sdd-state.md` → `**Artifact Language**: <code>`
 
-**On orient**: write language to orientation.md header.
-**On trace / synthesis**: read language using resolution order above.
-**Handoff**: When reverse-spec creates sdd-state.md, it reads orientation.md's language and copies it to sdd-state.md. From that point, sdd-state.md is the single source.
+- **If `--lang` provided**: write to sdd-state.md (create minimal file if absent)
+- **If `--lang` not provided**: read from sdd-state.md. If absent, default to `en`
+- **If sdd-state.md doesn't exist and `--lang` provided**: create `specs/_global/sdd-state.md` with only `**Artifact Language**: <code>` (reverse-spec/smart-sdd will populate the rest later)
 
-ALL generated content (section headings, descriptions, observations, AskUserQuestion labels) MUST use the resolved language.
+ALL generated content (section headings, descriptions, observations, AskUserQuestion labels) MUST use the stored language.
 
 ---
 
