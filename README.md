@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 15:14 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 17:35 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1293,20 +1293,28 @@ ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-s
 history.md
 lessons-learned.md
 specs/
-└── reverse-spec/
-    ├── roadmap.md
-    ├── constitution-seed.md
-    ├── entity-registry.md
-    ├── api-registry.md
-    ├── business-logic-map.md           # rebuild only
-    ├── stack-migration.md              # rebuild + new stack only
-    ├── coverage-baseline.md            # rebuild only
-    ├── parity-report.md                # rebuild only (by /smart-sdd parity)
-    ├── sdd-state.md
-    └── features/
-        ├── F001-auth/pre-context.md
-        ├── F002-product/pre-context.md
-        └── ...
+├── _global/                              ← Project-wide (GEL)
+│   ├── roadmap.md
+│   ├── constitution-seed.md
+│   ├── entity-registry.md
+│   ├── api-registry.md
+│   ├── business-logic-map.md            # rebuild only
+│   ├── stack-migration.md               # rebuild + new stack only
+│   ├── coverage-baseline.md             # rebuild only
+│   ├── parity-report.md                 # rebuild only (by /smart-sdd parity)
+│   ├── sdd-state.md
+│   └── speckit-prompt.md
+├── explore/                              ← Code-explore output
+│   ├── orientation.md
+│   └── traces/
+├── 001-auth/                             ← Per-Feature
+│   ├── pre-context.md
+│   ├── spec-draft.md                    # from reverse-spec (rebuild)
+│   ├── spec.md                          # from speckit-specify
+│   ├── plan.md                          # from speckit-plan
+│   └── tasks.md                         # from speckit-tasks
+├── 002-product/
+│   └── ...
 ```
 
 ### Constitution Best Practices
@@ -1469,6 +1477,7 @@ Each skill follows the same internal directory convention:
 | `templates/stack-migration-template.md` | Template for stack migration plan (rebuild + new stack) |
 | `templates/coverage-baseline-template.md` | Template for source coverage metrics baseline |
 | `templates/pre-context-template.md` | Template for per-Feature context extracted from runtime exploration |
+| `templates/spec-draft-template.md` | Template for Feature spec-draft artifact (reverse-spec Phase 4, rebuild mode) |
 | `templates/speckit-prompt-template.md` | Standalone prompt template for using spec-kit without smart-sdd |
 
 ### smart-sdd (`.claude/skills/smart-sdd/`)
@@ -1607,6 +1616,7 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/archetypes/microservice.md` | Microservice — A0 semantic + code patterns (gRPC, service mesh, Docker) |
 | `domains/archetypes/sdk-framework.md` | SDK/Framework — A0 semantic + code patterns (package metadata, public API, extension points, examples) |
 | **Runtime** | |
+| `runtime/_index.md` | Runtime module index — cross-skill registry with Domain Profile integration table |
 | `runtime/playwright-detection.md` | Playwright availability detection — CLI/MCP/CDP probe, Electron connection mode |
 | `runtime/data-storage-map.md` | Data storage detection — config stores, databases, file storage, lock analysis, userData path |
 | `runtime/user-assisted-setup.md` | User configuration flow — BLOCKING/PARTIAL/OPTIONAL classification, app-type-specific instructions |

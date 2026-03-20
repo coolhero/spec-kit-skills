@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-20] Post-pull audit: Artifact Structure sync + File Map completeness
+
+### What Changed
+- README Artifact Structure section updated from stale `specs/reverse-spec/` to `specs/_global/` + per-Feature flat structure (matching Project Directory Structure section and actual directory restructure commit `2541bc8`)
+- Added `spec-draft-template.md` to README File Map (both EN/KO) — template existed and was referenced from `analyze-generate.md` but missing from documentation
+- Added `runtime/_index.md` to English README File Map (Korean already had it) — sync issue
+
+### Why
+Directory restructure (`specs/reverse-spec/` → `specs/_global/`) was reflected in the Project Directory Structure section (line 172) but not in the Artifact Structure section (line 1290). File Map entries were missing for 2 files added in recent commits. All are documentation consistency issues — no functional impact.
+
+---
+
 ## [2026-03-20] spec-draft.md — reverse-spec generates initial spec for each Feature
 
 ### Design Decision

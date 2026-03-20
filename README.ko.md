@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 15:14 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 17:35 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -1305,20 +1305,28 @@ ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-s
 history.md
 lessons-learned.md
 specs/
-└── reverse-spec/
-    ├── roadmap.md
-    ├── constitution-seed.md
-    ├── entity-registry.md
-    ├── api-registry.md
-    ├── business-logic-map.md           # 재구축만
-    ├── stack-migration.md              # 재구축 + 새 스택만
-    ├── coverage-baseline.md            # 재구축만
-    ├── parity-report.md                # 재구축만 (/smart-sdd parity)
-    ├── sdd-state.md
-    └── features/
-        ├── F001-auth/pre-context.md
-        ├── F002-product/pre-context.md
-        └── ...
+├── _global/                              ← 프로젝트 전체 (GEL)
+│   ├── roadmap.md
+│   ├── constitution-seed.md
+│   ├── entity-registry.md
+│   ├── api-registry.md
+│   ├── business-logic-map.md            # 재구축만
+│   ├── stack-migration.md               # 재구축 + 새 스택만
+│   ├── coverage-baseline.md             # 재구축만
+│   ├── parity-report.md                 # 재구축만 (/smart-sdd parity)
+│   ├── sdd-state.md
+│   └── speckit-prompt.md
+├── explore/                              ← Code-explore 산출물
+│   ├── orientation.md
+│   └── traces/
+├── 001-auth/                             ← Feature별
+│   ├── pre-context.md
+│   ├── spec-draft.md                    # reverse-spec에서 생성 (재구축)
+│   ├── spec.md                          # speckit-specify에서 생성
+│   ├── plan.md                          # speckit-plan에서 생성
+│   └── tasks.md                         # speckit-tasks에서 생성
+├── 002-product/
+│   └── ...
 ```
 
 ### Constitution Best Practices
@@ -1481,6 +1489,7 @@ specs/
 | `templates/stack-migration-template.md` | 스택 마이그레이션 계획 템플릿 (재구축 + 새 스택) |
 | `templates/coverage-baseline-template.md` | 소스 커버리지 메트릭 베이스라인 템플릿 |
 | `templates/pre-context-template.md` | 런타임 탐색에서 추출한 Feature별 컨텍스트 템플릿 |
+| `templates/spec-draft-template.md` | Feature spec-draft 아티펙트 템플릿 (reverse-spec Phase 4, 재구축 모드) |
 | `templates/speckit-prompt-template.md` | smart-sdd 없이 spec-kit 단독 사용을 위한 독립 프롬프트 템플릿 |
 
 ### smart-sdd (`.claude/skills/smart-sdd/`)
