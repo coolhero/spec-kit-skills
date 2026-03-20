@@ -5,6 +5,110 @@
 
 ---
 
+## [2026-03-21] G1: --from-explore Implementation
+
+### What Changed
+- Added "Explore Step 1a: Synthesis Parsing Protocol" (BLOCKING gate) to `init.md` — verifies synthesis.md exists, parses 6 section types by heading detection (Domain Profile, Feature Candidates, Entity/API Maps, Insights, Handoff Readiness), warns on missing orientation.md, surfaces incomplete handoff criteria as Open Questions
+- Added "Type 4 Step 1a: Synthesis Parsing Protocol" (BLOCKING gate) to `add.md` — verifies synthesis.md and Feature Candidates table exist, parses Entity/API Consolidation for Perspective 3/4 seeding, maps Accumulated Insights icons to elaboration perspectives, reads referenced trace files for per-candidate context
+- Added `--from-explore <path>` argument to reverse-spec `SKILL.md` argument list and frontmatter hint
+- Added "Explore-Enhanced Mode" section to `analyze.md` — Pre-Phase reads explore artifacts as supplementary context, per-phase enrichment table (Scan/Deep/Classify/Generate), advisory-not-authoritative principle (code analysis wins on contradiction)
+
+### Why
+- The `--from-explore` flag was accepted by init, add, and reverse-spec but had no concrete parsing protocol. Agents would accept the flag then ignore synthesis.md content, generating Proposals/Briefs from scratch. BLOCKING gates now enforce that synthesis.md must exist and be parsed, with anti-pattern examples preventing both "ignore" and "verbatim copy" failure modes.
+
+### Files
+- `.claude/skills/smart-sdd/commands/init.md`
+- `.claude/skills/smart-sdd/commands/add.md`
+- `.claude/skills/reverse-spec/SKILL.md`
+- `.claude/skills/reverse-spec/commands/analyze.md`
+
+---
+
+## [2026-03-21] G6: add Type 1/Type 3 Parsing Protocols
+
+### What Changed
+- Added "Type 1 Step 1a: Document Parsing Protocol" to `add.md` — format detection (Markdown/plain text/PDF/other), heading-based Feature boundary extraction, candidate ID assignment (C###), fewer-than-2 Features AskUserQuestion with HARD STOP re-ask, entity/API hint propagation to Perspective 3/4
+- Added "Type 3 Step 3a: Gap Clustering Algorithm" to `add.md` — 6-step heuristic: source file proximity grouping (depth ≤ 2), entity co-reference merging, naming pattern merging, minimum cluster size (3), cluster naming by dominant entity/directory, cross-cutting detection (3+ cluster appearances)
+
+### Why
+- Type 1 (Document-based) had no format detection or structured parsing — agents would read the PRD but extract candidates inconsistently. Type 3 (Gap-driven) described clustering informally ("by domain/function") with no reproducible algorithm. Both needed concrete, step-by-step protocols for consistent agent behavior.
+
+### Files
+- `.claude/skills/smart-sdd/commands/add.md`
+
+---
+
+## [2026-03-21] G3: Multi-Language Project Support
+
+### What Changed
+- Added Phase 1-2a "Language Composition Analysis" to `analyze-scan.md` — scans source files by extension, classifies languages as Primary (≥50%), Secondary (≥5%), Tertiary (<5%), and assigns per-language SBI extraction depth
+- Added "Multi-Language SBI Extraction" to `analyze-deep.md` — language-specific scan patterns table (Python, JS/TS, C/C++, CUDA, Go, Rust, Java/Kotlin), cross-language call graph elevation (P2→P1 for FFI integration points), unified SBI table with Language column
+- Added "Multi-Language Foundation" paragraph to `_core.md` § R7 — R3 extraction targets loaded per qualifying language, Foundation field stores comma-separated values
+- Updated Foundation row in `_schema.md` Module Types table — clarified that Framework field supports comma-separated values for multi-language projects
+
+### Why
+- Projects like vLLM (Python 92% + CUDA 7% + C++ 4%) have multiple languages but the Foundation axis only detected a single language. SBI extraction had no language-specific strategy, causing secondary-language behaviors (e.g., CUDA kernels) to be missed or incorrectly parsed.
+
+### Files
+- `.claude/skills/reverse-spec/commands/analyze-scan.md`
+- `.claude/skills/reverse-spec/commands/analyze-deep.md`
+- `.claude/skills/reverse-spec/domains/_core.md`
+- `.claude/skills/smart-sdd/domains/_schema.md`
+
+---
+
+## [2026-03-21] G4: Large-Scale Project Handling
+
+### What Changed
+- Added Phase 1-4a "Scale Detection + Adaptive Processing" to `analyze-scan.md` — 3-tier scale classification (Small/Medium/Large) based on file count, module count, and estimated SBI entries. Large-scale adaptations: hierarchical module grouping (max 8–12 domain groups), domain-prefixed SBI numbering (B-INF-001), batched Phase 2 processing, Source Reference prioritization (Tier A/B/C), P3 summary mode
+- Added "Large-Scale SBI Processing" to `analyze-deep.md` — domain-prefixed IDs, per-domain-group processing, P3 summary mode, cross-domain integration point detection
+- Added 3 large-project heuristic rows to `context-injection-rules.md` Size Heuristics table — Source Reference >30 files per Feature, SBI >500 entries, Modules >60
+
+### Why
+- Projects with 78+ modules, 500+ SBI entries, and 31K files overwhelm flat processing. No scale thresholds existed, no hierarchical grouping, and no Source Reference prioritization caused context overflow during deep analysis.
+
+### Files
+- `.claude/skills/reverse-spec/commands/analyze-scan.md`
+- `.claude/skills/reverse-spec/commands/analyze-deep.md`
+- `.claude/skills/smart-sdd/reference/context-injection-rules.md`
+
+---
+
+## [2026-03-21] G5: adopt Phase 1.5 Conditional Skip for GUI Projects
+
+### What Changed
+- Replaced unconditional "Skip entirely" adopt mode rule in `analyze-runtime.md` with conditional logic based on Interface axis
+- If Interface axis includes `gui`: present HARD STOP AskUserQuestion letting user choose to run or skip Phase 1.5
+- If Interface axis does NOT include `gui`: skip entirely (unchanged behavior)
+- Added anti-pattern examples (WRONG: always skip / RIGHT: GUI gets optional HARD STOP)
+- Updated Phase routing table in `analyze.md` with clarifying note about adopt mode behavior
+- Updated section title from "Optional for adopt" to "Conditional for adopt"
+
+### Why
+- GUI projects in adopt mode were losing all UI structure information because Phase 1.5 was unconditionally skipped. GUI-heavy projects benefit from runtime exploration even in adoption mode to capture UI control types, interaction patterns, and visual layout that code analysis alone cannot reveal.
+
+### Files
+- `.claude/skills/reverse-spec/commands/analyze-runtime.md`
+- `.claude/skills/reverse-spec/commands/analyze.md`
+
+---
+
+## [2026-03-21] G2: adopt-specify SBI Parsing Protocol
+
+### What Changed
+- Added "SBI Parsing Protocol" section (~45 lines) to `adopt-specify.md` between "Source File Reading" and "Injected Content"
+- 4 concrete steps: Read SBI Table → Build Source Behavior Map → Generate FR with [source: B###] Tags → Coverage Validation
+- Two 🚫 BLOCKING gates: missing SBI table blocks execution; unmapped P1/P2 entries block Review approval
+- Anti-pattern examples (3 WRONG + 1 RIGHT) for agent behavior enforcement
+
+### Why
+- `adopt-specify.md` declared that B### SBI entries must map to FR-### with `[source: B###]` tags, but had NO concrete execution steps for HOW to read/parse the SBI table, iterate entries, and validate coverage. Agents would skip the parsing and produce generic FRs without source traceability.
+
+### Files
+- `.claude/skills/smart-sdd/reference/injection/adopt-specify.md`
+
+---
+
 ## [2026-03-21] G8: Archetype multi-detection + G9: SC template expansion
 
 ### What Changed

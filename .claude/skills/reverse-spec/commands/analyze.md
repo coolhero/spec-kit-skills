@@ -28,6 +28,29 @@ When `--skip-to` is provided, bypass all preceding phases with minimal defaults 
 
 ---
 
+### Explore-Enhanced Mode (`--from-explore <path>`)
+
+When `--from-explore` is provided, reverse-spec uses code-explore artifacts as **supplementary context** — enhancing (not replacing) its own analysis.
+
+**Pre-Phase: Read Explore Artifacts**
+1. Verify `{path}/synthesis.md` exists → if missing, warn and proceed without explore context
+2. Read Domain Profile from synthesis § Recommended Domain Profile → use as initial hypothesis (Phase 1 confirms or overrides)
+3. Read Entity/API Consolidation → cross-reference during Phase 2 (explore-sourced entities validate extraction completeness)
+4. Read Feature Candidates (C###) → seed Phase 3 boundary detection hypothesis (code analysis may reveal different boundaries)
+5. Read Accumulated Insights → enrich Phase 4 pre-context with user observations
+
+**Per-Phase Enrichment**:
+| Phase | How Explore Artifacts Help |
+|-------|--------------------------|
+| 1 (Scan) | Domain Profile hypothesis → confirm/refine tech stack detection faster |
+| 2 (Deep) | Entity/API maps → cross-validate extraction completeness (flag missed entities) |
+| 3 (Classify) | Feature candidates → seed boundary hypothesis (reduce classification ambiguity) |
+| 4 (Generate) | Insights + business rules → enrich pre-context.md with human-validated observations |
+
+Explore context is **advisory, not authoritative** — if code analysis contradicts explore findings, code analysis wins (source code is ground truth).
+
+---
+
 ## Pre-Phase — Git Repository Setup
 
 Before starting analysis, ensure the CWD (output directory) has a git repository. This enables branch-based workflow management throughout the SDD pipeline.
@@ -188,7 +211,7 @@ Each Phase is in a separate file. **Read the file BEFORE executing that Phase.**
 | Phase | File | Purpose | Lines |
 |-------|------|---------|-------|
 | **1** | [analyze-scan.md](analyze-scan.md) | Project scan — tech stack, entry points, modules | ~150 |
-| **1.5** | [analyze-runtime.md](analyze-runtime.md) | Runtime exploration — run source app, capture UI flows (🚫 BLOCKING for rebuild) | ~780 |
+| **1.5** | [analyze-runtime.md](analyze-runtime.md) | Runtime exploration — run source app, capture UI flows (🚫 BLOCKING for rebuild; adopt mode: optional HARD STOP for GUI projects, skip for non-GUI) | ~780 |
 | **2** | [analyze-deep.md](analyze-deep.md) | Deep analysis — data models, APIs, SBI, business logic | ~445 |
 | **3** | [analyze-classify.md](analyze-classify.md) | Feature classification — tier, dependencies, demo groups | ~358 |
 | **4** | [analyze-generate.md](analyze-generate.md) | Artifact + spec-draft generation — roadmap, registries, pre-context, spec-draft | ~585 |

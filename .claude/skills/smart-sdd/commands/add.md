@@ -159,6 +159,25 @@ Determine entry type from the user's input and arguments:
 
 #### Type 1 — Document-based
 
+#### Type 1 Step 1a: Document Parsing Protocol
+
+1. Read the file at `--prd` path. Detect format:
+   - Markdown (.md): parse by headings — each H2/H3 = potential Feature boundary
+   - Plain text (.txt): segment by blank-line-separated paragraphs
+   - PDF: extract text content, then apply heading/paragraph segmentation
+   - Other: ask user to paste key sections as text
+2. For each identified section/Feature boundary:
+   - Extract: name (from heading or first sentence), description (body text),
+     capability bullets, entity mentions (nouns), API hints (verbs + endpoints), dependency hints
+   - Assign candidate ID: C001, C002, etc.
+3. If fewer than 2 Features identified:
+   → AskUserQuestion: "Only [N] Feature(s) extracted. Options:"
+     - "Add more Features manually"
+     - "Proceed with [N] Feature(s)"
+     - "Provide a different document"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+4. Entity/API hints from document → pre-populate Perspective 3/4 during elaboration
+
 1. Read the PRD/requirements document at the `--prd` path
 2. Extract Feature candidates: name, description, capabilities, expected entities, API hints, dependencies
 3. Present extracted candidates for user confirmation/adjustment:
@@ -193,6 +212,20 @@ Determine entry type from the user's input and arguments:
 2. If `parity-report.md` exists at BASE_PATH: read gap areas for additional context
 3. If `coverage-baseline.md` exists at BASE_PATH: read Unmapped Items tables and collect all `cross-cutting` classified entries (files, endpoints, entities). These are **promotion candidates** — items previously deferred as shared infrastructure that may now warrant their own Feature.
 4. **Filter to `unmapped` status only**: Exclude `in_progress` behaviors (already assigned to pending Features). Only truly unmapped behaviors are gap candidates.
+
+#### Type 3 Step 3a: Gap Clustering Algorithm
+
+After filtering to unmapped-only behaviors (Step 4 above):
+
+1. **Source file proximity**: Group behaviors whose source files share a common parent directory (depth ≤ 2)
+2. **Entity co-reference**: Merge groups that reference the same entities (detected from function parameters and return types)
+3. **Naming pattern**: Merge groups whose function names share a common prefix (e.g., `handlePayment*`, `processOrder*`)
+4. **Minimum cluster size**: Clusters with <3 behaviors are merged into the nearest larger cluster by directory proximity
+5. **Name each cluster**: Use the dominant entity name or directory name as the Feature candidate name (C### ID assigned sequentially)
+6. **Cross-cutting detection**: If a behavior appears in 3+ clusters, classify as cross-cutting utility — NOT a Feature candidate, but noted in elaboration context
+
+This is a **heuristic algorithm** — results are presented to the user for confirmation/adjustment at the Type 3 HARD STOP.
+
 5. Cluster unmapped behaviors + cross-cutting items by domain/function (using behavior descriptions and source file proximity)
 6. Auto-propose Feature candidates from clusters:
    ```
@@ -225,6 +258,27 @@ Determine entry type from the user's input and arguments:
 #### Type 4 — Explore-Driven (`--from-explore`)
 
 > Triggered when `--from-explore <path>` is provided. Seeds Feature candidates from code-explore synthesis — the user has already studied the source and documented their understanding.
+
+#### Type 4 Step 1a: Synthesis Parsing Protocol (🚫 BLOCKING)
+
+1. Verify `{explore-path}/synthesis.md` exists. If missing:
+   → 🚫 BLOCKING: "synthesis.md not found at `{explore-path}`. Run `/code-explore synthesis` first."
+2. Parse `## Feature Candidates` table:
+   - For each row: extract C### ID, Name, Based On (trace refs), Key Modules, Owned Entities, APIs, Traces
+   - If table is empty or section missing:
+     → 🚫 BLOCKING: "No Feature candidates in synthesis.md. Run `/code-explore synthesis` to generate candidates, or use Type 2 (interactive) instead."
+3. Parse `## Consolidated Entity Map` → pre-populate entity ownership per candidate (Perspective 3 seed)
+4. Parse `## Consolidated API Map` → pre-populate API mapping per candidate (Perspective 4 seed)
+5. Parse `## Accumulated Insights`:
+   - 💡 Patterns to Adopt → seed Perspective 5 (Quality Attributes)
+   - 🔧 Design Improvements → seed Perspective 6 (Boundaries & Dependencies)
+   - ❓ Unresolved Questions → auto-generate elaboration questions for Brief
+6. For each candidate, read referenced traces (`{explore-path}/traces/{NNN}-{slug}.md`):
+   - Extract Observations sections → per-candidate elaboration context
+   - Extract Business Rules → seed domain logic understanding
+
+❌ WRONG: Accept --from-explore but present empty Brief → user must re-enter all explore findings manually
+✅ RIGHT: Parse synthesis → pre-populate Brief with explore-sourced perspectives → user refines, not re-creates
 
 1. **Read explore artifacts**:
    - Read `{path}/synthesis.md` — extract Feature Candidates table, Entity/API Consolidation, Business Rule Consolidation, and Accumulated Insights

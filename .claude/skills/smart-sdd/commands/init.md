@@ -135,6 +135,27 @@ After Proposal approval:
 
 > Activated when `--from-explore <path>` is provided. The user has already studied a reference codebase with `/code-explore` and wants to build a new project inspired by it. This mode seeds the Proposal with insights from exploration — Domain Profile, tech stack understanding, architectural patterns, and Feature candidates.
 
+#### Explore Step 1a: Synthesis Parsing Protocol (🚫 BLOCKING)
+
+1. Verify `{explore-path}/synthesis.md` exists. If missing:
+   → 🚫 BLOCKING: "synthesis.md not found at `{explore-path}`. Run `/code-explore synthesis` first."
+2. Parse sections by markdown heading detection:
+   - `## Recommended Domain Profile` → extract 5-axis table rows (Interface, Concern, Archetype, Foundation, Scenario) + Scale modifiers
+   - `## Feature Candidates` → extract table: C### ID, Name, Description, Based On, Key Modules, Owned Entities, APIs
+   - `## Consolidated Entity Map` → extract entity names, fields, candidate owners
+   - `## Consolidated API Map` → extract method, path, provider module
+   - `## Accumulated Insights` → extract by icon category (💡🔧❓⚠️)
+   - `## Handoff Readiness` → extract per-criterion status (✅/⚠️)
+3. Verify `{explore-path}/orientation.md` exists. If missing:
+   → ⚠️ WARNING (non-blocking): "orientation.md not found. Source project architecture context will be limited."
+4. If Handoff Readiness has any ⚠️ criteria:
+   → Display in Proposal: "⚠️ Exploration incomplete: [list ⚠️ criteria]"
+   → Auto-add to Open Questions section of Proposal
+
+❌ WRONG: Accept --from-explore flag but ignore synthesis.md content → Proposal generated from scratch
+❌ WRONG: Copy synthesis.md text verbatim into Proposal → loses structured extraction
+✅ RIGHT: Parse synthesis.md sections → map to Proposal fields → display source↔target comparison
+
 #### Explore Step 1: Read Explore Artifacts
 
 1. Read `{path}/synthesis.md`:

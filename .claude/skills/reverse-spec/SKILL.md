@@ -1,7 +1,7 @@
 ---
 name: reverse-spec
 description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. Use this skill whenever the user wants to analyze an existing codebase, extract Features from source code, generate a roadmap from existing code, or prepare an existing project for spec-driven rebuild or adoption.
-argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt] [--skip-to <phase>] [--lang <code>]"
+argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt] [--from-explore <path>] [--skip-to <phase>] [--lang <code>]"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
 
@@ -48,6 +48,11 @@ $ARGUMENTS parsing rules:
   --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
   --adopt       → SDD Adoption mode: forces --scope full --stack same, skips Question 3 (no renaming). Use when documenting existing code in-place.
   --skip-to <phase> → (DEV/TEST) Jump directly to a specific phase. Skips all preceding phases with sensible defaults. Valid values: "1.5", "2", "3", "4". Example: --skip-to 1.5 to test Runtime Exploration.
+  --from-explore <path>   Use code-explore artifacts to enrich analysis.
+                          Reads synthesis.md for Domain Profile hypothesis, entity/API
+                          pre-validation, and Feature boundary seeding.
+                          Does NOT skip any Phase — enhances each with pre-validated
+                          human understanding from exploration.
   --lang <code>     → Artifact language for generated files. Stored in sdd-state.md as Artifact Language.
                        If provided: update sdd-state.md and use this language.
                        If omitted: read from sdd-state.md. If absent, default to "en".
