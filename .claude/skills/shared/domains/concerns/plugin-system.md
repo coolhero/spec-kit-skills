@@ -20,6 +20,13 @@
 - Plugin lifecycle: load → initialize → activate → deactivate → unload patterns
 - Isolation: worker threads for plugins, sandboxed execution, permission scoping per plugin
 
+### Java SPI (Service Provider Interface)
+- `META-INF/services/` directory with interface-named files listing implementations
+- `java.util.ServiceLoader.load()` calls
+- `@AutoService` annotation (Google auto-service processor)
+- Spring's `META-INF/spring.factories` or `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
+- Abstract factory patterns with `ServiceLoader` discovery
+
 ---
 
 ## Module Metadata

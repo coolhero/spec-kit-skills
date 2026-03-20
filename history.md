@@ -5,6 +5,32 @@
 
 ---
 
+## [2026-03-21] SJ-Series: Spring/Java Enterprise Support + C/C++ Build System Stubs
+
+### What Changed
+
+**SJ-004+SJ-012: Spring Cloud Microservices Detection**
+- Added Spring Cloud-specific code patterns (Eureka, Feign, Gateway, Config Server, Resilience4j) to shared microservice archetype
+
+**SJ-006: Java SPI Plugin Mechanism**
+- Added ServiceLoader, META-INF/services, spring.factories detection to shared plugin-system concern
+
+**SJ-008: CQRS/Event Sourcing Concern (NEW)**
+- Created shared concern module with S0/R1 detection signals (Axon Framework, EventStoreDB, generic patterns)
+- Created reverse-spec concern module with R3 Feature boundary rules (Aggregate = Feature) and R4 data flow extraction (Command → Event → Projection)
+
+**C/C++ Build System Foundation Stubs**
+- Created cmake.md Foundation stub (CMakeLists.txt detection, target-based modules, preprocessor conditionals, Conan/vcpkg)
+- Created makefile.md Foundation stub (plain Make, Autotools, Meson, Bazel detection with per-system toolchain commands)
+
+### Why
+- Spring Cloud is the dominant Java microservice framework; inter-service calls via @FeignClient were invisible to dependency mapping
+- Java's ServiceLoader SPI is the native plugin mechanism, completely different from Node.js dynamic imports
+- CQRS/Event Sourcing requires different Feature boundary strategy (Aggregate-based, not package-based)
+- C/C++ projects use diverse build systems; Foundation stubs enable framework detection and correct toolchain commands
+
+---
+
 ## [2026-03-21] N-Series Gap Fixes Part 2: Multi-Ecosystem + Patterns + Adoption Report
 
 ### What Changed

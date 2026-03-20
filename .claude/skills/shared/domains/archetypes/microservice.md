@@ -18,6 +18,16 @@
 - **Code patterns**: gRPC service definitions (`.proto` files), message queue producers/consumers, service-to-service HTTP calls, circuit breaker patterns, distributed tracing (correlation IDs, trace headers), health check endpoints (`/health`, `/ready`, `/live`)
 - **Config files**: `docker-compose.yml` with multiple services, `Dockerfile`, Kubernetes manifests (`k8s/`, `helm/`), service mesh configs, `.proto` files, API gateway configs
 
+### Spring Cloud Patterns (Java/Kotlin)
+- `@EnableEurekaClient` / `@EnableDiscoveryClient` — service registry registration
+- `@FeignClient(name = "service-name")` — declarative inter-service HTTP client
+- Spring Cloud Gateway route definitions (`RouteLocatorBuilder`, `application.yml` routes)
+- `@EnableConfigServer` / `spring.cloud.config.*` — centralized configuration
+- `@CircuitBreaker` / `@Retry` (Resilience4j) / `@HystrixCommand` (legacy) — resilience patterns
+- `spring-cloud-starter-*` dependencies in `pom.xml`/`build.gradle`
+- `bootstrap.yml` / `bootstrap.properties` — Spring Cloud bootstrap config
+- `@RefreshScope` — runtime config refresh
+
 ---
 
 ## Module Metadata
