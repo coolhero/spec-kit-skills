@@ -136,31 +136,35 @@ sequenceDiagram
 
 ## Flow
 
+> **Source Location links**: Use markdown links so the user can click to open the file in their editor.
+> Format: `[short:line](relative-path-from-project-root#Lline)` — e.g., `[prompt.ts:666](packages/opencode/src/session/prompt.ts#L666)`
+> The `#Lline` fragment enables line-level navigation in VS Code/Cursor.
+
 | Step | Source Location | Action | Data In → Out |
 |------|----------------|--------|---------------|
-| 1 | `file.go:23` | functionName() | input → output |
-| 2 | `other.go:45` | processData() | raw → processed |
+| 1 | [file.go:23](src/file.go#L23) | functionName() | input → output |
+| 2 | [other.go:45](src/other.go#L45) | processData() | raw → processed |
 | ... | ... | ... | ... |
 
 ## Entities Observed
 
 | Entity | Source Location | Fields Observed | Notes |
 |--------|----------------|-----------------|-------|
-| User | `models/user.go:12` | id, name, email, role | Core identity |
-| Session | `session/session.go:5` | id, userId, token, expiresAt | Auth session |
+| User | [user.go:12](src/models/user.go#L12) | id, name, email, role | Core identity |
+| Session | [session.go:5](src/session/session.go#L5) | id, userId, token, expiresAt | Auth session |
 
 ## APIs Observed
 
 | Method | Path | Source Location | Request | Response |
 |--------|------|----------------|---------|----------|
-| POST | /api/login | `handlers/auth.go:34` | {email, password} | {token, user} |
+| POST | /api/login | [auth.go:34](src/handlers/auth.go#L34) | {email, password} | {token, user} |
 
 ## Business Rules
 
 | ID | Source Location | Rule Description |
 |----|----------------|-----------------|
-| BR-1 | `auth.go:56` | Token expires after 24h, refresh extends by 1h |
-| BR-2 | `auth.go:78` | 3 failed attempts → 15min lockout |
+| BR-1 | [auth.go:56](src/auth.go#L56) | Token expires after 24h, refresh extends by 1h |
+| BR-2 | [auth.go:78](src/auth.go#L78) | 3 failed attempts → 15min lockout |
 
 ## Observations
 
