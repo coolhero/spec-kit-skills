@@ -114,6 +114,11 @@ my-project/
 │   │   ├── entity-registry.md     ← Shared data models
 │   │   ├── api-registry.md        ← Inter-Feature API contracts
 │   │   └── sdd-state.md           ← Pipeline state + Domain Profile
+│   ├── explore/                   ← code-explore output
+│   │   ├── orientation.md         ← Architecture map + module map
+│   │   └── traces/                ← Per-topic flow traces
+│   │       ├── 001-context-mgmt.md
+│   │       └── 002-tool-execution.md
 │   ├── 001-auth/                  ← ALL Feature artifacts in one place
 │   │   ├── pre-context.md         ← What F001 needs to know (from reverse-spec)
 │   │   ├── spec-draft.md          ← Initial spec (from reverse-spec)

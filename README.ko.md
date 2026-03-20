@@ -112,6 +112,11 @@ my-project/
 │   │   ├── entity-registry.md     ← 공유 데이터 모델
 │   │   ├── api-registry.md        ← Feature 간 API 계약
 │   │   └── sdd-state.md           ← 파이프라인 상태 + Domain Profile
+│   ├── explore/                   ← code-explore 산출물
+│   │   ├── orientation.md         ← 아키텍처 맵 + 모듈 맵
+│   │   └── traces/                ← 주제별 흐름 트레이스
+│   │       ├── 001-context-mgmt.md
+│   │       └── 002-tool-execution.md
 │   ├── 001-auth/                  ← 모든 Feature 아티펙트 한 곳에
 │   │   ├── pre-context.md         ← F001이 알아야 할 것 (reverse-spec)
 │   │   ├── spec-draft.md          ← 초기 spec (reverse-spec)
