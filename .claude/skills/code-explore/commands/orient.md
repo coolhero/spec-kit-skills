@@ -244,14 +244,35 @@ When invoked with `--update`:
 
 ---
 
-## Post-Trace Auto-Update
+## Post-Trace Auto-Update (MANDATORY — called from trace.md Step 5)
 
-After every trace completion (called from trace.md):
+After every trace completion, update `orientation.md` with these **specific edits**:
 
-1. Read the trace document to identify which modules were touched
-2. Update Exploration Coverage percentages:
-   - Count unique files referenced in traces for each module
-   - Coverage = (files traced / total files in module) × 100%
-   - Update progress bar
-3. Add the trace to the Trace Index table
-4. If trace discovered files in a module not in the Module Map → add it (same as `--update` discovery)
+### 1. Update Exploration Coverage table
+
+Read the new trace's Flow table → extract all Source Location file paths → map each to a module in the Module Map.
+
+For each module mentioned in the trace:
+- Count unique source files referenced across ALL traces (not just this one)
+- Calculate: `coverage = (unique files in traces / File Count in Module Map) × 100%`
+- Update the coverage row:
+
+```
+Before: | packages/opencode/ | ░░░░░░░░░░ 0% | — |
+After:  | packages/opencode/ | ████░░░░░░ 40% | 001 |
+```
+
+**The coverage bar MUST be visually updated** — not just the percentage number. Use █ for filled and ░ for empty (10 characters total).
+
+### 2. Add trace to Trace Index table
+
+```
+Before: | (none yet) | | | |
+After:  | 001 | 코드베이스 컨텍스트 관리 | packages/opencode/ | 2026-03-20 |
+```
+
+### 3. Add new modules if discovered
+
+If the trace referenced files in a directory not in the Module Map, add a new row.
+
+> 🚨 **This step is NOT optional.** If orientation.md is not updated after a trace, the user sees stale coverage data and the synthesis step cannot accurately assess exploration completeness.
