@@ -1549,4 +1549,9 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |
 | `domains/archetypes/microservice.md` | Microservice — A0 semantic + code patterns (gRPC, service mesh, Docker) |
 | `domains/archetypes/sdk-framework.md` | SDK/Framework — A0 semantic + code patterns (package metadata, public API, extension points, examples) |
+| **Runtime** | |
+| `runtime/playwright-detection.md` | Playwright availability detection — CLI/MCP/CDP probe, Electron connection mode |
+| `runtime/data-storage-map.md` | Data storage detection — config stores, databases, file storage, lock analysis, userData path |
+| `runtime/user-assisted-setup.md` | User configuration flow — BLOCKING/PARTIAL/OPTIONAL classification, app-type-specific instructions |
+| `runtime/app-launch.md` | App launch + Playwright connection — Electron/Web/API/CLI with userData sharing |
 

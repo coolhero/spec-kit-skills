@@ -1,3 +1,9 @@
+> **Shared Runtime Modules**: This phase uses shared protocols from `shared/runtime/`:
+> - [`playwright-detection.md`](../../shared/runtime/playwright-detection.md) — Playwright availability
+> - [`data-storage-map.md`](../../shared/runtime/data-storage-map.md) — Storage detection + userData
+> - [`user-assisted-setup.md`](../../shared/runtime/user-assisted-setup.md) — User configuration flow
+> - [`app-launch.md`](../../shared/runtime/app-launch.md) — App launch + Playwright connection
+
 ## Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild, Optional for adopt)
 
 > **Purpose**: Run the original application and explore it interactively before deep code analysis. This provides visual and behavioral context (UI layout, user flows, actual states) that code reading alone cannot capture. The observations enrich Phase 2 analysis and Phase 4 deliverables.

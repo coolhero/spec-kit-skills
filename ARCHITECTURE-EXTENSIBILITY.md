@@ -99,6 +99,19 @@ This ensures a **single source of truth** — keyword updates in `shared/` autom
 
 See `shared/domains/_TEMPLATE.md` for the contributor template and `shared/domains/_taxonomy.md` for the complete module registry.
 
+### Shared Runtime Modules
+
+In addition to domain modules, `shared/runtime/` contains cross-skill protocols for app launch, data storage detection, and user configuration. These are **Interface-aware** — behavior changes based on Domain Profile Axis 1 (Interface):
+
+| Module | Purpose | Domain Profile Connection |
+|--------|---------|--------------------------|
+| `playwright-detection.md` | Detect Playwright backend | Interface determines connection mode (Electron → CLI, Web → browser) |
+| `data-storage-map.md` | Detect data storage + userData path | Foundation determines storage patterns (electron-store, SQLite, etc.) |
+| `user-assisted-setup.md` | Guide user through app config | Interface determines setup UX (Settings UI vs curl vs CLI commands) |
+| `app-launch.md` | Launch app + connect Playwright | Interface S8 Runtime Verification Strategy |
+
+Each Interface module's **S8 section** defines specific start/verify/stop methods. Shared runtime modules provide the **common protocol** that all S8 implementations follow. See `shared/runtime/_index.md` for the complete integration diagram.
+
 ---
 
 ## 2. 5-Axis + 1 Modifier Domain Composition
