@@ -7,15 +7,15 @@
 
 ---
 
-## Scale & Cross-Concern Adjustments
+## Scale & Cross-Concern Adjustments (🚫 BLOCKING)
 
-> **Loaded from**: `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+> Apply [`context-injection-rules.md`](../context-injection-rules.md) § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement before proceeding. If not applied → output will not match project maturity/team context.
 
-**At implement entry**:
-1. Read `sdd-state.md` → `project_maturity` and `team_context` values
-2. **Scale adjustments**: `prototype` → skip non-critical error handling, accept TODO stubs for edge cases; `production` → zero TODO stubs allowed, full error handling, logging/monitoring integration; `solo` → sequential task execution preferred; `large-team` → strict interface contracts, explicit module boundaries
-3. **Cross-Concern check**: For each active cross-concern combination, verify that implementation respects the combined pattern (e.g., `gui` + `ai-assistant` → streaming response rendering must handle abort/retry; `data-heavy` + `offline` → local-first storage with sync queue)
-4. Display in Checkpoint: `📊 Scale: {maturity} / {team_context} | Cross-Concerns: {N active}`
+**implement-specific adjustments**:
+- `prototype` → skip non-critical error handling, accept TODO stubs for edge cases
+- `production` → zero TODO stubs allowed, full error handling, logging/monitoring integration
+- `solo` → sequential task execution preferred; `large-team` → strict interface contracts, explicit module boundaries
+- Cross-Concern: verify implementation respects combined patterns (e.g., `gui` + `ai-assistant` → streaming response rendering must handle abort/retry; `data-heavy` + `offline` → local-first storage with sync queue)
 
 ---
 

@@ -7,15 +7,15 @@
 
 ---
 
-## Scale & Cross-Concern Adjustments
+## Scale & Cross-Concern Adjustments (🚫 BLOCKING)
 
-> **Loaded from**: `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+> Apply [`context-injection-rules.md`](../context-injection-rules.md) § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement before proceeding. If not applied → output will not match project maturity/team context.
 
-**At plan entry**:
-1. Read `sdd-state.md` → `project_maturity` and `team_context` values
-2. **Scale adjustments**: `prototype` → minimal architecture, inline patterns, no abstraction layers; `production` → full separation of concerns, error boundaries, monitoring hooks; `solo` → simpler module boundaries; `large-team` → explicit interface contracts between modules
-3. **Cross-Concern check**: For each active cross-concern combination, verify that plan architecture accounts for the combined pattern (e.g., `gui` + `data-heavy` → plan must address data-binding performance; `realtime` + `offline` → plan must address sync/conflict resolution)
-4. Display in Checkpoint: `📊 Scale: {maturity} / {team_context} | Cross-Concerns: {N active}`
+**plan-specific adjustments**:
+- `prototype` → minimal architecture, inline patterns, no abstraction layers
+- `production` → full separation of concerns, error boundaries, monitoring hooks
+- `solo` → simpler module boundaries; `large-team` → explicit interface contracts between modules
+- Cross-Concern: verify plan architecture accounts for combined patterns (e.g., `gui` + `data-heavy` → data-binding performance; `realtime` + `offline` → sync/conflict resolution)
 
 ```
 ❌ WRONG: Design architecture without Scale context → solo-prototype gets enterprise-grade abstraction layers

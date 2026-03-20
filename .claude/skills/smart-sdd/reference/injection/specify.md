@@ -7,15 +7,14 @@
 
 ---
 
-## Scale & Cross-Concern Adjustments
+## Scale & Cross-Concern Adjustments (🚫 BLOCKING)
 
-> **Loaded from**: `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+> Apply [`context-injection-rules.md`](../context-injection-rules.md) § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement before proceeding. If not applied → output will not match project maturity/team context.
 
-**At specify entry**:
-1. Read `sdd-state.md` → `project_maturity` and `team_context` values
-2. **Scale adjustments**: `prototype` → FR scope reduced to core-only, SC reduced to happy-path; `production` → add edge-case SCs, error-handling FRs, accessibility requirements
-3. **Cross-Concern check**: For each active cross-concern combination (from `_resolver.md` Step 3.5), verify that SCs cover the combined behavior pattern (e.g., `gui` + `realtime` → SC for reconnection UI; `gui` + `ai-assistant` → SC for streaming display)
-4. Display in Checkpoint: `📊 Scale: {maturity} / {team_context} | Cross-Concerns: {N active}`
+**specify-specific adjustments**:
+- `prototype` → FR scope reduced to core-only, SC reduced to happy-path
+- `production` → add edge-case SCs, error-handling FRs, accessibility requirements
+- Cross-Concern: verify SCs cover combined behavior patterns (e.g., `gui` + `realtime` → SC for reconnection UI; `gui` + `ai-assistant` → SC for streaming display)
 
 ```
 ❌ WRONG: Generate SCs without checking Scale → production project gets prototype-level coverage

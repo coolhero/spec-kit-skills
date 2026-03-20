@@ -6,7 +6,19 @@
 
 ---
 
-> **Scale & Cross-Concern Adjustments**: Read `sdd-state.md` → `project_maturity` and `team_context`. Scale adjustments: `prototype` → accept build-only verification, relaxed SC coverage threshold; `production` → strict SC coverage (≥80%), mandatory edge-case verification, performance baselines. Cross-Concern check: verify that combined behavior patterns (from `_resolver.md` Step 3.5) are tested at integration boundaries — e.g., `gui` + `realtime` → verify reconnection UI behavior, not just component existence. See `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+## Scale & Cross-Concern Adjustments (🚫 BLOCKING)
+
+> Apply [`context-injection-rules.md`](../context-injection-rules.md) § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement before proceeding. If not applied → output will not match project maturity/team context.
+
+**verify-specific adjustments**:
+- `prototype` → accept build-only verification, relaxed SC coverage threshold
+- `production` → strict SC coverage (≥80%), mandatory edge-case verification, performance baselines
+- Cross-Concern: verify combined behavior patterns are tested at integration boundaries (e.g., `gui` + `realtime` → verify reconnection UI behavior, not just component existence)
+
+```
+❌ WRONG: Run build-only check for production project → edge cases and SC coverage skipped
+✅ RIGHT: Read Scale → enforce SC coverage threshold → verify cross-concern integration tests present
+```
 
 > **Note**: `speckit-analyze` is NOT used in this step. Cross-artifact consistency (spec ↔ plan ↔ tasks) was already verified in step 4 (Analyze) before implementation. This step focuses on post-implementation validation.
 
