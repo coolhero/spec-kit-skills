@@ -69,7 +69,11 @@ Loaded modules provide: **Detection Signals** (R1), **Project Type Classificatio
 
 ## Workflow
 
-After parsing arguments, read `commands/analyze.md` for the complete workflow. Execute the following phases in order, reporting progress to the user after each Phase:
+After parsing arguments, read `commands/analyze.md` for Pre-Phase + Phase 0. Then **read each Phase file as you enter that Phase** — do NOT read all files upfront:
+
+> `analyze.md` (hub) → `analyze-scan.md` (Phase 1) → `analyze-runtime.md` (Phase 1.5) → `analyze-deep.md` (Phase 2) → `analyze-classify.md` (Phase 3) → `analyze-generate.md` (Phase 4)
+
+Execute the following phases in order, reporting progress to the user after each Phase:
 
 | Phase | Name | Description |
 |-------|------|-------------|
