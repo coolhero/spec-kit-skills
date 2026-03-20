@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 07:27 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:10 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1504,6 +1504,10 @@ Each skill follows the same internal directory convention:
 | `domains/foundations/chrome-extension.md` | Chrome Extension (Manifest V3) Foundation — F0 detection stub, architecture notes (service worker, content scripts, message passing) |
 | `domains/foundations/rust-cargo.md` | Rust (Cargo) Foundation — F0 detection stub, architecture notes (crate structure, visibility, traits, feature flags) |
 | `domains/foundations/svelte.md` | Svelte Foundation — F0 detection stub, architecture notes (components, reactivity, SvelteKit routing) |
+| `domains/foundations/spring-framework.md` | Spring Framework (non-Boot) Foundation — F0 detection stub, XML config, manual wiring, WAR deployment |
+| `domains/foundations/cmake.md` | CMake (C/C++) Foundation — F0 detection stub, target-based modules, preprocessor conditionals, Conan/vcpkg |
+| `domains/foundations/makefile.md` | Makefile/Autotools/Meson/Bazel Foundation — F0 detection stub, multi-build-system toolchain commands |
+| `domains/concerns/cqrs-eventsourcing.md` | CQRS/Event Sourcing concern — R1 detection, R3 Aggregate-based Feature boundary rules, R4 command→event→projection flow |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -1648,6 +1652,7 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/concerns/infra-as-code.md` | Infra-as-Code — S0 + R1 (Terraform, Helm, K8s manifests, Docker Compose, CI/CD, operators) |
 | `domains/concerns/llm-agents.md` | LLM agents — S0 + R1 (LLM SDKs, prompt templates, agent frameworks, multi-agent patterns) |
 | `domains/concerns/hardware-io.md` | Hardware I/O — S0 + R1 (ioctl, mmap, serial, USB, GPIO, KVM, device file access) |
+| `domains/concerns/cqrs-eventsourcing.md` | CQRS/Event Sourcing — S0 + R1 (Axon Framework, EventStoreDB, aggregate/command/event/query handler patterns) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant — A0 semantic + code patterns (LLM SDKs, streaming, RAG) |
 | `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |

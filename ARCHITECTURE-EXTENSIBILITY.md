@@ -873,3 +873,12 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Foundation files (svelte)** | `reverse-spec/domains/foundations/svelte.md` (detection stub) |
 | **Container-as-product SBI** | `reverse-spec/commands/analyze-deep.md` § Infrastructure-as-Product SBI Rule |
 | **Instrumentation SDK** | `shared/domains/archetypes/sdk-framework.md` § Instrumentation/Wrapper Variant |
+| **Spring/Java Enterprise SBI** | `reverse-spec/commands/analyze-deep.md` § Spring/Java Enterprise SBI Extension (annotation-driven bean discovery, AOP proxy, DI graph) |
+| **Spring Cloud microservices** | `shared/domains/archetypes/microservice.md` § Spring Cloud Patterns, `reverse-spec/domains/foundations/spring-boot.md` § F9 Spring Cloud |
+| **CQRS/Event Sourcing concern** | `shared/domains/concerns/cqrs-eventsourcing.md` (S0/R1), `reverse-spec/domains/concerns/cqrs-eventsourcing.md` (R3 Feature boundary, R4 data flow) |
+| **Java SPI (ServiceLoader)** | `shared/domains/concerns/plugin-system.md` § Java SPI |
+| **Maven/Gradle multi-module** | `reverse-spec/domains/foundations/_foundation-core.md` § Java/Maven + Java/Gradle Signals, `smart-sdd/reference/state-schema.md` § monorepo detection |
+| **Foundation files (Spring Framework)** | `reverse-spec/domains/foundations/spring-framework.md` (non-Boot detection stub) |
+| **Foundation files (C/C++ build)** | `reverse-spec/domains/foundations/cmake.md`, `reverse-spec/domains/foundations/makefile.md` |
+| **Hexagonal architecture** | `reverse-spec/commands/analyze-classify.md` § Architectural Pattern Detection |
+| **Reactive vs Servlet stack** | `reverse-spec/domains/foundations/spring-boot.md` § SB-BST-06, § F9 reactive patterns |
