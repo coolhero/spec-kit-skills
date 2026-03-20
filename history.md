@@ -4250,3 +4250,29 @@ Simulated 3 greenfield projects through the init pipeline (Hono REST API, Electr
 | `ARCHITECTURE-EXTENSIBILITY.md` | Added § 1.5 shared architecture section; updated § 3/4/5 contributor steps to 3-file pattern |
 | `README.md` | Added Proposal Modification sentence to CI/Proposal paragraph; updated timestamp |
 | `README.ko.md` | Added Proposal Modification sentence (Korean); updated timestamp |
+
+
+## [2026-03-20] Design-to-Implementation Wiring — Scale, Cross-Concern, Philosophy
+
+| Decision | Rationale |
+|----------|-----------|
+| Add Scale Modifier Enforcement + Cross-Concern Integration Enforcement to `context-injection-rules.md` | Scale modifier (project_maturity × team_context) was fully defined in `_resolver.md`/`_schema.md`/`state-schema.md` but NEVER consumed by any injection file. Cross-Concern Integration Rules (14 rules in `_resolver.md` Step 3.5) had zero enforcement logic. Both scored D in philosophy fidelity analysis — defined but not operationalized |
+| Add Scale & Cross-Concern Adjustments sections to all 4 injection files (specify, plan, implement, verify) | Per P2 (Enforce, Don't Reference), rules in a central file aren't enough — each execution point needs inline instructions. Each injection file now has a dedicated section that reads sdd-state.md Scale values, applies per-command adjustments, checks cross-concern combinations, and displays in Checkpoint |
+| Add explicit `Read injection/{step}.md` instructions to pipeline.md for plan, tasks, analyze | Pipeline injection was asymmetric — implement and verify had explicit "🚨 CRITICAL: Read injection/..." instructions, but plan/tasks/analyze relied on implicit Common Protocol Assemble. Agents skipped the injection files when not explicitly told to read them (P2 violation) |
+| Add "Design Philosophy" section to README.md + README.ko.md | The 3 foundational philosophies (P1 Context Continuity, P2 Enforce Don't Reference, P3 File over Memory) were only documented in CLAUDE.md. User-facing docs had no philosophy hierarchy — concepts were explained but not framed as a coherent governance system |
+| Add Sophistication Level current status to ARCHITECTURE-EXTENSIBILITY.md § 9 | Sophistication Levels were defined as an aspiration but never had honest "where we are now" markers. Added status table showing L1 ~90%, L2 ~60%, L3 ~40%, L4 ~10%, L5 ~15% |
+| Add P1/P2/P3 philosophy tags to lessons-learned.md Themes | Each Theme's lessons trace to specific philosophy violations, but the connection was implicit. Tags make the mapping explicit and help readers navigate by principle |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `smart-sdd/reference/context-injection-rules.md` | Added Scale Modifier Enforcement section + Cross-Concern Integration Enforcement section |
+| `smart-sdd/reference/injection/specify.md` | Added Scale & Cross-Concern Adjustments section |
+| `smart-sdd/reference/injection/plan.md` | Added Scale & Cross-Concern Adjustments section |
+| `smart-sdd/reference/injection/implement.md` | Added Scale & Cross-Concern Adjustments section |
+| `smart-sdd/reference/injection/verify.md` | Added Scale & Cross-Concern note in header |
+| `smart-sdd/commands/pipeline.md` | Added explicit injection file read instructions for plan, tasks, analyze steps |
+| `README.md` | Added Design Philosophy section; updated timestamp |
+| `README.ko.md` | Added 설계 철학 section; updated timestamp |
+| `ARCHITECTURE-EXTENSIBILITY.md` | Added Sophistication Level current status table to § 9 |
+| `lessons-learned.md` | Added P1/P2/P3 tags to all 9 Theme headings |

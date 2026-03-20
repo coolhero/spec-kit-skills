@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 17:35 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 18:23 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -16,6 +16,7 @@
 
 - [Quick Start](#quick-start)
 - [What It Solves](#what-it-solves)
+- [Design Philosophy](#design-philosophy)
 - [Skills](#skills)
 - [User Journeys](#user-journeys)
 - [Quick Examples](#quick-examples)
@@ -198,6 +199,31 @@ my-project/
 ```
 
 **Artifact Separation**: Project-wide artifacts (roadmap, registries, state) live in `specs/_global/`. Each Feature's artifacts — both analysis (pre-context, spec-draft from reverse-spec) and pipeline output (spec.md, plan.md, tasks.md from smart-sdd) — live together in `specs/NNN-feature/`. The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." Source details stay in pre-context.md, keeping specs clean and reusable.
+
+---
+
+## Design Philosophy
+
+Every design decision in spec-kit-skills traces back to three foundational principles. They answer a simple question: *Why do AI agent pipelines produce inconsistent results?*
+
+```
+            P1. Context Continuity (what to protect)
+           /          |           \
+  Domain Profile   Source Code    Cross-Feature
+  every step       every stage    every Feature
+          \           |           /
+         P2. Enforce, Don't Reference (how to protect)
+                      |
+         P3. File over Memory (where to store evidence)
+```
+
+**P1 — Context Continuity**: Information must flow without loss through every pipeline stage. Domain context (what kind of project), source fidelity (what the original code does), and cross-Feature memory (what other Features decided) — all must be systematically preserved. When any of these break, the agent makes decisions in a vacuum.
+
+**P2 — Enforce, Don't Reference**: "See X.md for details" has zero behavioral force. Agents optimize for completion, not compliance. Every critical rule needs three things: inline visibility (the rule itself, at the execution point), blocking power (can't proceed without compliance), and negative examples (what NOT to do). A rule that exists only in a reference file is decoration, not governance.
+
+**P3 — File over Memory**: Agent memory is ephemeral — bounded by context windows, lost across sessions, and unreliable under compaction. Every intermediate result, state transition, and decision must be persisted to a file. Files survive context limits, session breaks, and agent handoffs. When in doubt, write it down.
+
+These three principles are MECE for agent pipeline governance: P1 defines *what* to protect, P2 defines *how* to protect it, P3 defines *where* to store evidence. Every gap pattern in [lessons-learned.md](lessons-learned.md) traces back to a violation of exactly one of these three.
 
 ---
 

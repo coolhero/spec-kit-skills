@@ -85,6 +85,100 @@ Every pipeline command that uses Domain Profile rules (specify, plan, tasks, imp
 
 ---
 
+## Scale Modifier Enforcement (🚫 BLOCKING — must apply)
+
+After domain modules are loaded (Step 3 + 3.5), read `Project Maturity` and `Team Context` from sdd-state.md and apply adjustments. **This is NOT optional** — Scale affects how rules are enforced at every pipeline step.
+
+### Reading Scale Values
+
+```
+1. Read sdd-state.md header:
+   **Project Maturity**: prototype | mvp | production  (default: mvp if absent)
+   **Team Context**: solo | small-team | large-team     (default: solo if absent)
+
+2. Record values for use in all subsequent steps.
+```
+
+### Per-Command Scale Adjustments
+
+| Command | Maturity Effect | Team Context Effect |
+|---------|----------------|---------------------|
+| **specify** | `prototype`: SC depth = functional-only (skip performance/edge-case SCs). `mvp`: +key error-path SCs. `production`: full SC coverage including concurrency, performance, observability | No effect |
+| **add** (Brief) | `prototype`: S9 completion criteria relaxed (endpoints optional for API, screens optional for GUI). `mvp`/`production`: full S9 | `large-team`: add S5 probes for code ownership, API contract review process |
+| **plan** | `prototype`: S7 B-1 over-engineering guard active (warn if production-scale patterns in prototype). `production`: +observability requirements in architecture | `large-team`: add module ownership verification |
+| **implement** | `prototype`: S7 B-3 checks = warning only (not blocking). `production`: all B-3 checks blocking + observability instrumentation required | No effect |
+| **verify** | `prototype`: S3 tests = optional (encourage but don't block). `mvp`: tests required for critical paths only. `production`: comprehensive tests + performance benchmarks required | `large-team`: require PR review documentation in verify evidence |
+
+### Checkpoint Display
+
+Every Checkpoint MUST display Scale context:
+
+```
+📊 Scale: {maturity} / {team_context}
+   → SC depth: {functional-only | +error-paths | full}
+   → Test enforcement: {optional | critical-paths | comprehensive}
+```
+
+### Anti-Patterns
+
+```
+❌ WRONG: Load all S1 rules and enforce equally for prototype and production
+   → prototype gets "must handle concurrent writes with optimistic locking" = over-engineering
+
+✅ RIGHT: Load all S1 rules, but mark non-functional SCs as "(optional for prototype)"
+   → user sees the rule exists but it won't block progress
+
+❌ WRONG: Skip Scale reading because sdd-state.md doesn't have the fields
+   → Default to mvp/solo and note in Checkpoint: "Scale: mvp/solo (default)"
+```
+
+---
+
+## Cross-Concern Integration Enforcement
+
+After individual modules are loaded (Step 3), check for active concern combinations that trigger emergent patterns. These patterns inject **additional** S1/S5/S7 rules beyond what individual modules provide.
+
+### Procedure
+
+```
+1. Read active Interfaces, Concerns, and Archetype from merged profile.
+
+2. FOR EACH row in _resolver.md § Step 3.5 table:
+   IF ALL modules in the row's "Active Combination" are present in active profile:
+     → Extract "Injected Rule" column
+     → Append S1 rules to merged S1
+     → Append S5 probes to merged S5
+     → Append S7 rules to merged S7
+     → Record activated pattern name
+
+3. Display in Checkpoint:
+   "🔗 Cross-Concern: {N} integration rules active: {pattern names}"
+   If N = 0: "🔗 Cross-Concern: no emergent patterns for current profile"
+```
+
+### Per-Command Application
+
+| Command | How Integration Rules Apply |
+|---------|---------------------------|
+| **specify** | Injected S1 rules → additional SC patterns. Example: `gui+realtime` → "SC must cover optimistic update + reconnection UI" |
+| **add** (Brief) | Injected S5 probes → additional questions. Example: `gui+async-state+realtime` → "How does remote state sync with local store?" |
+| **plan** | Injected S7 B-1 rules → additional architecture checks. Example: `microservice+message-queue` → "cross-service message schema drift prevention" |
+| **implement** | Injected S7 B-3 rules → additional code checks. Example: `gui+realtime` → "stale UI after reconnect prevention" |
+| **verify** | Injected S1 rules → SC compliance check includes integration SCs |
+
+### Anti-Patterns
+
+```
+❌ WRONG: Load gui.md S1 + realtime.md S1 separately but skip Step 3.5
+   → User gets WebSocket reconnection SCs AND UI interaction SCs
+   → But MISSES "optimistic update during reconnection" = the emergent pattern
+
+✅ RIGHT: Load gui.md + realtime.md + Step 3.5 integration
+   → Merged S1 includes both individual AND combination rules
+```
+
+---
+
 **BASE_PATH**: `./specs/_global/` relative to CWD (project-wide GEL artifacts: roadmap, registries, state)
 **SPEC_PATH**: `./specs/` relative to CWD (per-Feature artifacts. Format: `specs/{NNN-feature}/` — contains ALL Feature artifacts: pre-context, spec-draft, spec, plan, tasks)
 

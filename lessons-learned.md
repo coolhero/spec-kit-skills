@@ -304,7 +304,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 > Concrete incidents with actionable takeaways. Grouped by theme.
 
-### Theme A: How Agents Interpret (and Ignore) Instructions
+### Theme A: How Agents Interpret (and Ignore) Instructions `[P2]`
 
 #### L1. Agents Fabricate Excuses to Bypass Safety Gates
 
@@ -348,7 +348,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme B: Context Window and Instruction Placement
+### Theme B: Context Window and Instruction Placement `[P2, P3]`
 
 #### L13. Rule Changes Require Re-execution to Validate
 
@@ -384,7 +384,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme C: Build and Verification Traps
+### Theme C: Build and Verification Traps `[P1, P2]`
 
 #### L5. State Selector Instability — Build Passes, Runtime Loops
 
@@ -406,7 +406,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme D: Cross-System Coordination
+### Theme D: Cross-System Coordination `[P1]`
 
 #### L16. Runtime Coupling ≠ Implementation Dependency
 
@@ -434,7 +434,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme E: Process and Maintenance
+### Theme E: Process and Maintenance `[P1, P3]`
 
 #### L2. Feature Ordering Must Survive Edge Cases
 
@@ -476,7 +476,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme F: Verification Completeness
+### Theme F: Verification Completeness `[P1, P2]`
 
 #### L23. Automation-Impossible ≠ Verification Skip
 
@@ -516,7 +516,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme G: Pipeline Architecture Patterns
+### Theme G: Pipeline Architecture Patterns `[P1, P2, P3]`
 
 #### L29. Ad-hoc Rules Don't Scale — Generalize into Guards
 
@@ -548,7 +548,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 **Universal takeaway**: Structural analysis (what components exist, how they're arranged) is necessary but insufficient for rebuild fidelity. **Behavioral paradigms** — how entities enter, activate, and exit a system — are orthogonal to structure and must be captured separately. In any system where entities have lifecycles (opt-in/opt-out, CRUD sequences, enable/disable patterns), the lifecycle paradigm must be an explicit, first-class artifact. Otherwise, agents default to the simplest implementation (typically "fetch all, enable all"), which is structurally valid but experientially wrong.
 
-### Theme H: Context Efficiency & Scalability
+### Theme H: Context Efficiency & Scalability `[P2, P3]`
 
 #### L37. Context Budget Is a Hard Ceiling — Framework Growth Must Account for It
 
@@ -567,7 +567,7 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
-### Theme I: Foundational Architecture Principles
+### Theme I: Foundational Architecture Principles `[P1, P2, P3]`
 
 #### L34. Three Foundational Philosophies — The Minimum Viable Governance
 

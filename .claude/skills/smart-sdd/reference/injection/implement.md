@@ -7,6 +7,18 @@
 
 ---
 
+## Scale & Cross-Concern Adjustments
+
+> **Loaded from**: `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+
+**At implement entry**:
+1. Read `sdd-state.md` → `project_maturity` and `team_context` values
+2. **Scale adjustments**: `prototype` → skip non-critical error handling, accept TODO stubs for edge cases; `production` → zero TODO stubs allowed, full error handling, logging/monitoring integration; `solo` → sequential task execution preferred; `large-team` → strict interface contracts, explicit module boundaries
+3. **Cross-Concern check**: For each active cross-concern combination, verify that implementation respects the combined pattern (e.g., `gui` + `ai-assistant` → streaming response rendering must handle abort/retry; `data-heavy` + `offline` → local-first storage with sync queue)
+4. Display in Checkpoint: `📊 Scale: {maturity} / {team_context} | Cross-Concerns: {N active}`
+
+---
+
 ## 🚨 BLOCKING Gates Summary (rebuild + GUI — read this FIRST)
 
 > **The gates in this section are defined in detail at the bottom of the file, but the agent may not read that far, so they are summarized here. See each gate's detailed section for full procedures.**

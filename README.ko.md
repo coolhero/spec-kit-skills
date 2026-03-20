@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 17:35 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 18:23 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -14,6 +14,7 @@
 
 - [빠른 시작](#빠른-시작)
 - [해결하는 문제](#해결하는-문제)
+- [설계 철학](#설계-철학)
 - [스킬](#스킬)
 - [사용자 여정](#사용자-여정)
 - [빠른 예시](#빠른-예시)
@@ -196,6 +197,31 @@ my-project/
 ```
 
 **아티펙트 분리**: 프로젝트 전체 아티펙트(roadmap, registries, state)는 `specs/_global/`에. 각 Feature의 아티펙트 — 분석(pre-context, spec-draft)과 파이프라인 산출물(spec.md, plan.md, tasks.md) — 은 `specs/NNN-feature/`에 함께. 파이프라인 아티펙트는 **요구사항만** 포함 — 소스 코드 참조 없음. spec.md를 읽으면 "무엇을 만드는지"만 보이고, "어디서 왔는지"는 보이지 않습니다. 소스 분석 결과는 pre-context.md에 유지되어 spec이 깨끗하고 재사용 가능합니다.
+
+---
+
+## 설계 철학
+
+spec-kit-skills의 모든 설계 결정은 3가지 기본 원칙으로 수렴합니다. 이 원칙들은 하나의 질문에 답합니다: *왜 AI 에이전트 파이프라인은 일관성 없는 결과를 만드는가?*
+
+```
+            P1. Context Continuity (무엇을 보호하는가)
+           /          |           \
+  Domain Profile   Source Code    Cross-Feature
+  모든 단계에서     모든 스테이지   모든 Feature 간
+          \           |           /
+         P2. Enforce, Don't Reference (어떻게 보호하는가)
+                      |
+         P3. File over Memory (증거를 어디에 저장하는가)
+```
+
+**P1 — Context Continuity**: 정보는 파이프라인의 모든 단계에서 손실 없이 흘러야 합니다. Domain context(프로젝트 유형), source fidelity(원본 코드의 동작), cross-Feature memory(다른 Feature의 결정사항) — 모두 체계적으로 보존되어야 합니다. 하나라도 깨지면 에이전트는 진공 상태에서 결정을 내립니다.
+
+**P2 — Enforce, Don't Reference**: "상세 내용은 X.md 참조"는 행동 강제력이 제로입니다. 에이전트는 규정 준수가 아니라 완료를 최적화합니다. 모든 중요 규칙에는 3가지가 필요합니다: 인라인 가시성(실행 시점에 규칙 자체가 보임), 차단력(준수하지 않으면 진행 불가), 부정적 예시(하면 안 되는 것). 참조 파일에만 존재하는 규칙은 거버넌스가 아니라 장식입니다.
+
+**P3 — File over Memory**: 에이전트 메모리는 일시적입니다 — 컨텍스트 윈도우에 제한되고, 세션 간 유실되며, 압축 시 신뢰할 수 없습니다. 모든 중간 결과, 상태 전환, 결정은 파일에 저장해야 합니다. 파일은 컨텍스트 한계, 세션 단절, 에이전트 교체에서도 살아남습니다. 의심스러우면 파일에 기록하세요.
+
+이 3가지 원칙은 에이전트 파이프라인 거버넌스를 MECE로 커버합니다: P1은 *무엇을* 보호할지, P2는 *어떻게* 보호할지, P3는 *어디에* 증거를 저장할지 정의합니다. [lessons-learned.md](lessons-learned.md)의 모든 Gap Pattern은 정확히 이 3가지 중 하나의 위반으로 추적됩니다.
 
 ---
 

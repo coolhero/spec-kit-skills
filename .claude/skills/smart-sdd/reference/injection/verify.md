@@ -6,6 +6,8 @@
 
 ---
 
+> **Scale & Cross-Concern Adjustments**: Read `sdd-state.md` → `project_maturity` and `team_context`. Scale adjustments: `prototype` → accept build-only verification, relaxed SC coverage threshold; `production` → strict SC coverage (≥80%), mandatory edge-case verification, performance baselines. Cross-Concern check: verify that combined behavior patterns (from `_resolver.md` Step 3.5) are tested at integration boundaries — e.g., `gui` + `realtime` → verify reconnection UI behavior, not just component existence. See `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+
 > **Note**: `speckit-analyze` is NOT used in this step. Cross-artifact consistency (spec ↔ plan ↔ tasks) was already verified in step 4 (Analyze) before implementation. This step focuses on post-implementation validation.
 
 > **Greenfield/add note**: For greenfield or add-origin projects, cross-Feature verification points in pre-context.md may be limited to dependency-based checks only (no source-code-derived verification points). The verify command works the same way — it just has fewer pre-defined verification items.

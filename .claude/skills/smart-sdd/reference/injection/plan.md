@@ -7,6 +7,23 @@
 
 ---
 
+## Scale & Cross-Concern Adjustments
+
+> **Loaded from**: `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement.
+
+**At plan entry**:
+1. Read `sdd-state.md` → `project_maturity` and `team_context` values
+2. **Scale adjustments**: `prototype` → minimal architecture, inline patterns, no abstraction layers; `production` → full separation of concerns, error boundaries, monitoring hooks; `solo` → simpler module boundaries; `large-team` → explicit interface contracts between modules
+3. **Cross-Concern check**: For each active cross-concern combination, verify that plan architecture accounts for the combined pattern (e.g., `gui` + `data-heavy` → plan must address data-binding performance; `realtime` + `offline` → plan must address sync/conflict resolution)
+4. Display in Checkpoint: `📊 Scale: {maturity} / {team_context} | Cross-Concerns: {N active}`
+
+```
+❌ WRONG: Design architecture without Scale context → solo-prototype gets enterprise-grade abstraction layers
+✅ RIGHT: Read Scale → adjust architecture depth → verify cross-concern patterns addressed in plan
+```
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |
