@@ -21,6 +21,9 @@
 | **fullstack** | Backend + Frontend integrated |
 | **mobile** | iOS/Android app |
 | **library** | Reusable library/package |
+| **infrastructure** | Databases, proxies, load balancers, container runtimes, message brokers, networking tools |
+| **desktop** | Desktop applications (Electron, Tauri, Qt, GTK, native GUI) |
+| **platform** | Multi-product monorepo containing multiple independently deployable products/services |
 
 ---
 
@@ -150,6 +153,8 @@ Identify logical functional units (Features) based on the Phase 2 analysis resul
 - **Route groups** (based on API path prefixes)
 - **Entity clusters** (groups of closely related entities)
 - **Interaction intensity** (Phase 3-1d): Feature pairs with Interaction Score ≥ 10 should be reviewed for potential merger; Features with Score = 0 across all pairs should be reviewed for correct scoping
+- **Protocol boundaries** — For infrastructure/network projects, each protocol handler or processing pipeline constitutes a natural Feature boundary.
+- **Workspace/package boundaries** — For monorepos, each workspace package with its own manifest file (package.json, Cargo.toml, go.mod) is a candidate Feature boundary. Packages with `private: true` are internal utility candidates.
 
 Define the following for each Feature:
 - Feature name (concise English name)

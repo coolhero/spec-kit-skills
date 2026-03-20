@@ -32,6 +32,18 @@ For projects with multiple source languages, detect the composition:
    | `.rb` | Ruby |
    | `.cs` | C# |
    | `.svelte` | Svelte |
+   | `.swift` | Swift |
+   | `.m`, `.h` | Objective-C |
+   | `.dart` | Dart |
+   | `.php` | PHP |
+   | `.rb` | Ruby |
+   | `.erl`, `.hrl` | Erlang |
+   | `.ex`, `.exs` | Elixir |
+   | `.scala`, `.sc` | Scala |
+   | `.clj`, `.cljs`, `.cljc`, `.edn` | Clojure/ClojureScript |
+   | `.gd` | GDScript |
+   | `.tf`, `.hcl`, `.tfvars` | HCL |
+   | `.cs` | C# |
 
 2. **Compute percentages**: Sort by file count descending
 3. **Classify by presence**:

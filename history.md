@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-21] Multi-Language & Multi-Platform Coverage Expansion
+
+### What Changed
+
+- **SBI Multi-Language Table** (analyze-deep.md): Added 12 languages — Swift, Objective-C, Dart, PHP, Ruby, C#, Erlang, Elixir, Scala, GDScript, Clojure, HCL
+- **Extension-to-Language Mapping** (analyze-scan.md): Added 12 corresponding extension mappings for the new languages
+- **R2 Project Type** (_core.md): Added 3 types — `infrastructure`, `desktop`, `platform`
+- **R5 Feature Boundary Heuristics** (_core.md): Added protocol boundaries (infrastructure) and workspace/package boundaries (monorepos)
+- **F0 Detection Signals** (_foundation-core.md): Added 14 frameworks — Swift/SPM, iOS/Xcode, Android Native, Nuxt, Angular, Remix, Qwik, Symfony, WordPress, Erlang/OTP, Qt, GTK, Bazel, SBT/Scala
+- **F4 Framework ID** (_foundation-core.md): Added 11 new FW codes — SW, AG, NU, RX, QK, SY, WP, ER, QT, GK, BZ
+
+### Why
+
+Coverage gaps meant projects in these stacks would fall through to generic detection paths, losing framework-specific extraction patterns and Foundation signals.
+
+---
+
 ## [2026-03-21] SJ-Series: Spring/Java Enterprise Support + C/C++ Build System Stubs
 
 ### What Changed

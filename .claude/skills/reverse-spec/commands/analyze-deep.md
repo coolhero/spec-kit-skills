@@ -67,6 +67,18 @@ When Language Composition Analysis (Phase 1-2a) detected multiple languages with
    | Rust | `fn` declarations | `pub fn`, `pub struct` |
    | Java | Method declarations, `@Bean` factory methods | `public`, `protected`, Spring stereotype annotations (`@Service`, `@Repository`, `@Controller`) |
    | Kotlin | `fun`/`suspend fun` declarations, `data class`, `object`/`companion object` | `public` (default), Spring stereotypes. Note: `suspend fun` = coroutine, `sealed class` = state machine, `Flow<T>` = reactive stream |
+   | Swift | `func`/`static func`/`init()` declarations, `class`/`struct`/`enum`/`protocol`/`extension` | `public`/`open` access (default `internal`); `@objc` = ObjC-interop |
+   | Objective-C | `-`/`+` method declarations in `@interface`/`@implementation` | Header file (`.h`) declarations = public API; categories = extensions |
+   | Dart | `class` + method declarations, top-level functions | No `_` prefix = public; `_` prefix = private; `Widget build()` = UI component |
+   | PHP | `function`/`class` method declarations | `public`/`protected`/`private` visibility; namespace declarations |
+   | Ruby | `def` method, `class`/`module` definitions | `public` section (above `private`/`protected` keywords); `include`/`extend` |
+   | C# | Method declarations, `async Task`, `class`/`struct`/`interface`/`record` | `public`/`internal`/`protected`; Unity: `MonoBehaviour` lifecycle methods |
+   | Erlang | `-module`, `-export` functions, `-callback` behaviors | `-export([func/arity])` list; GenServer: `handle_call/3`, `handle_cast/2` |
+   | Elixir | `def`/`defp`, `defmodule` declarations | `def` (public), `defp` (private); `@callback`, `use GenServer` |
+   | Scala | `def`, `val`, `object`/`class`/`trait` declarations | Public by default; `private`/`protected` modifiers; `case class`, `sealed trait` |
+   | GDScript | `func` declarations, `signal` definitions | `class_name`, `export var`, `extends` (public by default; `_` prefix = private) |
+   | Clojure | `defn`, `defmethod`, `defprotocol`, `defrecord` | Namespace-level public functions (no `-` prefix = public) |
+   | HCL | `resource`, `data`, `variable`, `output`, `module`, `provider` blocks | Top-level block declarations |
 
 #### Spring/Java Enterprise SBI Extension (when Foundation = Spring Boot or Spring Framework)
 

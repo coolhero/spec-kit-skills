@@ -35,6 +35,20 @@ Identify the primary framework(s) from project files:
 | Rust (Cargo) | `Cargo.toml` in root + `.rs` source files (standalone — without actix-web/tauri-specific signals) |
 | Svelte | `svelte` in dependencies + `.svelte` files + `svelte.config.*` |
 | Spring Framework | `spring-context`/`spring-web` in `pom.xml`/`build.gradle` WITHOUT `spring-boot-starter-*` + XML config OR `@Configuration` with `@Bean` |
+| Swift (SPM) | `Package.swift` in root + `.swift` source files |
+| iOS (Xcode) | `.xcodeproj` or `.xcworkspace` + `Info.plist` |
+| Android Native | `build.gradle` with `com.android.application`/`com.android.library` + `AndroidManifest.xml` |
+| Nuxt | `nuxt` in package.json deps + `nuxt.config.*` |
+| Angular | `@angular/core` in deps + `angular.json` |
+| Remix | `@remix-run/react` in deps |
+| Qwik | `@builder.io/qwik` in deps |
+| Symfony | `symfony/framework-bundle` in `composer.json` + `config/bundles.php` |
+| WordPress | `wp-config.php` + `wp-content/` directory |
+| Erlang/OTP | `rebar.config` or `.app.src` + `-behaviour` declarations |
+| Qt | `Q_OBJECT` macro or `qt_add_qml_module` in CMake + `.ui`/`.qml` files |
+| GTK | `gtk_init` or `GtkApplication` + `.glade` files or `meson.build` with gtk dep |
+| Bazel | `BUILD.bazel` + `WORKSPACE` or `MODULE.bazel` in root |
+| SBT (Scala) | `build.sbt` + `.scala` source files |
 
 **Multiple frameworks**: A project may use multiple frameworks (e.g., Express backend + React frontend). Detect all, load Foundation files for each. Comma-separate in `**Framework**` field.
 
@@ -231,7 +245,7 @@ Each Foundation item has a globally unique ID:
 
 | Component | Description | Example |
 |-----------|-------------|---------|
-| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), SF (Spring Framework), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix), CE (Chrome Extension), RC (Rust/Cargo), SV (Svelte) |
+| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), SF (Spring Framework), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix), CE (Chrome Extension), RC (Rust/Cargo), SV (Svelte), SW (Swift/SPM), AG (Angular), NU (Nuxt), RX (Remix), QK (Qwik), SY (Symfony), WP (WordPress), ER (Erlang/OTP), QT (Qt), GK (GTK), BZ (Bazel) |
 | CAT | Category code from § F1 | WIN, SEC, IPC, MID, REN, etc. |
 | NN | Sequential number (01-99) | 01, 02, 03, ... |
 
