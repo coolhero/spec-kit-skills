@@ -5,6 +5,51 @@
 
 ---
 
+## [2026-03-21] N-Series Gap Fixes + Completion Analysis Report
+
+### What Changed
+
+**N1+N2+N3: Monorepo Detection for Python/Rust/Go**
+- Added Python monorepo signals (pyproject.toml workspaces, uv, poetry, hatch, Pants/Bazel), Rust workspace signals (Cargo.toml [workspace]), and Go workspace signals (go.work, multiple go.mod) to `_foundation-core.md` F0 monorepo detection
+- Updated `state-schema.md` Structure detection (step 6b) to include Python/Rust/Go workspace signals alongside existing JS signals
+
+**N9: Micro Scale Tier**
+- Added Micro tier (<50 files, <5 modules, <50 SBI) to the scale classification table in `analyze-scan.md`
+- Added Micro-scale adaptations: simplified pipeline, single-Feature default, minimal artifact ceremony
+
+**N5/N6/N7/N13: New Foundation and Concern Stubs**
+- Created `chrome-extension.md` — Foundation stub for Manifest V3 Chrome extensions (F0 detection, architecture notes, runtime exploration guidance)
+- Created `rust-cargo.md` — Foundation stub for standalone Rust/Cargo projects (F0 detection, crate-based architecture notes)
+- Created `svelte.md` — Foundation stub for Svelte/SvelteKit projects (F0 detection, reactivity model notes)
+- Created `hardware-io.md` — Concern stub for hardware I/O projects (S0 detection signals, SBI priority mapping)
+- Added `.svelte` to Extension-to-Language Mapping table in `analyze-scan.md`
+- Added Chrome Extension, Rust (Cargo), Svelte to F0 detection signals table and F4 FW codes in `_foundation-core.md`
+- Added all 3 new Foundation stubs to F6 Framework Files table
+
+**Completion Analysis Report (PART 2)**
+- Created `shared/reference/completion-report.md` — shared template with 7 sections (Project Profile, Feature Catalog, SBI Summary, Entity & API, Quality Assessment, Recommendations, Artifact Inventory) usable by both reverse-spec and smart-sdd adopt
+- Added Phase 4-5 "Completion Analysis Report Generation" step to `analyze-generate.md` — reads shared template, populates from Phase artifacts, writes to `specs/_global/completion-report.md`, displays key metrics summary
+- Renumbered Phase 4-5 (Completion Checkpoint) to Phase 4-6
+
+### Why
+- Python/Rust/Go ecosystems have mature monorepo/workspace tooling that was undetected, causing misclassification as single-package
+- Projects with <50 files were classified as "Small" but their pipeline overhead was disproportionate — Micro tier enables simplified processing
+- Chrome extensions, standalone Rust, Svelte, and hardware I/O projects had no Foundation/Concern detection, falling through to generic handling
+- reverse-spec Phase 4 produced individual artifacts but no aggregated analysis report, making it hard to assess extraction quality or decide next steps
+
+### Files
+- `.claude/skills/reverse-spec/domains/foundations/_foundation-core.md` (F0, F4, F6 updates)
+- `.claude/skills/reverse-spec/commands/analyze-scan.md` (Micro tier, .svelte extension)
+- `.claude/skills/reverse-spec/commands/analyze-generate.md` (Phase 4-5 Completion Report)
+- `.claude/skills/smart-sdd/reference/state-schema.md` (monorepo detection)
+- `.claude/skills/reverse-spec/domains/foundations/chrome-extension.md` (new)
+- `.claude/skills/reverse-spec/domains/foundations/rust-cargo.md` (new)
+- `.claude/skills/reverse-spec/domains/foundations/svelte.md` (new)
+- `.claude/skills/shared/domains/concerns/hardware-io.md` (new)
+- `.claude/skills/shared/reference/completion-report.md` (new)
+
+---
+
 ## [2026-03-21] G1: --from-explore Implementation
 
 ### What Changed

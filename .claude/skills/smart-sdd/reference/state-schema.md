@@ -403,7 +403,7 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
    - `adoption` — if initialized from `/reverse-spec` artifacts for adoption workflow (`/smart-sdd adopt`)
    - Origin does not change when Features are added later via `/smart-sdd add`
 6b. Set Structure based on project analysis:
-   - `monorepo` — if Turbo, Lerna, Nx, or Bun/pnpm/Yarn workspaces detected (multiple `package.json` files in subdirectories, or `workspaces` field in root `package.json`)
+   - `monorepo` — if Turbo, Lerna, Nx, or Bun/pnpm/Yarn workspaces detected (multiple `package.json` files in subdirectories, or `workspaces` field in root `package.json`); or Python workspace signals (multiple `pyproject.toml` + `[tool.uv.workspace]` / `[tool.poetry.packages]` / Pants/Bazel BUILD); or Rust workspace (`Cargo.toml` with `[workspace]` + `members`); or Go workspace (`go.work` + multiple `go.mod`)
    - `single-package` — default for all other projects
    - For `rebuild` / `adoption`: auto-detected from source project structure during `/reverse-spec` Phase 1
    - For `greenfield`: set based on init project configuration (default `single-package`)

@@ -535,7 +535,32 @@ smart-sdd will automatically:
   5. Track SBI coverage (B### → FR-### mapping) and Demo Group progress in sdd-state.md
 ```
 
-### 4-5. Completion Checkpoint (commit + tag)
+### 4-5. Completion Analysis Report Generation
+
+After all Phase 4 artifacts are generated, create the Completion Analysis Report:
+
+1. Read the shared template: `~/.claude/skills/shared/reference/completion-report.md`
+2. Populate all sections using data from generated artifacts:
+   - §1 Project Profile: from Phase 1 scan results + sdd-state.md
+   - §2 Feature Catalog: from roadmap.md
+   - §3 SBI Summary: aggregate from all pre-context.md files
+   - §4 Entity & API: from entity-registry.md + api-registry.md
+   - §5 Quality Assessment: per-phase confidence (record during each phase)
+   - §6 Recommendations: based on scope (core vs full), scale, and any unresolved questions
+   - §7 Artifact Inventory: list all generated files with paths
+3. Write to `specs/_global/completion-report.md`
+4. Display summary in the Phase 4-4 Completion Report output:
+   ```
+   📊 Completion Analysis Report saved to specs/_global/completion-report.md
+
+   Key metrics:
+   - [N] Features across [N] Release Groups
+   - [N] SBI entries (P1: [N], P2: [N], P3: [N])
+   - [N] entities, [N] APIs
+   - Recommended next step: [adopt/rebuild/explore]
+   ```
+
+### 4-6. Completion Checkpoint (commit + tag)
 
 After displaying the Completion Report, create a git checkpoint so the user can reset smart-sdd pipeline state back to this point:
 

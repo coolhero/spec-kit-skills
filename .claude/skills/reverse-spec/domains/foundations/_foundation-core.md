@@ -31,12 +31,30 @@ Identify the primary framework(s) from project files:
 | ASP.NET Core | `*.csproj` with `Microsoft.AspNetCore.*` + `WebApplication.CreateBuilder` in `Program.cs` |
 | Laravel | `laravel/framework` in `composer.json` + `artisan` + `routes/api.php` |
 | Phoenix | `:phoenix` in `mix.exs` deps + `lib/*_web/` + `router.ex` with `scope`/`pipe_through` |
+| Chrome Extension | `manifest.json` with `"manifest_version": 3` (or 2) + `chrome.runtime`/`chrome.tabs` keywords |
+| Rust (Cargo) | `Cargo.toml` in root + `.rs` source files (standalone — without actix-web/tauri-specific signals) |
+| Svelte | `svelte` in dependencies + `.svelte` files + `svelte.config.*` |
 
 **Multiple frameworks**: A project may use multiple frameworks (e.g., Express backend + React frontend). Detect all, load Foundation files for each. Comma-separate in `**Framework**` field.
 
 **Priority**: If multiple signals conflict, prioritize by specificity (e.g., Next.js over plain React, NestJS over Express).
 
 **Monorepo detection**: If root `package.json` contains `workspaces` field, OR `turbo.json`/`nx.json`/`lerna.json` exists, classify as monorepo. Scan each workspace package for individual framework detection. Record all detected frameworks comma-separated in `**Framework**` field.
+
+**Python Monorepo Signals** (any 2+ = Python monorepo):
+- Multiple `pyproject.toml` files in subdirectories
+- `uv.lock` + `[tool.uv.workspace]` in root pyproject.toml
+- `poetry.lock` with `[tool.poetry.packages]` referencing subdirs
+- `hatch.toml` or `[tool.hatch.envs]` with multiple environments
+- Pants/Bazel BUILD files with Python targets
+
+**Rust Workspace Signals**:
+- Root `Cargo.toml` with `[workspace]` section and `members = [...]`
+- Multiple `Cargo.toml` files in subdirectories (crates)
+
+**Go Workspace Signals**:
+- `go.work` file in root (Go 1.18+ multi-module workspace)
+- Multiple `go.mod` files in subdirectories
 
 ---
 
@@ -200,7 +218,7 @@ Each Foundation item has a globally unique ID:
 
 | Component | Description | Example |
 |-----------|-------------|---------|
-| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix) |
+| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix), CE (Chrome Extension), RC (Rust/Cargo), SV (Svelte) |
 | CAT | Category code from § F1 | WIN, SEC, IPC, MID, REN, etc. |
 | NN | Sequential number (01-99) | 01, 02, 03, ... |
 
@@ -311,6 +329,9 @@ Each framework Foundation file in this directory follows the structure defined i
 | `dotnet.md` | ASP.NET Core | ~30 | 13 | ✅ | Implemented |
 | `laravel.md` | Laravel | ~30 | 13 | ✅ | Implemented |
 | `phoenix.md` | Phoenix | ~25 | 12 | ✅ | Implemented |
+| `chrome-extension.md` | Chrome Extension (MV3) | — | — | — | Detection stub |
+| `rust-cargo.md` | Rust (Cargo) | — | — | — | Detection stub |
+| `svelte.md` | Svelte | — | — | — | Detection stub |
 
 ---
 

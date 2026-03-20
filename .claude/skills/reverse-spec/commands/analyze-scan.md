@@ -31,6 +31,7 @@ For projects with multiple source languages, detect the composition:
    | `.swift` | Swift |
    | `.rb` | Ruby |
    | `.cs` | C# |
+   | `.svelte` | Svelte |
 
 2. **Compute percentages**: Sort by file count descending
 3. **Classify by presence**:
@@ -80,13 +81,19 @@ Classify the project type based on the collected information. Use the project ty
 
 After module identification, classify project scale:
 
-| Metric | Small | Medium | Large |
-|--------|-------|--------|-------|
-| Source files | <500 | 500–5,000 | >5,000 |
-| Detected modules | <20 | 20–60 | >60 |
-| Estimated SBI entries | <200 | 200–500 | >500 |
+| Metric | Micro | Small | Medium | Large |
+|--------|-------|-------|--------|-------|
+| Source files | <50 | 50–500 | 500–5,000 | >5,000 |
+| Detected modules | <5 | 5–20 | 20–60 | >60 |
+| Estimated SBI | <50 | 50–200 | 200–500 | >500 |
 
 **Scale classification**: Use the HIGHEST tier triggered by any single metric.
+
+**Micro-scale adaptations** (activated when scale = Micro):
+1. **Simplified Pipeline**: Skip Phase 1.5 (Runtime) unless Interface = gui. Collapse Phase 2 sub-steps into a single pass.
+2. **Single-Feature Default**: If <50 SBI entries estimated, propose a single Feature encompassing the entire project. User can override at Phase 3 HARD STOP.
+3. **Minimal Artifact Ceremony**: constitution-seed.md is optional (can be inlined). Registries may be empty if only 1 Feature.
+4. **Display**: `📏 Project Scale: Micro (~30 files, ~3 modules) → Simplified pipeline`
 
 **Large-scale adaptations** (activated when scale = Large):
 
