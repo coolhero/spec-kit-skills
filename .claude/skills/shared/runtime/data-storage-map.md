@@ -2,6 +2,11 @@
 
 > **Shared module** — used by reverse-spec (Phase 1-6), smart-sdd (verify), code-explore (orient).
 > Identifies WHERE the app stores persistent data and derives runtime configuration.
+>
+> **Core problem this solves**: Dev mode and production mode often use DIFFERENT data directories.
+> If the user configured API keys via `pnpm run dev`, those keys are in the dev directory.
+> If Playwright launches the production build, it reads the production directory — and finds nothing.
+> This module resolves the correct path so Playwright sees the user's actual configuration.
 
 ---
 
@@ -12,10 +17,11 @@ Scan source code for storage patterns:
 | Storage Type | Detection Signals | Example |
 |-------------|------------------|---------|
 | **Config store** | `electron-store`, `conf`, `configstore`, `dotenv` | API keys, preferences |
-| **SQL database** | `better-sqlite3`, `prisma`, `drizzle`, `typeorm`, `sequelize` | Entities, sessions |
+| **SQL database** | `better-sqlite3`, `prisma`, `drizzle`, `typeorm`, `sequelize`, `libsql` | Entities, sessions |
 | **Document DB** | `dexie`, `indexedDB`, `pouchdb`, `lowdb` | Messages, documents |
 | **Key-value** | `localStorage`, `redux-persist`, `zustand/persist` | App state, UI prefs |
 | **File storage** | `app.getPath('userData')`, custom data dirs | Uploads, vector DBs |
+| **Encrypted** | `safeStorage`, OS keychain, credential manager | API keys, tokens |
 | **External service** | `redis`, `mongodb`, `postgres` connection strings | Server-side data |
 
 ---
@@ -29,46 +35,154 @@ Scan source code for storage patterns:
 |---------|------|----------|-------|----------|
 | [name] | [type] | [path] | [Yes/No] | [what's stored] |
 
-userData path: [resolved path]
-App name: [from package.json name/productName]
+Dev userData: [resolved dev path]
+Prod userData: [resolved prod path]
+Active userData: [most recent = user's actual config] ← PLAYWRIGHT_USER_DATA_DIR
 ```
 
 ---
 
-## userData Path Resolution
+## userData Path Resolution — Universal Algorithm
 
-### Electron/Tauri (Desktop)
+### Step 1: Extract App Identity from Source
 
-1. Read `package.json` → `name` field
-2. Read `electron-builder.yml` or equivalent → `productName` field
-3. **Dev vs prod userData paths differ** — this is the #1 cause of "my settings aren't visible":
-   - **Production build**: uses `productName` → `~/Library/Application Support/[productName]/`
-   - **Dev mode**: uses `name` → `~/Library/Application Support/[name]/`
-   - **electron-vite dev mode**: appends `Dev` suffix → `~/Library/Application Support/[productName]Dev/`
-4. **ALWAYS check ALL possible paths** — list `~/Library/Application Support/` and grep for the app name:
-   ```bash
-   ls "/Users/[user]/Library/Application Support/" | grep -i [app-name]
-   ```
-5. **Use the MOST RECENT config.json** — compare timestamps across all matching directories:
-   ```bash
-   stat -f "%Sm" "/Users/[user]/Library/Application Support/[dir]/config.json"
-   ```
-   The most recently modified is the one the user has been using.
-6. Record the correct path as `PLAYWRIGHT_USER_DATA_DIR`
+| App Type | Where to find identity |
+|----------|----------------------|
+| **Electron** | `package.json` → `name` (dev), `electron-builder.yml` → `productName` (prod) |
+| **Electron (electron-vite)** | Same + `Dev` suffix appended in dev mode |
+| **Electron (electron-forge)** | `forge.config.js` → `packagerConfig.name` (prod) |
+| **Tauri** | `tauri.conf.json` → `productName` (both modes usually same) |
+| **NW.js** | `package.json` → `name` |
+| **Web app** | `.env` → `DATABASE_URL`, `SESSION_STORE` |
+| **CLI tool** | `package.json` → `name` or `bin` key |
 
-**Common mistake**: Using productName path (`Cherry Studio`) when user configured via `pnpm run dev` (which uses `Cherry StudioDev`). The API keys, model settings, and KB data are in the dev path.
+### Step 2: Resolve Platform Base Path
 
-### Web / API Server
+| Platform | Base path |
+|----------|-----------|
+| **macOS** | `~/Library/Application Support/` |
+| **Linux** | `~/.config/` |
+| **Windows** | `%APPDATA%/` |
+| **Web DB** | Connection string from `.env` or ORM config |
+| **CLI config** | `~/.config/[name]/` or `~/.[name]rc` |
 
-| Storage | Location |
-|---------|----------|
-| Database | Connection string from `.env` or ORM config |
-| Session | Redis URL or in-memory |
-| Uploads | `uploads/` dir or cloud storage config |
+### Step 3: Discover ALL Matching Directories
 
-### CLI Tool
+**🚨 CRITICAL**: Do NOT assume a single directory. Dev/prod/test modes create DIFFERENT directories.
 
-Config locations: `~/.config/[app]/`, `~/.local/share/[app]/`, `~/.[app]rc`
+```bash
+# macOS example — find ALL directories matching the app name
+ls "/Users/$(whoami)/Library/Application Support/" | grep -i "[app-name-fragment]"
+```
+
+**Known patterns that create multiple directories**:
+
+| Build Tool | Dev Directory | Prod Directory |
+|-----------|--------------|---------------|
+| **electron-vite** | `[productName]Dev` | `[productName]` |
+| **electron-builder** | `[name]` (package.json) | `[productName]` (builder config) |
+| **electron-forge** | `[name]` | `[packagerConfig.name]` |
+| **Tauri** | Same as prod (usually) | `[productName]` |
+
+**Real-world example (Cherry Studio)**:
+```
+~/Library/Application Support/
+  Cherry Studio/        ← installed app (productName)
+  Cherry StudioDev/     ← electron-vite dev mode (productName + "Dev")
+  CherryStudio/         ← older version (package.json name)
+  CherryStudioDev/      ← older dev mode
+```
+
+### Step 4: Determine Active Directory
+
+Compare config file timestamps across ALL discovered directories:
+
+```bash
+for dir in [each discovered directory]; do
+  stat -f "%Sm" "$dir/config.json" 2>/dev/null
+done
+```
+
+**The most recently modified = the one the user is actively using.**
+
+Record as `PLAYWRIGHT_USER_DATA_DIR`.
+
+### Step 5: Verify Settings Exist
+
+After determining the active directory, verify it contains the expected settings:
+
+```bash
+# Check config store exists and has content
+cat "[active-dir]/config.json" | head -5
+
+# Check database files exist
+ls "[active-dir]/Data/" 2>/dev/null
+
+# Check for encrypted storage markers
+ls "[active-dir]/SafeStorage/" 2>/dev/null
+```
+
+If the active directory is empty or missing expected files → warn the user:
+```
+⚠️ Active userData directory exists but appears empty.
+The user may not have configured the app yet.
+```
+
+---
+
+## Web / API Server Environment Resolution
+
+Web apps don't have userData directories, but they have **environment-specific configuration**:
+
+### Step 1: Detect Environment Files
+
+```bash
+ls -la .env .env.local .env.development .env.production .env.test 2>/dev/null
+```
+
+| File | Priority | Typical Content |
+|------|----------|-----------------|
+| `.env.local` | Highest (user-specific) | API keys, local overrides |
+| `.env.development` | Dev mode only | Dev database URL, debug flags |
+| `.env.production` | Prod mode only | Prod database URL, prod API keys |
+| `.env` | Default fallback | Shared settings |
+
+### Step 2: Determine Active Database
+
+```bash
+# From .env or ORM config
+grep DATABASE_URL .env .env.local .env.development 2>/dev/null
+```
+
+**Dev vs prod may use different databases**:
+- Dev: `sqlite:./dev.db` or `postgres://localhost/myapp_dev`
+- Prod: `postgres://prod-server/myapp`
+
+### Step 3: Verify Server is Running
+
+```bash
+# Check if dev server is already running
+lsof -i :[expected-port] 2>/dev/null
+curl -s http://localhost:[port]/health 2>/dev/null
+```
+
+If server is running → Playwright connects to it (no new server needed).
+If server is NOT running → start it, wait for health check, then proceed.
+
+---
+
+## CLI Tool Config Resolution
+
+```bash
+# Check standard config locations
+for path in \
+  "$HOME/.config/[app-name]/" \
+  "$HOME/.[app-name]rc" \
+  "$HOME/.[app-name]/config" \
+  "$HOME/.local/share/[app-name]/"; do
+  [ -e "$path" ] && echo "FOUND: $path" && stat -f "%Sm" "$path"
+done
+```
 
 ---
 
@@ -81,17 +195,20 @@ Config locations: `~/.config/[app]/`, `~/.local/share/[app]/`, `~/.[app]rc`
 | SQLite (non-WAL) | ❌ Single writer | App MUST be closed |
 | electron-store (JSON) | ✅ File-based | Can coexist (last-write-wins) |
 | Redis / MongoDB | ✅ Multi-client | No issue |
+| PostgreSQL | ✅ Multi-client | No issue |
 | .env / config files | ✅ File-based | Can coexist |
+| OS Keychain (safeStorage) | ✅ OS-managed | Can coexist |
 
 ---
 
 ## Derived Variables (consumed by other modules)
 
 ```
-PLAYWRIGHT_USER_DATA_DIR = [resolved userData path]
-REQUIRE_APP_CLOSE = true if any LevelDB store detected
+PLAYWRIGHT_USER_DATA_DIR = [resolved active userData path — Step 4 result]
+REQUIRE_APP_CLOSE = true if any LevelDB/single-process store detected
 SETUP_METHOD = "in-app-ui" | "env-file" | "cli-command" | "database-seed"
 AUTO_BLOCKING_ITEMS = [list of items stored in config store that need user setup]
+DEV_VS_PROD_WARNING = true if dev and prod directories both exist and differ
 ```
 
 ---
@@ -100,6 +217,6 @@ AUTO_BLOCKING_ITEMS = [list of items stored in config store that need user setup
 
 | Skill | Step | What It Uses |
 |-------|------|-------------|
-| **reverse-spec** | Phase 1-6 (detect) → Phase 1.5 (consume) | Full map + userData + lock analysis |
+| **reverse-spec** | Phase 1-6 (detect) → Phase 1.5 (consume) | Full map + active userData + lock analysis |
 | **smart-sdd** | verify pre-flight | userData path + lock for test isolation decision |
-| **code-explore** | orient (detect) | userData path for optional runtime trace |
+| **code-explore** | orient (detect) | userData path for runtime trace |
