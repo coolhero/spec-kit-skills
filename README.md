@@ -1491,6 +1491,7 @@ Each skill follows the same internal directory convention:
 | `reference/ui-flow-spec.md` | UI Flow Specification format — step-by-step interaction sequences for GUI Features |
 | `reference/ui-testing-integration.md` | Playwright MCP integration guide for UI verification |
 | `reference/user-cooperation-protocol.md` | User assistance patterns for HARD STOP interactions |
+| `reference/cascading-update.md` | Artifact Change Detection + Cascading Update Protocol — ensures changes flow through artifact hierarchy (spec→plan→tasks→code), never directly to code |
 | `reference/pipeline-integrity-guards.md` | 7 generalized guard patterns from 44 SKF field failures — extensible pipeline protection system |
 | **Context Injection** | |
 | `reference/injection/adopt-plan.md` | Adopt plan step — document existing architecture as-is |

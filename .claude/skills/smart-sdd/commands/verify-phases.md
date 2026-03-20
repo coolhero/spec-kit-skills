@@ -43,6 +43,8 @@ Before classifying by file count, ask: **"Does spec.md have an SC that defines t
 
 **Rationale**: The core principle of SDD is "spec defines the completion criteria." Sending behavior without an SC back to implement for fixing is not spec-driven but an ad-hoc fix. implement must always be about implementing the spec's SCs.
 
+**For Major-Spec or Major-Plan regressions**: Use the **Cascading Update Protocol** ([`reference/cascading-update.md`](../reference/cascading-update.md)) for incremental updates. Do NOT re-run the entire specify→plan→tasks pipeline. Instead: update spec.md (append FR/SC) → cascade to plan.md (append component) → cascade to tasks.md (append task) → implement the new task only → verify the new SC only.
+
 **Step B: File count classification (only when SC exists)**
 
 - **Minor**: Fix touches ≤2 files, no API/interface change, no architectural reasoning needed

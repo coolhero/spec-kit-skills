@@ -1,0 +1,212 @@
+# Cascading Update Protocol
+
+> **When to read this file**: When a user provides feedback, requests changes, or directly edits an artifact (spec.md, plan.md, tasks.md) at ANY point after specify completes.
+>
+> **Core principle**: All changes flow through the artifact hierarchy. Code is NEVER directly modified without first updating the appropriate artifact. The artifact hierarchy is the single source of truth; code is derived from it.
+
+---
+
+## Artifact Hierarchy
+
+```
+spec.md (WHAT to build)
+  ↓ drives
+plan.md (HOW to build)
+  ↓ drives
+tasks.md (STEPS to build)
+  ↓ drives
+source code (THE build)
+```
+
+**Upstream changes cascade downstream. Downstream changes may require upstream updates.**
+
+---
+
+## Trigger: User Feedback During Pipeline
+
+When the user provides feedback at any HARD STOP or between steps:
+
+### Step 1 — Classify the Change Level
+
+**Before touching ANY file**, determine which artifact level the change belongs to:
+
+| Signal | Level | Example |
+|--------|-------|---------|
+| "This feature should also do X" | **spec** | Missing FR — new requirement |
+| "The SC doesn't cover Y" | **spec** | Missing/incomplete SC |
+| "This should be a dropdown, not text input" | **spec** | FR detail missing |
+| "Use a different architecture for this" | **plan** | Architecture change |
+| "This component should be split into two" | **plan** | Component structure change |
+| "Add a task for error handling" | **tasks** | Missing task |
+| "This function has a bug" | **code** | Implementation bug (Minor) |
+
+**Decision flow**:
+```
+Is the user describing WHAT should happen (behavior/requirement)?
+  → spec level change
+
+Is the user describing HOW it should be built (architecture/design)?
+  → plan level change
+
+Is the user describing WHICH steps to take (task ordering/grouping)?
+  → tasks level change
+
+Is the user pointing out a bug in existing code?
+  → code level (use Bug Fix Severity Rule)
+```
+
+### Step 2 — Update the Origin Artifact
+
+Update ONLY the artifact at the identified level:
+
+| Level | Action |
+|-------|--------|
+| **spec** | Add/modify FR-### or SC-### in spec.md. Mark new items with `[added: post-specify]` tag |
+| **plan** | Add/modify component, architecture decision, or Interaction Chain in plan.md. Mark with `[added: post-plan]` tag |
+| **tasks** | Add/modify task in tasks.md. Mark with `[added: post-tasks]` tag |
+| **code** | Apply Bug Fix Severity Rule (verify-phases.md). Minor = inline fix. Major = route back to correct level |
+
+### Step 3 — Cascade Downstream (Incremental)
+
+After updating the origin artifact, cascade **only the change** downstream — do NOT re-run the entire step:
+
+```
+spec.md changed (new FR-008 added):
+  → plan.md: Add component/architecture to support FR-008 ONLY
+     (do NOT regenerate entire plan — append to existing)
+  → tasks.md: Add implementation tasks for FR-008 ONLY
+     (do NOT regenerate entire tasks — append to existing)
+  → If already in implement: Add new tasks to task queue
+  → If already in verify: Add new SC to verification matrix
+
+plan.md changed (new component added):
+  → tasks.md: Add tasks for new component ONLY
+  → spec.md: Check if new component implies a missing FR
+     (if yes → add FR first, then cascade again)
+
+tasks.md changed (new task added):
+  → No upstream change needed (tasks don't drive spec/plan)
+  → If in implement: Add to task queue
+```
+
+### Step 4 — Record the Change
+
+Append to sdd-state.md Feature Detail Log:
+
+```
+📝 POST-SPECIFY UPDATE: FR-008 "citation rendering" added during [plan/implement/verify]
+   Origin: user feedback at [step] Review
+   Cascade: → plan.md (CitationBlock added) → tasks.md (T012 added)
+```
+
+This creates an audit trail of post-specify changes.
+
+---
+
+## Trigger: User Directly Edits Artifact Files
+
+When the user modifies spec.md, plan.md, or tasks.md directly (e.g., in their editor):
+
+### Detection
+
+At each HARD STOP, before displaying Review content:
+
+1. **Check file timestamps**: Compare spec.md, plan.md, tasks.md modification times against last known state
+2. **If changed**: Read the diff and display:
+   ```
+   📝 Artifact change detected:
+     spec.md: 2 lines added (FR-008, SC-008)
+
+   Cascade needed:
+     → plan.md: Add architecture for FR-008
+     → tasks.md: Add implementation tasks for FR-008
+
+   Proceed with cascading update?
+   ```
+3. **HARD STOP**: User confirms cascade or provides additional context
+
+### Cascade Rules (same as Step 3 above)
+
+The cascade is identical whether the change came from user feedback or direct file editing.
+
+---
+
+## Incremental Update Format
+
+When cascading, use **append sections** marked clearly:
+
+### spec.md incremental addition:
+```markdown
+## Post-Specify Additions
+
+> Added during [plan/implement/verify] based on [user feedback / source comparison / verify finding]
+
+### FR-008: Citation rendering in chat responses
+Each KB search result renders as a numbered badge [N] inline in the AI response.
+Clicking the badge shows a tooltip with source file name and content preview.
+
+### SC-008: Citation click shows correct source
+User clicks citation badge [2] → tooltip displays source #2's file name and matched text.
+```
+
+### plan.md incremental addition:
+```markdown
+## Post-Plan Additions
+
+### CitationBlock Component (added for FR-008)
+- Renders inline [N] badges from KB search results
+- Tooltip on click with source preview
+- Uses refNumber-based lookup (not array index)
+```
+
+### tasks.md incremental addition:
+```markdown
+## Post-Tasks Additions
+
+### T012: Implement CitationBlock component (FR-008)
+- Create CitationBlock.tsx with refNumber-based lookup
+- Integrate into MessageContent renderer
+- Add citation data to AI prompt injection
+```
+
+---
+
+## Anti-Patterns
+
+```
+❌ WRONG: User says "citation doesn't work" → agent modifies code directly
+   → spec has no FR for citation → verify will find the same issue again
+
+❌ WRONG: User says "add citation" during implement → agent adds code without spec
+   → No SC exists → verify cannot evaluate → "implemented but unverifiable"
+
+❌ WRONG: User edits spec.md → agent ignores → continues with old plan
+   → plan/tasks/code diverge from spec → accumulated drift
+
+✅ RIGHT: User says "citation doesn't work" →
+   Step 1: "This is a spec-level issue (no FR for citation)"
+   Step 2: Add FR-008, SC-008 to spec.md
+   Step 3: Cascade → plan (CitationBlock) → tasks (T012)
+   Step 4: Implement T012 → verify SC-008
+```
+
+---
+
+## Context Optimization Note
+
+This file is ~150 lines. It should be read:
+- **Once** when the user first provides feedback or edits an artifact
+- **NOT** at every HARD STOP (only when a change is detected)
+- pipeline.md contains a brief reference to trigger reading this file
+
+The agent does NOT need to re-read this file for every step — just when the cascading protocol is needed.
+
+---
+
+## Consumers
+
+| Trigger Point | How Referenced |
+|--------------|---------------|
+| Any HARD STOP where user requests changes | pipeline.md § Cascading Update Reference |
+| Any HARD STOP where artifact file timestamp changed | pipeline.md § Artifact Change Detection |
+| verify Bug Fix Severity = Major-Spec or Major-Plan | verify-phases.md § Bug Fix Severity Rule |

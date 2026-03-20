@@ -782,6 +782,29 @@ Executes the following steps **strictly in order** for each Feature.
 >
 > **4. Fix → Runtime Verify → Report**: Every code fix must be followed by runtime verification before reporting to user. `❌ Code fix → build passes → "Fix complete" → ✅ Code fix → build → run app → verify the specific feature works → "Fix complete, runtime verified"`
 
+> **🔄 CASCADING UPDATE PROTOCOL** (apply at ALL HARD STOPs after specify):
+>
+> When the user requests changes or directly edits an artifact file (spec.md, plan.md, tasks.md):
+>
+> **1. NEVER modify code directly to address user feedback.** First determine: is this a spec issue, plan issue, tasks issue, or code bug?
+> **2. Update the HIGHEST-LEVEL artifact first**, then cascade incrementally downstream.
+> **3. If user edited a file directly**, detect the change and offer cascading update.
+>
+> ```
+> ❌ User: "citation doesn't work" → agent modifies code directly
+> ✅ User: "citation doesn't work" → "No FR for citation in spec.md.
+>    Adding FR-008 + SC-008 → cascading to plan (CitationBlock)
+>    → tasks (T012) → implement T012 → verify SC-008"
+> ```
+>
+> **Read [`reference/cascading-update.md`](../reference/cascading-update.md) when**:
+> - User requests changes at any Review HARD STOP
+> - User says "this should also do X" or "X is missing"
+> - Artifact file timestamps changed since last check
+> - verify finds Major-Spec or Major-Plan issue
+>
+> **Do NOT read it** at every HARD STOP — only when a change is detected.
+
 > **⚠️ INTER-STEP CONTINUITY — DO NOT STOP BETWEEN STEPS**:
 > After a step's Update completes and there are remaining steps, **IMMEDIATELY begin the next step** (e.g., plan Update done → start tasks Checkpoint). Do NOT display a "completed" summary and wait. Do NOT show "Next steps" commands. The pipeline is a continuous flow within a Feature — the ONLY valid pause points are HARD STOPs (awaiting user approval), BLOCK conditions, Feature completion, or unrecoverable errors. If you find yourself about to generate a response that ends without starting the next step — **STOP, you are breaking continuity. Proceed to the next step.**
 

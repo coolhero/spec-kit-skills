@@ -1505,6 +1505,7 @@ specs/
 | `reference/ui-flow-spec.md` | UI Flow Specification 포맷 — GUI Feature용 단계별 인터랙션 시퀀스 |
 | `reference/ui-testing-integration.md` | Playwright MCP 통합 가이드 — UI 검증용 |
 | `reference/user-cooperation-protocol.md` | HARD STOP 인터랙션을 위한 사용자 협력 패턴 |
+| `reference/cascading-update.md` | 아티펙트 변경 감지 + 계단식 업데이트 프로토콜 — 변경이 아티펙트 계층(spec→plan→tasks→code)을 통해 흐르도록 보장 |
 | `reference/pipeline-integrity-guards.md` | 44건의 SKF 현장 실패에서 추출한 7가지 일반화된 가드 패턴 — 확장 가능한 파이프라인 보호 시스템 |
 | **Context Injection** | |
 | `reference/injection/adopt-plan.md` | Adopt plan 단계 — 기존 아키텍처를 있는 그대로 문서화 |
