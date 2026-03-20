@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 18:23 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 18:32 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -16,7 +16,7 @@
 
 - [Quick Start](#quick-start)
 - [What It Solves](#what-it-solves)
-- [Design Philosophy](#design-philosophy)
+- [Design Discipline](#design-discipline)
 - [Skills](#skills)
 - [User Journeys](#user-journeys)
 - [Quick Examples](#quick-examples)
@@ -88,9 +88,15 @@ The challenge is that **real software is never just one Feature.** Even a simple
 
 The agent building Feature 2 *might* figure out what Feature 1 decided — but that depends on the agent's capability and context window, not on any systematic guarantee. It may define the same `User` entity with different field names, or design APIs without knowing the auth pattern already chosen. Even within a single spec, the agent may lack sufficient understanding of the user's environment — the same "add authentication" means very different things for a multi-tenant SaaS platform versus an internal admin tool. And when the user's description is vague, like "add profile management," the agent may just accept it without asking what it actually means.
 
-Each spec is internally solid, but these gaps — no memory across Features, insufficient understanding of the project's context, and no verification of user intent — are not things a single-spec workflow can address. spec-kit-skills adds three concepts to close them:
+Each spec is internally solid, but these gaps — no memory across Features, insufficient understanding of the project's context, and no verification of user intent — are not things a single-spec workflow can address.
+
+spec-kit-skills starts from a single belief: **the quality of an AI agent pipeline is determined not by the agent's capability, but by the quality of the structure you give it.** A smarter agent with no structure produces inconsistent results; a structured pipeline with clear context produces reliable results regardless of which agent runs it.
+
+This belief leads to three core concepts:
 
 #### Global Evolution Layer
+
+> *Features are not islands — they are an ecosystem. Every Feature must be built with full knowledge of the whole project.*
 
 **The gap**: Each agent manages context its own way, and none track cross-Feature relationships systematically.
 
@@ -108,6 +114,8 @@ Each spec is internally solid, but these gaps — no memory across Features, ins
 Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
 
 #### Domain Profile
+
+> *Every project has a DNA. The same "add authentication" means completely different things for a desktop app, a REST API, and an AI assistant.*
 
 **The gap**: Agents apply the same generic approach regardless of project type. Every project and every organization has its own conventions, constraints, and quality criteria that agents don't know about.
 
@@ -138,6 +146,8 @@ Domain Profile is a **first-class citizen** — not a configuration that's set o
 See [Domain Module System](#domain-module-system) for details.
 
 #### Brief
+
+> *Never trust that the agent understood. Verify understanding before it becomes code.*
 
 **The gap**: Agents start coding from whatever description they receive, with no quality gate on Feature definitions. Agents don't verify that they understood the user's intent — they accept input, interpret it, and proceed without confirmation.
 
@@ -202,28 +212,24 @@ my-project/
 
 ---
 
-## Design Philosophy
+## Design Discipline
 
-Every design decision in spec-kit-skills traces back to three foundational principles. They answer a simple question: *Why do AI agent pipelines produce inconsistent results?*
+The three core concepts above (GEL, Domain Profile, Brief) define *what* spec-kit-skills builds. The three rules below define *how* it's built — the engineering discipline that ensures the concepts actually work when an AI agent executes them.
 
 ```
-            P1. Context Continuity (what to protect)
-           /          |           \
-  Domain Profile   Source Code    Cross-Feature
-  every step       every stage    every Feature
-          \           |           /
-         P2. Enforce, Don't Reference (how to protect)
-                      |
-         P3. File over Memory (where to store evidence)
+Core Concepts (WHAT we believe)        Design Rules (HOW we build)
+├── GEL — ecosystem memory      ←───  P1. Context Continuity
+├── Domain Profile — project DNA ←───  P2. Enforce, Don't Reference
+└── Brief — intent verification  ←───  P3. File over Memory
 ```
 
-**P1 — Context Continuity**: Information must flow without loss through every pipeline stage. Domain context (what kind of project), source fidelity (what the original code does), and cross-Feature memory (what other Features decided) — all must be systematically preserved. When any of these break, the agent makes decisions in a vacuum.
+**P1 — Context Continuity**: Information must flow without loss through every pipeline stage. Domain context, source fidelity, and cross-Feature memory must be systematically preserved. When any of these break, the agent makes decisions in a vacuum. *This is why GEL exists — to make continuity structural, not accidental.*
 
-**P2 — Enforce, Don't Reference**: "See X.md for details" has zero behavioral force. Agents optimize for completion, not compliance. Every critical rule needs three things: inline visibility (the rule itself, at the execution point), blocking power (can't proceed without compliance), and negative examples (what NOT to do). A rule that exists only in a reference file is decoration, not governance.
+**P2 — Enforce, Don't Reference**: "See X.md for details" has zero behavioral force. Agents optimize for completion, not compliance. Every critical rule needs inline visibility, blocking power, and negative examples. *This is why Domain Profile rules are injected at every execution point, not stored in a config file.*
 
-**P3 — File over Memory**: Agent memory is ephemeral — bounded by context windows, lost across sessions, and unreliable under compaction. Every intermediate result, state transition, and decision must be persisted to a file. Files survive context limits, session breaks, and agent handoffs. When in doubt, write it down.
+**P3 — File over Memory**: Agent memory is ephemeral — bounded by context windows, lost across sessions, unreliable under compaction. Every intermediate result and decision must be persisted to a file. *This is why Brief produces a file-based pre-context, not a conversation summary.*
 
-These three principles are MECE for agent pipeline governance: P1 defines *what* to protect, P2 defines *how* to protect it, P3 defines *where* to store evidence. Every gap pattern in [lessons-learned.md](lessons-learned.md) traces back to a violation of exactly one of these three.
+Every gap pattern in [lessons-learned.md](lessons-learned.md) traces back to a violation of exactly one of these three rules.
 
 ---
 

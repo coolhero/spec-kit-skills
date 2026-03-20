@@ -5,6 +5,25 @@
 
 ---
 
+## [2026-03-20] Lean Scale & Cross-Concern sections in injection files
+
+### What Changed
+- Replaced duplicated procedural steps (read sdd-state.md, display in Checkpoint) in `injection/specify.md`, `injection/plan.md`, `injection/implement.md` with a single reference to `context-injection-rules.md` § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement
+- Kept only command-specific adjustment values and anti-patterns in each file
+- Added `(🚫 BLOCKING)` gate marker to all 4 section headers
+- Standardized `injection/verify.md`: promoted inline blockquote to proper `## Scale & Cross-Concern Adjustments (🚫 BLOCKING)` section header with the same lean structure as the other 3 files, plus its own anti-pattern example
+
+### Why
+All 4 injection files duplicated the procedural framework from `context-injection-rules.md` (Steps 1 and 4: read sdd-state.md, display in Checkpoint). This caused ~1,200 extra tokens of double-loading per command. The lean pattern keeps only what is unique to each command (the specific Scale thresholds and Cross-Concern examples) and delegates the shared procedure to the single source of truth. Aligns with P2 (Enforce, Don't Reference) by adding BLOCKING gates, and Single Source of Truth principle by removing duplication.
+
+### Files
+- `.claude/skills/smart-sdd/reference/injection/specify.md`
+- `.claude/skills/smart-sdd/reference/injection/plan.md`
+- `.claude/skills/smart-sdd/reference/injection/implement.md`
+- `.claude/skills/smart-sdd/reference/injection/verify.md`
+
+---
+
 ## [2026-03-20] Post-pull audit: Artifact Structure sync + File Map completeness
 
 ### What Changed
@@ -4276,3 +4295,18 @@ Simulated 3 greenfield projects through the init pipeline (Hono REST API, Electr
 | `README.ko.md` | Added 설계 철학 section; updated timestamp |
 | `ARCHITECTURE-EXTENSIBILITY.md` | Added Sophistication Level current status table to § 9 |
 | `lessons-learned.md` | Added P1/P2/P3 tags to all 9 Theme headings |
+
+## [2026-03-20] Philosophy Reframing — Core Concepts vs Design Rules
+
+| Decision | Rationale |
+|----------|-----------|
+| Rename "Design Philosophy" → "Design Discipline" in README.md/README.ko.md | P1/P2/P3 are engineering rules (HOW we build), not philosophy (WHAT we believe). The real philosophy is already in the three core concepts: GEL, Domain Profile, Brief |
+| Add foundational belief statement to "What It Solves" intro | "The quality of an agent pipeline is determined by the quality of the structure, not the agent's capability" — this is the actual philosophical premise that GEL/Domain Profile/Brief derive from |
+| Add philosophical taglines to GEL, Domain Profile, Brief subsections | Each concept now has a one-line italicized belief statement above the "gap/solution" pattern, making the WHY visible alongside the WHAT |
+| Connect P1/P2/P3 rules back to core concepts | Each rule now ends with an italicized sentence explaining which core concept it serves (P1→GEL, P2→Domain Profile, P3→Brief) |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `README.md` | Renamed Design Philosophy → Design Discipline; added belief statement + concept taglines + rule↔concept connections |
+| `README.ko.md` | Same changes in Korean; 설계 철학 → 설계 규율 |
