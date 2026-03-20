@@ -362,6 +362,11 @@ The diagram shows the full lifecycle: **understand** existing code with code-exp
 ── Incremental ───────────────────────────────────────────────────
 /smart-sdd add          →  updated GEL         →  /smart-sdd pipeline
 (Brief for new Feature)    (pre-context added)    (GEL + Domain Profile)
+
+── Learn & Build (study existing code, then build your own) ──────
+/code-explore ./source  →  traces + synthesis  →  /smart-sdd init --from-explore
+(orient + trace × N)       (C001... candidates)    (Domain Profile inherited)
+                                                →  /smart-sdd add → pipeline
 ```
 
 All journeys converge to **incremental mode** as the steady state. In every journey, the three core concepts participate: **Brief** ensures Feature definitions are complete, **GEL** provides cross-Feature context, and **Domain Profile** shapes each pipeline step's behavior.
@@ -512,6 +517,22 @@ All journeys converge to **incremental mode** as the steady state. In every jour
 
 /smart-sdd pipeline
 # → Skips completed Features, processes only new/pending ones
+```
+
+**Study a codebase, then build your own version**:
+```bash
+cd ~/my-project
+
+/code-explore ~/opencode
+# → Orient: architecture map + module map + Domain Profile detection
+# → Runtime: launches the app, captures screens, observes UI patterns
+# → Trace: "How does context management work?" → source-level flow doc
+# → Trace: "How does tool execution work?" → another flow doc
+# → Synthesis: Feature candidates (C001-context-engine, C002-tool-runtime...)
+
+/smart-sdd init --from-explore specs/explore/
+# → Domain Profile inherited from source analysis
+# → Feature candidates become the starting Feature list
 ```
 
 ---

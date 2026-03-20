@@ -360,6 +360,11 @@ flowchart TD
 ── 점진적 추가 ───────────────────────────────────────────────────
 /smart-sdd add            →  갱신된 GEL            →  /smart-sdd pipeline
 (새 Feature Brief)           (pre-context 추가)        (GEL + Domain Profile)
+
+── 학습 후 구축 (기존 코드를 공부하고 나만의 버전 만들기) ──────
+/code-explore ./source    →  traces + synthesis    →  /smart-sdd init --from-explore
+(orient + trace × N)         (C001... 후보)           (Domain Profile 상속)
+                                                   →  /smart-sdd add → pipeline
 ```
 
 모든 여정은 **점진적 추가 모드**로 수렴합니다. 모든 여정에서 세 가지 핵심 개념이 참여합니다: **Brief**는 Feature 정의의 완전성을 보장하고, **GEL**은 Feature 간 컨텍스트를 제공하며, **Domain Profile**은 각 파이프라인 단계의 동작을 조정합니다.
@@ -510,6 +515,22 @@ flowchart TD
 
 /smart-sdd pipeline
 # → 완료된 Feature는 건너뛰고, 새로운/대기 중인 Feature만 처리
+```
+
+**코드베이스를 공부하고 나만의 버전 만들기**:
+```bash
+cd ~/my-project
+
+/code-explore ~/opencode
+# → Orient: 아키텍처 맵 + 모듈 맵 + Domain Profile 감지
+# → Runtime: 앱 실행, 화면 캡처, UI 패턴 관찰
+# → Trace: "컨텍스트 관리는 어떻게 되나?" → 소스 레벨 흐름 문서
+# → Trace: "도구 실행은 어떻게 되나?" → 또 다른 흐름 문서
+# → Synthesis: Feature 후보 (C001-context-engine, C002-tool-runtime...)
+
+/smart-sdd init --from-explore specs/explore/
+# → Domain Profile이 소스 분석에서 상속
+# → Feature 후보가 초기 Feature 목록이 됨
 ```
 
 ---
