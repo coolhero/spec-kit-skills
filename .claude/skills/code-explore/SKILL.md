@@ -28,7 +28,7 @@ Interactive, user-driven source code exploration that produces persistent, struc
 ```
 /code-explore ./path/to/source          → Orient: scan and generate architecture map
 /code-explore trace "context management" → Trace: end-to-end flow tracing (new trace)
-/code-explore trace --continue           → Continue: append to the most recent trace
+/code-explore trace --continue [NNN]     → Continue: append to trace NNN (default: most recent)
 /code-explore synthesis                  → Synthesis: aggregate traces into Feature candidates
 /code-explore status                     → Status: exploration coverage summary
 ```
