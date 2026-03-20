@@ -41,10 +41,19 @@ Interactive, user-driven source code exploration that produces persistent, struc
 $ARGUMENTS parsing rules:
   Positional (path)         → target directory for orient (defaults to ".")
   trace "topic"             → topic string for flow tracing
+  trace --continue [NNN]    → continue trace NNN (default: most recent)
   synthesis                 → no additional args
   status                    → no additional args
   --update                  → with orient: re-scan and merge new discoveries
+  --lang <code>             → artifact language (ko, en, ja, etc.). Stored in orientation.md header.
 ```
+
+### Language Persistence
+
+`--lang` is stored in `orientation.md` header: `> Language: ko`
+
+**On orient**: write language to orientation.md header.
+**On trace / trace --continue / synthesis**: read language from orientation.md header. ALL generated content (section headings, descriptions, observations, AskUserQuestion labels) MUST use the stored language. If no language is stored, default to English.
 
 ---
 
