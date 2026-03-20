@@ -174,6 +174,18 @@ Diagnose what the app needs to run, based on Phase 1 results. The agent performs
 
 ### 1.5-2. Environment Readiness Checklist (HARD STOP)
 
+> 🚨 **API keys and service credentials are NEVER "Optional" for rebuild mode.**
+> If the source app uses LLM APIs, database connections, or external services as core features,
+> those credentials are **BLOCKING** — without them, Phase D captures error states instead of working flows.
+>
+> ```
+> ❌ WRONG: "API_KEY — LLM API key (ℹ️ Optional — UI 구조 탐색에는 불필요)"
+>    → Phase D captures empty dropdowns and error states → spec-draft describes broken UX
+>
+> ✅ RIGHT: "API_KEY — LLM API key (🚫 BLOCKING — chat, KB embedding, model selection all require this)"
+>    → Phase D captures working flows → spec-draft describes actual UX
+> ```
+
 Present the assessment results in three tiers:
 
 ```
@@ -183,18 +195,22 @@ Present the assessment results in three tiers:
   □ [package manager] install ([dependency dir] not found)
   □ .env creation (from .env.example — set config variable defaults)
 
-── ⚠️ Requires Your Action ─────────────────────────────
+── 🚫 BLOCKING (must resolve for full exploration) ──────
   □ [VAR_NAME] — [description] ([category: secret])
-    💡 [hint: e.g., "postgres service defined in docker-compose.yml
-       → start with docker compose up -d postgres"]
-  □ [VAR_NAME] — [description] ([category: secret])
+    💡 [hint: "Settings → Model Provider → Enter API key"]
+  □ [SERVICE] — [description]
+    💡 [hint: "docker compose up -d postgres"]
 
-── ℹ️ Optional (basic exploration possible without) ─────
-  □ [VAR_NAME] — [description] (not needed for exploration)
+── ℹ️ Optional (UI structure visible without) ────────────
+  □ [VAR_NAME] — [description] (truly non-essential for ANY flow)
 ──────────────────────────────────────────────────────────
 
 Dev Server: `[start command]` (port [N])
 ```
+
+> **Classification rule**: If a secret/service is used by ANY Feature's core flow (chat, search, CRUD, auth),
+> it is 🚫 BLOCKING, not ℹ️ Optional. "Optional" is ONLY for features that are genuinely peripheral
+> (e.g., analytics tracking, crash reporting, premium badges).
 
 Ask via AskUserQuestion:
 - **"Start infrastructure via Docker Compose + proceed"** — run `docker compose up -d` then continue (only shown if `docker-compose.yml` exists with relevant services)
@@ -339,20 +355,25 @@ Analyze the source code to identify likely first-run configuration requirements:
   • Settings → Premium → Enter license key
     Without this: premium badge hidden, but UI layout observable
 
-Please complete at least the BLOCKING items in the app.
+To configure BLOCKING items, you need to run the app yourself:
+
+  1. Open a terminal and run: [dev server command, e.g., pnpm run dev]
+  2. The app will open — navigate to Settings and configure the items above
+  3. When done, come back here and select "All BLOCKING items configured"
+
+The agent will then run its own Playwright session to explore the configured app.
 ```
 
+> 🚨 **The user MUST run the app themselves** to configure in-app settings.
+> Playwright runs headless — the user cannot interact with the agent's Playwright session.
+> The flow is: user runs app → configures → confirms → agent runs Playwright to explore.
+
 **HARD STOP** — Use AskUserQuestion:
-- **"All BLOCKING items configured — proceed with full exploration"** (Recommended)
+- **"All BLOCKING items configured — proceed with full exploration"** (Recommended) → User has run the app, completed settings, and closed it. Agent now runs Playwright for automated exploration.
 - **"Some BLOCKING items skipped — proceed with limited exploration"** → Record which items were skipped. Phase D will mark affected flows as `⚠️ LIMITED: [item] not configured — flow not fully observable`. These limitations propagate to spec-draft as `⚠️ UNVERIFIED` FRs.
 - **"Skip all setup — UI structure only"** → Phase D captures only screen structure, not interaction flows. spec-draft quality will be significantly lower.
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
-
-**HARD STOP** — Use AskUserQuestion:
-- "Setup complete — proceed with full exploration" (Recommended)
-- "Explore UI structure only (without setup)"
-- "Skip Runtime Exploration"
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
 
