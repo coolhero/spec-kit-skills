@@ -148,3 +148,67 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 ---
 
+### 1-6. Data Storage Map (all app types)
+
+> **Purpose**: Identify WHERE the app stores persistent data (settings, user content, databases, caches).
+> This map is consumed by Phase 1.5 for: userData path resolution, app-close requirements, setup guidance.
+> Without this, Phase 1.5 cannot share user-configured data with the Playwright session.
+
+**Detection method** — scan source code for storage patterns:
+
+| Storage Type | Detection Signals | Example |
+|-------------|------------------|---------|
+| **Config store** | `electron-store`, `conf`, `configstore`, `dotenv`, `fs.writeFile('config')` | API keys, user preferences |
+| **SQL database** | `better-sqlite3`, `prisma`, `drizzle`, `typeorm`, `sequelize`, `knex` | Structured data (entities, sessions) |
+| **Document DB** | `dexie`, `indexedDB`, `pouchdb`, `lowdb`, `realm` | Messages, documents |
+| **Key-value** | `localStorage`, `redux-persist`, `zustand/persist`, `electron-store` | App state, UI preferences |
+| **File storage** | `app.getPath('userData')`, `getDataPath()`, `fs.mkdir`, `fs.writeFile` | Uploaded files, generated content, vector DBs |
+| **External service** | `redis`, `mongodb`, `postgres` connection strings | Server-side data |
+
+**Output**: Generate a Data Storage Map table (saved to Phase 1 results, consumed by Phase 1.5):
+
+```
+📦 Data Storage Map
+
+| Storage | Type | Location | Lock? | Contains |
+|---------|------|----------|-------|----------|
+| electron-store | config | userData/config.json | No | API keys, settings |
+| KnowledgeBase | file+sqlite | userData/Data/KnowledgeBase/ | SQLite WAL | Vector embeddings, uploaded files |
+| Redux persist | key-value | userData/Local Storage/leveldb/ | ⚠️ LevelDB | App state (assistants, topics) |
+| Dexie/IndexedDB | document | userData/IndexedDB/ | ⚠️ LevelDB | Messages, conversations |
+| Memory DB | sqlite | userData/Data/Memory/memories.db | SQLite | Extracted memories |
+
+userData path: ~/Library/Application Support/[app-name]/ (macOS)
+               ~/.config/[app-name]/ (Linux)
+               %APPDATA%/[app-name]/ (Windows)
+
+App name detection: [from package.json "name" or "productName" field]
+
+⚠️ Lock analysis:
+  - LevelDB stores (localStorage, IndexedDB): single-process only → app must be CLOSED before Playwright
+  - SQLite stores (WAL mode): concurrent reads OK, but writes lock → app should be closed
+  - File stores (config.json, uploaded files): no lock → can coexist
+```
+
+**app-name resolution** (critical for userData path):
+1. Read `package.json` → `productName` field (used by packaged app)
+2. If no `productName` → `name` field (used by dev mode)
+3. **Dev mode vs prod may differ**: dev uses `name`, prod uses `productName` — record BOTH
+4. Verify by checking: `ls ~/Library/Application\ Support/[name]/` and `ls ~/Library/Application\ Support/[productName]/`
+
+**Platform-agnostic detection**: For non-Electron apps:
+
+| App Type | userData equivalent | Detection |
+|----------|-------------------|-----------|
+| **Web app** | Database (server-side) | Check DB connection config |
+| **API server** | Database + .env | Check ORM config, migration files |
+| **CLI tool** | Config file | Check `~/.config/[app]/`, `~/.local/share/[app]/` |
+| **Tauri** | `tauri.conf.json` → `identifier` field | `~/Library/Application Support/[identifier]/` |
+| **React Native** | AsyncStorage | Check `@react-native-async-storage` imports |
+
+> This map feeds directly into Phase 1.5:
+> - **1.5-2**: Auto-classify BLOCKING items (API keys stored in config store → must configure before explore)
+> - **1.5-4**: App launch with correct userData path
+> - **1.5-4b**: Setup guidance knows WHERE settings are stored
+> - **1.5-5**: Playwright launch with `--user-data-dir` pointing to detected path
+

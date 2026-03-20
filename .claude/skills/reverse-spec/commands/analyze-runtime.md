@@ -158,6 +158,26 @@ Ask via AskUserQuestion:
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If "Install Playwright CLI" is selected, run the installation command and retry detection from Step 1. If "Skip" is selected, record `Runtime Exploration: skipped (no Playwright)` and proceed to Phase 2.
 
+### 1.5-0b. Data Storage Map Consumption (from Phase 1-6)
+
+> Read the Data Storage Map generated in Phase 1-6. This determines:
+> 1. **userData path** → used for Playwright `--user-data-dir` in Phase 1.5-5
+> 2. **Lock analysis** → determines if user must close app before Playwright (LevelDB = yes)
+> 3. **Config store location** → determines where API keys/settings are stored → drives 1.5-4b guidance
+> 4. **BLOCKING classification** → if config store contains API keys, they're automatically 🚫 BLOCKING
+
+**Auto-derive from Data Storage Map**:
+
+```
+From Phase 1-6 Storage Map:
+  userData path: [detected] → PLAYWRIGHT_USER_DATA_DIR
+  Has LevelDB stores: [yes/no] → REQUIRE_APP_CLOSE = true if yes
+  Config store type: [electron-store/env/db] → SETUP_METHOD
+  Config contains: [API keys, credentials] → AUTO_BLOCKING_ITEMS
+```
+
+These variables are used throughout Phase 1.5 — do NOT re-detect them.
+
 ### 1.5-1. Environment Assessment (Automated)
 
 Diagnose what the app needs to run, based on Phase 1 results. The agent performs this assessment **automatically before asking the user**:
