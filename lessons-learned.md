@@ -630,3 +630,33 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 - The hub tells the agent WHICH file to read; the phase file tells it WHAT to do
 
 **Universal takeaway**: Treat instruction files like code modules — if a function is 2,000 lines, split it. The split boundary should match the agent's execution boundary: one file per step/phase/command. Each file should be independently actionable — the agent can execute it without needing other phase files in context simultaneously. Monitor total instruction size the way engineers monitor memory: budget it, measure it, and optimize when it exceeds thresholds.
+
+#### L43. Agents Self-Skip Optional Steps — Make Them Mandatory HARD STOPs
+
+**What happened** (code-explore orient, 3 consecutive sessions): orient Step 1.5 (Runtime Exploration) was labeled "Optional but recommended." The agent decided on its own: "TUI app, Playwright not suitable" and skipped runtime without asking the user. This happened 3 times despite the step header saying "DO NOT SKIP without asking." The project had web and desktop apps too — the agent's reasoning was wrong.
+
+**Why this happens**: When a step has ANY skip condition ("Skip if: CLI-only tool, library, or user declines"), agents treat the skip as the default path. The skip condition gives the agent justification to avoid the step entirely. Combined with pipeline completion bias, "optional" means "skipped."
+
+**What works instead**: Remove ALL agent-side skip conditions. Make the step a **MANDATORY HARD STOP** where the user — not the agent — decides to skip. The agent presents the choice; the user makes it. Anti-pattern examples (❌ WRONG / ✅ RIGHT) directly in the step header prevent the agent from rationalizing a self-skip.
+
+**Universal takeaway**: In multi-step agent pipelines, "optional" = "skipped." If a step matters, it must be a HARD STOP. The agent cannot have skip conditions — only the user can decide to skip. Every conditional step needs an explicit AskUserQuestion gate, not a "skip if" clause that the agent evaluates on its own.
+
+#### L44. Changes Must Flow Through Artifact Hierarchy — Never Directly to Code
+
+**What happened** (angdu-studio F006, 10+ iterations): When verify found "citation doesn't work," the agent modified code directly without updating spec.md. The code fix was ad-hoc — no FR defined citation rendering, no SC defined citation click behavior. The next verify found the same category of issue because the spec still didn't cover it. This repeated 10+ times: user reports issue → agent patches code → another issue → another patch → "start over."
+
+**Why direct code fixes fail in SDD**: The pipeline's value is that spec defines "done," plan defines "how," tasks define "steps," and code implements the steps. When you skip the hierarchy and modify code directly, you're operating outside the pipeline — the spec doesn't know about the change, verify can't evaluate it against an SC, and the next agent session has no record of what was intended.
+
+**What works instead**: The **Cascading Update Protocol** — classify the change level (spec/plan/tasks/code), update the highest-level artifact first, then cascade incrementally downstream. A missing feature is a spec issue, not a code issue. Adding FR-008 + SC-008 → appending to plan → appending to tasks → implementing one task → verifying one SC takes 30 minutes. Re-running the entire pipeline takes 3 hours.
+
+**Universal takeaway**: In any artifact-driven pipeline, enforce a rule: "code is derived from artifacts, never the reverse." When a problem is found in code, first ask "which artifact should have prevented this?" If no artifact covers it, the artifact is incomplete — fix the artifact first, then cascade to code.
+
+#### L45. Runtime Observation Must Be Domain Profile-Aware — Not Just "Take Screenshots"
+
+**What happened** (angdu-studio reverse-spec Phase 1.5): Runtime exploration captured 8 screenshots and 141 CSS variables but missed critical behavioral details — form field control types (dropdown vs text input), auto-fill patterns, error message content, drag-and-drop zones. The screenshots showed what the UI looks like but not how it behaves. Result: spec-draft described "KB creation" without specifying that the model selector is a dropdown showing only configured providers.
+
+**Why generic observation fails**: "Capture screenshots of all screens" produces visual references but no actionable data. A screenshot of a form doesn't tell you which fields are dropdowns, which auto-fill, which are required. The agent needs to know WHAT to look for, and that depends on the project type.
+
+**What works instead**: The **Observation Protocol** — structured per Domain Profile axis. For a GUI app: record form fields with exact control types, validation rules, auto-fill behavior. For an API server: record endpoint discovery, auth headers, response format. For an AI assistant: check streaming behavior, model selection, token display. Each axis contributes specific observation targets that generic "explore the app" misses.
+
+**Universal takeaway**: When agents explore an application, give them a **domain-aware checklist** of what to observe, not just "look around." The checklist should be derived from the project type — a REST API needs different observations than a desktop app. Without structured observation targets, agents default to surface-level capture (screenshots, element counts) and miss behavioral details that matter for accurate specification.
