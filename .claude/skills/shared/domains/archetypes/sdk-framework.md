@@ -23,6 +23,26 @@
 
 ---
 
+### Instrumentation/Wrapper Variant
+
+Some SDKs don't provide new functionality but add observability/telemetry to existing libraries by wrapping or monkey-patching them.
+
+**Detection signals**:
+- Keywords: `instrument`, `patch`, `wrap`, `monkey_patch`, `auto_instrument`, `trace`, `span`
+- Pattern: imports target library → wraps its methods → adds telemetry/logging/metrics
+- Registration: `register_instrumentor()`, `auto_configure()`, zero-config initialization
+
+**SBI extraction for instrumentation SDKs**:
+- **P1**: Instrumentor registration/initialization (what gets patched and how)
+- **P1**: Attribute extraction logic (what data is captured from wrapped calls)
+- **P2**: Span/metric creation (telemetry output format)
+- **P2**: Configuration options (enable/disable, sampling, filtering)
+- **P3**: Internal utility functions
+
+**Feature decomposition**: Use Repeating-Pattern strategy (see analyze-classify.md) — one template instrumentor + framework + variant list per wrapped library.
+
+---
+
 ## Module Metadata
 
 - **Axis**: Archetype

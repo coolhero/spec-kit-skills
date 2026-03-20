@@ -272,7 +272,18 @@ Ask via AskUserQuestion:
 Execute auto-resolvable steps:
 
 1. **Dependency installation**:
-   Run the detected package manager install command (e.g., `npm install`, `pip install -r requirements.txt`)
+   For dependency installation, detect the correct command per ecosystem. See the Dependency Install Detection table in smart-sdd adopt.md for the full mapping. Key additions beyond npm/pip:
+   - `poetry.lock` → `poetry install`
+   - `uv.lock` → `uv sync`
+   - `Cargo.lock` → `cargo build`
+   - Multiple ecosystems → install all, backend first
+
+   **Browser Extensions** (detected by `manifest.json` with `manifest_version`):
+   - Cannot launch standalone — must be loaded into Chrome
+   - For runtime exploration: use Playwright with `--load-extension=path/to/extension` flag
+   - Or delegate to user: AskUserQuestion "Load the extension in Chrome and describe the UI"
+
+   Run the detected package manager install command(s) for each ecosystem.
    - If fails → display error message → HARD STOP: "Resolve and retry" / "Skip Runtime Exploration"
 
 2. **`.env` creation** (if `.env` does not exist and `.env.example` exists):

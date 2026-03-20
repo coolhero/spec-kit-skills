@@ -220,6 +220,44 @@ This data feeds into:
 
 Then proceed to 3-2.
 
+### Repeating-Pattern Feature Strategy
+
+When Phase 2 identifies a set of modules/packages that share the same structural pattern (e.g., SDK provider integrations, messaging channel adapters, instrumentation packages):
+
+1. **Detection**: Look for N >= 5 modules with:
+   - Same directory structure (each has `index.ts`, `client.ts`, `types.ts`, etc.)
+   - Same import patterns (all import from a shared core/base module)
+   - Same naming convention (provider-*, channel-*, instrument-*)
+
+2. **Classification**:
+   - Create ONE **template Feature** (e.g., `F003-provider-template`) from the most complete/representative module
+   - Create ONE **framework Feature** (e.g., `F002-provider-framework`) for the shared core/base
+   - Group remaining modules as **variant instances** listed in the template Feature's notes
+
+3. **SBI Handling**:
+   - Template Feature gets full SBI extraction (P1/P2/P3)
+   - Variant instances: extract only **delta behaviors** (what differs from template)
+   - Framework Feature: extract shared/base behaviors
+
+4. **Artifact Generation**:
+   - Template Feature gets full pre-context.md + spec-draft.md
+   - Variant instances: listed in template Feature's pre-context § Variants section
+   - Each variant gets a one-line entry: `| [name] | [delta from template] | [status] |`
+
+5. **Display in Phase 3 Checkpoint**:
+   ```
+   Repeating Pattern Detected: [N] provider modules
+     Template: F003-provider-openai (representative)
+     Framework: F002-provider-framework (shared base)
+     Variants: anthropic, google, cohere, mistral, ... ([N-1] more)
+   ```
+
+This prevents Feature explosion (100+ providers != 100+ Features) while maintaining per-variant traceability.
+
+- WRONG: Create F003-openai, F004-anthropic, F005-google... (100+ Features -> pipeline explosion)
+- WRONG: Create F003-all-providers (one Feature -> loses per-provider coverage)
+- RIGHT: F002-framework + F003-template + variants list (manageable + traceable)
+
 ### 3-2. Dependency Graph Construction and Release Group Determination
 Derive inter-Feature dependencies:
 - **Direct Dependency**: Uses another Feature's modules via import/require

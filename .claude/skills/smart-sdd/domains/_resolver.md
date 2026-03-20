@@ -184,6 +184,13 @@ The Scale modifier does NOT produce rules — it **adjusts** rules from the 5 ax
 - `prototype` + S1 "IPC timeout handling": rule still visible in context, but marked `(optional for prototype)` in Checkpoint display
 - `production` + S7 "observability": rule escalated from ⚠️ warning to 🚫 blocking
 
+**Micro-project adjustment** (when Scale Detection = Micro):
+- Maturity: force to `prototype` regardless of CI/CD signals (project too small for production classification to matter)
+- Pipeline simplification: constitution is optional, registries minimal, single-Feature default
+- Specify depth: minimal FR/SC count (avoid over-specifying trivial functionality)
+- Plan depth: single-component architecture (no multi-layer decomposition)
+- Verify depth: build + basic test only (no cross-Feature, no demo)
+
 > **Where Scale is consumed**: See `scenarios/greenfield.md` § Configuration Parameters for the full parameter definitions and per-maturity SC depth rules. The Scale modifier is loaded alongside the Scenario axis but conceptually separate — Scenario defines the lifecycle context, Scale defines the rigor level within that context.
 
 ### Step 5. Per-Command Lazy Loading (Context Optimization)

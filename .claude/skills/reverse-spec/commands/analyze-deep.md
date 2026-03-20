@@ -38,6 +38,20 @@ For each source file identified in Phase 1, extract a **function-level inventory
 - Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
 - Skip internal/private helpers that are implementation details, not behaviors
 
+#### Infrastructure-as-Product SBI Rule
+
+When the project's core product IS infrastructure management (detected by: Archetype signals for VM/container/sandbox lifecycle, Dockerfile as product output rather than deployment):
+
+- Container/VM/sandbox **lifecycle methods** (create, start, stop, destroy, snapshot) → **P1** (core product behavior, not infrastructure)
+- Resource allocation/deallocation (memory, CPU, network) → **P1** (performance-critical product behavior)
+- Health checks, monitoring hooks → **P2**
+- Deployment/packaging of the infrastructure tool itself → **P3** (meta-infrastructure)
+
+Detection signal: if `Dockerfile` or `docker-compose.yml` exists AND the project's main module CREATES/MANAGES containers (not just runs inside one), classify as infrastructure-as-product.
+
+- WRONG: microVM create/destroy classified as P3 "infrastructure" → core product behavior undocumented
+- RIGHT: microVM lifecycle classified as P1 → documented as core Feature requirements
+
 #### Multi-Language SBI Extraction
 
 When Language Composition Analysis (Phase 1-2a) detected multiple languages with ≥5% presence:

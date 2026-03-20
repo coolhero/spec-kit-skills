@@ -5,6 +5,56 @@
 
 ---
 
+## [2026-03-21] N-Series Gap Fixes Part 2: Multi-Ecosystem + Patterns + Adoption Report
+
+### What Changed
+
+**N4: Python Package Manager Detection**
+- Expanded adopt.md dependency install table from 7 entries to 15, covering all Python package managers (Poetry, uv, PDM, Pipenv), Bun, Ruby, and Java (Maven)
+- Added multi-ecosystem project handling: install all detected ecosystems in order (backend first, frontend second)
+- Added same multi-ecosystem detection cross-reference to analyze-runtime.md Phase 1.5-3
+
+**N10: Multi-Language Build Orchestration**
+- Added "Multi-Language Build Orchestration" section to adopt.md with build dependency ordering, parallel/sequential execution, per-ecosystem result recording, and partial build success handling
+- Added multi-ecosystem build check note to pipeline.md Foundation Verification Gate
+
+**N8: Repeating-Pattern Feature Decomposition**
+- Added "Repeating-Pattern Feature Strategy" to analyze-classify.md — template Feature + framework Feature + variant instances pattern for N >= 5 similar modules, preventing Feature explosion while maintaining traceability
+
+**N11: Container-as-Product SBI Classification**
+- Added "Infrastructure-as-Product SBI Rule" to analyze-deep.md — when the project IS infrastructure management, lifecycle methods are P1 (not P3)
+
+**N12: Instrumentation/Wrapper SDK Pattern**
+- Added "Instrumentation/Wrapper Variant" section to shared sdk-framework.md — detection signals, SBI extraction rules, and Feature decomposition guidance for telemetry/observability wrapper SDKs
+
+**N9: Micro Scale in Resolver**
+- Added "Micro-project adjustment" block to _resolver.md Step 4 — forces prototype maturity, simplifies pipeline (optional constitution, minimal registries, single-Feature default), reduces specify/plan/verify depth
+
+**N4 continuation: Browser Extension note**
+- Added browser extension detection and runtime exploration guidance to analyze-runtime.md
+
+**PART 2: Adoption Analysis Report**
+- Added "Post-Pipeline: Adoption Analysis Report" section to adopt.md — generates `specs/_global/adoption-report.md` using shared completion-report.md template, with SBI coverage comparison against prior reverse-spec if available
+
+### Why
+- Python ecosystem has 5+ package managers; the old table only covered pip, missing Poetry/uv/PDM/Pipenv entirely
+- Multi-language projects (Python + Node, Rust + Node) need coordinated dependency install and build orchestration
+- SDK/instrumentation projects with 100+ provider modules need a decomposition strategy to avoid pipeline explosion
+- Infrastructure-as-product projects had core lifecycle methods misclassified as P3 infrastructure
+- Micro projects (<50 files) needed resolver-level pipeline simplification beyond just the scale tier
+- Adoption pipeline lacked a structured analysis report, unlike reverse-spec which got completion-report in the prior batch
+
+### Files
+- `.claude/skills/smart-sdd/commands/adopt.md` (N4 + N10 + Adoption Report)
+- `.claude/skills/smart-sdd/commands/pipeline.md` (N10 multi-ecosystem build check)
+- `.claude/skills/reverse-spec/commands/analyze-classify.md` (N8 repeating-pattern)
+- `.claude/skills/reverse-spec/commands/analyze-deep.md` (N11 infrastructure-as-product)
+- `.claude/skills/shared/domains/archetypes/sdk-framework.md` (N12 instrumentation variant)
+- `.claude/skills/smart-sdd/domains/_resolver.md` (N9 micro scale)
+- `.claude/skills/reverse-spec/commands/analyze-runtime.md` (N4 multi-ecosystem + browser extension)
+
+---
+
 ## [2026-03-21] N-Series Gap Fixes + Completion Analysis Report
 
 ### What Changed

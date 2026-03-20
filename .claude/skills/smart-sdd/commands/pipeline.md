@@ -525,6 +525,8 @@ This step is informational only — no user confirmation required.
 Foundation status: PASS (N warnings)
 ```
 
+**Multi-ecosystem build check**: If sdd-state.md Foundation contains comma-separated values (multi-language project), verify build succeeds for each ecosystem. Record per-ecosystem results. A Feature that spans multiple ecosystems must have ALL relevant builds passing.
+
 **Record** in `sdd-state.md`: `Foundation Verified: [date] | [PASS/WARN/FAIL] | [details]`
 - PASS or WARN → proceed to Feature pipeline
 - Any BLOCKING check fails → **HARD STOP**. Use AskUserQuestion:

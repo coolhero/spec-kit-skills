@@ -113,17 +113,32 @@ Use AskUserQuestion:
 
 ### Step 1 — Dependency Installation
 
-Detect the project's package manager and install dependencies:
+#### Dependency Install Detection (multi-ecosystem)
 
-| Marker | Command |
-|--------|---------|
-| `package-lock.json` | `npm ci` |
-| `yarn.lock` | `yarn install --frozen-lockfile` |
-| `pnpm-lock.yaml` | `pnpm install --frozen-lockfile` |
-| `requirements.txt` / `pyproject.toml` | `pip install -r requirements.txt` / `pip install .` |
-| `go.mod` | `go mod download` |
-| `Cargo.toml` | `cargo fetch` |
-| `pom.xml` | `mvn dependency:resolve` |
+Detect the correct install command by checking for lockfiles and config files:
+
+| Lockfile / Config | Install Command | Ecosystem |
+|-------------------|----------------|-----------|
+| `package-lock.json` | `npm ci` | Node.js |
+| `pnpm-lock.yaml` | `pnpm install --frozen-lockfile` | Node.js |
+| `yarn.lock` | `yarn install --frozen-lockfile` | Node.js |
+| `bun.lockb` | `bun install` | Node.js |
+| `requirements.txt` | `pip install -r requirements.txt` | Python |
+| `pyproject.toml` (no lockfile) | `pip install -e ".[dev]"` | Python |
+| `poetry.lock` | `poetry install` | Python (Poetry) |
+| `uv.lock` | `uv sync` | Python (uv) |
+| `pdm.lock` | `pdm install` | Python (PDM) |
+| `Pipfile.lock` | `pipenv install --dev` | Python (Pipenv) |
+| `Cargo.lock` | `cargo build` | Rust |
+| `go.sum` | `go mod download` | Go |
+| `Gemfile.lock` | `bundle install` | Ruby |
+| `pom.xml` | `mvn dependency:resolve` | Java (Maven) |
+
+**Multi-ecosystem projects** (e.g., Python backend + Node frontend):
+Run install commands for ALL detected ecosystems, in order:
+1. Backend/core first (Python/Rust/Go)
+2. Frontend second (Node.js)
+3. Display all detected commands in bootstrap summary
 
 If the install command fails, display the error and ask the user to resolve it before continuing.
 
@@ -167,6 +182,26 @@ Run the project's existing build, test, and run commands to establish a baseline
   - Library → skip run check (no standalone execution)
 - Stop the application after verification
 - If no run command is found or the project is a library/package, record: `No run command detected (library/package)` and skip
+
+#### Multi-Language Build Orchestration
+
+When multiple ecosystems are detected (from Dependency Install Detection above):
+
+1. **Identify build dependency order**: Does frontend build depend on backend? (Check if frontend imports from backend build output)
+2. **Run builds in order**:
+   - Independent builds: run in parallel if possible
+   - Dependent builds: run in dependency order (e.g., Python package → then pnpm build that imports it)
+3. **Record per-ecosystem build results**:
+   ```
+   Build Results:
+     Python (pip install -e .): ✅ success
+     Node.js (pnpm build): ✅ success
+     Rust (cargo build): ⚠️ skipped (no Rust in this project)
+   ```
+4. **Partial build success**: If one ecosystem builds but another fails:
+   - Record which succeeded/failed
+   - Apply C5 Build Environment Unavailability logic for failed ecosystems
+   - Adoption can proceed for ecosystems that built successfully
 
 #### Build Environment Unavailability
 
@@ -521,6 +556,34 @@ Display: `✅ Created: demos/project-demo.sh`
 ---
 
 ## Post-Pipeline Summary
+
+### Post-Pipeline: Adoption Analysis Report
+
+After Coverage Verification passes, generate `specs/_global/adoption-report.md`:
+
+1. Read the shared template structure from `~/.claude/skills/shared/reference/completion-report.md`
+2. Mode = "adoption"
+3. Populate sections:
+   - §1 Project Profile: from sdd-state.md + Phase 1 scan data
+   - §2 Feature Catalog: from roadmap.md + sdd-state.md Feature Progress
+   - §3 SBI → FR Mapping: aggregate [source: B###] tags from all spec.md files
+     - If `specs/_global/completion-report.md` exists (from prior reverse-spec):
+       Compare: "reverse-spec found [N] SBI → adoption mapped [X] to FRs ([%] coverage)"
+   - §4 Entity & API: from entity-registry.md + api-registry.md
+   - §5 Per-Feature Status Table: from sdd-state.md Feature statuses + verify results
+   - §6 Recommendations: pre-existing issues, suggested improvements, next steps
+   - §7 Artifact Inventory: list all generated files
+4. Write to `specs/_global/adoption-report.md`
+5. Display summary:
+   ```
+   📊 Adoption Analysis Report saved to specs/_global/adoption-report.md
+
+   Key metrics:
+   - [N] Features adopted ([N] passed, [N] with warnings)
+   - SBI Coverage: P1 [X/Y] ([%]) | P2 [X/Y] ([%])
+   - [N] entities, [N] APIs documented
+   - Pre-existing issues: [N] (see report §6)
+   ```
 
 📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M8.
 
