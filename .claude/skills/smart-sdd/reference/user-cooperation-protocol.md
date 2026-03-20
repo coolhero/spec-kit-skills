@@ -110,6 +110,18 @@ Classify as `external-dep` when:
 
      Please prepare these dependencies, then confirm.
 
+   For each dependency, provide EXACT setup instructions based on how the app stores configuration:
+     - **If .env-based** (detected from source or Data Storage Map): "Add OPENAI_API_KEY=sk-... to .env"
+     - **If in-app UI** (Electron/desktop with config store): "Run the app → navigate to Settings → configure → CLOSE the app"
+     - **If database seed**: "Run: [exact seed command]"
+     - **If external service**: "Start [service] on [port]: [exact command]"
+
+   When the app stores credentials in **in-app UI** (electron-store, sqlite, etc.),
+   the user MUST run the target app, configure settings, and close it.
+   The verify Playwright session then uses `--user-data-dir` pointing to the same userData
+   to access the user's configuration. See `reverse-spec/commands/analyze-scan.md` § 1-6
+   (Data Storage Map) for how storage locations are detected.
+
    - AskUserQuestion:
      - "Dependencies ready — proceed with verification"
      - "Skip user-assisted SCs"

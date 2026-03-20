@@ -65,7 +65,8 @@
 **Skip if**: Feature has no persistent state (pure stateless API, library, CLI with no config).
 
 Apply ONE of these strategies (in priority order):
-1. **Clean user data directory**: Launch the app with an isolated/temporary user data path (e.g., `--user-data-dir=/tmp/verify-clean-{FID}` for Electron, fresh browser profile for web). This guarantees pristine default state
+1. **Clean user data directory**: Launch the app with an isolated/temporary user data path (e.g., `--user-data-dir=/tmp/verify-clean-{FID}` for Electron, fresh browser profile for web). This guarantees pristine default state.
+   - **Exception**: If SC Verification Matrix has `user-assisted` SCs requiring in-app credentials (API keys stored in electron-store, not .env), use the user's ACTUAL userData dir instead of isolated. The user configures → closes app → verify reads their settings. See `user-cooperation-protocol.md` § 3 and `reverse-spec/commands/analyze-scan.md` § 1-6 (Data Storage Map) for storage detection.
 2. **Reset API**: If the app provides a config reset mechanism (IPC `config:reset`, API `POST /reset`, CLI `--factory-reset`), invoke it at verify start before any test execution
 3. **State-aware test pattern**: If neither 1 nor 2 is possible, every test scenario MUST follow the **read-before-act** pattern:
    - Read current value first (`const before = await getCurrentTheme()`)
