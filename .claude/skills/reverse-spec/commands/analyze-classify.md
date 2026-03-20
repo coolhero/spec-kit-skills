@@ -258,6 +258,19 @@ This prevents Feature explosion (100+ providers != 100+ Features) while maintain
 - WRONG: Create F003-all-providers (one Feature -> loses per-provider coverage)
 - RIGHT: F002-framework + F003-template + variants list (manageable + traceable)
 
+### Architectural Pattern Detection (Phase 3 enhancement)
+
+When Phase 1-2 module scan reveals specific directory patterns, detect the architecture style to improve Feature boundary accuracy:
+
+**Hexagonal/Clean Architecture Detection**:
+Signals: directories named `domain/`, `application/`, `adapter/`, `port/`, `infrastructure/`; OR packages like `*.domain`, `*.application.port.in`, `*.application.port.out`, `*.adapter.in.web`, `*.adapter.out.persistence`; OR ArchUnit/ArchUnit-like architecture test files.
+
+When detected:
+- Feature boundaries should follow **use cases** (application service methods), NOT layers
+- Each use case (e.g., "Send Money", "Create Account") spanning domain + ports + adapters = one Feature
+- Do NOT create "Web Adapter Feature" + "Persistence Adapter Feature" (layer-based = WRONG)
+- Record: `Architecture: Hexagonal/Clean` in Phase 3 summary
+
 ### 3-2. Dependency Graph Construction and Release Group Determination
 Derive inter-Feature dependencies:
 - **Direct Dependency**: Uses another Feature's modules via import/require

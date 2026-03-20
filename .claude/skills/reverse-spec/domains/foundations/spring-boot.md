@@ -10,7 +10,7 @@
 
 | Signal | Confidence |
 |--------|-----------|
-| `spring-boot-starter-*` in `pom.xml` or `build.gradle` dependencies | HIGH |
+| `spring-boot-starter-*` in `pom.xml` or `build.gradle`/`build.gradle.kts` dependencies | HIGH |
 | `@SpringBootApplication` annotation in main class | HIGH |
 | `application.properties` or `application.yml` in `src/main/resources/` | HIGH |
 | `mvnw` / `gradlew` wrapper + Spring dependency | MEDIUM |
@@ -32,7 +32,7 @@
 | LOG | Logging | SLF4J + Logback, structured logging, MDC propagation |
 | TST | Testing | @SpringBootTest, @WebMvcTest, Testcontainers, MockMvc, @DataJpaTest |
 | BLD | Build & Deploy | Maven/Gradle, Docker, GraalVM native image, layered JARs |
-| ENV | Environment Config | application.yml, @ConfigurationProperties, Spring Cloud Config, profiles |
+| ENV | Environment Config | application.yml, @ConfigurationProperties, Spring Cloud Config, profiles, active Spring Profiles |
 | DXP | Developer Experience | DevTools, LiveReload, Lombok, MapStruct |
 
 ---
@@ -47,6 +47,7 @@
 | SB-BST-03 | Starters | Critical | Which spring-boot-starters? (web, data-jpa, security, actuator, etc.) |
 | SB-BST-04 | Component scanning | Important | Default `@SpringBootApplication` scan or custom `@ComponentScan`? |
 | SB-BST-05 | Configuration binding | Important | `@Value` injection or `@ConfigurationProperties` typed binding? |
+| SB-BST-06 | Programming model | Critical | Servlet (blocking MVC, JPA, Tomcat) or Reactive (WebFlux, R2DBC, Netty)? Detection: `spring-boot-starter-webflux` = reactive, `spring-boot-starter-web` = servlet. Both present = mixed. |
 
 ### SEC — Security
 | ID | Item | Priority | Question |
@@ -111,6 +112,12 @@
 | SB-PRC-01 | Graceful shutdown | Important | `server.shutdown=graceful`? Shutdown timeout? |
 | SB-PRC-02 | Actuator endpoints | Important | Which actuator endpoints exposed? (`health`, `info`, `metrics`, `env`) |
 
+### ENV — Environment Config
+| ID | Item | Priority | Question |
+|----|------|----------|----------|
+| SB-ENV-01 | Config strategy | Important | `application.yml` or `application.properties`? `@ConfigurationProperties` typed binding? Spring Cloud Config? |
+| SB-ENV-02 | Active Spring Profiles | Important | What profiles are defined (`application-{profile}.yml`) and what do they control? Detection: glob `application-*.yml` / `application-*.properties`. |
+
 ---
 
 ## F7. Philosophy
@@ -151,3 +158,35 @@
 | `@RestController` + `@RequestMapping` / `@GetMapping` / `@PostMapping` / `@PutMapping` / `@DeleteMapping` | REST endpoint definitions |
 | `@PathVariable`, `@RequestParam`, `@RequestBody` | Request parameter extraction |
 | SpringDoc `@Operation`, `@ApiResponse` annotations | API documentation metadata |
+
+#### Reactive Patterns
+| Pattern | Description |
+|---------|-------------|
+| `RouterFunction` definitions | WebFlux functional routing |
+| `Mono<T>` / `Flux<T>` return types | Reactive stream return types |
+| `ReactiveRepository` / `ReactiveCrudRepository` interfaces | Reactive data access |
+| `@EnableWebFlux` | WebFlux activation |
+
+#### Spring Cloud Patterns
+| Pattern | Description |
+|---------|-------------|
+| `@FeignClient` | Declarative HTTP client |
+| `@EnableEurekaClient` / `@EnableDiscoveryClient` | Service discovery |
+| `@EnableConfigServer` | Centralized configuration server |
+| Spring Cloud Gateway route definitions (`RouteLocator`, `route().path()`) | API gateway routing |
+| `@CircuitBreaker` | Circuit breaker resilience pattern |
+
+#### AOP Annotation Patterns
+| Pattern | Description |
+|---------|-------------|
+| `@Transactional` | Transaction boundaries |
+| `@Cacheable` / `@CacheEvict` | Cache management |
+| `@Async` | Asynchronous execution |
+| `@Scheduled` | Scheduled task execution |
+| `@PreAuthorize` / `@Secured` | Method-level security |
+
+#### Profile Patterns
+| Pattern | Description |
+|---------|-------------|
+| `application-*.yml` / `application-*.properties` | Profile-specific configuration files |
+| `@Profile("...")` | Profile-conditional bean activation |

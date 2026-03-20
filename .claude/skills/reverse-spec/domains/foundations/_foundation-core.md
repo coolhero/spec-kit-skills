@@ -34,6 +34,7 @@ Identify the primary framework(s) from project files:
 | Chrome Extension | `manifest.json` with `"manifest_version": 3` (or 2) + `chrome.runtime`/`chrome.tabs` keywords |
 | Rust (Cargo) | `Cargo.toml` in root + `.rs` source files (standalone — without actix-web/tauri-specific signals) |
 | Svelte | `svelte` in dependencies + `.svelte` files + `svelte.config.*` |
+| Spring Framework | `spring-context`/`spring-web` in `pom.xml`/`build.gradle` WITHOUT `spring-boot-starter-*` + XML config OR `@Configuration` with `@Bean` |
 
 **Multiple frameworks**: A project may use multiple frameworks (e.g., Express backend + React frontend). Detect all, load Foundation files for each. Comma-separate in `**Framework**` field.
 
@@ -55,6 +56,18 @@ Identify the primary framework(s) from project files:
 **Go Workspace Signals**:
 - `go.work` file in root (Go 1.18+ multi-module workspace)
 - Multiple `go.mod` files in subdirectories
+
+**Java/Maven Multi-Module Signals**:
+- Parent `pom.xml` with `<modules>` section listing child modules
+- Multiple `pom.xml` files in subdirectories with `<parent>` referencing root
+- `<dependencyManagement>` in parent POM (BOM pattern)
+- Root `pom.xml` with `<packaging>pom</packaging>`
+
+**Java/Gradle Multi-Module Signals**:
+- `settings.gradle` or `settings.gradle.kts` with `include` statements (e.g., `include ':module-a', ':module-b'`)
+- Multiple `build.gradle` or `build.gradle.kts` files in subdirectories
+- Root `build.gradle` with `subprojects {}` or `allprojects {}` blocks
+- `buildSrc/` directory (custom plugin/convention code)
 
 ---
 
@@ -218,7 +231,7 @@ Each Foundation item has a globally unique ID:
 
 | Component | Description | Example |
 |-----------|-------------|---------|
-| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix), CE (Chrome Extension), RC (Rust/Cargo), SV (Svelte) |
+| FW | Framework code (2-3 chars) | EL (Electron), TA (Tauri), EX (Express), NX (Next.js), VR (Vite+React), NE (NestJS), FA (FastAPI), RN (React Native), FL (Flutter), BU (Bun), SO (Solid.js), HO (Hono), SB (Spring Boot), SF (Spring Framework), DJ (Django), RL (Rails), FK (Flask), AW (Actix-web), GC (Go Chi), DN (ASP.NET Core), LV (Laravel), PX (Phoenix), CE (Chrome Extension), RC (Rust/Cargo), SV (Svelte) |
 | CAT | Category code from § F1 | WIN, SEC, IPC, MID, REN, etc. |
 | NN | Sequential number (01-99) | 01, 02, 03, ... |
 
@@ -321,6 +334,7 @@ Each framework Foundation file in this directory follows the structure defined i
 | `solidjs.md` | Solid.js | — | 5 | ✅ | Implemented |
 | `hono.md` | Hono | — | 8 | ✅ | Implemented |
 | `spring-boot.md` | Spring Boot | ~35 | 13 | ✅ | Implemented |
+| `spring-framework.md` | Spring Framework | — | — | — | Detection stub |
 | `django.md` | Django | ~30 | 12 | ✅ | Implemented |
 | `rails.md` | Rails | ~30 | 13 | ✅ | Implemented |
 | `flask.md` | Flask | ~25 | 12 | ✅ | Implemented |

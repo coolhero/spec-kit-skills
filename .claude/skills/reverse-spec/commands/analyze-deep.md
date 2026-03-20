@@ -65,7 +65,38 @@ When Language Composition Analysis (Phase 1-2a) detected multiple languages with
    | CUDA | `__global__`, `__device__`, `__host__` functions | Kernel launch wrappers |
    | Go | `func` declarations | Capitalized names (exported) |
    | Rust | `fn` declarations | `pub fn`, `pub struct` |
-   | Java/Kotlin | Method declarations | `public`, `protected` |
+   | Java | Method declarations, `@Bean` factory methods | `public`, `protected`, Spring stereotype annotations (`@Service`, `@Repository`, `@Controller`) |
+   | Kotlin | `fun`/`suspend fun` declarations, `data class`, `object`/`companion object` | `public` (default), Spring stereotypes. Note: `suspend fun` = coroutine, `sealed class` = state machine, `Flow<T>` = reactive stream |
+
+#### Spring/Java Enterprise SBI Extension (when Foundation = Spring Boot or Spring Framework)
+
+When the detected Foundation includes Spring Boot or Spring Framework, apply these additional SBI extraction rules alongside standard Java/Kotlin method scanning:
+
+**1. Annotation-Driven Bean Discovery**:
+Spring applications are assembled via annotation scanning, not just method visibility. Identify behavioral units by these stereotype annotations:
+- `@Service` — business logic beans (P1: core domain behavior)
+- `@Repository` — data access beans (P1: data persistence)
+- `@Controller` / `@RestController` — request handler beans (P1: API surface)
+- `@Component` — general-purpose beans (P2 unless used as infrastructure)
+- `@Configuration` + `@Bean` methods — infrastructure/wiring (P2-P3 depending on what they create)
+- `@Conditional*` — profile/condition-activated beans (note activation condition in SBI Notes column)
+
+For each Spring bean class, the SBI entry should be the **class** (not individual methods), with its stereotype and key public methods listed in Notes.
+
+**2. AOP/Proxy-Based Cross-Cutting Behaviors**:
+Spring AOP annotations add invisible runtime behavior through proxies. When these annotations appear on a method, record the proxy behavior as part of the SBI entry's Notes:
+- `@Transactional` → "TX boundary: commits on success, rolls back on exception [isolation level if specified]"
+- `@Cacheable` / `@CacheEvict` → "Cache: reads/writes cache [cache name] with key [key expression]"
+- `@Async` → "Runs in thread pool [executor name if specified]"
+- `@Retryable` → "Retries [N] times on [exception types]"
+- `@Scheduled` → "Scheduled: [cron/fixedRate expression]"
+- `@PreAuthorize` / `@Secured` → "Auth: requires [role/expression]"
+- `@EventListener` → "Listens for [event type]"
+
+These are NOT separate SBI entries — they are behavioral modifiers recorded in the Notes of the method's existing SBI entry.
+
+**3. Dependency Injection Graph**:
+Spring's `@Autowired` / constructor injection reveals the bean dependency graph. For each `@Service`/`@Component` class, note its injected dependencies in the SBI Notes column (e.g., "Injects: UserRepository, EmailService, CacheManager"). This feeds into Phase 3-2 Feature dependency analysis.
 
 2. **Run SBI extraction per language** using the appropriate patterns
 3. **Add Language column** to the SBI table: `| B### | Language | Source File | Function | Behavior | Priority |`
