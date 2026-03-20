@@ -210,10 +210,18 @@ flowchart TD
 
 ### Step 6 — HARD STOP
 
-Present the orientation summary to the user via AskUserQuestion:
+**First, tell the user where to find the full orientation document:**
 
-- **"Looks good — start exploring"** → Display the suggested explorations and wait for the user to pick one or type their own topic
-- **"Adjust module map"** → User provides corrections (missed modules, wrong purpose). Agent updates orientation.md and re-presents.
+```
+✅ Orientation complete!
+📄 Full document: specs/explore/orientation.md
+   → Module map, Domain Profile, architecture diagram, suggested topics
+```
+
+Then present options via AskUserQuestion:
+
+- **"Start exploring (Recommended)"** → Display the suggested explorations and wait for the user to pick one or type their own topic
+- **"Review module map"** → User opens `specs/explore/orientation.md` to review. Agent waits for corrections if any.
 - **"Re-scan with different path"** → User specifies a different target directory
 
 **If response is empty → re-ask** (per MANDATORY RULE).
