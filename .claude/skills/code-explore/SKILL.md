@@ -50,10 +50,17 @@ $ARGUMENTS parsing rules:
 
 ### Language Persistence
 
-`--lang` is stored in `orientation.md` header: `> Language: ko`
+Language resolution order (first match wins):
+1. `--lang <code>` argument → use this, update storage
+2. `sdd-state.md` Artifact Language field → if exists (post-reverse-spec)
+3. `orientation.md` header `> Artifact Language: ko` → if exists (code-explore only)
+4. Default → `en`
 
 **On orient**: write language to orientation.md header.
-**On trace / trace --continue / synthesis**: read language from orientation.md header. ALL generated content (section headings, descriptions, observations, AskUserQuestion labels) MUST use the stored language. If no language is stored, default to English.
+**On trace / synthesis**: read language using resolution order above.
+**Handoff**: When reverse-spec creates sdd-state.md, it reads orientation.md's language and copies it to sdd-state.md. From that point, sdd-state.md is the single source.
+
+ALL generated content (section headings, descriptions, observations, AskUserQuestion labels) MUST use the resolved language.
 
 ---
 
