@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:28 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:39 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1670,7 +1670,24 @@ Each skill follows the same internal directory convention:
 | `domains/foundations/spring-framework.md` | Spring Framework (non-Boot) Foundation — F0 detection stub, XML config, manual wiring, WAR deployment |
 | `domains/foundations/cmake.md` | CMake (C/C++) Foundation — F0 detection stub, target-based modules, preprocessor conditionals, Conan/vcpkg |
 | `domains/foundations/makefile.md` | Makefile/Autotools/Meson/Bazel Foundation — F0 detection stub, multi-build-system toolchain commands |
+| `domains/foundations/python.md` | Python (Standalone) Foundation — F0 detection stub, virtualenv/pip/poetry/uv toolchain |
+| `domains/foundations/go.md` | Go (Standalone) Foundation — F0 detection stub, go modules, build tags, CGO |
+| `domains/foundations/swift-spm.md` | Swift (SPM/Xcode) Foundation — F0 detection stub, Package.swift, Xcode project structure |
+| `domains/foundations/erlang-otp.md` | Erlang/OTP Foundation — F0 detection stub, rebar3, OTP application structure |
+| `domains/foundations/nuxt.md` | Nuxt Foundation — F0 detection stub, auto-imports, server routes, Nitro engine |
+| `domains/foundations/angular.md` | Angular Foundation — F0 detection stub, modules/standalone components, dependency injection |
+| `domains/foundations/remix.md` | Remix Foundation — F0 detection stub, loader/action patterns, nested routing |
+| `domains/foundations/qt.md` | Qt (C++) Foundation — F0 detection stub, QML, signals/slots, MOC |
+| `domains/foundations/gtk.md` | GTK Foundation — F0 detection stub, GObject, widget hierarchy, Glade UI |
+| `domains/foundations/symfony.md` | Symfony Foundation — F0 detection stub, bundles, service container, Doctrine |
+| `domains/foundations/wordpress.md` | WordPress Foundation — F0 detection stub, hooks/filters, theme/plugin architecture |
+| `domains/foundations/android-native.md` | Android Native (Kotlin/Java) Foundation — F0 detection stub, Gradle, activity/fragment lifecycle |
 | `domains/concerns/cqrs-eventsourcing.md` | CQRS/Event Sourcing concern — R1 detection, R3 Aggregate-based Feature boundary rules, R4 command→event→projection flow |
+| `domains/concerns/distributed-consensus.md` | Distributed consensus concern — R3 consensus protocol extraction, leader election patterns |
+| `domains/concerns/dag-orchestration.md` | DAG orchestration concern — R3 task dependency extraction, scheduler integration patterns |
+| `domains/concerns/ecs.md` | ECS concern — R3 entity-component-system extraction, data-oriented design patterns |
+| `domains/concerns/wire-protocol.md` | Wire protocol concern — R3 protocol message extraction, framing/serialization patterns |
+| `domains/concerns/k8s-operator.md` | K8s operator concern — R3 CRD/controller extraction, reconciliation loop patterns |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -1816,11 +1833,22 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/concerns/llm-agents.md` | LLM agents — S0 + R1 (LLM SDKs, prompt templates, agent frameworks, multi-agent patterns) |
 | `domains/concerns/hardware-io.md` | Hardware I/O — S0 + R1 (ioctl, mmap, serial, USB, GPIO, KVM, device file access) |
 | `domains/concerns/cqrs-eventsourcing.md` | CQRS/Event Sourcing — S0 + R1 (Axon Framework, EventStoreDB, aggregate/command/event/query handler patterns) |
+| `domains/concerns/distributed-consensus.md` | Distributed consensus — S0 + R1 (Raft, Paxos, gossip, leader election, quorum patterns) |
+| `domains/concerns/dag-orchestration.md` | DAG orchestration — S0 + R1 (Airflow, Prefect, Dagster, dbt, task dependency patterns) |
+| `domains/concerns/ecs.md` | ECS — S0 + R1 (entity-component-system, data-oriented design, archetype storage) |
+| `domains/concerns/wire-protocol.md` | Wire protocol — S0 + R1 (MQTT, AMQP, RESP, WebRTC, binary framing patterns) |
+| `domains/concerns/k8s-operator.md` | K8s operator — S0 + R1 (CRD, controller-runtime, reconciliation loop, finalizer patterns) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant — A0 semantic + code patterns (LLM SDKs, streaming, RAG) |
 | `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |
 | `domains/archetypes/microservice.md` | Microservice — A0 semantic + code patterns (gRPC, service mesh, Docker) |
 | `domains/archetypes/sdk-framework.md` | SDK/Framework — A0 semantic + code patterns (package metadata, public API, extension points, examples) |
+| `domains/archetypes/database-engine.md` | Database engine — A0 semantic + code patterns (storage engines, query processors, B-tree/LSM) |
+| `domains/archetypes/network-server.md` | Network server — A0 semantic + code patterns (proxies, load balancers, L4/L7 traffic) |
+| `domains/archetypes/message-broker.md` | Message broker — A0 semantic + code patterns (Kafka, RabbitMQ, NATS, event streaming) |
+| `domains/archetypes/game-engine.md` | Game engine — A0 semantic + code patterns (Unity, Unreal, Godot, ECS, render loop) |
+| `domains/archetypes/browser-extension.md` | Browser extension — A0 semantic + code patterns (manifest, content scripts, background workers) |
+| `domains/archetypes/infra-tool.md` | Infra tool — A0 semantic + code patterns (Terraform, Pulumi, reconciliation engines) |
 | **Runtime** | |
 | `runtime/_index.md` | Runtime module index — cross-skill registry with Domain Profile integration table |
 | `runtime/playwright-detection.md` | Playwright availability detection — CLI/MCP/CDP probe, Electron connection mode |

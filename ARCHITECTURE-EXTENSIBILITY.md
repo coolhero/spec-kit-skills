@@ -882,3 +882,17 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Foundation files (C/C++ build)** | `reverse-spec/domains/foundations/cmake.md`, `reverse-spec/domains/foundations/makefile.md` |
 | **Hexagonal architecture** | `reverse-spec/commands/analyze-classify.md` § Architectural Pattern Detection |
 | **Reactive vs Servlet stack** | `reverse-spec/domains/foundations/spring-boot.md` § SB-BST-06, § F9 reactive patterns |
+| **Foundation files (multi-platform)** | `reverse-spec/domains/foundations/{python,go,swift-spm,erlang-otp,nuxt,angular,remix,qt,gtk,symfony,wordpress,android-native}.md` (detection stubs) |
+| **Database engine archetype** | `shared/domains/archetypes/database-engine.md` (A0 storage/query signals) |
+| **Network server archetype** | `shared/domains/archetypes/network-server.md` (A0 proxy/LB/gateway signals) |
+| **Message broker archetype** | `shared/domains/archetypes/message-broker.md` (A0 broker/streaming signals) |
+| **Game engine archetype** | `shared/domains/archetypes/game-engine.md` (A0 engine/ECS/render signals) |
+| **Browser extension archetype** | `shared/domains/archetypes/browser-extension.md` (A0 manifest/content script signals) |
+| **Infra tool archetype** | `shared/domains/archetypes/infra-tool.md` (A0 IaC/reconciliation signals) |
+| **Distributed consensus concern** | `shared/domains/concerns/distributed-consensus.md` (S0/R1), `reverse-spec/domains/concerns/distributed-consensus.md` (R3 protocol extraction) |
+| **DAG orchestration concern** | `shared/domains/concerns/dag-orchestration.md` (S0/R1), `reverse-spec/domains/concerns/dag-orchestration.md` (R3 dependency extraction) |
+| **ECS concern** | `shared/domains/concerns/ecs.md` (S0/R1), `reverse-spec/domains/concerns/ecs.md` (R3 component extraction) |
+| **Wire protocol concern** | `shared/domains/concerns/wire-protocol.md` (S0/R1), `reverse-spec/domains/concerns/wire-protocol.md` (R3 message extraction) |
+| **K8s operator concern** | `shared/domains/concerns/k8s-operator.md` (S0/R1), `reverse-spec/domains/concerns/k8s-operator.md` (R3 CRD/controller extraction) |
+| **R2 project types (expanded)** | `reverse-spec/domains/_core.md` § R2 (`infrastructure`, `desktop`, `platform` added) |
+| **R5 Feature boundary heuristics** | `reverse-spec/domains/_core.md` § R5 (protocol boundaries, workspace/package boundaries added) |
