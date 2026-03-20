@@ -8,9 +8,13 @@ Trace a specific flow through the codebase at the source level, producing a docu
 
 ---
 
+## Output Path
+
+All trace files are written to `specs/explore/traces/` relative to **CWD** (where the user ran the command), NOT the target directory being analyzed. This matches the output path rule in SKILL.md.
+
 ## Prerequisites
 
-- `specs/explore/orientation.md` must exist. If not, prompt:
+- `specs/explore/orientation.md` must exist (in CWD). If not, prompt:
   ```
   ⚠️ No orientation found. Run /code-explore [path] first to generate
   an architecture map before tracing specific flows.

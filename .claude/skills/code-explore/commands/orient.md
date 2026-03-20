@@ -100,6 +100,8 @@ Order by: entry points first, then core business logic, then infrastructure.
 
 ### Step 5 — Generate orientation.md
 
+> **Output path**: Write to `specs/explore/orientation.md` relative to **CWD** (where the user ran the command), NOT the target directory being analyzed. If user runs `/code-explore /other/project` from `~/my-project/`, write to `~/my-project/specs/explore/orientation.md`.
+
 Write `specs/explore/orientation.md` using the following structure:
 
 ```markdown
