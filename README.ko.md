@@ -1346,7 +1346,7 @@ specs/
 |------|------|
 | `SKILL.md` | 스킬 라우터 — code-explore 진입점 및 커맨드 라우팅 |
 | `commands/orient.md` | 코드베이스 오리엔테이션 — 스캔 및 아키텍처 맵 생성 |
-| `commands/trace.md` | End-to-end 흐름 트레이싱 — 소스 레벨 호출 체인 문서화 |
+| `commands/trace.md` | End-to-end 흐름 트레이싱 — 소스 레벨 호출 체인 문서화. `--continue [NNN]`으로 기존 trace에 추가 가능 |
 | `commands/synthesis.md` | Trace 합성 — Feature 후보 도출 및 spec-kit 핸드오프 |
 | `commands/status.md` | 탐색 커버리지 — trace 인덱스 및 준비 상태 확인 |
 
@@ -1355,7 +1355,12 @@ specs/
 | 파일 | 설명 |
 |------|------|
 | `SKILL.md` | 스킬 라우터 — reverse-spec 진입점 및 필수 규칙 |
-| `commands/analyze.md` | 소스코드 분석 및 Global Evolution Layer 아티펙트 생성 다단계 워크플로우 |
+| `commands/analyze.md` | 허브 — Pre-Phase + Phase 0 + Phase 파일 라우팅 테이블 |
+| `commands/analyze-scan.md` | Phase 1 — 프로젝트 스캔 (기술 스택, 진입점, 모듈) |
+| `commands/analyze-runtime.md` | Phase 1.5 — 런타임 탐색 (🚫 rebuild 필수) |
+| `commands/analyze-deep.md` | Phase 2 — 심층 분석 (데이터 모델, API, SBI, 비즈니스 로직) |
+| `commands/analyze-classify.md` | Phase 3 — Feature 분류 (Tier, 의존성, 데모 그룹) |
+| `commands/analyze-generate.md` | Phase 4 — 아티펙트 + spec-draft 생성 |
 | **Domains** | |
 | `domains/_core.md` | 범용 분석 프레임워크 (R1–R7 분석 섹션, Foundation Detection Heuristics 포함) |
 | `domains/_schema.md` | 도메인 프로필 스키마 템플릿 (Detection Signals, Analysis Axes, Feature Registry 등) |

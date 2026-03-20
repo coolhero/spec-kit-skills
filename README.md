@@ -1332,7 +1332,7 @@ Each skill follows the same internal directory convention:
 |------|-------------|
 | `SKILL.md` | Skill router — entry point and command routing for code-explore |
 | `commands/orient.md` | Codebase orientation — scan and generate architecture map |
-| `commands/trace.md` | End-to-end flow tracing — source-level call chain documentation |
+| `commands/trace.md` | End-to-end flow tracing — source-level call chain documentation. Supports `--continue [NNN]` to append to existing traces |
 | `commands/synthesis.md` | Trace aggregation — Feature candidates and spec-kit handoff |
 | `commands/status.md` | Exploration coverage — trace index and readiness check |
 
@@ -1341,7 +1341,12 @@ Each skill follows the same internal directory convention:
 | File | Description |
 |------|-------------|
 | `SKILL.md` | Skill router — entry point and mandatory rules for reverse-spec |
-| `commands/analyze.md` | Multi-phase workflow for analyzing source code and generating Global Evolution Layer artifacts |
+| `commands/analyze.md` | Hub — Pre-Phase + Phase 0 + routing table to Phase files |
+| `commands/analyze-scan.md` | Phase 1 — Project scan (tech stack, entry points, modules) |
+| `commands/analyze-runtime.md` | Phase 1.5 — Runtime exploration (🚫 BLOCKING for rebuild) |
+| `commands/analyze-deep.md` | Phase 2 — Deep analysis (data models, APIs, SBI, business logic) |
+| `commands/analyze-classify.md` | Phase 3 — Feature classification (tier, dependencies, demo groups) |
+| `commands/analyze-generate.md` | Phase 4 — Artifact + spec-draft generation |
 | **Domains** | |
 | `domains/_core.md` | Universal analysis framework (R1–R7 analysis sections, including Foundation Detection Heuristics) |
 | `domains/_schema.md` | Domain profile schema template (Detection Signals, Analysis Axes, Feature Registry, etc.) |
