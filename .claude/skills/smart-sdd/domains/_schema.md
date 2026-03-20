@@ -52,7 +52,7 @@ Archetypes **extend** Concern rules via A2 (SC extensions) and A3 (probes). They
 | **Interface** | `interfaces/{name}.md` | What the app exposes (http-api, gui, cli, data-io, tui) |
 | **Concern** | `concerns/{name}.md` | Cross-cutting patterns (async-state, ipc, external-sdk, i18n, realtime, auth, ...) |
 | **Archetype** | `archetypes/{name}.md` | Domain philosophy — principles that transcend framework/interface choices (ai-assistant, public-api, microservice, sdk-framework) |
-| **Foundation** | `../../reverse-spec/domains/foundations/{name}.md` | Framework-specific constraints and toolchain (React, Next.js, Electron, ...) |
+| **Foundation** | `../../reverse-spec/domains/foundations/{name}.md` | Framework-specific constraints and toolchain (React, Next.js, Electron, ...). For multi-language projects (Phase 1-2a), the Framework field stores comma-separated values (e.g., `pytorch,cmake,cuda`). Each Foundation is loaded independently per `_resolver.md` Step 2b. |
 | **Scenario** | `scenarios/{name}.md` | Why we're building (greenfield, rebuild, incremental, adoption) |
 | **Profile** | `profiles/{name}.md` | Preset composition of interfaces + concerns (~10 line manifest) |
 | **Core** | `_core.md` | Universal rules loaded for ALL projects |

@@ -107,6 +107,30 @@ Project type: [detected type — TUI/Web/Desktop/API]
 
 **If response is empty → re-ask.**
 
+#### Interface-Specific Runtime Strategy
+
+The runtime exploration approach depends on the detected Interface axis:
+
+| Interface | Runtime Strategy | Tool |
+|-----------|-----------------|------|
+| `gui` (desktop/web) | Playwright browser/Electron automation | Screenshots + accessibility tree |
+| `gui` (TUI/terminal) | Terminal recording or manual screenshots | User-assisted capture (P2 Delegate) |
+| `http-api` | HTTP request/response capture | curl/fetch probing of endpoints |
+| `cli` | Command execution capture | Run CLI commands, capture stdout |
+| `library` | Skip runtime (no interactive surface) | Code analysis only |
+
+**For TUI applications** (detected by: Bubble Tea, OpenTUI, Ink, blessed, ncurses, curses dependencies):
+- Playwright cannot interact with terminal-rendered UIs
+- Present AskUserQuestion:
+  "🖥️ TUI application detected. Playwright cannot capture terminal UIs directly."
+  Options:
+  - "I'll provide terminal screenshots manually"
+  - "Skip runtime exploration (code analysis only)"
+  - "Run the app — I'll describe what I see"
+  **If response is empty → re-ask** (per MANDATORY RULE 1)
+- If user provides screenshots: save to `specs/explore/screenshots/` and reference in orientation.md
+- If user describes: record as text observations in orientation.md § Runtime Observations
+
 **🚨 MANDATORY: Read the shared runtime modules BEFORE proceeding.**
 
 Read these files NOW (not "follow" or "reference" — actually READ them):

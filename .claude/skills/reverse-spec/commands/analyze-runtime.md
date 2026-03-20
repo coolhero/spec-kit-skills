@@ -7,7 +7,7 @@
 > 4. `~/.claude/skills/shared/runtime/playwright-detection.md` — backend detection
 > 5. `~/.claude/skills/shared/runtime/observation-protocol.md` — WHAT to observe per Domain Profile axis
 
-## Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild, Optional for adopt)
+## Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild, Conditional for adopt)
 
 > **Purpose**: Run the original application and explore it interactively before deep code analysis. This provides visual and behavioral context (UI layout, user flows, actual states) that code reading alone cannot capture. The observations enrich Phase 2 analysis and Phase 4 deliverables.
 >
@@ -23,7 +23,20 @@
 >    → implement creates Dropdown with auto-fill → matches source
 > ```
 >
-> **For adopt mode**: Skip entirely — adoption documents existing code in-place, no need to explore the app you're already running.
+> **Adopt mode behavior** (conditional on Interface axis):
+> - If Interface axis includes `gui` → **OPTIONAL with HARD STOP**.
+>   Present AskUserQuestion:
+>   "🖥️ GUI project detected in adoption mode. Phase 1.5 captures UI structure for richer spec extraction."
+>   Options:
+>   - "Run Phase 1.5 (recommended for GUI-heavy projects)"
+>   - "Skip (code analysis only — UI details inferred from source)"
+>   **If response is empty → re-ask** (per MANDATORY RULE 1)
+> - If Interface axis does NOT include `gui` → Skip entirely (no UI to capture).
+>
+> ```
+> ❌ WRONG: `--adopt` always skips Phase 1.5 → GUI adoption project loses all UI structure
+> ✅ RIGHT: `--adopt` + `gui` Interface → optional HARD STOP, user decides
+> ```
 >
 > **Rationale**: Code analysis reveals WHAT components exist. Runtime exploration reveals HOW they work — form field types, interaction patterns, visual feedback, error states, data flow through UI. Without runtime exploration, the agent must guess these details during implement, producing simplified versions that don't match the source app.
 

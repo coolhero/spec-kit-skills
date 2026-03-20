@@ -616,6 +616,30 @@ Pattern Constraints identify framework+library interaction patterns known to cau
 
 ---
 
+## Build Changes (optional plan.md output section)
+
+After speckit-plan completes, if the Feature requires build system modifications, verify the generated plan.md includes a `## Build Changes` section.
+
+**When to include**: Feature adds compilation targets, modifies build flags, adds native dependencies requiring compile steps, changes bundler/packager configuration, or introduces new build scripts.
+
+**When to skip**: Feature is purely application-level code with no build system impact.
+
+**Section format in plan.md**:
+```
+## Build Changes
+| Change | File | What | Why |
+|--------|------|------|-----|
+```
+
+Examples (framework-independent):
+- Add target: `CMakeLists.txt` / `webpack.config.js` / `build.gradle`
+- Add flag: `tsconfig.json` strict mode / `rustc` feature flag / `gcc -O2`
+- Add dependency: native module requiring compilation step
+
+This section is **informational for implement** — it tells the implement step which build files to modify alongside application code. If no build changes needed, omit the section entirely.
+
+---
+
 ## Source → Target Component Mapping (rebuild mode, BLOCKING)
 
 > Guard 1: Guideline → Gate Escalation. Plan Review rejects if source components are

@@ -35,6 +35,56 @@ Unlike standard specify, adopt-specify reads the **actual source files** listed 
 
 ---
 
+## SBI Parsing Protocol (🚫 BLOCKING — must complete before speckit-specify)
+
+### Step 1 — Read SBI Table
+1. Open `SPEC_PATH/[NNN-feature]/pre-context.md`
+2. Locate the `## Source Behavior Inventory` section
+3. Parse the markdown table rows: extract columns — B### ID, Priority (P1/P2/P3), Source File, Function/Method, Behavior Description
+   - B### IDs may be in standard format (`B001`) or domain-prefixed format (`B-INF-001`) for large-scale projects. Both formats are valid.
+4. Filter to current Feature's entries only (matched by Feature ID prefix or association column)
+5. If SBI section is missing or empty:
+   → 🚫 BLOCKING: "No SBI found in pre-context.md for [FID]. Cannot adopt without source behavior mapping. Re-run /reverse-spec to generate SBI."
+
+### Step 2 — Build Source Behavior Map
+For each P1 and P2 SBI entry:
+1. Resolve source file path: `[Source Path from sdd-state.md]/[relative path from SBI table]`
+2. Read the source file, locate the function/method by name
+3. Extract: signature, parameters, return type, core logic (key branches, validations, transformations)
+4. Record as structured context for FR generation
+
+For P3 entries: read function signature only (one-line description sufficient).
+
+### Step 3 — Generate FR with [source: B###] Tags
+During speckit-specify execution, ensure each generated FR includes source traceability:
+- Format: `FR-NNN: [behavior description] [source: B###]` or `[source: B-INF-001]` (match the format used in pre-context.md SBI table)
+- If one B### maps to multiple FRs (complex function with multiple behaviors): tag ALL related FRs with the same B###
+- If multiple B### entries collapse into one FR: tag with comma-separated sources `[source: B001, B002]`
+
+### Step 4 — Coverage Validation (🚫 BLOCKING — checked in Review)
+After speckit-specify generates spec.md, verify in the Review step:
+1. ✅ Every **P1** SBI entry → at least one FR-### with matching `[source: B###]`
+2. ✅ Every **P2** SBI entry → at least one FR-### with matching `[source: B###]`
+3. ℹ️ P3 entries → coverage optional (informational)
+
+Display coverage summary in Review:
+```
+📊 SBI Coverage: P1 [X/Y] (100% required) | P2 [X/Y] (100% required) | P3 [X/Y] (optional)
+(IDs may use standard B### or domain-prefixed B-XXX-### format)
+```
+
+If unmapped P1 or P2 entries exist:
+→ 🚫 BLOCKING: List unmapped B### entries
+→ Agent must generate additional FRs OR provide explicit exclusion justification
+→ Exclusion justification recorded in spec.md notes section
+
+❌ WRONG: Generate FRs without reading source files → FRs are generic, miss edge cases and validations
+❌ WRONG: Skip P2 SBI coverage check → secondary behaviors go undocumented in adoption
+❌ WRONG: Tag FRs with `[source: B###]` without actually verifying the behavior matches
+✅ RIGHT: Read each source function → extract precise behavior → generate FR → tag with [source: B###] → validate coverage
+
+---
+
 ## Injected Content
 
 > **Framing**: "Document the current code's behavior. Do NOT invent new requirements, suggest improvements, or add TODOs. Extract only what the code does today."

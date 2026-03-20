@@ -38,6 +38,45 @@ For each source file identified in Phase 1, extract a **function-level inventory
 - Group by Feature association (determined in Phase 3 when Feature boundaries are identified)
 - Skip internal/private helpers that are implementation details, not behaviors
 
+#### Multi-Language SBI Extraction
+
+When Language Composition Analysis (Phase 1-2a) detected multiple languages with ≥5% presence:
+
+1. **Load language-specific scan patterns** for each qualifying language:
+   | Language | Function Pattern | Export/Public Marker |
+   |----------|-----------------|---------------------|
+   | Python | `def`, `async def`, `class` methods | Module-level functions, `__all__` exports |
+   | JavaScript/TypeScript | `function`, `export`, `class` methods | `export`, `module.exports` |
+   | C/C++ | Function definitions, class methods | Header declarations, `extern "C"`, `__attribute__((visibility))` |
+   | CUDA | `__global__`, `__device__`, `__host__` functions | Kernel launch wrappers |
+   | Go | `func` declarations | Capitalized names (exported) |
+   | Rust | `fn` declarations | `pub fn`, `pub struct` |
+   | Java/Kotlin | Method declarations | `public`, `protected` |
+
+2. **Run SBI extraction per language** using the appropriate patterns
+3. **Add Language column** to the SBI table: `| B### | Language | Source File | Function | Behavior | Priority |`
+4. **Cross-language call graph consideration**: If a secondary-language function (e.g., C++ via FFI) is called by primary-language code and the callee is P2, elevate to P1 (it's a critical integration point)
+5. **Merge into unified SBI table** sorted by Feature association, then by B### ID
+6. **Template/Generic Instantiation Rule**: When a single function template, generic class, or macro generates multiple concrete variants (e.g., C++ `Marlin<FP8>`, `Marlin<INT4>`, `Marlin<BF16>`; Rust generic `impl<T>`; CUDA kernel template instantiations):
+   - Assign **ONE B### ID** to the template/generic definition itself
+   - Record all known instantiation variants in the Notes column: `variants: FP8, INT4, BF16`
+   - Do NOT create separate B### entries per variant — they share the same behavioral logic
+   - **Exception**: If a template specialization has meaningfully different behavior (not just type substitution), it gets its own B### with a note linking to the base template
+
+   This prevents SBI explosion in heavily templated codebases (e.g., CUDA kernels with 10+ dtype variants).
+
+This is a **universal protocol** — the language table above is extensible. For unlisted languages, use the general pattern: "exported/public function definitions."
+
+#### Large-Scale SBI Processing (scale = Large)
+
+When Scale Detection (Phase 1-4a) classified the project as Large:
+
+1. **Use domain-prefixed B### IDs** (see Phase 1-4a § Domain-Prefixed SBI Numbering)
+2. **Process one domain group at a time**: For each group, extract SBI → write to temporary accumulation → merge after all groups complete
+3. **P3 summary mode**: Extract function name + one-line description only (no detailed behavioral analysis)
+4. **SBI table includes Domain column**: `| B-INF-001 | inference | engine/scheduler.py | schedule_batch | ... | P1 |`
+5. **Cross-domain integration points**: If a function in domain A calls a function in domain B, flag as cross-domain interaction (elevate to P1 if either is P2, record in both domains' SBI)
+
 #### UI Control-Level Resolution Rule
 
 File-level SBI ("Settings page renders") misses individual controls. Apply finer granularity for UI-dense files:

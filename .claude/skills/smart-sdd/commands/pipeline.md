@@ -34,7 +34,7 @@ The pipeline is single-direction (reverse-spec → specify → plan → tasks �
 - Also references actual implementation results from preceding Features (under `specs/`) if available
 - **Graceful degradation**: If a source file is missing or a section contains only placeholder text (e.g., "N/A", "none yet"), that source is skipped. See `context-injection-rules.md` § Missing/Sparse Content Handling for details.
 
-**Registry Freshness Pre-check** (for Features after F001):
+**Registry Freshness Pre-check** (for Features after F001, 🚫 BLOCKING if repair fails):
 Before assembling context, verify that registries reflect the latest preceding Feature's updates:
 1. Read `BASE_PATH/entity-registry.md` and `BASE_PATH/api-registry.md`
 2. Check the last "Used by Features" / "Cross-Feature Consumers" entries — do they include the preceding Feature that just completed its plan/implement step?
@@ -44,6 +44,22 @@ Before assembling context, verify that registries reflect the latest preceding F
    - Read the preceding Feature's `data-model.md` and `contracts/` → update registries now
    - Display: `✅ Registry updated with [preceding FID]'s [N] entities and [M] APIs`
 4. If registries are current: proceed silently (no message needed)
+
+#### Post-Repair Verification (🚫 BLOCKING for Features after F001)
+
+After auto-repair completes, verify repair was successful:
+1. Re-read entity-registry.md and api-registry.md
+2. Confirm preceding Feature's entities/APIs now appear with correct ownership
+3. If repair succeeded → proceed silently
+4. If repair failed (corrupt data-model.md, empty contracts/, parse error):
+   → 🚫 BLOCKING: "Registry repair failed for preceding Feature [FID]. Cross-Feature data is stale."
+   → AskUserQuestion:
+     - "Fix manually and retry"
+     - "Skip registry check (⚠️ risk: duplicate entities)"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+❌ WRONG: Registry stale → warn → proceed anyway → F002 creates duplicate User entity
+✅ RIGHT: Registry stale → auto-repair → verify success → if failed, BLOCK with user choice
 
 > **Why this check exists**: If a plan Post-Step Update fails (context limit, session break, or agent omission), the next Feature assembles stale registry data. This pre-check catches the gap before it propagates. The cost is one registry read per Feature start — negligible compared to the cost of cross-Feature inconsistency.
 
@@ -384,6 +400,7 @@ This step is informational only — no user confirmation required.
    ```
    - Auto-repair: read the stale Feature's data-model.md / contracts/ and update registries
    - Display repair summary: `✅ Registry repaired: added [N] entities, [M] APIs from [FID]`
+   - **Post-Repair Verification**: After auto-repair, re-read registries to confirm repair succeeded. If repair failed (corrupt data-model.md, empty contracts/, parse error) → 🚫 BLOCKING gate applies (see § Assemble — Post-Repair Verification)
 4. **If no staleness**: proceed silently (no message needed)
 
 ### Step 3c — Foundation Verification Gate (first Feature only)

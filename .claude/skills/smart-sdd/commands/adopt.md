@@ -168,6 +168,33 @@ Run the project's existing build, test, and run commands to establish a baseline
 - Stop the application after verification
 - If no run command is found or the project is a library/package, record: `No run command detected (library/package)` and skip
 
+#### Build Environment Unavailability
+
+When bootstrap build step fails due to missing hardware or toolchain (GPU/CUDA not available, native compiler not installed, platform-specific SDK missing):
+
+1. Detect failure type from error output:
+   - CUDA compilation errors → "GPU/CUDA toolchain not available"
+   - Native module compilation errors → "[toolchain] not installed"
+   - Platform SDK errors → "[platform] SDK not available on this OS"
+
+2. Present AskUserQuestion:
+   "⚠️ Build failed: [failure type]. This adoption can proceed with documentation-only mode (specify + plan without build verification)."
+   Options:
+   - "Proceed without build (documentation-only adoption)"
+   - "I'll fix the environment — retry bootstrap"
+   - "Skip bootstrap entirely (environment already verified externally)"
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+3. If "Proceed without build":
+   - Record in sdd-state.md: `Environment Bootstrap: partial (build skipped — [reason])`
+   - adopt-verify Phase 1 (build/test): automatically marked as `skipped — no build environment`
+   - All other adoption phases proceed normally
+   - ⚠️ Display reminder at each Feature verify: "Build verification skipped. Manual testing recommended."
+
+❌ WRONG: Bootstrap build fails → entire adoption pipeline blocked → user gives up
+❌ WRONG: Bootstrap build fails → silently skip → user doesn't know verify is incomplete
+✅ RIGHT: Bootstrap build fails → explain why → offer choices → record decision → adjust downstream
+
 ### Step 4 — Record Baseline
 
 Record results in `sdd-state.md` under a new `Environment Bootstrap` section:

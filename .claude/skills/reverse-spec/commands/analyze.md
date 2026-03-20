@@ -91,6 +91,29 @@ Check if `case-study-log.md` exists at **CWD root** (the project being built, NO
 
 ---
 
+### Pre-Phase: Language Persistence
+
+If `--lang` argument is provided:
+1. Ensure `specs/_global/` directory exists in CWD (create if needed)
+2. Check if `specs/_global/sdd-state.md` exists in CWD
+3. If exists: update the `**Artifact Language**:` field to the provided value
+4. If not exists: create a minimal `specs/_global/sdd-state.md` with only:
+   ```markdown
+   # SDD State
+
+   **Artifact Language**: <provided-lang-code>
+   ```
+   (smart-sdd will populate remaining fields when it runs)
+
+If `--lang` argument is NOT provided:
+1. Check if `specs/_global/sdd-state.md` exists → read `**Artifact Language**:` field
+2. If exists and field present → use that language
+3. Otherwise → default to `en`
+
+All generated artifacts (roadmap.md, pre-context.md, constitution-seed.md, registries, history.md) use the resolved language for user-facing text, section headings in artifacts, and AskUserQuestion labels.
+
+---
+
 ## Phase 0 — Strategy Questions
 
 Determine the direction of the deliverables. Each question can be answered via CLI arguments OR interactive prompt.
@@ -198,9 +221,6 @@ Add a dated section after the Project Context:
 ```
 
 **Rules**: APPEND only — never overwrite existing entries. One row per decision. Record the user's reasoning if stated; write "—" if not.
-
----
-
 
 ---
 

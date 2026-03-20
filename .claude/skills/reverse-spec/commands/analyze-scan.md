@@ -10,6 +10,51 @@ Identify the overall structure and tech stack of the target directory.
 ### 1-2. Tech Stack Detection
 Read configuration files to identify the tech stack. See `domains/_core.md` § R3 (Tech Stack Detection) for the detection-target-to-file mapping.
 
+### 1-2a. Language Composition Analysis
+
+For projects with multiple source languages, detect the composition:
+
+1. **Language scan**: Count source files by extension (exclude `node_modules/`, `vendor/`, `build/`, `dist/`, `.git/`, `__pycache__/`)
+
+   **Extension-to-Language Mapping** (extensible — add entries for unlisted languages as encountered):
+   | Extensions | Language |
+   |-----------|----------|
+   | `.py`, `.pyx`, `.pxd` | Python |
+   | `.ts`, `.tsx`, `.mts` | TypeScript |
+   | `.js`, `.jsx`, `.mjs` | JavaScript |
+   | `.cu`, `.cuh` | CUDA |
+   | `.cpp`, `.cc`, `.cxx`, `.hpp`, `.h` | C++ |
+   | `.c` | C |
+   | `.go` | Go |
+   | `.rs` | Rust |
+   | `.java`, `.kt`, `.kts` | Java/Kotlin |
+   | `.swift` | Swift |
+   | `.rb` | Ruby |
+   | `.cs` | C# |
+
+2. **Compute percentages**: Sort by file count descending
+3. **Classify by presence**:
+   - **Primary**: highest percentage (typically ≥50%)
+   - **Secondary**: any language with ≥5% of source files
+   - **Tertiary**: languages with <5% (noted but not individually tracked)
+4. **Foundation detection per language**: Each language with ≥5% gets its own Foundation check (R7 section). Record comma-separated in sdd-state: `Foundation: electron,flask` or `Foundation: pytorch,cmake,cuda`
+5. **Per-language SBI strategy** (feeds Phase 2-6):
+   | Language Tier | SBI Extraction Depth |
+   |--------------|---------------------|
+   | Primary (≥50%) | Full: all P1/P2/P3 behaviors extracted |
+   | Secondary (≥5%) | Targeted: P1/P2 only, focus on public APIs and exports |
+   | Tertiary (<5%) | Minimal: P1 only, entry points and key exported functions |
+6. **Display in Phase 1 Checkpoint**:
+   ```
+   📊 Language Composition:
+     Python  92% (487 files) — Primary
+     CUDA     4% (21 files)  — Secondary
+     C++      3% (16 files)  — Secondary
+     Shell    1% (5 files)   — Tertiary
+   ```
+
+Cross-reference: Phase 2-6 uses this composition to apply language-specific extraction patterns.
+
 ### 1-2b. Framework Identification
 
 From Phase 1-2 tech stack results, identify the primary framework(s):
@@ -30,6 +75,50 @@ Classify the project type based on the collected information. Use the project ty
 - Identify logical module boundaries from the directory structure
 - For monorepos, identify workspace/package boundaries
 - Estimate the role of each module
+
+### 1-4a. Scale Detection + Adaptive Processing
+
+After module identification, classify project scale:
+
+| Metric | Small | Medium | Large |
+|--------|-------|--------|-------|
+| Source files | <500 | 500–5,000 | >5,000 |
+| Detected modules | <20 | 20–60 | >60 |
+| Estimated SBI entries | <200 | 200–500 | >500 |
+
+**Scale classification**: Use the HIGHEST tier triggered by any single metric.
+
+**Large-scale adaptations** (activated when scale = Large):
+
+1. **Hierarchical Module Grouping**: Cluster modules into domain groups (max 8–12 groups). Use top-level directory structure as primary signal, workspace/package definitions as secondary.
+   ```
+   Domain: inference (4 modules)
+     └ engine/, model_runner/, sampling/, scheduler/
+   Domain: serving (3 modules)
+     └ entrypoints/, api_server/, openai/
+   ```
+   Record domain groups in orientation artifacts for downstream use.
+
+2. **Domain-Prefixed SBI Numbering**: Replace global `B001..B999` with domain-prefixed IDs:
+   `B-INF-001` (inference), `B-SRV-001` (serving), `B-CHN-001` (channels).
+   Prefix: 3-char abbreviation of domain group name. Within each domain, numbering is sequential and contiguous.
+
+3. **Batched Phase 2 Processing**: Process 2–3 domain groups per batch. Between batches, merge results into running SBI/entity/API accumulation tables. This prevents context overflow during deep analysis of large codebases.
+
+4. **Source Reference Prioritization** (per-Feature pre-context.md):
+   When a Feature references >30 source files:
+   - **Tier A** (always included, max 15): Files containing P1 SBI entries
+   - **Tier B** (if budget allows, max 10): Files containing P2 SBI entries
+   - **Tier C** (count only): Remaining files listed as `+ N more files`
+   Display: `Source Reference: 12 primary + 8 secondary + 47 more`
+
+5. **P3 Summary Mode**: For Large projects, P3 SBI entries are extracted as one-line summaries only (function name + brief description). Full behavioral analysis is reserved for P1/P2.
+
+Display scale classification in Phase 1 Checkpoint:
+```
+📏 Project Scale: Large (7,200 files, 78 modules, ~600 est. behaviors)
+   → Hierarchical grouping + domain-prefixed SBI + batched processing activated
+```
 
 ### 1-5. Static Resource Inventory
 Identify non-code resource files used by the project. In **rebuild mode**, these must be **copied as-is** to the new project. In **adoption mode** (`--adopt`), these already exist in-place and are documented for reference only.

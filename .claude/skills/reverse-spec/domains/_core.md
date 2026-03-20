@@ -207,6 +207,8 @@ Framework identification from tech stack (feeds into `analyze.md` Phase 1-2b).
 
 When multiple frameworks are detected, record all (comma-separated). If none match, record `Framework: custom`.
 
+**Multi-Language Foundation**: When Phase 1-2a detects multiple languages with ≥5% presence, R3 extraction targets are loaded for EACH qualifying language. The extraction loop runs per-language using language-specific patterns from analyze-deep.md § Multi-Language SBI Extraction. Foundation field in sdd-state.md stores comma-separated values (e.g., `pytorch,cmake,cuda`). Each Foundation's domain module is loaded independently per `_resolver.md` Step 2b.
+
 ---
 
 ## S1-S7. (smart-sdd execution-time concerns)
