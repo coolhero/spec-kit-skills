@@ -73,13 +73,13 @@ Display a brief summary:
 > the USER decides — not you.
 >
 > ```
-> ❌ WRONG: "런타임 탐색은 건너뜁니다 (TUI 앱으로 Playwright가 적합하지 않음)"
+> ❌ WRONG: "Runtime exploration skipped (TUI app, Playwright not suitable)"
 >    → Agent decided on its own. User was never asked. VIOLATION.
 >
-> ❌ WRONG: "CLI-only tool이므로 런타임 스킵"
+> ❌ WRONG: "CLI-only tool, skipping runtime"
 >    → Even CLI tools may have web UIs, admin panels, or interactive modes.
 >
-> ✅ RIGHT: AskUserQuestion "런타임 탐색을 실행할까요?" with options:
+> ✅ RIGHT: AskUserQuestion "Run runtime exploration?" with options:
 >    - "Run Runtime Exploration" → proceed with Playwright
 >    - "Skip — static analysis only" → user explicitly chose to skip
 > ```
@@ -96,11 +96,11 @@ Use AskUserQuestion:
 ```
 📋 Runtime Exploration
 
-이 프로젝트의 앱을 실행하여 UI/동작을 직접 관찰할 수 있습니다.
-정적 코드 분석만으로는 놓칠 수 있는 UI 패턴, 인터랙션 흐름,
-에러 상태를 캡처합니다.
+You can run this project to directly observe UI/behavior.
+Captures UI patterns, interaction flows, and error states
+that static analysis alone might miss.
 
-프로젝트 유형: [detected type — TUI/Web/Desktop/API]
+Project type: [detected type — TUI/Web/Desktop/API]
 ```
 - **"Run Runtime Exploration (Recommended)"** → proceed to step 1
 - **"Skip — static analysis only"** → record skip, proceed to Step 2
@@ -362,7 +362,7 @@ Simply list which trace numbers touched each module. Users see "what I've explor
 
 ```
 Before: | (none yet) | | | |
-After:  | 001 | 코드베이스 컨텍스트 관리 | packages/opencode/ | 2026-03-20 |
+After:  | 001 | codebase-context-management | packages/opencode/ | 2026-03-20 |
 ```
 
 ### 3. Add new modules if discovered

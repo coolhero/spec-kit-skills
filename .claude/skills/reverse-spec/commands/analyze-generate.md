@@ -10,19 +10,19 @@ Generate hierarchical deliverables in `specs/_global/` (in CWD — see Output Di
 
 Generate the following files in order. Each file follows the template structure found in this skill's `templates/` directory.
 
-1. **`specs/_global/roadmap.md`** — See [roadmap-template.md](templates/roadmap-template.md)
+1. **`specs/_global/roadmap.md`** — See [roadmap-template.md](../templates/roadmap-template.md)
    - Project Overview, Rebuild Strategy, Feature Catalog (by Tier for Core scope / by dependency order for Full scope), Dependency Graph, Release Groups, **Demo Groups** (from Phase 3-1c), Cross-Feature Entity Dependencies, Cross-Feature API Dependencies
 
-2. **`specs/_global/entity-registry.md`** — See [entity-registry-template.md](templates/entity-registry-template.md)
+2. **`specs/_global/entity-registry.md`** — See [entity-registry-template.md](../templates/entity-registry-template.md)
    - Complete entity list, fields, relationships, validation rules, cross-Feature sharing mapping
 
-3. **`specs/_global/api-registry.md`** — See [api-registry-template.md](templates/api-registry-template.md)
+3. **`specs/_global/api-registry.md`** — See [api-registry-template.md](../templates/api-registry-template.md)
    - Complete API endpoint index, detailed contracts, cross-Feature dependencies
 
-4. **`specs/_global/business-logic-map.md`** — See [business-logic-map-template.md](templates/business-logic-map-template.md)
+4. **`specs/_global/business-logic-map.md`** — See [business-logic-map-template.md](../templates/business-logic-map-template.md)
    - Business rules per Feature, validation, workflows, cross-Feature rules
 
-5. **`specs/_global/constitution-seed.md`** — See [constitution-seed-template.md](templates/constitution-seed-template.md)
+5. **`specs/_global/constitution-seed.md`** — See [constitution-seed-template.md](../templates/constitution-seed-template.md)
    - Source code reference principles (branching by stack strategy), extracted architecture principles, technical constraints, coding conventions
    - **Naming Conventions** (if project identity changed in Phase 0 Question 3): Include a mapping section documenting original → new naming patterns (e.g., `Cherry` → `Angdu`, `CS` → `AS`). This section guides `speckit-constitution` and `speckit-implement` to use the new project naming consistently.
    - **Recommended Development Principles (Best Practices)**: Test-First, Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Demo-Ready Delivery
@@ -64,7 +64,7 @@ Generate the following files in order. Each file follows the template structure 
      3. Copy ALL rows from the Foundation F7 table — do NOT summarize, abbreviate, or omit any principle.
      4. Place this section AFTER "Archetype-Specific Principles" (or after "Project-Specific Recommended Principles" if no archetype was detected).
 
-6. **`specs/_global/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](templates/stack-migration-template.md)
+6. **`specs/_global/stack-migration.md`** (only for New Stack strategy) — See [stack-migration-template.md](../templates/stack-migration-template.md)
    - Current → New mapping per technology component, migration rationale, per-Feature migration notes, risks and mitigations
 
 7. **`.env.example`** (project root, **rebuild mode only** — skip when `--adopt` is specified):
@@ -82,7 +82,7 @@ Generate the following files in order. Each file follows the template structure 
      OAUTH_CLIENT_ID=your-oauth-client-id
      ```
 
-8. **`specs/_global/speckit-prompt.md` (MANDATORY)** — See [speckit-prompt-template.md](templates/speckit-prompt-template.md)
+8. **`specs/_global/speckit-prompt.md` (MANDATORY)** — See [speckit-prompt-template.md](../templates/speckit-prompt-template.md)
    - Standalone prompt for using spec-kit without smart-sdd
    - Per-command context guide: which artifacts to read before each spec-kit command (specify, plan, implement, verify)
    - Cross-Feature awareness rules
@@ -98,7 +98,7 @@ Generate the following files in order. Each file follows the template structure 
 
 ### 4-2. Feature-Level Deliverables
 
-For each Feature, generate `specs/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](templates/pre-context-template.md).
+For each Feature, generate `specs/[Feature-ID]-[feature-name]/pre-context.md`. See [pre-context-template.md](../templates/pre-context-template.md).
 
 **Path Convention**: All file paths in pre-context.md's Source Reference and Static Resources sections MUST be **relative to the target directory** (the source being analyzed). Do NOT use absolute paths. The `Source Root` header in the template references `$SOURCE_ROOT`, whose actual value is stored as `Source Path` in `sdd-state.md` and resolved at runtime by smart-sdd.
 
@@ -127,7 +127,7 @@ Total: 30 entries, B001–B030 (contiguous, no gaps)
 
 #### SBI Table Format (MANDATORY)
 
-All pre-context.md SBI tables MUST use this exact table format (from [pre-context-template.md](templates/pre-context-template.md)):
+All pre-context.md SBI tables MUST use this exact table format (from [pre-context-template.md](../templates/pre-context-template.md)):
 
 ```markdown
 | ID | Source File | Function/Method | Behavior Description | Priority | Origin |
@@ -193,7 +193,7 @@ After SBI Numbering Verification passes, calculate the SBI coverage ranges for e
 
 These SBI Coverage values MUST be included when writing the Demo Groups section in `roadmap.md` (Phase 4-1). The `**SBI Coverage**` field in each Demo Group entry uses the ranges calculated here.
 
-Contents to include in each pre-context.md (see [pre-context-template.md](templates/pre-context-template.md) for exact section structure):
+Contents to include in each pre-context.md (see [pre-context-template.md](../templates/pre-context-template.md) for exact section structure):
 - **Runtime Exploration Results** (rebuild only, if Phase 1.5 was performed): Read `specs/_global/runtime-exploration.md` and distribute observations to each Feature based on route-to-Feature mapping. For each Feature: extract the `## Screen:` sections whose routes belong to this Feature, include associated user flows and runtime behavior from those screen blocks, and add relevant App-Wide Observations. If Phase 1.5 was skipped or the file does not exist, write "Skipped — [reason]"
 
   **Route-to-Feature Mapping Algorithm**:
@@ -219,7 +219,7 @@ Contents to include in each pre-context.md (see [pre-context-template.md](templa
 
 > **Why spec-draft.md exists**: Previously, Draft FR/SC were 1-line bullet points in pre-context's "For /speckit.specify" section. speckit-specify would read these and generate spec.md — but it consistently compressed UI details (dropdowns → "input", auto-fill → omitted, error paths → ignored). By generating a detailed spec-draft.md during reverse-spec (when source context is fully loaded), the conversion from source behavior → requirements happens ONCE with full context, instead of twice with progressive loss.
 
-For each Feature, generate `SPEC_PATH/[NNN-feature]/spec-draft.md` using the [spec-draft-template.md](templates/spec-draft-template.md):
+For each Feature, generate `SPEC_PATH/[NNN-feature]/spec-draft.md` using the [spec-draft-template.md](../templates/spec-draft-template.md):
 
 **Conversion Rules (Source → spec-draft)**:
 
@@ -346,7 +346,7 @@ Display verification result:
 
 **Completeness Score**: Each pre-context must score 14/14 sections (or the applicable subset for backend-only projects). Display the score per Feature. If ANY Feature scores below its required count, the verification FAILS.
 
-**Cross-check against template**: For each pre-context, verify that the section headings match those in [pre-context-template.md](templates/pre-context-template.md). Missing headings = missing sections, even if content exists elsewhere in the file under a different heading.
+**Cross-check against template**: For each pre-context, verify that the section headings match those in [pre-context-template.md](../templates/pre-context-template.md). Missing headings = missing sections, even if content exists elsewhere in the file under a different heading.
 
 If any section is missing, add it BEFORE proceeding:
 ```
@@ -441,7 +441,7 @@ Options:
 If user selects "Create new Feature" for any items:
 - Assign the next available Feature ID (continuing the existing sequence)
 - Add to roadmap.md Feature Catalog (with appropriate Tier for core scope, or dependency position for full scope)
-- Generate pre-context.md for the new Feature using the [pre-context-template](templates/pre-context-template.md)
+- Generate pre-context.md for the new Feature using the [pre-context-template](../templates/pre-context-template.md)
 - The new Feature will be picked up by smart-sdd when the pipeline runs
 
 #### Step 3b — Post-Classification Coverage Update
@@ -470,7 +470,7 @@ After classifying ALL unmapped groups:
 
 #### Step 4 — Generate coverage-baseline.md
 
-Generate `specs/_global/coverage-baseline.md` using the [coverage-baseline-template](templates/coverage-baseline-template.md):
+Generate `specs/_global/coverage-baseline.md` using the [coverage-baseline-template](../templates/coverage-baseline-template.md):
 - Populate Surface Metrics table with the **final** measured values (after Step 3b update)
 - Record all unmapped items with their user-assigned classifications from Step 3
 - Record all intentional exclusions with their reasons and descriptions

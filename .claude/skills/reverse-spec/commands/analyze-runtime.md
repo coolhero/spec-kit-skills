@@ -208,7 +208,7 @@ Diagnose what the app needs to run, based on Phase 1 results. The agent performs
 > those credentials are **BLOCKING** — without them, Phase D captures error states instead of working flows.
 >
 > ```
-> ❌ WRONG: "API_KEY — LLM API key (ℹ️ Optional — UI 구조 탐색에는 불필요)"
+> ❌ WRONG: "API_KEY — LLM API key (ℹ️ Optional — not needed for UI structure exploration)"
 >    → Phase D captures empty dropdowns and error states → spec-draft describes broken UX
 >
 > ✅ RIGHT: "API_KEY — LLM API key (🚫 BLOCKING — chat, KB embedding, model selection all require this)"

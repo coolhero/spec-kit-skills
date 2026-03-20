@@ -3,7 +3,7 @@
 > Per-command injection rules for `/smart-sdd implement [FID]`.
 > For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 >
-> **Source App Runtime Reference** (rebuild/adoption): When implementing UI components or data flows, the source app can be launched to observe exact behavior using [`shared/runtime/app-launch.md`](../../../../shared/runtime/app-launch.md). Especially useful for: form field auto-fill patterns, error message content, animation/transition details, and data display formatting. Available on-demand.
+> **Source App Runtime Reference** (rebuild/adoption): When implementing UI components or data flows, the source app can be launched to observe exact behavior using [`shared/runtime/app-launch.md`](../../../shared/runtime/app-launch.md). Especially useful for: form field auto-fill patterns, error message content, animation/transition details, and data display formatting. Available on-demand.
 
 ---
 

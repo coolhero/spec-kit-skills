@@ -175,8 +175,8 @@ sequenceDiagram
 // Step 2: processData() — why this matters: [brief explanation]
 // src/other.go:45-58
 function processData(raw: RawInput): ProcessedOutput {
-  const validated = validate(raw)        // 입력 검증
-  const transformed = transform(validated) // 핵심 변환 로직
+  const validated = validate(raw)        // input validation
+  const transformed = transform(validated) // core transformation logic
   return { ...transformed, timestamp: Date.now() }
 }
 ```
