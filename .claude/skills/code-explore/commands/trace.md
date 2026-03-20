@@ -138,10 +138,11 @@ sequenceDiagram
 
 > **Source Location format**: Use markdown links with relative paths from the trace file to the source file.
 > Since traces are at `specs/explore/traces/`, prefix with `../../../` to reach project root.
-> Format: `[filename:line](../../../path/to/file#Lline)` — **NO `#L` fragment** (just the path).
-> If the editor doesn't support `#L` fragments, omit them. The link opens the file; the user navigates to the line.
+> Format: `[filename:line](../../../path/to/file)` — display includes line number, link opens the file.
 > Example: `[prompt.ts:666](../../../packages/opencode/src/session/prompt.ts)`
 > **NEVER use short paths** like `prompt.ts:666` without a link — the editor can't resolve them.
+>
+> **Tip**: Click the link to open the file, then press **Cmd+G** (Go to Line) and type the line number.
 
 | Step | Source Location | Action | Data In → Out |
 |------|----------------|--------|---------------|
