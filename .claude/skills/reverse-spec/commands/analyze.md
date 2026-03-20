@@ -625,32 +625,59 @@ If the app fails to start within the timeout:
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-### 1.5-4b. App Initial Setup (HARD STOP)
+### 1.5-4b. App Initial Setup (HARD STOP — rebuild: BLOCKING for service-dependent features)
 
-Many apps require **in-app configuration** before core features become usable — API keys entered through a settings UI, provider selection, onboarding wizards, initial account setup, etc. These are distinct from environment variables (`.env`) and cannot be automated by the agent (they often involve secrets entered through the app's own UI).
+Many apps require **in-app configuration** before core features become usable — API keys entered through a settings UI, provider selection, onboarding wizards, initial account setup, database connections, OAuth configuration, etc. These are distinct from environment variables (`.env`) and cannot be automated by the agent (they often involve secrets entered through the app's own UI).
+
+> **Why this matters for rebuild**: Without completing setup, Phase D (Interactive Flow Execution) can only observe **UI structure** — not **actual behavior**. An AI chat app without an API key shows empty model dropdowns, disabled send buttons, and error states instead of real interaction flows. The resulting UI Flow Specs will capture "error state" instead of "working flow," producing spec-drafts that describe the broken experience.
 
 **Step 1 — Detect initial setup needs**:
 Analyze the source code to identify likely first-run configuration requirements:
-- Settings/preferences pages that configure external services (API providers, OAuth, SMTP, etc.)
-- Onboarding flows or setup wizards (first-run detection in code)
-- In-app credential storage (e.g., `localStorage`, IndexedDB, Electron Store, SQLite)
-- Provider/model selection UI (common in AI apps)
 
-**Step 2 — Present setup guidance**:
+| Category | Detection Method | Example |
+|----------|-----------------|---------|
+| **API key / credentials** | Settings pages with key/token input fields, provider configuration UI | AI provider API key, payment gateway credentials, SMTP credentials |
+| **Service connection** | Database connection config, external service URLs | PostgreSQL connection string, Redis URL, S3 bucket |
+| **Account / auth** | Login page, registration flow, OAuth setup | Admin account creation, OAuth client ID/secret |
+| **Provider selection** | Model/provider dropdown in settings | LLM model selection, embedding model, TTS provider |
+| **Initial data** | Onboarding wizard, seed data, first-run detection | Default assistant creation, sample data import |
+
+**Step 2 — Classify setup items by exploration impact**:
+
+| Impact | Meaning | Action |
+|--------|---------|--------|
+| 🚫 **BLOCKING** | Without this, core Features cannot be explored at all (e.g., AI chat without API key → no message flow observable) | User MUST configure before Phase D |
+| ⚠️ **PARTIAL** | Some Features work without this, but key flows are incomplete (e.g., no OAuth → login flow unobservable, but other pages work) | User SHOULD configure; document which flows are limited |
+| ℹ️ **OPTIONAL** | Nice-to-have but UI structure is observable without it (e.g., premium features disabled) | Proceed without; note in runtime-exploration.md |
+
+**Step 3 — Present setup guidance with impact classification**:
 
 ```
-🔧 App Initial Setup
+🔧 App Initial Setup (BLOCKING items must be completed for full exploration)
 
-The app is running, but some in-app configuration may be needed to explore core features.
+🚫 BLOCKING — Core features won't work without these:
+  • Settings → Model Provider → Enter API key (e.g., OpenAI, Anthropic)
+    Without this: chat sends fail, KB embedding fails, model dropdown empty
+  • [Other blocking items]
 
-Setup items detected from code analysis:
-  • [Item 1: e.g., Settings → Enter API Key in AI Provider]
-  • [Item 2: e.g., Settings → Select Model]
-  • [Item 3: e.g., Complete onboarding on first run]
+⚠️ PARTIAL — Some flows limited without these:
+  • Settings → OAuth → Configure GitHub login
+    Without this: login flow unobservable, but all other pages accessible
+  • [Other partial items]
 
-Please complete the setup in the app, then select "Ready".
-UI structure exploration is possible even without setup.
+ℹ️ OPTIONAL — UI structure visible without these:
+  • Settings → Premium → Enter license key
+    Without this: premium badge hidden, but UI layout observable
+
+Please complete at least the BLOCKING items in the app.
 ```
+
+**HARD STOP** — Use AskUserQuestion:
+- **"All BLOCKING items configured — proceed with full exploration"** (Recommended)
+- **"Some BLOCKING items skipped — proceed with limited exploration"** → Record which items were skipped. Phase D will mark affected flows as `⚠️ LIMITED: [item] not configured — flow not fully observable`. These limitations propagate to spec-draft as `⚠️ UNVERIFIED` FRs.
+- **"Skip all setup — UI structure only"** → Phase D captures only screen structure, not interaction flows. spec-draft quality will be significantly lower.
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
 **HARD STOP** — Use AskUserQuestion:
 - "Setup complete — proceed with full exploration" (Recommended)
@@ -2309,7 +2336,18 @@ Options:
 - **"Assign to Feature [FID]"** — Add to existing Feature's pre-context.md Source Reference. Ask which FID if not obvious from context.
 - **"Create new Feature"** — Collect Feature name and description from user. Add to roadmap.md Feature Catalog (with next available ID). Generate pre-context.md for the new Feature.
 - **"Cross-cutting concern"** — Flag for constitution-seed.md update (add principle) or future infrastructure Feature. Record in coverage-baseline.md.
-- **"Intentional exclusion"** — Record with one of 6 exclusion reasons: `deprecated`, `replaced`, `third-party`, `deferred`, `out-of-scope`, `covered-differently`. If `deferred`, link to the relevant deferred Feature in roadmap.md.
+- **"Intentional exclusion"** — Record with one of the following reasons. **Rebuild mode restrictions apply:**
+  - `deprecated` — Code exists but is no longer used in source app. ✅ Allowed in rebuild.
+  - `replaced` — Functionality exists but will be replaced by a different approach (e.g., Dexie → better-sqlite3). ⚠️ **Rebuild: the replacement MUST be captured in a Feature's pre-context as a migration target.** Simply marking as "replaced" without specifying where the replacement lives is NOT allowed.
+  - `third-party` — External package that will be imported, not reimplemented. ✅ Allowed.
+  - `deferred` — Will be implemented later. ⚠️ **Rebuild: MUST be added to roadmap.md as a T3 Feature or explicitly merged into an existing Feature.** "Deferred" without a Feature assignment means the functionality is silently dropped.
+  - `out-of-scope` — Not code (docs, scripts, build config, tests). ✅ Allowed.
+  - `covered-differently` — Same functionality, different implementation. ⚠️ **Rebuild: the "different" approach MUST be documented in the owning Feature's pre-context.** Which Feature owns this? What's the alternative approach?
+
+  ```
+  ❌ WRONG (rebuild): "covered-differently — IndexedDB migration code" → no Feature assigned, no alternative documented → functionality silently lost
+  ✅ RIGHT (rebuild): "covered-differently — IndexedDB (Dexie) migration → F001 app-shell pre-context § Data Migration notes better-sqlite3 migration strategy"
+  ```
 
 **Empty/blank response = NOT classified — re-ask.** You MUST obtain an explicit classification for every group.
 
