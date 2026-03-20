@@ -543,6 +543,39 @@ cd ~/my-project
 
 **Brief**가 완전한 Feature 정의를 생성 → **GEL**에 pre-context로 저장 → **spec-kit 파이프라인**에 주입 → **Domain Profile** 규칙이 각 단계의 동작을 형성.
 
+### Artifact Separation (아티펙트 분리)
+
+소스 분석과 파이프라인 산출물은 별도 위치에 저장되며 섞이지 않습니다:
+
+- **소스 분석** (pre-context.md, spec-draft.md) → `specs/NNN-feature/`에 있지만 reverse-spec이 생성. 소스 앱의 UI 컨트롤 타입, 인터랙션 패턴, 데이터 흐름을 담고 있음.
+- **파이프라인 산출물** (spec.md, plan.md, tasks.md) → smart-sdd가 생성. **요구사항만** 포함 — 소스 코드 참조 없음. spec.md를 읽으면 "우리가 뭘 만드는지"만 보이고, "어디서 왔는지"는 보이지 않음.
+
+### Cascading Updates (계단식 업데이트)
+
+파이프라인 중간에 발견한 것("이 spec에 FR이 하나 더 필요해")은 코드가 아닌 **아티펙트 계층을 통해** 흘러갑니다:
+
+```
+사용자: "citation 렌더링이 빠졌는데"
+  → 에이전트: "spec.md에 citation FR 없음 — spec 레벨 이슈"
+  → spec.md: FR-008 + SC-008 추가 (전체 재실행 아님, incremental)
+  → plan.md: CitationBlock 컴포넌트 추가
+  → tasks.md: T012 추가
+  → implement: T012만 구현
+  → verify: SC-008만 검증
+```
+
+이건 **모든 HARD STOP**에서 동작 — plan Review, implement Review, verify Review 어디서든. 사용자가 직접 파일을 편집하면 변경을 감지하고 자동으로 cascade를 제안합니다.
+
+### Shared Runtime (공유 런타임)
+
+세 스킬 모두 앱을 실행해야 합니다 (소스 앱 분석용, 타겟 앱 검증용). 이 로직을 중복하지 않고 `shared/runtime/`에서 공통 프로토콜을 제공합니다:
+
+- **Playwright 감지** — 사용 가능한 백엔드 탐색 (CLI, MCP, CDP)
+- **Data Storage Map** — 앱이 어디에 데이터를 저장하는지 + userData 경로
+- **사용자 설정 안내** — API key 설정 가이드, BLOCKING/OPTIONAL 분류
+- **앱 실행** — 사용자 설정이 보이도록 올바른 userData로 시작
+- **관찰 프로토콜** — Domain Profile 축별 구조화된 관찰 (GUI vs API vs CLI에서 뭘 봐야 하는지)
+
 ### 구현: Pipeline Integrity Guards
 
 세 가지 개념은 7개의 Pipeline Integrity Guard를 통해 강제됩니다 — 실제 프로젝트 실패에서 추출한 보호 패턴입니다. 각 Guard가 하나의 문제 유형을 커버하며, 명확한 트리거 조건과 강제 규칙을 갖습니다. 새로운 실패가 발견되면 독립 규칙이 아니라 기존 Guard의 확장으로 처리됩니다. [`pipeline-integrity-guards.md`](.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md) 참조.
