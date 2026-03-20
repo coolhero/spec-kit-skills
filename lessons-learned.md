@@ -641,6 +641,8 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 
 **Universal takeaway**: In multi-step agent pipelines, "optional" = "skipped." If a step matters, it must be a HARD STOP. The agent cannot have skip conditions — only the user can decide to skip. Every conditional step needs an explicit AskUserQuestion gate, not a "skip if" clause that the agent evaluates on its own.
 
+**Corollary — "Follow X" ≠ "Read X"**: Cross-file references using "Follow protocol in X" or "See X for details" are treated as optional context by agents. If the agent MUST read the file for correct behavior (e.g., `--user-data-dir` for Electron apps), use "🚨 READ this file NOW" with the full path. The difference between "Follow `app-launch.md`" and "READ `~/.claude/skills/shared/runtime/app-launch.md`" is the difference between the agent improvising and the agent following the protocol.
+
 #### L44. Changes Must Flow Through Artifact Hierarchy — Never Directly to Code
 
 **What happened** (angdu-studio F006, 10+ iterations): When verify found "citation doesn't work," the agent modified code directly without updating spec.md. The code fix was ad-hoc — no FR defined citation rendering, no SC defined citation click behavior. The next verify found the same category of issue because the spec still didn't cover it. This repeated 10+ times: user reports issue → agent patches code → another issue → another patch → "start over."

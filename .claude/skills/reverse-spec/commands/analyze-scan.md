@@ -150,7 +150,7 @@ One row per category decided in Step 2. Record the user's reasoning for each cho
 
 ### 1-6. Data Storage Map (all app types)
 
-> **Shared module**: See [`shared/runtime/data-storage-map.md`](../../shared/runtime/data-storage-map.md) for the full detection protocol, lock analysis, and platform-agnostic resolution. This section applies the shared protocol to the current project.
+> **🚨 MANDATORY**: READ [`~/.claude/skills/shared/runtime/data-storage-map.md`](../../shared/runtime/data-storage-map.md) for the full detection protocol, lock analysis, and platform-agnostic resolution. This section applies the shared protocol to the current project.
 
 > **Purpose**: Identify WHERE the app stores persistent data (settings, user content, databases, caches).
 > This map is consumed by Phase 1.5 for: userData path resolution, app-close requirements, setup guidance.
