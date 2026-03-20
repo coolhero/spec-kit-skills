@@ -230,10 +230,15 @@ If T ≥ 5 AND coverage ≥ 50% (and nudge not shown twice already):
 ### Step 7 — Next Action (HARD STOP)
 
 AskUserQuestion:
-- **"Trace another flow"** → Ask for the next topic
-- **"Explore deeper into [specific part]"** → Start a new trace focused on the sub-flow. Add `Related: {current trace}` to the new trace.
+- **"Continue this trace"** → Continue exploring the **same topic**. Append new steps, entities, snippets to the current trace file (do NOT create a new file). Useful when the user wants to go deeper into a sub-flow discovered during this trace.
+- **"Trace another flow"** → Ask for the next topic. Creates a new trace file (NNN+1).
+- **"Explore deeper into [specific part]"** → Start a new trace focused on a specific sub-flow. Add `Related: {current trace}` to the new trace. Useful when the sub-flow is a distinct topic.
 - **"Update orientation"** → Run orient --update
 - **"Done for now"** → End session
+
+> **"Continue" vs "Explore deeper"**:
+> - **Continue**: Same trace file, append more steps. "I want to keep digging into context management."
+> - **Explore deeper**: New trace file with Related link. "The compaction system deserves its own trace."
 
 **If response is empty → re-ask** (per MANDATORY RULE).
 
