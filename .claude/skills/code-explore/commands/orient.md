@@ -65,17 +65,47 @@ Display a brief summary:
    Size: [N] files, [M] directories
 ```
 
-### Step 1.5 — Runtime Exploration (HARD STOP — ask user before skipping)
+### Step 1.5 — Runtime Exploration (🚫 MANDATORY HARD STOP)
 
-> **🚨 DO NOT SKIP THIS STEP without asking the user.**
-> Static scan reveals STRUCTURE. Runtime reveals BEHAVIOR. Without runtime,
-> traces will miss UI patterns, interaction flows, data display, and error states.
+> **🚨 THIS STEP REQUIRES A HARD STOP — ALWAYS.**
+> You MUST ask the user via AskUserQuestion whether to run or skip runtime exploration.
+> You CANNOT decide on your own. Even if the project is a CLI tool, TUI app, or library,
+> the USER decides — not you.
+>
+> ```
+> ❌ WRONG: "런타임 탐색은 건너뜁니다 (TUI 앱으로 Playwright가 적합하지 않음)"
+>    → Agent decided on its own. User was never asked. VIOLATION.
+>
+> ❌ WRONG: "CLI-only tool이므로 런타임 스킵"
+>    → Even CLI tools may have web UIs, admin panels, or interactive modes.
+>
+> ✅ RIGHT: AskUserQuestion "런타임 탐색을 실행할까요?" with options:
+>    - "Run Runtime Exploration" → proceed with Playwright
+>    - "Skip — static analysis only" → user explicitly chose to skip
+> ```
 >
 > **Shared protocols**:
 > - [`shared/runtime/_index.md`](../../shared/runtime/_index.md) — launch, storage, user setup
 > - [`shared/runtime/observation-protocol.md`](../../shared/runtime/observation-protocol.md) — **WHAT to observe** (3-layer: Common + Domain-Aware + Skill-Specific)
 >
 > Follow **Layer 1 + Layer 2** of observation-protocol.md during this step. Layer 3 (code-explore specific) is used during traces.
+
+**0. HARD STOP — Ask user first**:
+
+Use AskUserQuestion:
+```
+📋 Runtime Exploration
+
+이 프로젝트의 앱을 실행하여 UI/동작을 직접 관찰할 수 있습니다.
+정적 코드 분석만으로는 놓칠 수 있는 UI 패턴, 인터랙션 흐름,
+에러 상태를 캡처합니다.
+
+프로젝트 유형: [detected type — TUI/Web/Desktop/API]
+```
+- **"Run Runtime Exploration (Recommended)"** → proceed to step 1
+- **"Skip — static analysis only"** → record skip, proceed to Step 2
+
+**If response is empty → re-ask.**
 
 **1. Detect Playwright**: Follow `shared/runtime/playwright-detection.md` protocol
    - Result: `RUNTIME_BACKEND` (cli_direct / cli_browser / cdp / mcp_browser / none)
