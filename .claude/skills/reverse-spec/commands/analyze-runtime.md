@@ -371,7 +371,7 @@ Analyze the source code to identify likely first-run configuration requirements:
   • Settings → Premium → Enter license key
     Without this: premium badge hidden, but UI layout observable
 
-To configure BLOCKING items, follow these steps:
+To configure BLOCKING items, follow these steps in a SEPARATE terminal:
 
 [Generate EXACT commands based on detected app type from Phase 1]
 
@@ -381,7 +381,10 @@ To configure BLOCKING items, follow these steps:
   3. [exact dev command from 1.5-1, e.g., "pnpm run dev"]
   4. The app window will open
   5. [exact navigation path, e.g., "Click ⚙️ Settings → Model Provider → Enter your OpenAI API key"]
-  6. After setup, come back here and confirm
+  6. ⚠️ CLOSE THE APP completely (Cmd+Q or close window)
+     → Settings are saved to disk (electron-store/sqlite/localStorage)
+     → The agent's Playwright session will read the same saved settings
+  7. Come back here and confirm
 
 ── For Web apps ──
   1. Open a NEW terminal
@@ -389,27 +392,38 @@ To configure BLOCKING items, follow these steps:
   3. [exact dev command, e.g., "npm run dev"]
   4. Open browser: [URL, e.g., "http://localhost:3000"]
   5. [exact navigation, e.g., "Go to /admin → Create admin account → Set API keys"]
-  6. After setup, come back here and confirm
+  6. You can leave the server running — Playwright will connect to the same server
+  7. Come back here and confirm
 
 ── For API servers ──
-  1. Start the server: [exact command]
+  1. Start the server in a separate terminal: [exact command]
   2. Run these setup commands:
      [e.g., "curl -X POST http://localhost:8000/api/setup -d '{...}'"]
      [e.g., "node scripts/seed.js"]
-  3. Confirm when done
+  3. Leave the server running — the agent will test against it
+  4. Confirm when done
 
 ── For CLI tools ──
   1. Run: [exact config command, e.g., "mytool config set api-key YOUR_KEY"]
   2. Verify: [exact verify command, e.g., "mytool config show"]
-  3. Confirm when done
+  3. Config is saved to file — the agent reads the same config
+  4. Confirm when done
 ```
 
-> 🚨 **The user MUST run the app themselves** to configure in-app settings.
-> Playwright runs headless — the user cannot interact with the agent's Playwright session.
-> The flow is: user runs app → configures → confirms → agent runs Playwright to explore.
+> 🚨 **User configures → data persisted to disk → agent's automated session reads the same data.**
+>
+> **Why the user must close Desktop apps**: Electron/Tauri apps lock their data files (SQLite, electron-store).
+> If the user's instance is still running, Playwright's instance cannot read the same data.
+> Web apps don't have this issue — the server is shared, browser sessions are independent.
+>
+> **Data persistence locations the agent should verify after user confirms**:
+> - Electron: `~/Library/Application Support/[app-name]/` (macOS), `%APPDATA%/[app-name]/` (Windows)
+> - Web: database (check with SQL query or API call)
+> - CLI: config file (check with `cat ~/.config/[app]/config.json` or equivalent)
 
 **HARD STOP** — Use AskUserQuestion:
-- **"All BLOCKING items configured — proceed with full exploration"** (Recommended) → User has run the app, completed settings, and closed it. Agent now runs Playwright for automated exploration.
+- **"Setup complete and app closed — proceed"** (Recommended for Desktop) → User has configured, closed the app. Agent launches Playwright with same userData.
+- **"Setup complete, server still running — proceed"** (Recommended for Web/API) → Server is running with configured data. Agent connects to it.
 - **"Some BLOCKING items skipped — proceed with limited exploration"** → Record which items were skipped. Phase D will mark affected flows as `⚠️ LIMITED: [item] not configured — flow not fully observable`. These limitations propagate to spec-draft as `⚠️ UNVERIFIED` FRs.
 - **"Skip all setup — UI structure only"** → Phase D captures only screen structure, not interaction flows. spec-draft quality will be significantly lower.
 
@@ -429,9 +443,25 @@ With the app running, systematically explore using the available Playwright meth
 
 Execute exploration via Playwright library mode (Node.js script):
 
+**Pre-launch: Verify user configuration was persisted** (if 1.5-4b BLOCKING items were configured):
+
+For each app type, verify the user's setup was saved BEFORE launching Playwright:
+
+| App Type | Verification Method |
+|----------|-------------------|
+| **Electron** | Check userData dir exists and has config: `ls ~/Library/Application\ Support/[app-name]/` (macOS). Look for `config.json`, `*.db`, `electron-store` files with recent timestamps |
+| **Web** | Query the database or API: `curl http://localhost:PORT/api/health` or check DB for admin user |
+| **API** | Same as web — verify seed data exists |
+| **CLI** | Check config file: `cat ~/.config/[app]/config.json` |
+
+If verification fails → warn user: "Settings don't appear to be saved. Did you close the app after configuring? Try again."
+
 **Phase A — Initial Landing**:
 1. CLI library mode: `chromium.launch({ headless: false })` → `page.goto('http://localhost:[PORT]')` → `page.accessibility.snapshot()`
    - For Electron apps: use `_electron.launch({ executablePath: '[electron-binary-path]' })` instead of `chromium.launch()`
+     - **userData sharing**: Do NOT pass a custom `--user-data-dir`. Let Electron use the default userData path so it reads the same settings the user configured in 1.5-4b.
+     - If the app uses `electron-store` or `better-sqlite3`: data is in `~/Library/Application Support/[app-name]/` (macOS) — shared automatically.
+     - If the app uses `localStorage`: data is tied to the specific Electron profile — ensure no `--user-data-dir` override.
    - **Headful by default**: User sees the browser window during exploration (see runtime-verification.md §7)
 2. Parse the snapshot JSON for page structure (roles, names, values, children)
 3. Evaluate `page.evaluate(() => Array.from(document.querySelectorAll('script')).map(s => s.src))` → check for initial JS errors via console event listener
