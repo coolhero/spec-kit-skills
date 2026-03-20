@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-20 18:32 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 07:27 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1382,11 +1382,13 @@ Each skill follows the same internal directory convention:
 ```
 .claude/skills/
 ├── shared/                        Cross-skill shared resources
-│   └── domains/                   Signal keywords (S0 + R1/A0) — single source of truth
-│       ├── _taxonomy.md           Module registry (all interfaces, concerns, archetypes)
-│       ├── interfaces/            Per-interface signal keywords
-│       ├── concerns/              Per-concern signal keywords
-│       └── archetypes/            Per-archetype signal keywords
+│   ├── domains/                   Signal keywords (S0 + R1/A0) — single source of truth
+│   │   ├── _taxonomy.md           Module registry (all interfaces, concerns, archetypes)
+│   │   ├── interfaces/            Per-interface signal keywords
+│   │   ├── concerns/              Per-concern signal keywords
+│   │   └── archetypes/            Per-archetype signal keywords
+│   ├── runtime/                   Shared runtime protocols (Playwright, app launch, observation)
+│   └── reference/                 Shared templates (Completion Analysis Report)
 │
 ├── {skill}/                       Per-skill directory (code-explore, reverse-spec, smart-sdd)
 │   ├── SKILL.md                   Entry point — command routing and mandatory rules
@@ -1499,6 +1501,9 @@ Each skill follows the same internal directory convention:
 | `domains/foundations/dotnet.md` | ASP.NET Core Foundation — F0 detection, 13 categories, F7 DI First/Middleware Pipeline philosophy, F8 dotnet build/test toolchain |
 | `domains/foundations/laravel.md` | Laravel Foundation — F0 detection, 13 categories, F7 Elegant Syntax/Service Container philosophy, F8 artisan/phpstan toolchain |
 | `domains/foundations/phoenix.md` | Phoenix Foundation — F0 detection, 12 categories, F7 Let It Crash/Functional Core philosophy, F8 mix compile/credo toolchain |
+| `domains/foundations/chrome-extension.md` | Chrome Extension (Manifest V3) Foundation — F0 detection stub, architecture notes (service worker, content scripts, message passing) |
+| `domains/foundations/rust-cargo.md` | Rust (Cargo) Foundation — F0 detection stub, architecture notes (crate structure, visibility, traits, feature flags) |
+| `domains/foundations/svelte.md` | Svelte Foundation — F0 detection stub, architecture notes (components, reactivity, SvelteKit routing) |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -1642,6 +1647,7 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/concerns/multi-tenancy.md` | Multi-tenancy — S0 + R1 (tenant_id patterns, RLS policies, tenant middleware) |
 | `domains/concerns/infra-as-code.md` | Infra-as-Code — S0 + R1 (Terraform, Helm, K8s manifests, Docker Compose, CI/CD, operators) |
 | `domains/concerns/llm-agents.md` | LLM agents — S0 + R1 (LLM SDKs, prompt templates, agent frameworks, multi-agent patterns) |
+| `domains/concerns/hardware-io.md` | Hardware I/O — S0 + R1 (ioctl, mmap, serial, USB, GPIO, KVM, device file access) |
 | **Archetypes** | |
 | `domains/archetypes/ai-assistant.md` | AI assistant — A0 semantic + code patterns (LLM SDKs, streaming, RAG) |
 | `domains/archetypes/public-api.md` | Public API — A0 semantic + code patterns (OpenAPI, rate limiting, versioning) |
@@ -1654,4 +1660,6 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `runtime/user-assisted-setup.md` | User configuration flow — BLOCKING/PARTIAL/OPTIONAL classification, app-type-specific instructions |
 | `runtime/app-launch.md` | App launch + Playwright connection — Electron/Web/API/CLI with userData sharing |
 | `runtime/observation-protocol.md` | 3-layer observation framework — Common (screens, a11y tree) + Domain-Aware (per-axis observations) + Skill-Specific (form fields, SC evidence) |
+| **Reference** | |
+| `reference/completion-report.md` | Shared Completion Analysis Report template — used by reverse-spec (Phase 4) and smart-sdd adopt (post-pipeline) with mode-specific sections |
 

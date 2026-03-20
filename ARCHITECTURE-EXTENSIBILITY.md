@@ -862,3 +862,14 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Data science domain** | `smart-sdd/domains/data-science.md` (Demo/Parity/Verify), `reverse-spec/domains/data-science.md` (Detection/Classification/Axes/Registries/Boundaries/Tiers/Demo/Parity/Verify) |
 | **ML platform profile** | `smart-sdd/domains/profiles/ml-platform.md` |
 | **SDK library profile** | `smart-sdd/domains/profiles/sdk-library.md` |
+| **Completion Analysis Report** | `shared/reference/completion-report.md` (template), `reverse-spec/commands/analyze-generate.md` § Phase 4-5 (reverse-spec generation), `smart-sdd/commands/adopt.md` § Post-Pipeline Adoption Report (adopt generation) |
+| **Multi-language / Language Composition** | `reverse-spec/commands/analyze-scan.md` § 1-2a Language Composition, `reverse-spec/commands/analyze-deep.md` § Multi-Language SBI, `reverse-spec/domains/foundations/_foundation-core.md` § Monorepo Signals, `smart-sdd/reference/state-schema.md` § Foundation multi-language |
+| **Scale Detection** | `reverse-spec/commands/analyze-scan.md` § 1-4a Scale Detection, `smart-sdd/domains/_resolver.md` § Step 4 Micro adjustment, `smart-sdd/reference/context-injection-rules.md` § large-project heuristics |
+| **Repeating-Pattern Features** | `reverse-spec/commands/analyze-classify.md` § Repeating-Pattern Feature Strategy |
+| **Multi-ecosystem build** | `smart-sdd/commands/adopt.md` § Dependency Install Detection + Multi-Language Build, `smart-sdd/commands/pipeline.md` § Foundation Gate multi-ecosystem |
+| **Hardware I/O concern** | `shared/domains/concerns/hardware-io.md` (S0/R1 detection stub) |
+| **Foundation files (extension)** | `reverse-spec/domains/foundations/chrome-extension.md` (detection stub) |
+| **Foundation files (rust)** | `reverse-spec/domains/foundations/rust-cargo.md` (detection stub) |
+| **Foundation files (svelte)** | `reverse-spec/domains/foundations/svelte.md` (detection stub) |
+| **Container-as-product SBI** | `reverse-spec/commands/analyze-deep.md` § Infrastructure-as-Product SBI Rule |
+| **Instrumentation SDK** | `shared/domains/archetypes/sdk-framework.md` § Instrumentation/Wrapper Variant |
