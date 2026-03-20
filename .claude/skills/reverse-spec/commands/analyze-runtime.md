@@ -355,13 +355,17 @@ Analyze the source code to identify likely first-run configuration requirements:
   • Settings → Premium → Enter license key
     Without this: premium badge hidden, but UI layout observable
 
-To configure BLOCKING items, you need to run the app yourself:
+To configure BLOCKING items, run the app yourself in a separate terminal:
 
-  1. Open a terminal and run: [dev server command, e.g., pnpm run dev]
-  2. The app will open — navigate to Settings and configure the items above
-  3. When done, come back here and select "All BLOCKING items configured"
+  1. Open a NEW terminal (keep this Claude session running)
+  2. cd [target directory path]
+  3. [exact dev server command from 1.5-1 detection, e.g., "pnpm run dev"]
+  4. Wait for the app to open
+  5. Navigate to Settings and complete the BLOCKING items listed above
+  6. Leave the app running and come back here to confirm
 
-The agent will then run its own Playwright session to explore the configured app.
+The agent will then connect to your running app (or launch its own session
+with the same user data) for automated exploration.
 ```
 
 > 🚨 **The user MUST run the app themselves** to configure in-app settings.
