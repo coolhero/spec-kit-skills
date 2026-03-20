@@ -189,11 +189,14 @@ flowchart TD
 
 ## Exploration Coverage
 
-| Module | Coverage | Traces |
-|--------|----------|--------|
-| `cmd/` | ░░░░░░░░░░ 0% | — |
-| `internal/context/` | ░░░░░░░░░░ 0% | — |
-| ... | ... | ... |
+| Module | Traced | Trace # |
+|--------|--------|---------|
+| `cmd/` | — | |
+| `internal/context/` | — | |
+| ... | ... | |
+
+> After each trace, update: `—` → `✅` and add trace numbers.
+> Example: `| packages/opencode/ | ✅ | 001, 003 |`
 
 ## Suggested Explorations
 
@@ -236,7 +239,7 @@ When invoked with `--update`:
 2. Compare with existing `orientation.md` module map
 3. For new modules discovered:
    - Add to Module Map table
-   - Add to Exploration Coverage with 0%
+   - Add to Exploration Coverage as `—` (not yet traced)
    - Display: `🆕 New module discovered: [name] — [N] files`
 4. For modules that no longer exist:
    - Mark as `(removed)` in Module Map (don't delete — traces may reference them)
@@ -250,19 +253,22 @@ After every trace completion, update `orientation.md` with these **specific edit
 
 ### 1. Update Exploration Coverage table
 
-Read the new trace's Flow table → extract all Source Location file paths → map each to a module in the Module Map.
+Read the new trace's Flow table → identify which modules were touched.
 
-For each module mentioned in the trace:
-- Count unique source files referenced across ALL traces (not just this one)
-- Calculate: `coverage = (unique files in traces / File Count in Module Map) × 100%`
-- Update the coverage row:
+Mark each module as **traced or not** — no percentage calculation:
 
 ```
-Before: | packages/opencode/ | ░░░░░░░░░░ 0% | — |
-After:  | packages/opencode/ | ████░░░░░░ 40% | 001 |
+Before:
+  | packages/opencode/ | — |
+  | packages/app/      | — |
+
+After:
+  | packages/opencode/ | ✅ 001, 003 |
+  | packages/app/      | ✅ 002 |
+  | packages/ui/       | — |
 ```
 
-**The coverage bar MUST be visually updated** — not just the percentage number. Use █ for filled and ░ for empty (10 characters total).
+Simply list which trace numbers touched each module. Users see "what I've explored" and "what I haven't" at a glance.
 
 ### 2. Add trace to Trace Index table
 
@@ -275,4 +281,4 @@ After:  | 001 | 코드베이스 컨텍스트 관리 | packages/opencode/ | 2026-
 
 If the trace referenced files in a directory not in the Module Map, add a new row.
 
-> 🚨 **This step is NOT optional.** If orientation.md is not updated after a trace, the user sees stale coverage data and the synthesis step cannot accurately assess exploration completeness.
+> 🚨 **This step is NOT optional.** If orientation.md is not updated after a trace, the user sees stale data and cannot tell which modules are unexplored.
