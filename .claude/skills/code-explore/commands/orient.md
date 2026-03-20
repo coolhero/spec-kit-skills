@@ -107,21 +107,34 @@ Use AskUserQuestion:
 
 **If response is empty → re-ask.**
 
-**1. Detect Playwright**: Follow `shared/runtime/playwright-detection.md` protocol
+**🚨 MANDATORY: Read the shared runtime modules BEFORE proceeding.**
+
+Read these files NOW (not "follow" or "reference" — actually READ them):
+1. `~/.claude/skills/shared/runtime/playwright-detection.md` — READ this file
+2. `~/.claude/skills/shared/runtime/data-storage-map.md` — READ this file
+3. `~/.claude/skills/shared/runtime/user-assisted-setup.md` — READ this file
+4. `~/.claude/skills/shared/runtime/app-launch.md` — READ this file
+
+Then execute the steps defined in those files:
+
+**1. Detect Playwright** (from playwright-detection.md):
    - Result: `RUNTIME_BACKEND` (cli_direct / cli_browser / cdp / mcp_browser / none)
    - If `none` → HARD STOP: ask user to install Playwright or confirm skip
 
-**2. Detect Data Storage**: Follow `shared/runtime/data-storage-map.md` protocol
+**2. Detect Data Storage** (from data-storage-map.md):
    - Scan source for storage patterns → resolve userData path → determine lock constraints
+   - **CRITICAL for Electron apps**: Determine `PLAYWRIGHT_USER_DATA_DIR` — the path where user's settings (API keys, config) are stored. Playwright MUST use this SAME path.
 
-**3. User-Assisted Setup**: Follow `shared/runtime/user-assisted-setup.md` protocol
-   - Present BLOCKING / PARTIAL / OPTIONAL items
-   - For desktop apps: guide user to run app → configure → close
-   - For web apps: guide user to start server → configure
-   - **HARD STOP** — wait for user confirmation
+**3. User-Assisted Setup** (from user-assisted-setup.md):
+   - Present BLOCKING / PARTIAL / OPTIONAL items with EXACT setup commands
+   - For desktop apps: user runs app → configures → **CLOSES app** (LevelDB lock!) → confirms
+   - For web apps: user starts server → configures → leaves running → confirms
+   - **HARD STOP** — wait for user confirmation. Do NOT proceed without it.
 
-**4. Launch & Capture**: Follow `shared/runtime/app-launch.md` protocol
-   - Launch with correct userData path
+**4. Launch & Capture** (from app-launch.md):
+   - **Electron**: `_electron.launch()` with `--user-data-dir=[PLAYWRIGHT_USER_DATA_DIR]`
+   - **Web**: connect to user's running server (do NOT start a new one if already running)
+   - **Port conflict check**: Before starting a dev server, check if the port is already in use. If occupied by ANOTHER project → ask user to stop it first.
    - Capture screenshots per major route/view → `specs/explore/screenshots/`
    - Record UI structure (accessibility tree per screen)
    - Note interactive patterns (dropdowns, auto-fill, drag zones, modals)

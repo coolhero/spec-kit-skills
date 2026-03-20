@@ -1,9 +1,11 @@
-> **Shared Runtime Modules**: This phase uses shared protocols from `shared/runtime/`:
-> - [`playwright-detection.md`](../../shared/runtime/playwright-detection.md) — Playwright availability
-> - [`data-storage-map.md`](../../shared/runtime/data-storage-map.md) — Storage detection + userData
-> - [`user-assisted-setup.md`](../../shared/runtime/user-assisted-setup.md) — User configuration flow
-> - [`app-launch.md`](../../shared/runtime/app-launch.md) — App launch + Playwright connection
-> - [`observation-protocol.md`](../../shared/runtime/observation-protocol.md) — **WHAT to observe** (Layer 1 Common + Layer 2 Domain-Aware + Layer 3 reverse-spec specific: form fields, interactions, CSS tokens)
+> **🚨 MANDATORY: Read shared runtime modules BEFORE executing this phase.**
+>
+> READ these files (not "reference" — actually read them into context):
+> 1. `~/.claude/skills/shared/runtime/app-launch.md` — **Electron `--user-data-dir` is CRITICAL**
+> 2. `~/.claude/skills/shared/runtime/data-storage-map.md` — userData path + lock analysis
+> 3. `~/.claude/skills/shared/runtime/user-assisted-setup.md` — BLOCKING/OPTIONAL classification
+> 4. `~/.claude/skills/shared/runtime/playwright-detection.md` — backend detection
+> 5. `~/.claude/skills/shared/runtime/observation-protocol.md` — WHAT to observe per Domain Profile axis
 
 ## Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild, Optional for adopt)
 
