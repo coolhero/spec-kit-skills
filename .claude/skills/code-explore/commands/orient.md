@@ -10,6 +10,44 @@ Scan a codebase and generate a high-level architecture map that serves as the na
 
 ## Initial Orientation (first run)
 
+### Step 0 — Workspace Setup
+
+Determine where to write explore artifacts based on target directory:
+
+**If target directory = CWD** (user ran `/code-explore .`):
+- Create `explore-study` branch: `git checkout -b explore-study`
+- Output to `./specs/explore/` (standard)
+
+**If target directory ≠ CWD** (user ran `/code-explore /other/project` from `~/my-project/`):
+- The user wants to study `/other/project` but build in `~/my-project/`
+- **Output to target directory** (`/other/project/specs/explore/`) so source links work
+- Create explore branch in target repo to keep original clean:
+  ```bash
+  cd /other/project
+  git checkout -b explore-study
+  ```
+- Record workspace info for later synthesis handoff:
+  ```
+  Source project: /other/project (explore-study branch)
+  Output project: ~/my-project/ (CWD at invocation)
+  ```
+- Display:
+  ```
+  📂 Workspace Setup
+    Source: /other/project (branch: explore-study)
+    Explore artifacts: /other/project/specs/explore/
+    Synthesis handoff: ~/my-project/ (when you run /code-explore synthesis)
+
+    ℹ️ Source links in traces will be relative paths — clickable from the source project.
+    ℹ️ When you're done exploring, run /code-explore synthesis from ~/my-project/
+        to copy Feature candidates to your project.
+  ```
+
+**If target is not a git repo**:
+- Output to target directory directly
+- No branch creation needed
+- Add `specs/` to `.gitignore` if the directory has one
+
 ### Step 1 — Project Detection
 
 Scan the target directory to identify:

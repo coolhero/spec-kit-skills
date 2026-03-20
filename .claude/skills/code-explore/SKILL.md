@@ -17,12 +17,9 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, AskUserQuestion]
 
 Interactive, user-driven source code exploration that produces persistent, structured documentation. Unlike reverse-spec (which auto-extracts artifacts for redevelopment), code-explore supports **human-guided understanding** — the user decides what to explore, the agent traces the code and documents findings.
 
-**Output path**: `specs/explore/` relative to **CWD** (the directory where the user ran the command).
-> 🚨 **NOT the target directory.** If the user runs `/code-explore /other/project` from `~/my-project/`, output goes to `~/my-project/specs/explore/`, NOT to `/other/project/specs/explore/`.
-> ```
-> ❌ WRONG: Write to target directory (/other/project/specs/explore/)
-> ✅ RIGHT: Write to CWD (~/my-project/specs/explore/)
-> ```
+**Output path**: `specs/explore/` — location depends on context:
+- **Same directory** (`/code-explore .`): output to `./specs/explore/`
+- **Different directory** (`/code-explore /other/project`): output to `/other/project/specs/explore/` (so source links work). Creates `explore-study` branch in target repo to keep original clean. Synthesis handoff copies results back to CWD.
 
 ---
 

@@ -16,6 +16,23 @@ Aggregate all accumulated traces into a synthesis document: consolidated entity/
   the codebase before synthesizing.
   ```
 
+## Cross-Directory Handoff
+
+If explore artifacts are in a **different directory** from where the user wants to build (e.g., traces in `/other/project/specs/explore/` but building in `~/my-project/`):
+
+1. Generate `synthesis.md` in the explore directory (alongside traces)
+2. **Copy synthesis.md to CWD**: `cp /other/project/specs/explore/synthesis.md ~/my-project/specs/explore/synthesis.md`
+3. **Cleanup offer** (HARD STOP):
+   ```
+   📋 Synthesis complete. Explore artifacts are in /other/project/specs/explore/.
+
+   Cleanup options:
+   ```
+   AskUserQuestion:
+   - **"Keep explore branch"** → Leave `explore-study` branch for future reference
+   - **"Delete explore branch"** → `git checkout main && git branch -D explore-study` in target repo
+   - **"Keep as-is"** → No cleanup
+
 ---
 
 ## Synthesis Process
