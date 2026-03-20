@@ -104,37 +104,7 @@ Each spec is internally solid, but these gaps — no memory across Features, ins
 | **Source Behavior Inventory** | Function-level coverage tracking (for existing codebases) |
 | **Constitution** | Project-wide principles and architectural decisions |
 
-These artifacts live in your project directory:
-
-```
-my-project/
-├── specs/
-│   ├── _global/                   ← GEL (project-wide)
-│   │   ├── roadmap.md             ← Feature dependency graph
-│   │   ├── entity-registry.md     ← Shared data models
-│   │   ├── api-registry.md        ← Inter-Feature API contracts
-│   │   └── sdd-state.md           ← Pipeline state + Domain Profile
-│   ├── explore/                   ← code-explore output
-│   │   ├── orientation.md         ← Architecture map + module map
-│   │   └── traces/                ← Per-topic flow traces
-│   │       ├── 001-context-mgmt.md
-│   │       └── 002-tool-execution.md
-│   ├── 001-auth/                  ← ALL Feature artifacts in one place
-│   │   ├── pre-context.md         ← What F001 needs to know (from reverse-spec)
-│   │   ├── spec-draft.md          ← Initial spec (from reverse-spec)
-│   │   ├── spec.md                ← Final spec (from speckit-specify)
-│   │   ├── plan.md                ← Architecture (from speckit-plan)
-│   │   └── tasks.md               ← Implementation tasks
-│   └── 002-task-crud/
-│       └── ...
-└── .specify/
-    └── memory/
-        └── constitution.md        ← Project-wide principles
-```
-
 Before each pipeline step, the relevant artifacts are automatically injected into the agent's context. When a step completes, the artifacts are updated with automatic consistency verification — entity registries and API registries are cross-checked against actual implementations to catch drift. Dependency stubs from preceding Features are tracked and enforced as blocking gates before implementation begins. The agent doesn't need to remember — the artifacts remember for it, and the gates ensure what's recorded matches what's built.
-
-**Artifact Separation**: Project-wide analysis (roadmap, registries, state) lives in `specs/_global/`. Each Feature's artifacts — both analysis (pre-context, spec-draft from reverse-spec) and pipeline output (spec.md, plan.md, tasks.md from smart-sdd) — live together in `specs/NNN-feature/`. The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." Source details stay in pre-context.md (analysis layer), keeping specs clean and reusable.
 
 #### Domain Profile
 
@@ -198,6 +168,36 @@ After completeness criteria are met, the agent presents a **Brief Summary** show
 For existing codebases (`/smart-sdd adopt`), Features are auto-extracted from source code — but the same intent verification principle applies. Each Feature goes through a scope confirmation gate before adoption begins, ensuring the user validates what was inferred from code analysis.
 
 The result: specs generated from a well-formed, user-verified Brief are more complete, more testable, and require fewer mid-implementation corrections.
+
+#### Project Directory Structure
+
+All artifacts live in your project directory, organized by scope:
+
+```
+my-project/
+├── specs/
+│   ├── _global/                   ← Project-wide (GEL)
+│   │   ├── roadmap.md             ← Feature dependency graph
+│   │   ├── entity-registry.md     ← Shared data models
+│   │   ├── api-registry.md        ← Inter-Feature API contracts
+│   │   └── sdd-state.md           ← Pipeline state + Domain Profile
+│   ├── explore/                   ← Code-explore output (learning)
+│   │   ├── orientation.md         ← Architecture map + module map
+│   │   └── traces/                ← Per-topic flow traces
+│   ├── 001-auth/                  ← Per-Feature (analysis + pipeline together)
+│   │   ├── pre-context.md         ← What F001 needs to know (from reverse-spec)
+│   │   ├── spec-draft.md          ← Initial spec (from reverse-spec)
+│   │   ├── spec.md                ← Final spec (from speckit-specify)
+│   │   ├── plan.md                ← Architecture (from speckit-plan)
+│   │   └── tasks.md               ← Implementation tasks
+│   └── 002-task-crud/
+│       └── ...
+└── .specify/
+    └── memory/
+        └── constitution.md        ← Project-wide principles
+```
+
+**Artifact Separation**: Project-wide artifacts (roadmap, registries, state) live in `specs/_global/`. Each Feature's artifacts — both analysis (pre-context, spec-draft from reverse-spec) and pipeline output (spec.md, plan.md, tasks.md from smart-sdd) — live together in `specs/NNN-feature/`. The pipeline artifacts contain **requirements only** — no source code references. When you read `spec.md`, you see "what we're building," not "where it came from." Source details stay in pre-context.md, keeping specs clean and reusable.
 
 ---
 
