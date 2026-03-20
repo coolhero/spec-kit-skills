@@ -311,11 +311,27 @@ If the app fails to start within the timeout:
 
    **If response is empty → re-ask** (per MANDATORY RULE 1).
 
-### 1.5-4b. App Initial Setup (HARD STOP — rebuild: BLOCKING for service-dependent features)
+### 1.5-4b. User-Assisted Setup (HARD STOP — rebuild: BLOCKING for service-dependent features)
 
-Many apps require **in-app configuration** before core features become usable — API keys entered through a settings UI, provider selection, onboarding wizards, initial account setup, database connections, OAuth configuration, etc. These are distinct from environment variables (`.env`) and cannot be automated by the agent (they often involve secrets entered through the app's own UI).
+> **Principle: Delegate, Don't Skip** (CLAUDE.md P2 supplement)
+> The agent cannot do everything. Some setup requires the user's hands, credentials, or judgment.
+> When the agent hits something it can't automate, it MUST:
+> 1. Tell the user **exactly what to do** (not just what's needed)
+> 2. Provide **step-by-step commands** (not just descriptions)
+> 3. **Wait for confirmation** before proceeding
+> 4. **Never skip** because "the agent can't do it"
 
-> **Why this matters for rebuild**: Without completing setup, Phase D (Interactive Flow Execution) can only observe **UI structure** — not **actual behavior**. An AI chat app without an API key shows empty model dropdowns, disabled send buttons, and error states instead of real interaction flows. The resulting UI Flow Specs will capture "error state" instead of "working flow," producing spec-drafts that describe the broken experience.
+This step applies to ALL app types — not just Electron/GUI apps:
+
+| App Type | What the user may need to configure | How |
+|----------|-------------------------------------|-----|
+| **Desktop (Electron/Tauri)** | API keys in Settings UI, provider selection, onboarding | Run app → navigate to Settings → configure |
+| **Web app** | Admin account, OAuth setup, initial data seed | Open browser → go to http://localhost:PORT → configure |
+| **API server** | Auth tokens, database seed, admin user creation | Run CLI commands or curl requests provided by the agent |
+| **CLI tool** | Config file, credentials file, environment setup | Run specific commands provided by the agent |
+| **Mobile app** | Device setup, emulator config | Follow agent's step-by-step instructions |
+
+> **Why this matters for rebuild**: Without completing setup, Phase D can only observe **error states and empty UI** — not actual behavior. The resulting spec-drafts describe the broken experience, not the working app.
 
 **Step 1 — Detect initial setup needs**:
 Analyze the source code to identify likely first-run configuration requirements:
@@ -355,17 +371,37 @@ Analyze the source code to identify likely first-run configuration requirements:
   • Settings → Premium → Enter license key
     Without this: premium badge hidden, but UI layout observable
 
-To configure BLOCKING items, run the app yourself in a separate terminal:
+To configure BLOCKING items, follow these steps:
 
-  1. Open a NEW terminal (keep this Claude session running)
-  2. cd [target directory path]
-  3. [exact dev server command from 1.5-1 detection, e.g., "pnpm run dev"]
-  4. Wait for the app to open
-  5. Navigate to Settings and complete the BLOCKING items listed above
-  6. Leave the app running and come back here to confirm
+[Generate EXACT commands based on detected app type from Phase 1]
 
-The agent will then connect to your running app (or launch its own session
-with the same user data) for automated exploration.
+── For Desktop apps (Electron/Tauri) ──
+  1. Open a NEW terminal (keep this Claude Code session running)
+  2. cd [target directory absolute path]
+  3. [exact dev command from 1.5-1, e.g., "pnpm run dev"]
+  4. The app window will open
+  5. [exact navigation path, e.g., "Click ⚙️ Settings → Model Provider → Enter your OpenAI API key"]
+  6. After setup, come back here and confirm
+
+── For Web apps ──
+  1. Open a NEW terminal
+  2. cd [target directory absolute path]
+  3. [exact dev command, e.g., "npm run dev"]
+  4. Open browser: [URL, e.g., "http://localhost:3000"]
+  5. [exact navigation, e.g., "Go to /admin → Create admin account → Set API keys"]
+  6. After setup, come back here and confirm
+
+── For API servers ──
+  1. Start the server: [exact command]
+  2. Run these setup commands:
+     [e.g., "curl -X POST http://localhost:8000/api/setup -d '{...}'"]
+     [e.g., "node scripts/seed.js"]
+  3. Confirm when done
+
+── For CLI tools ──
+  1. Run: [exact config command, e.g., "mytool config set api-key YOUR_KEY"]
+  2. Verify: [exact verify command, e.g., "mytool config show"]
+  3. Confirm when done
 ```
 
 > 🚨 **The user MUST run the app themselves** to configure in-app settings.
