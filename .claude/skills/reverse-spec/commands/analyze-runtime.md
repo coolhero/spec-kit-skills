@@ -459,9 +459,20 @@ If verification fails → warn user: "Settings don't appear to be saved. Did you
 **Phase A — Initial Landing**:
 1. CLI library mode: `chromium.launch({ headless: false })` → `page.goto('http://localhost:[PORT]')` → `page.accessibility.snapshot()`
    - For Electron apps: use `_electron.launch({ executablePath: '[electron-binary-path]' })` instead of `chromium.launch()`
-     - **userData sharing**: Do NOT pass a custom `--user-data-dir`. Let Electron use the default userData path so it reads the same settings the user configured in 1.5-4b.
-     - If the app uses `electron-store` or `better-sqlite3`: data is in `~/Library/Application Support/[app-name]/` (macOS) — shared automatically.
-     - If the app uses `localStorage`: data is tied to the specific Electron profile — ensure no `--user-data-dir` override.
+     - **userData sharing**: Pass the user's actual userData path via `--user-data-dir` so Playwright reads the same settings:
+       ```javascript
+       // 1. Detect the app's userData path from source code
+       //    Look for: app.getPath('userData'), app.getName(), or electron-store config
+       // 2. Common locations:
+       //    macOS: ~/Library/Application Support/[app-name]/
+       //    Linux: ~/.config/[app-name]/
+       //    Windows: %APPDATA%/[app-name]/
+       const app = await _electron.launch({
+         args: ['out/main/index.js', '--user-data-dir=' + userDataPath]
+       });
+       ```
+     - ⚠️ **User's app MUST be closed first** — two Electron instances cannot share the same userData simultaneously (LevelDB/SQLite lock)
+     - After launch, verify settings loaded: check if provider/API key configuration is visible in the app UI
    - **Headful by default**: User sees the browser window during exploration (see runtime-verification.md §7)
 2. Parse the snapshot JSON for page structure (roles, names, values, children)
 3. Evaluate `page.evaluate(() => Array.from(document.querySelectorAll('script')).map(s => s.src))` → check for initial JS errors via console event listener
