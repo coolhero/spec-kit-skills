@@ -15,6 +15,21 @@
 
 > Anti-patterns, code markers, script template, and detailed requirements: see [reference/demo-standard.md](../reference/demo-standard.md).
 
+### Additional SC Pattern Categories (activated by Scale modifier)
+
+When the project's Scale modifier indicates these categories should be active, apply them during SC generation:
+
+| Category | When to Activate | Pattern Template | Anti-pattern |
+|----------|-----------------|------------------|-------------|
+| **Performance** | `production` maturity OR explicit performance FR | `SC-xxx: [operation] completes within [N]ms/s for [load profile]` | `SC: system is fast` (unmeasurable) |
+| **Resource** | `production` maturity AND server/infra Feature | `SC-xxx: [resource] usage stays below [threshold] under [concurrent load]` | `SC: memory usage is reasonable` (vague) |
+| **Build** | Foundation axis active AND build-affecting FR | `SC-xxx: [build target] compiles/bundles in < [N]s on [reference hardware]` | `SC: build works` (binary, no target) |
+| **Reliability** | `production` maturity AND distributed/async Feature | `SC-xxx: [operation] succeeds ≥[N]% under [failure condition]` | `SC: system is reliable` (unmeasurable) |
+
+**Scale guard**: `prototype` → these categories disabled (focus on functional correctness). `mvp` → Performance only for user-facing latency. `production` → all categories active based on Feature characteristics.
+
+These are **universal patterns** — framework-independent. The specific metrics and thresholds are determined during specify based on the Feature's FR requirements.
+
 ---
 
 ## S2. Parity Dimensions

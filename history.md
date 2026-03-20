@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-21] G8: Archetype multi-detection + G9: SC template expansion
+
+### What Changed
+- **G8 (Archetype Multi-Detection)**: Added multi-archetype support (comma-separated, merge-by-append) across 3 files:
+  - `_schema.md` § Archetype Section Schema: clarification paragraph on multi-archetype merge semantics with `_resolver.md` cross-reference
+  - `init.md` § Proposal Step 3: explicit multi-match instruction with example (`ai-assistant,sdk-framework`)
+  - `synthesis.md` § Step 5: note that Archetype axis can be comma-separated
+- **G9 (SC Template Expansion)**: Added "Additional SC Pattern Categories (activated by Scale modifier)" subsection to `_core.md` § S1 with 4 universal SC pattern categories (Performance, Resource, Build, Reliability), Scale guard rules, and anti-patterns
+
+### Why
+- G8: Archetype was implicitly single-value despite `_resolver.md` Step 2c supporting multi-archetype. Without explicit documentation, agents defaulted to picking one archetype even when multiple matched.
+- G9: SC generation lacked non-functional pattern templates. Production-grade projects need measurable Performance/Resource/Build/Reliability SCs, but without templates agents produced vague criteria like "system is fast".
+
+### Files
+- `.claude/skills/smart-sdd/domains/_schema.md`
+- `.claude/skills/smart-sdd/commands/init.md`
+- `.claude/skills/code-explore/commands/synthesis.md`
+- `.claude/skills/smart-sdd/domains/_core.md`
+
+---
+
 ## [2026-03-20] Lean Scale & Cross-Concern sections in injection files
 
 ### What Changed

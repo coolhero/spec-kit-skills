@@ -67,7 +67,7 @@ Generate the Proposal document (format in `reference/clarity-index.md` § 7) con
 - **Overview**: 1–2 sentence summary
 - **Clarity Index**: Score breakdown per dimension
 - **Inferred Domain Profile**: Interfaces, Concerns, and rationale
-- **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § S0/A0 Aggregation)
+- **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § S0/A0 Aggregation). Multiple archetypes may match — store comma-separated (e.g., `ai-assistant,sdk-framework`). All matched archetypes are activated with merge-by-append semantics (see `domains/_schema.md` § Archetype Section Schema).
 - **Proposed Features**: Extracted from signals + inferred from domain knowledge
 - **Quality Rules Activated**: S1/S7 rules from active modules
 - **Project Maturity**: Inferred value (`prototype`/`mvp`/`production`) with rationale

@@ -176,6 +176,8 @@ Domain-specific minimum requirements for the **Briefing** process (`/smart-sdd a
 
 Archetype modules use a separate section numbering (A-prefix) to avoid collision with S0–S8. Archetypes define application-domain philosophy — principles that transcend framework and interface choices. While an Interface says _what_ the app exposes and a Concern says _how_ it handles cross-cutting patterns, an Archetype says _why_ certain architectural decisions matter for this domain.
 
+> **Multi-Archetype Support**: A project may activate multiple archetypes (comma-separated, e.g., `ai-assistant,sdk-framework`). When multiple archetypes are active, their sections are merged using **append semantics** — A1 principles accumulate, A2 SC extensions accumulate, A3 probes accumulate, A4 constitution injections accumulate, A5 Brief criteria accumulate. No deduplication is performed; if two archetypes produce overlapping rules, both are kept (the more specific one wins at execution time). See `_resolver.md` § Step 2c for the resolution order.
+
 ### A0. Signal Keywords (archetypes)
 
 Keywords that indicate this archetype should be activated. Used by Clarity Index signal extraction during `init` Proposal Mode alongside S0 keywords. See `reference/clarity-index.md` § 5.

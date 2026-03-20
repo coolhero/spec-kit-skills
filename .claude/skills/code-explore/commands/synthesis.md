@@ -114,7 +114,7 @@ Derive the **user's target project Domain Profile** by combining the source proj
 2. **Analyze differentiation signals**: Scan all traces' Observations for domain-relevant changes:
    - 🔧 "Change from TUI to Web" → Axis 1 Interface change
    - 🔧 "Add streaming support" → Axis 2 Concern addition (`realtime`)
-   - 💡 "Keep provider abstraction" → Axis 3 Archetype confirmation
+   - 💡 "Keep provider abstraction" → Axis 3 Archetype confirmation (Archetype can be comma-separated if both source and target show multiple archetype signals, e.g., `ai-assistant,sdk-framework`)
    - 🔧 "TypeScript + React" → Axis 4 Foundation change
    - (Axis 5 Scenario is not inherited — it's determined by the user's project mode)
    - 🔧 "This should be production-grade" → Scale modifier change
