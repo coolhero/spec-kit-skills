@@ -2,6 +2,8 @@
 
 > Per-command injection rules for `/smart-sdd specify [FID]` and the conditional Clarify sub-step.
 > For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+>
+> **Source App Runtime Reference** (rebuild/adoption): If the user or agent needs to verify a UI detail during specify (e.g., "is this field a dropdown or text input?"), the source app can be launched using [`shared/runtime/app-launch.md`](../../../../shared/runtime/app-launch.md). This is NOT mandatory — it's available on-demand when static analysis (pre-context, screenshots) is insufficient.
 
 ---
 
@@ -230,8 +232,28 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 10. **FR Granularity Check** (always — see below)
 11. **SC Testability Check** (always — see below)
 12. **UI Flow Spec Generation** (GUI Features — see § UI Flow Spec Generation below)
-13. **Assemble Review Display** (include any ⚠️/❌ from steps 1-12)
-14. **HARD STOP** (ReviewApproval)
+13. **Source Screenshot Reference** (rebuild/adoption mode with runtime observations):
+    If `pre-context.md` has runtime screenshots (from reverse-spec Phase 1.5 or code-explore orient):
+    - Display the **relevant screen screenshot(s)** for this Feature in the Review
+    - Format: `🖼️ Source app reference: [screenshot path] — [screen name]`
+    - This helps the user compare spec.md against the actual source app UI
+    - If a Form Field Inventory exists for this Feature's screens, display it alongside the FR list so the user can spot missing controls
+    ```
+    🖼️ Source Reference (from runtime exploration):
+      Screen: Knowledge Base — specs/_global/visual-references/05-knowledge.png
+      Screen: KB Create Dialog — specs/_global/visual-references/kb-create-dialog.png
+
+      Form Field Inventory (KB Create Dialog):
+      | Field | Control Type | Auto-fill | Validation |
+      | Name | TextInput | no | required |
+      | Model | Dropdown (configured providers only) | no | required |
+      | Dimensions | NumberInput (readonly) | yes (from model) | auto |
+
+      Compare: Do FR-001~003 cover all fields and controls above?
+    ```
+
+14. **Assemble Review Display** (include any ⚠️/❌ from steps 1-13)
+15. **HARD STOP** (ReviewApproval)
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 

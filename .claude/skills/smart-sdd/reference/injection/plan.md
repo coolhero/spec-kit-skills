@@ -2,6 +2,8 @@
 
 > Per-command injection rules for `/smart-sdd plan [FID]`.
 > For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
+>
+> **Source App Runtime Reference** (rebuild/adoption): If the agent needs to verify architecture decisions against the source app's actual behavior (e.g., data flow, component interaction), the source app can be launched using [`shared/runtime/app-launch.md`](../../../../shared/runtime/app-launch.md). Available on-demand.
 
 ---
 

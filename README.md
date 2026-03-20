@@ -1554,4 +1554,5 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `runtime/data-storage-map.md` | Data storage detection — config stores, databases, file storage, lock analysis, userData path |
 | `runtime/user-assisted-setup.md` | User configuration flow — BLOCKING/PARTIAL/OPTIONAL classification, app-type-specific instructions |
 | `runtime/app-launch.md` | App launch + Playwright connection — Electron/Web/API/CLI with userData sharing |
+| `runtime/observation-protocol.md` | 3-layer observation framework — Common (screens, a11y tree) + Domain-Aware (per-axis observations) + Skill-Specific (form fields, SC evidence) |
 

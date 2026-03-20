@@ -71,7 +71,11 @@ Display a brief summary:
 > Static scan reveals STRUCTURE. Runtime reveals BEHAVIOR. Without runtime,
 > traces will miss UI patterns, interaction flows, data display, and error states.
 >
-> **Shared protocol**: Uses [`shared/runtime/`](../../shared/runtime/_index.md) modules.
+> **Shared protocols**:
+> - [`shared/runtime/_index.md`](../../shared/runtime/_index.md) — launch, storage, user setup
+> - [`shared/runtime/observation-protocol.md`](../../shared/runtime/observation-protocol.md) — **WHAT to observe** (3-layer: Common + Domain-Aware + Skill-Specific)
+>
+> Follow **Layer 1 + Layer 2** of observation-protocol.md during this step. Layer 3 (code-explore specific) is used during traces.
 
 **1. Detect Playwright**: Follow `shared/runtime/playwright-detection.md` protocol
    - Result: `RUNTIME_BACKEND` (cli_direct / cli_browser / cdp / mcp_browser / none)

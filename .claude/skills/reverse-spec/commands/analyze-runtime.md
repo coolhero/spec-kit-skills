@@ -3,6 +3,7 @@
 > - [`data-storage-map.md`](../../shared/runtime/data-storage-map.md) — Storage detection + userData
 > - [`user-assisted-setup.md`](../../shared/runtime/user-assisted-setup.md) — User configuration flow
 > - [`app-launch.md`](../../shared/runtime/app-launch.md) — App launch + Playwright connection
+> - [`observation-protocol.md`](../../shared/runtime/observation-protocol.md) — **WHAT to observe** (Layer 1 Common + Layer 2 Domain-Aware + Layer 3 reverse-spec specific: form fields, interactions, CSS tokens)
 
 ## Phase 1.5 — Runtime Exploration (🚫 BLOCKING for rebuild, Optional for adopt)
 
