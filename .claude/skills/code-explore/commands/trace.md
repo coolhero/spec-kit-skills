@@ -150,6 +150,26 @@ sequenceDiagram
 | 2 | [other.go:45](../../../src/other.go) | processData() | raw → processed |
 | ... | ... | ... | ... |
 
+> **Key Source Snippets**: For steps with important logic, include the actual source code inline after the Flow table. This makes the trace **self-contained** — the reader understands the flow without opening separate files. Include only the **essential lines** (5-15 lines per snippet), not entire functions. Add a brief comment explaining why this code matters.
+
+### Key Source Snippets
+
+```typescript
+// Step 2: processData() — why this matters: [brief explanation]
+// src/other.go:45-58
+function processData(raw: RawInput): ProcessedOutput {
+  const validated = validate(raw)        // 입력 검증
+  const transformed = transform(validated) // 핵심 변환 로직
+  return { ...transformed, timestamp: Date.now() }
+}
+```
+
+```typescript
+// Step N: [another critical step]
+// src/file.go:23-30
+// [code snippet]
+```
+
 ## Entities Observed
 
 | Entity | Source Location | Fields Observed | Notes |
