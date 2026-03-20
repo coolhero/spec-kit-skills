@@ -9,27 +9,88 @@
 
 ### Electron (cli_direct mode)
 
+> **🚨 CRITICAL: `app.setPath()` Override Detection**
+>
+> Many Electron apps override the userData path in code (`app.setPath('userData', ...)`).
+> When this happens, `--user-data-dir` is IGNORED — the code override takes precedence.
+>
+> **BEFORE launching**, grep the source for `setPath`:
+> ```bash
+> grep -rn "setPath.*userData\|app\.setPath" src/main/ --include="*.ts" --include="*.js"
+> ```
+>
+> **Common patterns**:
+> - `app.setPath('userData', app.getPath('userData') + 'Dev')` → dev mode adds "Dev" suffix
+> - `app.setPath('userData', customPath)` → app uses custom path entirely
+> - `app.setPath('userData', portableDir)` → portable mode
+>
+> **If `setPath` override exists**: `--user-data-dir` will NOT work. Instead:
+> 1. Check if the override is **conditional on dev mode** (`if (isDev)`)
+> 2. If yes: launch in dev mode (see "Dev Mode Launch" below)
+> 3. If unconditional: the app always uses a custom path — use THAT path
+
+#### Standard Launch (no setPath override)
+
 ```javascript
 const { _electron } = require('playwright');
-
-// Use userData from Data Storage Map
 const userDataDir = PLAYWRIGHT_USER_DATA_DIR; // from data-storage-map.md
 
 const app = await _electron.launch({
   executablePath: 'node_modules/.bin/electron',
   args: [
-    'out/main/index.js',  // or detected entry point
-    '--user-data-dir=' + userDataDir  // share user's settings
+    'out/main/index.js',
+    '--user-data-dir=' + userDataDir
   ]
 });
-
-const window = await app.firstWindow();
-await window.waitForLoadState('domcontentloaded');
 ```
 
-> **userData sharing**: Pass `--user-data-dir` pointing to user's actual data directory.
-> User MUST have closed their app first (LevelDB lock).
-> Without `--user-data-dir`, Playwright gets empty/default settings.
+#### Dev Mode Launch (when setPath override is conditional on isDev)
+
+When the app has `if (isDev) { app.setPath('userData', ... + 'Dev') }`,
+the production build (`out/main/index.js`) will use the PRODUCTION userData path,
+not the dev path where the user configured their settings.
+
+**Solution**: Launch in dev mode so `isDev = true` and the same setPath logic runs:
+
+```javascript
+const { _electron } = require('playwright');
+
+// Option A: Launch via electron-vite dev entry
+const app = await _electron.launch({
+  executablePath: 'node_modules/.bin/electron',
+  args: ['.'],  // electron-vite detects dev mode from project root
+  cwd: SOURCE_DIR,
+  env: { ...process.env, NODE_ENV: 'development' }
+});
+
+// Option B: Launch build but force dev environment
+const app = await _electron.launch({
+  executablePath: 'node_modules/.bin/electron',
+  args: ['out/main/index.js'],
+  cwd: SOURCE_DIR,
+  env: { ...process.env, NODE_ENV: 'development' }
+});
+```
+
+> **Which option?** Check how `isDev` is defined in the source:
+> - `import.meta.env.DEV` or `process.env.NODE_ENV !== 'production'` → Option B works
+> - Hardcoded in electron-vite build config → Option A (must use actual dev server)
+
+#### Decision Flow
+
+```
+1. grep for app.setPath('userData', ...) in source
+2. Found?
+   NO  → Standard Launch (--user-data-dir works)
+   YES → Is it conditional on isDev?
+         YES → Dev Mode Launch (Option A or B)
+         NO  → Read the custom path from code, use that as PLAYWRIGHT_USER_DATA_DIR
+3. After launch, verify: navigate to Settings → check if user's API keys are visible
+4. If keys missing → STOP, report userData mismatch, ask user to verify
+```
+
+> **userData sharing**: User MUST have closed their app first (LevelDB lock).
+> Without correct userData, Playwright sees an unconfigured app — no API keys, no models, no data.
 
 ### Web App (cli_browser mode)
 

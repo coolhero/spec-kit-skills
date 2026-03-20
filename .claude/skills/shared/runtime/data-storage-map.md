@@ -44,12 +44,26 @@ Active userData: [most recent = user's actual config] ← PLAYWRIGHT_USER_DATA_D
 
 ## userData Path Resolution — Universal Algorithm
 
+### Step 0: Check for userData Override in Source Code
+
+**🚨 DO THIS FIRST** — before any path resolution. Many apps override userData in code:
+
+```bash
+grep -rn "setPath.*userData\|app\.setPath" src/main/ --include="*.ts" --include="*.js"
+```
+
+If found: the app **ignores** `--user-data-dir`. The code determines the actual path.
+Read the override logic to understand which path is used in dev vs prod mode.
+
+Common pattern: `if (isDev) { app.setPath('userData', path + 'Dev') }`
+→ Dev mode userData ≠ prod mode userData, AND `--user-data-dir` is overridden.
+
 ### Step 1: Extract App Identity from Source
 
 | App Type | Where to find identity |
 |----------|----------------------|
 | **Electron** | `package.json` → `name` (dev), `electron-builder.yml` → `productName` (prod) |
-| **Electron (electron-vite)** | Same + `Dev` suffix appended in dev mode |
+| **Electron (electron-vite)** | Same + `Dev` suffix appended in dev mode. **Also check `app.setPath()` in source** |
 | **Electron (electron-forge)** | `forge.config.js` → `packagerConfig.name` (prod) |
 | **Tauri** | `tauri.conf.json` → `productName` (both modes usually same) |
 | **NW.js** | `package.json` → `name` |
