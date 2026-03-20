@@ -2158,15 +2158,27 @@ For each Feature, generate `SPEC_PATH/[NNN-feature]/spec-draft.md` using the [sp
    ```
 
 **Completeness Check (BLOCKING)**:
-After generating spec-draft.md, verify:
+After generating spec-draft.md for each Feature, verify:
 - Every P1/P2 SBI behavior has a corresponding FR → if not, add it
 - Every UI Flow Spec step has a corresponding FR → if not, add it
 - Every UI Flow Spec error path has a corresponding SC-E### → if not, add it
 - Every cross-feature interaction has a corresponding SC-X### → if not, add it
 - No FR uses generic verbs ("input", "configure", "manage") where specific controls were observed ("Dropdown", "Slider", "auto-fill")
-- **For /speckit.plan**: Preceding Feature dependencies, related entity/API contract drafts (owned + referenced entities, provided + consumed APIs), technical decisions
-- **Feature Contracts** (populated from Phase 3-1d interaction data and Phase 2-3 cross-Feature rules): Explicit guarantees this Feature provides to consumers, dependencies it requires from providers, and failure modes when contracts are violated. See [pre-context-template.md](templates/pre-context-template.md) § Feature Contracts. If this Feature has no cross-Feature interactions (Interaction Score = 0), write "None — this Feature operates independently."
-- **For /speckit.analyze**: Cross-Feature verification points, impact scope when this Feature changes
+
+```
+❌ WRONG: Phase 4 completes with 0 spec-draft.md files → "reverse-spec complete"
+   → specify has no seed → generates vague spec from scratch → UI detail lost
+
+✅ RIGHT: Phase 4 generates spec-draft.md for EVERY Feature → completeness check passes
+   → specify refines detailed seed → UI controls preserved
+```
+
+**Phase 4 Completion Gate (BLOCKING)**:
+Before displaying the Phase 4 Completion Report, verify:
+1. `spec-draft.md` exists for EVERY Feature in the roadmap → if any missing, generate it before proceeding
+2. Each spec-draft has at least 1 FR and 1 SC → empty spec-drafts are not acceptable
+3. Display count: `📋 spec-draft.md: [N]/[total] Features generated`
+4. If any missing → 🚫 BLOCKING: "spec-draft.md missing for [FID]. Generate before completing Phase 4."
 
 #### Per-Feature Pre-Context Generation Protocol (MANDATORY)
 
