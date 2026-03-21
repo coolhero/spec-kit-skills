@@ -21,7 +21,7 @@
 
 | ID | Scenario | Flow | Precondition | Outcome | Status |
 |----|----------|------|-------------|---------|--------|
-| SA01 | Study unfamiliar OSS codebase | `code-explore [path]` → traces → synthesis | Source code exists | Architecture map + trace docs | ✅ |
+| SA01 | Study unfamiliar codebase | `code-explore [path]` → traces → synthesis | Source code exists | Architecture map + trace docs | ✅ |
 | SA02 | Study specific module only | `code-explore [path] --scope src/auth` | Source code exists | Scoped orientation + traces | ✅ |
 | SA03 | Quick single-flow trace | `code-explore [path]` → `trace "login flow"` | Source code exists | Single trace document | ✅ |
 | SA04 | Onboard new team member | `code-explore .` → traces → synthesis | Team project | Architecture docs for onboarding | ✅ |
@@ -37,7 +37,7 @@
 | ID | Scenario | Flow | Precondition | Outcome | Status |
 |----|----------|------|-------------|---------|--------|
 | SB01 | New project from idea | `init "Build a chat app"` → auto-chains add → pipeline | Nothing | Full project with Features implemented | ✅ |
-| SB02 | New project after studying OSS | `code-explore A` → `init B --from-explore` → add → pipeline | Source A studied | New project B informed by A's architecture | ✅ |
+| SB02 | New project after studying existing code | `code-explore A` → `init B --from-explore` → add → pipeline | Source A studied | New project B informed by A's architecture | ✅ |
 | SB03 | New project with specific profile | `init --profile grpc-service` → add → pipeline | Nothing | Project with pre-set domain profile | ✅ |
 | SB04 | Add single Feature | `add "user authentication"` → pipeline | init completed | One Feature specified + implemented | ✅ |
 | SB05 | Add multiple Features batch | `add` → define F001-F005 → `pipeline` | init completed | Multiple Features in sequence | ✅ |
@@ -109,7 +109,7 @@
 |----|----------|------|-------------|---------|--------|
 | SH01 | Polyglot project | `init` with multiple languages detected | Multi-language codebase | polyglot + codegen concerns activated | ✅ |
 | SH02 | Plugin/extension development | `init --profile sdk-library` → add → pipeline | Framework exists | Plugin with extension points | ✅ |
-| SH03 | Fork OSS and extend | `adopt` OSS → `add` custom Features → `pipeline` | Forked repo | Extended OSS with SDD docs | ✅ |
+| SH03 | Fork and extend existing project | `adopt` → `add` custom Features → `pipeline` | Forked repo | Extended project with SDD docs | ✅ |
 | SH04 | Migration/modernization | `adopt` → `pipeline --migration` | Legacy code | Modernized codebase | ✅ |
 | SH05 | Different artifact language | `init --lang ko` or `adopt --lang ja` | Any | All artifacts in specified language | ✅ |
 | SH06 | Large codebase (1000+ files) | `reverse-spec .` with parallel sub-agents | Large repo | Distributed analysis | ✅ |
