@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-21] Documentation Update — Domain Module Count Sync
+
+### What Changed
+
+Updated documentation files to reflect current domain module counts across all 5 target files:
+- **Interfaces**: 5 → 9 (added mobile, library, embedded, grpc)
+- **Concerns**: 23 → 33 (added graceful-lifecycle, gpu-compute, observability, resilience, connection-pool, webrtc, tls-management, schema-registry, cryptography, udp-transport)
+- **Archetypes**: 10 → 15 (added cache-server, compiler, inference-server, media-server, workflow-engine)
+- **Cross-Concern Integration Rules**: 14 → 53
+- **Profiles**: 6 → 16
+
+### Files Modified
+- `ARCHITECTURE-EXTENSIBILITY.md` — Level 2 status table (14 → 53 rules)
+- `ARCHITECTURE-EXTENSIBILITY.ko.md` — same (Korean mirror)
+- `README.md` — Available Modules listing, Platform Foundation tree, Last updated timestamp
+- `README.ko.md` — same (Korean mirror), including full axis tree diagram update
+- `FILE-MAP.md` — § 3 Domain Module Hierarchy diagram, Module File Distribution, § 4 File Inventory tables (shared, reverse-spec, smart-sdd sections)
+
+---
+
 ## [2026-03-21] 5/5 Quality Improvements — 7 Gap Fixes
 
 ### What Changed

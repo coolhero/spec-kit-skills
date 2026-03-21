@@ -23,9 +23,9 @@ graph TB
         subgraph "shared/domains/"
             STAX["_taxonomy.md"]
             STPL["_TEMPLATE.md"]
-            SI["interfaces/ (5)"]
-            SC["concerns/ (23)"]
-            SA["archetypes/ (10)"]
+            SI["interfaces/ (9)"]
+            SC["concerns/ (33)"]
+            SA["archetypes/ (15)"]
             SCX["contexts/ (1)"]
         end
         subgraph "shared/runtime/"
@@ -142,17 +142,18 @@ graph TB
     DP --> A5["Axis 5: Scenario"]
     DP --> M1["Modifier: Scale"]
 
-    A1 --> I1["gui"] & I2["http-api"] & I3["cli"] & I4["data-io"] & I5["tui"]
+    A1 --> I1["gui"] & I2["http-api"] & I3["cli"] & I4["data-io"] & I5["tui"] & I6["mobile"] & I7["library"] & I8["embedded"] & I9["grpc"]
 
-    A2 --> C_GRP1["Core: auth, authorization, async-state, i18n, ipc, realtime"]
-    A2 --> C_GRP2["Integration: external-sdk, message-queue, task-worker, plugin-system"]
+    A2 --> C_GRP1["Core: auth, authorization, async-state, i18n, ipc, realtime, graceful-lifecycle, observability"]
+    A2 --> C_GRP2["Integration: external-sdk, message-queue, task-worker, plugin-system, connection-pool"]
     A2 --> C_GRP3["Code: codegen, polyglot, multi-tenancy, infra-as-code"]
-    A2 --> C_GRP4["Protocol: protocol-integration, llm-agents, hardware-io"]
-    A2 --> C_GRP5["Domain: cqrs, distributed-consensus, dag-orchestration, ecs, wire-protocol, k8s-operator"]
+    A2 --> C_GRP4["Protocol: protocol-integration, llm-agents, hardware-io, webrtc, tls-management, schema-registry, cryptography, udp-transport"]
+    A2 --> C_GRP5["Domain: cqrs, distributed-consensus, dag-orchestration, ecs, wire-protocol, k8s-operator, gpu-compute, resilience"]
 
     A3 --> AR1["ai-assistant"] & AR2["public-api"] & AR3["microservice"] & AR4["sdk-framework"]
     A3 --> AR5["database-engine"] & AR6["network-server"] & AR7["message-broker"]
     A3 --> AR8["game-engine"] & AR9["browser-extension"] & AR10["infra-tool"]
+    A3 --> AR11["cache-server"] & AR12["compiler"] & AR13["inference-server"] & AR14["media-server"] & AR15["workflow-engine"]
 
     A4 --> F_GRP["36 Foundation files<br/>(framework-specific rules)"]
 
@@ -167,25 +168,25 @@ graph TB
 
 ```
 shared/domains/           ← Signal keywords (S0/A0) + Code patterns (R1)
-  interfaces/ (5)           gui, http-api, cli, data-io, tui
-  concerns/ (23)            auth, async-state, i18n, ... k8s-operator, wire-protocol
-  archetypes/ (10)          ai-assistant, public-api, ... game-engine, infra-tool
+  interfaces/ (9)           gui, http-api, cli, data-io, tui, mobile, library, embedded, grpc
+  concerns/ (33)            auth, async-state, i18n, ... webrtc, cryptography, udp-transport
+  archetypes/ (15)          ai-assistant, public-api, ... inference-server, workflow-engine
   contexts/ (1)             migration
   _taxonomy.md              Single source of truth for all modules
 
 reverse-spec/domains/     ← Analysis rules (R3-R5)
-  interfaces/ (5)           R3 analysis axes per interface
-  concerns/ (20)            R3 Feature boundary + R4 data flow rules
-  archetypes/ (4)           R3 extraction patterns (only for original 4)
+  interfaces/ (9)           R3 analysis axes per interface
+  concerns/ (33)            R3 Feature boundary + R4 data flow rules
+  archetypes/ (15)          R3 extraction patterns
   contexts/ (1)             R3 migration Feature boundary + R5 scope estimation
   foundations/ (36+2)       Framework-specific detection stubs (F0-F9)
   _core.md                  R2 project types, R5 Feature boundary heuristics
 
 smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
-  interfaces/ (5)           SC rules, elaboration probes, bug prevention
-  concerns/ (23)            SC rules, elaboration probes, bug prevention
-  archetypes/ (10)          Domain philosophy, elaboration probes
-  profiles/ (6)             Pre-configured axis combinations
+  interfaces/ (9)           SC rules, elaboration probes, bug prevention
+  concerns/ (33)            SC rules, elaboration probes, bug prevention
+  archetypes/ (15)          Domain philosophy, elaboration probes
+  profiles/ (16)            Pre-configured axis combinations
   scenarios/ (4)            greenfield, rebuild, incremental, adoption
   _resolver.md              7-step module loading order
 ```
@@ -226,9 +227,9 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `domains/_schema.md` | Module file format specification |
 | `domains/app.md` | Domain Profile for analysis (reverse-spec-specific) |
 | `domains/data-science.md` | Data science domain extensions (TODO scaffolding) |
-| **Domains — Interfaces** (5) | `domains/interfaces/{gui,http-api,cli,data-io,tui}.md` | R3 analysis axes per interface type |
-| **Domains — Concerns** (23) | `domains/concerns/*.md` | R3 Feature boundary + R4 data flow per concern |
-| **Domains — Archetypes** (4) | `domains/archetypes/{ai-assistant,microservice,public-api,sdk-framework}.md` | R3 extraction patterns |
+| **Domains — Interfaces** (9) | `domains/interfaces/{gui,http-api,cli,data-io,tui,mobile,library,embedded,grpc}.md` | R3 analysis axes per interface type |
+| **Domains — Concerns** (33) | `domains/concerns/*.md` | R3 Feature boundary + R4 data flow per concern |
+| **Domains — Archetypes** (15) | `domains/archetypes/*.md` | R3 extraction patterns |
 | **Domains — Contexts** (1) | `domains/contexts/migration.md` | R3-R5 migration impact analysis |
 | **Domains — Foundations** (39+2) | `domains/foundations/*.md` | Framework-specific F0-F9 detection rules |
 | ↳ Full frameworks | `electron, nextjs, vite-react, django, flask, fastapi, express, nestjs, hono, bun, rails, laravel, phoenix, spring-boot, spring-framework, actix-web, go-chi, svelte, solidjs, tauri, react-native, flutter, dotnet, chrome-extension, rust-cargo` | Comprehensive F1-F9 rules |
@@ -266,10 +267,10 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `domains/_schema.md` | Module file format specification |
 | `domains/app.md` | Domain Profile for execution (smart-sdd-specific) |
 | `domains/data-science.md` | Data science domain extensions (TODO scaffolding) |
-| **Domains — Interfaces** (5) | `domains/interfaces/{gui,http-api,cli,data-io,tui}.md` | SC rules, elaboration probes, bug prevention |
-| **Domains — Concerns** (23) | `domains/concerns/*.md` | SC rules, elaboration probes, bug prevention |
-| **Domains — Archetypes** (10) | `domains/archetypes/*.md` | Domain philosophy (A1), SC extensions (A2), probes (A3), constitution (A4), brief criteria (A5) |
-| **Domains — Profiles** (6) | `domains/profiles/{fullstack-web,web-api,desktop-app,cli-tool,ml-platform,sdk-library}.md` | Pre-configured axis combinations |
+| **Domains — Interfaces** (9) | `domains/interfaces/{gui,http-api,cli,data-io,tui,mobile,library,embedded,grpc}.md` | SC rules, elaboration probes, bug prevention |
+| **Domains — Concerns** (33) | `domains/concerns/*.md` | SC rules, elaboration probes, bug prevention |
+| **Domains — Archetypes** (15) | `domains/archetypes/*.md` | Domain philosophy (A1), SC extensions (A2), probes (A3), constitution (A4), brief criteria (A5) |
+| **Domains — Profiles** (16) | `domains/profiles/*.md` | Pre-configured axis combinations |
 | **Domains — Scenarios** (4) | `domains/scenarios/{greenfield,rebuild,incremental,adoption}.md` | Scenario-specific pipeline rules |
 | **Reference** | | |
 | `reference/context-injection-rules.md` | Master injection rules — loading order, Scale/Cross-Concern enforcement |
@@ -314,9 +315,9 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 |----------|-------|-------------|
 | **Domains — Taxonomy** | `domains/_taxonomy.md` | Single source of truth for all module listings |
 | **Domains — Template** | `domains/_TEMPLATE.md` | Contributor template for new modules |
-| **Domains — Interfaces** (5) | `domains/interfaces/{gui,http-api,cli,data-io,tui}.md` | S0 keywords + R1 code patterns |
-| **Domains — Concerns** (23) | `domains/concerns/*.md` | S0 keywords + R1 code patterns |
-| **Domains — Archetypes** (10) | `domains/archetypes/*.md` | A0 semantic + code patterns |
+| **Domains — Interfaces** (9) | `domains/interfaces/{gui,http-api,cli,data-io,tui,mobile,library,embedded,grpc}.md` | S0 keywords + R1 code patterns |
+| **Domains — Concerns** (33) | `domains/concerns/*.md` | S0 keywords + R1 code patterns |
+| **Domains — Archetypes** (15) | `domains/archetypes/*.md` | A0 semantic + code patterns |
 | **Domains — Contexts** (1) | `domains/contexts/migration.md` | M0-M4 migration framework |
 | **Runtime** (6) | `runtime/*.md` | Cross-skill runtime modules |
 | **Reference** (1) | `reference/completion-report.md` | Auto-Report template (3 modes, 10 sections) |

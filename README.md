@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 13:31 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 17:47 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -971,15 +971,18 @@ The Domain Profile concept from [What It Solves](#domain-profile) is implemented
 ### Available Modules
 
 ```
-Interfaces (5):   gui, http-api, cli, data-io, tui
-Concerns (23):    auth, authorization, async-state, codegen, cqrs-eventsourcing,
+Interfaces (9):   gui, http-api, cli, data-io, tui, mobile, library, embedded, grpc
+Concerns (33):    auth, authorization, async-state, codegen, cqrs-eventsourcing,
                   dag-orchestration, distributed-consensus, ecs, external-sdk,
-                  hardware-io, i18n, infra-as-code, ipc, k8s-operator, llm-agents,
-                  message-queue, multi-tenancy, plugin-system, polyglot,
-                  protocol-integration, realtime, task-worker, wire-protocol
-Archetypes (10):  ai-assistant, browser-extension, database-engine, game-engine,
-                  infra-tool, message-broker, microservice, network-server,
-                  public-api, sdk-framework
+                  graceful-lifecycle, gpu-compute, hardware-io, i18n, infra-as-code,
+                  ipc, k8s-operator, llm-agents, message-queue, multi-tenancy,
+                  observability, plugin-system, polyglot, protocol-integration,
+                  realtime, resilience, connection-pool, task-worker, wire-protocol,
+                  webrtc, tls-management, schema-registry, cryptography, udp-transport
+Archetypes (15):  ai-assistant, browser-extension, cache-server, compiler,
+                  database-engine, game-engine, infra-tool, inference-server,
+                  media-server, message-broker, microservice, network-server,
+                  public-api, sdk-framework, workflow-engine
 Foundations (21): electron, nextjs, express, django, spring-boot, tauri, ...
 Scenarios (4):    greenfield, rebuild, incremental, adoption
 ```
@@ -1040,8 +1043,8 @@ Projects built on specific frameworks (Electron, Express, Next.js, etc.) have in
 Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library)
    │
    ├── Interface modules (gui, http-api, cli, data-io, tui)
-   ├── Concern modules (23: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
-   ├── Archetype modules (10: ai-assistant, browser-extension, database-engine, ...)
+   ├── Concern modules (33: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
+   ├── Archetype modules (15: ai-assistant, browser-extension, cache-server, compiler, ...)
    ├── Scenario (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: framework-specific guiding principles (distinct from F0–F6 checklists)

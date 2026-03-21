@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 13:31 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 17:47 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -973,26 +973,36 @@ Axis 1: Interface       Axis 2: Concern              Axis 3: Archetype       Axi
 (앱이 노출하는 것)       (횡단 관심사)                  (도메인 철학)             (프레임워크 제약)
 ├── http-api            ├── async-state               ├── ai-assistant        ├── electron
 ├── gui                 ├── auth                      ├── browser-extension   ├── nextjs
-├── cli                 ├── authorization             ├── database-engine     ├── express
-├── data-io             ├── codegen                   ├── game-engine         ├── django
-└── tui                 ├── cqrs-eventsourcing        ├── infra-tool          ├── spring-boot
-                        ├── dag-orchestration          ├── message-broker      └── ... (21개)
-                        ├── distributed-consensus      ├── microservice
-                        ├── ecs                        ├── network-server     Modifier: Scale
-                        ├── external-sdk               ├── public-api         (엄격도 수준)
-                        ├── hardware-io                └── sdk-framework      ├── prototype
-                        ├── i18n                                              ├── mvp
-                        ├── infra-as-code             Axis 5: Scenario        └── production
-                        ├── ipc                       (프로젝트 수명주기)       × solo / small-team
-                        ├── k8s-operator              ├── greenfield            / large-team
+├── cli                 ├── authorization             ├── cache-server        ├── express
+├── data-io             ├── codegen                   ├── compiler            ├── django
+├── tui                 ├── connection-pool           ├── database-engine     ├── spring-boot
+├── mobile              ├── cqrs-eventsourcing        ├── game-engine         └── ... (21개)
+├── library             ├── cryptography              ├── infra-tool
+├── embedded            ├── dag-orchestration         ├── inference-server   Modifier: Scale
+└── grpc                ├── distributed-consensus     ├── media-server       (엄격도 수준)
+                        ├── ecs                        ├── message-broker     ├── prototype
+                        ├── external-sdk               ├── microservice       ├── mvp
+                        ├── gpu-compute                ├── network-server     └── production
+                        ├── graceful-lifecycle          ├── public-api         × solo / small-team
+                        ├── hardware-io                ├── sdk-framework        / large-team
+                        ├── i18n                       └── workflow-engine
+                        ├── infra-as-code             Axis 5: Scenario
+                        ├── ipc                       (프로젝트 수명주기)
+                        ├── k8s-operator              ├── greenfield
                         ├── llm-agents                ├── rebuild
                         ├── message-queue             ├── incremental
                         ├── multi-tenancy             └── adoption
+                        ├── observability
                         ├── plugin-system
                         ├── polyglot
                         ├── protocol-integration
                         ├── realtime
+                        ├── resilience
+                        ├── schema-registry
                         ├── task-worker
+                        ├── tls-management
+                        ├── udp-transport
+                        ├── webrtc
                         └── wire-protocol
 ```
 
@@ -1071,9 +1081,9 @@ Domain Profile을 구축하는 방식은 새 프로젝트인지, 기존 코드�
 ```
 Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library)
    │
-   ├── Interface 모듈 (gui, http-api, cli, data-io, tui)
-   ├── Concern 모듈 (23: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
-   ├── Archetype 모듈 (10: ai-assistant, browser-extension, database-engine, ...)
+   ├── Interface 모듈 (gui, http-api, cli, data-io, tui, mobile, library, embedded, grpc)
+   ├── Concern 모듈 (33: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
+   ├── Archetype 모듈 (15: ai-assistant, browser-extension, cache-server, compiler, ...)
    ├── Scenario (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: 프레임워크 고유 가이드 원칙 (F0–F6 체크리스트와 구별)
