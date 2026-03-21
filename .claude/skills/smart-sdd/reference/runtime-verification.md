@@ -23,6 +23,7 @@ Available verification backends, detection method, and capabilities.
 | **SMTP Client** | `which swaks` or `curl --version` (curl supports SMTP) | SMTP EHLO, send email, TLS negotiation | 1 (for email) |
 | **Redis Client** | `which redis-cli` | GET/SET/DEL, PUB/SUB, TTL, data structure ops | 1 (for RESP protocol) |
 | **Broker CLI** | `which nats` or `which rabbitmqadmin` (broker-specific) | Pub/sub, queue inspection, consumer group management | 1 (for message brokers) |
+| **Mobile Test Runner** | `which maestro` or `npx appium --version` | Mobile app launch, tap/swipe/scroll, element assertion, screenshot comparison | 1 (for mobile) |
 
 ---
 
@@ -39,7 +40,7 @@ Maps each interface type (from sdd-state.md Domain Profile → Interfaces) to it
 | **data-io** | Pipeline prerequisite setup (data fixtures, configs) | Run pipeline with test data, compare output | Cleanup test artifacts | Pipeline Runner | demo --ci |
 | **grpc** | Server: `go run` / `cargo run` / `python -m` | grpcurl unary/stream calls, verify status codes + response messages | Kill server process | gRPC Client | cli-auto (grpc-health-probe) |
 | **tui** | Terminal: run in pseudo-terminal (pty) | Key input → screen scrape → verify output | Kill process | Process Runner | demo --ci |
-| **mobile** | Emulator/device (platform-specific) | Appium/Maestro commands | Stop emulator | Process Runner | user-assisted |
+| **mobile** | Emulator/device: `emulator -avd test` (Android) or iOS Simulator | Maestro flows or Appium commands for tap/swipe/assert | Kill emulator | Mobile Test Runner | Process Runner → user-assisted |
 | **library** | N/A (per-invocation via import) | Import + call API + verify return value | N/A | Process Runner | demo --ci |
 | **embedded** | Flash/deploy to target (or simulator) | Serial/JTAG output capture, GPIO state | Power cycle / reset | Process Runner | user-assisted |
 

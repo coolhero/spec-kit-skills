@@ -56,6 +56,20 @@
 | schema-registry | `concerns/schema-registry.md` | Schema evolution and registry (Protobuf, Avro, JSON Schema) | message-queue, grpc, codegen |
 | cryptography | `concerns/cryptography.md` | Cryptographic primitives (key exchange, encryption, signatures) | wire-protocol, tls-management, auth |
 | udp-transport | `concerns/udp-transport.md` | UDP datagram networking (DNS, QUIC, game net, media) | wire-protocol, network-server (archetype) |
+| media-streaming | `concerns/media-streaming.md` | HLS/DASH adaptive streaming, transcoding, RTMP ingest | realtime, gpu-compute |
+| geospatial | `concerns/geospatial.md` | Spatial indexing, geo-fencing, map tiles, geocoding | http-api, data-io |
+| compliance | `concerns/compliance.md` | Regulatory frameworks (HIPAA, PCI-DSS, GDPR, SOX) | auth, authorization, audit-logging |
+| payment-processing | `concerns/payment-processing.md` | Payment gateway integration, idempotency, refunds | auth, cryptography, compliance |
+| offline-sync | `concerns/offline-sync.md` | Offline-first storage, sync queues, conflict resolution | async-state, mobile |
+| search-engine | `concerns/search-engine.md` | Full-text search, inverted indexes, relevance scoring | http-api, data-io |
+| stream-processing | `concerns/stream-processing.md` | Windowing, watermarks, exactly-once, checkpointing | message-queue, data-io |
+| audit-logging | `concerns/audit-logging.md` | Immutable audit trails, tamper-proof event logging | auth, compliance, observability |
+| content-moderation | `concerns/content-moderation.md` | Text/image/video moderation, review queues, appeals | auth, llm-agents |
+| push-notification | `concerns/push-notification.md` | FCM/APNS/WNS, topic subscription, delivery tracking | mobile, message-queue |
+| iot-protocol | `concerns/iot-protocol.md` | MQTT/CoAP/LwM2M, device management, telemetry | wire-protocol, embedded |
+| speech-processing | `concerns/speech-processing.md` | STT/TTS, VAD, speaker diarization | gpu-compute, external-sdk |
+| simulation-engine | `concerns/simulation-engine.md` | Physics/DES, time-stepping, deterministic replay | gpu-compute, data-io |
+| scheduling-algorithm | `concerns/scheduling-algorithm.md` | Task scheduling, resource allocation, constraint solving | task-worker, distributed-consensus |
 
 ## Archetypes
 
