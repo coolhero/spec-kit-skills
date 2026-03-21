@@ -14,6 +14,9 @@
 | cli | `interfaces/cli.md` | Command-line tools, shell commands | — |
 | data-io | `interfaces/data-io.md` | Data pipelines, ETL, batch/stream processing | dag-orchestration |
 | tui | `interfaces/tui.md` | Terminal UI (Ink, bubbletea, Ratatui) | — |
+| mobile | `interfaces/mobile.md` | Mobile apps (iOS, Android, cross-platform) | auth, async-state, realtime |
+| library | `interfaces/library.md` | Libraries/SDKs consumed via import/linking | plugin-system |
+| embedded | `interfaces/embedded.md` | Embedded systems, firmware, IoT, RTOS | hardware-io, wire-protocol |
 
 ## Concerns
 
@@ -42,6 +45,11 @@
 | realtime | `concerns/realtime.md` | WebSocket, SSE, live updates | gui, http-api |
 | task-worker | `concerns/task-worker.md` | Background jobs, scheduled tasks | message-queue |
 | wire-protocol | `concerns/wire-protocol.md` | Binary protocols (MQTT, AMQP, RESP, WebRTC, RTMP) | network-server (archetype), message-broker (archetype) |
+| graceful-lifecycle | `concerns/graceful-lifecycle.md` | Server lifecycle (health checks, graceful shutdown, connection draining) | http-api, microservice, network-server (archetype) |
+| observability | `concerns/observability.md` | Structured logging, metrics, distributed tracing | http-api, microservice |
+| gpu-compute | `concerns/gpu-compute.md` | GPU/accelerator programming (CUDA, inference, compute shaders) | data-io, network-server (archetype) |
+| resilience | `concerns/resilience.md` | Retry, circuit breaker, backpressure, timeout management | http-api, microservice, external-sdk |
+| connection-pool | `concerns/connection-pool.md` | Connection/resource pool management (DB, HTTP, gRPC pools) | http-api, database-engine (archetype) |
 
 ## Archetypes
 
@@ -57,6 +65,7 @@
 | network-server | `archetypes/network-server.md` | Proxies, load balancers, L4/L7 servers | — |
 | public-api | `archetypes/public-api.md` | External-facing API platforms | http-api |
 | sdk-framework | `archetypes/sdk-framework.md` | Libraries, SDKs, and frameworks consumed by other developers | cli, http-api |
+| compiler | `archetypes/compiler.md` | Compilers, interpreters, language servers, linters, formatters | cli, library |
 
 ## Contexts
 
@@ -76,6 +85,10 @@
 | cli-tool | cli | — | — |
 | ml-platform | http-api, cli, data-io | plugin-system, auth | — |
 | sdk-library | cli | plugin-system | sdk-framework |
+| mobile-app | mobile | auth, async-state, realtime | — |
+| embedded-system | embedded | hardware-io | — |
+| compiler-tool | cli | codegen, plugin-system | compiler |
+| inference-server | http-api | gpu-compute, graceful-lifecycle, observability | — |
 
 ## Module File Structure
 
