@@ -205,7 +205,9 @@ Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skil
 
 **Step 0c. spec-kit project init check**: Look for `.claude/skills/speckit-specify/SKILL.md`. If not found → `specify init --here --ai claude --force --no-git --ai-skills`. If skills aren't registered in current session, use Skill Invocation Fallback (see [pipeline.md](commands/pipeline.md)).
 
-**Step 1. roadmap.md check** (skip for `init` and `status`): Verify `roadmap.md` exists at BASE_PATH. If not found → suggest `/smart-sdd init` or `/reverse-spec`.
+**Step 1. roadmap.md check** (skip for `init` and `status`): Verify `roadmap.md` exists at BASE_PATH. If not found:
+- **If command is `adopt`**: Auto-run `/reverse-spec . --adopt --lang {current lang}` inline (read `reverse-spec/SKILL.md` → `commands/analyze.md` → execute Phase 0–4). The `--adopt` flag forces `--scope full --stack same` and skips Phase 0 questions (scope, stack, rename), so no user interaction is needed before analysis begins. After reverse-spec completes, continue with the adopt pipeline.
+- **Otherwise**: suggest `/smart-sdd init` or `/reverse-spec`.
 
 **Additional rules**: `add` requires roadmap + registries + sdd-state.md. `status` without sdd-state.md → "No project initialized yet". BASE_PATH is relative to CWD.
 

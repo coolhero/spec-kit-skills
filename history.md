@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-21] adopt Auto-chains reverse-spec When Artifacts Missing
+
+### What Changed
+
+- **smart-sdd/SKILL.md Step 1**: When command is `adopt` and `roadmap.md` is not found, auto-run `/reverse-spec . --adopt --lang {lang}` inline instead of just suggesting it. The `--adopt` flag forces `--scope full --stack same` and skips all Phase 0 questions, so the user goes straight from `/smart-sdd adopt --lang ko` to analysis without any intermediate prompts.
+
+### Why
+
+Users expect `/smart-sdd adopt` to be a single command that handles everything. Requiring a separate `/reverse-spec` invocation first breaks the workflow and confuses users — "adopt" implies "take this code as-is", which should include the analysis step automatically.
+
+---
+
 ## [2026-03-21] Complete Domain Module Parity — 13 smart-sdd Stubs Added
 
 ### What Changed
