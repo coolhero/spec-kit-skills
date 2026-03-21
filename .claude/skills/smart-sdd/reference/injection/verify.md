@@ -3,6 +3,8 @@
 > Per-command injection rules for `/smart-sdd verify [FID]`.
 > For shared patterns (HARD STOP, Checkpoint, Missing/Sparse Content Handling), see [context-injection-rules.md](../context-injection-rules.md).
 > For the full verification workflow (Phase 1-4 execution details), see [verify-phases.md](../../commands/verify-phases.md).
+>
+> **Conditional loading**: Read [verify-preflight.md](../../commands/verify-preflight.md) ONLY when Domain Profile includes `gui` interface. For non-GUI projects (http-api, cli, data-io only), skip preflight entirely — Playwright probe is unnecessary.
 
 ---
 

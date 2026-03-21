@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-03-21] Context Optimization: Lazy-load Degradation Table + Budget Protocol
+
+### What Changed
+
+- **context-injection-rules.md**: Extracted 2 sections (~160 lines) into dedicated lazy-loaded files:
+  - `context-injection-degradation.md` (56-row Missing/Sparse Content Handling table)
+  - `context-injection-budget.md` (Priority tiers, overflow protocol, size heuristics)
+- **injection/verify.md**: Added GUI-only conditional for verify-preflight.md loading. Non-GUI projects skip Playwright probe (saves ~196 lines).
+- Main file reduced from 344 → ~210 lines. Extracted files are only read when needed.
+
+### Why
+
+context-injection-rules.md is loaded for EVERY pipeline command. The degradation table (56 rows) is only relevant when artifacts are missing — most pipeline runs have all artifacts. The budget protocol is only relevant under context pressure. Separating these saves ~800 tokens/invocation on the standard path. verify-preflight.md (196 lines of Playwright detection) is irrelevant for non-GUI projects, saving ~1000 tokens for API/CLI/data projects.
+
+---
+
 ## [2026-03-21] adopt Auto-chains reverse-spec When Artifacts Missing
 
 ### What Changed

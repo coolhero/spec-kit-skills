@@ -1,7 +1,7 @@
 # File Map — spec-kit-skills
 
 > Complete file inventory + relationship diagrams for the spec-kit-skills project.
-> **255 files** (248 .md + 7 .sh) across 4 skills + 1 shared module.
+> **257 files** (250 .md + 7 .sh) across 4 skills + 1 shared module.
 
 ---
 
@@ -51,7 +51,7 @@ graph TB
         SS_SKILL["SKILL.md"]
         SS_CMD["commands/ (16)"]
         SS_DOM["domains/ (54)"]
-        SS_REF["reference/ (24)"]
+        SS_REF["reference/ (26)"]
         SS_SCR["scripts/ (7)"]
     end
 
@@ -237,7 +237,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | **Reference** (1) | `reference/speckit-compatibility.md` | reverse-spec → spec-kit command mapping |
 | **Templates** (10) | `templates/*.md` | Artifact templates: roadmap, constitution-seed, entity/api/business-logic registries, coverage-baseline, pre-context, spec-draft, speckit-prompt, stack-migration |
 
-### smart-sdd (102 files)
+### smart-sdd (104 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
@@ -272,7 +272,9 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | **Domains — Profiles** (6) | `domains/profiles/{fullstack-web,web-api,desktop-app,cli-tool,ml-platform,sdk-library}.md` | Pre-configured axis combinations |
 | **Domains — Scenarios** (4) | `domains/scenarios/{greenfield,rebuild,incremental,adoption}.md` | Scenario-specific pipeline rules |
 | **Reference** | | |
-| `reference/context-injection-rules.md` | Master injection rules — loading order, graceful degradation |
+| `reference/context-injection-rules.md` | Master injection rules — loading order, Scale/Cross-Concern enforcement |
+| `reference/context-injection-degradation.md` | Missing/Sparse artifact handling table (lazy-loaded) |
+| `reference/context-injection-budget.md` | Context budget protocol — priority tiers, overflow, heuristics (lazy-loaded) |
 | `reference/pipeline-integrity-guards.md` | 7 guards (G1-G7) for pipeline safety |
 | `reference/state-schema.md` | sdd-state.md schema definition |
 | `reference/cascading-update.md` | Cross-Feature cascading update rules |
