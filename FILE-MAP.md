@@ -1,7 +1,7 @@
 # File Map — spec-kit-skills
 
 > Complete file inventory + relationship diagrams for the spec-kit-skills project.
-> **242 files** (235 .md + 7 .sh) across 4 skills + 1 shared module.
+> **255 files** (248 .md + 7 .sh) across 4 skills + 1 shared module.
 
 ---
 
@@ -50,7 +50,7 @@ graph TB
     subgraph "smart-sdd/"
         SS_SKILL["SKILL.md"]
         SS_CMD["commands/ (14)"]
-        SS_DOM["domains/ (30+)"]
+        SS_DOM["domains/ (43+)"]
         SS_REF["reference/ (16)"]
         SS_SCR["scripts/ (7)"]
     end
@@ -183,8 +183,8 @@ reverse-spec/domains/     ← Analysis rules (R3-R5)
 
 smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
   interfaces/ (5)           SC rules, elaboration probes, bug prevention
-  concerns/ (16)            SC rules, elaboration probes, bug prevention
-  archetypes/ (4)           Domain philosophy, elaboration probes
+  concerns/ (23)            SC rules, elaboration probes, bug prevention
+  archetypes/ (10)          Domain philosophy, elaboration probes
   profiles/ (6)             Pre-configured axis combinations
   scenarios/ (4)            greenfield, rebuild, incremental, adoption
   _resolver.md              7-step module loading order
@@ -237,7 +237,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | **Reference** (1) | `reference/speckit-compatibility.md` | reverse-spec → spec-kit command mapping |
 | **Templates** (10) | `templates/*.md` | Artifact templates: roadmap, constitution-seed, entity/api/business-logic registries, coverage-baseline, pre-context, spec-draft, speckit-prompt, stack-migration |
 
-### smart-sdd (72 files)
+### smart-sdd (85 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
@@ -267,8 +267,8 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `domains/app.md` | Domain Profile for execution (smart-sdd-specific) |
 | `domains/data-science.md` | Data science domain extensions (TODO scaffolding) |
 | **Domains — Interfaces** (5) | `domains/interfaces/{gui,http-api,cli,data-io,tui}.md` | SC rules, elaboration probes, bug prevention |
-| **Domains — Concerns** (16) | `domains/concerns/*.md` | SC rules, elaboration probes, bug prevention |
-| **Domains — Archetypes** (4) | `domains/archetypes/{ai-assistant,microservice,public-api,sdk-framework}.md` | Domain philosophy, elaboration probes |
+| **Domains — Concerns** (23) | `domains/concerns/*.md` | SC rules, elaboration probes, bug prevention |
+| **Domains — Archetypes** (10) | `domains/archetypes/*.md` | Domain philosophy (A1), SC extensions (A2), probes (A3), constitution (A4), brief criteria (A5) |
 | **Domains — Profiles** (6) | `domains/profiles/{fullstack-web,web-api,desktop-app,cli-tool,ml-platform,sdk-library}.md` | Pre-configured axis combinations |
 | **Domains — Scenarios** (4) | `domains/scenarios/{greenfield,rebuild,incremental,adoption}.md` | Scenario-specific pipeline rules |
 | **Reference** | | |

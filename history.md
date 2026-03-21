@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-21] Complete Domain Module Parity — 13 smart-sdd Stubs Added
+
+### What Changed
+
+- **7 smart-sdd concern stubs (NEW)**: `cqrs-eventsourcing.md`, `dag-orchestration.md`, `distributed-consensus.md`, `ecs.md`, `hardware-io.md`, `k8s-operator.md`, `wire-protocol.md` — each with S0 (cross-ref to shared), S1 (SC Generation Rules), S5 (Elaboration Probes), S7 (Bug Prevention).
+- **6 smart-sdd archetype stubs (NEW)**: `browser-extension.md`, `database-engine.md`, `game-engine.md`, `infra-tool.md`, `message-broker.md`, `network-server.md` — each with A0-A5 (Signal Keywords, Philosophy Principles, SC Extensions, Probes, Constitution Injection, Brief Criteria).
+- **FILE-MAP.md**: Updated counts — 242→255 files, concerns 16→23, archetypes 4→10.
+
+### Why
+
+12-check review identified that 7 concerns and 6 archetypes had shared domain files (S0/A0 signal keywords + R1 code patterns) but no corresponding smart-sdd pipeline files (S1/S5/S7 or A1-A5). This meant `smart-sdd init` could detect these domains but `specify`, `add`, and `pipeline` had no domain-specific rules to inject — SCs lacked domain guidance, elaboration probes were missing, and bug prevention rules were absent. Full parity ensures every detectable domain has complete pipeline support.
+
+---
+
 ## [2026-03-21] FILE-MAP.md — Dedicated File Inventory + Relationship Diagrams
 
 ### What Changed
