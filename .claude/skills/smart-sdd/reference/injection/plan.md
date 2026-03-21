@@ -268,7 +268,7 @@ When AI generates text that references external data sources, plan.md MUST inclu
 | 4. Filtering | Only cited results become citation blocks | `searchResults.filter(r => citedNums.has(r.refNumber))` | ❌ All search results → "5 refs" when AI only cited 2 |
 | 5. Renumbering | Display number assignment strategy | First-appearance order in text (not search rank order) | ❌ Search rank order → text [3] appears before [1] |
 | 6. Storage | Citation block data structure | `{ refNumber(display), originalRefNumber, filePath, text }` | ❌ Array index → breaks when citations reordered |
-| 7. Rendering | How numbers in text are transformed for display | Render-time `useMemo` (stored text untouched) | ❌ `updateBlock` to modify text → rendering corruption |
+| 7. Rendering | How numbers in text are transformed for display | Render-time memoization (stored text untouched; e.g., React `useMemo`, Vue `computed`, Svelte `$derived`) | ❌ Mutating stored text to renumber → rendering corruption |
 | 8. Interaction | Badge/link click behavior | `shell:openPath(filePath)` or `window.open(url)` | ❌ Raw DOM tooltip → layout shift, no rich preview |
 
 **🚫 BLOCKING**: If the Feature involves AI-referenced external data and plan.md lacks this pipeline → cannot approve plan.
@@ -277,9 +277,9 @@ When AI generates text that references external data sources, plan.md MUST inclu
 ```
 ❌ citations[num - 1]           → breaks when AI cites out of order
 ❌ all search results as refs   → "5 references" when only 2 were cited
-❌ updateBlock to renumber text → React state corruption + markdown parsing failure
+❌ mutating stored text to renumber → UI framework state corruption + markdown parsing failure
 ❌ inline DOM tooltip           → layout shift, no rich preview
-❌ useStore selector .filter()  → new array every render → infinite loop
+❌ store selector .filter()     → new array every render → infinite loop (React useMemo, Vue computed, Svelte $derived)
 ```
 
 ---

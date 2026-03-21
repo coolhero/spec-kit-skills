@@ -268,7 +268,7 @@ Scan the project's source files for micro-interaction patterns in 7 categories:
 
 **1. Hover Behaviors**:
 - CSS: grep for `:hover` pseudo-class rules → record which elements have hover styles and what changes (color, background, opacity, transform, box-shadow)
-- React/Vue: grep for `onMouseEnter`, `onMouseLeave`, `onMouseOver`, `@mouseenter`, `@mouseleave` → record handler target and behavior
+- Framework event handlers: grep for `onMouseEnter`, `onMouseLeave`, `onMouseOver` (React/Solid), `@mouseenter`, `@mouseleave` (Vue), `on:mouseenter`, `on:mouseleave` (Svelte), `(mouseenter)`, `(mouseleave)` (Angular), `addEventListener('mouseenter')` (vanilla) → record handler target and behavior
 - Tooltip components: grep for tooltip-related patterns:
   - Library usage: `<Tooltip`, `<Tippy`, `data-tooltip`, `data-tip`, `v-tooltip`
   - HTML native: `title=` attribute on interactive elements
@@ -277,7 +277,7 @@ Scan the project's source files for micro-interaction patterns in 7 categories:
 
 **2. Keyboard Shortcuts**:
 - Event listeners: grep for `addEventListener('keydown')`, `addEventListener('keyup')`, `addEventListener('keypress')`
-- React/Vue: grep for `onKeyDown`, `onKeyUp`, `@keydown`, `@keyup`
+- Framework event handlers: grep for `onKeyDown`, `onKeyUp` (React/Solid), `@keydown`, `@keyup` (Vue), `on:keydown`, `on:keyup` (Svelte), `(keydown)`, `(keyup)` (Angular)
 - Library usage: grep for keyboard shortcut libraries (hotkeys-js, mousetrap, react-hotkeys-hook, tinykeys, @mantine/hooks useHotkeys)
 - Global shortcuts: grep for `Mod+`, `Ctrl+`, `Meta+`, `Alt+`, `Shift+` key combinations in string literals
 - Record: `{ shortcut, scope (global/component), action, modifier keys }`
