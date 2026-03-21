@@ -481,16 +481,16 @@ Start: What needs to change?
 Do you already have SDD docs for this project?
   │
   ├─ YES (Case A) ─────────────────────────────────────────────────────────┐
-  │   Hotfix/Patch: /smart-sdd add → lightweight pipeline F00X            │
-  │   Minor/Major:  /smart-sdd add --gap → /smart-sdd pipeline F00X      │
-  │   Platform:     /smart-sdd add --gap → phased /smart-sdd pipeline    │
+  │   Hotfix/Patch: /smart-sdd add (auto-chains to pipeline)              │
+  │   Minor/Major:  /smart-sdd add --gap (auto-chains to pipeline)       │
+  │   Platform:     /smart-sdd add --gap (phased pipeline)               │
   │                                                                       │
   └─ NO (Case B) ──────────────────────────────────────────────────────────┐
       Hotfix: Targeted scan (affected component + callers) → fix → record │
-      Patch:  Partial adopt (affected scope) → add → pipeline             │
-      Minor:  Partial adopt (affected + adjacent) → add → pipeline        │
-      Major:  /reverse-spec --adopt → /smart-sdd adopt → add → pipeline   │
-      Platform: Full /reverse-spec → /smart-sdd adopt → add → pipeline    │
+      Patch:  Partial adopt (affected scope) → add                         │
+      Minor:  Partial adopt (affected + adjacent) → add                   │
+      Major:  /smart-sdd adopt → add                                      │
+      Platform: /smart-sdd adopt → add                                    │
 ```
 
 **Target Layers** (what is being changed — affects impact analysis depth):
@@ -518,11 +518,10 @@ Phase 1 — Rebuild:
 /reverse-spec ./old-source → /smart-sdd pipeline --all → /smart-sdd parity
 
 Phase 2 — Extend (now in incremental mode):
-/smart-sdd add                  → Define new Feature(s)
-/smart-sdd pipeline F00X        → Build new Feature(s)
+/smart-sdd add                  → Define + build new Feature(s)
 ```
 
-> After rebuild completes, the project is in **incremental mode**. Use `/smart-sdd add` freely — Origin stays `rebuild` but `add` and `pipeline` work transparently.
+> After rebuild completes, the project is in **incremental mode**. Use `/smart-sdd add` freely — it auto-chains to pipeline. Origin stays `rebuild` but `add` works transparently.
 
 ### S8: New Project
 
@@ -532,8 +531,8 @@ Goal: Build from scratch — no existing code.
 /smart-sdd init                          → Project setup + Domain Profile
   or: /smart-sdd init "task management app with Kanban boards"
   or: /smart-sdd init --prd requirements.md
-/smart-sdd add                           → Define Features via 6-Phase Briefing
-/smart-sdd pipeline --all                → Build all Features
+/smart-sdd add                           → Define + build Features
+                                           (Briefing → auto-chains to pipeline)
 ```
 
 ### S9: Explore → Decide
@@ -559,8 +558,8 @@ S1 (Explore) ──────────────────────�
 S2 (Spec Only) ──────────── adopt ─────────────── docs complete
 S3 (Extend) ─────────────── adopt → add ────┐
 S4 (Rebuild Same) ────────── pipeline ──────┤
-S5 (Rebuild New) ─────────── pipeline ──────┼──→ /smart-sdd add → pipeline (repeat)
-S6 (Modernize) ──────────── adopt → add ────┤
+S5 (Rebuild New) ─────────── pipeline ──────┼──→ /smart-sdd add (repeat)
+S6 (Modernize) ──────────── adopt → add ────┤     (auto-chains to pipeline)
 S7 (Rebuild+) ──────────── pipeline → add ──┤
 S8 (New Project) ─────────── init → add ────┤
 S9 (Explore→Decide) ──────── (any above) ───┘
