@@ -8,6 +8,8 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 # Smart-SDD: spec-kit Workflow Orchestrator
 
 > **⚠️ Known pitfalls**: See [`lessons-learned.md`](../../../lessons-learned.md) for 19 gap patterns + 46 specific lessons from real pipeline runs. Consult when hitting unexpected agent behavior.
+>
+> **📋 Known limitations**: See [`reference/known-limitations.md`](reference/known-limitations.md) for documented system limitations (L1-L7) with recovery paths — mid-step crash recovery, architecture pivot, concurrent development, monorepo support, etc.
 
 > **🚨 MANDATORY RULES — READ FIRST 🚨**
 >

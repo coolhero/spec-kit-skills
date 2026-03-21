@@ -270,7 +270,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | **Domains — Interfaces** (9) | `domains/interfaces/{gui,http-api,cli,data-io,tui,mobile,library,embedded,grpc}.md` | SC rules, elaboration probes, bug prevention |
 | **Domains — Concerns** (33) | `domains/concerns/*.md` | SC rules, elaboration probes, bug prevention |
 | **Domains — Archetypes** (15) | `domains/archetypes/*.md` | Domain philosophy (A1), SC extensions (A2), probes (A3), constitution (A4), brief criteria (A5) |
-| **Domains — Profiles** (11) | `domains/profiles/*.md` | Pre-configured axis combinations (6 files + 5 in _taxonomy.md pending) |
+| **Domains — Profiles** (15) | `domains/profiles/*.md` | Pre-configured axis combinations |
 | **Domains — Scenarios** (4) | `domains/scenarios/{greenfield,rebuild,incremental,adoption}.md` | Scenario-specific pipeline rules |
 | **Reference** | | |
 | `reference/context-injection-rules.md` | Master injection rules — loading order, Scale/Cross-Concern enforcement |
@@ -288,6 +288,8 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `reference/ui-testing-integration.md` | UI testing integration guide |
 | `reference/user-cooperation-protocol.md` | User cooperation protocol |
 | `reference/feature-elaboration-framework.md` | 6-perspective Feature evaluation |
+| `reference/archetype-verify-strategies.md` | Per-archetype verify extensions (start pre-conditions, health checks, SC categories) |
+| `reference/known-limitations.md` | Known limitations (L1-L7) with recovery paths |
 | **Injection Files** (11) | | |
 | `reference/injection/constitution.md` | Constitution step context injection |
 | `reference/injection/specify.md` | Specify step context injection |

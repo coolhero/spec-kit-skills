@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-03-22] S8 Verify Multi-Protocol Extension + Archetype Strategies + Known Limitations
+
+### What Changed
+
+Extended runtime verification from HTTP-only to 11 protocol backends. Added archetype-specific verify strategies and documented 7 known system limitations with recovery paths.
+
+**Runtime Verification**:
+- Backend Registry: 5 → 11 (+gRPC Client, WebSocket Client, DNS Client, SMTP Client, Redis Client, Broker CLI)
+- Interface-to-Backend Mapping: 4 → 9 (+grpc, tui, mobile, library, embedded)
+- Verification Protocols: §6a-6d → §6a-6f (+gRPC, +5 protocol-specific)
+- Preflight: +Step 2e (gRPC), +Step 2f (protocol clients)
+
+**New Files**:
+- `archetype-verify-strategies.md` — 15-archetype verify extension table (start pre-conditions, health overrides, SC category extensions, post-verify checks)
+- `known-limitations.md` — L1-L7 (mid-step crash, architecture pivot, Feature re-opening, CLI install, concurrent dev, monorepo, non-server patterns)
+
+**Profile Files**: 6 → 15 (created 9 missing: mobile-app, embedded-system, compiler-tool, inference-server, grpc-service, proxy-server, broker-server, cache-service, media-service)
+
+### Rationale
+
+25-type software simulation revealed 9/25 types were "mostly manual" for verify. Root causes: (1) S8 only on interfaces, not archetypes, (2) no non-HTTP backends, (3) "start→port→health" pattern assumed universal. Changes reduce mostly-manual from 9 to 5.
+
+---
+
 ## [2026-03-21] Documentation Update — Domain Module Count Sync
 
 ### What Changed
@@ -14,7 +38,7 @@ Updated documentation files to reflect current domain module counts across all 5
 - **Concerns**: 23 → 33 (added graceful-lifecycle, gpu-compute, observability, resilience, connection-pool, webrtc, tls-management, schema-registry, cryptography, udp-transport)
 - **Archetypes**: 10 → 15 (added cache-server, compiler, inference-server, media-server, workflow-engine)
 - **Cross-Concern Integration Rules**: 14 → 50
-- **Profiles**: 6 → 11 (6 profile files + 5 new entries in _taxonomy.md pending file creation)
+- **Profiles**: 6 → 15
 
 ### Files Modified
 - `ARCHITECTURE-EXTENSIBILITY.md` — Level 2 status table (14 → 50 rules)
