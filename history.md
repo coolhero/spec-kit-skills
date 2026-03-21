@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-21] Auto-Chaining Consistency: add→pipeline, trace batch mode
+
+### What Changed
+
+- **add.md**: Briefing 완료 후 HARD STOP에 "Run pipeline now" (Recommended), "Add another Feature first", "Define only" 옵션 추가. 기존 "Approve and finalize" → "Next Steps" 안내만 하던 패턴 제거. `add`가 자연스럽게 `pipeline`으로 이어지는 흐름.
+- **adopt.md, pipeline.md**: Post-completion summary의 `add` 설명을 "Define + build" (auto-chains to pipeline)로 통일.
+- **code-explore/trace.md**: Step 7 HARD STOP에 "Complete all remaining traces (N left)" 옵션 추가. 미탐색 주제를 중간 멈춤 없이 순차 실행.
+
+### Why
+
+일관성 문제: `adopt`는 `reverse-spec`을 자동 체이닝하고, `init` Proposal Mode는 `add→pipeline`을 자동 체이닝하는데, `add` 단독 실행은 정의만 하고 멈춤. 사용자가 매번 `/smart-sdd pipeline`을 따로 쳐야 했음. 동일 논리로 `code-explore trace`도 매 trace마다 멈추는 대신 일괄 실행 옵션 제공.
+
+---
+
 ## [2026-03-21] Revisiting Completed Feature — Branch Management for Step-Back
 
 ### What Changed

@@ -257,6 +257,7 @@ If T ≥ 5 AND coverage ≥ 50% (and nudge not shown twice already):
 ### Step 7 — Next Action (HARD STOP)
 
 AskUserQuestion:
+- **"Complete all remaining traces ({N} left)"** → Auto-execute traces for ALL remaining recommended topics from `orientation.md` § Recommended Exploration Topics. Process sequentially without stopping between traces — each trace follows Steps 1-6, then immediately starts the next topic. Display a brief one-line summary after each trace (`✅ Trace {NNN}: {topic} — {entities} entities, {apis} APIs`). After all traces complete, show the full summary and offer synthesis. This option appears ONLY when orientation.md has recommended topics with untouched modules (coverage < 100%).
 - **"Continue this trace"** → Continue exploring the **same topic**. Append new steps, entities, snippets to the current trace file (do NOT create a new file). Useful when the user wants to go deeper into a sub-flow discovered during this trace. When invoked via CLI as `trace --continue [NNN]`, read trace NNN and append. If NNN is omitted, use the most recent trace.
 - **"Trace another flow"** → Ask for the next topic. Creates a new trace file (NNN+1).
 - **"Explore deeper into [specific part]"** → Start a new trace focused on a specific sub-flow. Add `Related: {current trace}` to the new trace. Useful when the sub-flow is a distinct topic.

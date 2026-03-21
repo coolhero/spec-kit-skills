@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 13:01 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 13:31 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -426,8 +426,8 @@ Step 1 — Document existing code:
 /smart-sdd adopt                → Auto-runs reverse-spec + Document existing Features
 
 Step 2 — Add new features:
-/smart-sdd add                  → Define new Feature(s) via 6-Phase Briefing
-/smart-sdd pipeline F00X        → Build new Feature(s) on top of existing code
+/smart-sdd add                  → Define + build new Feature(s)
+                                  (Briefing → auto-chains to pipeline)
 ```
 
 ### S4: Rebuild (Same Stack)

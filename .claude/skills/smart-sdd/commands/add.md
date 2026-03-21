@@ -884,17 +884,18 @@ Update `specs/add-draft.md` with Demo Group assignment.
   Updated: roadmap.md (Feature Catalog, Dependency Graph, Demo Groups)
   Updated: sdd-state.md (Feature Progress, SBI Coverage, Demo Group Progress)
   Deleted: specs/add-draft.md
-
-── Next Steps ───────────────────────────────────
-  /smart-sdd specify F009     — Start specifying the new Feature
-  /smart-sdd pipeline         — Resume pipeline (picks up from first pending)
-
 ──────────────────────────────────────────────────
 ```
 
-**HARD STOP** — Use AskUserQuestion with options: "Approve and finalize", "Request modifications". **If response is empty → re-ask** (per MANDATORY RULE 1).
+**HARD STOP** — Use AskUserQuestion with options:
+- **"Run pipeline now"** (Recommended) → Finalize artifacts, then auto-chain to `pipeline.md` for the newly defined Feature(s). The user does NOT need to type a separate `/smart-sdd pipeline` command. Pipeline runs specify → plan → tasks → implement → verify → merge for each new Feature.
+- **"Add another Feature first"** → Finalize current Feature, then loop back to Phase 1 for the next Feature. After the last Feature is defined, offer "Run pipeline now" again.
+- **"Define only — I'll run pipeline later"** → Finalize artifacts and stop. User runs `/smart-sdd pipeline` manually later.
+- **"Request modifications"** → Loop back to the relevant Phase (user indicates which aspect to change).
+**If response is empty → re-ask** (per MANDATORY RULE 1).
 
-If "Request modifications": loop back to the relevant Phase (user indicates which aspect to change).
+If "Run pipeline now": proceed directly to `pipeline.md` execution for the newly added Feature(s). This is the default recommended flow — `add` defines WHAT to build, `pipeline` builds it.
+If "Add another Feature first": repeat Phases 1-6 for the next Feature, then present the same options again.
 
 ---
 
