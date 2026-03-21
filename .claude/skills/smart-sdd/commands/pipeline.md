@@ -338,8 +338,46 @@ Running `/smart-sdd pipeline` processes **one Feature at a time** by default. Us
 /smart-sdd pipeline F003 --start verify    → F003, from verify
 /smart-sdd pipeline --all                  → all eligible Features (batch)
 /smart-sdd pipeline --all --start verify   → all eligible Features, from verify
+/smart-sdd pipeline F001 --step specify,plan → run only specified steps
+/smart-sdd pipeline merge F003 F004        → merge two Features into one
 /smart-sdd constitution                    → finalize constitution (standalone)
 ```
+
+### merge Sub-command
+
+**Usage**: `pipeline merge F003 F004` — Merge two Features into one.
+
+**Flow**:
+1. Read both Features' spec.md, plan.md, tasks.md
+2. AskUserQuestion: "Which Feature ID should be the target? (the other will be absorbed)"
+3. Merge SCs from absorbed Feature into target Feature's spec.md
+4. Merge plan sections
+5. Merge task lists
+6. Update sdd-state.md: remove absorbed Feature, update target Feature
+7. Update roadmap.md: remove absorbed Feature entry
+8. If either Feature has implementation: warn user about code merge needed
+9. HARD STOP: "Merge complete. Review the merged spec?" **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+**Safeguards**:
+- Cannot merge Features in different tiers
+- Cannot merge if one Feature depends on the other (dependency, not overlap)
+- Both Features must be in the same pipeline stage or earlier
+
+### --step Flag
+
+**Usage**: `pipeline F001 --step specify,plan` — Run only the specified pipeline steps.
+
+**Valid steps**: `specify`, `plan`, `tasks`, `implement`, `verify`
+
+**Behavior**:
+- Only runs the listed steps in order
+- Skips unlisted steps entirely
+- sdd-state.md records the completed steps normally
+- If a step depends on a prior step's output (e.g., `plan` needs `spec.md`), and that prior step hasn't been run and no artifact exists, show error: "Cannot run {step}: {dependency} not found. Run {prior step} first."
+- Common use cases:
+  - `--step specify` — Generate spec only (documentation purpose)
+  - `--step specify,plan` — Spec + architecture plan without implementation
+  - `--step verify` — Re-run verification only
 
 ### Regression-Implement Protocol (`--start specify` or `--start plan`)
 

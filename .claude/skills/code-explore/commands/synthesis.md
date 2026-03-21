@@ -37,6 +37,29 @@ If explore artifacts are in a **different directory** from where the user wants 
 
 ## Synthesis Process
 
+### Comparison Mode
+
+If the user has explored multiple projects (multiple `specs/explore/` directories exist across different paths), synthesis can operate in **comparison mode**:
+
+1. Locate all `specs/explore/orientation.md` files across explored projects
+2. For each project, extract: tech stack, Domain Profile, module map, entity list, API list
+3. Generate a comparison table:
+
+| Aspect | Project A | Project B |
+|--------|----------|----------|
+| **Tech Stack** | {stack A} | {stack B} |
+| **Domain Profile** | {profile A} | {profile B} |
+| **Modules** | {count A} | {count B} |
+| **Entities** | {list A} | {list B} |
+| **Shared Patterns** | {patterns found in both} | — |
+| **Unique to A** | {A-only patterns} | — |
+| **Unique to B** | — | {B-only patterns} |
+
+4. Highlight architectural differences and similarities
+5. If handoff follows, recommend which patterns to adopt from each project
+
+This mode activates automatically when synthesis detects exploration artifacts from more than one target directory.
+
 ### Step 1 — Read All Traces
 
 Read every `specs/explore/traces/*.md` file and extract structured data:

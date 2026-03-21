@@ -60,9 +60,21 @@ If `sdd-state.md` already exists, verify Origin is `adoption`. If Origin is diff
 Continue with current origin, or update to adoption?
 ```
 
+### Step 1b — Argument Parsing
+
+| Argument | Effect |
+|----------|--------|
+| `--lang <code>` | Set artifact language (default: `en`). Stored in sdd-state.md. |
+| `--from-explore <path>` | Use exploration artifacts to enrich adoption. |
+| `--scope <path>` | Limit adoption to a specific subdirectory (e.g., `--scope services/api`). Passed through to reverse-spec as target path. sdd-state.md records the scope for future pipeline runs. |
+
 ### Step 2 — Source Path verification
 
-Source Path for adoption is always `.` (CWD). Verify the current directory contains source code:
+Source Path for adoption is determined by `--scope`:
+- If `--scope <path>` is provided, Source Path = the specified subdirectory (relative to CWD). Verify the subdirectory exists within the current directory.
+- If no `--scope`, Source Path = `.` (CWD).
+
+Verify the source path contains source code:
 - Check for common project markers: `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `pom.xml`, `src/`, `app/`
 - If no markers found, warn and ask for confirmation
 

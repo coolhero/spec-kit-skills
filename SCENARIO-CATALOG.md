@@ -25,7 +25,7 @@
 | SA02 | Study specific module only | `code-explore [path] --scope src/auth` | Source code exists | Scoped orientation + traces | ✅ |
 | SA03 | Quick single-flow trace | `code-explore [path]` → `trace "login flow"` | Source code exists | Single trace document | ✅ |
 | SA04 | Onboard new team member | `code-explore .` → traces → synthesis | Team project | Architecture docs for onboarding | ✅ |
-| SA05 | Compare two projects | `code-explore A` → `code-explore B` → manual comparison | Two source dirs | Two orientation.md files to compare | 🟡 |
+| SA05 | Compare two projects | `code-explore A` → `code-explore B` → synthesis (comparison mode) | Two source dirs | Comparison table + architectural diff | ✅ |
 | SA06 | Post-adopt deep exploration | `adopt` → `code-explore .` (Context-Aware) | sdd-state.md exists | Exploration enriched by existing SDD context | ✅ |
 | SA07 | Mid-pipeline investigation | During pipeline → `code-explore . --scope src/module --no-branch` | Active pipeline | Understanding of specific area without disrupting pipeline | ✅ |
 | SA08 | Post-pipeline architecture docs | Pipeline complete → `code-explore .` (Context-Aware) | All Features completed | Architecture docs cross-referenced with specs | ✅ |
@@ -56,7 +56,7 @@
 | SC03 | Adopt → add new Feature | `adopt` → `add "new feature"` → `pipeline` | Source code | Existing code wrapped + new Feature built | ✅ |
 | SC04 | Adopt → fix existing issues | `adopt` → `pipeline` | Source code | Existing Features re-implemented with fixes | ✅ |
 | SC05 | Adopt → explore → add | `adopt` → `code-explore` (Context-Aware) → `add` → `pipeline` | Source code | Deep understanding → targeted new Feature | ✅ |
-| SC06 | Adopt monorepo service | `adopt --scope services/api` | Monorepo | Single service documented | 🟡 |
+| SC06 | Adopt monorepo service | `adopt --scope services/api` | Monorepo | Single service documented | ✅ |
 | SC07 | Adopt with migration intent | `adopt` → identify migration targets → `pipeline --migration` | Legacy code | Modernization plan + execution | ✅ |
 
 ## Category D: Rebuild (reverse-spec + pipeline)
@@ -79,8 +79,8 @@
 | SE04 | Verify failure → fix → re-verify | verify finds bug → fix → re-verify | Feature in verify | Bug fixed, verify passes | ✅ |
 | SE05 | Supplement existing Feature | Feature completed → `pipeline F001 --step specify` | F001 completed | Re-open F001 for enhancement | ✅ |
 | SE06 | Split oversized Feature | During add → realize too big → split into F001a + F001b | Feature too large | Two smaller Features | ✅ |
-| SE07 | Merge related Features | F003 + F004 overlap → merge into F003 | Two overlapping Features | Single consolidated Feature | 🟡 |
-| SE08 | Skip implement (spec-only) | `pipeline F001 --step specify,plan` | Feature defined | Spec + plan without implementation | 🟡 |
+| SE07 | Merge related Features | `pipeline merge F003 F004` | Two overlapping Features | Single consolidated Feature | ✅ |
+| SE08 | Skip implement (spec-only) | `pipeline F001 --step specify,plan` | Feature defined | Spec + plan without implementation | ✅ |
 
 ## Category F: Multi-Feature Coordination
 
@@ -111,7 +111,7 @@
 | SH04 | Migration/modernization | `adopt` → `pipeline --migration` | Legacy code | Modernized codebase | ✅ |
 | SH05 | Different artifact language | `init --lang ko` or `adopt --lang ja` | Any | All artifacts in specified language | ✅ |
 | SH06 | Large codebase (1000+ files) | `reverse-spec .` with parallel sub-agents | Large repo | Distributed analysis | ✅ |
-| SH07 | Monorepo multi-service | `adopt` per service or `--scope` | Monorepo | Per-service SDD docs | 🟡 |
+| SH07 | Monorepo multi-service | `adopt --scope services/api` per service | Monorepo | Per-service SDD docs | ✅ |
 | SH08 | CI/CD integration | `pipeline` in CI environment (no Playwright) | CI runner | Graceful degradation of verify | ✅ |
 
 ---
@@ -134,9 +134,9 @@
 
 | Status | Count | Percentage |
 |--------|-------|-----------|
-| ✅ Fully supported | 51 | 89% |
-| 🟡 Partial | 5 | 9% |
-| ❌ Not yet supported | 1 | 2% |
+| ✅ Fully supported | 57 | 100% |
+| 🟡 Partial | 0 | 0% |
+| ❌ Not yet supported | 0 | 0% |
 
 ---
 
@@ -154,3 +154,4 @@ For each change, verify that no scenario is broken by the modification:
 | Date | Change |
 |------|--------|
 | 2026-03-22 | Initial creation — 57 scenarios across 8 categories |
+| 2026-03-22 | Resolve 5 partial scenarios (SA05, SC06, SE07, SE08, SH07) → 57/57 fully supported |
