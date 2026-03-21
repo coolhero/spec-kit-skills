@@ -91,8 +91,7 @@
 | SF01 | Dependent Features (F002 needs F001) | `pipeline F001` → `pipeline F002` | F002 depends on F001 | F002 built on F001's foundation | ✅ |
 | SF02 | Independent parallel Features | `pipeline F001` → `pipeline F002` (no dependency) | No inter-dependency | Both built independently, merged to main | ✅ |
 | SF03 | Return to earlier Feature | F001+F002 done → `pipeline F001 --step specify` | F001 needs enhancement | F001 re-opened on fresh branch from main | ✅ |
-| SF04 | Cross-Feature entity sharing | F001 defines User → F002 uses User | Shared entity | entity-registry.md ensures consistency | ✅ |
-| SF05 | Feature dependency chain | F001 → F002 → F003 (linear) | Chain dependency | Pipeline respects order | ✅ |
+| SF04 | Cross-Feature entity sharing | F001 defines User → F002 uses User | Shared entity | Automatic — registry ensures consistency | ✅ |
 
 ## Category G: Coverage & Status
 
@@ -107,13 +106,10 @@
 
 | ID | Scenario | Flow | Precondition | Outcome | Status |
 |----|----------|------|-------------|---------|--------|
-| SH01 | Polyglot project | `init` with multiple languages detected | Multi-language codebase | polyglot + codegen concerns activated | ✅ |
 | SH02 | Plugin/extension development | `init --profile sdk-library` → add → pipeline | Framework exists | Plugin with extension points | ✅ |
 | SH04 | Migration/modernization | `adopt` → `pipeline --migration` | Legacy code | Modernized codebase | ✅ |
 | SH05 | Different artifact language | `init --lang ko` or `adopt --lang ja` | Any | All artifacts in specified language | ✅ |
-| SH06 | Large codebase (1000+ files) | `reverse-spec .` with parallel sub-agents | Large repo | Distributed analysis | ✅ |
 | SH07 | Monorepo multi-service | `adopt --scope services/api` per service | Monorepo | Per-service SDD docs | ✅ |
-| SH08 | CI/CD integration | `pipeline` in CI environment (no Playwright) | CI runner | Graceful degradation of verify | ✅ |
 
 ---
 
@@ -126,16 +122,16 @@
 | C: Adopt | 7 | Existing code documentation |
 | D: Rebuild | 5 | Full rewrite |
 | E: Pipeline Iteration | 10 | Revision, rollback, augmentation |
-| F: Multi-Feature | 5 | Cross-Feature coordination |
+| F: Multi-Feature | 4 | Cross-Feature coordination |
 | G: Coverage & Status | 4 | Monitoring |
-| H: Special Modes | 7 | Advanced use cases |
-| **Total** | **58** | |
+| H: Special Modes | 4 | Advanced use cases |
+| **Total** | **53** | |
 
 ### Coverage by Status
 
 | Status | Count | Percentage |
 |--------|-------|-----------|
-| ✅ Fully supported | 58 | 100% |
+| ✅ Fully supported | 53 | 100% |
 | 🟡 Partial | 0 | 0% |
 | ❌ Not yet supported | 0 | 0% |
 
