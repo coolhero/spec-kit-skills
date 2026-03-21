@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-21] FILE-MAP.md — Dedicated File Inventory + Relationship Diagrams
+
+### What Changed
+
+- **FILE-MAP.md (NEW)**: Created dedicated file with 6 sections — § 1 Architecture Overview (Mermaid), § 2 Pipeline Execution Flow, § 3 Domain Module Hierarchy, § 4 Complete File Inventory (242 files), § 5 Cross-Skill Dependencies, § 6 Injection Loading Order.
+- **README.md**: Removed ~280 lines of file tables, replaced with FILE-MAP.md link + directory structure overview.
+- **README.ko.md**: Same treatment, removed ~280 lines.
+- **CLAUDE.md**: Updated Post-Change Propagation Check (README → FILE-MAP.md for file inventory), Review Protocol Check 10 (README File Table → FILE-MAP Completeness).
+
+### Why
+
+README file tables (~330 lines, ~17% of content) distracted from the project introduction. File tables are contributor/extension reference material, not "what is this project" content. FILE-MAP.md adds Mermaid diagrams showing file relationships that flat tables cannot express. Single file for inventory eliminates EN/KO sync burden (file paths don't need translation).
+
+---
+
 ## [2026-03-21] Case-Study Skill Deprecated — Auto-Report Replaces Manual Invocation
 
 ### What Changed
