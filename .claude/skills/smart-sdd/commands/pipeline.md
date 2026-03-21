@@ -673,6 +673,9 @@ Display the batch plan:
    - If the `--start` step is already ✅ → **mark it 🔀 and re-execute**. This is the purpose of `--start` — force re-run from a specific step
    - Steps AFTER `--start` that were already ✅ are also re-executed (marked 🔀)
 
+   **Branch handling for already-merged Features** (when Feature status is `completed` or `adopted`):
+   🚫 BLOCKING — If the target Feature was already merged to main, the old Feature branch is stale. **Always create a fresh branch from current main** (delete old branch if it exists). See [`branch-management.md`](../reference/branch-management.md) § Revisiting a Completed Feature. This ensures the branch has ALL other Features' code, not just the original Feature's code.
+
    **Cross-Feature Impact Analysis** (when `--start specify` or `--start plan`):
    After the re-executed step completes and BEFORE cascading downstream within this Feature, run the Impact Analysis Protocol from [`cascading-update.md`](../reference/cascading-update.md) § Cross-Feature Impact Analysis Protocol. This checks whether the spec/plan change affects entities or APIs that other Features reference, and lets the user choose which downstream Features to mark for re-run. Skip Impact Analysis for `--start tasks` or later (no public interface change).
 
