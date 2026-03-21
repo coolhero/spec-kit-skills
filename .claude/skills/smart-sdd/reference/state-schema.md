@@ -12,7 +12,7 @@ Before reading sdd-state.md, validate:
 1. File exists and is valid markdown
 2. **State Schema Version** field present (missing = v1.0 legacy)
 3. Required header fields present: Project, Origin, Domain Profile
-4. Feature Progress table has correct column count (9 columns)
+4. Feature Progress table has correct column count (10 columns for full scope, 11 for core scope with Tier column)
 5. All Feature IDs in progress table match Feature Mapping table
 6. No duplicate Feature IDs
 

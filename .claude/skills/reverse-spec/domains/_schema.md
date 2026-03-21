@@ -2,7 +2,7 @@
 
 > Defines the section schema for domain modules used during reverse-spec analysis.
 > Every module (interface, concern) follows this schema. Omit sections that don't apply.
-> For smart-sdd module sections (S1-S7), see `../smart-sdd/domains/_schema.md`.
+> For smart-sdd module sections (S0-S9), see `../smart-sdd/domains/_schema.md`.
 
 ---
 

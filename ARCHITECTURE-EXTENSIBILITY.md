@@ -48,7 +48,7 @@ Every module type exists in **two skills** with complementary roles:
 | Skill | Purpose | Section Schema | Module Role |
 |-------|---------|---------------|-------------|
 | **reverse-spec** | Analysis (extract from existing code) | R1–R6 (interfaces/concerns), A0–A1 (archetypes) | Detection signals, extraction axes, philosophy extraction |
-| **smart-sdd** | Execution (build new/rebuilt code) | S0–S8 (interfaces/concerns), A0–A4 (archetypes) | SC generation, elaboration probes, verification, constitution injection |
+| **smart-sdd** | Execution (build new/rebuilt code) | S0–S9 (interfaces/concerns), A0–A5 (archetypes) | SC generation, elaboration probes, verification, constitution injection |
 
 When adding a new module, you create files in **both** skills — they have different section schemas but cover the same domain concept.
 
@@ -680,7 +680,7 @@ Modules evolve through 5 levels of sophistication. This model helps prioritize i
 - Fill R1/R3 for all reverse-spec modules
 - Fill S0/S1/S5/S8 for all smart-sdd interface modules
 - Fill S0/S1/S5/S7 for all smart-sdd concern modules
-- Fill A0–A4 / A0–A1 for all archetype modules
+- Fill A0–A5 / A0–A1 for all archetype modules
 - Fill F0–F4 for all Foundation files (currently: react-native, flutter are TODO)
 
 **Metric**: `(filled sections) / (total required sections)` across all modules.
@@ -818,9 +818,9 @@ Which files touch which concepts — use this when modifying a concept to find a
 | Concept | Files |
 |---------|-------|
 | **Module loading order** | `smart-sdd/domains/_schema.md` § Loading Order, `smart-sdd/domains/_resolver.md` § Step 3, `reverse-spec/domains/_schema.md` § Loading Order |
-| **Section schema (S0–S8)** | `smart-sdd/domains/_schema.md` § Section Schema |
+| **Section schema (S0–S9)** | `smart-sdd/domains/_schema.md` § Section Schema |
 | **Section schema (R1–R6)** | `reverse-spec/domains/_schema.md` § Section Schema |
-| **Section schema (A0–A4)** | `smart-sdd/domains/_schema.md` § Archetype Section Schema, `reverse-spec/domains/_schema.md` § Archetype Section Schema |
+| **Section schema (A0–A5)** | `smart-sdd/domains/_schema.md` § Archetype Section Schema, `reverse-spec/domains/_schema.md` § Archetype Section Schema |
 | **Foundation schema (F0–F9)** | `reverse-spec/domains/foundations/_foundation-core.md` |
 | **F8 Toolchain Commands** | `reverse-spec/domains/foundations/_foundation-core.md` § F8, `smart-sdd/commands/pipeline.md` § Foundation Gate Toolchain Pre-flight, `smart-sdd/commands/verify-phases.md` § Phase 1 |
 | **F9 Scan Targets** | `reverse-spec/domains/foundations/_foundation-core.md` § F9, `reverse-spec/commands/analyze.md` § Phase 2 F9 Scan Target Loading |
