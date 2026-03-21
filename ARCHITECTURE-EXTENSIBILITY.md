@@ -896,3 +896,5 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **K8s operator concern** | `shared/domains/concerns/k8s-operator.md` (S0/R1), `reverse-spec/domains/concerns/k8s-operator.md` (R3 CRD/controller extraction) |
 | **R2 project types (expanded)** | `reverse-spec/domains/_core.md` § R2 (`infrastructure`, `desktop`, `platform` added) |
 | **R5 Feature boundary heuristics** | `reverse-spec/domains/_core.md` § R5 (protocol boundaries, workspace/package boundaries added) |
+| **Migration context (shared)** | `shared/domains/contexts/migration.md` — M0 signal detection, M1 scale classification (Hotfix→Platform), M2 target layer, M3 impact assessment, M4 pipeline depth modifier |
+| **Migration context (reverse-spec)** | `reverse-spec/domains/contexts/migration.md` — R3 Feature boundary per migration type, R4 dependency/data flow extraction, R5 scope estimation |

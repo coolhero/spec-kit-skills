@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 09:06 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 11:08 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -387,7 +387,7 @@ Every project falls into one of these scenarios. Find yours and follow the workf
 | **S3** | [Extend](#s3-extend-existing-code) | Add new features to an existing, running codebase | New code only |
 | **S4** | [Rebuild (Same Stack)](#s4-rebuild-same-stack) | Rewrite from scratch with the same technology | Full rewrite |
 | **S5** | [Rebuild (New Stack)](#s5-rebuild-new-stack) | Rewrite from scratch with a different technology | Full rewrite |
-| **S6** | [Modernization / Migration](#s6-modernization--migration) | Replace EOL frameworks, upgrade major versions, swap deprecated libraries, or migrate platforms | Affected parts only |
+| **S6** | [Modernization / Migration](#s6-modernization--migration) | Security hotfix, library patch, version upgrade, DB migration, framework swap, or platform move | Scale-dependent |
 | **S7** | [Rebuild → Extend](#s7-rebuild--extend) | Rewrite first, then add new features beyond original scope | Full + new |
 | **S8** | [New Project](#s8-new-project) | Start from scratch — no existing code | Full |
 | **S9** | [Explore → Decide](#s9-explore--decide) | Study code first, then decide what to do | Depends on choice |
@@ -455,23 +455,60 @@ Output: New codebase in new stack + stack-migration.md + SDD docs
 
 ### S6: Modernization / Migration
 
+S6 covers everything from emergency security patches to multi-quarter platform moves.
+The workflow adapts based on two axes: **migration scale** and **SDD state**.
+
+**Migration Scale:**
+
+| Scale | Time Pressure | Examples | Pipeline Depth |
+|-------|---------------|----------|----------------|
+| Hotfix | Hours | log4j CVE, OpenSSL patch, prototype pollution fix | Impact analysis + targeted fix |
+| Patch | Days | React 18.2→18.3, axios minor bump, TypeScript patch | Lightweight specify → implement → verify |
+| Minor | Weeks | Next.js 14→15, Node 18→20, deprecation warnings | specify → plan → implement → verify |
+| Major | Months | Vue 2→3, Python 2→3, MySQL→PostgreSQL, Sequelize→Prisma | Full pipeline |
+| Platform | Quarters | Heroku→AWS, monolith→microservices, REST→GraphQL | Full pipeline + phased rollout |
+
+**Decision Tree:**
+
 ```
-Goal: Upgrade, replace, or migrate specific parts of the tech stack.
-       Only modify affected code — not a full rewrite.
-Examples: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS,
-          React class→hooks, Webpack→Vite, REST→GraphQL, MySQL→PostgreSQL
+Start: What needs to change?
+  │
+  ├─ Security vulnerability / CVE         → Scale: Hotfix
+  ├─ Bug fix / patch version bump         → Scale: Patch
+  ├─ Deprecation warning / minor upgrade  → Scale: Minor
+  ├─ Major version / library swap         → Scale: Major
+  └─ Platform / architecture change       → Scale: Platform
 
-Step 1 — Document the current state:
-/reverse-spec ./source --adopt  → Analyze full codebase
-/smart-sdd adopt                → Document all Features
-
-Step 2 — Identify affected scope and add migration Feature(s):
-/smart-sdd add --gap            → Gap-driven: identifies affected SBI behaviors
-                                  Define migration Feature(s) covering the changes
-
-Step 3 — Implement migration:
-/smart-sdd pipeline F00X        → Implement migration Feature(s)
+Do you already have SDD docs for this project?
+  │
+  ├─ YES (Case A) ─────────────────────────────────────────────────────────┐
+  │   Hotfix/Patch: /smart-sdd add → lightweight pipeline F00X            │
+  │   Minor/Major:  /smart-sdd add --gap → /smart-sdd pipeline F00X      │
+  │   Platform:     /smart-sdd add --gap → phased /smart-sdd pipeline    │
+  │                                                                       │
+  └─ NO (Case B) ──────────────────────────────────────────────────────────┐
+      Hotfix: Targeted scan (affected component + callers) → fix → record │
+      Patch:  Partial adopt (affected scope) → add → pipeline             │
+      Minor:  Partial adopt (affected + adjacent) → add → pipeline        │
+      Major:  /reverse-spec --adopt → /smart-sdd adopt → add → pipeline   │
+      Platform: Full /reverse-spec → /smart-sdd adopt → add → pipeline    │
 ```
+
+**Target Layers** (what is being changed — affects impact analysis depth):
+
+| Layer | Key Concern | Data Migration? |
+|-------|-------------|-----------------|
+| Library/Package | Import paths, API calls | No |
+| Framework | Component patterns, config | No |
+| Language/Runtime | Syntax, stdlib, build chain | No |
+| DB Engine | Query compatibility, schema | Same vendor: usually no / Vendor swap: yes |
+| ORM/Query Layer | Repository code, model defs | Schema possible |
+| Cache/Queue | Client code, serialization | State loss possible |
+| Auth/Security | Token format, middleware | Token invalidation |
+| Build/Tooling | Config files, CI scripts | No |
+| Cloud/Infrastructure | SDK calls, deployment | Possible |
+
+> See `shared/domains/contexts/migration.md` for the full M0-M4 framework (signal detection, scale classification, impact assessment, pipeline depth modifiers).
 
 ### S7: Rebuild → Extend
 
@@ -1689,6 +1726,8 @@ Each skill follows the same internal directory convention:
 | `domains/concerns/ecs.md` | ECS concern — R3 entity-component-system extraction, data-oriented design patterns |
 | `domains/concerns/wire-protocol.md` | Wire protocol concern — R3 protocol message extraction, framing/serialization patterns |
 | `domains/concerns/k8s-operator.md` | K8s operator concern — R3 CRD/controller extraction, reconciliation loop patterns |
+| **Contexts** | |
+| `domains/contexts/migration.md` | Migration context — R3 Feature boundary per migration type, R4 dependency/data flow extraction, R5 scope estimation |
 | `reference/speckit-compatibility.md` | Compatibility guide mapping reverse-spec outputs to spec-kit commands |
 | **Templates** | |
 | `templates/roadmap-template.md` | Template for project roadmap artifact |
@@ -1850,6 +1889,8 @@ Signal keywords and module metadata shared by both reverse-spec and smart-sdd. E
 | `domains/archetypes/game-engine.md` | Game engine — A0 semantic + code patterns (Unity, Unreal, Godot, ECS, render loop) |
 | `domains/archetypes/browser-extension.md` | Browser extension — A0 semantic + code patterns (manifest, content scripts, background workers) |
 | `domains/archetypes/infra-tool.md` | Infra tool — A0 semantic + code patterns (Terraform, Pulumi, reconciliation engines) |
+| **Contexts** | |
+| `domains/contexts/migration.md` | Migration context — M0 signal detection, M1 scale (Hotfix→Platform), M2 target layer, M3 impact assessment, M4 pipeline depth modifier |
 | **Runtime** | |
 | `runtime/_index.md` | Runtime module index — cross-skill registry with Domain Profile integration table |
 | `runtime/playwright-detection.md` | Playwright availability detection — CLI/MCP/CDP probe, Electron connection mode |

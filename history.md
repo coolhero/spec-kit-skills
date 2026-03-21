@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-21] Migration Context Module — New Domain Module Type
+
+### What Changed
+
+- **New module type**: `contexts/` — differs from `concerns/` (what the app does) by describing what you're *doing to* the app. Contexts modify pipeline depth and dynamically activate relevant Concern/Foundation modules.
+- **shared/domains/contexts/migration.md**: M0-M4 framework — signal detection (dependency/infrastructure/code), scale classification (Hotfix→Platform), target layer classification (11 layers from Library to Cloud), impact assessment (code/data/infra/risk matrix), pipeline depth modifier (Hotfix=specify-only → Platform=full pipeline + phased rollout), SDD state modifier (Case A with docs vs Case B without docs).
+- **reverse-spec/domains/contexts/migration.md**: R3 Feature boundary rules per migration type (Library/Framework/DB/Infra), R4 dependency graph + data flow extraction, R5 migration scope estimation (file count, complexity indicators, pre-context recording).
+- **_taxonomy.md**: Added Contexts section with migration module, also added 7 missing concerns (cqrs-eventsourcing, dag-orchestration, distributed-consensus, ecs, hardware-io, k8s-operator, wire-protocol) and 6 missing archetypes (browser-extension, database-engine, game-engine, infra-tool, message-broker, network-server) that existed as files but weren't listed.
+- **S6 scenario (READMEs)**: Expanded from 3-step linear workflow to scale×SDD-state decision tree covering 5 scales (Hotfix/Patch/Minor/Major/Platform), 9 target layers, and Case A/B branching.
+
+### Why
+
+S6 previously assumed all migrations follow the same heavy workflow (full adopt → add --gap → pipeline). Real-world migrations range from emergency security patches (hours, no time for full pipeline) to multi-quarter platform moves. The 2×5 matrix (SDD state × scale) routes users to the right workflow depth. The `contexts/` module type is extensible — future candidates: `performance` (optimization), `compliance` (regulatory), `security-hardening`.
+
+### Design Decision: Why Context, Not Concern or Sub-Scenario
+
+- **Not a Concern**: Concerns describe static app characteristics (auth, i18n). Migration describes the *change* being made — it's transient and cross-cutting across all concerns.
+- **Not sub-scenarios (S6a/S6b/S6c)**: Scale (Hotfix vs Major) and target layer (DB vs Library) are orthogonal axes. Flattening to sub-scenarios causes combinatorial explosion (5 scales × 11 layers = 55 variants).
+- **Context as pipeline modifier**: The migration context dynamically adjusts pipeline depth and activates relevant domain modules at runtime, avoiding the N×M problem.
+
+---
+
 ## [2026-03-21] Unified Auto-Report Template — Absorbs Case-Study Report Structure
 
 ### What Changed
