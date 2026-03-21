@@ -120,6 +120,44 @@ Options:
 - Do NOT delete the Feature branch automatically
 - Display: "Feature branch `{NNN}-{short-name}` has been merged to main. You may delete it with `git branch -d {NNN}-{short-name}` if no longer needed."
 
+### Revisiting a Completed Feature (Step-Back / --start on merged Feature)
+
+When stepping back to a previously completed and merged Feature (e.g., `/smart-sdd pipeline F001 --start specify` after F001 and F002 are both merged to main):
+
+**Branch handling**:
+
+1. **Check if Feature branch still exists**: `git branch --list '001-*'`
+   - **If exists** (branch was not deleted after merge): checkout existing branch, then rebase on latest main:
+     ```bash
+     git checkout 001-auth
+     git rebase main        # Incorporate F002's changes
+     ```
+   - **If not exists** (branch was deleted): create fresh branch from current main:
+     ```bash
+     git checkout -b 001-auth    # Fresh branch with F002's code included
+     ```
+
+2. **The branch now contains ALL code** (F001 + F002 + any other merged Features). Step-back modifications happen on top of this.
+
+3. **After re-executing the target step** (e.g., specify → plan cascade):
+   - Cross-Feature Impact Analysis runs (if stepping back to specify/plan)
+   - Modified artifacts are committed on the `001-auth` branch
+   - Merge Checkpoint merges back to main
+
+4. **Downstream Features marked 🔀** (from Impact Analysis) are processed next — each on its own branch, rebased on the updated main.
+
+**Key principle**: The Feature branch always starts from the **latest main** (via fresh creation or rebase). This ensures the revisited Feature sees all code from other completed Features, not just its own original code.
+
+```
+main ──F001──F002──────────────────────────────── main (after both merged)
+                   │
+                   └── git checkout -b 001-auth  (fresh from main, includes F002 code)
+                       │
+                       ├── step-back: modify spec → cascade → implement → verify
+                       │
+main ←── merge ────────┘
+```
+
 ### Step Mode Branch Handling
 
 When using Step Mode (e.g., `/smart-sdd verify F001`):

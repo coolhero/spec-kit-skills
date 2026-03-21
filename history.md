@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-21] Revisiting Completed Feature — Branch Management for Step-Back
+
+### What Changed
+
+- **branch-management.md**: Added "Revisiting a Completed Feature" section. When stepping back to a previously merged Feature (e.g., F001 after F002 is also merged), the branch is either rebased on latest main (if still exists) or freshly created from current main (if deleted). This ensures the revisited Feature sees ALL code from other completed Features.
+
+### Why
+
+Step-back to specify/plan was added without addressing the branch scenario: F001 merged → F002 merged → user wants to fix F001's spec. Without this rule, it was unclear whether to checkout the old branch (which doesn't have F002's code) or create a new one. Now explicit: always start from latest main.
+
+---
+
 ## [2026-03-21] Step-Back Navigation + Cross-Feature Impact Analysis
 
 ### What Changed
