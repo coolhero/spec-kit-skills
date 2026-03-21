@@ -1478,7 +1478,7 @@ If "Stop here":
 Next steps:
   /smart-sdd pipeline         — Process next Feature (if any remain)
   /smart-sdd status           — View final progress report
-  /smart-sdd add              — Add new Features to the project
+  /smart-sdd add              — Define new Feature(s) (spec only, then run pipeline to build)
 ```
 
 **Pipeline Completion Report (MANDATORY — auto-generated)**:

@@ -621,7 +621,9 @@ After coverage verification and final demo:
     Review sdd-state.md → Source Behavior Coverage section
 
   To add new features:
-    /smart-sdd add         — Add new Features using the 6-step process
+    /smart-sdd add         — Define new Feature(s) via 6-step Briefing (spec definition only)
+    /smart-sdd pipeline    — Then build the defined Feature(s) (tasks → implement → verify)
+    (add defines WHAT to build; pipeline builds it)
 ```
 
 ---
