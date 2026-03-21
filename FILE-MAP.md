@@ -42,16 +42,16 @@ graph TB
     subgraph "reverse-spec/"
         RS_SKILL["SKILL.md"]
         RS_CMD["commands/ (6)"]
-        RS_DOM["domains/ (90+)"]
+        RS_DOM["domains/ (78)"]
         RS_REF["reference/ (1)"]
         RS_TPL["templates/ (10)"]
     end
 
     subgraph "smart-sdd/"
         SS_SKILL["SKILL.md"]
-        SS_CMD["commands/ (14)"]
-        SS_DOM["domains/ (43+)"]
-        SS_REF["reference/ (16)"]
+        SS_CMD["commands/ (16)"]
+        SS_DOM["domains/ (54)"]
+        SS_REF["reference/ (24)"]
         SS_SCR["scripts/ (7)"]
     end
 
@@ -209,7 +209,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for UI verification |
 | `install.sh` | Symlink installer for skills → ~/.claude/skills/ |
 
-### reverse-spec (100 files)
+### reverse-spec (96 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
@@ -227,17 +227,17 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `domains/app.md` | Domain Profile for analysis (reverse-spec-specific) |
 | `domains/data-science.md` | Data science domain extensions (TODO scaffolding) |
 | **Domains — Interfaces** (5) | `domains/interfaces/{gui,http-api,cli,data-io,tui}.md` | R3 analysis axes per interface type |
-| **Domains — Concerns** (20) | `domains/concerns/*.md` | R3 Feature boundary + R4 data flow per concern |
+| **Domains — Concerns** (23) | `domains/concerns/*.md` | R3 Feature boundary + R4 data flow per concern |
 | **Domains — Archetypes** (4) | `domains/archetypes/{ai-assistant,microservice,public-api,sdk-framework}.md` | R3 extraction patterns |
 | **Domains — Contexts** (1) | `domains/contexts/migration.md` | R3-R5 migration impact analysis |
-| **Domains — Foundations** (36+2) | `domains/foundations/*.md` | Framework-specific F0-F9 detection rules |
+| **Domains — Foundations** (39+2) | `domains/foundations/*.md` | Framework-specific F0-F9 detection rules |
 | ↳ Full frameworks | `electron, nextjs, vite-react, django, flask, fastapi, express, nestjs, hono, bun, rails, laravel, phoenix, spring-boot, spring-framework, actix-web, go-chi, svelte, solidjs, tauri, react-native, flutter, dotnet, chrome-extension, rust-cargo` | Comprehensive F1-F9 rules |
 | ↳ Detection stubs | `python, go, swift-spm, erlang-otp, nuxt, angular, remix, qt, gtk, symfony, wordpress, android-native, cmake, makefile` | F0 detection + Architecture Notes |
 | ↳ Meta | `_foundation-core.md, _TEMPLATE.md` | Core detection signals, contributor template |
 | **Reference** (1) | `reference/speckit-compatibility.md` | reverse-spec → spec-kit command mapping |
 | **Templates** (10) | `templates/*.md` | Artifact templates: roadmap, constitution-seed, entity/api/business-logic registries, coverage-baseline, pre-context, spec-draft, speckit-prompt, stack-migration |
 
-### smart-sdd (85 files)
+### smart-sdd (102 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
@@ -252,7 +252,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `commands/parity.md` | Structural/logic parity check |
 | `commands/expand.md` | Feature expansion (split/merge) |
 | `commands/reset.md` | Pipeline state reset |
-| **Verify Sub-commands** (6) | | |
+| **Verify Sub-commands** (7) | | |
 | `commands/verify-phases.md` | Verify phase orchestrator (Phase 0-4) |
 | `commands/verify-preflight.md` | Phase 0: Playwright availability check |
 | `commands/verify-build-test.md` | Phase 1: Build + TypeScript + Lint |
@@ -306,7 +306,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `scripts/semantic-stub-check.sh` | Semantic stub detector (Math.random, placeholder text) |
 | `scripts/wiring-check.sh` | Wiring integrity checker (IPC/API audit) |
 
-### shared (41 files)
+### shared (48 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
