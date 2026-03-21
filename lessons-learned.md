@@ -302,7 +302,19 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ## Part 2: Specific Lessons
 
-> Concrete incidents with actionable takeaways. Grouped by theme.
+> Concrete incidents with actionable takeaways. Organized by 3 top-level categories.
+>
+> | Category | Focus | Lessons |
+> |----------|-------|---------|
+> | **Agent Behavior** | How agents interpret, bypass, and misapply instructions | L1,L10-L15,L20-L21,L35,L39,L43,L47,L50 |
+> | **Pipeline Architecture** | How to design multi-stage pipelines that survive real use | L2,L8-L9,L29-L34,L37-L38,L40,L44,L48-L49 |
+> | **Runtime & Verification** | What breaks at execution time that static analysis misses | L3-L7,L16-L19,L22-L28,L41-L42,L45-L46,L51-L52 |
+
+---
+
+## Category 1: Agent Behavior
+
+> How agents interpret, bypass, and misapply instructions. The core challenge of skill engineering.
 
 ### Theme A: How Agents Interpret (and Ignore) Instructions `[P2]`
 
@@ -384,6 +396,10 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 ---
 
+## Category 3: Runtime & Verification
+
+> What breaks at execution time that static analysis misses. The gap between "build passes" and "feature works."
+
 ### Theme C: Build and Verification Traps `[P1, P2]`
 
 #### L5. State Selector Instability — Build Passes, Runtime Loops
@@ -433,6 +449,10 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 **Universal takeaway**: Any artifact written before implementation is a hypothesis. When dependencies change during the pipeline, downstream artifacts become silently wrong. Every step that reads a pre-implementation artifact should cross-check it against actual completed implementations.
 
 ---
+
+## Category 2: Pipeline Architecture
+
+> How to design multi-stage pipelines that survive real use. Ordering, scaling, governance.
 
 ### Theme E: Process and Maintenance `[P1, P3]`
 
@@ -674,6 +694,10 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **Universal takeaway**: In any system where an agent interacts with a user-configured application, the agent must use the **same data directory** as the user. Dev/prod mode divergence is the default, not the exception. Always discover the actual path by scanning the filesystem, never by constructing it from app name alone.
 
 ---
+
+### Theme J: Artifact Quality & Completeness `[P1, P2, P3]` (2026-03-21)
+
+> Lessons from 4-project quality analysis (angdu-studio rebuild, opencode explore, openclaw adopt, vllm adopt). Focus: what the agent produces vs what it should produce.
 
 #### L47. Post-Pipeline Reports Are Silently Skipped Without MANDATORY Gates
 
