@@ -265,6 +265,25 @@ Format (in Feature Detail Log, below the Verify Process Rules):
 **Lifecycle**: Created at verify start (empty) → Updated after each approved Minor fix → Deleted at verify completion.
 **Escalation**: If any module's Fix Count reaches 3, auto-escalate to Major-Implement per Bug Fix Severity Rule.
 
+### Impact Analysis Log
+
+> Records cross-Feature impact analysis results when spec/plan changes affect downstream Features.
+> Written by: Step-Back Protocol (pipeline.md), reset --from specify/plan (reset.md), cascading-update spec-level changes.
+> Read by: downstream Feature pipeline resumption (to understand why 🔀 was applied).
+
+Format (in Feature Detail Log, below Minor Fix Accumulator or Step table):
+
+```
+#### Impact Analysis Log
+| Date | Trigger | Changes | Affected | Classification | Action |
+|------|---------|---------|----------|---------------|--------|
+| 2024-01-20 | step-back to specify | User.email type String→Email | F002, F003 | 🔴 BREAKING | 🔀 from plan |
+| 2024-01-20 | step-back to specify | User.avatar_url added (optional) | F002, F005 | 🟡 ADDITIVE | no action |
+| 2024-01-20 | step-back to specify | auth rate limiting changed | — | 🟢 INTERNAL | — |
+```
+
+**Lifecycle**: Created on first impact analysis → Appended on subsequent analyses → Persists permanently (audit trail).
+
 ---
 
 ## Feature Mapping

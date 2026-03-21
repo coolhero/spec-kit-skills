@@ -10,6 +10,8 @@ Resets pipeline state for re-execution. Three modes:
 
 All modes preserve reverse-spec artifacts (roadmap, pre-context, registries) unless explicitly stated.
 
+> **reset vs step-back**: `reset` is **destructive** — it deletes artifacts (spec.md, plan.md, etc.) for the reset steps and starts fresh. **Step-back** (pipeline.md § Step-Back Protocol) is **incremental** — it preserves existing artifacts and modifies them via cascading update. Use reset when you want a clean slate; use step-back (via "Go back to earlier step" at any Review HARD STOP) when you want to fix something in an existing artifact.
+
 ---
 
 ## Step 1 — Parse & Validate
@@ -298,13 +300,23 @@ If branch is merged to main → display warning (code remains in main).
 | `specify` through `implement` | `rm -f demos/[FID]-[name].*` and `rm -f demos/F[NNN]-[name].*` |
 | `verify` | Keep demo files (just re-verify them) |
 
-#### B-4e. Mark dependent Features 🔀
+#### B-4e. Cross-Feature Impact Analysis (🚫 BLOCKING for specify/plan resets)
 
-If resetting from `specify` or `plan`: Other Features that depend on this Feature may need re-planning.
+If resetting from `specify` or `plan`: Run the **Cross-Feature Impact Analysis Protocol** from [`cascading-update.md`](../reference/cascading-update.md) § Cross-Feature Impact Analysis Protocol.
 
-For each dependent Feature (found via roadmap.md Dependency Graph):
-- Mark `plan` step as 🔀 in sdd-state.md Feature Progress
-- Set status to `restructured`
+This replaces blind 🔀 marking with classified impact analysis:
+1. Identify entities/APIs owned by this Feature in registries
+2. Find all referencing/consuming Features
+3. Classify changes: 🔴 BREAKING / 🟡 ADDITIVE / 🟢 INTERNAL
+4. Display Impact Report at HARD STOP (B-3 confirmation) — user sees full impact BEFORE confirming reset
+5. Mark downstream Features based on user's choice (not blindly)
+
+If resetting from `tasks` or later: No impact analysis needed (no public interface change). Skip to B-4f.
+
+```
+❌ WRONG: reset --from specify → blindly mark all dependents as 🔀
+✅ RIGHT: reset --from specify → Impact Analysis → user sees "F002 BREAKING, F005 ADDITIVE" → chooses which to mark
+```
 
 #### B-4f. Record in history.md
 

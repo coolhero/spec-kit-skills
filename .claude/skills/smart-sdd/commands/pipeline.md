@@ -115,7 +115,8 @@ Review the above content. You can:
 ```
 PROCEDURE ApprovalGate(type):
   # type = "checkpoint" → options: ["Approve as-is", "Request modifications"]
-  # type = "review"     → options: ["Approve", "Request modifications", "I've finished editing"]
+  # type = "review"     → options: ["Approve", "Request modifications", "I've finished editing", "Go back to earlier step"]
+  #   Note: "Go back" option appears in review type ONLY, and only for steps AFTER specify.
   LOOP:
     response = AskUserQuestion(options per type above)
 
@@ -123,10 +124,67 @@ PROCEDURE ApprovalGate(type):
     IF approved (yes/lgtm/approve) → BREAK LOOP → proceed to next step
     IF "Request modifications" → ask what to change → apply → re-display → CONTINUE LOOP
     IF "I've finished editing" (review only) → re-read artifacts → show diff → ask approve/edit-more
+    IF "Go back to earlier step" → execute PROCEDURE StepBack (see below)
     OTHERWISE → re-ask with valid options
 ```
 
 **⚠️ CRITICAL**: If response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed.
+
+### Step-Back Protocol
+
+> **When to use**: User wants to fix a previously approved artifact (e.g., fix spec while at implement, change architecture while at verify).
+> **Difference from `reset`**: Step-back is **incremental** (preserves existing artifacts as starting point, uses cascading update). Reset is **destructive** (deletes artifacts, starts fresh). Step-back says "I want to fix something"; reset says "I want to start over."
+
+```
+PROCEDURE StepBack:
+
+  Step 1 — TARGET SELECTION:
+    Present completed prior steps (read sdd-state.md Feature Progress — any ✅ step is a valid target):
+    AskUserQuestion: "Which step do you want to go back to?"
+    Options: [list of completed steps, e.g., "specify", "plan", "tasks"]
+    **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+  Step 2 — REASON RECORDING:
+    AskUserQuestion: "What needs to change?" (free text)
+    Record in Feature Detail Log: "↩️ STEP-BACK from [current] to [target] — [user reason]"
+
+  Step 3 — STATE UPDATE:
+    - Set Feature status to regression-{target} (reuse existing regression statuses)
+    - Mark steps from [target] onward as 🔀 in Feature Progress (NOT blank — preserves completion history)
+    - Preserve ALL existing artifacts (spec.md, plan.md, tasks.md, source code)
+
+  Step 4 — CROSS-FEATURE IMPACT ANALYSIS (if target = specify or plan):
+    🚫 BLOCKING — must complete before re-executing the target step.
+    Read reference/cascading-update.md § Cross-Feature Impact Analysis Protocol.
+    Execute the 6-step impact analysis:
+    1. Identify owned entities/APIs in registries
+    2. Find all referencing/consuming Features
+    3. After spec/plan change: classify diff as BREAKING / ADDITIVE / INTERNAL
+    4. Display Impact Report (HARD STOP)
+    5. Record in Feature Detail Log
+    6. Mark downstream Features per user selection
+    **If target = tasks or implement → skip Impact Analysis (no public interface change).**
+
+  Step 5 — RE-EXECUTE FROM TARGET:
+    Resume pipeline from [target] step.
+    The existing artifact is the STARTING POINT — cascading-update.md incremental protocol applies.
+    (NOT a full re-generation from scratch — the agent modifies the existing artifact based on user's requested change.)
+
+  Step 6 — CASCADING:
+    After [target] step completes, cascade changes downstream within this Feature:
+    - specify change → cascade to plan → tasks (existing artifacts updated incrementally)
+    - plan change → cascade to tasks (existing artifact updated incrementally)
+    - tasks change → no cascade needed (implement reads updated tasks)
+```
+
+**Preservation rules** — what stays vs what gets re-executed:
+
+| Step-back target | Preserved | Re-executed (🔀) |
+|------------------|-----------|-------------------|
+| specify | (nothing prior) | specify, plan, tasks, implement, verify |
+| plan | spec.md | plan, tasks, implement, verify |
+| tasks | spec.md, plan.md | tasks, implement, verify |
+| implement | spec.md, plan.md, tasks.md | implement, verify |
 
 ### 3. Execute — spec-kit Command Execution
 

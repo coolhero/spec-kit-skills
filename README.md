@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 12:00 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 13:01 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -564,6 +564,33 @@ S6 (Modernize) ──────────── adopt → add ────�
 S7 (Rebuild+) ──────────── pipeline → add ──┤
 S8 (New Project) ─────────── init → add ────┤
 S9 (Explore→Decide) ──────── (any above) ───┘
+```
+
+### Mid-Pipeline Navigation: Step-Back & Spec Revision
+
+During pipeline execution, you can go back to any previous step at any Review approval point by selecting **"Go back to earlier step"**:
+
+```
+Currently at implement, need to fix the spec?
+  → Review HARD STOP → "Go back to earlier step" → select "specify"
+  → Modify spec.md (incremental, not from scratch)
+  → Cross-Feature Impact Analysis auto-runs:
+      🔴 BREAKING: User.email type changed → F002, F003 affected
+      🟡 ADDITIVE: User.avatar added → F005 notified
+  → Choose which downstream Features to re-run
+  → Cascade: updated spec → plan → tasks → implement → verify
+
+Already completed Feature needs spec revision?
+  → /smart-sdd pipeline F005         (target the specific Feature)
+  → Review HARD STOP → "Go back to earlier step" → "specify"
+  → Same flow as above
+```
+
+**Step-back vs Reset**: Step-back **preserves** existing artifacts and modifies them incrementally (fix what's wrong). Reset **deletes** artifacts and starts fresh (redo from scratch). Use `reset` only when the existing artifact is fundamentally wrong.
+
+```
+Step-back: specify has 10 FRs → go back → fix 2 FRs → cascade changes
+Reset:     specify has 10 FRs → reset → regenerate all FRs from scratch
 ```
 
 ---

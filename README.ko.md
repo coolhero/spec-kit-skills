@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 12:00 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 13:01 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -562,6 +562,33 @@ S6 (현대화) ─────────── adopt → add ────┤
 S7 (리빌드+) ────────── pipeline → add ─┤
 S8 (새 프로젝트) ─────── init → add ────┤
 S9 (파악→결정) ────────── (위 중 선택) ─┘
+```
+
+### 파이프라인 중간 탐색: Step-Back & Spec 보완
+
+파이프라인 실행 중 언제든 이전 단계로 돌아갈 수 있습니다. Review 승인 시점에서 **"이전 단계로 돌아가기"**를 선택하세요:
+
+```
+implement 단계에서 spec을 수정해야 할 때?
+  → Review HARD STOP → "이전 단계로 돌아가기" → "specify" 선택
+  → spec.md 증분 수정 (처음부터 다시 작성하지 않음)
+  → Cross-Feature Impact Analysis 자동 실행:
+      🔴 BREAKING: User.email 타입 변경 → F002, F003 영향
+      🟡 ADDITIVE: User.avatar 추가 → F005 알림
+  → 영향 받는 downstream Feature 재실행 여부 선택
+  → 캐스케이드: 수정된 spec → plan → tasks → implement → verify
+
+이미 완료된 Feature의 spec을 보완해야 할 때?
+  → /smart-sdd pipeline F005         (특정 Feature 지정)
+  → Review HARD STOP → "이전 단계로 돌아가기" → "specify"
+  → 위와 동일한 흐름
+```
+
+**Step-back vs Reset**: Step-back은 기존 아티팩트를 **보존**하고 증분 수정합니다 (잘못된 부분만 고침). Reset은 아티팩트를 **삭제**하고 처음부터 다시 시작합니다. 기존 아티팩트가 근본적으로 잘못된 경우에만 `reset`을 사용하세요.
+
+```
+Step-back: specify에 FR 10개 → 돌아가기 → FR 2개 수정 → 변경 캐스케이드
+Reset:     specify에 FR 10개 → 리셋 → 모든 FR 처음부터 재생성
 ```
 
 ---

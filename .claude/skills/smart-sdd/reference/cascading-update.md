@@ -192,6 +192,112 @@ User clicks citation badge [2] → tooltip displays source #2's file name and ma
 
 ---
 
+## Cross-Feature Impact Analysis Protocol
+
+> **When to execute**: When a spec-level or plan-level change affects entities/APIs that OTHER Features reference. Triggered by:
+> - Step-back to `specify` or `plan` (pipeline.md § Step-Back Protocol)
+> - `reset --from specify` or `reset --from plan` (reset.md § Mode B)
+> - Cascading update that modifies entity fields or API signatures
+
+### Step 1 — Identify Owned Public Surfaces
+
+Read `entity-registry.md` and `api-registry.md`:
+- **Entities**: rows where `Owner Feature` = current FID → extract field list (this is the "before" snapshot)
+- **APIs**: rows where `Provider Feature` = current FID → extract endpoint signatures
+- If FID owns NO entities and provides NO APIs → **skip impact analysis** (no public surface)
+
+### Step 2 — Identify Consumers
+
+From entity-registry.md: `Referencing Features` column for each owned entity.
+From api-registry.md: `Consumer Features` column for each provided API.
+From roadmap.md: Dependency Table entries where `Depends On` includes current FID.
+
+Deduplicate all downstream FIDs. If none → **skip** (no consumers).
+
+### Step 3 — Diff Classification (after spec/plan change completes)
+
+Compare the changed artifact against the "before" snapshot from Step 1:
+
+| Change Type | Classification | Examples |
+|-------------|---------------|---------|
+| Field removed or renamed | 🔴 BREAKING | `User.email` removed, `Order.status` renamed to `state` |
+| Field type changed | 🔴 BREAKING | `User.age: String → Number` |
+| Required field added | 🔴 BREAKING | New required `User.phone` (existing consumers don't send it) |
+| API endpoint removed/changed | 🔴 BREAKING | `POST /auth/register` removed or path changed |
+| Required request param added | 🔴 BREAKING | New required `phone` param on existing API |
+| Optional field added | 🟡 ADDITIVE | New `User.avatar_url` (nullable, backward-compatible) |
+| New API endpoint added | 🟡 ADDITIVE | New `GET /auth/profile` (consumers don't need to call it) |
+| Optional request param added | 🟡 ADDITIVE | New optional `limit` param |
+| Internal logic changed | 🟢 INTERNAL | Rate limiting logic, validation rules, implementation details |
+
+### Step 4 — Impact Report (HARD STOP)
+
+Display classified impact to user:
+
+```
+📋 Cross-Feature Impact Analysis for [FID]-[name]:
+
+── 🔴 BREAKING Changes ────────────────────────
+  Entity [User]: field [email] type changed String → Email
+    → F002-product (references User.email for display)
+    → F003-order (references User.email for receipts)
+
+  API [POST /api/auth/register]: new required field [phone]
+    → F004-profile (calls POST /api/auth/register)
+
+── 🟡 ADDITIVE Changes ────────────────────────
+  Entity [User]: new optional field [avatar_url]
+    → F002-product, F005-social (backward compatible)
+
+── 🟢 INTERNAL Changes ────────────────────────
+  API [POST /api/auth/register]: rate limiting logic changed
+    → No downstream impact
+
+── Summary ─────────────────────────────────────
+  🔴 BREAKING: 2 changes → 3 Features affected (F002, F003, F004)
+  🟡 ADDITIVE: 1 change → 2 Features notified (F002, F005)
+  🟢 INTERNAL: 1 change → 0 Features affected
+```
+
+**Use AskUserQuestion** (HARD STOP):
+- "Auto-mark BREAKING-affected Features for re-run from plan" → marks F002/F003/F004 plan step as 🔀
+- "Auto-mark ALL affected Features for re-run" → includes ADDITIVE-affected too
+- "Select which Features to re-run" → interactive selection
+- "Proceed without marking (I'll handle downstream manually)"
+**If response is empty → re-ask** (per MANDATORY RULE 1)
+
+### Step 5 — Record Impact Analysis
+
+Record in sdd-state.md Feature Detail Log under the current Feature:
+
+```
+📋 IMPACT ANALYSIS: [date] — [trigger: step-back / reset / cascading-update]
+   🔴 BREAKING: [change details] → [FID2] 🔀plan, [FID3] 🔀plan
+   🟡 ADDITIVE: [change details] → [FID4] (no action)
+   🟢 INTERNAL: [change details]
+   User action: [selected option]
+```
+
+Also record in `history.md` for audit trail.
+
+### Step 6 — Execute Downstream Marking
+
+Based on user selection, for each selected downstream Feature:
+- 🔴 BREAKING → mark from `plan` onward as 🔀 (plan needs to update data-model/contracts)
+- 🟡 ADDITIVE → mark from `implement` onward as 🔀 (plan structure is fine, just needs new code)
+- Set downstream Feature status to `restructured`
+- Update entity-registry.md and api-registry.md with new field/endpoint definitions
+
+```
+❌ WRONG: Reset F005's spec → blindly mark ALL downstream as 🔀 from specify
+   → F002 (only reads User.avatar_url, an ADDITIVE change) gets full re-spec unnecessarily
+
+✅ RIGHT: Reset F005's spec → classify changes → F002 marked 🔀 from implement only (ADDITIVE),
+   F003 marked 🔀 from plan (BREAKING — field type changed)
+```
+
+---
+
 ## Context Optimization Note
 
 This file is ~150 lines. It should be read:
@@ -210,3 +316,5 @@ The agent does NOT need to re-read this file for every step — just when the ca
 | Any HARD STOP where user requests changes | pipeline.md § Cascading Update Reference |
 | Any HARD STOP where artifact file timestamp changed | pipeline.md § Artifact Change Detection |
 | verify Bug Fix Severity = Major-Spec or Major-Plan | verify-phases.md § Bug Fix Severity Rule |
+| Step-back to specify or plan | pipeline.md § Step-Back Protocol → § Cross-Feature Impact Analysis |
+| reset --from specify or --from plan | reset.md § Mode B Step B-4e |

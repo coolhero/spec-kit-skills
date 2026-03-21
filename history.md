@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-21] Step-Back Navigation + Cross-Feature Impact Analysis
+
+### What Changed
+
+- **pipeline.md**: ApprovalGate에 "Go back to earlier step" 옵션 추가. Step-Back Protocol 인라인 섹션 추가 (6단계: target selection → reason recording → state update → impact analysis → re-execute → cascade).
+- **cascading-update.md**: Cross-Feature Impact Analysis Protocol 추가 (6단계: owned surfaces 식별 → consumer 탐색 → diff 분류 BREAKING/ADDITIVE/INTERNAL → Impact Report HARD STOP → 기록 → downstream marking).
+- **reset.md**: B-4e를 blind 🔀 마킹에서 Impact Analysis 기반 classified 마킹으로 강화. reset vs step-back 비교 노트 추가.
+- **state-schema.md**: Feature Detail Log에 Impact Analysis Log 포맷 추가.
+- **README.md/ko.md**: "파이프라인 중간 탐색: Step-Back & Spec 보완" 섹션 추가 — 사용 예시, step-back vs reset 비교.
+
+### Why
+
+두 가지 워크플로우가 부재했음:
+1. 파이프라인 중간에서 이전 단계로 돌아가기 (verify에서 specify로, implement에서 plan으로)
+2. 완료된 Feature의 spec 변경 시 downstream Feature 영향 자동 분석
+
+기존 reset은 파괴적(아티팩트 삭제)이라 "일부 수정"에 부적합. 기존 cascading-update는 단일 Feature 내 캐스케이드만 처리하고 cross-Feature 영향은 blind 🔀로 처리. Impact Analysis는 entity/API registry를 활용하여 BREAKING vs ADDITIVE vs INTERNAL을 분류하고, 사용자가 downstream 처리를 선택적으로 결정할 수 있게 함.
+
+---
+
 ## [2026-03-21] User App Configuration Gate (verify-preflight Phase 0-2b)
 
 ### What Changed
