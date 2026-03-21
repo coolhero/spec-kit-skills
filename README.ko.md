@@ -584,11 +584,20 @@ implement 단계에서 spec을 수정해야 할 때?
   → 위와 동일한 흐름
 ```
 
+**두 가지 방법으로 이전 단계로 돌아갈 수 있습니다**:
+
+| 방법 | 사용 시점 |
+|------|----------|
+| Review HARD STOP → "이전 단계로 돌아가기" | 파이프라인 실행 중 — 에이전트가 이미 동작 중일 때 |
+| `/smart-sdd pipeline F005 --start specify` | 언제든 — 직접 명령어, 동일한 결과 |
+
+두 방법 모두 기존 아티팩트를 보존하고, Impact Analysis를 실행하며, 변경 사항을 증분적으로 캐스케이드합니다.
+
 **Step-back vs Reset**: Step-back은 기존 아티팩트를 **보존**하고 증분 수정합니다 (잘못된 부분만 고침). Reset은 아티팩트를 **삭제**하고 처음부터 다시 시작합니다. 기존 아티팩트가 근본적으로 잘못된 경우에만 `reset`을 사용하세요.
 
 ```
-Step-back: specify에 FR 10개 → 돌아가기 → FR 2개 수정 → 변경 캐스케이드
-Reset:     specify에 FR 10개 → 리셋 → 모든 FR 처음부터 재생성
+Step-back: /smart-sdd pipeline F005 --start specify  → FR 2개 수정 → 캐스케이드
+Reset:     /smart-sdd reset F005 --from specify       → spec 삭제 → 전체 재생성
 ```
 
 ---

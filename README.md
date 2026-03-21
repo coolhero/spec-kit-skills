@@ -586,11 +586,20 @@ Already completed Feature needs spec revision?
   → Same flow as above
 ```
 
+**Two ways to step back**:
+
+| Method | When to use |
+|--------|------------|
+| Review HARD STOP → "Go back to earlier step" | During pipeline execution — agent is already running |
+| `/smart-sdd pipeline F005 --start specify` | Anytime — direct command, same result |
+
+Both methods preserve existing artifacts, run Impact Analysis, and cascade changes incrementally.
+
 **Step-back vs Reset**: Step-back **preserves** existing artifacts and modifies them incrementally (fix what's wrong). Reset **deletes** artifacts and starts fresh (redo from scratch). Use `reset` only when the existing artifact is fundamentally wrong.
 
 ```
-Step-back: specify has 10 FRs → go back → fix 2 FRs → cascade changes
-Reset:     specify has 10 FRs → reset → regenerate all FRs from scratch
+Step-back: /smart-sdd pipeline F005 --start specify  → fix 2 FRs → cascade
+Reset:     /smart-sdd reset F005 --from specify       → delete spec → regenerate all
 ```
 
 ---

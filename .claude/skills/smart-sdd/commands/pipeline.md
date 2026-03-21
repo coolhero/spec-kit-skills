@@ -673,6 +673,9 @@ Display the batch plan:
    - If the `--start` step is already ✅ → **mark it 🔀 and re-execute**. This is the purpose of `--start` — force re-run from a specific step
    - Steps AFTER `--start` that were already ✅ are also re-executed (marked 🔀)
 
+   **Cross-Feature Impact Analysis** (when `--start specify` or `--start plan`):
+   After the re-executed step completes and BEFORE cascading downstream within this Feature, run the Impact Analysis Protocol from [`cascading-update.md`](../reference/cascading-update.md) § Cross-Feature Impact Analysis Protocol. This checks whether the spec/plan change affects entities or APIs that other Features reference, and lets the user choose which downstream Features to mark for re-run. Skip Impact Analysis for `--start tasks` or later (no public interface change).
+
 4. **Display confirmation (HARD STOP)**:
 
    **Single-Feature mode**:
