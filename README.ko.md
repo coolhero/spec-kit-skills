@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 11:24 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 12:00 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -408,8 +408,8 @@ flowchart TD
 목표: 기존 코드에 SDD 문서 래핑. 코드는 그대로.
 산출물: roadmap, registries, constitution-seed, Feature별 spec.md + plan.md
 
-/reverse-spec ./source --adopt  → Phase 0-4: 코드 분석, GEL 추출
-/smart-sdd adopt                → Constitution → Feature별: specify + plan + verify
+/smart-sdd adopt                → reverse-spec 미실행 시 자동 실행, 이후
+                                  Constitution → Feature별: specify + plan + verify
                                   (tasks/implement 없음 — 코드가 이미 존재)
 ```
 
@@ -421,8 +421,7 @@ flowchart TD
 전제: 먼저 기존 코드 문서화(S2), 그 다음 추가.
 
 Step 1 — 기존 코드 문서화:
-/reverse-spec ./source --adopt  → 분석 및 GEL 추출
-/smart-sdd adopt                → 기존 Feature 문서화
+/smart-sdd adopt                → reverse-spec 자동 실행 + 기존 Feature 문서화
 
 Step 2 — 새 기능 추가:
 /smart-sdd add                  → 6-Phase Briefing으로 새 Feature 정의
@@ -582,8 +581,8 @@ S9 (파악→결정) ────────── (위 중 선택) ─┘
 (Domain Profile 설정)        (Feature별 Brief)        (GEL + Domain Profile)
 
 ── SDD 도입 ──────────────────────────────────────────────────────
-/reverse-spec --adopt     →  GEL 아티펙트          →  /smart-sdd adopt
-(Domain Profile 자동)        (roadmap, registries)     (기존 코드 문서화)
+/smart-sdd adopt          →  reverse-spec 자동     →  adopt 파이프라인
+(필요 시 자동 체이닝)         (Domain Profile 자동)     (기존 코드 문서화)
 
 ── 재구축 ────────────────────────────────────────────────────────
 /reverse-spec             →  GEL 아티펙트          →  /smart-sdd pipeline
@@ -938,21 +937,28 @@ verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 
 Axis 1: Interface       Axis 2: Concern              Axis 3: Archetype       Axis 4: Foundation
 (앱이 노출하는 것)       (횡단 관심사)                  (도메인 철학)             (프레임워크 제약)
 ├── http-api            ├── async-state               ├── ai-assistant        ├── electron
-├── gui                 ├── auth                      ├── public-api          ├── nextjs
-├── cli                 ├── authorization             ├── microservice        ├── express
-├── data-io             ├── codegen                   └── sdk-framework       ├── django
-└── tui                 ├── external-sdk                                      ├── spring-boot
-                        ├── i18n                                              └── ... (21개)
-                        ├── infra-as-code
-                        ├── ipc                       Axis 5: Scenario        Modifier: Scale
-                        ├── llm-agents                (프로젝트 수명주기)       (엄격도 수준)
-                        ├── message-queue             ├── greenfield          ├── prototype
-                        ├── multi-tenancy             ├── rebuild             ├── mvp
-                        ├── plugin-system             ├── incremental         └── production
-                        ├── polyglot                  └── adoption            × solo / small-team
-                        ├── protocol-integration                                / large-team
+├── gui                 ├── auth                      ├── browser-extension   ├── nextjs
+├── cli                 ├── authorization             ├── database-engine     ├── express
+├── data-io             ├── codegen                   ├── game-engine         ├── django
+└── tui                 ├── cqrs-eventsourcing        ├── infra-tool          ├── spring-boot
+                        ├── dag-orchestration          ├── message-broker      └── ... (21개)
+                        ├── distributed-consensus      ├── microservice
+                        ├── ecs                        ├── network-server     Modifier: Scale
+                        ├── external-sdk               ├── public-api         (엄격도 수준)
+                        ├── hardware-io                └── sdk-framework      ├── prototype
+                        ├── i18n                                              ├── mvp
+                        ├── infra-as-code             Axis 5: Scenario        └── production
+                        ├── ipc                       (프로젝트 수명주기)       × solo / small-team
+                        ├── k8s-operator              ├── greenfield            / large-team
+                        ├── llm-agents                ├── rebuild
+                        ├── message-queue             ├── incremental
+                        ├── multi-tenancy             └── adoption
+                        ├── plugin-system
+                        ├── polyglot
+                        ├── protocol-integration
                         ├── realtime
-                        └── task-worker
+                        ├── task-worker
+                        └── wire-protocol
 ```
 
 각 축은 다른 질문에 답하고, modifier는 enforcement 깊이를 조절합니다:
@@ -1031,8 +1037,8 @@ Domain Profile을 구축하는 방식은 새 프로젝트인지, 기존 코드�
 Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library)
    │
    ├── Interface 모듈 (gui, http-api, cli, data-io, tui)
-   ├── Concern 모듈 (15: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
-   ├── Archetype 모듈 (ai-assistant, public-api, microservice, sdk-framework)
+   ├── Concern 모듈 (23: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
+   ├── Archetype 모듈 (10: ai-assistant, browser-extension, database-engine, ...)
    ├── Scenario (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: 프레임워크 고유 가이드 원칙 (F0–F6 체크리스트와 구별)
@@ -1523,7 +1529,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-s
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd 상태 파일 | `specs/_global/sdd-state.md` |
 | 결정 이력 | `history.md` |
-| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 19개 갭 패턴 + 42개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
+| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 19개 갭 패턴 + 46개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
 
 ### Feature 네이밍 규약
 
@@ -1586,7 +1592,7 @@ specs/
 
 ## 파일 맵
 
-**242개 파일** (235 .md + 7 .sh), 4개 스킬 + 1개 공유 모듈.
+**255개 파일** (248 .md + 7 .sh), 4개 스킬 + 1개 공유 모듈.
 
 관계도, 실행 흐름도, 도메인 모듈 계층 구조를 포함한 전체 파일 인벤토리는 **[FILE-MAP.md](FILE-MAP.md)**를 참조하세요.
 

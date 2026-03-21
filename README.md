@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 11:24 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 12:00 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -410,8 +410,8 @@ Output: Architecture map, flow traces, Feature candidates
 Goal: Wrap existing code with SDD documentation. Code stays as-is.
 Output: roadmap, registries, constitution-seed, spec.md + plan.md per Feature
 
-/reverse-spec ./source --adopt  → Phase 0-4: analyze code, extract GEL
-/smart-sdd adopt                → Constitution → Feature-by-Feature: specify + plan + verify
+/smart-sdd adopt                → Auto-runs reverse-spec if needed, then
+                                  Constitution → Feature-by-Feature: specify + plan + verify
                                   (no tasks/implement — code already exists)
 ```
 
@@ -423,8 +423,7 @@ Output: Existing code documented + new Feature code + SDD docs
 Prerequisite: Document existing code first (S2), then add.
 
 Step 1 — Document existing code:
-/reverse-spec ./source --adopt  → Analyze and extract GEL
-/smart-sdd adopt                → Document existing Features
+/smart-sdd adopt                → Auto-runs reverse-spec + Document existing Features
 
 Step 2 — Add new features:
 /smart-sdd add                  → Define new Feature(s) via 6-Phase Briefing
@@ -584,8 +583,8 @@ The Scenario Guide above shows **what to do**. This section shows **how it works
 (Domain Profile setup)     (Brief per Feature)    (GEL + Domain Profile)
 
 ── SDD Adoption ──────────────────────────────────────────────────
-/reverse-spec --adopt   →  GEL artifacts       →  /smart-sdd adopt
-(Domain Profile auto)      (roadmap, registries)   (document existing)
+/smart-sdd adopt        →  reverse-spec auto   →  adopt pipeline
+(auto-chains if needed)    (Domain Profile auto)   (document existing)
 
 ── Rebuild ───────────────────────────────────────────────────────
 /reverse-spec           →  GEL artifacts       →  /smart-sdd pipeline
@@ -938,10 +937,14 @@ The Domain Profile concept from [What It Solves](#domain-profile) is implemented
 
 ```
 Interfaces (5):   gui, http-api, cli, data-io, tui
-Concerns (16):    auth, authorization, async-state, codegen, external-sdk, i18n,
-                  infra-as-code, ipc, llm-agents, message-queue, multi-tenancy,
-                  plugin-system, polyglot, protocol-integration, realtime, task-worker
-Archetypes (4):   ai-assistant, public-api, microservice, sdk-framework
+Concerns (23):    auth, authorization, async-state, codegen, cqrs-eventsourcing,
+                  dag-orchestration, distributed-consensus, ecs, external-sdk,
+                  hardware-io, i18n, infra-as-code, ipc, k8s-operator, llm-agents,
+                  message-queue, multi-tenancy, plugin-system, polyglot,
+                  protocol-integration, realtime, task-worker, wire-protocol
+Archetypes (10):  ai-assistant, browser-extension, database-engine, game-engine,
+                  infra-tool, message-broker, microservice, network-server,
+                  public-api, sdk-framework
 Foundations (21): electron, nextjs, express, django, spring-boot, tauri, ...
 Scenarios (4):    greenfield, rebuild, incremental, adoption
 ```
@@ -1002,8 +1005,8 @@ Projects built on specific frameworks (Electron, Express, Next.js, etc.) have in
 Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library)
    │
    ├── Interface modules (gui, http-api, cli, data-io, tui)
-   ├── Concern modules (15: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
-   ├── Archetype modules (ai-assistant, public-api, microservice, sdk-framework)
+   ├── Concern modules (23: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
+   ├── Archetype modules (10: ai-assistant, browser-extension, database-engine, ...)
    ├── Scenario (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: framework-specific guiding principles (distinct from F0–F6 checklists)
@@ -1574,7 +1577,7 @@ specs/
 
 ## File Map
 
-**242 files** (235 .md + 7 .sh) across 4 skills + 1 shared module.
+**255 files** (248 .md + 7 .sh) across 4 skills + 1 shared module.
 
 For the complete file inventory with relationship diagrams, execution flow charts, and domain module hierarchy, see **[FILE-MAP.md](FILE-MAP.md)**.
 

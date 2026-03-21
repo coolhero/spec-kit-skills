@@ -456,6 +456,13 @@ Add a new concern when a project has a recurring cross-cutting pattern not cover
 | `codegen` | Generated/templated code from IDL/schema/template | Source-of-truth tracking, regeneration pipeline, repetitive file detection |
 | `multi-tenancy` | Tenant isolation, per-tenant configuration | Row-level security, tenant context propagation, cache isolation |
 | `infra-as-code` | Infrastructure definitions as first-class components | Terraform, Helm, K8s, Docker Compose, app-infra sync |
+| `cqrs-eventsourcing` | CQRS / Event Sourcing patterns | Command/Event flow, projections, saga orchestration, event replay |
+| `dag-orchestration` | DAG-based workflow orchestration | Airflow, Prefect, Dagster, dbt, task dependencies, backfill |
+| `distributed-consensus` | Consensus protocols and distributed agreement | Raft, Paxos, gossip, leader election, log replication |
+| `ecs` | Entity-Component-System architecture | Data-oriented design, component queries, system scheduling |
+| `hardware-io` | Hardware I/O and device communication | Serial, USB, GPIO, SPI, I2C, device lifecycle, HAL |
+| `k8s-operator` | Kubernetes operator pattern | CRDs, reconciliation loops, finalizers, status subresource |
+| `wire-protocol` | Wire protocol implementations | MQTT, AMQP, RESP, frame parsing, protocol state machines |
 
 ### Examples of Potential New Concerns
 
@@ -518,8 +525,14 @@ Add a new archetype when a class of applications has distinct philosophical prin
 | Archetype | Description | Key Principles |
 |-----------|-------------|---------------|
 | `ai-assistant` | LLM-powered applications | Streaming-First, Model Agnosticism, Offline Resilience, Token Awareness, Prompt Versioning |
-| `public-api` | External-facing API platforms | Rate Limiting, Versioning, API Key Lifecycle, Documentation Parity |
+| `browser-extension` | Browser extensions and add-ons | Minimal Permissions, Content Script Isolation, Background Lifecycle, Storage-First, Cross-Browser |
+| `database-engine` | Storage engines, query processors, database systems | Storage/Compute Separation, ACID, Query Lifecycle, Replication, Schema Evolution |
+| `game-engine` | Game engines and interactive simulations | Deterministic Update Loop, Data-Oriented Design, Render-Update Separation, Asset Lifecycle, Frame Budget |
+| `infra-tool` | Infrastructure-as-Code tools and reconciliation engines | Declarative Over Imperative, Provider Extensibility, State as Source of Truth, Idempotent, Plan Before Apply |
+| `message-broker` | Message brokers and event streaming platforms | Protocol Conformance, Message Ordering, Durability/Throughput Tradeoff, Cluster Consensus, Backpressure |
 | `microservice` | Distributed service architecture | Service Autonomy, Contract-First, Circuit Breaking, Observability |
+| `network-server` | Proxies, load balancers, API gateways | Connection Lifecycle, Filter Chain, Protocol State Machine, Hot-Reload, Backpressure |
+| `public-api` | External-facing API platforms | Rate Limiting, Versioning, API Key Lifecycle, Documentation Parity |
 | `sdk-framework` | Libraries, SDKs, frameworks for other developers | API Stability, Extension-First Design, Example-as-Contract, Documentation Parity, Backward Compatibility |
 
 ---
