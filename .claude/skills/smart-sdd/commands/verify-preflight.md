@@ -29,43 +29,48 @@
 - Record PID in the Verify PID Registry (see Process Lifecycle Protocol above)
 - Display: `🚀 Starting dev server...`
 
-**0-2b. User App Configuration Gate** (GUI apps with in-app settings):
+**0-2b. User App Configuration Gate** (all app types with runtime config dependencies):
 
-> Many desktop/web apps store critical configuration in-app (API keys, model selection, account login, server URLs) rather than in `.env` files. Without these settings, the app cannot perform core functions — chat won't work without a configured model, sync won't work without a logged-in account, AI features won't work without API keys. Attempting SC verification without user configuration wastes time and produces false negatives.
+> Apps often store critical configuration that the agent cannot provide — API keys, model selection, account login, database credentials, OAuth tokens. Without these, core functions fail. This gate delegates setup to the user BEFORE verification, preventing wasted attempts and false negatives.
+> Follows **Delegate, Don't Skip** (CLAUDE.md P2 appendix). For setup instruction templates, see [`shared/runtime/user-assisted-setup.md`](../../../shared/runtime/user-assisted-setup.md).
+> Symmetry: reverse-spec has the equivalent gate at `analyze-runtime.md` § 1.5-4b (User-Assisted Setup).
 
-**Detection**: Check if the app has user-configurable dependencies:
-1. Read Data Storage Map (from `pre-context.md` or `analyze-scan.md` § 1-6) for in-app config stores (electron-store, localStorage, SQLite, config files in userData)
-2. Read SC Verification Matrix for `user-assisted` SCs requiring credentials/config
+**Detection** — Read [`shared/runtime/data-storage-map.md`](../../../shared/runtime/data-storage-map.md) results (from `pre-context.md` or `analyze-scan.md` § 1-6):
+1. Identify config stores: electron-store, localStorage, SQLite, `.env`, config files, OS keychain
+2. Cross-check SC Verification Matrix for `user-assisted` SCs requiring credentials/config
 3. Read `constitution.md` or `pre-context.md` for external service dependencies (AI providers, databases, auth)
+4. **Classify impact** per `user-assisted-setup.md` § Impact Classification: 🚫 BLOCKING / ⚠️ PARTIAL / ℹ️ OPTIONAL
 
-**If in-app configuration detected**:
-1. Keep the app running (launched in 0-2/0-2alt)
-2. Use AskUserQuestion:
-   ```
-   🔧 App Configuration Required
+**If BLOCKING or PARTIAL config detected** — apply per interface type:
 
-   The app is now running. Please configure the following settings
-   in the app before verification can proceed:
+| Interface | Gate Behavior |
+|-----------|--------------|
+| **GUI (desktop)** | Keep app running (from 0-2). User configures in-app UI. Playwright uses SAME userData dir. |
+| **GUI (web)** | Keep dev server running (from 0-2alt). User configures in browser. If OAuth needed, offer: test account / mock server / skip. |
+| **HTTP API** | If DB seed needed → provide exact seed command. If `.env` keys missing → list required keys. |
+| **CLI** | If config file needed → provide exact `[tool] config set` commands. If env vars needed → list them. |
 
-   [List detected dependencies, e.g.:]
-   - AI provider API key (Settings → Provider)
-   - Default model selection (Settings → Model)
-   - Account login (if required)
+Use AskUserQuestion with setup instructions from `user-assisted-setup.md` templates:
+```
+🔧 App Configuration Required
 
-   After configuring, you can keep the app running or close it.
-   The agent will use your saved configuration for verification.
-   ```
-   Options:
-   - "Configuration complete — proceed with verification"
-   - "Skip — proceed without full app configuration" → SCs depending on these settings will be marked `⚠️ skipped (unconfigured)`
-   **If response is empty → re-ask** (per MANDATORY RULE 1)
+[Interface-specific instructions, e.g.:]
+- AI provider API key (Settings → Provider)
+- Default model selection (Settings → Model)
+- Database seed: `pnpm run db:seed`
+```
+Options:
+- "Configuration complete — proceed with verification"
+- "Skip — proceed without full configuration" → dependent SCs marked `⚠️ skipped (unconfigured)`
+**If response is empty → re-ask** (per MANDATORY RULE 1)
 
-3. After user confirms:
-   - If app stores config in userData (electron-store, etc.): subsequent Playwright sessions use the SAME userData dir (not isolated) to access user's configuration
-   - If app stores config in `.env` or external file: verify file contains expected keys
-   - Record configured status in Feature Detail Log
+**After user confirms**:
+- Record `0-2b-configured: true` + configured items in Feature Detail Log
+- If userData-based config: subsequent sessions use SAME userData dir (not isolated)
+- If `.env` or external file: verify expected keys are present
+- **Downstream Phase 3 reads this flag** — do NOT re-ask for items already configured here (see `user-cooperation-protocol.md` § 3)
 
-**If NO in-app configuration detected** (pure .env config, no runtime setup needed): Skip this step silently.
+**If NO runtime config detected**: Skip this step silently.
 
 **0-2c. Dev Mode Stability Probe** (GUI projects with distinct dev command):
 

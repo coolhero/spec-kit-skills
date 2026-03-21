@@ -332,20 +332,23 @@ For each SC in the SC Verification Matrix:
 
 **`user-assisted` SCs** (all interfaces):
 > See [user-cooperation-protocol.md](../reference/user-cooperation-protocol.md) §3.
-1. Before verifying `user-assisted` SCs, batch ALL user preparation requests into one prompt:
+1. **Check Phase 0-2b status first**: Read Feature Detail Log for `0-2b-configured` flag.
+   - If `0-2b-configured: true` → filter out items already configured in Phase 0. Only ask for ADDITIONAL items not covered.
+   - If `0-2b-configured` absent → ask for all user-assisted dependencies (Phase 0 was skipped or not applicable).
+2. If remaining items exist, batch ALL user preparation requests into one prompt:
    ```
    📋 User-Assisted Verification for [FID]:
-     SC-023: Requires OPENAI_API_KEY in .env
      SC-031: Requires MCP server running on localhost:3001
+     (Note: API key already configured in Phase 0)
 
    Please prepare these dependencies, then confirm.
    ```
-2. **Use AskUserQuestion**:
+3. **Use AskUserQuestion**:
    - "Dependencies ready — proceed with verification"
    - "Skip user-assisted SCs"
    **If response is empty → re-ask** (per MANDATORY RULE 1)
-3. If "Dependencies ready": re-verify each dependency (probe API key presence, service endpoint) → run automated verification (same as auto categories)
-4. If "Skip": record as `⚠️ user-assisted — skipped`
+4. If "Dependencies ready": re-verify each dependency (probe API key presence, service endpoint) → run automated verification (same as auto categories)
+5. If "Skip": record as `⚠️ user-assisted — skipped`
 
 **Per-SC Depth Tracking** (MANDATORY — enforces SC Minimum Depth Rule from Step 0):
 

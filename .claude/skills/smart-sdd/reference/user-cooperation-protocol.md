@@ -164,6 +164,7 @@ All existing and new cooperation points, organized by pipeline stage. Each follo
 | Point | File | Category | Detection |
 |-------|------|----------|-----------|
 | Runtime Backend Pre-flight | `commands/verify-phases.md` Pre-flight | Environment Setup | Multi-backend detection (see `runtime-verification.md` §3) |
+| User App Configuration | `commands/verify-preflight.md` Step 0-2b | Configuration | Data Storage Map identifies in-app config (electron-store, localStorage, SQLite, etc.) |
 | CDP not configured (Case A) | `commands/verify-phases.md` Phase 3 Step 3 | Configuration | `browser_snapshot` returns default page |
 | Lint tool not found | `commands/verify-phases.md` Phase 1 Step 3b | Environment Setup | Lint command not found error |
 | User-assisted SCs | `commands/verify-phases.md` Phase 3 Step 3d | External Services | SC classified as `user-assisted` |

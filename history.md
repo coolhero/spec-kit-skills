@@ -9,13 +9,17 @@
 
 ### What Changed
 
-- **verify-preflight.md**: Added new step **0-2b. User App Configuration Gate** between app startup (0-2) and Dev Mode Stability Probe (0-2c).
-- When the app has in-app configuration dependencies (API keys, model selection, account login stored in electron-store/localStorage/SQLite), the agent keeps the app running and asks the user to configure it before proceeding with SC verification.
-- Updated State Isolation (0-4) exception to reference the new gate instead of inline explanation.
+- **verify-preflight.md**: Added **0-2b. User App Configuration Gate** between app startup (0-2) and Dev Mode Stability Probe (0-2c). Generalized for ALL interface types (GUI desktop/web, HTTP API, CLI), not just Electron.
+- References `shared/runtime/user-assisted-setup.md` for setup instruction templates and `shared/runtime/data-storage-map.md` for config store detection — reusing existing shared modules.
+- Records `0-2b-configured` flag in Feature Detail Log so **Phase 3 Step 3d does NOT re-ask** for the same items.
+- **verify-sc-verification.md**: Phase 3 `user-assisted` SCs now check 0-2b flag first, only asking for ADDITIONAL items not already configured.
+- **user-cooperation-protocol.md**: Added 0-2b to §4 Cross-Reference table.
+- Updated State Isolation (0-4) exception to reference the new gate.
+- Noted symmetry with reverse-spec `analyze-runtime.md` § 1.5-4b (which already had the equivalent gate).
 
 ### Why
 
-Desktop apps like Cherry Studio store configuration (AI provider API keys, model selection) in-app (electron-store), not in `.env`. Playwright launches the app in a clean state without these settings, making core functionality (chat, AI features) untestable. Previously the agent would attempt SC verification → fail → waste time. Now: app launches → user configures in running app → agent uses the same userData dir → SC verification succeeds. This aligns with CLAUDE.md P2 부칙 "Delegate, Don't Skip" — agent limitation doesn't mean verification skip, it means user delegation.
+Desktop apps like Cherry Studio store configuration (AI provider API keys, model selection) in-app (electron-store), not in `.env`. Playwright launches the app in a clean state without these settings, making core functionality (chat, AI features) untestable. Previously the agent would attempt SC verification → fail → waste time. Now: app launches → user configures → agent uses same userData dir → SC verification succeeds. This aligns with P2 부칙 "Delegate, Don't Skip". The generalized interface table (GUI/API/CLI) ensures the pattern applies beyond Electron to any app type with runtime config dependencies.
 
 ---
 
