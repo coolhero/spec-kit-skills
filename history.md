@@ -13,11 +13,11 @@ Updated documentation files to reflect current domain module counts across all 5
 - **Interfaces**: 5 → 9 (added mobile, library, embedded, grpc)
 - **Concerns**: 23 → 33 (added graceful-lifecycle, gpu-compute, observability, resilience, connection-pool, webrtc, tls-management, schema-registry, cryptography, udp-transport)
 - **Archetypes**: 10 → 15 (added cache-server, compiler, inference-server, media-server, workflow-engine)
-- **Cross-Concern Integration Rules**: 14 → 53
-- **Profiles**: 6 → 16
+- **Cross-Concern Integration Rules**: 14 → 50
+- **Profiles**: 6 → 11 (6 profile files + 5 new entries in _taxonomy.md pending file creation)
 
 ### Files Modified
-- `ARCHITECTURE-EXTENSIBILITY.md` — Level 2 status table (14 → 53 rules)
+- `ARCHITECTURE-EXTENSIBILITY.md` — Level 2 status table (14 → 50 rules)
 - `ARCHITECTURE-EXTENSIBILITY.ko.md` — same (Korean mirror)
 - `README.md` — Available Modules listing, Platform Foundation tree, Last updated timestamp
 - `README.ko.md` — same (Korean mirror), including full axis tree diagram update

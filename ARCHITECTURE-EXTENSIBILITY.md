@@ -681,7 +681,7 @@ Modules evolve through 5 levels of sophistication. This model helps prioritize i
 | Level | Status | Notes |
 |-------|--------|-------|
 | **Level 1** | ✅ ~90% | Most modules complete. Remaining: `react-native`, `flutter` Foundation files have TODO scaffolds |
-| **Level 2** | 🔶 ~60% | Cross-Concern Integration Rules defined in `_resolver.md` Step 3.5 (53 rules). Enforcement recently wired to `context-injection-rules.md` and all injection files. Scale modifier enforcement added. Conflict resolution rules still limited to documented pairs |
+| **Level 2** | 🔶 ~60% | Cross-Concern Integration Rules defined in `_resolver.md` Step 3.5 (50 rules). Enforcement recently wired to `context-injection-rules.md` and all injection files. Scale modifier enforcement added. Conflict resolution rules still limited to documented pairs |
 | **Level 3** | 🔶 ~40% | Per-archetype verify/specify behavior exists for `ai-assistant`, `desktop-app`. Most archetypes lack pipeline behavior customization |
 | **Level 4** | ⬜ ~10% | Anti-pattern examples exist in lessons-learned.md and injection files, but no structured pattern library per module combination |
 | **Level 5** | ⬜ ~15% | skill-feedback.md intake process exists; 65+ SKF items processed. No automated tracking of rule effectiveness yet |

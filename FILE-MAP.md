@@ -270,7 +270,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | **Domains — Interfaces** (9) | `domains/interfaces/{gui,http-api,cli,data-io,tui,mobile,library,embedded,grpc}.md` | SC rules, elaboration probes, bug prevention |
 | **Domains — Concerns** (33) | `domains/concerns/*.md` | SC rules, elaboration probes, bug prevention |
 | **Domains — Archetypes** (15) | `domains/archetypes/*.md` | Domain philosophy (A1), SC extensions (A2), probes (A3), constitution (A4), brief criteria (A5) |
-| **Domains — Profiles** (16) | `domains/profiles/*.md` | Pre-configured axis combinations |
+| **Domains — Profiles** (11) | `domains/profiles/*.md` | Pre-configured axis combinations (6 files + 5 in _taxonomy.md pending) |
 | **Domains — Scenarios** (4) | `domains/scenarios/{greenfield,rebuild,incremental,adoption}.md` | Scenario-specific pipeline rules |
 | **Reference** | | |
 | `reference/context-injection-rules.md` | Master injection rules — loading order, Scale/Cross-Concern enforcement |
