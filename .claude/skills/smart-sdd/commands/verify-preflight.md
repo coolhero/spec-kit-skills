@@ -29,6 +29,44 @@
 - Record PID in the Verify PID Registry (see Process Lifecycle Protocol above)
 - Display: `🚀 Starting dev server...`
 
+**0-2b. User App Configuration Gate** (GUI apps with in-app settings):
+
+> Many desktop/web apps store critical configuration in-app (API keys, model selection, account login, server URLs) rather than in `.env` files. Without these settings, the app cannot perform core functions — chat won't work without a configured model, sync won't work without a logged-in account, AI features won't work without API keys. Attempting SC verification without user configuration wastes time and produces false negatives.
+
+**Detection**: Check if the app has user-configurable dependencies:
+1. Read Data Storage Map (from `pre-context.md` or `analyze-scan.md` § 1-6) for in-app config stores (electron-store, localStorage, SQLite, config files in userData)
+2. Read SC Verification Matrix for `user-assisted` SCs requiring credentials/config
+3. Read `constitution.md` or `pre-context.md` for external service dependencies (AI providers, databases, auth)
+
+**If in-app configuration detected**:
+1. Keep the app running (launched in 0-2/0-2alt)
+2. Use AskUserQuestion:
+   ```
+   🔧 App Configuration Required
+
+   The app is now running. Please configure the following settings
+   in the app before verification can proceed:
+
+   [List detected dependencies, e.g.:]
+   - AI provider API key (Settings → Provider)
+   - Default model selection (Settings → Model)
+   - Account login (if required)
+
+   After configuring, you can keep the app running or close it.
+   The agent will use your saved configuration for verification.
+   ```
+   Options:
+   - "Configuration complete — proceed with verification"
+   - "Skip — proceed without full app configuration" → SCs depending on these settings will be marked `⚠️ skipped (unconfigured)`
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+3. After user confirms:
+   - If app stores config in userData (electron-store, etc.): subsequent Playwright sessions use the SAME userData dir (not isolated) to access user's configuration
+   - If app stores config in `.env` or external file: verify file contains expected keys
+   - Record configured status in Feature Detail Log
+
+**If NO in-app configuration detected** (pure .env config, no runtime setup needed): Skip this step silently.
+
 **0-2c. Dev Mode Stability Probe** (GUI projects with distinct dev command):
 
 > Production builds and dev mode follow different code paths — module bundling vs native ESM, static env injection vs runtime loading, pre-compiled vs HMR-driven. Bugs that only manifest under one path (e.g., module-scope side effects that depend on initialization order) are invisible if verify only exercises the other. This probe catches startup-time crashes in the path NOT covered by 0-2/0-2alt.
@@ -66,7 +104,7 @@
 
 Apply ONE of these strategies (in priority order):
 1. **Clean user data directory**: Launch the app with an isolated/temporary user data path (e.g., `--user-data-dir=/tmp/verify-clean-{FID}` for Electron, fresh browser profile for web). This guarantees pristine default state.
-   - **Exception**: If SC Verification Matrix has `user-assisted` SCs requiring in-app credentials (API keys stored in electron-store, not .env), use the user's ACTUAL userData dir instead of isolated. The user configures → closes app → verify reads their settings. See `user-cooperation-protocol.md` § 3 and `reverse-spec/commands/analyze-scan.md` § 1-6 (Data Storage Map) for storage detection.
+   - **Exception**: If User App Configuration Gate (0-2b) was triggered and user configured in-app settings, use the user's ACTUAL userData dir instead of isolated — otherwise user's configuration is lost. See `user-cooperation-protocol.md` § 3.
 2. **Reset API**: If the app provides a config reset mechanism (IPC `config:reset`, API `POST /reset`, CLI `--factory-reset`), invoke it at verify start before any test execution
 3. **State-aware test pattern**: If neither 1 nor 2 is possible, every test scenario MUST follow the **read-before-act** pattern:
    - Read current value first (`const before = await getCurrentTheme()`)

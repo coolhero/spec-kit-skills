@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-21] User App Configuration Gate (verify-preflight Phase 0-2b)
+
+### What Changed
+
+- **verify-preflight.md**: Added new step **0-2b. User App Configuration Gate** between app startup (0-2) and Dev Mode Stability Probe (0-2c).
+- When the app has in-app configuration dependencies (API keys, model selection, account login stored in electron-store/localStorage/SQLite), the agent keeps the app running and asks the user to configure it before proceeding with SC verification.
+- Updated State Isolation (0-4) exception to reference the new gate instead of inline explanation.
+
+### Why
+
+Desktop apps like Cherry Studio store configuration (AI provider API keys, model selection) in-app (electron-store), not in `.env`. Playwright launches the app in a clean state without these settings, making core functionality (chat, AI features) untestable. Previously the agent would attempt SC verification → fail → waste time. Now: app launches → user configures in running app → agent uses the same userData dir → SC verification succeeds. This aligns with CLAUDE.md P2 부칙 "Delegate, Don't Skip" — agent limitation doesn't mean verification skip, it means user delegation.
+
+---
+
 ## [2026-03-21] Context Optimization: Lazy-load Degradation Table + Budget Protocol
 
 ### What Changed
