@@ -192,7 +192,7 @@
 
 **Why it happens**: Quantitative metrics are easy to extract automatically. Qualitative rationale requires tracing decisions back to principles — a fundamentally different operation.
 
-**How we catch it**: Philosophy-aware report generation (`/case-study`) traces each architectural decision back to the principle that motivated it. Section 4.2 (Architecture Philosophy) + Section 4.3 (Principle-to-Decision Mapping).
+**How we catch it**: Philosophy-aware Auto-Report generation (triggered automatically at pipeline completion) traces each architectural decision back to the principle that motivated it. §5.2 (Architecture Philosophy) + §5.3 (Principle-to-Decision Mapping) in `shared/reference/completion-report.md`.
 
 **Coverage**: ~75% — captures decisions that are traceable to explicit principles; implicit "it seemed right" decisions are harder to capture.
 

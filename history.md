@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-21] Case-Study Skill Deprecated — Auto-Report Replaces Manual Invocation
+
+### What Changed
+
+- **case-study/SKILL.md**: Added deprecation notice pointing to Auto-Report system
+- **CLAUDE.md Intentional Exclusions**: Updated to reflect deprecated status and Auto-Report replacement
+- **lessons-learned.md**: Updated G14 reference from `/case-study` to Auto-Report §5.2-§5.3
+- **No files deleted**: case-study skill retained for backward compatibility; `/case-study` still works
+
+### Why
+
+The Auto-Report system (completion-report.md) generates reports automatically at pipeline completion, eliminating the need for manual `/case-study` invocation. Data overlap is ~90% — history.md per-Feature Implementation Decisions replace case-study-log.md M6 entries. The Auto-Report adds §5.2 Architecture Philosophy and §5.3 Principle-to-Decision Mapping that case-study lacked.
+
+---
+
 ## [2026-03-21] Migration Context Module — New Domain Module Type
 
 ### What Changed
