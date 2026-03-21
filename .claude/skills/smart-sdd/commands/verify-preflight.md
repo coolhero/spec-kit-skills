@@ -182,6 +182,19 @@ Shell is always available. Set `RUNTIME_BACKEND = process-runner` for this inter
 **Step 2d — Data-IO Backend Detection**:
 Shell is always available. Set `RUNTIME_BACKEND = pipeline-runner` for this interface. No HARD STOP needed.
 
+**Step 2e — gRPC Backend Detection**:
+Execute the detection protocol defined in [runtime-verification.md §3e](../reference/runtime-verification.md):
+1. Check `grpcurl` availability → if found, `RUNTIME_BACKEND = grpc-client`
+2. If not found → attempt install → re-check
+3. Fallback: `process-runner` (use project's own test suite or grpc-health-probe)
+No HARD STOP needed. Display: `ℹ️ Runtime verification: gRPC Client (grpcurl) for grpc interface`
+
+**Step 2f — Protocol Client Detection** (for non-HTTP concerns):
+Execute the detection protocol defined in [runtime-verification.md §3f](../reference/runtime-verification.md):
+- WebSocket (`websocat`/`wscat`), DNS (`dig`), SMTP (`swaks`), Redis (`redis-cli`), Broker CLI (`nats`/`rabbitmqadmin`)
+- Record available clients. Unavailable → SCs using that protocol classified as `user-assisted`
+No HARD STOP needed. Display: `ℹ️ Protocol clients: [available list]`
+
 ---
 
 **⛔ Workaround Prohibition** (clarified scope — see [runtime-verification.md](../reference/runtime-verification.md) §5):

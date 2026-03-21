@@ -17,6 +17,12 @@ Available verification backends, detection method, and capabilities.
 | **HTTP Client** | `curl --version` → exit 0 (always available) | HTTP request/response, status code, body verification, header inspection | 1 (preferred for http-api) |
 | **Process Runner** | Shell availability (always true) | stdin/stdout/stderr capture, exit code, timing, signal handling | 1 (preferred for cli) |
 | **Pipeline Runner** | Shell + project config (always true) | Input/output file comparison, schema validation, log inspection | 1 (preferred for data-io) |
+| **gRPC Client** | `which grpcurl` or `go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest` | Unary/streaming RPC, health probe, service reflection, metadata | 1 (preferred for grpc) |
+| **WebSocket Client** | `which websocat` or `npx wscat --version` | WS connect, frame send/receive, close handshake | 1 (for realtime WS) |
+| **DNS Client** | `which dig` (pre-installed on Linux/macOS) | DNS query/response, zone transfer, DNSSEC validation | 1 (for DNS) |
+| **SMTP Client** | `which swaks` or `curl --version` (curl supports SMTP) | SMTP EHLO, send email, TLS negotiation | 1 (for email) |
+| **Redis Client** | `which redis-cli` | GET/SET/DEL, PUB/SUB, TTL, data structure ops | 1 (for RESP protocol) |
+| **Broker CLI** | `which nats` or `which rabbitmqadmin` (broker-specific) | Pub/sub, queue inspection, consumer group management | 1 (for message brokers) |
 
 ---
 
@@ -31,6 +37,11 @@ Maps each interface type (from sdd-state.md Domain Profile → Interfaces) to it
 | **http-api** | Server: `npm start` / quickstart.md / build tool | curl/supertest endpoints, verify status + body | Kill server process | HTTP Client | demo --ci health check |
 | **cli** | N/A (per-invocation) | Execute command, capture stdout/stderr/exit code | N/A (process exits) | Process Runner | demo --ci |
 | **data-io** | Pipeline prerequisite setup (data fixtures, configs) | Run pipeline with test data, compare output | Cleanup test artifacts | Pipeline Runner | demo --ci |
+| **grpc** | Server: `go run` / `cargo run` / `python -m` | grpcurl unary/stream calls, verify status codes + response messages | Kill server process | gRPC Client | cli-auto (grpc-health-probe) |
+| **tui** | Terminal: run in pseudo-terminal (pty) | Key input → screen scrape → verify output | Kill process | Process Runner | demo --ci |
+| **mobile** | Emulator/device (platform-specific) | Appium/Maestro commands | Stop emulator | Process Runner | user-assisted |
+| **library** | N/A (per-invocation via import) | Import + call API + verify return value | N/A | Process Runner | demo --ci |
+| **embedded** | Flash/deploy to target (or simulator) | Serial/JTAG output capture, GPIO state | Power cycle / reset | Process Runner | user-assisted |
 
 **Multi-interface projects**: When a project has multiple interfaces (e.g., `gui` + `http-api`), run detection for ALL applicable interfaces. Each Feature's SCs are verified using the backend matching the Feature's primary interface.
 
@@ -119,6 +130,41 @@ Set RUNTIME_BACKEND = pipeline-runner
 ```
 
 No HARD STOP, no session restart, no MCP dependency.
+
+### 3e. gRPC Backend Detection
+
+```
+1. Check grpcurl: `which grpcurl` or `grpcurl --version`
+   - If available → RUNTIME_BACKEND = grpc-client
+   - If unavailable → try install: `go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest`
+     - If install succeeds → RUNTIME_BACKEND = grpc-client
+     - If install fails → RUNTIME_BACKEND = process-runner (fallback: use grpc-health-probe or project test suite)
+2. Check grpc-health-probe: `which grpc-health-probe`
+   - Record GRPC_HEALTH_PROBE = available / unavailable (used for health check, not SC verification)
+```
+
+No HARD STOP. Display: `ℹ️ Runtime verification: gRPC Client (grpcurl) for grpc interface`
+
+### 3f. Protocol-Specific Backend Detection
+
+For interfaces/concerns that use non-HTTP protocols, detect available CLI tools:
+
+```
+1. WebSocket: `which websocat` or `npx wscat --version`
+   → WS_CLIENT = available / unavailable
+2. DNS: `which dig` (pre-installed on most systems)
+   → DNS_CLIENT = available / unavailable
+3. SMTP: `which swaks` (preferred) or curl SMTP support (`curl --version | grep smtp`)
+   → SMTP_CLIENT = available / unavailable
+4. Redis/RESP: `which redis-cli`
+   → RESP_CLIENT = available / unavailable
+5. Message Broker: `which nats` (NATS) or `which rabbitmqadmin` (RabbitMQ) — broker-specific
+   → BROKER_CLI = available / unavailable
+```
+
+No HARD STOP for any protocol client. If unavailable, SCs using that protocol are classified as `user-assisted` (Delegate, Don't Skip).
+
+Display: `ℹ️ Protocol clients: [list of available clients]`
 
 ---
 
@@ -228,6 +274,60 @@ For each SC classified as `pipeline-auto`:
    - Key value spot checks (first row, last row, aggregate values)
 4. Verify no error logs during execution (grep stderr for error patterns)
 5. Cleanup test artifacts after verification
+
+### 6e. gRPC Verification Protocol
+
+After server start:
+1. **Health check**: `grpcurl -plaintext localhost:PORT grpc.health.v1.Health/Check` → verify SERVING
+2. **Service discovery**: `grpcurl -plaintext localhost:PORT list` → verify expected services registered
+3. For each SC classified as `grpc-auto`:
+   - Unary RPC: `grpcurl -plaintext -d '{"field":"value"}' localhost:PORT package.Service/Method` → verify response message + gRPC status code (0=OK, 5=NOT_FOUND, etc.)
+   - Error case: send invalid input → verify correct gRPC status code (NOT HTTP status)
+4. For each SC classified as `grpc-stream`:
+   - Server streaming: initiate stream → verify message sequence and completion
+   - Client streaming: pipe multiple messages → verify aggregate response
+5. **Metadata**: verify required metadata (auth token, trace ID) propagates through interceptor chain
+6. Error scan: check server stderr for panic, fatal errors
+
+### 6f. Protocol-Specific Verification Protocols
+
+**WebSocket** (`ws-auto` SCs — when WS_CLIENT available):
+1. Connect: `websocat ws://localhost:PORT/path` or `wscat -c ws://localhost:PORT/path`
+2. Send message → verify echo/response
+3. Verify connection upgrade (HTTP 101)
+4. Verify close handshake (close frame sent/received)
+5. If WS_CLIENT unavailable → classify as `user-assisted`, provide manual test instructions
+
+**DNS** (`dns-auto` SCs — when DNS_CLIENT available):
+1. Query: `dig @localhost -p PORT example.com A` → verify answer section
+2. Zone transfer: `dig @localhost -p PORT example.com AXFR` → verify record set
+3. NXDOMAIN: `dig @localhost -p PORT nonexistent.example.com` → verify NXDOMAIN response
+4. If DNS_CLIENT unavailable → classify as `user-assisted`
+
+**Redis/RESP** (`resp-auto` SCs — when RESP_CLIENT available):
+1. Health: `redis-cli -p PORT ping` → verify PONG
+2. Data ops: `redis-cli -p PORT SET key value` → `GET key` → verify roundtrip
+3. TTL: `redis-cli -p PORT SET key value EX 5` → `TTL key` → verify countdown
+4. If RESP_CLIENT unavailable → classify as `user-assisted`
+
+**Message Broker** (`broker-auto` SCs — when BROKER_CLI available):
+1. NATS: `nats pub subject "msg"` + `nats sub subject` → verify delivery
+2. RabbitMQ: `rabbitmqadmin publish routing_key=queue payload="msg"` + `rabbitmqadmin get queue=queue` → verify
+3. If BROKER_CLI unavailable → classify as `user-assisted`
+
+**SMTP** (`smtp-auto` SCs — when SMTP_CLIENT available):
+1. `swaks --to test@localhost --server localhost:PORT` → verify delivery
+2. Or: `curl smtp://localhost:PORT --mail-from sender@test --mail-rcpt rcpt@test -T message.txt`
+3. If SMTP_CLIENT unavailable → classify as `user-assisted`
+
+**Fallback for all protocol backends**: When the specific client tool is unavailable, apply **Delegate, Don't Skip** (CLAUDE.md P2 appendix):
+```
+AskUserQuestion:
+  "Protocol client [tool] is not installed. Please verify manually:
+   1. [Specific verification step with exact command]
+   2. [Expected result]
+   Confirm the result when done."
+```
 
 ---
 
