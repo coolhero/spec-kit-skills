@@ -916,6 +916,16 @@ After `speckit-specify` completes and the user approves the Review, **automatica
 4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
 5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-clarify executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to plan.
 
+#### Analyze Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After `speckit-analyze` returns, do NOT show its raw output. You MUST suppress it, read the artifact, display Review, and call AskUserQuestion. Stopping after raw output is **Violation Pattern A**.
+
+1. Execute `speckit-analyze` via Inline Execution (NOT Skill tool)
+2. **In the SAME response** — SUPPRESS any navigation output from speckit-analyze. Do NOT show these to the user.
+3. Read the analysis output and assemble Review Display (show: CRITICAL issues that block implement, warnings, analysis summary)
+4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options. If CRITICAL issues exist, inform the user they block implement.
+5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-analyze executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to implement.
+
 #### Per-Feature Environment Variable Check (implement step)
 
 Environment variables are checked **per Feature, at implement time** — not aggregated upfront. This ensures variables are only requested when the Feature that needs them is about to be implemented.
@@ -1267,6 +1277,16 @@ When the user reports a problem with phrases like "there's an error", "it doesn'
 ✅ RIGHT: const app = await _electron.launch({args: ['out/main/index.js']})
   → Playwright accessibility.snapshot() + Feature-specific element verification
 ```
+
+#### Verify Execute+Review (HARD STOP)
+
+> **⚠️ MANDATORY RULE 3 REMINDER**: After verify phases complete, do NOT just show "verify ✅". You MUST suppress navigation output, display the Verify Execution Checklist with results, and call AskUserQuestion. Stopping with only a summary is **Violation Pattern A**.
+
+1. Execute all verify phases per `commands/verify-phases.md` and `reference/injection/verify.md`
+2. **In the SAME response** — SUPPRESS any spec-kit navigation messages. Do NOT show these to the user.
+3. Assemble Review Display: filled Verify Execution Checklist (above) + per-SC verification results + bug severity classifications
+4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ Verification executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to merge.
 
 #### Verify Structural Enforcement Gates (SKF-053)
 

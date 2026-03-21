@@ -424,6 +424,12 @@ Key behaviors:
 - **SBI Coverage**: Check B### → FR-### mapping completeness
 - **Overall status**: `adopted` (not `completed`)
 
+> **⚠️ MANDATORY RULE 3 REMINDER**: After verify phases complete, do NOT just show "verify ✅". You MUST:
+> 1. **SUPPRESS** any spec-kit navigation messages — do NOT show to the user
+> 2. Display verify results (phase execution summary, SBI coverage, pre-existing issues)
+> 3. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
+> 4. **Catch-all**: If this response ends without AskUserQuestion, show: `✅ Verification executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.`
+
 #### Step 5 — Merge (Checkpoint)
 
 **Same as standard pipeline merge**, but with adoption-specific status:
