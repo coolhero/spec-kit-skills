@@ -17,6 +17,7 @@
 | mobile | `interfaces/mobile.md` | Mobile apps (iOS, Android, cross-platform) | auth, async-state, realtime |
 | library | `interfaces/library.md` | Libraries/SDKs consumed via import/linking | plugin-system |
 | embedded | `interfaces/embedded.md` | Embedded systems, firmware, IoT, RTOS | hardware-io, wire-protocol |
+| grpc | `interfaces/grpc.md` | gRPC/RPC services (Protobuf, Connect, Twirp) | auth, resilience, observability |
 
 ## Concerns
 
@@ -50,6 +51,11 @@
 | gpu-compute | `concerns/gpu-compute.md` | GPU/accelerator programming (CUDA, inference, compute shaders) | data-io, network-server (archetype) |
 | resilience | `concerns/resilience.md` | Retry, circuit breaker, backpressure, timeout management | http-api, microservice, external-sdk |
 | connection-pool | `concerns/connection-pool.md` | Connection/resource pool management (DB, HTTP, gRPC pools) | http-api, database-engine (archetype) |
+| webrtc | `concerns/webrtc.md` | WebRTC protocol suite (ICE, DTLS-SRTP, SDP, media tracks) | realtime, wire-protocol |
+| tls-management | `concerns/tls-management.md` | TLS/mTLS certificate lifecycle (ACME, rotation, SNI) | network-server (archetype), http-api |
+| schema-registry | `concerns/schema-registry.md` | Schema evolution and registry (Protobuf, Avro, JSON Schema) | message-queue, grpc, codegen |
+| cryptography | `concerns/cryptography.md` | Cryptographic primitives (key exchange, encryption, signatures) | wire-protocol, tls-management, auth |
+| udp-transport | `concerns/udp-transport.md` | UDP datagram networking (DNS, QUIC, game net, media) | wire-protocol, network-server (archetype) |
 
 ## Archetypes
 
@@ -66,6 +72,10 @@
 | public-api | `archetypes/public-api.md` | External-facing API platforms | http-api |
 | sdk-framework | `archetypes/sdk-framework.md` | Libraries, SDKs, and frameworks consumed by other developers | cli, http-api |
 | compiler | `archetypes/compiler.md` | Compilers, interpreters, language servers, linters, formatters | cli, library |
+| cache-server | `archetypes/cache-server.md` | In-memory stores, caching servers (Redis, Memcached, Dragonfly) | cli, library |
+| workflow-engine | `archetypes/workflow-engine.md` | Durable execution engines (Temporal, Cadence, Step Functions) | http-api, cli |
+| media-server | `archetypes/media-server.md` | SFU/MCU media servers, streaming, transcoding | http-api, grpc |
+| inference-server | `archetypes/inference-server.md` | ML inference serving (vLLM, Triton, TGI, Ollama) | http-api, grpc |
 
 ## Contexts
 
@@ -88,7 +98,12 @@
 | mobile-app | mobile | auth, async-state, realtime | — |
 | embedded-system | embedded | hardware-io | — |
 | compiler-tool | cli | codegen, plugin-system | compiler |
-| inference-server | http-api | gpu-compute, graceful-lifecycle, observability | — |
+| inference-server | http-api | gpu-compute, graceful-lifecycle, observability | inference-server |
+| grpc-service | grpc | auth, resilience, observability | microservice |
+| proxy-server | cli | graceful-lifecycle, tls-management | network-server |
+| broker-server | cli | graceful-lifecycle, observability | message-broker |
+| cache-service | cli | graceful-lifecycle, connection-pool | cache-server |
+| media-service | http-api, grpc | webrtc, realtime, graceful-lifecycle | media-server |
 
 ## Module File Structure
 
