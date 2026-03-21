@@ -1,7 +1,7 @@
 # 시나리오 카탈로그 — spec-kit-skills
 
-> 사용자 시나리오의 전체 카탈로그. 전체 파일 리뷰 시 검증 체크리스트로 사용됩니다 (CLAUDE.md § Review Protocol 참조).
-> 각 시나리오는 커맨드 흐름, 전제 조건, 기대 결과를 명시합니다.
+> 사용자가 겪는 다양한 상황별 가이드. "나는 지금 이 상황인데, 뭘 해야 하지?"에 대한 답입니다.
+> 영문 버전: [SCENARIO-CATALOG.md](SCENARIO-CATALOG.md)
 
 ---
 
@@ -9,130 +9,144 @@
 
 | 열 | 의미 |
 |--------|---------|
-| **ID** | `S{카테고리}{번호}` — 고유하고 안정적인 참조 식별자 |
-| **흐름** | 사용자가 실행하는 커맨드 순서 |
-| **전제 조건** | 시작 전 존재해야 하는 것 |
-| **결과** | 완료 시 사용자가 얻는 것 |
-| **상태** | ✅ 완전 지원 · 🟡 부분 지원 · ❌ 미지원 |
+| **ID** | 고유 식별자 |
+| **이런 상황일 때** | 사용자가 처한 구체적 상황 |
+| **이렇게 하세요** | 실행할 커맨드 순서 |
+| **필요한 것** | 시작 전에 준비되어야 하는 것 |
+| **얻는 것** | 완료 후 결과물 |
 
 ---
 
-## 카테고리 A: 학습 및 탐색 (code-explore)
+## A. 코드 이해하기 (code-explore)
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SA01 | 낯선 OSS 코드베이스 학습 | `code-explore [path]` → 트레이스 → 종합 | 소스 코드 존재 | 아키텍처 맵 + 트레이스 문서 | ✅ |
-| SA02 | 특정 모듈만 학습 | `code-explore [path] --scope src/auth` | 소스 코드 존재 | 범위 한정 오리엔테이션 + 트레이스 | ✅ |
-| SA03 | 단일 흐름 빠른 트레이스 | `code-explore [path]` → `trace "login flow"` | 소스 코드 존재 | 단일 트레이스 문서 | ✅ |
-| SA04 | 신규 팀원 온보딩 | `code-explore .` → 트레이스 → 종합 | 팀 프로젝트 | 온보딩용 아키텍처 문서 | ✅ |
-| SA05 | 두 프로젝트 비교 | `code-explore A` → `code-explore B` → 종합 (비교 모드) | 두 개의 소스 디렉토리 | 비교 테이블 + 아키텍처 차이점 | ✅ |
-| SA06 | adopt 후 심층 탐색 | `adopt` → `code-explore .` (Context-Aware) | sdd-state.md 존재 | 기존 SDD 컨텍스트로 강화된 탐색 | ✅ |
-| SA07 | Pipeline 중간 조사 | Pipeline 진행 중 → `code-explore . --scope src/module --no-branch` | 활성 Pipeline | Pipeline 중단 없이 특정 영역 이해 | ✅ |
-| SA08 | Pipeline 완료 후 아키텍처 문서 | Pipeline 완료 → `code-explore .` (Context-Aware) | 모든 Feature 완료 | 스펙과 교차 참조된 아키텍처 문서 | ✅ |
-| SA09 | 디버그 조사 | 버그 발견 → `code-explore . --scope src/buggy` → 트레이스 → 수정 | 실행 중인 프로젝트 | 관찰 사항이 포함된 버그 흐름 트레이스 | ✅ |
-| SA10 | 보안 감사 탐색 | `code-explore .` → 인증/암호화 흐름 중심 트레이스 | 소스 코드 존재 | 보안 관찰 사항 카탈로그 | ✅ |
+> 💡 "이 코드가 어떻게 돌아가는지 이해하고 싶어요"
 
-## 카테고리 B: 그린필드 프로젝트 (smart-sdd init + add + pipeline)
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SA01 | 처음 보는 오픈소스 프로젝트가 어떻게 작동하는지 파악하고 싶을 때 | `code-explore [path]` → 궁금한 흐름을 하나씩 trace → synthesis | 분석할 소스 코드 | 전체 아키텍처 맵 + 주요 흐름 문서 | ✅ |
+| SA02 | 전체 코드가 아니라 인증 모듈 같은 특정 부분만 깊이 보고 싶을 때 | `code-explore [path] --scope src/auth` | 소스 코드 | 해당 영역의 집중 분석 문서 | ✅ |
+| SA03 | "로그인이 어떻게 동작하지?" 같은 질문 하나만 빠르게 답하고 싶을 때 | `code-explore [path]` → `trace "login flow"` | 소스 코드 | 로그인 흐름의 처음부터 끝까지 추적 문서 | ✅ |
+| SA04 | 팀에 새로 합류했는데 코드베이스를 빨리 파악해야 할 때 | `code-explore .` → 주요 흐름 trace → synthesis | 팀 프로젝트 | 신규 팀원용 아키텍처 온보딩 문서 | ✅ |
+| SA05 | 두 프로젝트의 설계를 비교하고 싶을 때 (예: "A와 B 중 어떤 구조가 나을까?") | `code-explore A` → `code-explore B` → synthesis (비교 모드) | 비교할 두 프로젝트 | 기술 스택, 구조, 패턴 비교표 | ✅ |
+| SA06 | adopt으로 코드를 문서화했는데, 특정 영역을 더 깊이 이해하고 싶을 때 | `adopt` 완료 후 → `code-explore .` | adopt 완료 상태 | 기존 SDD 문서와 연계된 심층 분석 | ✅ |
+| SA07 | pipeline으로 Feature를 구현하는 중인데, 코드의 특정 부분이 이해가 안 될 때 | `code-explore . --scope src/module --no-branch` | 진행 중인 pipeline | pipeline을 중단하지 않고 해당 영역 이해 | ✅ |
+| SA08 | 프로젝트 구현이 끝났는데, 아키텍처 문서를 남기고 싶을 때 | pipeline 완료 후 → `code-explore .` | 모든 Feature 완료 | spec과 교차 참조된 아키텍처 문서 | ✅ |
+| SA09 | 버그가 발생했는데, 관련 코드 흐름을 먼저 파악하고 싶을 때 | `code-explore . --scope src/문제영역` → trace → 원인 파악 | 버그가 있는 프로젝트 | 버그 관련 흐름 추적 + 관찰 사항 | ✅ |
+| SA10 | 보안 관점에서 코드를 점검하고 싶을 때 | `code-explore .` → 인증/암호화 흐름 위주로 trace | 소스 코드 | 🔒 보안 관찰 사항 카탈로그 | ✅ |
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SB01 | 아이디어에서 새 프로젝트 시작 | `init "Build a chat app"` → add 자동 연결 → pipeline | 없음 | Feature가 구현된 전체 프로젝트 | ✅ |
-| SB02 | OSS 학습 후 새 프로젝트 | `code-explore A` → `init B --from-explore` → add → pipeline | 소스 A 학습 완료 | A의 아키텍처를 참고한 새 프로젝트 B | ✅ |
-| SB03 | 특정 프로필로 새 프로젝트 | `init --profile grpc-service` → add → pipeline | 없음 | 도메인 프로필이 사전 설정된 프로젝트 | ✅ |
-| SB04 | 단일 Feature 추가 | `add "user authentication"` → pipeline | init 완료 | 하나의 Feature 명세 + 구현 완료 | ✅ |
-| SB05 | 다수 Feature 일괄 추가 | `add` → F001-F005 정의 → `pipeline` | init 완료 | 순차적으로 다수 Feature 처리 | ✅ |
-| SB06 | 탐색 결과에서 Feature 추가 | `code-explore` → 종합 → `add --from-explore` → pipeline | 탐색 완료 | 트레이스에서 도출된 Feature 후보 | ✅ |
-| SB07 | T1 전용 MVP Pipeline | `pipeline --tier 1` | Feature 정의 완료 | Tier 1 Feature만 빌드 | ✅ |
-| SB08 | 단일 Feature Pipeline | `pipeline F003` | F003 정의 완료 | F003만 빌드 | ✅ |
-| SB09 | 중단된 Pipeline 재개 | `pipeline --continue` | Pipeline 중단됨 | 마지막 체크포인트에서 재개 | ✅ |
-| SB10 | 실패한 프로젝트 재초기화 | specs/ 삭제 → `init` 재실행 | 이전 시도 실패 | 새로 시작 | ✅ |
+## B. 새 프로젝트 시작하기 (init + add + pipeline)
 
-## 카테고리 C: 기존 코드 채택 (smart-sdd adopt)
+> 💡 "아이디어나 기획서가 있고, 처음부터 새로 만들고 싶어요"
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SC01 | 기존 코드베이스 채택 | `adopt --lang ko` | 소스 코드 존재, SDD 산출물 없음 | reverse-spec 자동 연결 → 모든 Feature 문서화 (채택) | ✅ |
-| SC02 | 사전 탐색 후 채택 | `code-explore` → `adopt --from-explore` | 탐색 완료 | 트레이스로 강화된 채택 | ✅ |
-| SC03 | 채택 → 새 Feature 추가 | `adopt` → `add "new feature"` → `pipeline` | 소스 코드 | 기존 코드 래핑 + 새 Feature 빌드 | ✅ |
-| SC04 | 채택 → 기존 이슈 수정 | `adopt` → `pipeline` | 소스 코드 | 기존 Feature를 수정 포함하여 재구현 | ✅ |
-| SC05 | 채택 → 탐색 → 추가 | `adopt` → `code-explore` (Context-Aware) → `add` → `pipeline` | 소스 코드 | 심층 이해 → 대상 지정 새 Feature | ✅ |
-| SC06 | 모노레포 서비스 채택 | `adopt --scope services/api` | 모노레포 | 단일 서비스 문서화 | ✅ |
-| SC07 | 마이그레이션 의도로 채택 | `adopt` → 마이그레이션 대상 식별 → `pipeline --migration` | 레거시 코드 | 현대화 계획 + 실행 | ✅ |
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SB01 | 아이디어만 있고 코드는 아무것도 없을 때 | `init "채팅 앱 만들기"` → add가 자동으로 이어짐 → pipeline | 아이디어 한 줄 | Feature별로 구현된 전체 프로젝트 | ✅ |
+| SB02 | 오픈소스를 공부한 다음, 비슷하지만 더 나은 걸 직접 만들고 싶을 때 | `code-explore A` → `init B --from-explore` → add → pipeline | 참고할 소스 A | A의 장점을 살린 새 프로젝트 B | ✅ |
+| SB03 | gRPC 서비스, CLI 도구 등 특정 유형의 프로젝트를 시작하고 싶을 때 | `init --profile grpc-service` → add → pipeline | 없음 | 도메인에 맞는 설정이 미리 된 프로젝트 | ✅ |
+| SB04 | 이미 시작된 프로젝트에 "사용자 인증" 같은 Feature를 하나 추가하고 싶을 때 | `add "user authentication"` → pipeline | init 완료 | 해당 Feature의 스펙 + 구현 | ✅ |
+| SB05 | 여러 Feature를 한 번에 정의하고 순서대로 구현하고 싶을 때 | `add` → F001~F005 정의 → `pipeline` | init 완료 | 5개 Feature가 순서대로 구현됨 | ✅ |
+| SB06 | code-explore로 코드를 분석한 결과를 바탕으로 Feature를 만들고 싶을 때 | `code-explore` → synthesis → `add --from-explore` → pipeline | 탐색 완료 | 분석에서 도출된 Feature 자동 생성 | ✅ |
+| SB07 | 핵심 기능만 먼저 빠르게 MVP로 만들고 싶을 때 | `pipeline --tier 1` | Feature 정의 완료 | Tier 1(핵심) Feature만 구현된 MVP | ✅ |
+| SB08 | 여러 Feature 중 하나만 골라서 구현하고 싶을 때 | `pipeline F003` | F003 정의 완료 | F003만 구현됨 | ✅ |
+| SB09 | pipeline이 중간에 끊겼는데 이어서 하고 싶을 때 | `pipeline --continue` | 중단된 pipeline | 끊긴 지점부터 재개 | ✅ |
+| SB10 | 이전 시도가 엉망이라 처음부터 다시 시작하고 싶을 때 | specs/ 폴더 삭제 → `init` 다시 실행 | 실패한 이전 시도 | 완전히 새로운 시작 | ✅ |
 
-## 카테고리 D: 재빌드 (reverse-spec + pipeline)
+## C. 기존 코드에 SDD 적용하기 (adopt)
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SD01 | 동일 스택으로 전체 재빌드 | `reverse-spec . --adopt` → `pipeline` | 소스 코드 | 동일 기술 스택으로 완전 재작성 | ✅ |
-| SD02 | 다른 스택으로 재빌드 | `reverse-spec .` → `init --stack new` → `pipeline` | 소스 코드 | 새 기술 스택으로 재작성 | ✅ |
-| SD03 | 탐색 후 재빌드 | `code-explore` → `reverse-spec --from-explore` → `pipeline` | 소스 학습 완료 | 충분한 이해를 바탕으로 한 재빌드 | ✅ |
-| SD04 | 부분 재빌드 (T1만) | `reverse-spec` → `pipeline --tier 1` | 소스 코드 | 핵심 Feature만 재빌드, 나머지 보류 | ✅ |
-| SD05 | 프로젝트 간 재빌드 | `reverse-spec A` (디렉토리 B에서) → `pipeline` | 소스 A, 대상 디렉토리 B | A의 Feature를 B에서 재빌드 | ✅ |
+> 💡 "이미 동작하는 코드가 있는데, SDD 문서를 씌우고 싶어요"
 
-## 카테고리 E: Pipeline 반복 및 수정
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SC01 | 기존 프로젝트에 SDD 문서 체계를 입히고 싶을 때 | `adopt --lang ko` | 동작하는 소스 코드 | 모든 Feature가 문서화된 상태 (코드 변경 없음) | ✅ |
+| SC02 | code-explore로 먼저 코드를 이해한 후 SDD를 적용하고 싶을 때 | `code-explore` → `adopt --from-explore` | 탐색 완료 | 분석 결과가 반영된 더 정확한 SDD 문서 | ✅ |
+| SC03 | 기존 코드를 문서화한 후, 새 기능을 추가하고 싶을 때 | `adopt` → `add "new feature"` → `pipeline` | 소스 코드 | 기존 코드 보존 + 새 Feature 구현 | ✅ |
+| SC04 | 기존 코드의 버그나 설계 문제를 SDD 프로세스로 수정하고 싶을 때 | `adopt` → `pipeline` | 소스 코드 | 기존 Feature의 이슈가 체계적으로 수정됨 | ✅ |
+| SC05 | adopt 후 특정 영역을 더 깊이 이해한 다음 기능을 추가하고 싶을 때 | `adopt` → `code-explore` → `add` → `pipeline` | 소스 코드 | 심층 이해 기반의 정확한 Feature 추가 | ✅ |
+| SC06 | 모노레포에서 특정 서비스 하나만 SDD로 문서화하고 싶을 때 | `adopt --scope services/api` | 모노레포 | 해당 서비스만 문서화 | ✅ |
+| SC07 | 레거시 코드를 현대적 기술로 마이그레이션할 계획이 있을 때 | `adopt` → 마이그레이션 대상 식별 → `pipeline --migration` | 레거시 코드 | 현대화 계획 + 단계별 실행 | ✅ |
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SE01 | 스펙 거부 → 수정 | specify HARD STOP에서 "reject" → 재명세 | Feature가 specify 단계 | 수정된 spec.md | ✅ |
-| SE02 | specify로 되돌리기 → plan | plan HARD STOP에서 → "back to specify" | Feature가 plan 단계 | 새로운 이해를 반영하여 재명세 | ✅ |
-| SE03 | plan으로 되돌리기 → implement | implement 중 → "back to plan" | Feature가 implement 단계 | 수정된 plan.md | ✅ |
-| SE04 | verify 실패 → 수정 → 재검증 | verify에서 버그 발견 → 수정 → 재검증 | Feature가 verify 단계 | 버그 수정됨, verify 통과 | ✅ |
-| SE05 | 기존 Feature 보완 | Feature 완료 → `pipeline F001 --step specify` | F001 완료 | F001을 개선을 위해 다시 열기 | ✅ |
-| SE06 | 과대 Feature 분할 | add 중 → 너무 크다고 판단 → F001a + F001b로 분할 | Feature가 너무 큼 | 두 개의 작은 Feature | ✅ |
-| SE07 | 관련 Feature 병합 | `pipeline merge F003 F004` | 겹치는 두 Feature | 하나로 통합된 Feature | ✅ |
-| SE08 | implement 건너뛰기 (스펙 전용) | `pipeline F001 --step specify,plan` | Feature 정의 완료 | 구현 없이 스펙 + 계획만 | ✅ |
-| SE09 | 기존 Feature 증강 | `add --to F001 "add OAuth"` → `pipeline F001` | F001 정의 또는 완료 | F001 pre-context 증강 → SC 보존하며 재명세 | ✅ |
-| SE10 | 파일에서 증강 | `add --to F001 oauth-spec.md` | F001 존재 + 파일 | SE09와 동일하나 문서에서 입력 | ✅ |
+## D. 코드 전면 재작성 (Rebuild)
 
-## 카테고리 F: 다중 Feature 조율
+> 💡 "기존 코드를 분석해서, 처음부터 새로 작성하고 싶어요"
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SF01 | 의존 Feature (F002가 F001 필요) | `pipeline F001` → `pipeline F002` | F002가 F001에 의존 | F001의 기반 위에 F002 빌드 | ✅ |
-| SF02 | 독립적인 병렬 Feature | `pipeline F001` → `pipeline F002` (의존성 없음) | 상호 의존성 없음 | 둘 다 독립적으로 빌드, main에 병합 | ✅ |
-| SF03 | 이전 Feature로 복귀 | F001+F002 완료 → `pipeline F001 --step specify` | F001 개선 필요 | main에서 새 브랜치로 F001 재개 | ✅ |
-| SF04 | Feature 간 엔티티 공유 | F001이 User 정의 → F002가 User 사용 | 공유 엔티티 | entity-registry.md가 일관성 보장 | ✅ |
-| SF05 | Feature 의존성 체인 | F001 → F002 → F003 (선형) | 체인 의존성 | Pipeline이 순서를 준수 | ✅ |
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SD01 | 같은 기술 스택으로 코드를 깨끗하게 재작성하고 싶을 때 | `reverse-spec . --adopt` → `pipeline` | 분석할 소스 코드 | 동일 스택으로 완전히 새로 작성된 코드 | ✅ |
+| SD02 | Python으로 된 코드를 Go로 바꾸는 것처럼 기술 스택을 변경하고 싶을 때 | `reverse-spec .` → `init --stack new` → `pipeline` | 소스 코드 | 새 기술 스택으로 동일 기능 구현 | ✅ |
+| SD03 | 코드를 충분히 이해한 후 재작성에 착수하고 싶을 때 | `code-explore` → `reverse-spec --from-explore` → `pipeline` | 소스 코드 | 충분한 이해를 바탕으로 한 재작성 | ✅ |
+| SD04 | 핵심 기능만 먼저 재작성하고 나머지는 나중에 하고 싶을 때 | `reverse-spec` → `pipeline --tier 1` | 소스 코드 | 핵심(Tier 1)만 재작성, 나머지 보류 | ✅ |
+| SD05 | 프로젝트 A의 기능을 별도 프로젝트 B로 재작성하고 싶을 때 | 디렉토리 B에서 `reverse-spec A` → `pipeline` | 소스 A + 빈 디렉토리 B | B에 A의 Feature가 새로 구현됨 | ✅ |
 
-## 카테고리 G: 커버리지 및 상태
+## E. 수정하고 다시 하기 (Pipeline 반복)
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SG01 | SBI 커버리지 확인 | `coverage` | adopt 완료 | SBI 커버리지 보고서 | ✅ |
-| SG02 | 스펙-코드 동등성 확인 | `parity` | Feature 구현 완료 | 동등성 보고서 | ✅ |
-| SG03 | Pipeline 상태 확인 | `status` | Pipeline 활성 | 상태 대시보드 | ✅ |
-| SG04 | 탐색 상태 확인 | `code-explore status` | 탐색 활성 | 커버리지 + 트레이스 인덱스 | ✅ |
+> 💡 "이미 진행한 결과를 수정하거나, 기존 Feature를 보강하고 싶어요"
 
-## 카테고리 H: 특수 모드 및 고급
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SE01 | 생성된 스펙이 마음에 안 들어서 다시 작성하고 싶을 때 | specify HARD STOP에서 "Reject" 선택 → 피드백과 함께 재작성 | specify 단계의 Feature | 피드백이 반영된 수정 spec.md | ✅ |
+| SE02 | plan을 보니 specify부터 다시 해야 할 것 같을 때 | plan HARD STOP에서 "back to specify" 선택 | plan 단계의 Feature | 새로운 이해를 반영한 재명세 | ✅ |
+| SE03 | 구현 중에 계획을 수정해야 할 때 | implement 중 "back to plan" 선택 | implement 단계의 Feature | 수정된 plan.md | ✅ |
+| SE04 | verify에서 버그가 발견되어 수정 후 다시 검증하고 싶을 때 | 버그 수정 → 재검증 | verify 단계의 Feature | 버그 수정 완료 + verify 통과 | ✅ |
+| SE05 | 이미 완료된 Feature를 처음부터 다시 명세하고 싶을 때 | `pipeline F001 --step specify` | 완료된 F001 | F001이 다시 열려서 재작업 | ✅ |
+| SE06 | Feature가 너무 커서 두 개로 나누고 싶을 때 | add 중에 분할 결정 → F001a + F001b로 나눔 | 과대 Feature | 관리 가능한 크기의 두 Feature | ✅ |
+| SE07 | 두 Feature가 겹쳐서 하나로 합치고 싶을 때 | `pipeline merge F003 F004` | 겹치는 두 Feature | 하나로 통합된 Feature | ✅ |
+| SE08 | 구현 없이 스펙과 계획만 만들고 싶을 때 (문서 목적) | `pipeline F001 --step specify,plan` | Feature 정의 완료 | spec.md + plan.md (구현 없음) | ✅ |
+| SE09 | 이미 정의한 Feature에 OAuth 같은 새 요구사항을 추가하고 싶을 때 | `add --to F001 "add OAuth"` → `pipeline F001` | 기존 F001 | 기존 SC 보존 + 새 SC 추가 | ✅ |
+| SE10 | 추가 요구사항이 담긴 문서 파일로 기존 Feature를 보강하고 싶을 때 | `add --to F001 oauth-spec.md` | F001 + 요구사항 파일 | SE09와 동일 (문서 기반) | ✅ |
 
-| ID | 시나리오 | 흐름 | 전제 조건 | 결과 | 상태 |
-|----|----------|------|-----------|------|------|
-| SH01 | 다중 언어 프로젝트 | `init`, 여러 언어 감지됨 | 다중 언어 코드베이스 | polyglot + codegen concern 활성화 | ✅ |
-| SH02 | 플러그인/확장 개발 | `init --profile sdk-library` → add → pipeline | 프레임워크 존재 | 확장 포인트가 있는 플러그인 | ✅ |
-| SH03 | OSS 포크 후 확장 | OSS `adopt` → 커스텀 Feature `add` → `pipeline` | 포크된 저장소 | SDD 문서를 갖춘 확장된 OSS | ✅ |
-| SH04 | 마이그레이션/현대화 | `adopt` → `pipeline --migration` | 레거시 코드 | 현대화된 코드베이스 | ✅ |
-| SH05 | 다른 산출물 언어 | `init --lang ko` 또는 `adopt --lang ja` | 아무거나 | 모든 산출물이 지정된 언어로 생성 | ✅ |
-| SH06 | 대규모 코드베이스 (1000+ 파일) | `reverse-spec .`, 병렬 하위 에이전트 사용 | 대형 저장소 | 분산 분석 | ✅ |
-| SH07 | 모노레포 다중 서비스 | 서비스별 `adopt --scope services/api` | 모노레포 | 서비스별 SDD 문서 | ✅ |
-| SH08 | CI/CD 통합 | CI 환경에서 `pipeline` (Playwright 없음) | CI 러너 | verify의 우아한 퇴보 | ✅ |
+## F. 여러 Feature 함께 관리하기
+
+> 💡 "Feature 간의 순서, 의존성, 공유 문제를 관리하고 싶어요"
+
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SF01 | F002가 F001의 결과물을 사용해야 할 때 (순서 의존) | `pipeline F001` 완료 → `pipeline F002` | F002가 F001에 의존 | F001 위에 F002가 올바르게 구현됨 | ✅ |
+| SF02 | 서로 관련 없는 Feature를 각각 독립적으로 구현하고 싶을 때 | `pipeline F001` → `pipeline F002` (순서 무관) | 의존성 없음 | 각각 독립적으로 구현되어 main에 병합 | ✅ |
+| SF03 | F001과 F002를 다 끝냈는데, F001을 다시 개선하고 싶을 때 | `pipeline F001 --step specify` | F001 개선 필요 | main에서 새 브랜치 생성 → F001 재작업 | ✅ |
+| SF04 | F001에서 정의한 User 엔티티를 F002에서도 사용해야 할 때 | 자동 처리됨 (entity-registry.md 참조) | 공유 엔티티 존재 | 레지스트리가 일관성 자동 보장 | ✅ |
+| SF05 | F001 → F002 → F003이 순서대로 의존할 때 | 순서대로 `pipeline` 실행 | 체인 의존성 | Pipeline이 순서를 자동 준수 | ✅ |
+
+## G. 상태 확인하기
+
+> 💡 "지금 어디까지 진행됐는지, 빠진 건 없는지 확인하고 싶어요"
+
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SG01 | 기존 코드의 동작이 SDD로 얼마나 커버되었는지 확인하고 싶을 때 | `coverage` | adopt 완료 | SBI 커버리지 보고서 (몇 % 매핑됨) | ✅ |
+| SG02 | 스펙에 쓴 대로 실제 코드가 구현되었는지 확인하고 싶을 때 | `parity` | Feature 구현 완료 | 스펙-코드 일치도 보고서 | ✅ |
+| SG03 | 전체 pipeline이 어디까지 진행됐는지 한눈에 보고 싶을 때 | `status` | Pipeline 진행 중 | Feature별 진행 상태 대시보드 | ✅ |
+| SG04 | code-explore로 얼마나 탐색했는지 확인하고 싶을 때 | `code-explore status` | 탐색 진행 중 | 모듈별 커버리지 + 트레이스 목록 | ✅ |
+
+## H. 고급 시나리오
+
+> 💡 "특수한 프로젝트 유형이나 복잡한 상황을 다루고 싶어요"
+
+| ID | 이런 상황일 때 | 이렇게 하세요 | 필요한 것 | 얻는 것 | 상태 |
+|----|---------------|-------------|----------|---------|------|
+| SH01 | Go + Python처럼 여러 언어가 섞인 프로젝트일 때 | `init` → 자동으로 다중 언어 감지 | 다중 언어 코드베이스 | polyglot + codegen concern 자동 활성화 | ✅ |
+| SH02 | VS Code 확장이나 플러그인을 만들고 싶을 때 | `init --profile sdk-library` → add → pipeline | 확장 대상 프레임워크 | 확장 포인트가 설계된 플러그인 | ✅ |
+| SH03 | 오픈소스를 포크해서 커스텀 기능을 추가하고 싶을 때 | OSS `adopt` → 커스텀 Feature `add` → `pipeline` | 포크한 저장소 | SDD 문서 + 커스텀 기능이 추가된 OSS | ✅ |
+| SH04 | 레거시 코드를 현대적으로 탈바꿈하고 싶을 때 | `adopt` → `pipeline --migration` | 레거시 코드 | 현대화된 코드베이스 | ✅ |
+| SH05 | 모든 문서를 한국어나 일본어로 생성하고 싶을 때 | `init --lang ko` 또는 `adopt --lang ja` | 아무 프로젝트 | spec, plan 등 모든 산출물이 지정 언어 | ✅ |
+| SH06 | 파일이 1000개 넘는 대규모 프로젝트일 때 | `reverse-spec .` → 자동으로 병렬 분석 | 대형 저장소 | 분산 분석된 완전한 결과 | ✅ |
+| SH07 | 모노레포에서 서비스별로 각각 SDD를 적용하고 싶을 때 | 서비스별 `adopt --scope services/api` 반복 | 모노레포 | 서비스별 독립 SDD 문서 | ✅ |
+| SH08 | CI/CD에서 자동으로 pipeline을 돌리고 싶을 때 (Playwright 없는 환경) | CI에서 `pipeline` 실행 | CI 러너 | UI 검증은 건너뛰고 나머지는 정상 실행 | ✅ |
 
 ---
 
-## 시나리오 수 요약
+## 요약
 
 | 카테고리 | 수 | 설명 |
 |----------|-----|------|
-| A: 학습 및 탐색 | 10 | code-explore 시나리오 |
-| B: 그린필드 | 10 | init + add + pipeline |
-| C: 채택 | 7 | 기존 코드 문서화 |
-| D: 재빌드 | 5 | 전체 재작성 |
-| E: Pipeline 반복 | 10 | 수정, 롤백, 증강 |
-| F: 다중 Feature | 5 | Feature 간 조율 |
-| G: 커버리지 및 상태 | 4 | 모니터링 |
-| H: 특수 모드 | 8 | 고급 사용 사례 |
+| A: 코드 이해하기 | 10 | code-explore |
+| B: 새 프로젝트 시작하기 | 10 | init + add + pipeline |
+| C: 기존 코드에 SDD 적용 | 7 | adopt |
+| D: 코드 전면 재작성 | 5 | rebuild |
+| E: 수정하고 다시 하기 | 10 | 수정, 롤백, 보강 |
+| F: 여러 Feature 관리 | 5 | 조율 |
+| G: 상태 확인 | 4 | 모니터링 |
+| H: 고급 시나리오 | 8 | 특수 상황 |
 | **합계** | **59** | |
-
-### 상태별 커버리지
 
 | 상태 | 수 | 비율 |
 |------|-----|------|
@@ -142,18 +156,9 @@
 
 ---
 
-## 리뷰 시 활용법
-
-이 카탈로그는 전체 파일 리뷰 시 참조됩니다 (CLAUDE.md § Review Protocol, Check 13).
-각 변경사항에 대해 해당 수정으로 인해 깨지는 시나리오가 없는지 확인합니다:
-
-1. 수정된 파일에 관련된 시나리오 식별
-2. 흐름을 추적하여 여전히 작동하는지 확인
-3. 시나리오가 깨질 경우, 변경을 수정하거나 시나리오 상태를 업데이트
-
 ## 변경 이력
 
 | 날짜 | 변경 사항 |
 |------|-----------|
-| 2026-03-22 | 최초 생성 — 8개 카테고리에 걸쳐 57개 시나리오 |
-| 2026-03-22 | 5개 부분 지원 시나리오 해소 (SA05, SC06, SE07, SE08, SH07) → 57/57 완전 지원 |
+| 2026-03-22 | 최초 생성 — 8개 카테고리, 59개 시나리오 |
+| 2026-03-22 | 사용자 관점 설명으로 전면 재작성 |
