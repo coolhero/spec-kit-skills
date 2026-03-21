@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:43 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 09:06 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -62,7 +62,7 @@ cd spec-kit-skills
           기능 추가      → adopt → /smart-sdd add → pipeline       (S3: 확장)
           재구축 (동일)  → /reverse-spec → /smart-sdd pipeline     (S4: 리빌드)
           재구축 (전환)  → /reverse-spec --stack new → pipeline    (S5: 마이그레이션)
-          EOL/폐기 대응  → adopt → add --gap → pipeline            (S6: EOS)
+          현대화/마이그레이션 → adopt → add --gap → pipeline         (S6: Modernize)
           재구축 후 확장 → reverse-spec → pipeline → add           (S7: 리빌드+)
 ```
 
@@ -385,7 +385,7 @@ flowchart TD
 | **S3** | [확장](#s3-기존-코드-확장) | 기존 코드에 새 기능 추가 | 새 코드만 |
 | **S4** | [리빌드 (동일 스택)](#s4-리빌드-동일-스택) | 같은 기술로 처음부터 재작성 | 전체 재작성 |
 | **S5** | [리빌드 (새 스택)](#s5-리빌드-새-스택) | 다른 기술로 마이그레이션 + 재작성 | 전체 재작성 |
-| **S6** | [EOS / 마이그레이션](#s6-eos--마이그레이션) | EOL 프레임워크, 폐기 라이브러리, 플랫폼 교체 | 영향 부분만 |
+| **S6** | [현대화 / 마이그레이션](#s6-현대화--마이그레이션) | EOL 프레임워크 교체, 메이저 버전 업그레이드, 폐기 라이브러리 대체, 플랫폼 이전 | 영향 부분만 |
 | **S7** | [리빌드 → 확장](#s7-리빌드--확장) | 먼저 재작성, 그 다음 원본 범위 넘어 새 기능 추가 | 전체 + 추가 |
 | **S8** | [새 프로젝트](#s8-새-프로젝트) | 기존 코드 없이 처음부터 시작 | 전체 |
 | **S9** | [파악 → 결정](#s9-파악--결정) | 코드를 먼저 이해하고 방향 결정 | 선택에 따라 |
@@ -451,12 +451,13 @@ Step 2 — 새 기능 추가:
 /smart-sdd parity --source ./old-source  → 동작 패리티 검증
 ```
 
-### S6: EOS / 마이그레이션
+### S6: 현대화 / 마이그레이션
 
 ```
-목표: EOL 프레임워크, 폐기 라이브러리, 플랫폼 교체.
+목표: 기술 스택의 특정 부분을 업그레이드, 교체, 또는 이전.
       영향 받는 코드만 수정 — 전체 재작성이 아님.
-예시: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS
+예시: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS,
+      React class→hooks, Webpack→Vite, REST→GraphQL, MySQL→PostgreSQL
 
 Step 1 — 현재 상태 문서화:
 /reverse-spec ./source --adopt  → 전체 코드 분석
@@ -521,7 +522,7 @@ S2 (Spec만) ──────────── adopt ────────
 S3 (확장) ───────────── adopt → add ────┐
 S4 (리빌드 동일) ─────── pipeline ──────┤
 S5 (리빌드 전환) ─────── pipeline ──────┼──→ /smart-sdd add → pipeline (반복)
-S6 (EOS) ────────────── adopt → add ────┤
+S6 (현대화) ─────────── adopt → add ────┤
 S7 (리빌드+) ────────── pipeline → add ─┤
 S8 (새 프로젝트) ─────── init → add ────┤
 S9 (파악→결정) ────────── (위 중 선택) ─┘

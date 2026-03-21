@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 08:43 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-21 09:06 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -64,7 +64,7 @@ Have existing code?
          Add features       → adopt → /smart-sdd add → pipeline     (S3: Extend)
          Rebuild (same)     → /reverse-spec → /smart-sdd pipeline   (S4: Rebuild)
          Rebuild (new stack)→ /reverse-spec --stack new → pipeline   (S5: Migrate)
-         Fix EOL/deprecation→ adopt → add --gap → pipeline          (S6: EOS)
+         Modernize/migrate → adopt → add --gap → pipeline          (S6: Modernize)
          Rebuild then extend→ reverse-spec → pipeline → add         (S7: Rebuild+)
 ```
 
@@ -387,7 +387,7 @@ Every project falls into one of these scenarios. Find yours and follow the workf
 | **S3** | [Extend](#s3-extend-existing-code) | Add new features to an existing, running codebase | New code only |
 | **S4** | [Rebuild (Same Stack)](#s4-rebuild-same-stack) | Rewrite from scratch with the same technology | Full rewrite |
 | **S5** | [Rebuild (New Stack)](#s5-rebuild-new-stack) | Rewrite from scratch with a different technology | Full rewrite |
-| **S6** | [EOS / Migration](#s6-eos--migration) | Replace EOL frameworks, deprecated libraries, or sunset platforms | Affected parts only |
+| **S6** | [Modernization / Migration](#s6-modernization--migration) | Replace EOL frameworks, upgrade major versions, swap deprecated libraries, or migrate platforms | Affected parts only |
 | **S7** | [Rebuild → Extend](#s7-rebuild--extend) | Rewrite first, then add new features beyond original scope | Full + new |
 | **S8** | [New Project](#s8-new-project) | Start from scratch — no existing code | Full |
 | **S9** | [Explore → Decide](#s9-explore--decide) | Study code first, then decide what to do | Depends on choice |
@@ -453,12 +453,13 @@ Output: New codebase in new stack + stack-migration.md + SDD docs
 /smart-sdd parity --source ./old-source  → Verify behavioral parity
 ```
 
-### S6: EOS / Migration
+### S6: Modernization / Migration
 
 ```
-Goal: Replace EOL framework, deprecated library, or sunset platform.
+Goal: Upgrade, replace, or migrate specific parts of the tech stack.
        Only modify affected code — not a full rewrite.
-Examples: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS
+Examples: Python 2→3, AngularJS→Angular, moment.js→date-fns, Heroku→AWS,
+          React class→hooks, Webpack→Vite, REST→GraphQL, MySQL→PostgreSQL
 
 Step 1 — Document the current state:
 /reverse-spec ./source --adopt  → Analyze full codebase
@@ -523,7 +524,7 @@ S2 (Spec Only) ──────────── adopt ───────�
 S3 (Extend) ─────────────── adopt → add ────┐
 S4 (Rebuild Same) ────────── pipeline ──────┤
 S5 (Rebuild New) ─────────── pipeline ──────┼──→ /smart-sdd add → pipeline (repeat)
-S6 (EOS) ────────────────── adopt → add ────┤
+S6 (Modernize) ──────────── adopt → add ────┤
 S7 (Rebuild+) ──────────── pipeline → add ──┤
 S8 (New Project) ─────────── init → add ────┤
 S9 (Explore→Decide) ──────── (any above) ───┘
