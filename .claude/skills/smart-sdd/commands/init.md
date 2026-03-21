@@ -10,6 +10,12 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 
 1. **Idea string** (positional argument): `init "Build a task management app with Kanban boards"` — brief natural language description triggers Proposal Mode
 2. **PRD document** (`--prd path/to/prd.md`): Reads the PRD file and extracts project description and requirements. If the PRD is sufficiently detailed, triggers Proposal Mode
+
+**Positional input auto-detection**: Positional arguments can be mixed freely — files and text in any combination:
+- If an argument ends with `.md`, `.txt`, `.yaml`, `.yml`, `.json`, or `.pdf` AND the file exists on disk → treat as document input (same as `--prd`)
+- If an argument is a quoted string or does not match a file on disk → treat as idea string
+- Multiple inputs can be combined: `init requirements.md "add real-time chat"` → file parsed for project structure, text used as supplementary intent
+- When both files and text are provided: merge extracted information, use text as priority signal for Proposal Mode
 3. **Code-explore artifacts** (`--from-explore path/to/specs/explore/`): Reads code-explore synthesis to seed project identity, Domain Profile, and Feature candidates. Triggers Explore-Informed Mode. See § Explore-Informed Mode below.
 4. **Conversational input**: If no idea string, no `--prd`, and no `--from-explore` is specified, gathers all information through interactive Q&A with the user (original flow)
 5. **Artifact language** (`--lang <code>`): Sets the language for all pipeline-generated artifacts (spec.md, plan.md, tasks.md, roadmap.md, registries, etc.). Default: `en`. Stored in `sdd-state.md` as `**Artifact Language**: <code>`. Examples: `--lang ko` (Korean), `--lang ja` (Japanese). Skill source files (SKILL.md, commands/, reference/) are always English regardless of this setting.

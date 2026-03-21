@@ -140,9 +140,15 @@ Determine entry type from the user's input and arguments:
 
 | Type | Trigger | Approach |
 |------|---------|----------|
-| **Type 1: Document-based** | `--prd` provided, or user pastes structured document | Parse document → extract Feature candidates → confirm with user |
-| **Type 2: Conversational** | Default (no `--prd`, no `--gap`) | Gather Feature intent through interactive Q&A, gradually elaborating |
+| **Type 1: Document-based** | `--prd` provided, positional arg is a file path, or user pastes structured document | Parse document → extract Feature candidates → confirm with user |
+| **Type 2: Conversational** | Default (no `--prd`, no `--gap`, no file path) | Gather Feature intent through interactive Q&A, gradually elaborating |
 | **Type 3: Gap-driven** | `--gap` flag, or auto-detected | Analyze SBI/parity gaps → auto-propose Feature candidates → user selects |
+
+**Positional input auto-detection**: Positional arguments after `add` can be mixed freely — files and text in any combination:
+- If an argument ends with `.md`, `.txt`, `.yaml`, `.yml`, `.json`, or `.pdf` AND the file exists on disk → treat as document input (Type 1)
+- If an argument is a quoted string or does not match a file on disk → treat as idea/text input (Type 2)
+- Multiple files + text can be combined: `add requirements.md design.yaml "add user auth"` → all files are parsed for Feature candidates, text is used as supplementary context
+- When both files and text are provided: merge all extracted Feature candidates, use text as additional intent signal for prioritization
 
 **Auto gap detection** (when no `--gap` but project might have gaps):
 - Read `sdd-state.md` for Origin (`rebuild` or `adoption`)
@@ -161,10 +167,12 @@ Determine entry type from the user's input and arguments:
 
 #### Type 1 Step 1a: Document Parsing Protocol
 
-1. Read the file at `--prd` path. Detect format:
+1. Read the file at the document path. Accepts any requirements/design/planning document — not limited to PRDs. Detect format:
    - Markdown (.md): parse by headings — each H2/H3 = potential Feature boundary
    - Plain text (.txt): segment by blank-line-separated paragraphs
-   - PDF: extract text content, then apply heading/paragraph segmentation
+   - YAML/YML (.yaml, .yml): parse top-level keys as Feature candidates, nested keys as sub-features
+   - JSON (.json): parse top-level object keys as Feature candidates
+   - PDF (.pdf): extract text content, then apply heading/paragraph segmentation
    - Other: ask user to paste key sections as text
 2. For each identified section/Feature boundary:
    - Extract: name (from heading or first sentence), description (body text),

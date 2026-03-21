@@ -79,6 +79,7 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 
 # Brownfield (incremental) — Add new Feature(s) to existing smart-sdd project
 /smart-sdd add                           # Interactive: define and add new Feature(s)
+/smart-sdd add prd.md                    # Auto-detect file → same as --prd prd.md
 /smart-sdd add --prd path/to/requirements.md  # Define from a PRD/requirements document
 /smart-sdd add --from-explore specs/explore/  # Define from code-explore synthesis
 /smart-sdd add --gap                     # Gap-driven: cover unmapped SBI/parity gaps
