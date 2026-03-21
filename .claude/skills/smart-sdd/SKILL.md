@@ -1,11 +1,13 @@
 ---
 name: smart-sdd
-description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec. Use this skill whenever the user mentions spec-kit, SDD, specification-driven development, Feature pipeline, spec generation, or wants to systematically break down a project into Features with specs, plans, and implementations.
+description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec. Use this skill whenever the user mentions spec-kit, SDD, specification-driven development, Feature pipeline, spec generation, or wants to systematically break down a project into Features with specs, plans, and implementations. Typical flow — greenfield: init → add → pipeline. Brownfield: /reverse-spec first (or auto-chained via adopt), then pipeline. Composable with /code-explore for feature discovery before building.
 argument-hint: "<command> [feature-id] [--from path|step] [--from-explore path] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app] [--lang <code>]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
 # Smart-SDD: spec-kit Workflow Orchestrator
+
+> **⚠️ Known pitfalls**: See [`lessons-learned.md`](../../../lessons-learned.md) for 19 gap patterns + 46 specific lessons from real pipeline runs. Consult when hitting unexpected agent behavior.
 
 > **🚨 MANDATORY RULES — READ FIRST 🚨**
 >

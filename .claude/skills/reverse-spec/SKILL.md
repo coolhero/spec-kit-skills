@@ -1,6 +1,6 @@
 ---
 name: reverse-spec
-description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. Use this skill whenever the user wants to analyze an existing codebase, extract Features from source code, generate a roadmap from existing code, or prepare an existing project for spec-driven rebuild or adoption.
+description: Reverse-analyzes existing source code to extract the Global Evolution Layer (roadmap.md + supporting artifacts) for spec-kit SDD redevelopment. Use this skill whenever the user wants to analyze an existing codebase, extract Features from source code, generate a roadmap from existing code, or prepare an existing project for spec-driven rebuild or adoption. Typically followed by /smart-sdd pipeline (rebuild) or /smart-sdd adopt (documentation). Auto-chained when /smart-sdd adopt is invoked without existing artifacts.
 argument-hint: "[target-directory] [--scope core|full] [--stack same|new] [--name new-project-name] [--domain app|data-science] [--adopt] [--from-explore <path>] [--skip-to <phase>] [--lang <code>]"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Task, AskUserQuestion]
 ---
