@@ -255,6 +255,15 @@ wait || true
   **Sources**: Derive Action/Expected from spec.md SC definitions + plan.md Interaction Chain Verify Method column. Confirm maps to what the user visually observes. Mark `(manual — [reason])` for items requiring OS-level actions.
   **Downstream**: verify Phase 3 Step 3d3 parses this TEST PLAN and executes automatable items via Playwright.
 - **Concrete "Try it" instructions**: Print at least 2-3 things the user can actually DO — real URLs, real curl commands, real CLI invocations. NOT prose descriptions
+- **3-Tier Demo Scope** (MANDATORY):
+  - **T1 Core** (REQUIRED): Health check + at least one core operation (CRUD, primary flow)
+  - **T2 Error** (REQUIRED for production): At least 2 error scenario demonstrations — invalid input, service timeout, empty state. In CI mode: verify error responses return correct status codes.
+  - **T3 Advanced** (RECOMMENDED): Feature-specific — streaming, concurrency, pagination, multi-provider. In CI mode: at least one advanced assertion.
+  - Post-creation check: agent verifies all applicable tiers are covered before completing the demo step.
+  ```
+  ❌ WRONG: health check + one curl → "demo complete"
+  ✅ RIGHT: health + CRUD + invalid-input error + streaming test → comprehensive demo
+  ```
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
 - **Playwright header** (optional): For UI Features, include a `# Playwright` comment section with URLs and element assertions for automated UI verification. See [reference/ui-testing-integration.md](ui-testing-integration.md)
 

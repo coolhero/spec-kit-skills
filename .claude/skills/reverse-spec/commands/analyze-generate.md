@@ -6,6 +6,38 @@ Generate hierarchical deliverables in `specs/_global/` (in CWD — see Output Di
 >
 > **Scope = Full**: All Features are included without Tier classification. No Features are deferred. The `Tier` column is omitted from roadmap.md and sdd-state.md.
 
+### 4-0. sdd-state.md Domain Profile Population (🚫 MANDATORY — BLOCKING)
+
+Before generating deliverables, populate `specs/_global/sdd-state.md` with the full Domain Profile detected during Phase 1-3. This ensures smart-sdd can read the profile directly without re-detection.
+
+Read analysis results from Phase 1-3 and write these fields (per `smart-sdd/reference/state-schema.md`):
+
+| Field | Source |
+|-------|--------|
+| **Project** | Phase 0 project name |
+| **Origin** | `rebuild` (if `--adopt` → `adoption`) |
+| **Interfaces** | Phase 1-2 detected interfaces (gui, http-api, cli, data-io, tui) |
+| **Concerns** | Phase 1-2 detected concerns (auth, realtime, ipc, etc.) |
+| **Archetype** | Phase 3-1e detected archetype or "none" |
+| **Scenario** | `rebuild` or `adoption` (from Phase 0 mode) |
+| **Framework** | Phase 1-2 detected framework or "custom" |
+| **Structure** | Phase 1 detection (single-package / monorepo) |
+| **Source Path** | Absolute path to target directory |
+| **Scope** | Phase 0 scope decision (core / full) |
+| **Project Maturity** | `production` (existing app default) |
+| **Team Context** | `solo` (default — user overrides during smart-sdd init) |
+| **Artifact Language** | Preserved from Pre-Phase |
+| **Created / Last Updated** | Current timestamp |
+
+Also write Feature Mapping table and Feature Progress table (all Features in `—` status).
+
+```
+❌ WRONG: sdd-state.md with only Artifact Language → smart-sdd must re-detect everything
+✅ RIGHT: Full Domain Profile from Phase 1-3 → smart-sdd reads directly
+```
+
+🚫 Do NOT proceed to 4-1 if sdd-state.md is missing Project, Origin, Interfaces, or Framework.
+
 ### 4-1. Project-Level Deliverables
 
 Generate the following files in order. Each file follows the template structure found in this skill's `templates/` directory.
@@ -18,6 +50,9 @@ Generate the following files in order. Each file follows the template structure 
 
 3. **`specs/_global/api-registry.md`** — See [api-registry-template.md](../templates/api-registry-template.md)
    - Complete API endpoint index, detailed contracts, cross-Feature dependencies
+   - **Error responses for EVERY endpoint** (MANDATORY): status codes, conditions, response shapes, retryable flag
+   - **IPC channels** (if desktop): error payloads alongside success payloads for each channel
+   - **Timeout & retry policy** per endpoint category (see template § Error Contracts Summary)
 
 4. **`specs/_global/business-logic-map.md`** — See [business-logic-map-template.md](../templates/business-logic-map-template.md)
    - Business rules per Feature, validation, workflows, cross-Feature rules
@@ -356,6 +391,33 @@ If any section is missing, add it BEFORE proceeding:
   → Adding missing sections now...
 ```
 
+#### Source Reference Path Verification (MANDATORY — after pre-context completeness)
+
+Verify that EVERY file path in each pre-context.md § Source Reference actually exists in the target directory.
+
+1. Read each pre-context.md → Source Reference → File Path column
+2. Resolve as `[target-directory]/[File Path]` and check existence
+3. **If file NOT found**: search for similarly named file in same/parent directory:
+   - Same basename, different extension (`.ts` vs `.tsx`)
+   - Similar name (`config-validation.ts` vs `validation.ts`)
+   - If match found → correct the path in pre-context.md
+   - If no match → mark as `⚠️ NOT FOUND` in the Role column
+4. Display result:
+```
+✅ Source Reference Paths: F001 12/12, F002 8/8, F003 15/15 — all verified
+```
+or:
+```
+⚠️ Source Reference Paths:
+  F003: 13/15 verified — CORRECTED: config-validation.ts → validation.ts
+  F007: 7/8 verified — REMOVED: useThemeManager.ts (not found)
+```
+
+```
+❌ WRONG: List "config-validation.ts" from Phase 2 notes → file doesn't exist
+✅ RIGHT: Verify path → find "validation.ts" instead → correct it
+```
+
 ### 4-3. Source Coverage Baseline (BLOCKING)
 
 > ⚠️ **This sub-phase is MANDATORY and BLOCKING.** Do NOT skip Steps 2-3 even if the deliverables are already generated. Low source coverage means Features are incomplete — the unmapped source files likely represent functionality that needs to be assigned to existing Features or defined as new Features. **Proceeding to Phase 4-4 without completing Step 3 classification is NOT allowed.**
@@ -537,14 +599,23 @@ smart-sdd will automatically:
 After all Phase 4 artifacts are generated, create the Completion Analysis Report:
 
 1. Read the shared template: `~/.claude/skills/shared/reference/completion-report.md`
-2. Populate all sections using data from generated artifacts:
-   - §1 Project Profile: from Phase 1 scan results + sdd-state.md
-   - §2 Feature Catalog: from roadmap.md
-   - §3 SBI Summary: aggregate from all pre-context.md files
-   - §4 Entity & API: from entity-registry.md + api-registry.md
-   - §5 Quality Assessment: per-phase confidence (record during each phase)
-   - §6 Recommendations: based on scope (core vs full), scale, and any unresolved questions
-   - §7 Artifact Inventory: list all generated files with paths
+2. Populate sections (must match template numbering exactly):
+   - §1 Executive Summary: project overview, key metrics, recommended next step
+   - §2 Project Background: from history.md + roadmap.md project overview
+   - §3 Source Analysis: from coverage-baseline.md + scan metrics (files, languages, frameworks)
+   - §4 Feature Catalog: from roadmap.md (full table with tiers, dependencies, SBI ranges)
+   - §5 Architecture & Strategy: from constitution-seed.md + stack-migration.md (if rebuild)
+   - §6 Pipeline Execution: SKIP for reverse-spec mode (no pipeline data yet)
+   - §7 Quality & Parity: SKIP for reverse-spec mode (no pipeline data yet)
+   - §8 Challenges & Solutions: analysis-phase observations (low confidence modules, ambiguous boundaries)
+   - §9 Outcomes & Lessons Learned: analysis insights, recommended adoption/rebuild path
+   - §10 Artifact Inventory: list ALL generated files with paths
+
+   🚫 BLOCKING: After writing, verify ALL active sections (§1-§5, §8-§10) are present.
+   ```
+   ❌ WRONG: Stop at §5 or §7 → "report generated" (missing §8-§10)
+   ✅ RIGHT: 8 active sections (§1-§5, §8-§10) all present
+   ```
 3. Write to `specs/_global/completion-report.md`
 4. Display summary in the Phase 4-4 Completion Report output:
    ```

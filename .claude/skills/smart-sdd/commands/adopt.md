@@ -561,9 +561,11 @@ Display: `✅ Created: demos/project-demo.sh`
 
 ## Post-Pipeline Summary
 
-### Post-Pipeline: Adoption Analysis Report
+### Post-Pipeline: Adoption Analysis Report (🚫 MANDATORY — do NOT skip)
 
-After Coverage Verification passes, generate `specs/_global/adoption-report.md`:
+> **⚠️ This report generation is NOT optional.** The adopt pipeline is NOT complete until `adoption-report.md` is written to disk. Showing the "Adoption Pipeline Complete" summary without generating the report file is a violation of CLAUDE.md Rule 8 (Execute+Review Continuity).
+
+After Coverage Verification passes (or is skipped), generate `specs/_global/adoption-report.md`:
 
 1. Read the shared template structure from `~/.claude/skills/shared/reference/completion-report.md`
 2. Mode = "adoption"

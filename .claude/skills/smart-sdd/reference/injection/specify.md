@@ -243,10 +243,11 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
 6. **Build-Time Plugin FR Check** (if applicable — rebuild mode + source has build config with plugins)
 7. **Domain Rule Compliance Check (S1)** (always — see § Domain Rule Compliance Check below)
 8. **External API Dependency Edge Cases** (if Feature consumes external APIs — see below)
-9. **Integration Method Specificity Check** (if Feature integrates with AI/LLM pipeline — rebuild only — see below)
-10. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
-10. **FR Granularity Check** (always — see below)
-11. **SC Testability Check** (always — see below)
+9. **Error Scenario Coverage Check** (always — see § Error Scenario Coverage Check below)
+10. **Integration Method Specificity Check** (if Feature integrates with AI/LLM pipeline — rebuild only — see below)
+11. **Data Pipeline Completeness Check** (if Feature processes data through multiple stages — see below)
+12. **FR Granularity Check** (always — see below)
+13. **SC Testability Check** (always — see below)
 12. **UI Flow Spec Generation** (GUI Features — see § UI Flow Spec Generation below)
 13. **Source Screenshot Reference** (rebuild/adoption mode with runtime observations):
     If `pre-context.md` has runtime screenshots (from reverse-spec Phase 1.5 or code-explore orient):
@@ -501,6 +502,37 @@ If any FR references an external API/service (keywords: "via API", "using provid
 3. For rebuild mode: check how source app handles these cases (e.g., Cherry Studio only shows authenticated providers in ModelSelector). If source app has a UX pattern for this, the FR MUST specify that same pattern or an explicit alternative.
 
 **Skip if**: Feature has no external API dependencies (pure local functionality).
+
+### Error Scenario Coverage Check (always — 🚫 BLOCKING for production)
+
+> Every Feature has failure modes. SCs that only cover happy paths produce "all tests pass" while users hit unhandled errors.
+
+Scan spec.md and verify coverage of applicable error categories:
+
+| Category | Applicable When | What SC Must Specify |
+|----------|----------------|---------------------|
+| **Input Validation** | Feature has forms, user inputs, API params | Error state display for invalid/empty/oversized input |
+| **Network/Service Errors** | Feature calls APIs or external services | Timeout, 5xx, rate-limit behavior (retry? fallback? error message?) |
+| **Empty/No-Data States** | Feature displays collections or search results | What user sees when zero items (first-time user, empty search) |
+| **Permission/Auth Errors** | Feature has auth-gated operations | Session expired, insufficient permissions behavior |
+| **Concurrent/State Conflicts** | Feature modifies shared state | Concurrent edit, stale data, optimistic update rollback |
+
+**Display in Review**:
+```
+── Error Scenario Coverage ─────────────────────
+| Category | Applicable | Covered | Status |
+|----------|-----------|---------|--------|
+| Input Validation | Yes (FR-001) | SC-008 | ✅ |
+| Network Errors | Yes (FR-003) | — | ❌ |
+| Empty States | Yes (FR-002) | SC-015 | ✅ |
+```
+
+**Enforcement**: `production` → 🚫 BLOCKING (all applicable must have SC). `mvp` → ⚠️ WARNING. `prototype` → skip.
+
+```
+❌ WRONG: 12 FRs, 12 happy-path SCs → "spec complete"
+✅ RIGHT: 12 FRs, 12 happy-path SCs + 5 error SCs → error paths specified
+```
 
 ### Integration Method Specificity Check (rebuild — 🚫 BLOCKING)
 

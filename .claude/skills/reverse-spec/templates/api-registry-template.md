@@ -128,3 +128,31 @@
 ---
 
 <!-- Repeat the above format for each API group (per Feature) -->
+
+---
+
+## Error Contracts Summary
+
+> Aggregate error response patterns across all endpoints. Used by `speckit-specify` to generate error-handling SCs, and by `speckit-implement` for consistent error responses.
+
+### Standard Error Response Format
+
+```json
+{
+  "error": "string (error code or message)",
+  "details": [{ "field": "string", "message": "string" }],
+  "retryable": false
+}
+```
+
+### Timeout & Retry Policy
+
+| Endpoint Category | Default Timeout | Max Retries | Backoff |
+|-------------------|----------------|-------------|---------|
+| Auth endpoints | 10s | 0 | — |
+| CRUD endpoints | 15s | 2 | exponential |
+| Streaming endpoints | 60s | 1 | fixed 5s |
+| File upload | 120s | 0 | — |
+| IPC channels | 5s | 1 | none |
+
+> **IPC channels** (if Electron/Tauri/desktop): Document error payloads alongside success payloads. IPC errors follow the same contract pattern as HTTP errors — each channel must specify failure modes, not just success shapes.

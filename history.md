@@ -5,6 +5,26 @@
 
 ---
 
+## [2026-03-21] 5/5 Quality Improvements — 7 Gap Fixes
+
+### What Changed
+
+7개 반복 품질 갭을 해결하는 스킬 파일 수정:
+
+1. **Gap 1 (sdd-state Domain Profile)**: `analyze-generate.md` Phase 4-0 추가. reverse-spec이 Phase 1-3에서 감지한 Domain Profile(Interface, Concern, Archetype, Framework 등)을 sdd-state.md에 자동 기록. smart-sdd가 재감지할 필요 없음.
+2. **Gap 2 (Error Scenario Coverage)**: `injection/specify.md`에 Error Scenario Coverage Check 추가. 5개 에러 카테고리(입력 검증, 네트워크, 빈 상태, 권한, 동시성) 중 해당되는 항목에 SC가 없으면 production은 BLOCKING.
+3. **Gap 3 (Demo Scope)**: `demo-standard.md`에 3-Tier 범위 요구사항 추가 (T1 Core, T2 Error, T3 Advanced). health check만으로 "demo 완료" 불가.
+4. **Gap 4 (adoption-report 미생성)**: `adopt.md` Post-Pipeline에 MANDATORY 게이트 추가 (이전 커밋).
+5. **Gap 5 (completion-report 절단)**: `analyze-generate.md` Phase 4-5 섹션 번호를 completion-report.md 템플릿과 정확히 일치시킴 (§1-§5, §8-§10). 완전성 검증 단계 추가.
+6. **Gap 6 (API Error Contracts)**: `api-registry-template.md`에 Error Contracts Summary + Timeout & Retry Policy 섹션 추가. `analyze-generate.md` item 3에 에러 응답 MANDATORY 지시 추가.
+7. **Gap 7 (Source Reference 경로 정확성)**: `analyze-generate.md`에 Source Reference Path Verification 단계 추가. pre-context의 모든 파일 경로 존재 여부 검증, 유사 파일명 자동 교정.
+
+### Why
+
+4개 테스트 프로젝트 품질 분석(4.1~4.4/5)에서 반복적으로 감점된 패턴. sdd-state Domain Profile 부재(→smart-sdd 재감지 필요), 에러 시나리오 미문서화(→행복 경로만 테스트), demo 범위 제한(→기본 기능만 검증), completion-report 절단(→§8-§10 누락), API 에러 계약 부재(→IPC/HTTP 에러 핸들링 미지정), 소스 경로 부정확(→존재하지 않는 파일 참조)을 해결하여 5/5 달성 기반 마련.
+
+---
+
 ## [2026-03-21] Auto-Chaining Consistency: add→pipeline, trace batch mode
 
 ### What Changed
