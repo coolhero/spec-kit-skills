@@ -672,3 +672,75 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What works instead**: Before launching the app for any automated interaction, execute a **5-step userData resolution**: (1) extract all possible app names from source (package.json, builder config, framework config), (2) resolve platform base path, (3) list ALL matching directories, (4) compare config timestamps — most recent = user's active directory, (5) use that path for `--user-data-dir`. Never assume a single directory exists.
 
 **Universal takeaway**: In any system where an agent interacts with a user-configured application, the agent must use the **same data directory** as the user. Dev/prod mode divergence is the default, not the exception. Always discover the actual path by scanning the filesystem, never by constructing it from app name alone.
+
+---
+
+#### L47. Post-Pipeline Reports Are Silently Skipped Without MANDATORY Gates
+
+**What happened** (openclaw adopt, vllm adopt): The adopt pipeline completed successfully — all Features documented, demo script created, "Adoption Pipeline Complete" summary displayed. But `adoption-report.md` was never generated. The instruction to create it existed in `adopt.md` Post-Pipeline section, but it was advisory ("After Coverage Verification passes, generate..."), not a BLOCKING gate. The agent showed the completion summary and stopped, satisfied it had "finished."
+
+**Why this is universal**: Agents treat the final step of a workflow as optional — especially when the preceding steps produce visible output (summaries, status tables). If the final artifact is a report that isn't immediately consumed by a subsequent step, the agent skips it. The agent's "satisfaction threshold" is met by the summary display, not by the file write.
+
+**What works instead**: Make report generation a MANDATORY gate with explicit anti-pattern: "The pipeline is NOT complete until `report.md` is written to disk. Displaying a summary without writing the report file is a violation."
+
+**Universal takeaway**: Any artifact that is the *final output* of a pipeline — not consumed by a subsequent step — will be skipped unless it has a BLOCKING gate. Advisory instructions ("generate the report") are consistently ignored at pipeline boundaries.
+
+---
+
+#### L48. Detected Domain Profile Not Persisted — Downstream Re-Detection Required
+
+**What happened** (angdu-studio rebuild): reverse-spec Phase 1-3 detected the full Domain Profile (gui interface, async-state/ipc/llm-agents concerns, ai-assistant archetype, electron foundation). But Phase 4 only wrote `Artifact Language: ko` to sdd-state.md. When smart-sdd started, it had to re-detect the profile from scratch — or worse, asked the user to specify it again.
+
+**Why this is universal**: Detection and persistence are separate actions. The agent performs detection (reads code, identifies patterns) and uses the results immediately. But it doesn't store the results for the next agent/session. Every multi-phase system where Phase N detects something and Phase N+M consumes it faces this: the detection results live in the agent's working memory, not in a persistent file.
+
+**What works instead**: Add a "persist detection results" step at the boundary between detection and consumption. In our case: Phase 4-0 writes the full Domain Profile to sdd-state.md before generating any deliverables.
+
+**Universal takeaway**: If one agent/phase detects something and another agent/phase needs it, the detection result MUST be written to a file. Agent memory is session-scoped; file state is permanent.
+
+---
+
+#### L49. Report Section Numbering Mismatch — Template ≠ Instructions
+
+**What happened** (angdu-studio completion-report): The completion-report.md template has 10 sections (§1-§10). But the analyze-generate.md instruction listed only 7 sections (§1-§7) with different numbering (§5 mapped to "Quality Assessment" instead of template's "Architecture & Strategy"). The agent generated 7 sections and stopped, missing §8 (Challenges), §9 (Outcomes), §10 (Artifact Inventory).
+
+**Why this is universal**: When a template and its invocation instructions use different numbering, the agent follows the instructions (closer in context), not the template (farther away, read once). The template is "reference"; the instructions are "execution". Instructions win.
+
+**What works instead**: Instructions must use the exact same section numbering as the template. Add a post-generation completeness check: "verify all active sections are present in the output file."
+
+**Universal takeaway**: Template files and their invocation instructions must be kept in strict sync. Any numbering divergence means the agent generates the wrong structure. Include a post-generation verification step that checks the output against the template.
+
+---
+
+#### L50. Agents Default to Happy Path — Error Scenarios Require Explicit Enforcement
+
+**What happened** (all 4 tests): spec.md files consistently had 10-15 FRs with matching SCs — but all SCs tested only the success path. No validation errors, no network timeouts, no empty states, no permission errors. The agent treated "cover all FRs with SCs" as "one SC per FR, happy path" and reported the spec as complete.
+
+**Why this is universal**: Agents optimize for coverage metrics. "12 FRs → 12 SCs → 100% coverage" looks complete. Error scenarios add SCs without adding FRs, making the ratio look "worse" (12 FRs → 17 SCs). The agent doesn't spontaneously think about what can go wrong — it thinks about what the Feature does right.
+
+**What works instead**: Add an explicit Error Scenario Coverage Check that categorizes error types (input validation, network, empty state, auth, concurrency) and requires at least one SC per applicable category. Make it BLOCKING for production scale.
+
+**Universal takeaway**: If you want error handling in specifications, you must explicitly require it. Agents will never spontaneously add error scenarios — they must be prompted with a checklist of error categories applicable to the Feature.
+
+---
+
+#### L51. Source Reference Paths Drift from Actual Filenames
+
+**What happened** (openclaw adopt): Pre-context.md listed `src/config/config-validation.ts` as a source reference, but the actual file was `src/config/validation.ts`. Similarly, `src/config/config-migration.ts` → actual `src/config/legacy-migrate.ts`. The agent used descriptive names from its Phase 2 analysis notes rather than verifying the actual filesystem.
+
+**Why this is universal**: During deep analysis, agents create internal labels for files based on their function ("the config validation file"). When writing references, they reconstruct filenames from these labels rather than re-checking the filesystem. The result: paths that are semantically correct but filesystem-incorrect.
+
+**What works instead**: Add a Source Reference Path Verification step after pre-context generation. For each listed file, resolve the path and check existence. If not found, search for similarly named files and auto-correct.
+
+**Universal takeaway**: Any agent-generated file path must be verified against the actual filesystem. Agents reconstruct paths from semantic understanding, not from `ls` output. Always verify, never trust agent-generated paths.
+
+---
+
+#### L52. Demo Scripts Default to Minimum Viable — Health Check ≠ Feature Demonstration
+
+**What happened** (openclaw, vllm demos): Demo scripts contained only basic health checks — `curl /health`, `--help`, `--version`. No error scenarios tested. No streaming. No concurrent requests. No advanced features (LoRA, multi-model, plugin system). The agent treated "demo script exists and is executable" as sufficient.
+
+**Why this is universal**: Demo generation is the last step before pipeline completion. The agent has already produced spec, plan, tasks, implementation, and verification — it's context-fatigued. The simplest possible demo (health check) satisfies the "create a demo" instruction while consuming minimal remaining context budget.
+
+**What works instead**: Define a 3-tier demo scope requirement: T1 Core (health + CRUD, mandatory), T2 Error (invalid input + service failure, mandatory for production), T3 Advanced (streaming, concurrency, Feature-specific capabilities, recommended). Verify tier coverage after creation.
+
+**Universal takeaway**: Last-step artifacts receive the least agent attention. The more fatigued the agent, the more minimal the output. Compensate with explicit tier requirements and post-creation verification. Never rely on the agent to spontaneously produce comprehensive demos.
