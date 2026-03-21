@@ -214,8 +214,6 @@ Principles with Evidence:
 This data feeds into:
 - Phase 4-1: constitution-seed generation (archetype-specific principles with evidence)
 - smart-sdd pipeline: sdd-state.md Archetype field
-- `./case-study-log.md` (CWD root): Update `**Archetype**:` header field with detected archetype name(s) (e.g., `ai-assistant`). If no archetype detected, leave as `none`.
-
 **No HARD STOP** — archetype detection is informational. Display detected archetypes and evidence summary in the Phase 3 summary.
 
 Then proceed to 3-2.
@@ -402,8 +400,6 @@ After Phase 3 is complete (granularity selected, dependencies mapped, Tier class
 ```
 
 Record each user modification to the AI's Tier proposals (e.g., "Moved Search from T2 → T1"). If scope is `full`, omit the Tier Adjustments row.
-
-📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M3.
 
 ---
 

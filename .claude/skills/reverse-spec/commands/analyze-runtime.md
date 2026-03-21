@@ -921,15 +921,5 @@ or
 
 Runtime exploration results are saved in `specs/_global/runtime-exploration.md`. Visual references (if captured) are saved in `specs/_global/visual-references/`. Style tokens (if extracted) are saved in `specs/_global/visual-references/style-tokens.md`. Phase 2 will read these to cross-reference code analysis with runtime observations.
 
-📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md):
-```
-### M1.5 — Runtime Exploration
-- **Timestamp**: [ISO timestamp]
-- **Mode**: [automated (Playwright) | skipped]
-- **Screens explored**: [N]
-- **Visual references captured**: [N screenshots | skipped]
-- **Key findings**: [1-2 sentence summary]
-```
-
 ---
 

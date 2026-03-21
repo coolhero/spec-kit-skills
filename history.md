@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-21] Unified Auto-Report Template — Absorbs Case-Study Report Structure
+
+### What Changed
+
+- **shared/reference/completion-report.md**: Expanded from 117-line 2-mode template to 666-line unified Auto-Report template with 3 generation modes (`reverse-spec`, `adoption`, `rebuild-pipeline`) and 10 sections (§1-§10)
+- Absorbed case-study's 8-section report structure (Executive Summary, Project Background, Architecture Philosophy, Pipeline Execution, Challenges & Solutions, Outcomes & Lessons Learned)
+- Added §5.2 Architecture Philosophy and §5.3 Principle-to-Decision Mapping as conditional subsections (only when constitution-seed.md has archetype/F7 data)
+- Philosophy Adherence per-Feature now sourced from history.md per-Feature Implementation Decisions (replaces case-study-log M6)
+- All data extracted from existing artifacts (sdd-state.md, history.md, registries, constitution-seed.md, per-Feature specs) — no case-study-log.md dependency
+- Added `rebuild-pipeline` mode (previously only `reverse-spec` and `adoption`)
+
+### Why
+
+Replacing the manual `/case-study` skill with automatic report generation at pipeline completion. The case-study skill required a separate case-study-log.md with manual milestone entries (M1-M8). The unified template generates a comprehensive report from artifacts that already exist in the pipeline, eliminating the need for parallel manual logging. This aligns with P3 (File over Memory) — all data comes from pipeline artifacts, not from a separately maintained log.
+
+---
+
 ## [2026-03-21] Data-IO Interface Module Expansion
 
 ### What Changed

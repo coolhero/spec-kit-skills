@@ -451,9 +451,7 @@ Key behaviors:
    - Update Demo Group Progress
    - Check Integration Demo trigger
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6. When composing the `### Philosophy Adherence` subsection: read the project's constitution (`.specify/memory/constitution.md`) for active archetype/F7 principles, and reference the Feature's `spec.md` and implementation decisions from `history.md` to identify which principles were applied during this Feature's pipeline. If no archetype/F7 principles are active, record "N/A".
-
-**After recording, IMMEDIATELY proceed to the next Feature. Do NOT stop or wait for user input.**
+**IMMEDIATELY proceed to the next Feature. Do NOT stop or wait for user input.**
 
 > **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display:
 > ```
@@ -584,8 +582,6 @@ After Coverage Verification passes, generate `specs/_global/adoption-report.md`:
    - [N] entities, [N] APIs documented
    - Pre-existing issues: [N] (see report §6)
    ```
-
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M8.
 
 After coverage verification and final demo:
 

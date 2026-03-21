@@ -79,8 +79,6 @@ From Phase 1-2 tech stack results, identify the primary framework(s):
 
 This determination feeds into Phase 2-8 (Foundation Decision Extraction) and into `smart-sdd init` Step 3b for greenfield projects.
 
-Also update `./case-study-log.md` (CWD root) header `**Framework**:` field with the detected framework name(s) (e.g., `electron`). If no match (`custom`), leave as `none`.
-
 ### 1-3. Project Type Classification
 Classify the project type based on the collected information. Use the project types defined in `domains/_core.md` § R2 (Project Type Classification).
 
@@ -160,8 +158,6 @@ For each discovered resource directory/group, record:
 Exclude: `node_modules/`, build output (`dist/`, `build/`), generated files, test fixtures.
 
 Upon completing Phase 1, report a summary of the detected tech stack, project structure, and static resource inventory to the user.
-
-📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M2.
 
 ### 1-6. Stack Strategy Details (Only if "New Stack" was selected in Phase 0)
 

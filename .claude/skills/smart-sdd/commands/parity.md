@@ -225,8 +225,6 @@ After Phase 5 completes, **append** to `specs/history.md`:
 
 One row per group decision from Phase 4.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M7.
-
 ---
 
 ## Catch-Up Workflow: Handling Original Source Updates

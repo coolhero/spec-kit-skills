@@ -88,7 +88,6 @@ Read `sdd-state.md` and display:
     📁 specs/_global/features/              (pre-context.md files)
 
   ── Optional (choose below) ─────────────────────────
-    📄 case-study-log.md                         — Case study observations
     📄 specs/history.md                          — Decision history
 ```
 
@@ -96,8 +95,8 @@ Read `sdd-state.md` and display:
 
 Use AskUserQuestion with the following options:
 
-- **"Reset pipeline state only"** — Remove pipeline artifacts, keep case-study-log and history.md
-- **"Full reset (include logs)"** — Also reinitialize case-study-log.md and remove pipeline entries from history.md
+- **"Reset pipeline state only"** — Remove pipeline artifacts, keep history.md
+- **"Full reset (include logs)"** — Also remove pipeline entries from history.md
 - **"Cancel"** — Abort without changes
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
@@ -160,9 +159,7 @@ If the tag does not exist: Display a warning that registries may contain pipelin
 
 **If "Full reset (include logs)" was selected**:
 
-1. **Reinitialize case-study-log.md**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and overwrite `case-study-log.md` at project root
-
-2. **Clean history.md pipeline entries**: Remove all `### [FID]-[name] — Implementation Decisions` sections and `## [YYYY-MM-DD] /smart-sdd pipeline — Constitution` sections from `specs/history.md`. Keep `/reverse-spec` entries, strategy/architecture decisions, and the Project Context block intact.
+1. **Clean history.md pipeline entries**: Remove all `### [FID]-[name] — Implementation Decisions` sections and `## [YYYY-MM-DD] /smart-sdd pipeline — Constitution` sections from `specs/history.md`. Keep `/reverse-spec` entries, strategy/architecture decisions, and the Project Context block intact.
 
 #### A-3e. Commit
 
@@ -181,7 +178,6 @@ git commit -m "chore: reset smart-sdd pipeline state (preserve reverse-spec arti
     - constitution.md (will be re-finalized from constitution-seed.md)
     - {N} Feature spec directories
     - {N} Feature branches
-    {- case-study-log.md reinitialized (if full reset)}
     {- history.md pipeline entries removed (if full reset)}
 
   Preserved (reverse-spec artifacts):

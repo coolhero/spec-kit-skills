@@ -730,13 +730,6 @@ After Phase 0-4 completes, **append** to `specs/history.md` (create with the sta
 | Key Modifications | [changes made during review, or "Accepted as-is"] |
 ```
 
-**Auto-initialize case study logging** (if not already present):
-Check if `case-study-log.md` exists at project root:
-- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `case-study-log.md`. Display: `📝 Case study log initialized: case-study-log.md`
-- **If already exists**: Skip silently (created by `/reverse-spec` or manually)
-
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M5.
-
 **Post-Phase 0 validation**: Run `scripts/validate.sh <project-root>` to check cross-file consistency (Feature IDs, SBI mappings, Demo Group references). If ❌ errors are found, display them and resolve before proceeding. ⚠️ warnings are informational — note but continue.
 
 **After recording and validation, IMMEDIATELY proceed to Phase 1 below. Do NOT stop. Do NOT wait for user input. Do NOT suggest running a separate command. The pipeline is a continuous flow — constitution finalization is just the first step.**
@@ -1151,22 +1144,30 @@ After Smoke Launch passes, verify implementation completeness:
 
 📋 **Dependency Stub Registry**: After implement completion, generate `specs/{NNN-feature}/stubs.md` if any stub/placeholder implementations depend on future Features. See `injection/implement.md` § Post-Step Update Rules #2 for format and detection rules. These stubs are auto-injected into the dependent Feature's pipeline context.
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M6. When composing the `### Philosophy Adherence` subsection: read the project's constitution (`.specify/memory/constitution.md`) for active archetype/F7 principles, and reference the Feature's `spec.md` and implementation decisions from `history.md` to identify which principles were applied during this Feature's pipeline. If no archetype/F7 principles are active, record "N/A".
-
 📝 **Decision History Recording — Feature Implementation** (after merge):
-If there were notable decisions during this Feature's pipeline (specify → verify), **append** to `specs/history.md`:
+**Append** to `specs/history.md` for EVERY completed Feature:
 
 ```markdown
 ### [FID]-[name] — Implementation Decisions
+
+**Delivers**: [What the user can now do — e.g., "Users can register, login, and manage accounts via OAuth or email/password"]
 
 | Decision | Choice | Details |
 |----------|--------|---------|
 | [e.g., Spec deviation] | [what changed] | [why — from specify/plan review discussions] |
 | [e.g., Architecture choice] | [pattern/approach chosen] | [rationale] |
 | [e.g., Limited verification] | [what was limited] | [reason and planned resolution] |
+
+#### Philosophy Adherence
+- [Principle name]: [How this Feature applied or was constrained by the principle — e.g., "Streaming-First: Implemented SSE streaming for chat responses (FR-003, FR-004)"]
+- [Principle name]: [e.g., "Secure by Default: Context isolation enforced in preload script (FR-001)"]
 ```
 
-> **When to record**: Only if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification acknowledgments, or user-requested changes. If the Feature went through without notable decisions, skip this recording (do NOT create empty entries).
+> **"Delivers" field is MANDATORY** for every Feature — this is the user-facing narrative of what was built. It feeds into the auto-generated Pipeline Completion Report § Outcomes.
+>
+> **"Philosophy Adherence" section**: Read the project's constitution (`.specify/memory/constitution.md`) for active archetype/F7 principles. Reference the Feature's spec.md and implementation decisions to identify which principles were applied. If no principles apply to this Feature, write "N/A — no applicable archetype/F7 principles for this Feature". This feeds into the Pipeline Completion Report § Philosophy Assessment.
+>
+> **Decision table**: Only include rows if there were meaningful decisions — spec deviations, architecture choices, trade-offs, limited verification. If no notable decisions, omit the table (but keep "Delivers" and "Philosophy Adherence").
 
 #### Delegate, Don't Skip (common across all pipeline stages — delegate to user when automation is impossible)
 
@@ -1384,8 +1385,6 @@ If "Stop here":
 
 **All Features completed** (both modes):
 
-📝 **Case Study Recording**: Append milestone entry to `case-study-log.md` per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M8.
-
 ```
 🎉 All active Features completed!
 
@@ -1397,6 +1396,27 @@ Next steps:
   /smart-sdd status           — View final progress report
   /smart-sdd add              — Add new Features to the project
 ```
+
+**Pipeline Completion Report (MANDATORY — auto-generated)**:
+
+After all Features are completed, generate the Pipeline Completion Report automatically:
+
+1. Read the shared template: `~/.claude/skills/shared/reference/completion-report.md`
+2. Set mode = `rebuild-pipeline` (for rebuild) or `adoption` (for adopt — note: adopt has its own report trigger in adopt.md)
+3. Follow the template's Data Extraction protocol (Steps 2-1 through 2-10) to populate all sections
+4. Write to `specs/_global/pipeline-report.md`
+5. Display summary:
+   ```
+   📊 Pipeline Completion Report saved to specs/_global/pipeline-report.md
+
+   Key metrics:
+   - [N] Features completed across [N] Release Groups
+   - [N] SBI entries (P1: [N], P2: [N], P3: [N])
+   - [N] entities, [N] APIs
+   - Demo Groups: [completed]/[total]
+   ```
+
+> This auto-report replaces the manual `/case-study` invocation. All data is extracted from existing artifacts (history.md, sdd-state.md, registries, pre-contexts, specs) — no separate log file needed.
 
 **Final validation**: Run `scripts/validate.sh <project-root>` to verify cross-file consistency across all completed Features. Display any ❌ errors or ⚠️ warnings.
 

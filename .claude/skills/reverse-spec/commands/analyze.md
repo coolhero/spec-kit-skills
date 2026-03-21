@@ -80,15 +80,6 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 - "Create a new branch" — Create and checkout a new branch for the SDD work
 
 **If response is empty → re-ask.** If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
-**Step 4 — Auto-initialize case study logging**:
-Check if `case-study-log.md` exists at **CWD root** (the project being built, NOT the target/source directory being analyzed):
-- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `./case-study-log.md` (CWD root). Populate header fields: `**Archetype**: none`, `**Framework**: none` (these will be updated in-place after Phase 1-2b framework detection and Phase 3-1e archetype detection). Display: `📝 Case study log initialized: ./case-study-log.md`
-- **If already exists**: Skip silently (user may have manually initialized earlier)
-
-> ⚠️ **Path warning**: The case-study-log.md MUST be at CWD root (`./case-study-log.md`), NOT inside the target directory or `specs/_global/`. The target directory is the source code being analyzed (read-only). All outputs go to CWD.
-
-📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M1.
-
 ---
 
 ### Pre-Phase: Language Persistence

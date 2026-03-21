@@ -106,7 +106,7 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd reset F007 --from plan        # Reset F007 from plan step (keep specify results)
 /smart-sdd reset F007 F008               # Reset multiple Features
 /smart-sdd reset                         # Full pipeline reset, keep reverse-spec artifacts + logs
-/smart-sdd reset --all                   # Full pipeline reset + reinitialize case-study-log + clean history.md
+/smart-sdd reset --all                   # Full pipeline reset + clean history.md
 /smart-sdd reset --delete F007           # Permanently remove Feature (delete all traces)
 
 # Status check

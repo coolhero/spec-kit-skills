@@ -264,11 +264,6 @@ Ask the user via AskUserQuestion whether to work on the current branch or create
 
 **If response is empty → re-ask** (per MANDATORY RULE 1). If the user selects "Create a new branch", ask for the branch name via "Other" input (suggest `sdd-setup` as default).
 
-**Step 4 — Auto-initialize case study logging**:
-Check if `case-study-log.md` exists at project root:
-- **If not exists**: Read [`case-study-log-template.md`](../../case-study/templates/case-study-log-template.md) and write it to `case-study-log.md`. Display: `Case study log initialized: case-study-log.md`
-- **If already exists**: Skip silently
-
 #### Phase 1: Project Definition
 
 1. **If `--prd` is provided**: Read the PRD document and extract:
@@ -442,7 +437,6 @@ Display the completion report:
   specs/_global/entity-registry.md (empty — populated during plan)
   specs/_global/api-registry.md (empty — populated during plan)
   specs/_global/sdd-state.md
-  case-study-log.md
 ```
 
 Then ask the user via AskUserQuestion whether to define Features now:

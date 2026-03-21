@@ -493,8 +493,6 @@ Generate `specs/_global/coverage-baseline.md` using the [coverage-baseline-templ
      → Correcting to [Y]
    ```
 
-📝 **Case Study Recording**: Append milestone entry to `./case-study-log.md` (CWD root) per [recording-protocol.md](../../case-study/reference/recording-protocol.md) § M4.
-
 ### 4-4. Completion Report
 
 Report the complete list of generated deliverables and next-step guidance to the user:
@@ -511,7 +509,6 @@ Generation complete:
 - specs/F001-xxx/pre-context.md
 - specs/F002-xxx/pre-context.md
 - ...
-- case-study-log.md                                 (observation log for milestone tracking — project root)
 - .env.example                                    (rebuild only — if env vars detected)
 - specs/_global/speckit-prompt.md             (spec-kit standalone usage prompt)
 
@@ -566,7 +563,7 @@ After displaying the Completion Report, create a git checkpoint so the user can 
 
 1. **Stage all reverse-spec artifacts**:
    ```bash
-   git add specs/ case-study-log.md .env.example .gitignore
+   git add specs/ .env.example .gitignore
    ```
 
 2. **Commit**:
