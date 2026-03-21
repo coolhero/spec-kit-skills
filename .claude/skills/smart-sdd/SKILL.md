@@ -81,6 +81,8 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd add                           # Interactive: define and add new Feature(s)
 /smart-sdd add prd.md                    # Auto-detect file → same as --prd prd.md
 /smart-sdd add --prd path/to/requirements.md  # Define from a PRD/requirements document
+/smart-sdd add --to F001 "add OAuth"     # Augment existing Feature with new requirements
+/smart-sdd add --to F001 oauth-spec.md   # Augment from file
 /smart-sdd add --from-explore specs/explore/  # Define from code-explore synthesis
 /smart-sdd add --gap                     # Gap-driven: cover unmapped SBI/parity gaps
 

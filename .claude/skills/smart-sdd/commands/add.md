@@ -19,6 +19,7 @@ This is the **universal Feature definition path** for all project modes:
 - **`--prd path/to/prd.md`**: Reads the PRD/requirements document and extracts Feature candidates (triggers Phase 1 Type 1). Each `add` invocation can reference a different PRD.
 - **`--from-explore path/to/specs/explore/`**: Reads code-explore synthesis and trace artifacts to seed Feature candidates with pre-validated understanding (triggers Phase 1 Type 4 — Explore-Driven). See § Phase 1 Type 4 below.
 - **`--gap`**: Starts in gap-driven mode — analyzes unmapped SBI behaviors and parity gaps to auto-propose Feature candidates (triggers Phase 1 Type 3). Only meaningful for rebuild/adoption projects with SBI data.
+- **`--to F00N`**: Augment an existing Feature instead of creating a new one (triggers Phase 1 Type 5 — Augment). See § Phase 1 Type 5 below.
 - **Conversational input** (default): Gathers Feature information through interactive Q&A (Phase 1 Type 2). Auto gap detection may suggest switching to Type 3 if unmapped behaviors are found.
 - **Chained from init**: When init chains into add, the same `--prd` path is automatically passed if it was provided to init
 
@@ -143,6 +144,7 @@ Determine entry type from the user's input and arguments:
 | **Type 1: Document-based** | `--prd` provided, positional arg is a file path, or user pastes structured document | Parse document → extract Feature candidates → confirm with user |
 | **Type 2: Conversational** | Default (no `--prd`, no `--gap`, no file path) | Gather Feature intent through interactive Q&A, gradually elaborating |
 | **Type 3: Gap-driven** | `--gap` flag, or auto-detected | Analyze SBI/parity gaps → auto-propose Feature candidates → user selects |
+| **Type 5: Augment** | `--to F00N` provided | Read existing Feature → append new requirements → re-specify with SC preservation |
 
 **Positional input auto-detection**: Positional arguments after `add` can be mixed freely — files and text in any combination:
 - If an argument ends with `.md`, `.txt`, `.yaml`, `.yml`, `.json`, or `.pdf` AND the file exists on disk → treat as document input (Type 1)
@@ -456,11 +458,76 @@ Display the Brief Summary extracted from the draft:
 
 ### Existing Feature Extension
 
-When the user describes extending an existing Feature (e.g., "add 2FA to F001-auth"):
-- This is NOT a separate entry type — the user enters via Type 2 (Conversational) or Type 1 (if they have a document)
-- During Elaboration (1c), reference the existing Feature's `spec.md` and `plan.md` to understand current scope
-- Phase 2 (Overlap Check) will detect the overlap and propose: merge into existing Feature vs. create new Feature
-- The user decides in Phase 2, not Phase 1
+#### Type 5 — Augment Existing Feature (`--to F00N`)
+
+> Triggered when `--to F00N` is provided. Augments an existing Feature's pre-context with additional requirements, then triggers re-specify with SC preservation.
+
+#### Type 5 Flow
+
+1. **Validate target Feature**: Read `sdd-state.md` → confirm `F00N` exists. If not found:
+   → 🚫 BLOCKING: "Feature F00N not found in sdd-state.md."
+
+2. **Read existing artifacts**:
+   - Read `pre-contexts/F00N.md` → current Feature definition
+   - Read `F00N/spec.md` (if exists) → current SCs to preserve
+   - Read `F00N/plan.md` (if exists) → current architecture decisions
+
+3. **Gather augmentation input**: The remaining positional arguments (files and/or text) describe what to add:
+   - Files → parsed as additional requirements (same as Type 1 Document Parsing Protocol)
+   - Text → conversational elaboration of what to add
+   - Both can be mixed: `add --to F001 oauth-spec.md "add social login"`
+
+4. **Display current → augmented comparison** (HARD STOP):
+   ```
+   📋 Augmenting F001: User Authentication
+
+   Current scope:
+   - Email/password login
+   - Session management
+   - Password reset
+
+   Additions:
+   - OAuth2 social login (Google, GitHub)
+   - Two-factor authentication (TOTP)
+
+   Source: oauth-spec.md + "add social login"
+   ```
+   AskUserQuestion: "Confirm augmentation?"
+   - "Approve augmentation (Recommended)" → proceed
+   - "Modify additions" → re-gather
+   - "Cancel" → abort
+   **If response is empty → re-ask** (per MANDATORY RULE 1)
+
+5. **Update pre-context**: Append new requirements to `pre-contexts/F00N.md` under a `## Augmentation` section with timestamp:
+   ```markdown
+   ## Augmentation (2026-03-22)
+
+   ### Additional Requirements
+   {parsed additions}
+
+   ### Source
+   {file paths and/or text input}
+   ```
+
+6. **Trigger re-specify with SC preservation**:
+   - Set Feature status in sdd-state.md back to `specify` (or `re-specify`)
+   - When `speckit-specify` runs next (via `pipeline F00N`), the injection file MUST include:
+     ```
+     ⚠️ SC PRESERVATION: This is a re-specify after augmentation.
+     Existing SCs in spec.md MUST be preserved unless explicitly contradicted
+     by the new requirements. New SCs are ADDED, not replaced.
+     Renumber if needed to maintain sequence.
+     ```
+   - Skip Phases 2-6 of the add flow (overlap check, scope negotiation, etc. are unnecessary for augmentation)
+
+7. **Display next step**:
+   ```
+   ✅ F001 augmented with new requirements.
+   Run `/smart-sdd pipeline F001` to re-specify with preserved SCs + new additions.
+   ```
+
+❌ WRONG: Create a new Feature F00M that overlaps with F00N → duplicate scope, confused pipeline
+✅ RIGHT: Augment F00N's pre-context → re-specify preserves existing SCs + adds new ones
 
 ---
 

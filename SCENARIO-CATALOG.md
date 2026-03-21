@@ -81,6 +81,8 @@
 | SE06 | Split oversized Feature | During add → realize too big → split into F001a + F001b | Feature too large | Two smaller Features | ✅ |
 | SE07 | Merge related Features | `pipeline merge F003 F004` | Two overlapping Features | Single consolidated Feature | ✅ |
 | SE08 | Skip implement (spec-only) | `pipeline F001 --step specify,plan` | Feature defined | Spec + plan without implementation | ✅ |
+| SE09 | Augment existing Feature | `add --to F001 "add OAuth"` → `pipeline F001` | F001 defined or completed | F001 pre-context augmented → re-specify with SC preservation | ✅ |
+| SE10 | Augment from file | `add --to F001 oauth-spec.md` | F001 exists + file | Same as SE09 but from document | ✅ |
 
 ## Category F: Multi-Feature Coordination
 
@@ -124,17 +126,17 @@
 | B: Greenfield | 10 | init + add + pipeline |
 | C: Adopt | 7 | Existing code documentation |
 | D: Rebuild | 5 | Full rewrite |
-| E: Pipeline Iteration | 8 | Revision and rollback |
+| E: Pipeline Iteration | 10 | Revision, rollback, augmentation |
 | F: Multi-Feature | 5 | Cross-Feature coordination |
 | G: Coverage & Status | 4 | Monitoring |
 | H: Special Modes | 8 | Advanced use cases |
-| **Total** | **57** | |
+| **Total** | **59** | |
 
 ### Coverage by Status
 
 | Status | Count | Percentage |
 |--------|-------|-----------|
-| ✅ Fully supported | 57 | 100% |
+| ✅ Fully supported | 59 | 100% |
 | 🟡 Partial | 0 | 0% |
 | ❌ Not yet supported | 0 | 0% |
 
