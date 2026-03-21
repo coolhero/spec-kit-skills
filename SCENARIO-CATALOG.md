@@ -109,7 +109,6 @@
 |----|----------|------|-------------|---------|--------|
 | SH01 | Polyglot project | `init` with multiple languages detected | Multi-language codebase | polyglot + codegen concerns activated | ✅ |
 | SH02 | Plugin/extension development | `init --profile sdk-library` → add → pipeline | Framework exists | Plugin with extension points | ✅ |
-| SH03 | Fork and extend existing project | `adopt` → `add` custom Features → `pipeline` | Forked repo | Extended project with SDD docs | ✅ |
 | SH04 | Migration/modernization | `adopt` → `pipeline --migration` | Legacy code | Modernized codebase | ✅ |
 | SH05 | Different artifact language | `init --lang ko` or `adopt --lang ja` | Any | All artifacts in specified language | ✅ |
 | SH06 | Large codebase (1000+ files) | `reverse-spec .` with parallel sub-agents | Large repo | Distributed analysis | ✅ |
@@ -129,14 +128,14 @@
 | E: Pipeline Iteration | 10 | Revision, rollback, augmentation |
 | F: Multi-Feature | 5 | Cross-Feature coordination |
 | G: Coverage & Status | 4 | Monitoring |
-| H: Special Modes | 8 | Advanced use cases |
-| **Total** | **59** | |
+| H: Special Modes | 7 | Advanced use cases |
+| **Total** | **58** | |
 
 ### Coverage by Status
 
 | Status | Count | Percentage |
 |--------|-------|-----------|
-| ✅ Fully supported | 59 | 100% |
+| ✅ Fully supported | 58 | 100% |
 | 🟡 Partial | 0 | 0% |
 | ❌ Not yet supported | 0 | 0% |
 
