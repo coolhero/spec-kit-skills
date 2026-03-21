@@ -104,6 +104,24 @@ From the entry point, trace the execution flow by:
 5. **Stop at boundaries**: External APIs, database operations, framework boundaries
 6. **Cross-reference runtime** (if available): For UI-related steps, note what the user sees at this point (from screenshots or live observation)
 
+#### Context-Aware Cross-Referencing
+
+If `CONTEXT_AWARE = true`, during flow tracing:
+
+1. **Entity cross-ref**: For each entity discovered in the trace, check `EXISTING_ENTITIES`:
+   - If entity exists in registry → mark as `[registered: E003]` in trace output
+   - If entity is NEW (not in registry) → mark as `[new: not in registry]`
+   - If entity fields differ from registry → mark as `[divergent: registry says X, code shows Y]`
+
+2. **API cross-ref**: For each API endpoint discovered, check `EXISTING_APIS`:
+   - If API exists → mark as `[registered: API-012]`
+   - If API is NEW → mark as `[new: not in registry]`
+
+3. **SC cross-ref**: If `specs/{FID}/spec.md` exists for the relevant Feature:
+   - Check which SCs the traced flow covers
+   - Mark covered SCs: `[covers: SC-003 of F002]`
+   - Identify untested behaviors: `[gap: no SC covers this error path]`
+
 **Depth control**: Trace deep enough to understand the full flow, but don't recurse into utility functions or framework internals. Rule of thumb: if a function is domain-specific (business logic), trace into it. If it's infrastructure (logging, serialization, HTTP handling), note it but don't recurse.
 
 **During tracing, collect**:
@@ -189,16 +207,16 @@ function processData(raw: RawInput): ProcessedOutput {
 
 ## Entities Observed
 
-| Entity | Source Location | Fields Observed | Notes |
-|--------|----------------|-----------------|-------|
-| User | [user.go:12](../../../src/models/user.go) | id, name, email, role | Core identity |
-| Session | [session.go:5](../../../src/session/session.go) | id, userId, token, expiresAt | Auth session |
+| Entity | Source Location | Fields Observed | Notes | Registry Status |
+|--------|----------------|-----------------|-------|-----------------|
+| User | [user.go:12](../../../src/models/user.go) | id, name, email, role | Core identity | ✅ Registered (E003) / 🆕 New / ⚠️ Divergent |
+| Session | [session.go:5](../../../src/session/session.go) | id, userId, token, expiresAt | Auth session | ✅ Registered (E003) / 🆕 New / ⚠️ Divergent |
 
 ## APIs Observed
 
-| Method | Path | Source Location | Request | Response |
-|--------|------|----------------|---------|----------|
-| POST | /api/login | [auth.go:34](../../../src/handlers/auth.go) | {email, password} | {token, user} |
+| Method | Path | Source Location | Request | Response | Registry Status |
+|--------|------|----------------|---------|----------|-----------------|
+| POST | /api/login | [auth.go:34](../../../src/handlers/auth.go) | {email, password} | {token, user} | ✅ Registered (API-012) / 🆕 New |
 
 ## Business Rules
 
@@ -262,6 +280,7 @@ AskUserQuestion:
 - **"Trace another flow"** → Ask for the next topic. Creates a new trace file (NNN+1).
 - **"Explore deeper into [specific part]"** → Start a new trace focused on a specific sub-flow. Add `Related: {current trace}` to the new trace. Useful when the sub-flow is a distinct topic.
 - **"Update orientation"** → Run orient --update
+- **"Update registries with discoveries"** (only if `CONTEXT_AWARE = true`) → Propose additions to entity-registry.md and api-registry.md based on newly discovered entities/APIs from this trace. Show diff preview → AskUserQuestion for confirmation → update files
 - **"Done for now"** → End session
 
 > **"Continue" vs "Explore deeper"**:

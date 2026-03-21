@@ -63,6 +63,18 @@ Merge entities observed across multiple traces:
 | Order | Trace 003 | 003, 006 | id, items, status, userId, total, createdAt | C003-orders |
 ```
 
+#### Consolidated Entity Relationship Diagram
+
+After consolidation, generate a Mermaid erDiagram showing all discovered entities and their relationships:
+
+```mermaid
+erDiagram
+    {Entity1} ||--o{ {Entity2} : "has many"
+    {Entity2} }|--|| {Entity3} : "belongs to"
+```
+
+If `CONTEXT_AWARE = true`, include registered entities from `EXISTING_ENTITIES` and mark new entities with a `[NEW]` suffix in the diagram.
+
 ### Step 3 — API Consolidation
 
 Merge APIs observed across traces:
@@ -75,6 +87,18 @@ Merge APIs observed across traces:
 | POST | /api/login | 001, 004 | auth/ | ui/, cli/ |
 | GET | /api/orders | 003, 006 | orders/ | ui/ |
 ```
+
+#### API Dependency Graph
+
+Generate a Mermaid flowchart showing API call chains and dependencies:
+
+```mermaid
+flowchart LR
+    Client --> |"POST /api/users"| UserService
+    UserService --> |"GET /api/roles"| RoleService
+```
+
+If `CONTEXT_AWARE = true`, include registered APIs and mark new APIs with dashed lines (`-.->`) in the diagram.
 
 ### Step 4 — Observation Aggregation
 
@@ -108,7 +132,19 @@ Group observations by icon type:
 
 ### Step 5 — Target Domain Profile Derivation (5 axes + Scale)
 
-Derive the **user's target project Domain Profile** by combining the source project's Detected Domain Profile (from orientation.md) with differentiation decisions accumulated across traces.
+#### Context-Aware Profile Handling
+
+If `CONTEXT_AWARE = true`:
+- **Do NOT derive a new Target Domain Profile from scratch**
+- Instead, use `EXISTING_PROFILE` as the base
+- Only flag **additions** (newly detected concerns/interfaces not in existing profile)
+- Output: "Suggested Profile Updates" table showing what to add to sdd-state.md
+
+| Axis | Current (sdd-state.md) | Suggested Addition | Evidence |
+|------|----------------------|-------------------|----------|
+| Concern | auth, realtime | + geospatial | Traces 003, 005 show geo-query patterns |
+
+If `CONTEXT_AWARE = false` (Fresh Mode), derive the **user's target project Domain Profile** by combining the source project's Detected Domain Profile (from orientation.md) with differentiation decisions accumulated across traces.
 
 1. **Read source profile**: Extract the full Detected Domain Profile (5 axes + Scale) from `orientation.md`
 2. **Analyze differentiation signals**: Scan all traces' Observations for domain-relevant changes:
@@ -158,7 +194,22 @@ Derive the **user's target project Domain Profile** by combining the source proj
 
 ### Step 6 — Feature Candidate Derivation
 
-Analyze the consolidated entities, APIs, module coverage, and target Domain Profile to derive Feature candidates:
+#### Context-Aware Feature Candidates
+
+If `CONTEXT_AWARE = true`:
+- Read existing Features from `EXISTING_FEATURES`
+- Feature candidates start numbering after the last existing F-number
+- Each candidate shows relationship to existing Features:
+  - "Extends F002" — adds capability to existing Feature
+  - "New" — entirely new Feature not covered by current SDD
+  - "Gap in F001" — existing Feature is missing this behavior
+
+| ID | Name | Type | Related Feature | Discovered in |
+|----|------|------|----------------|---------------|
+| C001 | Geo-search | New | — | Trace 005 |
+| C002 | Auth token refresh | Gap in F003 | F003 (Authentication) | Trace 002 |
+
+If `CONTEXT_AWARE = false` (Fresh Mode), analyze the consolidated entities, APIs, module coverage, and target Domain Profile to derive Feature candidates:
 
 1. **Module clustering**: Group related modules that frequently appear together in traces
 2. **Entity ownership**: Assign entities to the Feature candidate that primarily manages them
@@ -216,6 +267,19 @@ Evaluate whether the exploration is sufficient for handoff:
 → /reverse-spec --from-explore specs/explore/     (enhance reverse-spec with human insights)
 → /smart-sdd adopt --from-explore specs/explore/  (adopt existing code with pre-understanding)
 ```
+
+#### Context-Aware Handoff
+
+If `CONTEXT_AWARE = true`, the handoff options change:
+
+| Option | When to Use |
+|--------|-------------|
+| `/smart-sdd add --from-explore` | Add new Feature candidates to existing project |
+| "Update registries" | Merge newly discovered entities/APIs into existing registries |
+| "Update Domain Profile" | Apply suggested profile additions to sdd-state.md |
+| "Continue exploring" | More traces needed |
+
+Do NOT offer `/smart-sdd init --from-explore` in Context-Aware Mode (project already initialized).
 
 ### Step 8 — Write synthesis.md
 

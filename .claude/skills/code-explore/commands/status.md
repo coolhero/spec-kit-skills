@@ -80,4 +80,20 @@ APIs documented: {N}
   {If T < 5}: ℹ️ Explore more flows before synthesizing (recommended: 5+ traces)
 ```
 
+#### Context-Aware Status
+
+If `specs/_global/sdd-state.md` exists, add these sections:
+
+```
+## SDD Integration Status
+
+| Metric | Value |
+|--------|-------|
+| **Mode** | Context-Aware (SDD artifacts detected) |
+| **Existing Features** | {count} ({list with status}) |
+| **Registry Coverage** | Entities: {explored}/{registered} | APIs: {explored}/{registered} |
+| **New Discoveries** | {count} entities, {count} APIs not yet in registries |
+| **Suggested Profile Updates** | {count} new concerns/interfaces detected |
+```
+
 No HARD STOP needed — status is informational only.

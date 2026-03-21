@@ -46,6 +46,8 @@ $ARGUMENTS parsing rules:
   status                    → no additional args
   --update                  → with orient: re-scan and merge new discoveries
   --lang <code>             → artifact language (ko, en, ja, etc.). Stored in orientation.md header.
+  --scope <path>            → Limit exploration to a specific directory or module (e.g., --scope src/auth)
+  --no-branch               → Skip branch creation; explore in current working tree (useful when already on a feature branch)
 ```
 
 ### Language Persistence
@@ -105,6 +107,9 @@ Format: `{NNN}-{slug}.md` where slug is derived from the topic (kebab-case, max 
 | ❓ | Open question to investigate | "Unresolved Questions" section |
 | ⚠️ | Concern or risk observed | "Risks and Concerns" section |
 | 🔧 | Improvement idea for my version | "Design Improvements" section |
+| 🔒 | Security consideration | Authentication bypass, input validation gap, exposed secret pattern |
+| 🧪 | Test coverage gap | Untested path, missing edge case, no error test |
+| 📊 | Performance concern | N+1 query, unbounded loop, missing cache, synchronous bottleneck |
 
 ### Orientation Coverage
 
@@ -166,3 +171,14 @@ The `--from-explore` flag tells the receiving skill to read `specs/explore/` art
 
 **Primary flow**: `explore → init --from-explore → add --from-explore` (continuous handoff)
 **Domain Profile continuity**: orient detects source profile → synthesis derives target profile → init seeds sdd-state.md → add/pipeline uses it throughout
+
+### Context-Aware Mode
+
+When SDD artifacts already exist (`specs/_global/sdd-state.md` or `specs/reverse-spec/`), code-explore activates **Context-Aware Mode** automatically:
+
+- **orient**: Inherits Domain Profile from `sdd-state.md` instead of re-deriving. Shows existing Features (F001~F00N) and their coverage status
+- **trace**: Cross-references `entity-registry.md` and `api-registry.md`. Marks entities/APIs as "already registered" vs "newly discovered". Cross-references spec.md SCs to identify untested behaviors
+- **synthesis**: Produces additive Feature candidates (C001→ next available F-number). Offers registry update suggestions instead of fresh registry creation. Handoff uses `add --from-explore` instead of `init --from-explore`
+- **Detection**: Check in this order: (1) `specs/_global/sdd-state.md` (2) `specs/reverse-spec/roadmap.md` (3) `specs/explore/orientation.md`. If (1) or (2) exists → Context-Aware Mode
+
+This enables all post-adopt and mid-pipeline exploration scenarios without conflicting with existing SDD state.

@@ -12,6 +12,31 @@ Scan a codebase and generate a high-level architecture map that serves as the na
 
 ### Step 0 — Workspace Setup
 
+#### Context-Aware Mode Detection
+
+Before workspace setup, check for existing SDD artifacts:
+
+1. Check `specs/_global/sdd-state.md` → if exists, read Domain Profile, Feature list, Artifact Language
+2. Check `specs/reverse-spec/roadmap.md` → if exists, read Feature inventory
+3. Check `specs/reverse-spec/entity-registry.md` + `api-registry.md` → if exist, load for cross-referencing
+
+**If any exist → activate Context-Aware Mode**:
+- Set internal flag: `CONTEXT_AWARE = true`
+- Store loaded Domain Profile as `EXISTING_PROFILE`
+- Store loaded Feature list as `EXISTING_FEATURES`
+- Store loaded registries as `EXISTING_ENTITIES`, `EXISTING_APIS`
+- In Step 3, use `EXISTING_PROFILE` instead of re-deriving (but note any mismatches)
+- In Step 4, exclude already-covered Features from suggested topics
+- In Step 5, add "Existing SDD Context" section to orientation.md
+
+**If none exist → Fresh Mode** (current behavior unchanged).
+
+#### Branch Strategy
+
+- If `--no-branch` is specified: skip branch creation, work in current working tree
+- If already on a non-main branch (e.g., a feature branch): skip branch creation, note current branch name
+- Otherwise: create `explore-study` branch as before
+
 Determine where to write explore artifacts based on target directory:
 
 **If target directory = CWD** (user ran `/code-explore .`):
@@ -64,6 +89,14 @@ Display a brief summary:
    Entry: [main entry point(s)]
    Size: [N] files, [M] directories
 ```
+
+#### Scoped Exploration
+
+If `--scope <path>` is specified:
+- Limit file scanning to the specified subdirectory
+- Still detect project-wide tech stack from root config files (package.json, go.mod, Cargo.toml)
+- Module Map focuses on the scoped directory's internal structure
+- Suggested Exploration Topics prioritize flows within the scope
 
 ### Step 1.5 — Runtime Exploration (🚫 MANDATORY HARD STOP)
 
@@ -251,6 +284,29 @@ Order by: entry points first, then core business logic, then infrastructure.
 ### Step 5 — Generate orientation.md
 
 > **Output path**: Write to `specs/explore/orientation.md` relative to **CWD** (where the user ran the command), NOT the target directory being analyzed. If user runs `/code-explore /other/project` from `~/my-project/`, write to `~/my-project/specs/explore/orientation.md`.
+
+#### Context-Aware Sections
+
+If `CONTEXT_AWARE = true`, add these sections to orientation.md:
+
+```
+## Existing SDD Context
+
+| Field | Value |
+|-------|-------|
+| **Domain Profile** | {from sdd-state.md} |
+| **Active Features** | F001: {name} (status), F002: {name} (status), ... |
+| **Registered Entities** | {count} entities in entity-registry.md |
+| **Registered APIs** | {count} APIs in api-registry.md |
+| **Pipeline Stage** | {latest completed stage from sdd-state.md} |
+
+### Exploration Opportunities (not yet covered by SDD)
+
+| Module | In SDD? | Suggested Trace Topic |
+|--------|---------|----------------------|
+| {module} | ❌ Not covered | "{suggested question}" |
+| {module} | 🟡 Partial (F002 spec only) | "{deeper question}" |
+```
 
 Write `specs/explore/orientation.md` using the following structure:
 
