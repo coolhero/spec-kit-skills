@@ -2,6 +2,8 @@ Taming the AI Coder: Why Your Agent Needs a Harness, Not Just a Prompt
 
 Part 1 of 4 — Background, Architecture, and Real-World Scenarios
 
+![Part 1 Cover](part1.png)
+
 *This article was written with Claude Code — the same tool this project is built for. The irony is intentional.*
 
 ---

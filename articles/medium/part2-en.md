@@ -2,6 +2,8 @@ Three Skills, One Pipeline: How code-explore, reverse-spec, and smart-sdd Work T
 
 Part 2 of 4 — Each Skill in Detail
 
+![Part 2 Cover](part2.png)
+
 *Continued from Part 1: Why Your Agent Needs a Harness — (link to Part 1 on Medium)*
 
 ---
