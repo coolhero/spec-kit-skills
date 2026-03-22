@@ -60,12 +60,6 @@ graph TB
         CE_CMD["commands/ (4)"]
     end
 
-    subgraph "case-study/ (DEPRECATED)"
-        CS_SKILL["SKILL.md"]
-        CS_CMD["commands/ (1)"]
-        CS_REF["reference/ (1)"]
-        CS_TPL["templates/ (1)"]
-    end
 
     %% Key relationships
     SS_CMD -->|"loads domain modules"| SI & SC & SA & SCX
@@ -333,15 +327,6 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `commands/trace.md` | Feature flow tracing with Mermaid diagrams |
 | `commands/synthesis.md` | Understanding synthesis — architecture map, Feature candidates |
 | `commands/status.md` | Exploration progress display |
-
-### case-study (DEPRECATED) (4 files)
-
-| File | Description |
-|------|-------------|
-| `SKILL.md` | Deprecated — points to Auto-Report system |
-| `commands/generate.md` | Legacy report generation |
-| `reference/recording-protocol.md` | Legacy recording protocol |
-| `templates/case-study-log-template.md` | Legacy log template |
 
 ---
 

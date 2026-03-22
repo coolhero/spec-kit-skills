@@ -1,6 +1,5 @@
 # Auto-Report Template — Unified Completion Report
 
-> Replaces both the old completion-report template and the standalone case-study skill.
 > Generates a full report automatically from existing artifacts — no external log file needed.
 >
 > **3 generation modes**: `reverse-spec`, `adoption`, `rebuild-pipeline`
@@ -546,7 +545,7 @@ Deferred behaviors: {list}
 
 > **Condition**: Only include when per-Feature Philosophy Adherence data exists in history.md per-Feature Implementation Decisions. Omit entirely otherwise.
 >
-> **NOTE — Philosophy Adherence data source change**: Philosophy Adherence per-Feature is now recorded in **history.md per-Feature Implementation Decisions** (not case-study-log M6). When implementing Features, the pipeline records which architecture principles guided each Feature's implementation decisions directly in history.md. This eliminates the need for a separate case-study-log.md.
+> **NOTE**: Philosophy Adherence per-Feature is recorded in **history.md per-Feature Implementation Decisions**. The pipeline records which architecture principles guided each Feature's implementation decisions directly in history.md.
 
 ```markdown
 ### Philosophy Assessment

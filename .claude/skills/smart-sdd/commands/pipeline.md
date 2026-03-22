@@ -1538,7 +1538,7 @@ After all Features are completed, generate the Pipeline Completion Report automa
    - Demo Groups: [completed]/[total]
    ```
 
-> This auto-report replaces the manual `/case-study` invocation. All data is extracted from existing artifacts (history.md, sdd-state.md, registries, pre-contexts, specs) — no separate log file needed.
+> This auto-report is generated from existing artifacts (history.md, sdd-state.md, registries, pre-contexts, specs) — no separate log file needed.
 
 **Final validation**: Run `scripts/validate.sh <project-root>` to verify cross-file consistency across all completed Features. Display any ❌ errors or ⚠️ warnings.
 
