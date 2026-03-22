@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-22 08:20 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-22 13:17 KST
 
 **Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1616,7 +1616,7 @@ specs/
 
 ## File Map
 
-**255 files** (248 .md + 7 .sh) across 4 skills + 1 shared module.
+3 skills + 1 shared module. See [FILE-MAP.md](FILE-MAP.md) for the complete file inventory.
 
 For the complete file inventory with relationship diagrams, execution flow charts, and domain module hierarchy, see **[FILE-MAP.md](FILE-MAP.md)**.
 

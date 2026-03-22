@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-22 08:20 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-22 13:17 KST
 
 **AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 만드는 세 가지 개념: Feature 간 기억을 위한 [Global Evolution Layer](#global-evolution-layer), 프로젝트 유형별 전문성을 위한 [Domain Profile](#domain-profile), 구조화된 Feature 정의를 위한 [Brief](#brief) — [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -1638,7 +1638,7 @@ specs/
 
 ## 파일 맵
 
-**255개 파일** (248 .md + 7 .sh), 4개 스킬 + 1개 공유 모듈.
+3개 스킬 + 1개 공유 모듈. 전체 파일 인벤토리는 [FILE-MAP.md](FILE-MAP.md) 참조.
 
 관계도, 실행 흐름도, 도메인 모듈 계층 구조를 포함한 전체 파일 인벤토리는 **[FILE-MAP.md](FILE-MAP.md)**를 참조하세요.
 

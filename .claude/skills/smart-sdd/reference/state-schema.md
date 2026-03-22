@@ -190,6 +190,7 @@ Foundation Verified: [ISO date] | [PASS/WARN/FAIL] | [details summary]
 - `regression-specify` : Verify found regression requiring re-run from specify step
 - `regression-plan` : Verify found regression requiring re-run from plan step
 - `regression-implement` : Verify found regression requiring re-run from implement step
+- `augmented` : Feature was augmented via `add --to F00N` with additional requirements — triggers SC Preservation on next `speckit-specify` run (see `injection/specify.md` § SC Preservation on Re-specification)
 
 ---
 
