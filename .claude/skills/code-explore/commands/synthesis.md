@@ -98,6 +98,14 @@ erDiagram
 
 If `CONTEXT_AWARE = true`, include registered entities from `EXISTING_ENTITIES` and mark new entities with a `[NEW]` suffix in the diagram.
 
+#### Entity Conflict Resolution
+
+When multiple traces discover the same entity with different field sets or types:
+1. **Union fields**: Combine all observed fields from all traces
+2. **Type conflicts**: If same field has different types across traces (e.g., `metadata: string` in trace 001, `metadata: JSON` in trace 003), flag with `⚠️ Type conflict` and record both observations
+3. **Optional fields**: If a field appears in some traces but not others, mark as `optional` in the consolidated view
+4. **Resolution**: Present conflicts to the user in the synthesis review — don't silently pick one
+
 ### Step 3 — API Consolidation
 
 Merge APIs observed across traces:
@@ -154,14 +162,6 @@ flowchart LR
     RedisServer -->|"publish"| EventBus
     EventBus -->|"subscribe"| MetricsCollector
 ```
-
-#### Entity Conflict Resolution
-
-When multiple traces discover the same entity with different field sets or types:
-1. **Union fields**: Combine all observed fields from all traces
-2. **Type conflicts**: If same field has different types across traces (e.g., `metadata: string` in trace 001, `metadata: JSON` in trace 003), flag with `⚠️ Type conflict` and record both observations
-3. **Optional fields**: If a field appears in some traces but not others, mark as `optional` in the consolidated view
-4. **Resolution**: Present conflicts to the user in the synthesis review — don't silently pick one
 
 ### Step 4 — Observation Aggregation
 

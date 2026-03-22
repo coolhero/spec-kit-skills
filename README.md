@@ -1659,6 +1659,6 @@ See **[FILE-MAP.md](FILE-MAP.md)** for:
 - **§ 1**: Architecture overview (Mermaid diagram)
 - **§ 2**: Pipeline execution flow (per-step file chain)
 - **§ 3**: Domain module hierarchy (Interface → Concern → Archetype → Context → Foundation)
-- **§ 4**: Complete file inventory (all 242 files with descriptions)
+- **§ 4**: Complete file inventory (all files with descriptions)
 - **§ 5**: Cross-skill dependencies
 - **§ 6**: Injection file loading order
