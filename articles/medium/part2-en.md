@@ -313,47 +313,176 @@ The `add --to` flow solves this with SC Preservation:
 
 ---
 
-## How They Compose
+## How They Compose: End-to-End Scenarios
 
-The three skills are designed to work independently or together. Here are the composition patterns:
+The three skills are designed to work independently or together. But the composition patterns aren't just "run this, then that" — each scenario has a distinct rhythm, different artifacts flow between stages, and the human involvement changes at each step.
 
-**Greenfield** (new project from scratch):
+Here's the big picture — how every entry point, skill, and artifact connects:
+
+![How the Skills Connect](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2-diagram1.png)
+
+Let's walk through what actually happens in each scenario.
+
+---
+
+### Scenario 1: Greenfield — Building from Scratch
+
+**You have:** An idea. No code yet.
+
 ```
-/smart-sdd init → add → pipeline
+/smart-sdd init "AI-powered knowledge base with provider abstraction"
 ```
 
-**Exploration → Build** (understand existing code, then build something inspired by it):
+**What happens step by step:**
+
+**Step 1 — init.** The agent creates `sdd-state.md` with your project identity. It auto-detects or asks for your Domain Profile. You say "Electron desktop app with AI features" → profile becomes `gui + ai-assistant + external-sdk + electron + greenfield`. This profile will shape every subsequent decision.
+
+**Step 2 — add.** You describe your first Feature. Maybe just "knowledge base CRUD." The 6-step consultation kicks in: the agent identifies gaps in your description (no error handling mentioned, no file format limits, no concurrent access), asks domain-specific probes (the `ai-assistant` archetype asks about embedding generation, the `gui` interface asks about loading states), and drafts a Brief with temporal interaction flows (create → uploading → processing → ready, with error paths for each transition). You review and approve.
+
+**Step 3 — pipeline.** Now the machine runs. `specify` generates Success Criteria from your Brief — not generic ones, but domain-shaped ones. Because `gui` is active, you get SCs for loading indicators, error feedback, and empty states. Because `ai-assistant` is active, you get SCs for provider abstraction and token management. Each SC is reviewable. You approve.
+
+`plan` breaks the spec into an architecture with components, data flow, and API contracts. `tasks` creates implementation tasks ordered by dependency. `implement` writes actual code, task by task. `verify` runs 4 phases of verification — build, tests, runtime UI check, cross-Feature integration.
+
+**The key insight:** At no point does the agent guess. Every transition has a HARD STOP where you see what's about to happen and approve it. The pipeline is autonomous but not unsupervised.
+
+**Step 4 — add more Features.** You add Feature 2: "Chat with streaming." Now the magic of cross-Feature memory shows. The `specify` step sees Feature 1's entities in the registry — it knows `KnowledgeBase` and `Document` already exist with specific fields. It generates SCs that reference these existing entities instead of reinventing them. The `plan` step sees Feature 1's API contracts and designs Feature 2's APIs to be compatible.
+
+**Total flow:**
 ```
-/code-explore /path/to/reference-project
-/code-explore trace "auth flow"
-/code-explore trace "data pipeline"
-/code-explore synthesis
+init → add F001 → pipeline F001 → add F002 → pipeline F002 → ...
+```
+
+---
+
+### Scenario 2: Exploration → Build — Study First, Then Create
+
+**You have:** A reference project you admire. You want to build something similar but better.
+
+```
+/code-explore /path/to/opencode
+```
+
+**What happens step by step:**
+
+**Step 1 — Orient.** The agent scans the reference project and produces a structural map. You learn it's a Go TUI app using Bubble Tea, with goroutine-based concurrency, 847 files across 42 directories. The Domain Profile is auto-detected: `tui + ai-assistant + realtime + Go`. The agent suggests 8 exploration topics.
+
+**Step 2 — Trace (3-5 rounds).** You pick the flows that matter most. "How does context window management work?" → the agent traces from user input through token counting to message truncation, producing a Mermaid diagram and a flow table with source references. "How does tool execution work?" → another trace, this time using the concurrent actors strategy because tools run in parallel goroutines.
+
+Each trace produces entities (you discover `Message`, `Conversation`, `Tool`, `Provider` data structures), APIs (you see internal function contracts), and observations (💡 "elegant pattern: provider abstraction via interface" and 🔧 "improvement: tool execution should support cancellation").
+
+**Step 3 — Synthesis.** The agent merges all traces into a consolidated view: unified entity map, API map, Feature candidates (C001: conversation management, C002: provider abstraction, C003: tool system, C004: context window management). The 🔧 observations become your "What I'd Do Differently" decisions — you're not just copying, you're improving.
+
+**Step 4 — Handoff to smart-sdd.** The synthesis feeds directly into the build pipeline:
+
+```
 /smart-sdd init --from-explore
-/smart-sdd add --from-explore    # Feature candidates become Briefs
-/smart-sdd pipeline F001
 ```
 
-**Rebuild** (rewrite an existing app from scratch):
+The Domain Profile carries over (but you can change it — maybe you want `gui` instead of `tui`). The entity map pre-populates the registry. Feature candidates become the starting point for `add`.
+
+```
+/smart-sdd add --from-explore C001    # Conversation management
+```
+
+The pre-context for this Feature includes the trace data — what the source does, what you'd do differently. When `specify` runs, it generates SCs based on YOUR design decisions, not the source's implementation.
+
+**Total flow:**
+```
+code-explore orient → trace × 3-5 → synthesis
+  → smart-sdd init --from-explore → add --from-explore → pipeline
+```
+
+---
+
+### Scenario 3: Rebuild — Rewriting an Existing App
+
+**You have:** A working app that needs to be rewritten. Different tech stack, better architecture, but same functionality.
+
 ```
 /reverse-spec /path/to/legacy-app
-/smart-sdd init --from-reverse-spec
-/smart-sdd pipeline              # builds all Features in dependency order
 ```
 
-**Adoption** (add SDD docs to existing code without rewriting):
+**What happens step by step:**
+
+**Step 1 — reverse-spec (5 phases).** The agent performs an exhaustive analysis. Phase 1 maps the file structure. Phase 2 catalogs every user-facing behavior — "B001: User can create a knowledge base with name, model selection, and auto-calculated dimensions." Phase 3 extracts entities and APIs into registry format. Phase 4 groups behaviors into Features ordered by dependency. Phase 5 extracts architectural principles for the constitution.
+
+The critical output is the **Source Behavior Inventory (SBI)** — it ensures nothing gets lost. If the source has 47 behaviors, you know exactly which 47 things need to survive the rebuild.
+
+**Step 2 — init from reverse-spec.** The roadmap, registries, and constitution seed carry over:
+
+```
+/smart-sdd init --from-reverse-spec
+```
+
+The Features are already defined. The dependency order is already set. Entity and API registries are pre-populated from the source analysis.
+
+**Step 3 — pipeline with source fidelity.** This is where the Artifact Separation principle matters most. When `specify` runs for Feature 3, it receives two distinct inputs:
+
+- **Pre-context** (from reverse-spec): "The source uses a ModelSelector dropdown with auto-calculated dimensions based on the selected model"
+- **Spec** (what you're building): "User selects a model. Dimensions are auto-populated based on the model's configuration"
+
+The spec describes WHAT to build. The pre-context records WHERE it came from. The implementation can be completely different (React instead of Electron, PostgreSQL instead of SQLite) while preserving the same behavior.
+
+**Step 4 — SBI tracking.** Throughout the pipeline, each B### behavior maps to FR-### requirements. At any point, you can check: "Which source behaviors are covered? Which are missing?" This is the rebuild's safety net — it catches dropped functionality before it reaches production.
+
+**Total flow:**
+```
+reverse-spec (5 phases) → smart-sdd init --from-reverse-spec
+  → pipeline F001 → pipeline F002 → ... (in dependency order)
+```
+
+---
+
+### Scenario 4: Adoption — Documenting Without Rewriting
+
+**You have:** A working app that needs SDD documentation but shouldn't be rewritten.
+
 ```
 /smart-sdd adopt /path/to/existing-app
 ```
 
-**Mid-pipeline investigation** (something's wrong, need to understand the source better):
+**What happens step by step:**
+
+This scenario is fundamentally different — you're not building anything. You're creating specs, plans, and task breakdowns that DESCRIBE the existing code, making it maintainable and extendable.
+
+**Step 1 — Auto-chained reverse-spec.** If reverse-spec artifacts don't exist yet, `adopt` automatically runs reverse-spec first. You don't need to invoke it separately.
+
+**Step 2 — Adopt consultation (4 steps).** For each Feature identified by reverse-spec, the agent walks through a lighter consultation. Instead of asking "what do you want to build?", it asks "does this description accurately capture what exists?" You review the behaviors, confirm or correct them, and approve.
+
+**Step 3 — Spec generation.** The agent generates specs that describe the existing code's behavior as-is. Success Criteria are derived from actual behavior, not desired behavior. The spec for "login" says "user enters email and password, system validates against bcrypt hash, returns JWT with 24h expiry" — because that's what the code actually does.
+
+**Step 4 — Plan and tasks.** These describe the existing architecture and implementation structure. They serve as documentation and onboarding material — a new team member can read the spec, plan, and tasks to understand the system without reading every source file.
+
+**Total flow:**
 ```
-/smart-sdd pipeline F003         # stuck on implementation
-/code-explore . --no-branch      # explore without disturbing the pipeline
-/code-explore trace "how does the original handle this edge case"
-# continue pipeline with new understanding
+smart-sdd adopt → (auto reverse-spec if needed)
+  → adopt consultation per Feature → spec/plan/tasks as documentation
 ```
 
-The `--from-explore` and `--from-reverse-spec` flags carry context seamlessly — Domain Profile, entities, APIs, Feature candidates. The handoff is lossless.
+---
+
+### Scenario 5: Mid-Pipeline Investigation
+
+**You have:** An active pipeline that's stuck. Feature 3's implementation isn't working because you don't understand how the source handles a specific edge case.
+
+```
+/code-explore . --no-branch
+/code-explore trace "how does the original handle concurrent file uploads"
+```
+
+**What happens:** code-explore runs without disturbing the pipeline state. The trace reveals the source uses a queue with deduplication. You return to the pipeline with this understanding, and the implementation proceeds.
+
+This pattern — stepping out of the pipeline to investigate, then stepping back in — is why the three skills are loosely coupled. Each produces persistent file artifacts. The pipeline reads files, not agent memory. So you can interrupt, explore, and resume without losing state.
+
+**Total flow:**
+```
+pipeline F003 (stuck) → code-explore trace → (understanding gained)
+  → pipeline F003 (continue)
+```
+
+---
+
+The `--from-explore` and `--from-reverse-spec` flags carry context seamlessly — Domain Profile, entities, APIs, Feature candidates. The handoff is lossless because everything is in files (P3: File over Memory).
 
 ---
 

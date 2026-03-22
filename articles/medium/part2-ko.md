@@ -313,47 +313,176 @@ Playwright를 사용할 수 없으면 에이전트가 **사용자에게 위임**
 
 ---
 
-## 세 스킬의 조합
+## 세 스킬의 조합: End-to-End 시나리오
 
-세 스킬은 독립적으로 또는 함께 사용하도록 설계되었습니다. 조합 패턴은 다음과 같습니다:
+세 스킬은 독립적으로 또는 함께 사용하도록 설계되었습니다. 하지만 조합 패턴은 단순히 "이걸 실행하고, 저걸 실행하고"가 아닙니다 — 각 시나리오마다 고유한 리듬이 있고, 다른 아티팩트가 단계 사이를 흐르며, 사람의 개입 방식도 각 단계마다 달라집니다.
 
-**그린필드** (처음부터 새 프로젝트):
+전체 그림부터 봅시다 — 모든 진입점, 스킬, 아티팩트가 어떻게 연결되는지:
+
+![스킬 연결 다이어그램](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2-diagram1.png)
+
+각 시나리오에서 실제로 무슨 일이 일어나는지 따라가 봅시다.
+
+---
+
+### 시나리오 1: 그린필드 — 처음부터 빌드
+
+**가진 것:** 아이디어. 코드는 아직 없음.
+
 ```
-/smart-sdd init → add → pipeline
+/smart-sdd init "프로바이더 추상화를 갖춘 AI 기반 지식 베이스"
 ```
 
-**탐색 → 빌드** (기존 코드를 이해한 후 영감을 받아 빌드):
+**단계별 진행:**
+
+**Step 1 — init.** 에이전트가 프로젝트 아이덴티티로 `sdd-state.md`를 생성합니다. Domain Profile을 자동 감지하거나 물어봅니다. "AI 기능이 있는 Electron 데스크톱 앱"이라고 하면 → 프로필이 `gui + ai-assistant + external-sdk + electron + greenfield`가 됩니다. 이 프로필이 이후의 모든 결정을 형성합니다.
+
+**Step 2 — add.** 첫 번째 Feature를 설명합니다. "지식 베이스 CRUD" 정도로 시작할 수 있습니다. 6단계 상담이 시작됩니다: 에이전트가 설명의 빈틈을 찾고 (에러 처리 언급 없음, 파일 형식 제한 없음, 동시 접근 없음), 도메인 특화 프로브를 질문하고 (`ai-assistant` 아키타입은 임베딩 생성에 대해, `gui` 인터페이스는 로딩 상태에 대해), 시간적 인터랙션 흐름이 포함된 Brief를 작성합니다 (생성 → 업로드 중 → 처리 중 → 준비 완료, 각 전환의 에러 경로 포함). 리뷰하고 승인합니다.
+
+**Step 3 — pipeline.** 이제 머신이 돌아갑니다. `specify`가 Brief에서 Success Criteria를 생성합니다 — 범용이 아니라 도메인에 맞춰진 것들. `gui`가 활성화되어 있으니 로딩 인디케이터, 에러 피드백, 빈 상태에 대한 SC가 나옵니다. `ai-assistant`가 활성화되어 있으니 프로바이더 추상화와 토큰 관리 SC가 나옵니다. 각 SC를 검토할 수 있습니다. 승인합니다.
+
+`plan`이 스펙을 컴포넌트, 데이터 흐름, API 계약을 가진 아키텍처로 분해합니다. `tasks`가 의존성 순서의 구현 태스크를 만듭니다. `implement`가 태스크별로 실제 코드를 작성합니다. `verify`가 4단계 검증을 실행합니다 — 빌드, 테스트, 런타임 UI 확인, Feature 간 통합.
+
+**핵심 통찰:** 에이전트가 추측하는 순간은 없습니다. 모든 전환에 HARD STOP이 있어서 무슨 일이 일어날지 보고 승인합니다. 파이프라인은 자율적이지만 비감독은 아닙니다.
+
+**Step 4 — 더 많은 Feature 추가.** Feature 2: "스트리밍 채팅"을 추가합니다. 이제 Cross-Feature Memory의 마법이 보입니다. `specify` 단계가 레지스트리에서 Feature 1의 엔티티를 봅니다 — `KnowledgeBase`와 `Document`가 특정 필드와 함께 이미 존재한다는 걸 압니다. 재발명 대신 기존 엔티티를 참조하는 SC를 생성합니다. `plan` 단계가 Feature 1의 API 계약을 보고 호환되는 Feature 2 API를 설계합니다.
+
+**전체 흐름:**
 ```
-/code-explore /path/to/reference-project
-/code-explore trace "인증 흐름"
-/code-explore trace "데이터 파이프라인"
-/code-explore synthesis
+init → add F001 → pipeline F001 → add F002 → pipeline F002 → ...
+```
+
+---
+
+### 시나리오 2: 탐색 → 빌드 — 먼저 공부하고, 그 다음 만들기
+
+**가진 것:** 존경하는 레퍼런스 프로젝트. 비슷하지만 더 나은 것을 만들고 싶음.
+
+```
+/code-explore /path/to/opencode
+```
+
+**단계별 진행:**
+
+**Step 1 — Orient.** 에이전트가 레퍼런스 프로젝트를 스캔하고 구조적 맵을 만듭니다. Go TUI 앱이고 Bubble Tea를 사용하며, goroutine 기반 동시성, 42개 디렉토리에 847개 파일이라는 걸 알게 됩니다. Domain Profile 자동 감지: `tui + ai-assistant + realtime + Go`. 에이전트가 8개 탐색 주제를 제안합니다.
+
+**Step 2 — Trace (3-5회).** 가장 중요한 흐름을 선택합니다. "컨텍스트 윈도우 관리가 어떻게 동작하는지?" → 에이전트가 사용자 입력에서 토큰 카운팅을 거쳐 메시지 트런케이션까지 추적하고, Mermaid 다이어그램과 소스 참조가 있는 흐름 테이블을 만듭니다. "도구 실행은 어떻게 동작하는지?" → 이번엔 도구가 병렬 goroutine에서 실행되니 concurrent actors 전략을 사용합니다.
+
+각 trace가 엔티티(`Message`, `Conversation`, `Tool`, `Provider` 데이터 구조), API(내부 함수 계약), 관찰(💡 "우아한 패턴: 인터페이스를 통한 프로바이더 추상화", 🔧 "개선: 도구 실행에 취소 지원 필요")을 산출합니다.
+
+**Step 3 — Synthesis.** 에이전트가 모든 trace를 통합된 뷰로 병합합니다: 통합 엔티티 맵, API 맵, Feature 후보 (C001: 대화 관리, C002: 프로바이더 추상화, C003: 도구 시스템, C004: 컨텍스트 윈도우 관리). 🔧 관찰이 "내가 다르게 할 것" 결정이 됩니다 — 단순 복사가 아니라 개선입니다.
+
+**Step 4 — smart-sdd로 핸드오프.** synthesis가 빌드 파이프라인에 직접 전달됩니다:
+
+```
 /smart-sdd init --from-explore
-/smart-sdd add --from-explore    # Feature 후보가 Brief가 됨
-/smart-sdd pipeline F001
 ```
 
-**리빌드** (기존 앱을 처음부터 재작성):
+Domain Profile이 이어집니다 (바꿀 수 있습니다 — `tui` 대신 `gui`를 원할 수도). 엔티티 맵이 레지스트리를 미리 채웁니다. Feature 후보가 `add`의 시작점이 됩니다.
+
+```
+/smart-sdd add --from-explore C001    # 대화 관리
+```
+
+이 Feature의 프리컨텍스트에 trace 데이터가 포함됩니다 — 소스가 뭘 하는지, 내가 뭘 다르게 할지. `specify`가 실행될 때 소스의 구현이 아니라 나의 설계 결정에 기반한 SC를 생성합니다.
+
+**전체 흐름:**
+```
+code-explore orient → trace × 3-5 → synthesis
+  → smart-sdd init --from-explore → add --from-explore → pipeline
+```
+
+---
+
+### 시나리오 3: 리빌드 — 기존 앱 재작성
+
+**가진 것:** 재작성이 필요한 동작하는 앱. 다른 기술 스택, 더 나은 아키텍처, 하지만 같은 기능.
+
 ```
 /reverse-spec /path/to/legacy-app
-/smart-sdd init --from-reverse-spec
-/smart-sdd pipeline              # 의존성 순서로 모든 Feature 빌드
 ```
 
-**어답션** (재작성 없이 기존 코드에 SDD 문서 추가):
+**단계별 진행:**
+
+**Step 1 — reverse-spec (5단계).** 에이전트가 철저한 분석을 수행합니다. Phase 1이 파일 구조를 매핑. Phase 2가 모든 사용자 대면 행동을 카탈로그 — "B001: 사용자가 이름, 모델 선택, 자동 계산 차원으로 지식 베이스를 생성할 수 있다." Phase 3이 엔티티와 API를 레지스트리 형식으로 추출. Phase 4가 행동을 의존성 순서의 Feature로 그룹핑. Phase 5가 헌법을 위한 아키텍처 원칙을 추출.
+
+핵심 산출물은 **Source Behavior Inventory (SBI)** — 아무것도 누락되지 않도록 보장합니다. 소스에 47개 행동이 있으면, 리빌드가 정확히 어떤 47가지를 살려야 하는지 알 수 있습니다.
+
+**Step 2 — reverse-spec에서 init.** 로드맵, 레지스트리, 헌법 시드가 이어집니다:
+
+```
+/smart-sdd init --from-reverse-spec
+```
+
+Feature가 이미 정의되어 있습니다. 의존성 순서가 이미 설정되어 있습니다. 엔티티와 API 레지스트리가 소스 분석에서 미리 채워져 있습니다.
+
+**Step 3 — 소스 충실성을 갖춘 pipeline.** 여기서 Artifact Separation 원칙이 가장 중요합니다. Feature 3의 `specify`가 실행될 때, 두 가지 다른 입력을 받습니다:
+
+- **프리컨텍스트** (reverse-spec에서): "소스는 선택된 모델에 기반한 자동 계산 차원이 있는 ModelSelector 드롭다운을 사용한다"
+- **스펙** (만들고 있는 것): "사용자가 모델을 선택한다. 모델의 설정에 따라 차원이 자동 채워진다"
+
+스펙은 무엇을 만드는지 기술합니다. 프리컨텍스트는 어디서 왔는지 기록합니다. 구현은 완전히 다를 수 있습니다 (Electron 대신 React, SQLite 대신 PostgreSQL) 같은 동작을 보존하면서.
+
+**Step 4 — SBI 추적.** 파이프라인 내내, 각 B### 행동이 FR-### 요구사항에 매핑됩니다. 어떤 시점에서든 확인할 수 있습니다: "어떤 소스 행동이 커버되었나? 어떤 게 빠져 있나?" 이것이 리빌드의 안전망입니다 — 누락된 기능을 프로덕션에 도달하기 전에 잡습니다.
+
+**전체 흐름:**
+```
+reverse-spec (5단계) → smart-sdd init --from-reverse-spec
+  → pipeline F001 → pipeline F002 → ... (의존성 순서로)
+```
+
+---
+
+### 시나리오 4: 어답션 — 재작성 없이 문서화
+
+**가진 것:** SDD 문서가 필요하지만 재작성하면 안 되는 동작하는 앱.
+
 ```
 /smart-sdd adopt /path/to/existing-app
 ```
 
-**파이프라인 중간 조사** (뭔가 잘못되었을 때 소스를 더 이해해야 할 때):
+**단계별 진행:**
+
+이 시나리오는 근본적으로 다릅니다 — 아무것도 빌드하지 않습니다. 기존 코드를 설명하는 스펙, 플랜, 태스크 분해를 만들어서 유지보수와 확장이 가능하게 합니다.
+
+**Step 1 — 자동 연쇄 reverse-spec.** reverse-spec 아티팩트가 아직 없으면, `adopt`이 자동으로 reverse-spec을 먼저 실행합니다. 별도로 호출할 필요가 없습니다.
+
+**Step 2 — Adopt 상담 (4단계).** reverse-spec이 식별한 각 Feature에 대해, 에이전트가 가벼운 상담을 진행합니다. "뭘 만들고 싶은지" 대신 "이 설명이 기존 것을 정확히 포착하는지" 물어봅니다. 행동을 검토하고, 확인하거나 수정하고, 승인합니다.
+
+**Step 3 — 스펙 생성.** 에이전트가 기존 코드의 현재 동작을 그대로 기술하는 스펙을 생성합니다. Success Criteria가 희망 사항이 아니라 실제 동작에서 도출됩니다. "로그인" 스펙이 "사용자가 이메일과 비밀번호를 입력, 시스템이 bcrypt 해시로 검증, 24시간 만료 JWT 반환"이라고 합니다 — 코드가 실제로 하는 것이니까.
+
+**Step 4 — 플랜과 태스크.** 기존 아키텍처와 구현 구조를 설명합니다. 문서이자 온보딩 자료 역할 — 새 팀원이 모든 소스 파일을 읽지 않고도 스펙, 플랜, 태스크를 읽으며 시스템을 이해할 수 있습니다.
+
+**전체 흐름:**
 ```
-/smart-sdd pipeline F003         # 구현에서 막힘
-/code-explore . --no-branch      # 파이프라인을 방해하지 않고 탐색
-/code-explore trace "원본이 이 엣지 케이스를 어떻게 처리하는지"
-# 새 이해로 파이프라인 계속
+smart-sdd adopt → (필요하면 자동 reverse-spec)
+  → Feature별 adopt 상담 → 문서로서의 spec/plan/tasks
 ```
 
-`--from-explore`와 `--from-reverse-spec` 플래그가 컨텍스트를 매끄럽게 전달합니다 — Domain Profile, 엔티티, API, Feature 후보. 핸드오프에서 손실이 없습니다.
+---
+
+### 시나리오 5: 파이프라인 중간 조사
+
+**가진 것:** 막힌 활성 파이프라인. Feature 3 구현이 안 되는데, 소스가 특정 엣지 케이스를 어떻게 처리하는지 이해가 안 됨.
+
+```
+/code-explore . --no-branch
+/code-explore trace "원본이 동시 파일 업로드를 어떻게 처리하는지"
+```
+
+**무슨 일이 일어나나:** code-explore가 파이프라인 상태를 방해하지 않고 실행됩니다. trace가 소스에서 중복 제거가 있는 큐를 사용한다는 걸 보여줍니다. 이 이해를 가지고 파이프라인으로 돌아가면 구현이 진행됩니다.
+
+이 패턴 — 파이프라인에서 나와 조사하고, 다시 돌아오기 — 이 세 스킬이 느슨하게 결합된 이유입니다. 각각이 영구적인 파일 아티팩트를 만듭니다. 파이프라인은 에이전트 메모리가 아니라 파일을 읽습니다. 그래서 중단하고, 탐색하고, 상태를 잃지 않고 재개할 수 있습니다.
+
+**전체 흐름:**
+```
+pipeline F003 (막힘) → code-explore trace → (이해 획득)
+  → pipeline F003 (계속)
+```
+
+---
+
+`--from-explore`와 `--from-reverse-spec` 플래그가 컨텍스트를 매끄럽게 전달합니다 — Domain Profile, 엔티티, API, Feature 후보. 핸드오프에서 손실이 없습니다. 모든 것이 파일에 있기 때문입니다 (P3: File over Memory).
 
 ---
 
