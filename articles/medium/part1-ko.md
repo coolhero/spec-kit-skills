@@ -190,7 +190,7 @@ core concepts:
 
 enforcement:
   HARD STOP: 모든 체크포인트에서 명시적 사용자 승인
-  Pipeline Guards: G1-G7 파이프라인 진행 차단
+  Pipeline Guards: 7개 차단 검사로 파이프라인 진행 차단
   빈 응답: 항상 재질문, 침묵에 대해 절대 진행하지 않음
 
 scenarios:

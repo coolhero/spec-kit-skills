@@ -226,7 +226,7 @@ core concepts:
 
 enforcement:
   HARD STOPs: explicit user approval at every checkpoint
-  Pipeline Guards: G1-G7 block progression
+  Pipeline Guards: 7 blocking checks that prevent progression
   Empty response: always re-ask, never proceed on silence
 
 scenarios:

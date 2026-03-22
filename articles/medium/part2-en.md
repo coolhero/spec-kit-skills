@@ -225,7 +225,7 @@ spec-kit by itself is powerful: you give it a spec, it generates a plan, tasks, 
 smart-sdd wraps spec-kit with:
 1. **Global Evolution Layer** — registries, pre-context, stubs that carry information across Features
 2. **Domain Profile** — rules that adapt to your project type
-3. **Pipeline Integrity Guards** — 7 guards (G1-G7) that block progression when something is wrong
+3. **Pipeline Integrity Guards** — 7 blocking checks that prevent the pipeline from proceeding when something is wrong
 
 ### init: Project Identity
 
@@ -282,7 +282,7 @@ At each step, a 4-phase protocol executes:
 
 ### The 4-Phase Verify
 
-Verification is not "does it build?" That was Gap Pattern G1 — the very first failure pattern we discovered. Build passes mean nothing about whether the feature actually works.
+Verification is not "does it build?" That was the very first failure pattern we discovered — build passes mean nothing about whether the feature actually works.
 
 **Phase 1 — Build + TypeScript + Lint.** The baseline. If this fails, nothing else runs.
 
@@ -290,9 +290,9 @@ Verification is not "does it build?" That was Gap Pattern G1 — the very first 
 
 **Phase 3 — UI/Runtime verification.** This is where spec-kit-skills diverges from every other tool. The agent launches the actual application using Playwright (or Electron-specific protocols for desktop apps) and verifies each Success Criterion against the running UI. Not "does the login component render?" but "can I actually type a password, click submit, see the dashboard, and see the correct user name?"
 
-If Playwright isn't available, the agent **delegates to the user**: "Please click the login button. Does the dashboard appear with your username?" It never skips. This is the "Delegate, Don't Skip" principle born from Gap Pattern G6.
+If Playwright isn't available, the agent **delegates to the user**: "Please click the login button. Does the dashboard appear with your username?" It never skips. This is the "Delegate, Don't Skip" principle.
 
-**Phase 4 — Cross-Feature integration.** Verify that Features work together. Feature 2's settings page actually changes Feature 1's behavior. The API gateway correctly routes to both Feature 3 and Feature 4's endpoints. This catches Gap Pattern G7 — cross-Feature integration contract failures.
+**Phase 4 — Cross-Feature integration.** Verify that Features work together. Feature 2's settings page actually changes Feature 1's behavior. The API gateway correctly routes to both Feature 3 and Feature 4's endpoints. This catches cross-Feature integration contract failures — one of the most common breakage patterns we encountered.
 
 ### add --to: Augmenting Without Destroying
 
@@ -410,8 +410,8 @@ smart_sdd:
     triggers: SC Preservation (preserved/new/updated tags)
     post_check: SC count >= previous, preserved SCs unchanged, new SCs cover augmented reqs
 
-  guards: G1_constitution, G2_entity_registry, G3_api_registry, G4_pre_context,
-          G5_dependency_order, G6_augmentation, G7_regression
+  guards: constitution, entity_registry, api_registry, pre_context,
+          dependency_order, augmentation, regression (7 total)
 ```
 
 ---

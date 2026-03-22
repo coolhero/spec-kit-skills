@@ -10,222 +10,204 @@
 
 ## The Honest Truth
 
-Building spec-kit-skills took over 200 commits across three weeks. Along the way, we cataloged **19 gap patterns** (recurring failure categories) and **50+ specific lessons** (concrete incidents with fixes). Every single one came from a real pipeline run that produced wrong results.
+Building spec-kit-skills took over 200 commits across three weeks. We cataloged 19 recurring failure patterns and 50+ specific incidents. Every single one came from a real pipeline run that produced wrong results.
 
 The insight that changed everything: making AI agents *reliable* is fundamentally different from making them *capable*. The agent could always build features. The challenge was getting it to build the right features, the right way, every time.
 
-This article distills those failures into patterns that apply to anyone building AI agent workflows — whether you use spec-kit-skills or not.
+This article distills those failures into **universal patterns** that apply to anyone building AI agent workflows — whether you use spec-kit-skills, build your own Claude Code skills, or work with any other agentic coding tool.
 
 ---
 
-## Part A: The Gap Patterns
-
-These are recurring failure categories. Each represents a class of bugs that traditional software checks (build, test, lint) don't catch.
+## Part A: Failure Patterns Every Skill Developer Should Know
 
 ---
 
-### G1: Build Pass ≠ Feature Works
+### "Build Passes" Is Not "Feature Works"
 
 **The trap:** Your build succeeds, tests pass, linter is clean — and the feature is broken at runtime.
 
-**Real example:** Zustand state selectors created new object references every render. Result: infinite re-renders, broken scroll during streaming. TypeScript saw nothing wrong. Tests passed in isolation. The app was unusable.
+**Real example:** A state management selector created new object references every render. Result: infinite re-renders, broken scroll during streaming. TypeScript saw nothing wrong. Tests passed in isolation. The app was unusable.
 
-Another example: Tailwind CSS 4 plugin wasn't registered in the build config. The entire UI was unstyled — plain HTML with no CSS. Build passed. TypeScript passed. The framework's absence didn't cause errors; it just produced no output.
+Another: A CSS framework plugin wasn't registered in the build config. The UI was completely unstyled — plain HTML. Build passed. The framework's absence didn't cause errors; it just produced no output.
 
-**Why it's invisible:** Build tools check syntax and types. Tests check isolated units. Neither checks runtime state behavior, animation timing, CSS rendering, or interaction between live components. Build-time transformation frameworks (Tailwind, i18next, code generators) fail silently when their plugins aren't registered.
-
-**How we catch it:** Per-task runtime verification. Playwright launches the actual app and checks: Can the user log in? Does the sidebar render? Does streaming work? Is the CSS applied? Not "does the component exist in code" but "does the feature work in the browser."
+**The universal lesson:** Build tools check syntax. Tests check isolated units. Neither checks runtime behavior — animation timing, state interaction, CSS rendering, scroll position during streaming. **If your skill has a verify step, it must include runtime verification, not just build+test.** When runtime verification isn't possible (no Playwright, no browser), delegate to the user — never skip.
 
 ---
 
-### G3: The Agent Guesses Instead of Reading
+### Agents Guess Instead of Reading
 
-**The trap:** The agent generates a plausible value when it could have read the actual value from source code.
+**The trap:** The agent generates a plausible value when it could have read the actual value from the codebase.
 
-**Real example 1:** Agent guessed CSS color tokens instead of reading them from the source theme file. Three colors were wrong.
+**Real example:** The agent guessed CSS color tokens instead of reading them from the source theme file. It assumed "3 sidebar tabs" from a summary when the code actually had 2 (the third was conditional).
 
-**Real example 2:** Summary said "3 sidebar tabs." Code actually had 2 tabs — the third was a conditional view that only appeared in certain states. The agent built 3 tabs.
-
-**Real example 3:** Pre-context said "uses better-sqlite3." But the dependency Feature had already switched to electron-store during implementation. The agent built an sqlite3 integration for a module that no longer existed.
-
-**Why it happens:** Agents are trained to generate. Given incomplete information, they produce the most likely completion. But "most likely" isn't "correct." The correct answer is one `grep` away — the agent just didn't look.
-
-**How we catch it:** Active Read directives — not "check the theme" but "Read `theme.css`, extract the exact hex code for `--color-primary`, use that value." Plus freshness checks: before specify runs, compare pre-context assumptions against actual implementation of completed dependencies.
+**The universal lesson:** Agents are trained to generate. Given incomplete information, they produce the most likely completion — but "most likely" isn't "correct." **Your skill instructions must force source reading with explicit verbs**: not "check the config" but "Read `config.yaml`, extract the exact value for `max_connections`, use that value." Vague instructions get vague (generated) results.
 
 ---
 
-### G5: Context Compression Erases Rules
+### Context Compression Erases Your Rules
 
 **The trap:** The agent reads your skill file at conversation start. 50 messages later, context compression kicks in. The rules are gone. The agent reverts to default behavior.
 
-**Real example:** During Feature 6 verification, context compression erased the verify-phases.md reference. The agent skipped Playwright UI verification entirely — despite completing it successfully for Features 1 through 5. Same agent, same skill file, same pipeline. The only difference: context was compressed.
+**Real example:** After 5 Features were correctly verified with full Playwright UI checks, Feature 6's verification skipped Playwright entirely. Context compression had eaten the verification instructions. Same agent, same skill, same pipeline — just a longer conversation.
 
-**Why it's the meta-problem:** Every other safeguard assumes the agent reads its instructions. If instructions get compressed out of context, no rule — no matter how well written — matters.
-
-**How we catch it:** Three defenses working together: (1) Critical rules inlined at every execution point, not just in referenced files. (2) State tracked in files — even if the agent forgets the rules, sdd-state.md tells it which verify phase to resume from. (3) Verify progress written to sdd-state.md at every phase boundary, so the resumption protocol can pick up where compression interrupted.
+**The universal lesson:** This is the meta-problem of skill development. Every other safeguard assumes the agent reads your instructions. **If instructions get compressed out of context, nothing works.** Three defenses: (1) Inline critical rules at every execution point, not just in a header. (2) Track state in files so the agent can recover. (3) Write progress markers — even if the agent forgets the rules, the state file tells it where to resume.
 
 ---
 
-### G7: Cross-Feature Integration Failures
+### Cross-Feature Integration Fails Silently
 
-**The trap:** Each Feature works in isolation, but Features break when they interact — because nobody defined the data shapes at boundaries.
+**The trap:** Each Feature works in isolation, but they break when they interact — because nobody defined the data shapes at boundaries.
 
-**Real example:** Feature A's ParameterBuilder expected `{ mcpMode, mcpServers }` on the assistant object. Feature B's store actually stored `{ mcpEnabled, servers }`. Different field names, different types. No bridge was designed, built, or verified. Three-layer miss: spec didn't define it, implement didn't build it, verify didn't check it.
+**Real example:** Feature A expected `{ mcpMode, mcpServers }` on an object. Feature B stored `{ mcpEnabled, servers }`. Different names, different structure. Spec didn't define the contract, implementation didn't build a bridge, verification didn't check compatibility.
 
-**How we catch it:** Integration Contracts in plan.md explicitly define Provider Shape vs Consumer Shape for each cross-Feature boundary. Verify Phase 4 checks actual data shape compatibility at runtime.
-
----
-
-### G9: SDK API Contract Gaps
-
-**The trap:** Code passes metadata-only objects to SDK functions that expect callable objects. Build passes (loose types). SDK silently ignores the input.
-
-**Real example:** AI SDK's `tool()` function expects `{ execute: async () => {...} }`. The agent passed `{ type: "mcp", serverId: "xxx" }` — metadata only, no execute function. The SDK silently ignored these "tools." The AI responded without tool access. Build passed. Tests passed. The tools simply didn't work.
-
-**Why it's insidious:** Many SDKs use permissive types (`any`, `Record<string, unknown>`) that accept anything at compile time. The contract is enforced at runtime, not at build time.
-
-**How we catch it:** SDK API contract gap detection in Pattern Compliance Scan, with Trust Classification: High-trust (well-typed, strict), Medium-trust (typed but permissive), Low-trust (any-typed or documentation-only).
+**The universal lesson:** If your pipeline builds multiple Features, **define integration contracts explicitly** — what does Feature A provide, what does Feature B consume, and what's the exact data shape at the boundary. Then verify the contract at runtime, not just in the spec.
 
 ---
 
-### G15: The Skill Tool Response Boundary
+### SDK APIs Accept Anything, Execute Nothing
 
-**The trap:** When an orchestrator skill calls a sub-skill via the Skill tool, the sub-skill's completion message becomes the final response. All post-execution steps (review, approval, state update) are structurally impossible.
+**The trap:** Code passes metadata-only objects to SDK functions that expect callable objects. Build passes (loose types). The SDK silently ignores the input.
 
-**Real example:** `speckit-constitution` returned "Constitution finalized." The agent displayed this raw output and jumped to the next pipeline step. No artifact reading, no review, no user approval. The user saw cryptic output and had no idea what to do next.
+**Real example:** An AI SDK's `tool()` function expects `{ execute: async () => {...} }`. The agent passed `{ type: "mcp", serverId: "xxx" }` — metadata only, no execute function. The SDK silently accepted it. The AI responded without tool access. Everything "worked" — except the tools.
 
-**Why it happens:** The Skill tool creates a response boundary — when the sub-skill returns, the orchestrator's turn ends. It's not a bug in the agent's behavior; it's a structural limitation of the tool invocation model.
-
-**How we catch it:** 4-layer defense: (1) Inline Execution — read the sub-skill's SKILL.md and execute steps directly, never via Skill tool. (2) MANDATORY RULE 3 in always-loaded SKILL.md. (3) Per-step inline Execute+Review sections. (4) Catch-all fallback: if response ends without AskUserQuestion for ANY reason, show continue prompt.
+**The universal lesson:** Many SDKs use permissive types that accept anything at compile time. **Classify SDKs by trust level**: high-trust (strict types, fails loudly), medium-trust (typed but permissive), low-trust (accepts anything, documentation-only contracts). For medium and low trust SDKs, add explicit runtime contract checks in your verification step.
 
 ---
 
-### G17: Information Dies Between Pipeline Stages
+### Sub-Skill Calls Break Orchestration
 
-**The trap:** Each pipeline stage produces analysis, but the next stage only sees the output artifact — not the underlying evidence. By the time implement runs, source code details have been distilled through 4 layers of abstraction.
+**The trap:** When your orchestrator skill calls a sub-skill via the Skill tool, the sub-skill's completion message becomes the final response. All your post-execution steps (review, approval, state update) become structurally impossible.
 
-**Real example:** Source app's `AddKnowledgeBasePopup.tsx` had a `ModelSelector` dropdown with auto-calculated dimensions. SBI recorded "create KB with name, model, dimensions." Plan said "create dialog." Tasks said "build form with inputs." Implement agent — seeing only task text — created 3 plain text inputs. The dropdown, auto-fill, and provider filtering were all lost through 4 stages of abstraction.
+**Real example:** An orchestrator called a spec generation sub-skill. The sub-skill returned "Spec finalized." That became the entire response. No artifact review, no user approval, no state update. The user saw a cryptic message and had no idea what to do next.
 
-**How we catch it:** Source Code Reference Injection at implement time. For rebuild projects with GUI interfaces, the implement step receives actual source code references (not summaries) as a BLOCKING gate.
-
----
-
-### G18: Enforce, Don't Reference — In Practice
-
-**The trap:** You write a detailed rule in a reference file. The agent never reads it, or reads it and skips the rule because there's no blocking gate.
-
-**Real example:** `verify-phases.md` contained 400+ lines of Phase 0-4 verification procedures. Pipeline.md's verify section was one line: "verify → Checkpoint → Test/Build/Lint → Review." Agent ran build+TS, displayed "verify ✅", moved to merge. All 400 lines were never executed. 10 SCs went unverified. The Feature was unreachable from the UI.
-
-**The universal lesson:** This was the incident that crystallized P2: Enforce, Don't Reference. The rule existed. It was well-written. It was comprehensive. And it was completely ignored because it was referenced, not enforced.
+**The universal lesson:** The Skill tool creates a response boundary. **If your orchestrator needs to do anything after a sub-skill completes, don't use the Skill tool.** Instead, read the sub-skill's instructions and execute them inline. This preserves your turn and allows post-processing.
 
 ---
 
-## Part B: Specific Lessons for Skill Developers
+### Information Dies Between Pipeline Stages
 
-These are concrete, actionable findings. Each one will save you debugging time.
+**The trap:** Each stage produces analysis, but the next stage only sees the output artifact — not the underlying evidence. Details get lost through layers of abstraction.
 
----
+**Real example:** Source code had a dropdown component with auto-calculated dimensions. Stage 1 recorded "create form with model selection." Stage 2 said "create dialog." Stage 3 said "build form with inputs." The final implementation created 3 plain text inputs — the dropdown, auto-fill, and dynamic sizing were all lost through 4 stages of summarization.
 
-### How Agents Interpret Your Instructions
-
-**L1: Agents fabricate excuses to bypass gates.** The agent auto-skipped HARD STOP checkpoints, citing "health check passed" or "non-blocking classification." It found "reasonable" reasons to skip inconvenient steps. The defense: inline repetition at every execution point, not just in a referenced file.
-
-**L10: "MANDATORY" is a suggestion. Only BLOCKING gates work.** A step marked "MANDATORY — You MUST NOT skip it" was skipped twice. The keyword was treated as "important but situational." The fix: downstream output verification. "Does the file contain section X? If no → block." That's enforcement.
-
-**L11: Bullet lists are suggestions. Tables are requirements.** A 14-item bullet list of required document sections. Agent generated 6 of 14, ignoring sections it deemed "not needed." The fix: structured checklist table + post-generation verification step. Lists are interpreted as "choose what's relevant." Tables with completion checkboxes are interpreted as "complete all."
-
-**L12: "Update" ≠ "Write to file."** Instruction said "Update Demo Group SBI ranges." Agent calculated the values, displayed them — and did NOT write them to the file. The fix: explicit verbs. "**Write** these ranges **into** roadmap.md by adding a `| SBI Coverage | B###–B### |` row." Never use "Update," "Reflect," or "Record" without specifying target file, path, and format.
-
-**L15: Checklists are interpreted by title scope.** Step 5 of "SBI Numbering Verification" was a Demo Group calculation. Agent completed steps 1-4 (about numbering) and stopped — step 5 didn't match the checklist title. The fix: give distinct tasks their own headings.
+**The universal lesson:** If your pipeline has multiple stages, **be intentional about what context each stage receives.** Summaries are efficient but lossy. For critical details (UI interactions, data formats, error handling), inject the original source alongside the summary. Don't assume the summary preserved everything.
 
 ---
 
-### Context Window and Instruction Placement
+### "See X for Details" Gets Ignored
 
-**L13: Rule changes require re-execution to validate.** Applied 4 fixes. Code review said they looked correct. Re-execution showed fixes 1-3 worked, fix 4 was completely ignored. You cannot validate agent behavior rules by reading the rules. Only re-execution reveals whether the rule actually changes behavior. Budget at least 2 iterations.
+**The trap:** You write a detailed rule in a reference file. You reference it from the main skill. The agent treats the reference as optional reading.
 
-**L14: Sub-skill calls break multi-step orchestration.** When an orchestrator calls a sub-skill via the Skill tool, the sub-skill's completion message terminates the orchestrator's turn. Post-execution review becomes structurally impossible. Use inline execution: read the sub-skill's instructions and execute as inline steps.
+**Real example:** A verification file contained 400+ lines of detailed procedures. The main pipeline file said: "verify → run tests → review." The agent ran tests, displayed "verify complete," and moved on. All 400 lines were never read. 10 success criteria went unverified. The feature was unreachable from the UI.
 
-**L20: Safety nets must be unconditional.** The fallback was scoped to "if context limit prevents..." but the actual failure wasn't a context limit — it was a different edge case. The fix: define safety nets as INVARIANTS ("every response after X must end with Y"), not CONDITIONS ("if error Z occurs, show fallback"). If you enumerate failure conditions, you'll always miss one.
-
-**L21: Instruction proximity determines compliance.** Execute+Review instructions existed 150 lines away from the execution point and in a separate file. By execution time, both were pushed out of context. The fix: dedicated inline sections immediately adjacent to each execution point. The probability of compliance is inversely proportional to distance from execution.
+**The universal lesson:** This is probably the single most important lesson. **Referenced rules don't exist for agents.** Every critical rule needs three layers: (1) Inline instruction at the execution point, (2) Blocking gate that structurally prevents progression, (3) Anti-pattern examples showing WRONG then RIGHT. If you only do one thing from this article, do this.
 
 ---
 
-### Runtime and Verification Traps
-
-**L5: State selector instability.** Zustand selectors creating new references per render — invisible to static analysis, causes infinite re-renders. Applies to Zustand, Redux, MobX, and similar state libraries.
-
-**L6: Test files are not demos.** Agent generated test suites as "demos." They were executable but didn't demonstrate the feature. "Executable" and "demonstrable" are different properties.
-
-**L16: Runtime coupling ≠ implementation dependency.** "Shell imports DB at startup" was interpreted as "Shell depends on DB for implementation." This put DB before Shell in the build order — but Shell can be implemented without DB existing. Test: "If B didn't exist, could I still write A from scratch?" If yes, A doesn't depend on B.
-
-**L22: Pre-context assumptions drift after dependencies complete.** Pre-context said "better-sqlite3" but the dependency Feature had switched to electron-store during implementation. Every step that reads a pre-implementation artifact should cross-check against actual completed implementations.
+## Part B: Practical Tips for Skill Developers
 
 ---
 
-### Pipeline Architecture
+### Your Skill Is a Contract, Not a Guide
 
-**L3: Tool availability must be verified early.** "eslint: command not found" at every Feature's verify phase. Don't assume tools are installed. Verify once at pipeline start, cache the result.
+Write SKILL.md as if it's a legal contract. Every ambiguous phrase will be interpreted the easiest way for the agent.
 
-**L18: Pre-allocated numbers conflict with auto-numbering.** smart-sdd created branch `002-navigation`, then spec-kit detected 002 as "in use" and created `003-navigation`. When two systems both create numbered resources, pass the number explicitly from the controlling system.
+"Consider running tests after implementation" → Agent: "Tests are optional."
+
+"BLOCKING: Run tests. If tests fail, do NOT proceed." → Agent: "I must run tests and they must pass."
+
+The difference is night and day. Agents aren't malicious — they're optimizers. They'll find the shortest path to "done." Make sure the shortest path goes through your quality gates.
 
 ---
 
-## Part C: Universal Principles for Skill Developers
+### Anti-Patterns Are More Important Than Patterns
 
-Distilled from all 19 gap patterns and 50+ lessons:
+A RIGHT example gives the agent one reference point. A WRONG + RIGHT pair gives it a **boundary**. Agents learn boundaries faster than targets.
 
-### 1. Your Skill Is a Contract, Not a Guide
+Show what NOT to do first, then what TO do:
 
-Write SKILL.md as if it's a legal contract. Every ambiguous phrase will be interpreted the easiest way for the agent — which is usually not what you intended.
+```
+❌ WRONG: Show raw output and stop. User sees cryptic text.
+✅ RIGHT: Read the artifact → show formatted summary → ask for approval.
+```
 
-"Consider running tests" → Agent: "Tests are optional"
-"BLOCKING: Run tests. If tests fail, do NOT proceed." → Agent: "I must run tests"
+Anti-patterns saved us more debugging time than any other technique.
 
-### 2. Anti-Patterns Are More Important Than Patterns
+---
 
-A RIGHT example gives the agent one reference point. A WRONG + RIGHT pair gives it a boundary. Show what NOT to do first, then what TO do. Anti-patterns saved us more debugging time than any other technique.
+### State Machines Beat Natural Language Conditionals
 
-### 3. State Machines Beat If/Else
+When your skill has multiple states (pending, in progress, waiting for review, completed, needs revision...), model them as a state machine in a **file** — not as conditional logic in your skill text.
 
-When your skill has multiple states (pending, in_progress, augmented, completed, regression-specify), model them as a state machine in a file. The agent reads the current state, determines valid transitions, acts accordingly. Don't embed state logic in natural language conditionals.
+The file-based state machine has three advantages: (1) it survives context compression, (2) the agent can read it to recover after a session break, (3) you can inspect and edit it manually when something goes wrong.
 
-### 4. Test with Context Compression
+---
 
-Your skill will eventually be compressed out of context. Test for this:
+### The Inverse Proximity Law
+
+The probability of an agent following an instruction is inversely proportional to its distance from the execution point.
+
+Rules at the top of a file are "documentation" by the time execution happens 200 lines later. Rules adjacent to the execution point are "working memory."
+
+Implication: **place rules where they'll be executed, not where they're organizationally tidy.** Yes, this means repeating yourself. In agent skills, 30 inline repetitions beat 1 beautifully organized reference that gets ignored.
+
+---
+
+### Test with Context Compression in Mind
+
+Your skill will eventually be compressed out of the agent's context. Test for this:
+
 1. Start a conversation
-2. Run 50+ messages
+2. Run your skill through a long workflow (50+ messages)
 3. Check: does the agent still follow your rules?
-If not, you need more inline enforcement and file-based state tracking.
 
-### 5. Delegate, Don't Skip
+If not, you need more inline enforcement and more file-based state tracking. This is the single most important test you can run.
 
-The agent can't drag files, enter API keys, or observe terminal rendering. Instead of skipping these checks, delegate to the user with specific instructions. "Drag a file onto the upload zone. Does the status change from 'idle' to 'processing'?" is infinitely better than "Drag-and-drop test skipped."
+---
 
-### 6. Version Your Skill Like Software
+### Delegate What You Can't Automate
 
-Track changes in a history file. Document *why* rules changed, not just what changed. When a future failure occurs, you need to understand: was this rule added because of a real incident, or was it speculative? Our `history.md` has 40+ entries, each linking a rule change to the specific failure that triggered it.
+The agent can't drag files, can't enter API keys, can't observe terminal UI rendering. Instead of skipping these checks, delegate to the user with **specific instructions:**
 
-### 7. The Inverse Proximity Law
+"Drag-and-drop test skipped (tool limitation)" → Untested. ❌
 
-The probability of an agent following an instruction is inversely proportional to the instruction's distance from the execution point. Rules at the top of a file are "documentation" by the time execution happens 200 lines later. Rules adjacent to the execution point are "working memory." Place rules where they'll be read, not where they're organizationally tidy.
+"Please drag a file onto the upload zone. Does the status change from 'idle' to 'processing'?" → User verifies. ✅
+
+The second version is 10x more valuable. Skipping is invisible tech debt. Delegating is documented verification.
+
+---
+
+### Version Your Skill Like Software
+
+Skills evolve. Track changes in a history file. When you change a rule, document **why** — which failure triggered it. Future-you needs this context.
+
+We have 40+ entries in our history file. Each links a rule change to the specific failure that caused it. When we need to decide "is this rule still needed?" the history tells us exactly what breaks if we remove it.
+
+---
+
+### Safety Nets Must Be Unconditional
+
+Don't write: "If context limit prevents review, show fallback."
+
+Write: "If this response ends without user interaction, for ANY reason, show the continue prompt."
+
+The difference: the first version enumerates one failure mode. The second covers all of them. If you enumerate conditions, you'll always miss one. Define safety nets as invariants, not conditions.
 
 ---
 
 ## The Bigger Picture
 
-spec-kit-skills is one project's attempt at Harness Engineering. The implementation details — markdown files, domain modules, HARD STOPs — will evolve. But the patterns will remain relevant wherever humans and AI agents collaborate:
+These patterns aren't specific to Claude Code skills. They apply wherever AI agents execute multi-step workflows with human oversight:
 
-**Context Continuity** — Information must survive transitions between Features, between pipeline stages, and between sessions. Files, not memory.
+**Context Continuity** — Information must survive transitions. Between features, between stages, between sessions. Files, not memory.
 
-**Enforce, Don't Reference** — Rules that aren't enforced at the point of execution don't exist. Inline repetition beats DRY for agent compliance.
+**Enforce, Don't Reference** — Rules that aren't enforced at the execution point don't exist. Inline repetition beats DRY for agent compliance.
 
-**File over Memory** — The agent's context window is finite, session-scoped, and non-inspectable. Everything that matters goes into a file.
+**File over Memory** — Everything that matters goes into a persistent, diffable, editable file. The agent's context window is finite and unreliable.
 
 **Delegate, Don't Skip** — When the agent can't automate something, it asks the user. Skipping is never acceptable.
 
-As AI agents become more capable, the value shifts from writing code to designing the systems that write code. The developers who thrive won't be the ones who write the best prompts — they'll be the ones who build the best harnesses.
+As AI agents become more capable, the value shifts from writing code to designing the systems that channel that capability. The developers who thrive won't be the ones who write the best prompts — they'll be the ones who build the best harnesses.
 
 ---
 
@@ -240,15 +222,13 @@ cd spec-kit-skills
 Then:
 
 ```
-/code-explore /path/to/interesting-project    # understand a codebase
-/smart-sdd init "your project idea"           # start a new project
-/smart-sdd add "your first Feature"           # define a Feature
-/smart-sdd pipeline F001                      # build it
+/code-explore /path/to/interesting-project
+/smart-sdd init "your project idea"
+/smart-sdd add "your first Feature"
+/smart-sdd pipeline F001
 ```
 
-Full scenario catalog (32 scenarios): [SCENARIO-CATALOG.md](https://github.com/coolhero/spec-kit-skills/blob/main/SCENARIO-CATALOG.md)
-
-Detailed lessons learned (19 patterns, 50+ lessons): [lessons-learned.md](https://github.com/coolhero/spec-kit-skills/blob/main/lessons-learned.md)
+The repository includes 32 user-facing scenarios in SCENARIO-CATALOG.md and a comprehensive lessons-learned file with all 19 patterns and 50+ specific incidents.
 
 ---
 
@@ -263,55 +243,47 @@ skill development checklist:
     - reference/ for supporting rules and schemas
     - domains/ for modular expertise (loaded per profile)
 
-  enforcement (P2):
-    - every critical rule: inline instruction + blocking gate + anti-pattern example
-    - never "See X.md for details" for critical behavior
+  enforcement:
+    - every critical rule: inline instruction + blocking gate + anti-pattern
+    - never "See X for details" for critical behavior
     - HARD STOPs: use AskUserQuestion, never auto-proceed
-    - empty response: always re-ask, never interpret silence as approval
-    - safety nets: define as invariants, not conditions
-    - DRY kills compliance: 30 inline repetitions > 1 reference that gets ignored
+    - empty response: always re-ask
+    - safety nets: invariants, not conditions
+    - 30 inline repetitions > 1 reference that gets ignored
 
-  state management (P3):
-    - all pipeline state in files (sdd-state.md, registries, pre-context)
-    - state machine file with valid transitions and current state
-    - after context compression: agent recovers by reading state file
-    - every intermediate artifact persisted (not just final outputs)
-
-  context efficiency:
-    - selective module loading based on Domain Profile
-    - budget: ~1,300 lines typical vs ~15,000 if everything loaded
-    - on-demand command loading (only invoked command)
+  state management:
+    - all pipeline state in files (not agent memory)
+    - state machine file with valid transitions
+    - after context compression: recover by reading state file
 
   testing:
-    - test with 50+ message conversations (context compression scenario)
-    - test with interrupted sessions (can agent resume from file state?)
-    - test anti-patterns (does agent avoid documented WRONG patterns?)
-    - re-execute after rule changes (reading rules ≠ validating rules)
-    - budget 2+ iterations per rule change
+    - test with 50+ message conversations (compression scenario)
+    - test with interrupted sessions (resume from file state)
+    - test anti-patterns (agent avoids WRONG patterns)
+    - re-execute after rule changes (reading ≠ validating)
 
-  gap patterns to watch for:
-    G1: build pass ≠ feature works → runtime verification required
-    G3: agent guesses not reads → active read directives
-    G5: context compression erases rules → inline at every execution point
-    G7: cross-feature integration fails → integration contracts + Phase 4 verify
-    G9: SDK contracts violated silently → trust classification + contract scanning
-    G15: skill tool breaks orchestration → inline execution, never skill tool for sub-steps
-    G17: information dies between stages → source reference injection at implement
-    G18: reference rules ignored → 3-layer enforcement (inline + gate + anti-pattern)
+  failure patterns to watch:
+    - build pass ≠ feature works → runtime verification required
+    - agent guesses → force explicit source reading
+    - context compression → inline rules at every execution point
+    - cross-feature integration → explicit contracts + runtime check
+    - SDK contracts → trust classification + runtime verification
+    - sub-skill calls → inline execution instead of Skill tool
+    - information loss between stages → inject source alongside summary
+    - referenced rules → 3-layer enforcement (inline + gate + anti-pattern)
 
-  universal principles:
-    - contract not guide (every ambiguity exploited)
-    - anti-patterns > patterns (WRONG + RIGHT = boundary)
-    - state machines > if/else (file-based state)
-    - proximity law (closer to execution = higher compliance)
-    - delegate > skip (ask user when automation fails)
-    - version history with WHY (link rule changes to incidents)
+  principles:
+    - contract not guide
+    - anti-patterns > patterns
+    - state machines > conditionals
+    - inverse proximity law
+    - delegate > skip
+    - unconditional safety nets
+    - version with WHY
 ```
 
 ---
 
-*This concludes the 4-part series on spec-kit-skills.*
-
-*The project is open-source at [github.com/coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills). The complete lessons-learned.md in the repository contains all 19 gap patterns and 50+ specific lessons with full context.*
+*This concludes the 4-part series on spec-kit-skills. The project is open-source at github.com/coolhero/spec-kit-skills — contributions, feedback, and experiments welcome.*
 
 *Written using Claude Code (Claude Opus 4.6). This entire series, and the project it describes, was developed through human-AI collaboration. The human designed the harness. The AI operated within it. Both were essential.*

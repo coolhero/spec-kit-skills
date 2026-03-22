@@ -91,7 +91,7 @@ This is why spec-kit-skills has what looks like redundant text. The HARD STOP re
 
 **A concrete example of the pattern:**
 
-We discovered that the agent would often execute a spec-kit command, show the raw output, and stop — without reading the generated artifact, displaying a review, or asking for user approval (Gap Pattern G15). The fix wasn't a single rule; it was a 4-layer defense:
+We discovered that the agent would often execute a spec-kit command, show the raw output, and stop — without reading the generated artifact, displaying a review, or asking for user approval (the "Skill Tool Response Boundary" problem). The fix wasn't a single rule; it was a 4-layer defense:
 
 1. The SKILL.md (always loaded) contains MANDATORY RULE 3: "After every speckit-* execution, you MUST read the artifact, show a review, and call AskUserQuestion"
 2. Each pipeline step's section contains an inline Execute+Review protocol specific to that step
@@ -256,21 +256,21 @@ This means a company can define org-wide conventions (naming patterns, API desig
 
 ## The Pipeline Integrity Guards
 
-Seven guards (G1-G7) enforce pipeline correctness. Each guard is a blocking check at a specific pipeline transition:
+Seven guards enforce pipeline correctness. Each is a blocking check at a specific transition point:
 
-**G1 — Constitution Guard.** Before specify: is the constitution defined? Without it, specs lack guiding principles.
+**Constitution Guard.** Before specify: is the constitution defined? Without it, specs lack guiding principles.
 
-**G2 — Entity Registry Guard.** Before plan: are all entities from spec registered? Without them, the plan can't reference existing data models.
+**Entity Registry Guard.** Before plan: are all entities from spec registered? Without them, the plan can't reference existing data models.
 
-**G3 — API Registry Guard.** Before implement: are all APIs from the plan registered? Without them, implementation guesses at contracts.
+**API Registry Guard.** Before implement: are all APIs from the plan registered? Without them, implementation guesses at contracts.
 
-**G4 — Pre-Context Guard.** Before specify: does pre-context exist for this Feature? Without it, the spec is based on nothing.
+**Pre-Context Guard.** Before specify: does pre-context exist for this Feature? Without it, the spec is based on nothing.
 
-**G5 — Dependency Order Guard.** Before pipeline: are this Feature's dependencies completed? Without them, implementation references entities that don't exist yet.
+**Dependency Order Guard.** Before pipeline: are this Feature's dependencies completed? Without them, implementation references entities that don't exist yet.
 
-**G6 — Augmentation Guard.** After `add --to`: was the pipeline re-run? Without it, the spec doesn't reflect the new requirements.
+**Augmentation Guard.** After `add --to`: was the pipeline re-run? Without it, the spec doesn't reflect the new requirements.
 
-**G7 — Regression Guard.** After verify finds issues: was the regression addressed? Without it, known bugs carry forward.
+**Regression Guard.** After verify finds issues: was the regression addressed? Without it, known bugs carry forward.
 
 Each guard follows the same pattern: check condition → if failed, display blocking message → agent cannot proceed until the condition is met.
 
@@ -318,7 +318,8 @@ architecture:
     typical: ~1,300 lines (SKILL.md + command + 3-5 modules + Feature context)
     worst_case: ~15,000 lines if everything loaded (avoided by selective loading)
 
-  pipeline_guards: G1 (constitution) through G7 (regression)
+  pipeline_guards: 7 guards (constitution, entity_registry, api_registry, pre_context,
+                   dependency_order, augmentation, regression)
     pattern: check condition → if failed → blocking message → cannot proceed
 
   extensibility:
