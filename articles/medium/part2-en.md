@@ -4,7 +4,7 @@
 
 ![Part 2 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2.png)
 
-*Continued from Part 1: Why Your Agent Needs a Harness — (link to Part 1 on Medium)*
+*Continued from [Part 1: Why Your Agent Needs a Harness](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)*
 
 ---
 
