@@ -1,6 +1,6 @@
-Three Skills, One Pipeline: How code-explore, reverse-spec, and smart-sdd Work Together
+# Three Skills, One Pipeline: How code-explore, reverse-spec, and smart-sdd Work Together
 
-Part 2 of 4 — Each Skill in Detail
+## Part 2 of 4 — Each Skill in Detail
 
 ![Part 2 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2.png)
 

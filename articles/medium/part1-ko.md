@@ -1,6 +1,6 @@
-AI 코딩 에이전트 길들이기: 프롬프트가 아니라 하네스가 필요한 이유
+# AI 코딩 에이전트 길들이기: 프롬프트가 아니라 하네스가 필요한 이유
 
-4부작 중 1편 — 배경, 아키텍처, 실전 시나리오
+## 4부작 중 1편 — 배경, 아키텍처, 실전 시나리오
 
 ![1편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part1.png)
 

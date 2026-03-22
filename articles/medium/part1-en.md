@@ -1,6 +1,6 @@
-Taming the AI Coder: Why Your Agent Needs a Harness, Not Just a Prompt
+# Taming the AI Coder: Why Your Agent Needs a Harness, Not Just a Prompt
 
-Part 1 of 4 — Background, Architecture, and Real-World Scenarios
+## Part 1 of 4 — Background, Architecture, and Real-World Scenarios
 
 ![Part 1 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part1.png)
 

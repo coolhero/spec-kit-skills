@@ -1,6 +1,6 @@
-세 가지 스킬, 하나의 파이프라인: code-explore, reverse-spec, smart-sdd의 협업
+# 세 가지 스킬, 하나의 파이프라인: code-explore, reverse-spec, smart-sdd의 협업
 
-4부작 중 2편 — 각 스킬 상세
+## 4부작 중 2편 — 각 스킬 상세
 
 ![2편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2.png)
 

@@ -1,6 +1,6 @@
-AI 에이전트를 위한 스킬 만들기: 실패 패턴, 팁, 그리고 힘들게 얻은 지혜
+# AI 에이전트를 위한 스킬 만들기: 실패 패턴, 팁, 그리고 힘들게 얻은 지혜
 
-4부작 중 4편 — 200+ 커밋의 에이전트 스킬 개발에서 배운 것
+## 4부작 중 4편 — 200+ 커밋의 에이전트 스킬 개발에서 배운 것
 
 ![4편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part4.png)
 

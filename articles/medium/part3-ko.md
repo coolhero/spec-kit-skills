@@ -1,6 +1,6 @@
-생각하는 400개의 마크다운 파일: spec-kit-skills의 아키텍처
+# 생각하는 400개의 마크다운 파일: spec-kit-skills의 아키텍처
 
-4부작 중 3편 — 설계 철학, 파일 구조, 확장성
+## 4부작 중 3편 — 설계 철학, 파일 구조, 확장성
 
 ![3편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part3.png)
 

@@ -1,6 +1,6 @@
-400 Markdown Files That Think: The Architecture of spec-kit-skills
+# 400 Markdown Files That Think: The Architecture of spec-kit-skills
 
-Part 3 of 4 — Design Philosophy, File Structure, Extensibility
+## Part 3 of 4 — Design Philosophy, File Structure, Extensibility
 
 ![Part 3 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part3.png)
 
