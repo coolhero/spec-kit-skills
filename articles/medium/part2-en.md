@@ -168,19 +168,19 @@ This is synthesis's most valuable section for rebuild projects. Every trace gene
 - C002 context — Source: hardcoded 128k token limit → My design: configurable per-provider
 - C003 tools — Source: synchronous tool execution → My design: async with timeout + cancel
 
-These decisions carry forward into the build pipeline. When smart-sdd's `speckit-specify` runs, it sees these decisions and generates SCs that reflect your design choices, not the source's.
+These decisions carry forward into the build pipeline. When smart-sdd's `speckit-specify` runs, it sees these decisions and generates SCs (Success Criteria — the measurable conditions that define when a feature works correctly) that reflect your design choices, not the source's.
 
 ---
 
 ## /reverse-spec — Automated Knowledge Extraction
 
-If code-explore is a senior engineer carefully reading code, reverse-spec is an entire team doing a comprehensive audit. It systematically extracts the **Global Evolution Layer** from a codebase in 5 phases.
+If code-explore is a senior engineer carefully reading code, reverse-spec is an entire team doing a comprehensive audit. It systematically extracts the **Global Evolution Layer (GEL)** — the set of files that carry information across Features — from a codebase in 5 phases.
 
 ### Phase 1: Code Pattern Analysis
 
 Scans the entire file structure, analyzes dependency graphs, identifies architectural patterns. Produces a structural map of the codebase — which modules exist, how they relate, what frameworks and libraries are used.
 
-### Phase 2: Source Behavior Inventory (SBI)
+### Phase 2: Source Behavior Inventory (SBI) — a catalog of every user-facing behavior in the codebase
 
 This is the phase that makes reverse-spec unique. The agent catalogs every user-facing behavior in the codebase. Not just "the auth module exists" but:
 
@@ -254,7 +254,7 @@ This is where most of the value lives. Instead of "add auth," you go through a s
 
 The probe questions come from domain modules — they're not generic. They encode real expertise about what matters for each project type.
 
-**Step 4 — Draft Brief.** The agent assembles your answers into a structured Brief: scope (in/out), actors with permissions, entity definitions, interaction patterns with temporal flows (loading → streaming → completion → error → retry), error scenarios, cross-Feature dependencies, and non-functional requirements.
+**Step 4 — Draft Brief** (the structured requirements document)**.** The agent assembles your answers into a structured Brief: scope (in/out), actors with permissions, entity definitions, interaction patterns with temporal flows (loading → streaming → completion → error → retry), error scenarios, cross-Feature dependencies, and non-functional requirements.
 
 **Step 5 — Review HARD STOP.** The agent presents the Brief and waits for your explicit approval. You can modify, add, remove. This is a blocking gate — the pipeline literally cannot proceed without your response.
 

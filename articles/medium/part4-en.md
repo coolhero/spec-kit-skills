@@ -10,6 +10,8 @@
 
 ## The Honest Truth
 
+The build passed. TypeScript was clean. Tests were green. And the app was completely unusable — infinite re-renders caused by a state selector creating new object references every frame, scroll broken during streaming, the UI locked in a death spiral. We stared at a "successful" pipeline run that produced a broken application, and realized: everything we assumed about verification was wrong.
+
 Building spec-kit-skills took over 200 commits across three weeks. We cataloged 19 recurring failure patterns and 50+ specific incidents. Every single one came from a real pipeline run that produced wrong results.
 
 The insight that changed everything: making AI agents *reliable* is fundamentally different from making them *capable*. The agent could always build features. The challenge was getting it to build the right features, the right way, every time.
@@ -262,24 +264,48 @@ skill development checklist:
     - test anti-patterns (agent avoids WRONG patterns)
     - re-execute after rule changes (reading ≠ validating)
 
-  failure patterns to watch:
-    - build pass ≠ feature works → runtime verification required
-    - agent guesses → force explicit source reading
-    - context compression → inline rules at every execution point
-    - cross-feature integration → explicit contracts + runtime check
-    - SDK contracts → trust classification + runtime verification
-    - sub-skill calls → inline execution instead of Skill tool
-    - information loss between stages → inject source alongside summary
-    - referenced rules → 3-layer enforcement (inline + gate + anti-pattern)
+  failure_patterns:
+    build_passes_feature_broken:
+      signal: build ✅ + TypeScript ✅ but feature doesn't work at runtime
+      cause: static analysis can't catch runtime behavior (state selectors, async timing, CSS rendering)
+      fix: add Playwright runtime verification (Phase 3) — never trust build-only verification
+    agent_guesses_instead_of_reading:
+      signal: implementation doesn't match source app's UI controls or behavior
+      cause: agent invents from imagination instead of reading source code
+      fix: BLOCKING source code reference at implement stage — agent must read before writing
+    context_compression_erases_rules:
+      signal: agent follows rules for first N features, then stops
+      cause: long conversation triggers context compression, skill instructions get evicted
+      fix: inline critical rules at every execution point + file-based state for recovery
+    cross_feature_integration_fails:
+      signal: features work alone but break when combined
+      cause: no explicit data contract at feature boundaries
+      fix: define integration contracts (provider shape, consumer shape, exact fields) + runtime check
+    sdk_accepts_anything_executes_nothing:
+      signal: SDK call succeeds but produces no effect
+      cause: permissive SDK types accept metadata-only objects without callable functions
+      fix: classify SDKs by trust level + add runtime contract checks for medium/low trust
+    sub_skill_breaks_orchestration:
+      signal: orchestrator stops after sub-skill returns, no review or state update
+      cause: Skill tool creates response boundary, post-execution steps become unreachable
+      fix: read sub-skill instructions and execute inline instead of using Skill tool
+    information_dies_between_stages:
+      signal: final implementation missing details that existed in source analysis
+      cause: each stage only sees previous stage's summary, not underlying evidence
+      fix: inject original source alongside summaries for critical details (UI, data formats, errors)
+    referenced_rules_get_ignored:
+      signal: agent skips detailed procedures in reference files
+      cause: "See X for details" is treated as optional reading by agents
+      fix: 3-layer enforcement at every execution point (inline instruction + blocking gate + anti-pattern)
 
   principles:
-    - contract not guide
-    - anti-patterns > patterns
-    - state machines > conditionals
-    - inverse proximity law
-    - delegate > skip
-    - unconditional safety nets
-    - version with WHY
+    - "contract not guide": write SKILL.md like a legal contract — every ambiguous phrase will be interpreted the easiest way
+    - "anti-patterns > patterns": WRONG + RIGHT pairs give boundaries; agents learn boundaries faster than targets
+    - "state machines > conditionals": model multi-state workflows as file-based state machines, not natural language if/else
+    - "inverse proximity law": place rules where they execute, not where they're organized — 30 inline repetitions beat 1 ignored reference
+    - "delegate > skip": when the agent can't automate a check, ask the user with specific instructions — never silently skip
+    - "unconditional safety nets": define safety nets as invariants ("if response ends without interaction"), not conditions ("if context limit")
+    - "version with WHY": track every rule change with the failure that caused it — future-you needs that context
 ```
 
 ---

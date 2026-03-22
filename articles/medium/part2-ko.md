@@ -4,7 +4,7 @@
 
 ![2편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2.png)
 
-*[1편: 왜 에이전트에게 하네스가 필요한가](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)에서 이어집니다*
+*1편에서 이어집니다: [AI 코더 길들이기: 왜 에이전트에겐 프롬프트가 아니라 하네스가 필요한가](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)*
 
 ---
 
@@ -168,19 +168,19 @@ ConnHandler → reads/writes independently
 - C002 context — 소스: 하드코딩된 128k 토큰 제한 → 내 설계: 프로바이더별 설정 가능
 - C003 tools — 소스: 동기식 도구 실행 → 내 설계: 타임아웃 + 취소가 있는 비동기
 
-이 결정들이 빌드 파이프라인으로 이어집니다. smart-sdd의 `speckit-specify`가 실행될 때 이 결정을 보고, 소스의 것이 아니라 여러분의 설계 선택을 반영하는 SC를 생성합니다.
+이 결정들이 빌드 파이프라인으로 이어집니다. smart-sdd의 `speckit-specify`가 실행될 때 이 결정을 보고, 소스의 것이 아니라 여러분의 설계 선택을 반영하는 SC(Success Criteria — Feature가 올바르게 동작하는지 정의하는 측정 가능한 조건)를 생성합니다.
 
 ---
 
 ## /reverse-spec — 자동화된 지식 추출
 
-code-explore가 시니어 엔지니어가 코드를 주의 깊게 읽는 것이라면, reverse-spec는 팀 전체가 종합 감사를 하는 것입니다. 5단계로 코드베이스에서 **Global Evolution Layer**를 체계적으로 추출합니다.
+code-explore가 시니어 엔지니어가 코드를 주의 깊게 읽는 것이라면, reverse-spec는 팀 전체가 종합 감사를 하는 것입니다. 5단계로 코드베이스에서 **Global Evolution Layer(GEL)** — Feature 간 정보를 전달하는 파일들의 집합 — 를 체계적으로 추출합니다.
 
 ### Phase 1: 코드 패턴 분석
 
 전체 파일 구조를 스캔하고, 의존성 그래프를 분석하며, 아키텍처 패턴을 식별합니다. 코드베이스의 구조적 맵을 생산합니다 — 어떤 모듈이 존재하고, 어떻게 관련되며, 어떤 프레임워크와 라이브러리를 사용하는지.
 
-### Phase 2: 소스 행동 인벤토리 (SBI)
+### Phase 2: 소스 행동 인벤토리 (SBI) — 코드베이스의 모든 사용자 대면 행동을 카탈로그화
 
 reverse-spec를 독특하게 만드는 단계입니다. 에이전트가 코드베이스의 모든 사용자 대면 행동을 카탈로그화합니다. "인증 모듈이 있다" 수준이 아니라:
 
@@ -254,7 +254,7 @@ smart-sdd는 spec-kit을 세 가지로 감쌉니다:
 
 프로브 질문은 도메인 모듈에서 옵니다 — 범용적이지 않습니다. 각 프로젝트 유형에서 무엇이 중요한지에 대한 실제 전문 지식을 인코딩합니다.
 
-**Step 4 — Brief 초안.** 에이전트가 여러분의 답변을 구조화된 Brief로 조립합니다: 범위(in/out), 권한이 있는 액터, 엔티티 정의, 시간적 흐름이 있는 인터랙션 패턴(로딩 → 스트리밍 → 완료 → 에러 → 재시도), 에러 시나리오, Feature 간 의존성, 비기능 요구사항.
+**Step 4 — Brief 초안** (구조화된 요구사항 문서)**.**  에이전트가 여러분의 답변을 구조화된 Brief로 조립합니다: 범위(in/out), 권한이 있는 액터, 엔티티 정의, 시간적 흐름이 있는 인터랙션 패턴(로딩 → 스트리밍 → 완료 → 에러 → 재시도), 에러 시나리오, Feature 간 의존성, 비기능 요구사항.
 
 **Step 5 — 리뷰 HARD STOP.** 에이전트가 Brief를 제시하고 명시적 승인을 기다립니다. 수정, 추가, 제거 가능. 이것은 차단 게이트 — 파이프라인이 여러분의 응답 없이는 말 그대로 진행할 수 없습니다.
 
