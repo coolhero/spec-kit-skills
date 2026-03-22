@@ -2,7 +2,7 @@
 
 Part 3 of 4 — Design Philosophy, File Structure, Extensibility
 
-![Part 3 Cover](part3.png)
+![Part 3 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part3.png)
 
 *Continued from Part 2: Three Skills, One Pipeline — (link to Part 2 on Medium)*
 

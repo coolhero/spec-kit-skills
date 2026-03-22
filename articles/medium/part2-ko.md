@@ -2,7 +2,7 @@
 
 4부작 중 2편 — 각 스킬 상세
 
-![2편 커버](part2.png)
+![2편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part2.png)
 
 *1편: 왜 에이전트에게 하네스가 필요한가 — (Medium 1편 링크로 교체)에서 이어집니다*
 

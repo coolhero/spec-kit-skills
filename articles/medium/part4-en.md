@@ -2,7 +2,7 @@ Building Skills for AI Agents: Failure Patterns, Tips, and Hard-Won Wisdom
 
 Part 4 of 4 — Lessons Learned from 200+ Commits of Agent Skill Development
 
-![Part 4 Cover](part4.png)
+![Part 4 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part4.png)
 
 *Continued from Part 3: Architecture Deep Dive — (link to Part 3 on Medium)*
 

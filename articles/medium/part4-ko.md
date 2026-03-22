@@ -2,7 +2,7 @@ AI 에이전트를 위한 스킬 만들기: 실패 패턴, 팁, 그리고 힘들
 
 4부작 중 4편 — 200+ 커밋의 에이전트 스킬 개발에서 배운 것
 
-![4편 커버](part4.png)
+![4편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part4.png)
 
 *3편: 아키텍처 딥 다이브 — (Medium 3편 링크로 교체)에서 이어집니다*
 
