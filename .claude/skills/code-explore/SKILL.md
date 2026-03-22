@@ -122,8 +122,38 @@ After each trace completes, auto-update `orientation.md` coverage section:
 
 Every trace MUST include at least one Mermaid diagram:
 - **Flow traces** → `sequenceDiagram` (call chain between components)
+- **State machines** → `stateDiagram-v2` (for presence, connection state, reconciler loops)
 - **Data model discoveries** → `erDiagram` (entity relationships)
 - **Decision logic** → `flowchart` (branching/routing logic)
+
+### Extended Project Type Support
+
+Orient detects a wide range of project types beyond web apps and CLIs:
+
+| Category | Detected Types |
+|----------|---------------|
+| **Server/Network** | TCP server, UDP server, HTTP proxy, gRPC service, WebSocket server, message broker, API gateway |
+| **Consumer** | Kafka consumer, event handler, queue worker (annotation-driven entry points like `@KafkaListener`) |
+| **Desktop/Mobile** | Electron, Tauri, Flutter, React Native, SwiftUI, Qt, GTK |
+| **Terminal** | TUI apps (Bubble Tea, ncurses, blessed, Ink) |
+| **Embedded** | Firmware (ISR, RTOS, HAL), IoT gateways |
+| **Data/ML** | Pipelines (dbt, Airflow), ML training, LLM applications |
+
+Orient also detects the **concurrency model** (async/await, goroutines, actor model, thread pool, event loop) — critical for understanding server programs.
+
+### Non-Sequential Flow Strategies
+
+Trace supports 5 strategies beyond linear request→response:
+
+1. **Connection Lifecycle** — accept → handshake → request → response → close (TCP/WS/gRPC servers)
+2. **State Machine** — state diagram with transitions mapped to source locations (presence, reconcilers)
+3. **Pub/Sub Fan-out** — trace both publish AND consume paths with fan-out visualization
+4. **Error/Retry Path** — timeout → retry → backoff → circuit breaker → DLQ (resilience patterns)
+5. **Concurrent Actors** — annotate which goroutine/task/thread each step runs on
+
+### Server Component Map (synthesis)
+
+For server/network projects, synthesis generates an additional **Server Component Map** showing architectural layers (Listener → Protocol → Middleware → Handler → Storage → Background) and a **Network Topology** diagram for multi-service interactions.
 
 ### Synthesis Nudge
 

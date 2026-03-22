@@ -35,6 +35,7 @@ Before workspace setup, check for existing SDD artifacts:
 
 - If `--no-branch` is specified: skip branch creation, work in current working tree
 - If already on a non-main branch (e.g., a feature branch): skip branch creation, note current branch name
+  - **Auto-detect smart-sdd feature branches**: If current branch matches `{NNN}-{name}` pattern (e.g., `001-auth`), automatically enable `--no-branch` behavior and display: `🔀 Active feature branch detected (001-auth). Exploring in current branch.`
 - Otherwise: create `explore-study` branch as before
 
 Determine where to write explore artifacts based on target directory:
