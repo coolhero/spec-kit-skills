@@ -102,3 +102,27 @@ Execute the following phases in order, reporting progress to the user after each
 - For large codebases (1000+ files), distribute model/API/logic extraction across parallel sub-agents using the Task tool in Phase 2.
 - Write entity/API formats in deliverables to be compatible with spec-kit's data-model.md and contracts/ style.
 - Refer to [speckit-compatibility.md](reference/speckit-compatibility.md) for the spec-kit integration guide.
+
+---
+
+## Gotchas
+
+| # | Gotcha | What Goes Wrong | Fix |
+|---|--------|----------------|-----|
+| G1 | Running on a monorepo root without `--scope` | Phase 1 scans all services → entities from unrelated services mix → Feature boundaries blur | Use `--scope services/api` or point target-directory to specific service |
+| G2 | Skipping runtime exploration (Phase 1.5) | Static analysis misses dynamic routes, lazy-loaded components, runtime config | Install Playwright (`npm i -D @playwright/test`) for Phase 1.5. For Electron, use `_electron.launch()` |
+| G3 | Mixing target-directory and output-directory | Target = source to analyze (read-only). Output = CWD (where artifacts write). Running `reverse-spec .` in the target directory writes artifacts there | For separate output, `cd output-dir && reverse-spec /path/to/source` |
+| G4 | Re-running reverse-spec after adopt | Overwrites roadmap.md and registries that adopt already enriched | Use `pipeline F001 --step specify` to re-analyze specific Features instead |
+| G5 | Large codebase without parallel extraction | Phase 2 times out or hits context limits for 1000+ file projects | Automatic: Task tool distributes extraction across sub-agents in Phase 2 |
+| G6 | Expecting reverse-spec to generate implementation code | reverse-spec only produces analysis artifacts (roadmap, registries, pre-context) | Use `/smart-sdd pipeline` after reverse-spec to generate implementation |
+
+---
+
+## Composability
+
+```
+code-explore → reverse-spec --from-explore       (informed analysis)
+reverse-spec → /smart-sdd pipeline               (rebuild with new code)
+reverse-spec → /smart-sdd adopt                  (document existing code)
+/smart-sdd adopt → reverse-spec (auto-chained)   (adopt triggers reverse-spec automatically)
+```

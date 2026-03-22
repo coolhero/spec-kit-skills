@@ -1,6 +1,6 @@
 ---
 name: code-explore
-description: Interactive source code exploration that produces documented understanding — architecture maps, flow traces with Mermaid diagrams, and Feature candidates — feeding directly into spec-kit SDD workflows. Use this skill when the user wants to study, understand, or learn an unfamiliar codebase, trace how a feature works at the source level, or explore code architecture before building something similar. Output feeds into /smart-sdd init --from-explore or /reverse-spec --from-explore for seamless pipeline transition.
+description: "Interactive source code exploration that produces documented understanding — architecture maps, flow traces with Mermaid diagrams, and Feature candidates — feeding directly into spec-kit SDD workflows. Use this skill when the user wants to study, understand, or learn an unfamiliar codebase, trace how a feature works at the source level, or explore code architecture before building something similar. Output feeds into /smart-sdd init --from-explore or /reverse-spec --from-explore for seamless pipeline transition."
 argument-hint: "[path] [--lang <code>] | trace \"topic\" | synthesis | status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, AskUserQuestion]
 ---
@@ -182,3 +182,35 @@ When SDD artifacts already exist (`specs/_global/sdd-state.md` or `specs/reverse
 - **Detection**: Check in this order: (1) `specs/_global/sdd-state.md` (2) `specs/reverse-spec/roadmap.md` (3) `specs/explore/orientation.md`. If (1) or (2) exists → Context-Aware Mode
 
 This enables all post-adopt and mid-pipeline exploration scenarios without conflicting with existing SDD state.
+
+---
+
+## Gotchas
+
+Accumulated edge cases from real usage. Check this list when hitting unexpected behavior.
+
+| # | Gotcha | What Goes Wrong | Fix |
+|---|--------|----------------|-----|
+| G1 | Running on a monorepo without `--scope` | Orient tries to map everything → overwhelmingly large orientation → unfocused traces | Always use `--scope services/api` or similar for monorepos |
+| G2 | Forgetting `--no-branch` mid-pipeline | code-explore creates its own git branch → conflicts with the pipeline's feature branch | Use `--no-branch` when exploring during an active pipeline |
+| G3 | Tracing too broadly (e.g., "the whole auth system") | Trace becomes a wall of text, not actionable | Narrow the topic: "login flow from form submit to session creation" |
+| G4 | Running synthesis with only 1-2 traces | Not enough coverage for meaningful architecture map | Complete at least 3-5 traces covering different system areas first |
+| G5 | Expecting code-explore to generate SDD artifacts | code-explore produces understanding, not specs | Use `--from-explore` flag with `/smart-sdd init` or `/reverse-spec` to convert |
+| G6 | Large codebase (1000+ files) orient timeout | orient scan takes too long or hits context limits | Use `--scope` to limit initial scan area, then expand in subsequent traces |
+| G7 | Re-running orient after SDD artifacts exist | Orient overwrites previous orientation without Context-Aware Mode | Context-Aware Mode auto-detects SDD artifacts — let it merge, don't force fresh |
+
+---
+
+## Composability
+
+code-explore is designed to work with the other spec-kit skills:
+
+```
+code-explore → /smart-sdd init --from-explore    (new project informed by exploration)
+code-explore → /reverse-spec --from-explore       (rebuild informed by exploration)
+code-explore → /smart-sdd add --from-explore      (add Features from exploration)
+/smart-sdd adopt → code-explore                    (deepen understanding after adoption)
+/smart-sdd pipeline → code-explore --no-branch     (mid-pipeline investigation)
+```
+
+All transitions preserve Domain Profile continuity via `sdd-state.md`.

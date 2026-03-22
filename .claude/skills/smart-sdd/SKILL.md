@@ -320,3 +320,38 @@ When creating `specs/history.md` for the first time, use this header:
 - Per-command injection details: [injection/{command}.md](reference/injection/) (constitution, specify, plan, tasks, analyze, implement, verify, parity, adopt-specify, adopt-plan, adopt-verify)
 - State file schema: [state-schema.md](reference/state-schema.md)
 - Git branch management: [branch-management.md](reference/branch-management.md)
+
+---
+
+## Gotchas
+
+Accumulated edge cases from real pipeline runs. Check this list when hitting unexpected behavior.
+
+| # | Gotcha | What Goes Wrong | Fix |
+|---|--------|----------------|-----|
+| G1 | Running `add` when no `init` has been done | sdd-state.md doesn't exist → add fails or creates incomplete state | Run `init` first (or `adopt` for existing code) |
+| G2 | Using `Skill(speckit-specify)` instead of inline execution | Skill tool's response boundary ends smart-sdd's turn → Review HARD STOP never fires → user sees raw spec-kit output and doesn't know what to do next | Always use inline execution: read the SKILL.md and execute steps directly. Never call `Skill(speckit-*)` |
+| G3 | Skipping HARD STOP Review after speckit-* execution | User loses approval opportunity → pipeline proceeds with potentially wrong artifacts | Every speckit-* command must be followed by artifact read → Review → AskUserQuestion in the same response |
+| G4 | `pipeline --continue` after a crash | Agent doesn't know which step crashed → may re-execute completed steps or skip the failed one | Check sdd-state.md Feature status → resume from the recorded step |
+| G5 | Amending a commit after pre-commit hook failure | `--amend` modifies the PREVIOUS commit (since the failed commit never happened) → destroys earlier work | Always create a NEW commit after fixing hook issues |
+| G6 | `add --to F001` without subsequent `pipeline F001` | Pre-context is augmented but spec.md is not updated → stale spec doesn't reflect new requirements | Always run `pipeline F001` (or at minimum `pipeline F001 --step specify`) after augmenting |
+| G7 | Running `pipeline` without specifying Feature ID when multiple Features exist | May pick wrong Feature or process all in unintended order | Specify explicitly: `pipeline F003` |
+| G8 | Forgetting `--lang` on first command | Artifacts default to English → switching language mid-pipeline requires regeneration | Set `--lang` on `init`, `adopt`, or first `add` |
+| G9 | App requires user configuration (API keys, model selection) for verify | Playwright launches app but features don't work without setup | Agent asks user to configure the app, then continues verification (Phase 0-2b) |
+| G10 | `pipeline F001 --step specify` on completed Feature without checking branch | May modify code on wrong branch (main vs feature branch) | Branch management auto-handles: creates fresh branch from main for re-opened Features |
+
+---
+
+## Composability
+
+smart-sdd works with the other spec-kit skills:
+
+```
+/code-explore → /smart-sdd init --from-explore    (new project from exploration)
+/code-explore → /smart-sdd add --from-explore      (add Features from exploration)
+/smart-sdd adopt → /reverse-spec (auto-chained)    (adopt triggers reverse-spec)
+/smart-sdd adopt → /code-explore                    (deepen understanding after adoption)
+/smart-sdd pipeline → /code-explore --no-branch     (mid-pipeline investigation)
+```
+
+Inter-skill data flow is file-based (P3: File over Memory): `sdd-state.md`, registries, and pre-context files serve as the handoff medium.
