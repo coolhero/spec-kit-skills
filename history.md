@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-22] Case-study cleanup + add --to augmentation refinement + SC preservation injection
+
+### What Changed
+
+| Change | Location | Rationale |
+|--------|----------|-----------|
+| Remove case-study references from MEMORY.md | MEMORY.md | case-study skill directory was deleted in previous commit; clean up remaining references |
+| Update FILE-MAP.md header | FILE-MAP.md | "4 skills" → "3 skills" after case-study removal |
+| Fix pre-context paths in add.md Type 5 | commands/add.md | `pre-contexts/F00N.md` → `SPEC_PATH/F00N-name/pre-context.md` to match actual path convention |
+| Set augmented Feature status to `augmented` | commands/add.md | Previously used `specify`/`re-specify`; dedicated `augmented` status lets injection file detect and activate SC preservation |
+| Add SC Preservation on Re-specification | injection/specify.md | When re-specifying an augmented Feature, existing SCs are preserved with `[preserved]` tags, new SCs added with `[new]` tags. Includes post-execution SC count check and preservation verification |
+
+### Design Decision
+
+The `augmented` status in sdd-state.md serves as the trigger for SC preservation in the specify injection. This keeps the add command and specify injection loosely coupled — add sets the status, specify reads it. The `[preserved]`/`[new]`/`[updated]` tags provide traceability in the generated spec.md, making it clear which SCs existed before augmentation and which were added.
+
+---
+
 ## [2026-03-22] S8 Verify Multi-Protocol Extension + Archetype Strategies + Known Limitations
 
 ### What Changed

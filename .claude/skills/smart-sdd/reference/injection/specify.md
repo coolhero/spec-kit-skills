@@ -964,6 +964,72 @@ After spec.md is approved in the Review HARD STOP, generate `ui-flows.md`:
 
 ---
 
+## SC Preservation on Re-specification
+
+> When re-specifying a Feature with status `augmented` (set by `add --to F00N`), existing SCs must be preserved. New SCs are added for the augmented requirements, not replaced.
+
+### Trigger
+
+- Read Feature status from `sdd-state.md`
+- If status = `augmented` → activate this protocol
+- If status is anything else → skip this section entirely
+
+### Protocol
+
+1. **Read existing spec.md SCs first**: Before invoking `speckit-specify`, read the current `SPEC_PATH/F00N-name/spec.md` and extract all existing SC-### entries with their full descriptions
+2. **Identify augmented requirements**: Read the `## Augmented Requirements` section from `SPEC_PATH/F00N-name/pre-context.md` — these are the NEW requirements added by `add --to`
+3. **Generate new SCs**: Run `speckit-specify` with context that includes both the original pre-context AND the augmented requirements. Instruct speckit-specify to generate SCs for the new requirements only
+4. **Merge SCs**:
+   - All existing SCs from the previous spec.md are **preserved** — mark each with `[preserved]` tag
+   - New SCs generated for augmented requirements are **appended** — mark each with `[new]` tag
+   - If a new requirement explicitly contradicts an existing SC, the existing SC is updated (not deleted) and marked `[updated]` with a note explaining the change
+   - Renumber SC-### sequentially if needed to maintain a clean sequence
+5. **Inject preservation instruction**: Include this in the speckit-specify context:
+   ```
+   ⚠️ SC PRESERVATION MODE (Feature status: augmented)
+   This Feature was augmented via `add --to`. You MUST:
+   - Preserve all existing SCs from the current spec.md (listed below)
+   - Generate NEW SCs only for the Augmented Requirements section in pre-context
+   - Mark preserved SCs with [preserved] and new SCs with [new]
+   - Do NOT remove, merge, or compress existing SCs unless explicitly contradicted
+
+   Existing SCs to preserve:
+   {list of current SC-### entries from spec.md}
+   ```
+
+### Post-Execution Verification (added to standard verification sequence)
+
+After `speckit-specify` completes for an augmented Feature:
+
+1. **SC count check**: Compare SC count in new spec.md against previous spec.md
+   - If new count < previous count → **BLOCKING**: "SC count decreased from [M] to [N]. [M-N] SCs may have been dropped during re-specification."
+2. **SC preservation check**: For each `[preserved]` SC, verify its description matches the original (minor wording refinements OK, semantic changes NOT OK)
+3. **New SC coverage**: Verify each augmented requirement has at least one `[new]` SC
+
+### Review Display Addition
+
+When displaying the Review for an augmented Feature, add a preservation summary:
+
+```
+── SC Preservation Summary ──────────────────────
+Preserved: [N] SCs from previous spec (unchanged)
+New: [M] SCs for augmented requirements
+Updated: [K] SCs modified due to requirement conflicts
+Total: [N+M+K] SCs
+
+[preserved] SC-001: ...
+[preserved] SC-002: ...
+[new] SC-00N: ...
+──────────────────────────────────────────────────
+```
+
+```
+❌ WRONG: Re-specify from scratch → lose existing SCs → rebuild rework
+✅ RIGHT: Preserve existing SCs + add new ones → incremental specification growth
+```
+
+---
+
 ## Post-Step Update Rules
 
 Update `sdd-state.md` per generic step-completion rules in [state-schema.md](../state-schema.md). Additionally:

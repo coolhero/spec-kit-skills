@@ -468,9 +468,9 @@ Display the Brief Summary extracted from the draft:
    → 🚫 BLOCKING: "Feature F00N not found in sdd-state.md."
 
 2. **Read existing artifacts**:
-   - Read `pre-contexts/F00N.md` → current Feature definition
-   - Read `F00N/spec.md` (if exists) → current SCs to preserve
-   - Read `F00N/plan.md` (if exists) → current architecture decisions
+   - Read `SPEC_PATH/F00N-name/pre-context.md` → current Feature definition
+   - Read `SPEC_PATH/F00N-name/spec.md` (if exists) → current SCs to preserve
+   - Read `SPEC_PATH/F00N-name/plan.md` (if exists) → current architecture decisions
 
 3. **Gather augmentation input**: The remaining positional arguments (files and/or text) describe what to add:
    - Files → parsed as additional requirements (same as Type 1 Document Parsing Protocol)
@@ -498,9 +498,9 @@ Display the Brief Summary extracted from the draft:
    - "Cancel" → abort
    **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-5. **Update pre-context**: Append new requirements to `pre-contexts/F00N.md` under a `## Augmentation` section with timestamp:
+5. **Update pre-context**: Append new requirements to `SPEC_PATH/F00N-name/pre-context.md` under an `## Augmented Requirements` section with timestamp:
    ```markdown
-   ## Augmentation (2026-03-22)
+   ## Augmented Requirements (YYYY-MM-DD)
 
    ### Additional Requirements
    {parsed additions}
@@ -509,9 +509,10 @@ Display the Brief Summary extracted from the draft:
    {file paths and/or text input}
    ```
 
-6. **Trigger re-specify with SC preservation**:
-   - Set Feature status in sdd-state.md back to `specify` (or `re-specify`)
-   - When `speckit-specify` runs next (via `pipeline F00N`), the injection file MUST include:
+6. **Set Feature status to "augmented"**:
+   - Update `sdd-state.md` Feature Progress table: set Feature status to `augmented`
+   - The `augmented` status signals to the pipeline that re-specification is needed with SC preservation
+   - When `speckit-specify` runs next (via `pipeline F00N`), the injection file detects `augmented` status and activates SC Preservation (see `injection/specify.md` § SC Preservation on Re-specification):
      ```
      ⚠️ SC PRESERVATION: This is a re-specify after augmentation.
      Existing SCs in spec.md MUST be preserved unless explicitly contradicted
@@ -522,8 +523,7 @@ Display the Brief Summary extracted from the draft:
 
 7. **Display next step**:
    ```
-   ✅ F001 augmented with new requirements.
-   Run `/smart-sdd pipeline F001` to re-specify with preserved SCs + new additions.
+   ✅ F00N pre-context augmented. Run `pipeline F00N` to re-specify.
    ```
 
 ❌ WRONG: Create a new Feature F00M that overlaps with F00N → duplicate scope, confused pipeline

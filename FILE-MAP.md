@@ -1,7 +1,7 @@
 # File Map — spec-kit-skills
 
 > Complete file inventory + relationship diagrams for the spec-kit-skills project.
-> **257 files** (250 .md + 7 .sh) across 4 skills + 1 shared module.
+> Complete file inventory + relationship diagrams across 3 skills + 1 shared module.
 
 ---
 
