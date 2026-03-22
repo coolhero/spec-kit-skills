@@ -2,7 +2,7 @@
 
 ## Part 2 of 4 — Each Skill in Detail
 
-*Continued from [Part 1: Why Your Agent Needs a Harness](part1-en.md)*
+*Continued from Part 1: Why Your Agent Needs a Harness — (link to Part 1 on Medium)*
 
 ---
 

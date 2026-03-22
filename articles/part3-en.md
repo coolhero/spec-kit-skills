@@ -2,7 +2,7 @@
 
 ## Part 3 of 4 — Design Philosophy, File Structure, Extensibility
 
-*Continued from [Part 2: Three Skills, One Pipeline](part2-en.md)*
+*Continued from Part 2: Three Skills, One Pipeline — (link to Part 2 on Medium)*
 
 ---
 

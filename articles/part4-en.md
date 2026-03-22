@@ -2,7 +2,7 @@
 
 ## Part 4 of 4 — Lessons Learned from 200+ Commits of Agent Skill Development
 
-*Continued from [Part 3: Architecture Deep Dive](part3-en.md)*
+*Continued from Part 3: Architecture Deep Dive — (link to Part 3 on Medium)*
 
 ---
 
