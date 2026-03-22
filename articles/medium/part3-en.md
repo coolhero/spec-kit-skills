@@ -14,143 +14,265 @@ Here's the strange truth about building tools for AI agents: **the agent is both
 
 When you write a React component, React runs it. When you write a Claude Code skill, Claude *reads* it — as markdown — and decides how to behave. Your "code" is natural language. Your "compiler" is an LLM. Your "bugs" are behavioral: the agent does the wrong thing not because of a syntax error, but because it misunderstood your intent.
 
+This means you can't debug with a stack trace. You can't set breakpoints. You can't write unit tests for "the agent follows instruction X." Your only testing method is: run the pipeline, watch what happens, iterate.
+
+And there's an additional constraint that makes this uniquely difficult: **context windows are finite and get compressed.** The beautifully written rule you put at the top of your skill file? After 50 messages, it may be compressed into a single summary sentence — or dropped entirely.
+
 This changes everything about how you design.
 
 ---
 
 ## Three Foundational Philosophies
 
-Every design decision in spec-kit-skills traces back to three principles. We learned them the hard way — through hundreds of failed pipeline runs.
+Every design decision in spec-kit-skills traces back to three principles. We didn't start with these principles — we discovered them through hundreds of failed pipeline runs, each failure revealing a pattern that no amount of "write better instructions" could fix.
 
 ---
 
-### P1: Context Continuity
+### P1: Context Continuity — Information Must Flow Forward
 
 > Information must flow continuously through every pipeline stage. Nothing gets lost at transitions.
 
-This sounds obvious. It isn't.
+This sounds obvious until you realize what "transitions" means for an AI agent:
 
-In practice, an AI agent starting Feature 3 knows nothing about Feature 1 — unless you explicitly load Feature 1's artifacts into its context. The agent doesn't have a "project memory." It has a context window that gets compressed and eventually forgets.
+**Between Features:** Feature 3 starts with a clean context. It knows nothing about Feature 1's User entity or Feature 2's API contracts — unless you explicitly load that information. We solved this with the Global Evolution Layer: entity-registry.md, api-registry.md, and sdd-state.md carry information forward as files.
 
-Context Continuity manifests in three ways:
+**Between pipeline stages:** When `speckit-specify` finishes and `speckit-plan` starts, the agent's working context shifts. The detailed analysis from specify might be compressed. We solved this with injection files that explicitly re-load the relevant context for each stage.
 
-**P1-a: Domain Profile is a First-Class Citizen.** It's not a one-time config. It actively shapes every stage — which probes get asked during `add`, which rules activate during `specify`, which verification steps run during `verify`.
+**Between sessions:** The user closes their laptop, opens it the next day, and continues. Everything the agent "knew" yesterday is gone — except what's in files. Every intermediate result, every decision, every state transition is persisted to the filesystem.
 
-**P1-b: Source Code Fidelity.** Specs describe *what to build*, not *where it came from*. Source analysis stays in reverse-spec artifacts. Smart-sdd specs are source-agnostic. This means you can rebuild a feature differently from the source without the spec being contaminated by the old implementation.
+Context Continuity has three sub-principles:
 
-**P1-c: Cross-Feature Memory (GEL).** Entity registries, API registries, pre-context, stubs — these are the Global Evolution Layer. Feature 3 reads Feature 1's registry. The information flows forward through files, not through the agent's memory.
+**P1-a: Domain Profile is a First-Class Citizen.** It's not a one-time configuration. The Domain Profile actively shapes every stage — which probes get asked during `add`, which rules activate during `specify`, which verification steps run during `verify`. If the profile says `gui + realtime`, then specify generates SCs for optimistic UI updates and reconnection handling. If it says `cli + resilience`, completely different SCs emerge.
+
+Here's the concrete mechanism: domain modules have standardized sections (S1 for SC generation rules, S5 for elaboration probes, S7 for bug prevention rules, S8 for runtime verification strategy). When the pipeline runs, the injection file loads the relevant modules and merges their sections. An `ai-assistant` archetype adds A2 (SC extensions for token management, streaming interruption). A `gui` interface adds S6 (UI testing integration). They accumulate — the final context for specify is the union of all active modules' S1 sections.
+
+**P1-b: Artifact Separation (Source Code Fidelity).** This principle was born from a painful failure. During a rebuild project, the spec for Feature 3 described the source app's implementation details instead of the desired behavior. When we tried to implement it differently (better data model, different API design), the spec fought us — it kept pulling toward the old implementation.
+
+The fix: specs describe *what to build*, never *where it came from*. Source analysis stays in reverse-spec artifacts (pre-context.md). Smart-sdd specs (spec.md) are source-agnostic. This separation means you can rebuild differently without the spec being contaminated by the old implementation.
+
+**P1-c: Cross-Feature Memory (GEL).** The Global Evolution Layer consists of files that carry information across Features:
+- `entity-registry.md` — all data models with fields, types, relationships
+- `api-registry.md` — all endpoints with contracts
+- `sdd-state.md` — project state machine (which Feature is at which step)
+- `roadmap.md` — Feature dependency graph
+- `pre-context.md` (per Feature) — detailed requirements context
+
+When Feature 3 starts, the agent reads the registry. It sees Feature 1's User entity and generates SCs that reference existing fields, not hypothetical ones. This is trivially obvious in hindsight — but without it, every Feature reinvents every entity, and integration becomes a nightmare.
 
 ---
 
-### P2: Enforce, Don't Reference
+### P2: Enforce, Don't Reference — The Most Counterintuitive Principle
 
 > "See X for details" has zero enforcement power. Rules must be enforced at the point of execution, not referenced from a distance.
 
-This is the most counterintuitive principle. In normal software, you write a function once and call it from everywhere. In agent skills, **referenced rules get ignored.**
+In normal software, you write a function once and call it from everywhere. DRY — Don't Repeat Yourself. But in agent skills, **DRY kills compliance.**
 
-Why? Because the agent treats references as optional reading.
+Here's why: the agent treats references as optional reading. When it sees "See verify-phases.md for the full verification protocol," it processes this as "there's more info available, but I have enough context to proceed." It runs build + TypeScript, reports "verify ✅", and moves on. The 400 lines of detailed verification logic in verify-phases.md are never read.
 
-"See verify-phases.md for the full verification protocol"
-→ Agent: "there's more info somewhere, but I'll just do build + test and call it done."
+This isn't a hypothetical. It happened during Feature 6 verification — after the same agent had correctly executed the full verification protocol for Features 1 through 5. Context compression had eaten the verify-phases.md content, and the reference was treated as optional.
 
-Every critical rule needs three things:
+The fix required three layers:
 
-**Inline instruction** — the rule appears directly at the execution point
+**Layer 1 — Inline instruction.** The rule appears directly at the execution point, not in a referenced file. Not "see verify-phases.md" but the actual rule, right there.
 
-**Blocking gate** — not a warning, a blocker. The agent cannot proceed without compliance.
+**Layer 2 — Blocking gate.** Not a warning ("⚠️ you should verify") but a blocker ("🚫 BLOCKING: verification incomplete. Cannot proceed to merge."). The difference is the agent can't rationalize its way past a blocker — it structurally cannot produce the next step's output without completing verification.
 
-**Anti-pattern examples** — explicit WRONG and RIGHT patterns
+**Layer 3 — Anti-pattern examples.** Explicit WRONG and RIGHT patterns:
 
-This is why spec-kit-skills has seemingly redundant text across files. It's intentional. The HARD STOP re-ask text appears 30+ times because each occurrence is at a different execution point, and referencing a shared file doesn't work.
+```
+❌ WRONG: Run build+TS, display "verify ✅", proceed to merge
+   → 10 SCs unverified. Feature unreachable from UI.
+
+✅ RIGHT: Read verify-phases.md → execute Phase 0-4 →
+   show SC coverage matrix → AskUserQuestion
+```
+
+This is why spec-kit-skills has what looks like redundant text. The HARD STOP re-ask instruction appears 30+ times across different files. Each occurrence is at a different execution point. Extracting it to a shared file would be "cleaner" code — and would be ignored by the agent.
+
+**A concrete example of the pattern:**
+
+We discovered that the agent would often execute a spec-kit command, show the raw output, and stop — without reading the generated artifact, displaying a review, or asking for user approval (Gap Pattern G15). The fix wasn't a single rule; it was a 4-layer defense:
+
+1. The SKILL.md (always loaded) contains MANDATORY RULE 3: "After every speckit-* execution, you MUST read the artifact, show a review, and call AskUserQuestion"
+2. Each pipeline step's section contains an inline Execute+Review protocol specific to that step
+3. A catch-all fallback: if for ANY reason the response ends without AskUserQuestion, show a continue prompt
+4. A Stop hook (shell script) that detects raw spec-kit navigation messages leaking through
 
 ---
 
-### P3: File over Memory
+### P3: File over Memory — The Persistence Principle
 
 > Every intermediate artifact and state goes into a file. Never rely on agent memory.
 
-The agent's context window is **limited** (gets compressed), **session-scoped** (gone when session ends), and **non-inspectable** (you can't see what the agent remembers).
+Three properties of the agent's context window make it unreliable for state:
 
-Files are **persistent** (survive across sessions), **diffable** (`git diff` shows changes), **editable** (you can fix a spec manually), and **shareable** (another agent or human can continue).
+- **Limited** — It gets compressed as the conversation grows. After 50 messages, early context is summarized or dropped entirely.
+- **Session-scoped** — When the session ends, everything is gone. The next session starts blank.
+- **Non-inspectable** — You can't see what the agent remembers. You can't debug "why did it forget that Feature 1 uses UUIDs?"
 
-This is why `sdd-state.md` exists. It's the project's state machine — in a file, not in the agent's head.
+Files have none of these problems. They're persistent, diffable (`git diff` shows exactly what changed), editable (you can manually fix a spec and re-run), and shareable (another agent or human can continue the work).
 
----
-
-## The File Architecture
-
-Each skill follows the same pattern:
-
-**SKILL.md** — System prompt. Slim routing + MANDATORY RULES. Always loaded. ~200 lines.
-
-**commands/** — On-demand workflows. Only the invoked command gets loaded.
-
-**reference/injection/** — Per-command context injection rules. Orchestrates which domain modules and artifacts load for each pipeline step.
-
-**domains/** — Modular domain expertise:
-- `_core.md` — Universal rules (always loaded)
-- `_resolver.md` — Module loading logic
-- `interfaces/` — 9 interface modules (gui, cli, http-api, grpc, tui, embedded, mobile, library, data-io)
-- `concerns/` — 48 concern modules (auth, realtime, resilience, etc.)
-- `archetypes/` — 15 archetype modules (ai-assistant, microservice, etc.)
-- `profiles/` — 15 pre-built profiles
+This is why `sdd-state.md` exists as a state machine file. When the agent resumes after context compression or a new session, it reads the file, sees "F003 is at step implement, task 4/7", and continues from there. No guessing, no "I think we were working on..."
 
 ---
 
-### Why This Structure?
+## The File Architecture: How 400+ Files Stay Context-Efficient
 
-**Context efficiency.** Here's the math:
+### The Core Pattern
 
-- Always loaded: ~200 lines (SKILL.md)
-- Per-command: ~500 lines (the invoked command file)
-- Per-domain: ~400 lines (3–5 modules matching your profile)
-- Per-Feature: ~200 lines (pre-context + spec)
-- **Total: ~1,300 lines in context**
+Every skill follows the same structure:
 
-Compare this to loading everything: ~15,000+ lines → context overflow. The selective loading is what makes this work with real LLM context windows.
+```
+SKILL.md              — Always loaded (~200 lines)
+commands/             — Loaded on-demand (only the invoked command)
+reference/
+  injection/          — Per-command context assembly rules
+  state-schema.md     — State machine definition
+  pipeline-integrity-guards.md
+domains/
+  _core.md            — Universal rules (always loaded with domain)
+  _resolver.md        — Module loading logic
+  interfaces/         — 9 modules (gui, cli, http-api, grpc, tui, embedded, mobile, library, data-io)
+  concerns/           — 48 modules (auth, realtime, resilience, connection-pool, tls-management, ...)
+  archetypes/         — 15 modules (ai-assistant, microservice, network-server, ...)
+  scenarios/          — 4 modules (greenfield, rebuild, adoption, incremental)
+  profiles/           — 15 pre-built profiles
+```
 
----
+### Why This Structure Works: The Context Budget
+
+LLM context windows are large but not infinite. If you load everything, you burn through the context budget before the agent even starts working. spec-kit-skills uses **selective loading** — only the modules that match the current task and project profile.
+
+Here's the math for a typical pipeline step:
+
+- **Always loaded:** ~200 lines (SKILL.md with routing + mandatory rules)
+- **Per-command:** ~500 lines (the specific command file, e.g., pipeline.md)
+- **Per-domain:** ~400 lines (3-5 modules × ~100 lines each, matching the Domain Profile)
+- **Per-Feature:** ~200 lines (pre-context + current spec)
+- **Total:** ~1,300 lines in working context
+
+If everything were loaded: ~15,000+ lines — the agent would spend its context budget reading instructions instead of doing work. The selective loading is what makes this practical.
 
 ### The Domain Module Loading Order
 
-When the pipeline runs, domain modules load in a specific order. Later modules extend earlier ones:
+When the pipeline runs, modules load in a specific order. Each layer can extend the previous:
 
-1. `_core.md` — Universal rules (always)
-2. `interfaces/{name}.md` — Per Interface (gui, cli, etc.)
-3. `concerns/{name}.md` — Per Concern (auth, realtime, etc.)
-4. `archetypes/{name}.md` — Per Archetype (ai-assistant, etc.)
-5. `foundations/{framework}.md` — Per Foundation (electron, fastapi, etc.)
-6. `org-convention.md` — Organization-wide rules (optional)
-7. `scenarios/{name}.md` — Per Scenario (greenfield, rebuild, etc.)
-8. `domain-custom.md` — Project-level overrides (optional)
+1. **_core.md** — Universal rules that apply to every project
+2. **interfaces/{name}.md** — Rules specific to the Interface axis (gui, cli, http-api, grpc, etc.)
+3. **concerns/{name}.md** — Rules for each active Concern (auth, realtime, resilience, etc.)
+4. **archetypes/{name}.md** — Domain philosophy rules (ai-assistant, microservice, network-server, etc.)
+5. **foundations/{framework}.md** — Framework-specific rules (electron, fastapi, go, etc.)
+6. **org-convention.md** — Organization-wide rules (optional, shared across projects)
+7. **scenarios/{name}.md** — Lifecycle rules (greenfield, rebuild, adoption)
+8. **domain-custom.md** — Project-level overrides (optional)
 
-Each module has standardized sections. Rules accumulate — if both `gui` and `realtime` are active, their SC Generation Rules merge.
+Modules use standardized section numbering. Interfaces and concerns use S0-S9. Archetypes use A0-A5 (separate numbering to avoid collision). When multiple modules are active, their sections **merge** — `gui.md`'s S1 (SC generation rules) accumulates with `realtime.md`'s S1 and `ai-assistant`'s A2 (SC extensions).
+
+The merge semantics are append-based: if `gui` says "every interactive element needs a hover state SC" and `realtime` says "every streaming display needs a completion indicator SC," the combined S1 section includes both rules. No conflicts because the rules operate on different domains.
+
+### Context Injection: The Key Innovation
+
+This is the architectural heart of the system. Each pipeline step has an **injection file** that orchestrates context assembly:
+
+```
+reference/injection/
+  specify.md    — What context speckit-specify receives
+  plan.md       — What context speckit-plan receives
+  implement.md  — What context speckit-implement receives
+```
+
+Think of it as a dependency injection container for natural language rules. The injection file doesn't contain the rules — it declares which modules to load, which GEL artifacts to include, and which step-specific instructions to add.
+
+**Example: What happens when `speckit-specify` runs for an ai-assistant + gui + realtime project:**
+
+1. Injection file loads `_core.md` § S1 — universal SC generation rules
+2. Loads `gui.md` § S1 — "Every form needs validation feedback SC, every navigation needs route guard SC"
+3. Loads `realtime.md` § S1 — "Every streaming display needs: start indicator, progress update, completion signal, error fallback, reconnection logic"
+4. Loads `ai-assistant` § A2 — "Provider abstraction requires: multi-provider SC, rate limit handling SC, token budget management SC"
+5. Adds step-specific rules: Brief → SC mapping, elaboration probes, SC numbering convention
+6. Includes GEL context: existing entity-registry.md, api-registry.md
+7. Includes Feature context: pre-context.md for this Feature
+
+The result: speckit-specify receives a tailored context that reflects this specific project's needs. A different project — say, a cli + resilience + microservice — would receive completely different rules through the same injection mechanism.
 
 ---
 
-### Context Injection — The Key Innovation
+## Extensibility: Convention over Configuration
 
-Each pipeline step has an **injection file** that defines what context gets assembled:
+### Adding a New Concern Module
 
-- `injection/specify.md` — What context speckit-specify receives
-- `injection/plan.md` — What context speckit-plan receives
-- `injection/implement.md` — What context speckit-implement receives
+You've discovered a cross-cutting pattern that doesn't fit any existing concern — say, `rate-limiting` as a distinct concern. Here's what you do:
 
-Think of it as a dependency injection container for natural language rules.
+1. Create `domains/concerns/rate-limiting.md`
+2. Add sections following the schema:
+   - S0: Signal Keywords (how to detect this concern in code)
+   - S1: SC Generation Rules (what SCs to create when this concern is active)
+   - S3: Verify Steps (additional verification when this concern is active)
+   - S5: Elaboration Probes (questions to ask during Brief consultation)
+   - S7: Bug Prevention Rules (common anti-patterns for this concern)
+3. That's it. The resolver auto-discovers it when a user's Domain Profile includes `rate-limiting`.
 
-Example: when `speckit-specify` runs for an `ai-assistant` + `gui` + `realtime` project, the injection file loads universal SC rules from `_core.md`, UI-specific patterns from `gui.md`, streaming requirements from `realtime.md`, and LLM-specific extensions from the `ai-assistant` archetype. All merged into one coherent context.
+No code changes. No registration step. No config file update. If the file exists at the expected path, it gets loaded.
+
+### Adding a New Foundation
+
+Framework-specific rules live in `domains/foundations/{framework}.md` with two sections:
+
+- **F2** — Specify-time rules (what constraints this framework imposes on spec generation)
+- **F3** — Implement-time rules (framework idioms, anti-patterns, toolchain setup)
+
+For example, `electron.md`'s F2 includes "main process must survive renderer crashes" as a mandatory architectural principle. Its F3 includes "use `_electron.launch()` for Playwright, pass `--user-data-dir` to preserve user settings."
+
+### Creating a Custom Profile
+
+A profile is a ~10-line manifest:
+
+```markdown
+# Profile: my-ai-chat
+
+interfaces: gui, http-api
+concerns: auth, realtime, ai-assistants, external-sdk
+archetype: ai-assistant
+foundation: nextjs
+scenario: greenfield
+scale:
+  project_maturity: mvp
+  team_context: solo
+```
+
+Save to `domains/profiles/my-ai-chat.md`. Use with `/smart-sdd init --profile my-ai-chat`. The resolver reads the profile and loads all declared modules.
+
+### The Three-Level Convention Hierarchy
+
+Rules can come from three levels, with later levels overriding earlier ones:
+
+1. **Skill-level** — `_core.md` + domain modules (universal, maintained by the project)
+2. **Org-level** — `org-convention.md` (shared across an organization's projects)
+3. **Project-level** — `domain-custom.md` (specific to one project)
+
+This means a company can define org-wide conventions (naming patterns, API design standards, security requirements) that automatically apply to all projects using spec-kit-skills, while individual projects can override specific rules.
 
 ---
 
-## Extensibility
+## The Pipeline Integrity Guards
 
-**Adding a new Concern module:** Create `domains/concerns/your-concern.md`, follow the section schema. That's it — the resolver auto-discovers it.
+Seven guards (G1-G7) enforce pipeline correctness. Each guard is a blocking check at a specific pipeline transition:
 
-**Adding a new Foundation:** Create `domains/foundations/your-framework.md`. Add specify-time and implement-time sections. Auto-loaded when matched.
+**G1 — Constitution Guard.** Before specify: is the constitution defined? Without it, specs lack guiding principles.
 
-**Creating a custom Profile:** Write a ~10-line manifest declaring your axes. Save to `domains/profiles/`. Use with `--profile`.
+**G2 — Entity Registry Guard.** Before plan: are all entities from spec registered? Without them, the plan can't reference existing data models.
 
-No code changes. No registration. Convention-based: if a file exists at the expected path, it gets loaded.
+**G3 — API Registry Guard.** Before implement: are all APIs from the plan registered? Without them, implementation guesses at contracts.
+
+**G4 — Pre-Context Guard.** Before specify: does pre-context exist for this Feature? Without it, the spec is based on nothing.
+
+**G5 — Dependency Order Guard.** Before pipeline: are this Feature's dependencies completed? Without them, implementation references entities that don't exist yet.
+
+**G6 — Augmentation Guard.** After `add --to`: was the pipeline re-run? Without it, the spec doesn't reflect the new requirements.
+
+**G7 — Regression Guard.** After verify finds issues: was the regression addressed? Without it, known bugs carry forward.
+
+Each guard follows the same pattern: check condition → if failed, display blocking message → agent cannot proceed until the condition is met.
 
 ---
 
@@ -160,39 +282,52 @@ No code changes. No registration. Convention-based: if a file exists at the expe
 architecture:
   principles:
     P1 Context Continuity:
-      - Domain Profile is first-class (shapes every pipeline stage)
-      - Artifact Separation (specs describe WHAT, not WHERE FROM)
-      - Cross-Feature Memory via GEL files
+      P1-a: Domain Profile is first-class (shapes every pipeline stage via module sections)
+      P1-b: Artifact Separation (specs describe WHAT, not WHERE FROM)
+      P1-c: Cross-Feature Memory via GEL files (entity-registry, api-registry, sdd-state)
 
     P2 Enforce Don't Reference:
-      - Every critical rule: inline + blocking gate + anti-pattern
-      - Never "See X.md for details" for critical behavior
-      - 30+ inline repetitions > 1 reference that gets ignored
+      requirement: every critical rule needs 3 layers
+        layer_1: inline instruction at execution point
+        layer_2: blocking gate (not warning — structural blocker)
+        layer_3: anti-pattern examples (WRONG then RIGHT)
+      evidence: HARD STOP text appears 30+ times (each at different execution point)
+      reason: agents treat references as optional reading
+      corollary: DRY kills compliance in agent skills
 
     P3 File over Memory:
-      - All state in files (sdd-state.md, registries, pre-context)
-      - Agent recovers from context compression by reading files
-      - git diff = full audit trail
+      requirement: all state in files (sdd-state.md, registries, pre-context)
+      reason: context window is limited, session-scoped, non-inspectable
+      benefit: git diff = full audit trail, cross-session persistence, human-editable
 
   file structure:
     SKILL.md: ~200 lines, always loaded (routing + mandatory rules)
     commands/: loaded per invocation (~500 lines)
-    reference/injection/: context assembly per pipeline step
+    reference/injection/: context assembly per pipeline step (DI container for natural language rules)
     domains/: loaded per Domain Profile (~400 lines for 3-5 modules)
 
-  module loading order:
-    _core → interfaces → concerns → archetypes → foundations → org → scenarios → custom
+  domain module system:
+    loading_order: _core → interfaces → concerns → archetypes → foundations → org → scenarios → custom
+    section_schema:
+      interfaces_concerns: S0 (keywords), S1 (SC rules), S3 (verify), S5 (probes), S7 (bugs), S8 (runtime)
+      archetypes: A0 (keywords), A1 (philosophy), A2 (SC extensions), A3 (probes), A4 (constitution), A5 (brief criteria)
+    merge_rule: append semantics (accumulate, don't override)
+    selection: only modules matching active Domain Profile
 
-  context budget:
-    typical total: ~1,300 lines
-    worst case (all loaded): ~15,000 lines (avoided by selective loading)
+  context_budget:
+    typical: ~1,300 lines (SKILL.md + command + 3-5 modules + Feature context)
+    worst_case: ~15,000 lines if everything loaded (avoided by selective loading)
+
+  pipeline_guards: G1 (constitution) through G7 (regression)
+    pattern: check condition → if failed → blocking message → cannot proceed
 
   extensibility:
-    add concern: create file at domains/concerns/{name}.md → auto-discovered
-    add foundation: create file at domains/foundations/{name}.md → auto-loaded
-    add profile: create file at domains/profiles/{name}.md → usable via --profile
+    add_concern: create domains/concerns/{name}.md with S0-S9 → auto-discovered
+    add_foundation: create domains/foundations/{name}.md with F2-F3 → auto-loaded
+    add_profile: create domains/profiles/{name}.md → usable via --profile
+    convention_hierarchy: skill-level → org-level → project-level (later overrides earlier)
 ```
 
 ---
 
-*Next: **Part 4 — Lessons Learned: Building Skills for AI Agents** — failure patterns, tips, and practical guidance for skill developers.*
+*Next: **Part 4 — Lessons Learned** — 19 gap patterns and 50+ specific lessons from building AI agent skills. Real failures, real fixes, and universal takeaways for anyone building their own agent workflows.*
