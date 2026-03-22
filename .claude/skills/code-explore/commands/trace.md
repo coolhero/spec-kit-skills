@@ -44,12 +44,20 @@ Read `orientation.md` to identify relevant modules and **Detected Domain Profile
 |---------------|----------------------|
 | `gui` | Component files, event handlers, state management, routing |
 | `http-api` | Route/endpoint definitions, request handlers, middleware chain |
+| `grpc` | `.proto` service definitions, RPC handler implementations, interceptor chain |
 | `cli` | Command definitions, argument parsing, subcommand dispatch |
 | `async-state` | Store/reducer files, state machine definitions, subscription patterns |
 | `auth` | Authentication middleware, token management, session handling |
 | `realtime` | WebSocket/SSE handlers, streaming endpoints, event emitters |
 | `ipc` | Message channels, process communication, event bridges |
 | `external-sdk` | API client wrappers, provider abstractions, SDK initialization |
+| `message-queue` | Consumer handlers (`@KafkaListener`, `subscribe()`), producer calls, DLQ config |
+| `resilience` | Circuit breaker definitions, retry policies, timeout configs, fallback handlers |
+| `connection-pool` | Pool initialization, borrow/return logic, health check, eviction |
+| `graceful-lifecycle` | Signal handlers, shutdown hooks, drain logic, health endpoints |
+| `tls-management` | Certificate loading, TLS config, SNI handlers, cert rotation |
+| `plugin-system` | Plugin interface definitions, plugin discovery/loading, plugin lifecycle hooks |
+| network-server (archetype) | Accept loop, connection handler, protocol parser, response writer |
 
 If the user's topic aligns with a detected module (e.g., "auth flow" and `auth` is detected), prioritize that module's typical file patterns. If the topic is cross-cutting, use multiple module patterns.
 
@@ -123,6 +131,61 @@ If `CONTEXT_AWARE = true`, during flow tracing:
    - Identify untested behaviors: `[gap: no SC covers this error path]`
 
 **Depth control**: Trace deep enough to understand the full flow, but don't recurse into utility functions or framework internals. Rule of thumb: if a function is domain-specific (business logic), trace into it. If it's infrastructure (logging, serialization, HTTP handling), note it but don't recurse.
+
+#### Non-Sequential Flow Strategies
+
+Not all flows are linear request→response. Use the appropriate strategy based on the flow type:
+
+**Strategy 1 — Connection Lifecycle** (for TCP/WebSocket/gRPC servers):
+Trace the full connection lifecycle: `accept/connect` → `handshake/upgrade` → `read request` → `parse protocol` → `dispatch` → `handle` → `write response` → `close/disconnect`. Include the protocol framing layer (how bytes become messages). In the Mermaid diagram, show the connection as a long-lived participant.
+
+**Strategy 2 — State Machine** (for presence, connection state, reconciler loops, workflow engines):
+Instead of a sequence diagram, produce a **state diagram** showing states and transitions:
+```mermaid
+stateDiagram-v2
+    [*] --> Connected: accept()
+    Connected --> Authenticated: auth success
+    Connected --> Disconnected: auth fail
+    Authenticated --> Subscribed: subscribe(topic)
+    Subscribed --> Disconnected: close/timeout
+```
+Map each transition to source code locations. This is more useful than a linear trace for state-driven logic.
+
+**Strategy 3 — Pub/Sub / Fan-out** (for message brokers, event systems, broadcast):
+Trace BOTH sides: the publish path AND the consume/delivery path. Use a Mermaid diagram that shows the fan-out:
+```mermaid
+sequenceDiagram
+    Publisher->>Broker: PUBLISH(topic, msg)
+    Broker->>Storage: persist(msg)
+    Broker->>Consumer1: deliver(msg)
+    Broker->>Consumer2: deliver(msg)
+    Consumer1-->>Broker: ACK
+```
+
+**Strategy 4 — Error/Retry Path** (for resilience patterns):
+The user often wants to understand what happens when things go wrong. Explicitly trace the error path:
+`request` → `timeout/error` → `retry decision` → `backoff` → `retry` → `circuit breaker check` → `fallback/DLQ`. Include the retry count, backoff calculation, and DLQ routing logic.
+
+**Strategy 5 — Concurrent Actors** (for systems with multiple concurrent subsystems):
+When the flow involves multiple goroutines/tasks running concurrently, annotate which actor/goroutine/task each step runs on. Use Mermaid with parallel participants:
+```mermaid
+sequenceDiagram
+    participant AcceptLoop
+    participant ConnHandler
+    participant PoolManager
+    AcceptLoop->>ConnHandler: spawn(conn)
+    ConnHandler->>PoolManager: borrow(conn)
+    PoolManager-->>ConnHandler: pooled_conn
+```
+
+#### Protocol Boundary Guidance
+
+For server/network programs, the network boundary needs special treatment:
+
+- **Don't stop at socket.write()**: For network programs, the protocol exchange IS the core logic. Document what bytes/messages are sent and what's expected back.
+- **Cross-service calls**: When tracing hits a call to another service (gRPC client, HTTP client), document: (1) what's sent, (2) what's expected back, (3) error handling if the call fails. Note it as `[cross-service: ServiceName.Method()]`.
+- **Protocol parsing**: If the server implements a custom protocol, trace the parsing layer: raw bytes → framed message → parsed command → domain object. This is business logic, not infrastructure.
+- **Configuration-driven routing**: For proxies/gateways, read the config/routing rules and document them as part of the trace. The config IS the logic.
 
 **During tracing, collect**:
 

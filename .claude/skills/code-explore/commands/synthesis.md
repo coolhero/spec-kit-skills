@@ -123,6 +123,46 @@ flowchart LR
 
 If `CONTEXT_AWARE = true`, include registered APIs and mark new APIs with dashed lines (`-.->`) in the diagram.
 
+### Step 3.5 — Server/Network Component Map (conditional)
+
+> Generate this section only when the source project's Detected Domain Profile includes a network-server archetype, grpc interface, message-queue concern, or the orient detected a server concurrency model.
+
+For server/network projects, produce an additional **Server Component Map** that captures the architectural layers specific to servers:
+
+```markdown
+## Server Component Map
+
+| Layer | Component | Source Module | Traces |
+|-------|-----------|---------------|--------|
+| **Listener** | TCP accept loop on :8080 | `cmd/server.go` | 001 |
+| **Protocol** | Redis RESP parser | `protocol/resp.go` | 001, 003 |
+| **Middleware** | Auth interceptor → Rate limiter → Logger | `middleware/` | 002 |
+| **Handler** | GET, SET, DEL command handlers | `handler/` | 001, 003, 004 |
+| **Storage** | In-memory store + AOF persistence | `storage/` | 003, 005 |
+| **Background** | Key expiration goroutine, AOF compaction | `background/` | 005 |
+| **Admin** | Health check endpoint on :9090 | `admin/` | — |
+```
+
+#### Network Topology (if multi-service)
+
+If traces reveal cross-service calls (gRPC clients, HTTP clients to other services, message publish/subscribe):
+
+```mermaid
+flowchart LR
+    Client -->|"RESP protocol"| RedisServer
+    RedisServer -->|"gRPC"| AuthService
+    RedisServer -->|"publish"| EventBus
+    EventBus -->|"subscribe"| MetricsCollector
+```
+
+#### Entity Conflict Resolution
+
+When multiple traces discover the same entity with different field sets or types:
+1. **Union fields**: Combine all observed fields from all traces
+2. **Type conflicts**: If same field has different types across traces (e.g., `metadata: string` in trace 001, `metadata: JSON` in trace 003), flag with `⚠️ Type conflict` and record both observations
+3. **Optional fields**: If a field appears in some traces but not others, mark as `optional` in the consolidated view
+4. **Resolution**: Present conflicts to the user in the synthesis review — don't silently pick one
+
 ### Step 4 — Observation Aggregation
 
 Group observations by icon type:

@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-22] SOFTWARE CATALOG + code-explore server/network enhancement
+
+### What Changed
+
+| Change | Location | Rationale |
+|--------|----------|-----------|
+| Create SOFTWARE-CATALOG.md | Root | 24 target project types with code-explore simulation results — identifies gaps across server/network, web, desktop, data/ML, infra, embedded categories |
+| Enhance orient.md entry point detection | code-explore/commands/orient.md | Add server-specific patterns: accept loops, event handlers, proto services, ISR, concurrency model detection |
+| Expand Interface/Concern/Archetype detection | code-explore/commands/orient.md | 4 interfaces → 11+ (grpc, tui, embedded, mobile, multi-interface), 7 concerns → 14+ (connection-pool, tls, resilience, observability, etc.), 3 archetypes → 8+ (network-server, message-broker, etc.) |
+| Add non-sequential flow strategies to trace.md | code-explore/commands/trace.md | 5 strategies: Connection Lifecycle, State Machine, Pub/Sub Fan-out, Error/Retry Path, Concurrent Actors |
+| Add protocol boundary guidance | code-explore/commands/trace.md | Don't stop at socket.write() for network programs; trace cross-service calls; treat config as logic for proxies |
+| Add Server Component Map to synthesis.md | code-explore/commands/synthesis.md | Layer-based view (Listener → Protocol → Middleware → Handler → Storage → Background) for server projects |
+| Add Entity Conflict Resolution | code-explore/commands/synthesis.md | Union fields, type conflict flagging, optional field detection |
+| Add Network Topology diagram | code-explore/commands/synthesis.md | Cross-service Mermaid diagram when traces reveal multi-service interactions |
+
+### Design Decision
+
+The SOFTWARE CATALOG serves as a systematic test harness for code-explore capabilities. By simulating 24 diverse project types (10 server/network, 3 web, 3 desktop, 3 data/ML, 2 infra, 2 embedded, 1 SDK), we identified 6 cross-cutting gap patterns: non-linear flows, protocol boundaries, config-as-logic, missing server interfaces, concurrency blindness, and non-flow user questions. The code-explore enhancements address the first 5 patterns; the 6th (architectural questions) remains a future enhancement.
+
+---
+
 ## [2026-03-22] Case-study cleanup + add --to augmentation refinement + SC preservation injection
 
 ### What Changed

@@ -77,10 +77,22 @@ Determine where to write explore artifacts based on target directory:
 
 Scan the target directory to identify:
 
-1. **Language & Framework**: Detect from project markers (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, `pom.xml`, etc.)
-2. **Project type**: CLI, web app, library, desktop app, API server, etc.
-3. **Entry points**: `main`, `index`, `app`, `server` files
+1. **Language & Framework**: Detect from project markers (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, `pom.xml`, `CMakeLists.txt`, `Makefile`, etc.)
+2. **Project type**: CLI, web app, library, desktop app, API server, TCP/UDP server, message consumer, proxy, gateway, gRPC service, etc.
+3. **Entry points**: Detect both traditional and server-specific patterns:
+   - Traditional: `main`, `index`, `app`, `server` files
+   - Server/network: accept loops, listener bindings (`net.Listen`, `bind()`, `TcpListener::bind`), event loop setup
+   - Event-driven: `@KafkaListener`, `@EventHandler`, message consumer registration, subscription setup
+   - Protocol-based: gRPC service registration (`RegisterServer`), `.proto` service definitions
+   - Embedded: interrupt handlers (ISR), RTOS task creation, hardware init routines
 4. **Package/module structure**: Top-level directories and their apparent purpose
+5. **Concurrency model** (new — critical for server/network programs):
+   - Thread pool (`ThreadPoolExecutor`, worker threads)
+   - Async/await (`tokio`, `asyncio`, `libuv`)
+   - Goroutines / green threads
+   - Actor model (`GenServer`, Akka actors)
+   - Event loop (Node.js, libuv, epoll/kqueue)
+   - Record the model in orientation.md — it shapes how traces should be read
 
 Display a brief summary:
 ```
@@ -232,22 +244,42 @@ Analyze the detected tech stack, architecture patterns, and module structure to 
 1. **Interface detection**: Map project characteristics to Interface modules
    - GUI indicators (UI framework, component files, styles) → `gui`
    - HTTP server indicators (router, handlers, middleware) → `http-api`
+   - gRPC indicators (`.proto` files, `grpc.NewServer()`, service registration) → `grpc`
+   - TCP/UDP server indicators (`net.Listen`, `TcpListener::bind`, `bind()`+`accept()`, raw socket ops) → detect as network server (use closest: `http-api` for L7, note "custom protocol" for L4)
+   - WebSocket server indicators (upgrade handler, `ws.on('message')`, WS frame handling) → `http-api` + `realtime` concern
+   - Message consumer indicators (`@KafkaListener`, `subscribe()`, consumer group config, no incoming HTTP) → note as message consumer (use `data-io` interface, `message-queue` concern)
    - CLI indicators (flag parsing, command structure) → `cli`
+   - TUI indicators (Bubble Tea, ncurses, blessed, Ink) → `tui`
+   - Embedded indicators (ISR, RTOS, HAL, register manipulation) → `embedded`
+   - Mobile indicators (Flutter, React Native, SwiftUI, Kotlin Android) → `mobile`
    - Library indicators (no entry point, exported API surface only) → `library`
+   - **Multi-interface detection**: A project may expose multiple interfaces simultaneously (e.g., HTTP API + gRPC + admin CLI). List ALL detected interfaces, marking the primary one.
 
 2. **Concern detection**: Map cross-cutting patterns to Concern modules
    - Auth files/middleware → `auth`
    - State management (stores, reducers, context) → `async-state`
    - IPC/messaging (channels, events, message passing) → `ipc`
    - i18n files (locales, translations) → `i18n`
-   - Database/ORM files → `persistence`
+   - Database/ORM files → persistence (use `external-sdk` or note in profile)
    - Queue/worker files → `message-queue` or `task-worker`
    - Real-time indicators (WebSocket, SSE, streaming) → `realtime`
+   - Connection pool patterns (`pool.Get()`, connection reuse, max-connections config) → `connection-pool`
+   - TLS/certificate handling (cert loading, TLS config, SNI) → `tls-management`
+   - Circuit breaker/retry/timeout patterns → `resilience`
+   - Logging/metrics/tracing (OpenTelemetry, Prometheus, structured logging) → `observability`
+   - Graceful shutdown (signal handling, drain connections, health checks) → `graceful-lifecycle`
+   - Crypto operations (encryption, hashing, key management) → `cryptography`
+   - Plugin loading (dynamic module discovery, plugin interface) → `plugin-system`
 
 3. **Archetype detection**: Infer from project-level patterns
    - AI/LLM integration (provider abstraction, prompt management, token counting) → `ai-assistant`
    - Plugin/extension architecture → `sdk-framework`
    - Microservice indicators (service mesh, service discovery) → `microservice`
+   - Network server (accept loop, connection handling, protocol parsing) → `network-server`
+   - Proxy/gateway (upstream forwarding, request routing, load balancing) → `network-server` with proxy note
+   - Message broker (topic management, consumer groups, message persistence) → `message-broker`
+   - Database/cache engine (query parsing, storage engine, indexing) → `database-engine` or `cache-server`
+   - Workflow/orchestration (DAG execution, task scheduling, state machines) → `workflow-engine`
 
 4. **Foundation detection** (Axis 4): Identify frameworks from dependency files
    - Read `package.json` dependencies, `go.mod` requires, `Cargo.toml` dependencies, etc.
@@ -346,6 +378,18 @@ flowchart TD
 > This profile describes the **source project** you are studying, not the project you will build.
 > During `/code-explore synthesis`, this is combined with your "What I'd Do Differently" decisions
 > to derive a **recommended Domain Profile for your project** (all 5 axes + Scale).
+
+## Concurrency Model
+
+| Aspect | Detected |
+|--------|----------|
+| **Model** | [e.g., async/await (tokio), goroutines, thread pool, event loop, actor model] |
+| **Per-connection state** | [e.g., each goroutine holds a connection struct] |
+| **Shared state** | [e.g., global config, connection pool, session store] |
+| **Synchronization** | [e.g., mutex on pool, channels for shutdown, atomic counters] |
+
+> Understanding the concurrency model is critical for tracing server/network programs.
+> Traces should annotate which goroutine/task/thread a step runs on.
 
 ## Module Map
 

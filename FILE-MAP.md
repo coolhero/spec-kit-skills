@@ -202,6 +202,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `history.md` | Design decision history |
 | `lessons-learned.md` | Failure patterns and countermeasures |
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for UI verification |
+| `SOFTWARE-CATALOG.md` | Target project types catalog with code-explore simulation results |
 | `install.sh` | Symlink installer for skills → ~/.claude/skills/ |
 
 ### reverse-spec (96 files)
