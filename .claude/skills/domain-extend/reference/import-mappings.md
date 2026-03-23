@@ -91,6 +91,33 @@
 | ## Escalation | — | Metadata only | Not mappable to module sections |
 | ## Recovery | Concern | S7 Prevention | Recovery procedures inform prevention |
 
+### Compliance -> Module Sections
+
+| Compliance Section | Target Module Type | Target Section | Notes |
+|-------------------|-------------------|---------------|-------|
+| ## Requirements / ## Controls | Concern (compliance) | S1 SC Rules | Mandatory requirements become SC patterns |
+| ## Audit Trail | Concern (audit-logging) | S1 SC Rules | Audit requirements become logging SCs |
+| ## Data Retention / ## Privacy | Concern (compliance) | S5 Probes | Retention rules become elaboration questions |
+| ## Encryption / ## Access Control | Concern (cryptography or auth) | S7 Prevention | Security requirements become prevention rules |
+
+### PR Checklist -> Module Sections
+
+| Checklist Section | Target Module Type | Target Section | Notes |
+|------------------|-------------------|---------------|-------|
+| ## Must / Required items | Concern | S1 SC Rules | Must-have items become mandatory SC patterns |
+| ## Should / Recommended items | Concern | S5 Probes | Should-have items become elaboration questions |
+| ## Never / Forbidden items | Concern | S7 Prevention | Forbidden patterns become bug prevention |
+| ## Test / Coverage items | Foundation | F2 Decision Items | Test requirements become Foundation decisions |
+
+### Tech Radar -> Module Sections
+
+| Radar Section | Target Module Type | Target Section | Notes |
+|--------------|-------------------|---------------|-------|
+| Adopt entries | Foundation | F0 Detection (high confidence) | Adopted tech strengthens detection signals |
+| Trial entries | Foundation | F0 Detection (low confidence) | Trial tech added as secondary signals |
+| Hold entries | Concern | S7 Prevention | Held tech becomes "avoid using" prevention rule |
+| Rationale / Tradeoffs | Foundation | F7 Philosophy | Technology rationale becomes framework principles |
+
 ---
 
 ## Merge vs Create Decision

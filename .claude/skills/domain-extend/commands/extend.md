@@ -13,7 +13,7 @@ Create new domain module files (concern, interface, archetype, foundation, profi
 ```
 /domain-extend extend <type> <name> [flags]
 
-  <type>       concern | interface | archetype | foundation | profile | rule
+  <type>       concern | interface | archetype | foundation | profile | rule | context-modifier
   <name>       Module name in kebab-case (e.g., "message-queue", "grpc")
 
   --from-explore    Seed from code-explore artifacts (traces/orientation)
@@ -26,11 +26,12 @@ Create new domain module files (concern, interface, archetype, foundation, profi
 
 ### Step 0 — Parse Arguments
 
-1. Validate `<type>` is one of: `concern`, `interface`, `archetype`, `foundation`, `profile`, `rule`
+1. Validate `<type>` is one of: `concern`, `interface`, `archetype`, `foundation`, `profile`, `rule`, `context-modifier`
 2. Validate `<name>` is kebab-case, no duplicates in existing modules
 3. If `--from-explore`: verify `specs/explore/orientation.md` exists
 4. If `--from-detect`: verify CWD is a project with source files
 5. If `<type>` is `rule`: branch to **Cross-Concern Rule Flow** (see below)
+6. If `<type>` is `context-modifier`: branch to **Context Modifier Flow** (single file in `smart-sdd/domains/contexts/modifiers/`)
 
 ### Step 1 — Template Selection + Similar Module Analysis
 
@@ -40,6 +41,7 @@ Create new domain module files (concern, interface, archetype, foundation, profi
    - `archetype` → 3-file set: `shared/`, `reverse-spec/domains/archetypes/`, `smart-sdd/domains/archetypes/`
    - `foundation` → 1-file: `smart-sdd/domains/foundations/`
    - `profile` → 1-file: `smart-sdd/domains/profiles/`
+   - `context-modifier` → 1-file: `smart-sdd/domains/contexts/modifiers/`
 
 2. **Find similar existing modules** (by name or keyword overlap):
    - Read `_taxonomy.md` for the relevant module type
@@ -244,3 +246,46 @@ Describe the pattern that ONLY emerges when both concerns interact:
 1. Confirm rule was added to the table
 2. Verify referenced modules exist
 3. Display confirmation
+
+---
+
+## Context Modifier Flow (`extend context-modifier <name>`)
+
+Context modifiers are **single-file** situational overlays (not 3-file sets like concerns).
+They adjust rule depth for a specific situation without producing new structural rules.
+
+### Step M1 — Validate
+
+1. Verify `<name>` is kebab-case
+2. Check `smart-sdd/domains/contexts/modifiers/` for duplicates
+3. Load template from `templates/context-modifier-template.md`
+
+### Step M2 — Interactive Elaboration (HARD STOP)
+
+AskUserQuestion:
+```
+Describe the context modifier "{name}":
+
+1. When is it active? (activation condition)
+2. What additional SCs or preservation rules does it add? (S1)
+3. What context-specific questions should be asked during elaboration? (S5)
+4. What failure patterns are unique to this context? (S7)
+```
+**If response is empty -> re-ask** (per MANDATORY RULE 1)
+
+### Step M3 — Generate + Review (HARD STOP)
+
+1. Generate single file: `smart-sdd/domains/contexts/modifiers/{name}.md`
+2. Show preview -> HARD STOP for approval
+3. Write file on approval
+
+### Step M4 — Post-Install
+
+1. Validate file matches template structure (Activation Condition, S1, S5, S7)
+2. Context modifiers are NOT registered in `_taxonomy.md` (activated by condition, not keywords)
+3. Display:
+   ```
+   ✅ Context Modifier "{name}" installed.
+     File: smart-sdd/domains/contexts/modifiers/{name}.md
+     Note: Activated by condition, not keyword detection.
+   ```

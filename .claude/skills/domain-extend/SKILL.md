@@ -43,6 +43,7 @@ Interactive toolkit for exploring, extending, and customizing the 5-axis domain 
 /domain-extend detect --from-explore ./specs   → Cross-reference explore artifacts vs modules
 
 /domain-extend extend concerns/rate-limiting   → Create new Concern module from scratch
+/domain-extend extend context-modifier compliance → Create Context Modifier (single file)
 /domain-extend import /docs/style-guide.md     → Import internal doc as module sections
 /domain-extend customize auth --org            → Create org-level auth convention overlay
 /domain-extend validate                        → Check all modules for schema compliance
