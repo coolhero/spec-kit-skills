@@ -97,6 +97,7 @@
 | SH07 | 팀 ADR이나 스타일 가이드를 도메인 규칙으로 바꾸고 싶을 때 | `domain-extend import ./docs/adr/` | ADR이 S1/S7 규칙으로 변환된 모듈 |
 | SH08 | 조직 전체 코딩 컨벤션을 적용하고 싶을 때 | `domain-extend customize org` | 모든 프로젝트에 적용되는 org-convention.md |
 | SH09 | code-explore가 미커버 패턴을 발견했을 때 | `domain-extend detect --from-explore ./specs/explore/` → `extend` | 탐색 갭에서 생성된 새 모듈 |
+| SH10 | 커스텀 모듈을 파이프라인에서 사용하기 전에 검증하고 싶을 때 | `domain-extend validate` | 검증 리포트: 스키마 준수, 택소노미 동기화, 크로스-컨선 규칙 |
 
 ---
 
@@ -111,8 +112,8 @@
 | E: 수정하고 다시 하기 | 6 |
 | F: 여러 Feature 관리 | 2 |
 | G: 상태 확인 | 2 |
-| H: 고급 & 커스터마이징 | 9 |
-| **합계** | **37** |
+| H: 고급 & 커스터마이징 | 10 |
+| **합계** | **38** |
 
 ---
 

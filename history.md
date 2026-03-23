@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-03-23] Post-release integrity fixes (v0.1.0)
+
+### What Changed
+- **CLAUDE.md**: Corrected scenario count reference (57 → 38)
+- **FILE-MAP.md**: Added domain-extend skill (16 files) to § 1 diagram and § 4 inventory; added shared/_schema.md; updated shared file count (49 → 50)
+- **smart-sdd migration.md**: Created `contexts/modifiers/migration.md` with pipeline-specific S1/S3/S5/S7 rules (previously only shared and reverse-spec had migration files)
+- **shared/_schema.md**: Created consolidated schema for shared modules (S0/A0 keywords, R1 code patterns, M0-M4 modifiers)
+- **browse.md**: Fixed Foundation path from `shared/domains/foundations/` (non-existent) to `reverse-spec/domains/foundations/` (actual location)
+- **SCENARIO-CATALOG**: Added SH10 (domain-extend validate), updated counts (37 → 38) in EN/KO
+
+### Why
+Post-release integrity analysis revealed: (1) domain-extend was not reflected in FILE-MAP, (2) smart-sdd couldn't load migration modifier at runtime, (3) domain-extend browse/validate referenced non-existent shared schema, (4) scenario count in CLAUDE.md was stale from pre-consolidation era.
+
+---
+
 ## [2026-03-23] Architectural Rename: Scenario → Context (5th axis unification)
 
 ### What Changed

@@ -97,6 +97,7 @@
 | SH07 | Import team ADRs/style guides as domain rules | `domain-extend import ./docs/adr/` | ADRs converted to S1/S7 rules in modules |
 | SH08 | Set org-wide coding conventions | `domain-extend customize org` | org-convention.md applied to all projects |
 | SH09 | code-explore found uncovered patterns | `domain-extend detect --from-explore ./specs/explore/` → `extend` | New modules from exploration gaps |
+| SH10 | Validate custom modules before using in pipeline | `domain-extend validate` | Validation report: schema compliance, taxonomy sync, cross-concern rules |
 
 ---
 
@@ -111,8 +112,8 @@
 | E: Revise and Iterate | 6 |
 | F: Manage Multiple Features | 2 |
 | G: Check Status | 2 |
-| H: Advanced & Customization | 9 |
-| **Total** | **37** |
+| H: Advanced & Customization | 10 |
+| **Total** | **38** |
 
 ---
 

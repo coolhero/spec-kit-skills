@@ -28,7 +28,7 @@ Domain Module System Overview
 | Interfaces | {N} | .claude/skills/shared/domains/interfaces/ |
 | Concerns | {N} | .claude/skills/shared/domains/concerns/ |
 | Archetypes | {N} | .claude/skills/shared/domains/archetypes/ |
-| Foundations | {N} | .claude/skills/shared/domains/foundations/ |
+| Foundations | {N} | .claude/skills/reverse-spec/domains/foundations/ (skill-specific) |
 | Contexts | {N} | .claude/skills/shared/domains/contexts/ |
 | **Total** | **{sum}** | |
 

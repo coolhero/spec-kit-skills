@@ -1,7 +1,7 @@
 # File Map — spec-kit-skills
 
 > Complete file inventory + relationship diagrams for the spec-kit-skills project.
-> Complete file inventory + relationship diagrams across 3 skills + 1 shared module.
+> Complete file inventory + relationship diagrams across 4 skills + 1 shared module.
 
 ---
 
@@ -60,6 +60,12 @@ graph TB
         CE_CMD["commands/ (4)"]
     end
 
+    subgraph "domain-extend/"
+        DE_SKILL["SKILL.md"]
+        DE_CMD["commands/ (6)"]
+        DE_REF["reference/ (2)"]
+        DE_TPL["templates/ (7)"]
+    end
 
     %% Key relationships
     SS_CMD -->|"loads domain modules"| SI & SC & SA & SCX
@@ -71,6 +77,8 @@ graph TB
     RS_CMD -->|"generates report"| SCR
     CE_CMD -->|"feeds into"| RS_CMD
     RS_CMD -->|"feeds into"| SS_CMD
+    DE_CMD -->|"manages modules"| SI & SC & SA
+    DE_CMD -->|"reads taxonomy"| STAX
 ```
 
 ---
@@ -182,7 +190,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
   archetypes/ (15)          Domain philosophy, elaboration probes
   profiles/ (15)            Pre-configured axis combinations
   contexts/modes/ (4)       greenfield, rebuild, incremental, adoption
-  contexts/modifiers/ (1+)  migration, ...
+  contexts/modifiers/ (1)   migration (S1/S3/S5/S7 pipeline rules)
   _resolver.md              7-step module loading order
 ```
 
@@ -307,11 +315,12 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `scripts/semantic-stub-check.sh` | Semantic stub detector (Math.random, placeholder text) |
 | `scripts/wiring-check.sh` | Wiring integrity checker (IPC/API audit) |
 
-### shared (49 files)
+### shared (50 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
 | **Domains — Taxonomy** | `domains/_taxonomy.md` | Single source of truth for all module listings |
+| **Domains — Schema** | `domains/_schema.md` | Shared module section schema (S0/A0 keywords, R1 code patterns, M0-M4 modifiers) |
 | **Domains — Template** | `domains/_TEMPLATE.md` | Contributor template for new modules |
 | **Domains — Interfaces** (10) | `domains/interfaces/{gui,http-api,cli,data-io,tui,mobile,library,embedded,grpc,k8s-api}.md` | S0 keywords + R1 code patterns |
 | **Domains — Concerns** (47) | `domains/concerns/*.md` | S0 keywords + R1 code patterns |
@@ -329,6 +338,30 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `commands/trace.md` | Feature flow tracing with Mermaid diagrams |
 | `commands/synthesis.md` | Understanding synthesis — architecture map, Feature candidates |
 | `commands/status.md` | Exploration progress display |
+
+### domain-extend (16 files)
+
+| Category | Files | Description |
+|----------|-------|-------------|
+| **Entry** | `SKILL.md` | Skill router — command dispatch, MANDATORY RULES |
+| **Commands** | | |
+| `commands/browse.md` | Interactive exploration of the module system (overview, axis, keyword, detail, compare, active) |
+| `commands/detect.md` | Auto-detect domain profile from existing codebase |
+| `commands/extend.md` | Create new domain modules (interface, concern, archetype, foundation, context modifier) |
+| `commands/import.md` | Import external documents (ADR, style guide, postmortem) as org-conventions |
+| `commands/customize.md` | Create project-level or org-level convention overrides |
+| `commands/validate.md` | Validate module structure, taxonomy sync, cross-concern rules |
+| **Reference** (2) | | |
+| `reference/import-mappings.md` | Document type detection signals and extraction rules for import |
+| `reference/module-templates.md` | Detailed module authoring guide with section-by-section instructions |
+| **Templates** (7) | | |
+| `templates/interface-template.md` | Template for new Interface modules (S0-S9) |
+| `templates/concern-template.md` | Template for new Concern modules (S0-S9) |
+| `templates/archetype-template.md` | Template for new Archetype modules (A0-A5) |
+| `templates/foundation-template.md` | Template for new Foundation modules (F0-F9) |
+| `templates/context-modifier-template.md` | Template for new Context Modifier modules (M0-M4) |
+| `templates/profile-template.md` | Template for new Profile manifests |
+| `templates/org-convention-template.md` | Template for organization-level conventions |
 
 ---
 
@@ -349,6 +382,12 @@ shared/runtime/          ← Read by both skills for app lifecycle
 
 shared/reference/        ← Read by pipeline endpoints
   └── completion-report.md  ← analyze-generate.md, pipeline.md, adopt.md
+
+domain-extend/           ← Manages shared/domains/ module lifecycle
+  ├── browse              ← reads _taxonomy.md, module files
+  ├── extend              ← writes new modules to shared/, reverse-spec/, smart-sdd/
+  ├── validate            ← checks taxonomy sync, schema compliance
+  └── import/customize    ← creates org-convention, domain-custom files
 
 code-explore/ → reverse-spec/ → smart-sdd/  (data flows left to right)
   explore artifacts → reverse-spec artifacts → smart-sdd pipeline
