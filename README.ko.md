@@ -601,6 +601,7 @@ Phase 2 — 확장 (이제 점진적 추가 모드):
 새 모듈 생성:
 /domain-extend extend concern "video-encoding"         → 새 concern (3파일 세트)
 /domain-extend extend foundation "fastify"             → 새 Foundation
+/domain-extend extend context-modifier "compliance"    → 새 Context Modifier (compliance용 S1+S5+S7)
 /domain-extend extend rule gui+video-encoding          → 새 cross-concern 통합 규칙
 
 팀 지식 임포트:
@@ -1182,7 +1183,7 @@ S-section은 파이프라인에 *무엇을 해야 하는지* (SC 생성, 버그 
 
 **모듈 로딩 순서**: `_core.md` (항상) → 활성 Interface → 활성 Concern → 활성 Archetype → Org Convention (지정된 경우) → Context Mode → Context Modifiers → 프로젝트 커스텀 (`domain-custom.md`).
 
-**`/domain-extend`로 확장**: `/domain-extend extend concerns/rate-limiting`으로 가이드 템플릿에서 새 Concern 모듈을 생성합니다. `/domain-extend import ./docs/style-guide.md`로 내부 문서를 모듈 섹션으로 변환합니다. `/domain-extend detect`로 프로젝트 패턴과 기존 모듈 간의 gap을 찾습니다. 모듈 파일을 직접 편집할 수도 있습니다 — 아래 수동 예시를 참조하세요.
+**`/domain-extend`로 확장**: `/domain-extend extend concern "rate-limiting"`으로 새 Concern 모듈을 생성합니다. `/domain-extend extend context-modifier "compliance"`로 상황별 오버레이(compliance용 S1 규칙 + S5 질문 + S7 예방)를 추가합니다. `/domain-extend import ./docs/style-guide.md`로 내부 문서를 모듈 섹션으로 변환합니다. `/domain-extend detect`로 프로젝트 패턴과 기존 모듈 간의 gap을 찾습니다. 모듈 파일을 직접 편집할 수도 있습니다 — 아래 수동 예시를 참조하세요.
 
 ### 플랫폼 파운데이션 & Tier 시스템
 

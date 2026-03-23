@@ -603,6 +603,7 @@ Detect gaps (standalone or from code-explore):
 Create new modules:
 /domain-extend extend concern "video-encoding"         → New concern (3-file set)
 /domain-extend extend foundation "fastify"             → New Foundation
+/domain-extend extend context-modifier "compliance"    → New Context Modifier (S1+S5+S7 for compliance)
 /domain-extend extend rule gui+video-encoding          → New cross-concern integration rule
 
 Import team knowledge:
@@ -1134,7 +1135,7 @@ S-sections tell the pipeline *what to do* (generate SCs, prevent bugs, verify). 
 
 **Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Context Mode → Context Modifiers → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
-**Extending with `/domain-extend`**: Use `/domain-extend extend concerns/rate-limiting` to create a new concern module from a guided template. Use `/domain-extend import ./docs/style-guide.md` to convert existing internal documentation into module sections. Use `/domain-extend detect` to find gaps between your project's patterns and available modules. You can also edit module files directly — see the manual examples below.
+**Extending with `/domain-extend`**: Use `/domain-extend extend concern "rate-limiting"` to create a new concern module from a guided template. Use `/domain-extend extend context-modifier "compliance"` to add a situational overlay (S1 rules + S5 probes + S7 prevention for compliance scenarios). Use `/domain-extend import ./docs/style-guide.md` to convert existing internal documentation into module sections. Use `/domain-extend detect` to find gaps between your project's patterns and available modules. You can also edit module files directly — see the manual examples below.
 
 ### Platform Foundation & Tier System
 
