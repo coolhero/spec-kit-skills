@@ -148,7 +148,7 @@ After Proposal approval:
 1. Verify `{explore-path}/synthesis.md` exists. If missing:
    → 🚫 BLOCKING: "synthesis.md not found at `{explore-path}`. Run `/code-explore synthesis` first."
 2. Parse sections by markdown heading detection:
-   - `## Recommended Domain Profile` → extract 5-axis table rows (Interface, Concern, Archetype, Foundation, Scenario) + Scale modifiers
+   - `## Recommended Domain Profile` → extract 5-axis table rows (Interface, Concern, Archetype, Foundation, Context) + Scale modifiers
    - `## Feature Candidates` → extract table: C### ID, Name, Description, Based On, Key Modules, Owned Entities, APIs
    - `## Consolidated Entity Map` → extract entity names, fields, candidate owners
    - `## Consolidated API Map` → extract method, path, provider module
@@ -262,7 +262,7 @@ After Domain Profile confirmation:
    → ⚠️ WARNING (non-blocking): "constitution-seed.md not found. Constitution will need interactive definition during pipeline."
 
 4. Read & parse:
-   - `sdd-state.md` → Domain Profile (Interfaces, Concerns, Archetype, Framework, Scenario) + Scale modifiers
+   - `sdd-state.md` → Domain Profile (Interfaces, Concerns, Archetype, Framework, Context) + Scale modifiers
    - `roadmap.md` → Project Overview, Rebuild/Adoption Strategy, Feature Catalog (F### with Tiers), Dependency Graph
    - `constitution-seed.md` → Architecture principles, technical constraints, coding conventions, recommended practices
    - `entity-registry.md`, `api-registry.md` → validate existence (non-blocking, read for display)
@@ -283,7 +283,7 @@ Generate a Proposal (same display format as Proposal Mode Step 3), populated fro
 | Proposal Section | Source |
 |-----------------|--------|
 | Project Overview | roadmap.md § Project Overview |
-| Domain Profile | sdd-state.md header fields (Interfaces, Concerns, Archetype, Framework, Scenario) |
+| Domain Profile | sdd-state.md header fields (Interfaces, Concerns, Archetype, Framework, Context) |
 | Scale | sdd-state.md § Scale (project_maturity, team_context) |
 | Strategy | roadmap.md § Rebuild/Adoption Strategy |
 | Features | roadmap.md § Feature Catalog (F### table with Tiers and Release Groups) |
@@ -307,8 +307,8 @@ Strategy: [strategy summary]
 | Concerns | [detected] |
 | Archetype | [detected] |
 | Framework | [detected] |
-| Scenario | [rebuild/adoption] |
-| Scale | [maturity] / [team] |
+| Context Mode | [rebuild/adoption] |
+| Context Scale | [maturity] / [team] |
 
 ── Feature Catalog ([N] Features) ─────────────
 | ID | Name | Tier | Release Group |
