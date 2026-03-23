@@ -306,7 +306,16 @@ When the pipeline runs, modules load in a specific order. Each layer can extend 
 7. **contexts/modes/{name}.md** — Lifecycle rules (greenfield, rebuild, adoption)
 8. **domain-custom.md** — Project-level overrides (optional)
 
-Modules use standardized section numbering. Interfaces and concerns use S0-S9. Archetypes use A0-A5 (separate numbering to avoid collision). When multiple modules are active, their sections **merge** — `gui.md`'s S1 (SC generation rules) accumulates with `realtime.md`'s S1 and `ai-assistant`'s A2 (SC extensions).
+Modules use standardized section numbering across four families — each serving a different purpose in the system:
+
+- **S-sections** (S0–S9) tell smart-sdd how to *build* this domain — S0 detects it, S1 generates test scenarios, S5 asks the user domain-specific questions during the Brief, S7 prevents known bugs
+- **A-sections** (A0–A5) tell smart-sdd *why* certain decisions matter — philosophy principles, not just checklists
+- **R-sections** (R1–R5) tell reverse-spec how to *read* existing code for this pattern — what imports to look for, how to extract Feature boundaries
+- **F-sections** (F0–F8) define the *platform* — framework detection, infrastructure decisions, toolchain commands
+
+The key design: each numbered section maps to exactly one pipeline stage. S5 (Elaboration Probes) feeds only the Brief; S7 (Bug Prevention) feeds only implement and verify. This means each pipeline step loads only the sections it needs — specify loads S0/S1/S5/S9, implement loads S7/S6, skipping 55-70% of module content. The same separation makes `/domain-extend` practical: you can create a new module by filling S5 (what to ask users) without knowing S7 (bug patterns yet), and add S7 later as you discover failure modes in production.
+
+When multiple modules are active, their sections **merge** — `gui.md`'s S1 (SC generation rules) accumulates with `realtime.md`'s S1 and `ai-assistant`'s A2 (SC extensions).
 
 The merge semantics are append-based: if `gui` says "every interactive element needs a hover state SC" and `realtime` says "every streaming display needs a completion indicator SC," the combined S1 section includes both rules. No conflicts because the rules operate on different domains.
 

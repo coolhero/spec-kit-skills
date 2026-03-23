@@ -1072,43 +1072,65 @@ Contexts (4 modes): greenfield, rebuild, incremental, adoption
 
 ### What's Inside Each Module — The Section System
 
-Each module isn't just a tag that says "this project uses auth." It's a file containing **numbered sections**, where each section feeds a specific pipeline step. There are four section families, each serving a different skill:
+Each module isn't just a tag that says "this project uses auth." It's a file containing **numbered sections**, where each section feeds a specific pipeline step.
+
+**Why four section families?** Each family serves a different skill and a different *purpose*:
+
+| Family | Skill | Purpose | Analogy |
+|--------|-------|---------|---------|
+| **S** (S0–S9) | smart-sdd | How to **build** this domain | Construction manual |
+| **A** (A0–A5) | smart-sdd | *Why* certain decisions **matter** | Architecture philosophy |
+| **R** (R1–R5) | reverse-spec | How to **read** existing code for this domain | Reading comprehension guide |
+| **F** (F0–F8) | reverse-spec / smart-sdd | **Framework-specific** infrastructure decisions | Platform blueprint |
+
+S-sections tell the pipeline *what to do* (generate SCs, prevent bugs, verify). A-sections tell it *why* (streaming-first philosophy guides every SC). R-sections tell reverse-spec *how to recognize* the pattern in existing code. F-sections define the *platform* that business Features build on.
+
+**Design philosophy within each family**: Each numbered section maps to exactly one stage of the user's journey — from project setup through Feature definition, specification, implementation, to verification. This separation has two benefits: (1) **lazy loading** — each pipeline step loads only the sections it needs (specify loads S0/S1/S5/S9, implement loads S7/S6 — skipping 55-70% of module content), and (2) **independent extensibility** — when creating a new module via `/domain-extend`, you can fill S5 (what to ask users) without knowing S7 (bug patterns), and add S7 later as you discover failure modes.
 
 **S-sections** (smart-sdd — pipeline execution):
 
-| Section | What it provides | Which pipeline step uses it |
-|---------|-----------------|---------------------------|
-| **S0** | Signal keywords for auto-detection | `init` (profile inference) |
-| **S1** | Success criteria rules and anti-patterns | `specify` (what "done" means for this module) |
-| **S3** | Verification steps and gates | `verify` (what to check and what blocks progress) |
-| **S4** | Data integrity principles (authority, empty input, pipeline trace) | All steps (universal engineering principles) |
-| **S5** | Consultation questions | `clarify` / `add` (what to ask the user about this module) |
-| **S7** | Bug prevention rules with detection + fix | `plan` / `implement` / `verify` (known failure patterns) |
+| Section | Name | Pipeline stage | What it does |
+|---------|------|---------------|-------------|
+| **S0** | Signal Keywords | `init` / `detect` | When to **activate** this module — keyword matching |
+| **S1** | SC Generation Rules | `specify` | What **scenarios to test** — "auth token expiry SC required" |
+| **S3** | Verify Steps | `verify` | What **additional checks** to run — reconnection test, load test |
+| **S4** | Data Integrity | All steps | **Immutable rules** — stored data never transformed, display-time only |
+| **S5** | Elaboration Probes | `add` (Brief) | What to **ask the user** — "Auth strategy? JWT, session, OAuth?" |
+| **S6** | UI Testing | `implement` (gui) | How to **test the UI** — Playwright scenarios, screenshot comparison |
+| **S7** | Bug Prevention | `implement` / `verify` | **Common mistakes** to prevent — "stale token accepted after cache purge" |
+| **S8** | Runtime Verification | `verify` | How to **confirm at runtime** — launch app → call API → check response |
+| **S9** | Brief Completion | `add` (Brief) | When the **Brief is complete** — "protocol choice specified" ✓ |
 
-**A-sections** (archetypes — domain philosophy):
+**A-sections** (archetypes — domain philosophy): Archetypes answer *why* certain decisions matter. While S-sections describe *what* to check, A-sections describe the *values* that should guide those checks.
 
-| Section | What it provides | Which pipeline step uses it |
-|---------|-----------------|---------------------------|
-| **A0** | Signal keywords for archetype detection | `init` (archetype inference) |
-| **A1** | Core philosophy principles | Guides all steps (e.g., "Streaming-First" shapes every decision) |
-| **A2** | SC generation extensions | `specify` (archetype-specific success criteria) |
-| **A3** | Domain-specific consultation questions | `clarify` / `add` (e.g., "Single or multi-provider LLM?") |
-| **A4** | Constitution injection | `constitution` (principles baked into the project's foundation) |
+| Section | Name | Pipeline stage | What it does |
+|---------|------|---------------|-------------|
+| **A0** | Signal Keywords | `init` / `detect` | When to **activate** this archetype |
+| **A1** | Philosophy Principles | All steps | **Core values** — "Streaming-First", "Model Agnosticism" |
+| **A2** | SC Extensions | `specify` | Archetype-specific **scenarios** — beyond what concerns provide |
+| **A3** | Elaboration Probes | `add` (Brief) | Domain-specific **questions** — "Single or multi-provider LLM?" |
+| **A4** | Constitution Injection | `constitution` | **Principles baked into** the project's foundation |
+| **A5** | Brief Completion | `add` (Brief) | When the archetype-specific **Brief is complete** |
 
-**R-sections** (reverse-spec — source analysis):
+**R-sections** (reverse-spec — source analysis): These sections tell reverse-spec *how to read* existing code for this module type. They're the "reading comprehension guide" for source analysis.
 
-| Section | What it provides | Which pipeline step uses it |
-|---------|-----------------|---------------------------|
-| **R1** | Code patterns for detection | `analyze` Phase 1 (auto-detect which modules apply) |
-| **R3** | Extraction axes | `analyze` Phase 2 (what to extract from the code for this module) |
+| Section | Name | Pipeline stage | What it does |
+|---------|------|---------------|-------------|
+| **R1** | Code Patterns | `analyze` Phase 1 | What **code patterns** indicate this module — imports, decorators, config |
+| **R3** | Analysis Axes | `analyze` Phase 2 | What to **extract** — Feature boundaries, data flow focus areas |
+| **R4** | Data Flow | `analyze` Phase 2 | How **data moves** through this module's domain |
+| **R5** | Feature Boundaries | `analyze` Phase 3 | How to **split** detected patterns into Features |
 
-**F-sections** (foundations — framework infrastructure):
+**F-sections** (foundations — framework infrastructure): Framework-specific decisions that must be made before any business Feature. These form the "platform" that Features build on.
 
-| Section | What it provides | Which pipeline step uses it |
-|---------|-----------------|---------------------------|
-| **F0** | Framework detection signals | `analyze` Phase 1 / `init` (identify framework) |
-| **F2** | Infrastructure checklist items | `init` (decisions before coding) / `analyze` (extract existing decisions) |
-| **F7** | Framework philosophy principles | `constitution` (framework-endorsed patterns) |
+| Section | Name | Pipeline stage | What it does |
+|---------|------|---------------|-------------|
+| **F0** | Detection Signals | `analyze` Phase 1 / `init` | **Identify** the framework — package.json, config files |
+| **F1** | Categories | `init` | **Infrastructure categories** — BST, SEC, MID, API, etc. |
+| **F2** | Decision Items | `init` / `analyze` | **Choices to make** — "CORS policy? Auth strategy? ORM?" |
+| **F3** | Extraction Rules | `analyze` | **How to extract** existing decisions from code |
+| **F7** | Philosophy | `constitution` | **Framework values** — "Middleware Composition", "Convention over Configuration" |
+| **F8** | Toolchain | `implement` / `verify` | **Build/test/lint commands** — `npm run build`, `cargo test` |
 
 **Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Context Mode → Context Modifiers → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
