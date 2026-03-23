@@ -82,9 +82,9 @@
 | SG01 | See overall progress | `status` (pipeline) or `code-explore status` (exploration) | Progress dashboard |
 | SG02 | Check spec-code alignment or coverage | `parity` (spec vs code) or `coverage` (SBI coverage) | Alignment/coverage report |
 
-## H. Advanced
+## H. Advanced & Customization
 
-> 💡 "I have a special project type or need"
+> 💡 "I have a special project type, need custom domain rules, or want org-wide conventions"
 
 | ID | When you want to... | Do this | You get |
 |----|-------------------|---------|---------|
@@ -92,6 +92,11 @@
 | SH02 | Modernize legacy code | `adopt` → `pipeline --migration` | Modernized codebase |
 | SH03 | Generate all artifacts in a specific language | `init --lang ko` or `adopt --lang ja` | All artifacts in your language |
 | SH04 | Apply SDD per service in a monorepo | `adopt --scope services/api` per service | Per-service SDD docs |
+| SH05 | See what domain modules are available | `domain-extend browse` or `domain-extend browse concerns` | Full module inventory with file paths |
+| SH06 | My project uses a pattern no module covers | `domain-extend detect` → `domain-extend extend concern "video-encoding"` | New concern module (3-file set) |
+| SH07 | Import team ADRs/style guides as domain rules | `domain-extend import ./docs/adr/` | ADRs converted to S1/S7 rules in modules |
+| SH08 | Set org-wide coding conventions | `domain-extend customize org` | org-convention.md applied to all projects |
+| SH09 | code-explore found uncovered patterns | `domain-extend detect --from-explore ./specs/explore/` → `extend` | New modules from exploration gaps |
 
 ---
 
@@ -106,8 +111,8 @@
 | E: Revise and Iterate | 6 |
 | F: Manage Multiple Features | 2 |
 | G: Check Status | 2 |
-| H: Advanced | 4 |
-| **Total** | **32** |
+| H: Advanced & Customization | 9 |
+| **Total** | **37** |
 
 ---
 

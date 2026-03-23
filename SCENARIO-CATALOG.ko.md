@@ -82,9 +82,9 @@
 | SG01 | 전체 진행 상태를 한눈에 보고 싶을 때 | `status` (pipeline) 또는 `code-explore status` (탐색) | Feature별 진행 대시보드 |
 | SG02 | 스펙 대로 구현되었는지, 커버리지를 확인하고 싶을 때 | `parity` (스펙-코드 일치) 또는 `coverage` (SBI 커버리지) | 일치도·커버리지 보고서 |
 
-## H. 고급 시나리오
+## H. 고급 & 커스터마이징
 
-> 💡 "특수한 프로젝트 유형을 다루고 싶어요"
+> 💡 "특수한 프로젝트 유형이거나, 커스텀 도메인 규칙이 필요하거나, 조직 전체 컨벤션을 적용하고 싶어요"
 
 | ID | 이런 상황일 때 | 이렇게 하세요 | 얻는 것 |
 |----|---------------|-------------|---------|
@@ -92,6 +92,11 @@
 | SH02 | 레거시 코드를 현대적으로 탈바꿈하고 싶을 때 | `adopt` → `pipeline --migration` | 현대화된 코드베이스 |
 | SH03 | 모든 문서를 한국어나 일본어로 생성하고 싶을 때 | `init --lang ko` 또는 `adopt --lang ja` | 모든 산출물이 지정 언어 |
 | SH04 | 모노레포에서 서비스별로 각각 SDD를 적용하고 싶을 때 | 서비스별 `adopt --scope services/api` 반복 | 서비스별 독립 SDD 문서 |
+| SH05 | 어떤 도메인 모듈이 있는지 보고 싶을 때 | `domain-extend browse` 또는 `domain-extend browse concerns` | 파일 경로 포함 전체 모듈 목록 |
+| SH06 | 내 프로젝트 패턴이 기존 모듈에 없을 때 | `domain-extend detect` → `domain-extend extend concern "video-encoding"` | 새 concern 모듈 (3파일 세트) |
+| SH07 | 팀 ADR이나 스타일 가이드를 도메인 규칙으로 바꾸고 싶을 때 | `domain-extend import ./docs/adr/` | ADR이 S1/S7 규칙으로 변환된 모듈 |
+| SH08 | 조직 전체 코딩 컨벤션을 적용하고 싶을 때 | `domain-extend customize org` | 모든 프로젝트에 적용되는 org-convention.md |
+| SH09 | code-explore가 미커버 패턴을 발견했을 때 | `domain-extend detect --from-explore ./specs/explore/` → `extend` | 탐색 갭에서 생성된 새 모듈 |
 
 ---
 
@@ -106,8 +111,8 @@
 | E: 수정하고 다시 하기 | 6 |
 | F: 여러 Feature 관리 | 2 |
 | G: 상태 확인 | 2 |
-| H: 고급 시나리오 | 4 |
-| **합계** | **32** |
+| H: 고급 & 커스터마이징 | 9 |
+| **합계** | **37** |
 
 ---
 
