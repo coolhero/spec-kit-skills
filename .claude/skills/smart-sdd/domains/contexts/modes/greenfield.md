@@ -1,4 +1,4 @@
-# Scenario: greenfield
+# Context Mode: greenfield
 
 > Building a new project from scratch. No existing system to preserve.
 > Module type: scenario

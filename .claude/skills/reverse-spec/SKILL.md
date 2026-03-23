@@ -115,14 +115,18 @@ Execute the following phases in order, reporting progress to the user after each
 | G4 | Re-running reverse-spec after adopt | Overwrites roadmap.md and registries that adopt already enriched | Use `pipeline F001 --step specify` to re-analyze specific Features instead |
 | G5 | Large codebase without parallel extraction | Phase 2 times out or hits context limits for 1000+ file projects | Automatic: Task tool distributes extraction across sub-agents in Phase 2 |
 | G6 | Expecting reverse-spec to generate implementation code | reverse-spec only produces analysis artifacts (roadmap, registries, pre-context) | Use `/smart-sdd pipeline` after reverse-spec to generate implementation |
+| G7 | Starting pipeline/adopt immediately after reverse-spec without context reset | Reverse-spec fills context with source analysis (2000+ lines) → pipeline's specify injection gets truncated → spec quality drops | `/clear` then `/smart-sdd pipeline` or `/smart-sdd adopt`. All reverse-spec output is in files (roadmap.md, pre-context, registries) |
 
 ---
 
 ## Composability
 
 ```
-code-explore → reverse-spec --from-explore       (informed analysis)
-reverse-spec → /smart-sdd pipeline               (rebuild with new code)
-reverse-spec → /smart-sdd adopt                  (document existing code)
-/smart-sdd adopt → reverse-spec (auto-chained)   (adopt triggers reverse-spec automatically)
+code-explore → reverse-spec --from-explore                          (informed analysis)
+reverse-spec → [context reset] → /smart-sdd init --from-reverse-spec  (rebuild with review)
+reverse-spec → [context reset] → /smart-sdd pipeline                   (rebuild direct)
+reverse-spec → [context reset] → /smart-sdd adopt                     (document existing code)
+/smart-sdd adopt → reverse-spec (auto-chained)                         (adopt triggers reverse-spec)
 ```
+
+> **💡 Context reset** (`/clear`) between reverse-spec and pipeline/adopt is recommended. reverse-spec produces 5+ artifact files — all persisted to disk. The pipeline reads them via Context Injection Protocol, not from conversation history.

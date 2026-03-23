@@ -13,6 +13,20 @@ Adopt specify: **"Extract what exists"** — documents the current code's behavi
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+After domain modules are merged (Steps 1-4), retain ONLY these sections for `specify (adopt)`:
+
+| Active (retain) | Skipped (discard from context) |
+|-----------------|-------------------------------|
+| S0, S1, S5, S9, A2, A3, A5 | S2, S3, S6, S7, S8 |
+
+Display in Checkpoint: `📊 Domain: [N] modules → [M] sections active (S0,S1,S5,S9,A2,A3,A5) | [K] skipped`
+
+🚫 Do NOT retain skipped sections.
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

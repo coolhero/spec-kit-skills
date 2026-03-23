@@ -28,7 +28,7 @@ If `specs/_global/visual-references/manifest.md` exists AND this Feature covers 
    - `✅ Visual match` — layout structure and key elements consistent
    - `⚠️ Visual deviation` — describe specific differences (missing elements, layout shift, style mismatch, color/spacing drift)
    - `❌ Major regression` — screen fundamentally different or broken
-4. **Result severity** varies by `preservation_level` (read from sdd-state.md Rebuild Configuration — see `domains/scenarios/rebuild.md` §S3):
+4. **Result severity** varies by `preservation_level` (read from sdd-state.md Rebuild Configuration — see `domains/contexts/modes/rebuild.md` §S3):
    - `exact`: Visual deviations are ⚠️ HIGH WARNING (pixel-level match expected)
    - `equivalent`: Structural deviations are ⚠️ WARNING; minor spacing/color differences informational
    - `functional`: Visual fidelity check is informational only (UI may be intentionally redesigned)
@@ -83,7 +83,7 @@ If visual references don't exist or no screens match this Feature: skip silently
 
 **Comparison procedure** (when both apps are running):
 
-Comparison criteria vary by `preservation_level` (read from sdd-state.md Rebuild Configuration — see `domains/scenarios/rebuild.md` §S3):
+Comparison criteria vary by `preservation_level` (read from sdd-state.md Rebuild Configuration — see `domains/contexts/modes/rebuild.md` §S3):
 - `exact`: Byte-level response comparison (API), pixel-level screenshot comparison (UI). Any deviation = ⚠️ WARNING
 - `equivalent`: Data shape and semantic comparison. Format differences (JSON key order, whitespace) ignored. Same data values required
 - `functional`: Goal-level comparison. Same user flow produces same outcome. UI appearance and API format may differ

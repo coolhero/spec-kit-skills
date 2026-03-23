@@ -26,6 +26,20 @@
 
 > **Greenfield/add note**: For greenfield or add-origin projects, cross-Feature verification points in pre-context.md may be limited to dependency-based checks only (no source-code-derived verification points). The verify command works the same way — it just has fewer pre-defined verification items.
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+After domain modules are merged (Steps 1-4), retain ONLY these sections for `verify`:
+
+| Active (retain) | Skipped (discard from context) |
+|-----------------|-------------------------------|
+| S1 (SC compliance check), S3, S7 (B-4), S8, Foundation F8 | S0, S2, S5, S6, S9 |
+
+Display in Checkpoint: `📊 Domain: [N] modules → S1+S3+S7(B-4)+S8+F8 active | [K] skipped`
+
+🚫 Do NOT retain skipped sections. Verify checks SC compliance (S1), verification strategy (S3), bug prevention (S7), and runtime (S8).
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

@@ -1,12 +1,12 @@
 # Domain Module Schema (smart-sdd)
 
-> Defines the section schema for domain modules in the **5-axis + 1 modifier** architecture.
-> Every module (interface, concern, archetype, foundation, scenario) follows this schema. Omit sections that don't apply.
+> Defines the section schema for domain modules in the **5-axis** architecture.
+> Every module (interface, concern, archetype, foundation, context) follows this schema. Omit sections that don't apply.
 > For reverse-spec module sections (R1-R6), see `../reverse-spec/domains/_schema.md`.
 
 ---
 
-## Domain Profile Model: 5 Axes + 1 Modifier
+## Domain Profile Model: 5 Axes
 
 Domain Profile is a **first-class citizen** — a living context that actively influences every step of every skill.
 
@@ -20,17 +20,19 @@ Each axis contributes rules (S-sections or F-sections) that are merged and appli
 | **Concern** | `concerns/{name}.md` | Cross-cutting patterns that span multiple Features | S0–S9 |
 | **Archetype** | `archetypes/{name}.md` | Domain philosophy — WHY certain decisions matter | A0–A5 |
 | **Foundation** | `foundations/{name}.md` | Framework-specific rules, constraints, and toolchain | F0–F9 |
-| **Scenario** | `scenarios/{name}.md` | Project lifecycle context (greenfield, rebuild, adoption) | S1, S3, S5, S7 |
+| **Context** | `contexts/modes/{name}.md` | Project lifecycle context and depth calibration | S1, S3, S5, S7 |
 
-### 1 Modifier (rule filter)
+### Context: 3 Components
 
-The modifier does not produce rules — it **adjusts the depth and rigor** of rules from the 5 axes.
+Axis 5 (Context) is a composite axis with three components:
 
-| Modifier | Fields | Purpose | Effect |
-|----------|--------|---------|--------|
-| **Scale** | `project_maturity` × `team_context` | How big/serious is this project? | Dials rule depth up or down |
+| Component | Values | Purpose |
+|-----------|--------|---------|
+| **Mode** | `greenfield` \| `rebuild` \| `incremental` \| `adoption` | Pipeline structure — defines which steps run and how |
+| **Scale** | `project_maturity` × `team_context` (e.g., `production × small-team`) | Depth calibration — adjusts the rigor of rules from all axes |
+| **Modifiers** | `+migration` \| `+compliance` \| ... (zero or more, extensible via domain-extend) | Situational overlays — add rules for specific circumstances |
 
-> **Axis vs Modifier**: An axis produces rules ("check for IPC timeout handling"). A modifier adjusts how strictly those rules apply ("in prototype mode, timeout SCs are optional").
+> **Mode vs Scale vs Modifiers**: Mode determines *what* the pipeline does (greenfield builds from scratch, rebuild preserves existing behaviors). Scale determines *how deeply* rules are enforced (prototype is lenient, production is strict). Modifiers add *situational rules* that apply regardless of mode or scale (migration adds preservation checks, compliance adds audit requirements).
 
 ### Archetype ↔ Concern Relationship
 
@@ -53,7 +55,7 @@ Archetypes **extend** Concern rules via A2 (SC extensions) and A3 (probes). They
 | **Concern** | `concerns/{name}.md` | Cross-cutting patterns (async-state, ipc, external-sdk, i18n, realtime, auth, ...) |
 | **Archetype** | `archetypes/{name}.md` | Domain philosophy — principles that transcend framework/interface choices (ai-assistant, public-api, microservice, sdk-framework) |
 | **Foundation** | `../../reverse-spec/domains/foundations/{name}.md` | Framework-specific constraints and toolchain (React, Next.js, Electron, ...). For multi-language projects (Phase 1-2a), the Framework field stores comma-separated values (e.g., `pytorch,cmake,cuda`). Each Foundation is loaded independently per `_resolver.md` Step 2b. |
-| **Scenario** | `scenarios/{name}.md` | Why we're building (greenfield, rebuild, incremental, adoption) |
+| **Context** | `contexts/modes/{name}.md` | Project lifecycle context (greenfield, rebuild, incremental, adoption) |
 | **Profile** | `profiles/{name}.md` | Preset composition of interfaces + concerns (~10 line manifest) |
 | **Core** | `_core.md` | Universal rules loaded for ALL projects |
 
@@ -102,19 +104,19 @@ Additional verification steps when this module is active.
 | **Detection** | How to find/run the relevant tool |
 | **Description** | What this step checks |
 
-### S4. Data Integrity Principles (Universal — _core.md + extensible by concerns/scenarios)
+### S4. Data Integrity Principles (Universal — _core.md + extensible by concerns/contexts)
 
-Universal data engineering principles that apply to ALL projects. Defined in `_core.md` as S4a-S4c. Concerns and scenarios can extend with S4x subsections (e.g., `ipc.md` adds IPC N-Layer Completeness as S4 extension; `rebuild.md` adds S4d Source Deep Analysis).
+Universal data engineering principles that apply to ALL projects. Defined in `_core.md` as S4a-S4c. Concerns and context modes can extend with S4x subsections (e.g., `ipc.md` adds IPC N-Layer Completeness as S4 extension; `rebuild.md` adds S4d Source Deep Analysis).
 
 | Sub-section | Scope | Description |
 |-------------|-------|-------------|
 | **S4a** | Universal | Data Authority (Single Source of Truth) — every persistent data entity has one authoritative source |
 | **S4b** | Universal | Empty/Invalid Input Handling — no pipeline stage treats empty input as success |
 | **S4c** | Universal | Data Pipeline Traceability — every processing stage is independently verifiable |
-| **S4d** | Scenario (rebuild) | Source Feature Deep Analysis — 3-level source analysis (pipeline, UI, rendering) |
+| **S4d** | Context mode (rebuild) | Source Feature Deep Analysis — 3-level source analysis (pipeline, UI, rendering) |
 | **S4x** | Concern-specific | Extension point — concerns add concrete integrity patterns (e.g., IPC N-Layer) |
 
-> **Note**: Adoption-specific behavior (verify treatment, injection framing, Feature status) is now in `scenarios/adoption.md` § Adoption-Specific Rules, not in S4.
+> **Note**: Adoption-specific behavior (verify treatment, injection framing, Feature status) is now in `contexts/modes/adoption.md` § Adoption-Specific Rules, not in S4.
 
 ### S5. Elaboration Probes (interfaces, concerns — additions to _core)
 
@@ -249,7 +251,7 @@ Profiles are pure manifests (~10 lines) that compose interfaces and concerns:
 interfaces: [{comma-separated list}]
 concerns: [{comma-separated list}]
 
-# Scenario is determined by sdd-state.md Origin field, not by profile.
+# Context Mode is determined by sdd-state.md Origin field, not by profile.
 ```
 
 ---
@@ -264,8 +266,9 @@ Defined in `_resolver.md`. Modules are loaded in this order:
 3. concerns/{concern}.md                 (for EACH listed concern)
 4. archetypes/{archetype}.md             (for EACH listed archetype)
 5. {Org convention path}                 (if specified — organization-level shared conventions)
-6. scenarios/{scenario}.md               (ONE scenario)
-7. {Custom path}/domain-custom.md        (if specified — project-level customization)
+6. contexts/modes/{mode}.md              (ONE mode: greenfield | rebuild | incremental | adoption)
+7. contexts/modifiers/{modifier}.md      (ZERO or more: migration, compliance, etc.)
+8. {Custom path}/domain-custom.md        (if specified — project-level customization)
 ```
 
 ### Convention Hierarchy

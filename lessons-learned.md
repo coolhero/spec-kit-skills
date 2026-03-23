@@ -579,6 +579,20 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 - **Per-phase file reading**: For mega files (2000+ lines), read only the relevant phase section when executing that phase, not the entire file upfront.
 - **Deduplication monitoring**: Intentional inline duplication (P2) is necessary, but track its growth. If the same rule appears in 5+ locations, consider whether all locations are actually read by agents.
 
+#### L53. Context Saturation Across Work Units — Reset at Boundaries, Not Mid-Flow
+
+**What happened**: When processing 3+ Features consecutively in a single session, later Features showed degraded quality: specify produced shallow FR/SC extraction, verify defaulted to Level 1 (code review only) due to insufficient context budget for Playwright launch, and Review displays were truncated. The root cause was accumulated context from prior Features' conversation history, source analysis, and Review dialogs consuming the window.
+
+**Universal takeaway**: Agent context windows are designed for one unit of work, not an entire pipeline. At **work unit boundaries** (Feature completion, skill transition), recommend context reset (`/clear` + re-invoke). This is safe when all state is file-based (P3). Key design: (1) identify natural boundaries where reset is safe, (2) identify boundaries where reset is forbidden (mid-Feature step sequence), (3) give users the choice (recommended, not forced), (4) ensure the resume path is clear (exact command to re-invoke). The anti-pattern is treating context as infinite and letting quality silently degrade.
+
+#### L54. Specification Without Enforcement Is Decoration — The Lazy-Loading Gap
+
+**What happened**: `_resolver.md` Step 5 defined a per-command lazy-loading table specifying exactly which S-sections each command needs (specify: S0,S1,S5,S9,A2,A3,A5; implement: S7(B-3),S6,F8; etc.). The table was well-designed, the savings were documented (40-95% reduction). But no injection file referenced Step 5. Agents loaded full modules every time, consuming 1,400-1,800 lines when 600-900 would suffice. The optimization existed on paper for months while every pipeline run wasted context.
+
+**Universal takeaway**: In agent skill systems, a rule that lives only in a reference file — no matter how well-designed — **does not exist for the agent**. This is P2 (Enforce, Don't Reference) applied to the framework's own internal mechanisms. The fix was trivial: add a "Domain Module Filtering" section to each injection file with the exact sections to retain/discard. The spec didn't change — only the enforcement points did. When designing any optimization or protocol: (1) specify it in the reference file, then (2) add an inline enforcement directive at every execution point where the agent must act on it. Step 2 is not optional. Without it, step 1 is documentation, not implementation.
+
+---
+
 #### L38. Simulation-Driven Gap Detection Finds What Reviews Cannot
 
 **What happened**: A systematic review audit (11-point protocol) found 17 issues across the framework. But simulating code-explore → rebuild on a real Python/LLM/Streamlit project (ai-data-science-team) found **6 entirely new gap categories** that reviews couldn't discover: LLM non-determinism testing, multi-agent coordination, sandbox execution, Streamlit-specific testing, Python dependency management, and data pipeline validation.
@@ -768,3 +782,31 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What works instead**: Define a 3-tier demo scope requirement: T1 Core (health + CRUD, mandatory), T2 Error (invalid input + service failure, mandatory for production), T3 Advanced (streaming, concurrency, Feature-specific capabilities, recommended). Verify tier coverage after creation.
 
 **Universal takeaway**: Last-step artifacts receive the least agent attention. The more fatigued the agent, the more minimal the output. Compensate with explicit tier requirements and post-creation verification. Never rely on the agent to spontaneously produce comprehensive demos.
+
+---
+
+### Theme K: Skill Authoring Patterns `[P2]` (2026-03-23)
+
+> Patterns specific to writing and maintaining agent skills (SKILL.md, commands, domain modules). These apply to anyone building reusable agent instructions.
+
+#### L57. Skill Files Are Contracts, Not Guides — Ambiguity Is Exploited, Not Resolved
+
+**What happened**: Early skill files used natural language like "consider running tests after implementation" and "you should verify all phases." The agent consistently interpreted these as suggestions. "Consider" became "optional." "Should" became "when convenient." Tests were skipped when context was tight. Verification was simplified to build-only. The agent wasn't being defiant — it was being an optimizer, finding the shortest path to "done."
+
+**Universal takeaway**: Write every skill file as if it's a legal contract, not a helpful guide. Every ambiguous phrase will be interpreted the easiest way — not the most thorough way. Replace "consider" with "BLOCKING." Replace "should" with "MUST." Replace "verify all phases" with "BLOCKING: Phase 0-4 completion records required in sdd-state.md before merge proceeds." The difference in compliance is measurable: guidelines (~70%), warnings (~85%), BLOCKING gates (~100%). If you're writing instructions for an AI agent and using soft language anywhere, rewrite it with hard constraints.
+
+#### L58. Anti-Pattern Examples Are More Effective Than Positive Examples Alone
+
+**What happened**: We documented correct behavior with positive examples: "After speckit-specify, read the artifact, show review, call AskUserQuestion." The agent followed this ~80% of the time. When we added WRONG+RIGHT pairs — explicitly showing the bad pattern first, then the correct pattern — compliance jumped to ~95%. Adding a BLOCKING gate on top reached ~100%.
+
+**Why it works**: A single positive example gives the agent one reference point. A WRONG+RIGHT pair gives it a **boundary** — a region of behavior to avoid plus a region to target. Agents learn boundaries faster than targets because boundaries constrain the search space. The WRONG example is especially powerful because it matches patterns the agent might otherwise generate (show raw output, stop, declare "done"). Seeing those patterns explicitly labeled as WRONG creates an avoidance signal that pure positive examples don't.
+
+**Universal takeaway**: For every critical behavior in your skill, define WRONG then RIGHT. The WRONG example should be the behavior you've actually observed the agent produce — not a hypothetical. Real anti-patterns are more effective because they match the agent's natural tendencies. Format: `❌ WRONG: [observed bad behavior] → [consequence]` then `✅ RIGHT: [desired behavior] → [outcome]`. This single technique saved more debugging time than any other in our development.
+
+#### L59. File-Based State Machines Beat Natural Language Conditionals for Multi-State Workflows
+
+**What happened**: Early pipeline designs used natural language conditionals: "If the Feature is in progress, continue from the current step. If it's completed, skip it. If it's blocked, ask the user." The agent handled 2-3 states correctly but fell apart at 5+ states. It would resume a completed Feature, skip a blocked Feature without asking, or process a deferred Feature that should have been filtered out.
+
+**Why it fails**: Natural language conditionals don't compose. Each new state adds interactions with every existing state. At 7 states (pending, in_progress, completed, adopted, blocked, deferred, restructured), there are 21 possible state transitions. Natural language can't encode 21 transitions clearly — the agent "merges" similar-sounding states and invents transitions that don't exist.
+
+**Universal takeaway**: When your workflow has 4+ states, model them as a file-based state machine, not natural language conditionals. The file gives three advantages: (1) it survives context compression (the agent reads it fresh), (2) you can inspect and edit it manually, (3) valid transitions are explicit (if a transition isn't in the file, it's invalid). Our sdd-state.md encodes Feature status, current step, verify progress, and bootstrap status — all as structured data the agent reads, not as conversational context it tries to remember. The cost is a file read at each step. The benefit is deterministic state management in a probabilistic system.

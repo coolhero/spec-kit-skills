@@ -6,7 +6,7 @@
 > - `_core.md` — Universal rules (always loaded)
 > - `interfaces/` — Interface-specific modules (http-api, gui, cli, data-io)
 > - `concerns/` — Concern-specific modules (async-state, ipc, external-sdk, i18n, realtime, auth)
-> - `scenarios/` — Scenario-specific modules (greenfield, rebuild, incremental, adoption)
+> - `contexts/modes/` — Context mode modules (greenfield, rebuild, incremental, adoption)
 > - `profiles/` — Preset compositions (web-api, desktop-app, fullstack-web, cli-tool)
 
 ## Expansion
@@ -38,6 +38,6 @@ After migration, the expanded fields look like:
 **Domain Profile**: fullstack-web
 **Interfaces**: http-api, gui
 **Concerns**: async-state, auth, i18n
-**Scenario**: <determined by Origin field>
+**Context Mode**: <determined by Origin field>
 **Custom**: none
 ```

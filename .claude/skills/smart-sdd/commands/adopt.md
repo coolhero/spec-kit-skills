@@ -469,7 +469,14 @@ Key behaviors:
    - Update Demo Group Progress
    - Check Integration Demo trigger
 
-**IMMEDIATELY proceed to the next Feature. Do NOT stop or wait for user input.**
+**Context Reset Check**: Before proceeding to the next Feature, evaluate context health:
+- If 3+ Features have been processed in this session, or context compaction has occurred → **recommend context reset**:
+  ```
+  🔄 Context reset recommended before [next-FID]-[next-name].
+  [completed]/[total] Features adopted. All state saved to files (P3).
+  💡 Please run /clear, then type: /smart-sdd adopt
+  ```
+- Otherwise → **IMMEDIATELY proceed to the next Feature. Do NOT stop or wait for user input.**
 
 > **Fallback**: If you cannot immediately proceed to the next Feature (e.g., context limit reached), display:
 > ```
@@ -479,6 +486,8 @@ Key behaviors:
 > → Next: [next-FID]-[next-name]
 >   Steps: specify(adopt) → plan(adopt) → analyze → verify(adopt) → merge
 > ```
+>
+> **Why context reset matters for adopt**: Adoption reads extensive source code during specify (extracting existing behavior). After 3+ Features, this accumulated source context can saturate the window, causing subsequent Features' specify to produce shallow FR/SC extraction. Context reset ensures each Feature gets a fresh, full-depth analysis.
 
 ---
 

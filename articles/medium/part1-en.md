@@ -67,19 +67,15 @@ This is where the industry is heading. Not "AI replaces developers" but "develop
 
 ## What spec-kit-skills Actually Is
 
-**spec-kit-skills** is a set of three Claude Code skills that wrap spec-kit (GitHub's Specification-Driven Development tool) with project-wide awareness:
+**spec-kit-skills** is a set of four Claude Code skills that wrap spec-kit (GitHub's Specification-Driven Development tool) with project-wide awareness. They form a pipeline:
 
-- `/code-explore` → Understand existing code before building
-- `/reverse-spec` → Extract specs from existing codebases
-- `/smart-sdd` → Run the full SDD pipeline with cross-Feature memory
-
-Together, they form a pipeline:
-
-**Understand** (code-explore: orient → trace → synthesis)
-→ **Specify** (smart-sdd: init → add → specify → plan)
-→ **Build** (smart-sdd: implement)
-→ **Verify** (smart-sdd: 4-phase runtime verification)
+**Understand** (`/code-explore`: orient → trace → synthesis)
+→ **Analyze** (`/reverse-spec`: scan → classify → extract → generate)
+→ **Specify + Build** (`/smart-sdd`: init → add → specify → plan → implement)
+→ **Verify** (`/smart-sdd`: 4-phase runtime verification)
 → *feedback loop back to Understand*
+
+The fourth skill, `/domain-extend`, works differently — it doesn't sit in the pipeline but **wraps around it**. When any of the three pipeline skills encounters a pattern your project uses (WebRTC signaling, custom protocols, blockchain consensus) that no built-in module covers, domain-extend teaches the system that new domain. It can also import your team's ADRs, style guides, and postmortems into the module format. The three pipeline skills consume domain knowledge; domain-extend produces it.
 
 ---
 
@@ -99,9 +95,9 @@ Not all projects are the same. An Electron desktop app has different concerns th
 - **Concern** — Cross-cutting patterns: `auth`, `realtime`, `resilience`
 - **Archetype** — Domain philosophy: `ai-assistant`, `microservice`
 - **Foundation** — Framework specifics: `electron`, `fastapi`, `go`
-- **Scenario** — Project lifecycle: `greenfield`, `rebuild`, `adoption`
+- **Context** — Project situation: `greenfield`, `rebuild`, `adoption` + scale + modifiers
 
-When you tell the system your project is an Electron app with real-time features, every subsequent spec, plan, and verification step adapts — IPC gets checked, renderer/main process boundaries are enforced, and Playwright launches via Electron-specific protocols.
+When you tell the system your project is an Electron app with real-time features, every subsequent spec, plan, and verification step adapts — IPC gets checked, renderer/main process boundaries are enforced, and Playwright launches via Electron-specific protocols. And when a pattern isn't covered by any existing module, that's where `/domain-extend` comes in — as described above.
 
 **3. Brief — Structured Feature intake**
 
@@ -170,9 +166,9 @@ There are plenty of "prompt libraries" and "AI workflow tools." Here's what's di
 
 **It enforces, not suggests.** HARD STOP gates require your explicit approval. The agent literally cannot proceed without your response. This isn't a "best practice" — it's a blocking gate.
 
-**It adapts to your domain.** 48 concern modules, 15 archetypes, 40+ framework foundations. The verification rules for an Electron app are different from a Django server. This isn't a generic checklist.
+**It adapts to your domain.** 47 concern modules, 15 archetypes, 40+ framework foundations. The verification rules for an Electron app are different from a Django server. This isn't a generic checklist.
 
-**It composes.** Use code-explore alone to study a codebase. Use smart-sdd alone for greenfield. Use all three together for a full rebuild. Each skill works independently; together they form a pipeline.
+**It composes.** Use code-explore alone to study a codebase. Use smart-sdd alone for greenfield. Use all four together for a full rebuild. Each skill works independently; together they form a pipeline.
 
 ---
 
@@ -219,9 +215,15 @@ skills:
     output: specs/
     concept: Every Feature knows about every other Feature
 
+  domain-extend:
+    trigger: /domain-extend
+    commands: create, import, validate
+    output: domains/ (new concern, archetype, or foundation modules)
+    concept: Grow the domain vocabulary when existing modules don't cover your patterns
+
 core concepts:
   GEL: Cross-Feature memory in files (entity-registry, api-registry, sdd-state)
-  Domain Profile: 5 axes (Interface, Concern, Archetype, Foundation, Scenario)
+  Domain Profile: 5 axes (Interface, Concern, Archetype, Foundation, Context)
   Brief: 6-step structured Feature intake
 
 enforcement:
@@ -238,6 +240,14 @@ scenarios:
 
 ---
 
-*Next in the series: **Part 2 — The Three Skills in Detail** — deep dive into code-explore, reverse-spec, and smart-sdd with step-by-step walkthroughs.*
+*This article was written using Claude Code (Claude Opus 4.6). The entire spec-kit-skills project, including this series, was developed through human-AI collaboration — the human designs the harness, the AI operates within it.*
 
-*This article was written using Claude Code (Claude Opus 4.6). The entire spec-kit-skills project, including this article, was developed through human-AI collaboration — the human designs the harness, the AI operates within it.*
+---
+
+**Series Navigation:**
+
+→ **Part 2**: [Four Skills, One Pipeline](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d) — deep dive into each skill with step-by-step walkthroughs
+
+→ **Part 3**: [400 Markdown Files That Think](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — design philosophy, file structure, extensibility
+
+→ **Part 4**: Failure Patterns and Hard-Won Wisdom — 19 gap patterns, 50+ lessons, practical tips

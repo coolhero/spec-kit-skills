@@ -1,4 +1,4 @@
-# Three Skills, One Pipeline: How code-explore, reverse-spec, and smart-sdd Work Together
+# Four Skills, One Pipeline: How code-explore, reverse-spec, smart-sdd, and domain-extend Work Together
 
 ## Part 2 of 4 — Each Skill in Detail
 
@@ -313,9 +313,27 @@ The `add --to` flow solves this with SC Preservation:
 
 ---
 
+## /domain-extend — Growing the Vocabulary
+
+The three skills above — code-explore, reverse-spec, and smart-sdd — all draw on a shared domain module system: 47 concern modules, 15 archetypes, 40+ foundations. But what happens when your project uses a pattern that none of those modules cover?
+
+`/domain-extend` solves this. It creates new domain modules from three sources:
+
+1. **Discovery during pipeline runs.** When specify or plan encounters a pattern gap — say, your project uses WebRTC signaling and no existing concern module covers it — domain-extend generates a new `webrtc-signaling.md` concern module with the standard sections (S0 signal keywords, S1 SC generation rules, S5 elaboration probes, S7 bug prevention).
+
+2. **Import from existing documentation.** Your team's ADRs, style guides, and postmortem reports contain hard-won domain knowledge. Domain-extend can import these into the module format, converting "ADR-007: We chose event sourcing over CRUD for audit trail reasons" into an archetype module with SC rules, probes, and anti-patterns.
+
+3. **Validate and integrate.** New modules are validated against the schema (`_schema.md`), checked for section numbering consistency, and optionally tested against the resolver's cross-concern integration rules.
+
+The key constraint: domain-extend creates modules that follow the same conventions as built-in modules. They're auto-discovered by the resolver, they merge with existing modules via append semantics, and they participate in cross-concern integration. No special handling required — once created, they're indistinguishable from modules that shipped with the system.
+
+This creates a compounding effect. When Feature 1's pipeline discovers a rate-limiting gap and domain-extend creates a `rate-limiting.md` concern module, Feature 2 automatically inherits those SC rules, bug prevention patterns, and elaboration probes. The vocabulary grows with each pipeline run. Over time, a project's domain modules become a living knowledge base — not just of what the *code* does, but of what *matters* in this domain.
+
+---
+
 ## How They Compose: End-to-End Scenarios
 
-The three skills are designed to work independently or together. But the composition patterns aren't just "run this, then that" — each scenario has a distinct rhythm, different artifacts flow between stages, and the human involvement changes at each step.
+The four skills are designed to work independently or together. But the composition patterns aren't just "run this, then that" — each scenario has a distinct rhythm, different artifacts flow between stages, and the human involvement changes at each step.
 
 Here's the big picture — how every entry point, skill, and artifact connects:
 
@@ -472,7 +490,7 @@ smart-sdd adopt → (auto reverse-spec if needed)
 
 **What happens:** code-explore runs without disturbing the pipeline state. The trace reveals the source uses a queue with deduplication. You return to the pipeline with this understanding, and the implementation proceeds.
 
-This pattern — stepping out of the pipeline to investigate, then stepping back in — is why the three skills are loosely coupled. Each produces persistent file artifacts. The pipeline reads files, not agent memory. So you can interrupt, explore, and resume without losing state.
+This pattern — stepping out of the pipeline to investigate, then stepping back in — is why the four skills are loosely coupled. Each produces persistent file artifacts. The pipeline reads files, not agent memory. So you can interrupt, explore, and resume without losing state.
 
 **Total flow:**
 ```
@@ -541,8 +559,24 @@ smart_sdd:
 
   guards: constitution, entity_registry, api_registry, pre_context,
           dependency_order, augmentation, regression (7 total)
+
+domain_extend:
+  sources: pipeline_discovery, existing_docs_import, manual_creation
+  outputs: new concern, archetype, or foundation modules in domains/
+  validation: schema compliance, section numbering, cross-concern integration
+  key_property: created modules are indistinguishable from built-in modules (auto-discovered, append-merged)
 ```
 
 ---
 
-*Next: **Part 3 — Architecture Deep Dive** — how 400+ markdown files become a context-efficient, extensible skill system. We'll look at why "enforce, don't reference" is the most counterintuitive lesson, and how domain modules make the same pipeline produce different results for different project types.*
+*This article was written using Claude Code. The entire spec-kit-skills project, including this series, was developed through human-AI collaboration.*
+
+---
+
+**Series Navigation:**
+
+← **Part 1**: [Why Your Agent Needs a Harness](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)
+
+→ **Part 3**: [400 Markdown Files That Think](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — design philosophy, file structure, extensibility
+
+→ **Part 4**: Failure Patterns and Hard-Won Wisdom — 19 gap patterns, 50+ lessons, practical tips

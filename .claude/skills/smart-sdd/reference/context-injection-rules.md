@@ -39,19 +39,21 @@ The following patterns apply to ALL commands:
 
 ---
 
-## Domain Module Loading Protocol (5 axes + 1 modifier)
+## Domain Module Loading Protocol (5 axes)
 
 Every pipeline command that uses Domain Profile rules (specify, plan, tasks, implement, verify) must load active modules **once per command session**. If modules are already cached from a previous step in the same session, skip reloading.
 
+> **🚫 Per-Command Section Filtering (MANDATORY)**: After modules are loaded and merged, each command retains ONLY the S-sections it needs (per `_resolver.md` Step 5). Each injection file (`injection/specify.md`, `injection/plan.md`, etc.) contains a **"Domain Module Filtering"** section that specifies exactly which sections to retain and which to discard. Agents MUST follow this filtering — loading full modules without filtering wastes 40-95% of domain context per command.
+
 ```
-1. Read sdd-state.md header → extract 5 axes + 1 modifier:
+1. Read sdd-state.md header → extract 5 axes:
    Axis 1 — **Interfaces**: [comma-separated list]
    Axis 2 — **Concerns**: [comma-separated list]
    Axis 3 — **Archetype**: [name or "none"]
    Axis 4 — **Framework**: [name or "none"] (Foundation)
-   Axis 5 — **Scenario**: [greenfield | rebuild | incremental | adoption]
-   Modifier — **Project Maturity**: [prototype | mvp | production]
-   Modifier — **Team Context**: [solo | small-team | large-team]
+   Axis 5 — **Context Mode**: [greenfield | rebuild | incremental | adoption]
+           **Context Scale**: [project_maturity × team_context]
+           **Context Modifiers**: [comma-separated list or "none"]
 
 2. Resolve via domains/_resolver.md Steps 1–5:
    - Load _core.md (always)
@@ -60,11 +62,12 @@ Every pipeline command that uses Domain Profile rules (specify, plan, tasks, imp
    - Load Axis 3: archetypes/{name}.md if Archetype ≠ "none"
    - Load Axis 4: foundations/{framework}.md § F2 + _foundation-core.md § F3
    - Load org convention if specified
-   - Load Axis 5: scenarios/{scenario}.md
+   - Load Axis 5: contexts/modes/{mode}.md
+   - Load Axis 5: contexts/modifiers/{modifier}.md for each Context Modifier
    - Apply Step 3.5: Cross-Concern Integration Rules
-   - Apply Step 4: Scale Modifier (adjusts rule depth per maturity/team)
+   - Apply Step 4: Context Scale (adjusts rule depth per maturity/team)
 
-3. Cache merged profile (5 axes + modifier) in working memory.
+3. Cache merged profile (5 axes) in working memory.
 
 4. Sections available to injection files:
    - S1 SC Rules → specify (SC compliance check), verify (SC verification)

@@ -47,7 +47,7 @@
 
 | ID | 이런 상황일 때 | 이렇게 하세요 | 얻는 것 |
 |----|---------------|-------------|---------|
-| SD01 | 같은 스택이든 다른 스택이든, 코드를 처음부터 다시 쓰고 싶을 때 | `reverse-spec .` → `pipeline` — 다른 스택으로 바꾸려면 `init --stack new`를 중간에 넣으세요 | 깨끗하게 재작성된 코드 |
+| SD01 | 같은 스택이든 다른 스택이든, 코드를 처음부터 다시 쓰고 싶을 때 | `reverse-spec .` → `init --from-reverse-spec` (리뷰 포함) 또는 `pipeline` (바로 진행) — 다른 스택으로 바꾸려면 `init --stack new`를 중간에 넣으세요 | 깨끗하게 재작성된 코드 |
 | SD02 | 코드를 충분히 이해한 후 재작성하고 싶을 때 | `code-explore` → `reverse-spec --from-explore` → `pipeline` | 충분한 이해를 바탕으로 한 재작성 |
 | SD03 | 핵심 기능만 먼저, 또는 별도 디렉토리에 재작성하고 싶을 때 | `reverse-spec` → `pipeline --tier 1` (핵심만) 또는 디렉토리 B에서 `reverse-spec A` (별도 프로젝트) | 선택적 재작성 |
 

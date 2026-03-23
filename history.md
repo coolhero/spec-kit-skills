@@ -5,6 +5,147 @@
 
 ---
 
+## [2026-03-23] Architectural Rename: Scenario → Context (5th axis unification)
+
+### What Changed
+Unified the 5th axis from "Scenario" to "Context", absorbing the separate Scale modifier and Context concept into a single coherent axis. The "5 axes + 1 modifier" model becomes a pure "5 axes" model.
+
+### Structure
+- Context Mode: greenfield | rebuild | incremental | adoption (pipeline structure)
+- Context Scale: project_maturity × team_context (depth adjustment)
+- Context Modifiers: +migration | +compliance | ... (extensible situational overlays)
+
+### Directory Changes
+- `smart-sdd/domains/scenarios/` → `smart-sdd/domains/contexts/modes/`
+- `shared/domains/contexts/migration.md` → `shared/domains/contexts/modifiers/migration.md`
+- `reverse-spec/domains/contexts/migration.md` → `reverse-spec/domains/contexts/modifiers/migration.md`
+
+### Files Changed
+- Core: _schema.md, _resolver.md, _taxonomy.md, state-schema.md, _core.md
+- Commands: init.md, pipeline.md, verify-sc-rebuild.md, synthesis.md (code-explore)
+- SKILL.md: smart-sdd, reverse-spec (loading order)
+- Injection: context-injection-rules.md, clarity-index.md
+- Context mode files: 4 files renamed headers
+- Documentation: README.md, README.ko.md, FILE-MAP.md, ARCHITECTURE-EXTENSIBILITY.md/.ko.md
+- New skill: domain-extend (15 files)
+
+---
+
+## [2026-03-23] Complete Remaining Simulation Gaps — Foundations + k8s-api Interface
+
+### What Changed
+1. Expanded 4 Foundation stubs to full modules (F0-F4, F7): python.md (31 items), go.md (31 items), rust-cargo.md (34 items), erlang-otp.md (32 items)
+2. Created k8s-api Interface module across all 3 skills (shared, reverse-spec, smart-sdd) — enables K8s Operator projects to use proper CRD/reconciliation patterns instead of forcing grpc/cli
+
+### Impact
+- All 6 simulation projects now have full Foundation support
+- E01 K8s Operator can now use `k8s-api` interface instead of `grpc`
+- No remaining HIGH-severity gaps from the 6-project simulation
+
+---
+
+## [2026-03-23] Simulation-Driven Gap Fixes from 6-Project Virtual Pipeline Test
+
+### What Changed
+Ran virtual pipeline simulations on 6 representative project types (A05 Message Broker, B02 Next.js, C01 Electron, D01 Data Pipeline, E01 K8s Operator, G01 Network SDK) across S4 Rebuild and S5 Adoption scenarios. Fixed all HIGH/MEDIUM issues discovered.
+
+### Fixes Applied
+1. **TypeScript Foundation stub**: Created `foundations/typescript.md` (F0 + Architecture Notes). Was completely missing — G01 Network SDK had no Foundation support.
+2. **desktop-app verify strategy**: Added to `archetype-verify-strategies.md`. Covers `_electron.launch()`, IPC bridge health check, `window-auto`/`ipc-auto`/`tray-auto` SC categories. Was missing — C01 Electron had no archetype-specific verify.
+3. **10 cross-concern integration rules**: Added to `_resolver.md` Step 3.5 for combinations discovered as gaps: `gui+async-state`, `gui+ipc`, `async-state+ipc`, `gui+async-state+ipc`, `http-api+auth`, `resilience+connection-pool`, `k8s-operator+resilience`, `k8s-operator+graceful-lifecycle`, `dag-orchestration+observability`.
+4. **adopt-verify.md Foundation F8**: Added missing F8 to Domain Module Filtering section.
+5. **SKILL.md argument-hint**: Added `--from-reverse-spec` to argument parsing docs.
+6. **L54 numbering collision**: Renumbered Theme K lessons (L54→L57, L55→L58, L56→L59).
+
+### Remaining Known Gaps (deferred)
+- Foundation stubs: `python.md`, `go.md`, `rust-cargo.md`, `erlang-otp.md` still detection-only (no F2/F8)
+- No `k8s-api` interface module (K8s operators use CRD spec/status, not gRPC/HTTP)
+- No custom TCP protocol interface (A05 gap — known from SOFTWARE-CATALOG)
+
+---
+
+## [2026-03-23] Context Optimization Phase 1 — Enforce Domain Module Lazy-Loading
+
+### What Changed
+Added "Domain Module Filtering" sections to all 9 injection files, enforcing _resolver.md Step 5 per-command section filtering that was specified but never enforced. Added conditional gate to cross-concern integration rules (Step 3.5), context budget indicator to pipeline Checkpoint template, and enforcement note to context-injection-rules.md.
+
+### Design Decisions
+1. **Enforce existing spec, don't redesign**: Step 5 lazy-loading table already specified exactly which S-sections each command needs. The gap was enforcement — no injection file referenced Step 5. Fix: add inline filtering directive to each injection file.
+2. **Conditional cross-concern loading**: 61-rule integration table is ~1,200 lines. For single-module or prototype projects, most rules can never activate. Pre-check skips the table when ≤1 module is active or Scale is prototype+solo.
+3. **Budget visibility**: Added `📊 Domain: [N] modules → [M] sections active | [K] skipped` to Checkpoint display so users can see context efficiency.
+4. **No file splits, no architecture changes**: All changes add inline directives to existing files. Fallback is "load everything" (current behavior). Zero risk of breaking existing pipelines.
+
+### Files Changed
+- 9 injection files (specify, plan, tasks, implement, verify, analyze, adopt-specify, adopt-plan, adopt-verify)
+- `_resolver.md` — Step 3.5 Pre-check
+- `pipeline.md` — Checkpoint budget indicator
+- `context-injection-rules.md` — Enforcement note
+
+### Expected Impact
+- specify: ~55% domain context reduction
+- implement: ~70% domain context reduction
+- tasks: ~95% domain context reduction
+- 10-Feature project aggregate: ~30,000 lines saved
+
+---
+
+## [2026-03-23] Implement --from-reverse-spec for init command
+
+### What Changed
+Added `--from-reverse-spec <path>` flag to the `init` command, creating an explicit review checkpoint between reverse-spec analysis and pipeline execution.
+
+### Design Decisions
+1. **Mirrors --from-explore pattern**: Same 4-step structure (Artifact Validation → Proposal → Confirmation HARD STOP → Auto-chain) with different input artifacts
+2. **Two rebuild paths preserved**: `init --from-reverse-spec` (with review) and direct `pipeline` (without review) — user chooses
+3. **No CI scoring**: Trust reverse-spec analysis (unlike Proposal Mode which scores from text)
+4. **Auto-chain to pipeline**: After approval, recommends context reset then pipeline start
+5. **Articles now accurate**: Part 1/2 already described this flow — implementation catches up to documentation
+
+### Files Changed
+- `smart-sdd/commands/init.md` — New Reverse-Spec-Informed Mode section (~100 lines)
+- `smart-sdd/SKILL.md` — Composability + argument docs
+- `reverse-spec/SKILL.md` — Composability update
+- `smart-sdd/commands/pipeline.md` — Note about --from-reverse-spec alternative
+- `README.md` + `README.ko.md` — Rebuild flow description
+- `SCENARIO-CATALOG.md` + `.ko.md` — SD01 expansion
+- `MEDIUM-EDIT-GUIDE.md` — Flag status update
+
+---
+
+## [2026-03-23] Context Reset Protocol — Inter-work-unit context management
+
+### What Changed
+Added Context Reset Protocol to manage context window saturation at work unit boundaries.
+
+### Design Decisions
+
+1. **Inline protocol, not separate reference file**: Per P2 (Enforce, Don't Reference), the protocol is inlined at each execution point (pipeline.md § Context Reset Protocol, adopt.md Feature transition, SKILL.md Gotchas) rather than creating a `context-reset-protocol.md` reference file. Agents ignore reference files; inline text at the execution point is enforced.
+
+2. **Five transition boundaries identified**:
+   - Feature → Feature (pipeline, adopt)
+   - reverse-spec → pipeline/adopt
+   - code-explore → init/reverse-spec/add
+   - add → pipeline (auto-chain, 3+ Features)
+   - Mid-Feature recovery (context compaction)
+
+3. **Two "never reset" boundaries**:
+   - Within a Feature's step sequence (Inter-step Continuity, Rule 9)
+   - Between Phase 0 (Constitution) and Phase 1 (first Feature)
+
+4. **Recommended, not mandatory**: Context reset is "recommended" not "required" — the user can choose "without context reset" in batch mode. This respects user autonomy while providing the safety net.
+
+5. **P3 justification**: All state is file-based (sdd-state.md, registries, constitution, pre-context, history.md). Context reset is safe precisely because P3 (File over Memory) guarantees no information loss.
+
+### Files Changed
+- `smart-sdd/commands/pipeline.md` — § Context Reset Protocol (new section), Batch Mode HARD STOP options, Feature Completion guidance
+- `smart-sdd/commands/adopt.md` — Context Reset Check at Feature transition
+- `smart-sdd/SKILL.md` — G11 gotcha
+- `reverse-spec/SKILL.md` — G7 gotcha + Composability update
+- `code-explore/SKILL.md` — Composability update with context reset markers
+- `history.md` — this entry
+
+---
+
 ## [2026-03-22] SOFTWARE CATALOG + code-explore server/network enhancement
 
 ### What Changed

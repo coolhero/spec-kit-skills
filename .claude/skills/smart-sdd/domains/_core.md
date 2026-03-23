@@ -1,6 +1,6 @@
 # Domain Core — Universal Rules
 
-> Loaded for ALL projects regardless of interface, concern, or scenario.
+> Loaded for ALL projects regardless of interface, concern, or context.
 > Contains rules that apply universally across app types.
 
 ---
@@ -17,7 +17,7 @@
 
 ### Additional SC Pattern Categories (activated by Scale modifier)
 
-When the project's Scale modifier indicates these categories should be active, apply them during SC generation:
+When the project's Context Scale indicates these categories should be active, apply them during SC generation:
 
 | Category | When to Activate | Pattern Template | Anti-pattern |
 |----------|-----------------|------------------|-------------|
@@ -189,7 +189,7 @@ When external dependencies (third-party APIs, paid services, hardware) block tes
 
 ## S4. Data Integrity Principles (Universal)
 
-> These principles apply to ALL projects regardless of interface, concern, or scenario.
+> These principles apply to ALL projects regardless of interface, concern, or context.
 > They are checked at multiple pipeline stages: specify (FR coverage), plan (architecture), implement (code), verify (runtime).
 
 ### S4a. Data Authority (Single Source of Truth)

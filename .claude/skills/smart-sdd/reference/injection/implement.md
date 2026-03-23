@@ -19,6 +19,20 @@
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+After domain modules are merged (Steps 1-4), retain ONLY these sections for `implement`:
+
+| Active (retain) | Skipped (discard from context) |
+|-----------------|-------------------------------|
+| S7 (B-3 bug prevention only), S6, Foundation F8 | S0, S1, S2, S3, S5, S8, S9 |
+
+Display in Checkpoint: `📊 Domain: [N] modules → S7(B-3)+S6+F8 active | all other sections skipped`
+
+🚫 Do NOT retain skipped sections. Implement uses plan.md + tasks.md (which already embed S1/S5 decisions).
+
+---
+
 ## 🚨 BLOCKING Gates Summary (rebuild + GUI — read this FIRST)
 
 > **The gates in this section are defined in detail at the bottom of the file, but the agent may not read that far, so they are summarized here. See each gate's detailed section for full procedures.**

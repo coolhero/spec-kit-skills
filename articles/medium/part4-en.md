@@ -1,26 +1,30 @@
 # Building Skills for AI Agents: Failure Patterns, Tips, and Hard-Won Wisdom
 
-## Part 4 of 4 — Lessons Learned from 200+ Commits of Agent Skill Development
+## Part 4 of 4 — Lessons Learned from 500+ Commits of Agent Skill Development
 
 ![Part 4 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part4.png)
 
-*Continued from Part 3: Architecture Deep Dive — (link to Part 3 on Medium)*
+*Continued from [Part 3: 400 Markdown Files That Think](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f)*
+
+*Written with Claude Code — because of course it was. This article about controlling AI agents was itself drafted, revised, and polished by the same AI agent, operating within the same harness this series describes.*
 
 ---
 
 ## The Honest Truth
 
-The build passed. TypeScript was clean. Tests were green. And the app was completely unusable — infinite re-renders caused by a state selector creating new object references every frame, scroll broken during streaming, the UI locked in a death spiral. We stared at a "successful" pipeline run that produced a broken application, and realized: everything we assumed about verification was wrong.
+The build passed. TypeScript was clean. Tests were green. And the app was completely unusable — infinite re-renders caused by a state selector creating new object references every frame, scroll broken during streaming, the UI locked in a death spiral. A "successful" pipeline run had produced a broken application.
 
-Building spec-kit-skills took over 200 commits across three weeks. We cataloged 19 recurring failure patterns and 50+ specific incidents. Every single one came from a real pipeline run that produced wrong results.
+Building spec-kit-skills took over 500 commits across three weeks. We cataloged 19 recurring failure patterns and 50+ specific incidents. Every single one came from a real pipeline run that produced wrong results.
 
-The insight that changed everything: making AI agents *reliable* is fundamentally different from making them *capable*. The agent could always build features. The challenge was getting it to build the right features, the right way, every time.
+The insight: making AI agents *reliable* is fundamentally different from making them *capable*. The agent could always build features. The challenge was getting it to build the *right* features, the *right* way, *every time*.
 
-This article distills those failures into **universal patterns** that apply to anyone building AI agent workflows — whether you use spec-kit-skills, build your own Claude Code skills, or work with any other agentic coding tool.
+Part 3 explained the architecture — *how* we built the system. This part is the field guide — *what went wrong* along the way, and what we learned from it. These patterns apply to anyone building AI agent workflows, regardless of the tool.
 
 ---
 
-## Part A: Failure Patterns Every Skill Developer Should Know
+## For Humans — Failure Patterns and Practical Wisdom
+
+> The first half of this article tells the human story: patterns we discovered, tips we wish we'd known earlier, and the bigger picture of where this is all heading. The second half — "For Agents" — encodes the same lessons as structured data for agent consumption.
 
 ---
 
@@ -106,7 +110,21 @@ Another: A CSS framework plugin wasn't registered in the build config. The UI wa
 
 ---
 
-## Part B: Practical Tips for Skill Developers
+### Pattern 9: Vocabulary Gap — Implement Guesses When No Module Covers the Pattern
+
+The pipeline's quality depends on domain modules. When the system has an `auth` concern module, every Feature touching authentication gets 8 specific SC rules, 4 bug prevention patterns, and 5 elaboration probes. Quality is structural.
+
+But when a Feature uses a pattern no module covers — say, video transcoding or blockchain consensus — the pipeline has no domain-specific rules to draw from. It falls back to generic `_core.md` rules, which produce generic SCs like "handle error gracefully" instead of "verify codec negotiation produces compatible output format."
+
+**The fix**: `/domain-extend detect` identifies these gaps. `/domain-extend extend concern "video-encoding"` creates a module with targeted S1 rules, S7 bug patterns, and S5 probes. Once created, the module is indistinguishable from built-in ones — and every future Feature in this domain benefits.
+
+**The universal lesson**: Any rule system has vocabulary limits. Build a mechanism to extend the vocabulary when the system encounters something new, rather than falling back to generic behavior that passes all gates but misses domain-specific risks.
+
+---
+
+## Practical Tips for Skill Developers
+
+The failure patterns above describe *what* goes wrong. These tips describe *how to prevent it* — practical techniques we've validated through 500+ commits.
 
 ---
 
@@ -137,11 +155,35 @@ Anti-patterns saved us more debugging time than any other technique.
 
 ---
 
+### Specification Without Enforcement Is Decoration
+
+We had a perfectly designed lazy-loading table: "specify needs sections S0, S1, S5, S9; implement needs S7, S6." The table was documented, the savings calculated (40-95% context reduction). It sat in a reference file for months.
+
+No injection file referenced it. Agents loaded full modules every time.
+
+The fix took one afternoon: add a "Domain Module Filtering" section to each injection file with the exact sections to retain. The specification didn't change — only the enforcement points did.
+
+This is the P2 principle applied to your own internal mechanisms: **a rule that lives only in a reference file does not exist for the agent.** Design the optimization, then add enforcement at every execution point. Step 2 is not optional.
+
+---
+
 ### State Machines Beat Natural Language Conditionals
 
 When your skill has multiple states (pending, in progress, waiting for review, completed, needs revision...), model them as a state machine in a **file** — not as conditional logic in your skill text.
 
 The file-based state machine has three advantages: (1) it survives context compression, (2) the agent can read it to recover after a session break, (3) you can inspect and edit it manually when something goes wrong.
+
+---
+
+### Context Reset Protocol
+
+When processing multiple Features, clear the context between them. All state is in files — nothing is lost.
+
+Here's why this matters: after completing Feature 1 through all pipeline steps (specify → plan → tasks → implement → verify → merge), the agent's context window holds thousands of lines of conversation history — spec review discussions, plan alternatives considered, implementation debugging, verify evidence. Feature 2 starts in this cramped context, and the degradation is measurable: specify produces fewer SCs, verify defaults to code review instead of Playwright, Reviews get truncated.
+
+The fix is simple: `/clear` (or start a new session) between Features. The agent re-reads `sdd-state.md`, loads updated registries, and operates with a fresh context budget. P3 (File over Memory) guarantees nothing is lost — every decision, every artifact, every status update lives in files.
+
+When NOT to reset: never between steps within a Feature (specify → plan → tasks must flow continuously). Reset only at Feature boundaries, between skill transitions (reverse-spec → pipeline), or after the agent warns about context compaction.
 
 ---
 
@@ -164,6 +206,18 @@ Your skill will eventually be compressed out of the agent's context. Test for th
 3. Check: does the agent still follow your rules?
 
 If not, you need more inline enforcement and more file-based state tracking. This is the single most important test you can run.
+
+---
+
+### Reset Context Between Work Units
+
+Context saturation is cumulative and silent. After processing 3+ work units (features, documents, analysis passes) in a single session, later work units receive degraded attention — shallower analysis, truncated reviews, simplified verification. The agent doesn't announce this degradation. It just produces less thorough output.
+
+The fix is simple: clear the conversation context at natural work unit boundaries. Between features, between skill transitions (exploration to implementation), between analysis and execution.
+
+This works because of P3 (File over Memory) — if all state is in files, clearing context loses nothing. The agent re-reads the state file, picks up where it left off, and operates with a fresh context budget.
+
+The key design: identify where reset is safe (between work units) and where it's forbidden (mid-work-unit, where step continuity matters). Give users the choice — recommend reset, don't force it.
 
 ---
 
@@ -199,17 +253,15 @@ The difference: the first version enumerates one failure mode. The second covers
 
 ## The Bigger Picture
 
-These patterns aren't specific to Claude Code skills. They apply wherever AI agents execute multi-step workflows with human oversight:
+Throughout this series, we keep returning to the same tension: AI agents are getting smarter every month, yet the need for structured control isn't decreasing — it's increasing.
 
-**Context Continuity** — Information must survive transitions. Between features, between stages, between sessions. Files, not memory.
+Why? Because a more capable agent without guardrails produces more *impressive-looking* output that's *harder to review*. When the agent generates 12 files of authentication code in 30 seconds, you can't review each line. You have to trust the process. And the process is only trustworthy if it has structural guarantees — gates that block, registries that remember, state machines that track.
 
-**Enforce, Don't Reference** — Rules that aren't enforced at the execution point don't exist. Inline repetition beats DRY for agent compliance.
+This is the future of software development with AI: not "prompting better" but **harness engineering**. The three principles from Part 3 — Context Continuity, Enforce Don't Reference, File over Memory — plus the fourth from this article:
 
-**File over Memory** — Everything that matters goes into a persistent, diffable, editable file. The agent's context window is finite and unreliable.
+**Delegate, Don't Skip** — When the agent can't automate something, it asks the user with specific instructions. Skipping is never acceptable. Silent skips are invisible tech debt.
 
-**Delegate, Don't Skip** — When the agent can't automate something, it asks the user. Skipping is never acceptable.
-
-As AI agents become more capable, the value shifts from writing code to designing the systems that channel that capability. The developers who thrive won't be the ones who write the best prompts — they'll be the ones who build the best harnesses.
+The developers who thrive in the age of agentic coding won't be the ones who write the best prompts. They'll be the ones who build the best harnesses — the systems that channel AI capability toward reliable, reviewable, controllable outcomes.
 
 ---
 
@@ -235,6 +287,8 @@ The repository includes 32 user-facing scenarios in SCENARIO-CATALOG.md and a co
 ---
 
 ## 🤖 For Agents — Skill Development Checklist
+
+> Everything above was the human version — stories, analogies, practical wisdom. Everything below encodes the same lessons in a format agents consume directly. If you're building a skill, paste this into your project as a reference. If you're an agent reading this — well, this part is literally for you.
 
 ```
 skill development checklist:
@@ -297,11 +351,17 @@ skill development checklist:
       signal: agent skips detailed procedures in reference files
       cause: "See X for details" is treated as optional reading by agents
       fix: 3-layer enforcement at every execution point (inline instruction + blocking gate + anti-pattern)
+    context_saturation_across_work_units:
+      signal: later work units get shallower analysis, truncated reviews, simplified verification
+      cause: accumulated context from prior work units fills the window silently
+      fix: reset context at work unit boundaries (between features, between skill transitions) — safe when all state is in files
 
   principles:
     - "contract not guide": write SKILL.md like a legal contract — every ambiguous phrase will be interpreted the easiest way
     - "anti-patterns > patterns": WRONG + RIGHT pairs give boundaries; agents learn boundaries faster than targets
     - "state machines > conditionals": model multi-state workflows as file-based state machines, not natural language if/else
+    - "context reset protocol": clear context between work units (Features) — all state is in files, nothing is lost, later Features get fresh context budget
+    - "domain extend": when existing modules don't cover your patterns, /domain-extend creates new ones from discovery, ADR import, or manual creation
     - "inverse proximity law": place rules where they execute, not where they're organized — 30 inline repetitions beat 1 ignored reference
     - "delegate > skip": when the agent can't automate a check, ask the user with specific instructions — never silently skip
     - "unconditional safety nets": define safety nets as invariants ("if response ends without interaction"), not conditions ("if context limit")
@@ -310,6 +370,16 @@ skill development checklist:
 
 ---
 
-*This concludes the 4-part series on spec-kit-skills. The project is open-source at github.com/coolhero/spec-kit-skills — contributions, feedback, and experiments welcome.*
+*This concludes the 4-part series on spec-kit-skills. The project is open-source at [github.com/coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills) — contributions, feedback, and experiments welcome.*
 
 *Written using Claude Code (Claude Opus 4.6). This entire series, and the project it describes, was developed through human-AI collaboration. The human designed the harness. The AI operated within it. Both were essential.*
+
+---
+
+**Series Navigation:**
+
+← **Part 1**: [Why Your Agent Needs a Harness](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)
+
+← **Part 2**: [Four Skills, One Pipeline](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)
+
+← **Part 3**: [400 Markdown Files That Think](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f)

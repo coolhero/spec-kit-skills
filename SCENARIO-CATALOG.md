@@ -47,7 +47,7 @@
 
 | ID | When you want to... | Do this | You get |
 |----|-------------------|---------|---------|
-| SD01 | Rewrite (same or different tech stack) | `reverse-spec .` → `pipeline` — to change stacks, add `init --stack new` in between | Cleanly rewritten code |
+| SD01 | Rewrite (same or different tech stack) | `reverse-spec .` → `init --from-reverse-spec` (with review) or `pipeline` (direct) — to change stacks, add `init --stack new` in between | Cleanly rewritten code |
 | SD02 | Study the code deeply before rewriting | `code-explore` first → `reverse-spec --from-explore` → `pipeline` | Informed rewrite based on deep understanding |
 | SD03 | Rewrite only core Features, or into a separate directory | `reverse-spec` → `pipeline --tier 1` (core only) or run `reverse-spec A` from directory B (separate project) | Selective rewrite |
 

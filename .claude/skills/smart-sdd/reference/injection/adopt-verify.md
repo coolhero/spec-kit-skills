@@ -13,6 +13,20 @@ Adopt verify: Test failures are recorded as **"pre-existing issues" (non-blockin
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+After domain modules are merged (Steps 1-4), retain ONLY these sections for `verify (adopt)`:
+
+| Active (retain) | Skipped (discard from context) |
+|-----------------|-------------------------------|
+| S1 (SC compliance check), S3, S7 (B-4), S8, Foundation F8 | S0, S2, S5, S6, S9 |
+
+Display in Checkpoint: `📊 Domain: [N] modules → S1+S3+S7(B-4)+S8+F8 active | [K] skipped`
+
+🚫 Do NOT retain skipped sections.
+
+---
+
 ## Read Targets
 
 Same as standard verify:

@@ -1,4 +1,4 @@
-# Scenario: adoption
+# Context Mode: adoption
 
 > Wrapping existing code with SDD documentation. No new implementation.
 > Module type: scenario

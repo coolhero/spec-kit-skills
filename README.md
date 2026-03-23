@@ -2,13 +2,14 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-22 13:32 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-23 15:39 KST
 
-**Three concepts that turn AI coding agents into reliable software engineers: [Global Evolution Layer](#global-evolution-layer) for cross-Feature memory, [Domain Profile](#domain-profile) for project-type expertise, and [Brief](#brief) for structured Feature intake — built on [spec-kit](https://github.com/github/spec-kit) SDD**
+**Four Claude Code skills that turn AI coding agents into reliable software engineers — built on three design principles ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief)) and [spec-kit](https://github.com/github/spec-kit) SDD**
 
 - **Code-Explore** helps you understand an existing codebase through interactive, source-level exploration. Scan a project to get an architecture map, then trace specific flows end-to-end — each session produces documented traces with call chains, entity maps, and flow diagrams. When you've understood enough, synthesize your traces into Feature candidates that feed directly into the SDD pipeline. *(Under development)*
 - **Reverse-Spec** analyzes an existing codebase and reverse-engineers the spec — from source code all the way to draft spec.md per Feature. It runs the source app to capture real UI flows (form fields, dropdowns, auto-fill, error paths), then converts those observations into detailed requirements. The pipeline receives specs that already describe exact interaction patterns, not vague one-liners that the agent has to guess. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
+- **Domain-Extend** customizes the domain module system to your project's needs. Browse existing modules, detect gaps from code or explore artifacts, create new modules from scratch, import from internal docs, and manage org/project conventions — all without manually editing module files.
 
 ---
 
@@ -17,19 +18,16 @@
 - [Quick Start](#quick-start)
 - [What It Solves](#what-it-solves)
 - [Design Discipline](#design-discipline)
-- [Skills](#skills)
-- [Scenario Guide](#scenario-guide)
-- [User Journeys](#user-journeys)
+- [Skills](#skills) — code-explore, reverse-spec, smart-sdd, domain-extend
+- [Scenario Guide](#scenario-guide) — S1~S9 use cases
+- [User Journeys](#user-journeys) — end-to-end walkthroughs
 - [Quick Examples](#quick-examples)
-- [Architecture](#architecture)
-- [Domain Module System](#domain-module-system)
+- [Architecture](#architecture) — 3 design principles, pipeline guards
+- [Domain Module System](#domain-module-system) — 5-axis model, module sections
 - [Extensibility & Customization](#extensibility--customization)
 - [Session Resilience & Agent Governance](#session-resilience--agent-governance)
-- [Detailed Reference](#detailed-reference)
-- [/reverse-spec — Detailed Workflow](#reverse-spec--detailed-workflow)
-- [Using spec-kit without smart-sdd](#using-spec-kit-without-smart-sdd)
-- [/smart-sdd — Detailed Workflow](#smart-sdd--detailed-workflow)
-- [Reference](#reference)
+- [Detailed Reference](#detailed-reference) — common protocol, per-skill workflows
+- [Reference](#reference) — installation, paths, naming
 - [File Map](#file-map)
 
 ---
@@ -62,10 +60,13 @@ Have existing code?
          Understand only    → /code-explore                          (S1: Explore)
          Document only      → /reverse-spec --adopt → adopt          (S2: Spec Only)
          Add features       → adopt → /smart-sdd add → pipeline     (S3: Extend)
-         Rebuild (same)     → /reverse-spec → /smart-sdd pipeline   (S4: Rebuild)
+         Rebuild (same)     → /reverse-spec → init --from-reverse-spec or pipeline  (S4: Rebuild)
          Rebuild (new stack)→ /reverse-spec --stack new → pipeline   (S5: Migrate)
          Modernize/migrate → adopt → add --gap → pipeline          (S6: Modernize)
          Rebuild then extend→ reverse-spec → pipeline → add         (S7: Rebuild+)
+
+Need custom domain modules (your framework/pattern isn't covered)?
+  → /domain-extend detect → extend
 ```
 
 > **Every journey converges to incremental mode** (`/smart-sdd add → pipeline`) as the steady state. See [Scenario Guide](#scenario-guide) for detailed workflows.
@@ -76,6 +77,7 @@ Have existing code?
 # In Claude Code, type:
 /reverse-spec --help     # Should show command help
 /smart-sdd status        # Should show status or ask to initialize
+/domain-extend browse    # Should show domain module system overview
 ```
 
 ---
@@ -127,7 +129,7 @@ Before each pipeline step, the relevant artifacts are automatically injected int
 
 **The solution**: A composable rule system that detects your project type and loads only the relevant rules — so a REST API gets endpoint validation checks, a desktop app gets window management safety rules, and an AI chatbot gets streaming-first design principles. Organization-level conventions can be shared across projects, and project-specific rules can override both.
 
-A Domain Profile consists of **5 axes** that produce rules and **1 modifier** that adjusts their depth:
+A Domain Profile consists of **5 axes** that produce rules and adjust their depth:
 
 | | Component | What it determines | Example |
 |-|-----------|-------------------|---------|
@@ -135,19 +137,18 @@ A Domain Profile consists of **5 axes** that produce rules and **1 modifier** th
 | Axis 2 | **Concern** | Cross-cutting patterns that span Features | auth, async-state, IPC, realtime, i18n |
 | Axis 3 | **Archetype** | Domain philosophy — *why* certain decisions matter | AI assistant, microservice, public API |
 | Axis 4 | **Foundation** | Framework-specific constraints and toolchain | React, Electron, Next.js (21 frameworks) |
-| Axis 5 | **Scenario** | Project lifecycle context | greenfield, rebuild, adoption |
-| Modifier | **Scale** | How much rigor to apply | prototype / mvp / production × solo / small-team / large-team |
+| Axis 5 | **Context** | Project situation (mode + scale + modifiers) | greenfield, rebuild, adoption + production×small-team + migration |
 
-Each axis contributes rules (SC quality criteria, bug prevention patterns, verification strategies). The Scale modifier doesn't add rules — it adjusts their enforcement: a prototype gets functional-only SCs with optional tests, while a production project gets full edge-case coverage with mandatory observability.
+Each axis contributes rules (SC quality criteria, bug prevention patterns, verification strategies). The Context axis has three components: **Mode** (which pipeline lifecycle — greenfield, rebuild, incremental, adoption), **Scale** (how deep to enforce — project_maturity × team_context, e.g., prototype×solo vs production×large-team), and **Modifiers** (what special situations apply — +migration, +compliance, etc.). A prototype gets functional-only SCs with optional tests, while a production project gets full edge-case coverage with mandatory observability.
 
 When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns — for example, `gui` + `realtime` triggers optimistic update and reconnection UI rules that neither module produces alone.
 
 Domain Profile is a **first-class citizen** — not a configuration that's set once and forgotten, but a living context that actively influences every step of every skill:
 
-- **code-explore**: detects the source project's profile (all 5 axes + Scale) during orientation, guides which flows to trace, and derives your target profile during synthesis
+- **code-explore**: detects the source project's profile (all 5 axes) during orientation, guides which flows to trace, and derives your target profile during synthesis
 - **init**: infers your profile from a text description or inherits it from code-explore, writes it to project state
 - **add**: uses profile rules to determine what makes a Feature definition "complete" (an API project must define endpoints; a GUI project must specify interactions)
-- **specify → plan → implement → verify**: each step loads profile-specific rules, filtered by Scale — so a production desktop app with IPC gets mandatory process boundary safety checks, while an MVP microservice with message queues gets dead-letter handling as a recommended (not blocking) pattern
+- **specify → plan → implement → verify**: each step loads profile-specific rules, filtered by Context scale — so a production desktop app with IPC gets mandatory process boundary safety checks, while an MVP microservice with message queues gets dead-letter handling as a recommended (not blocking) pattern
 
 See [Domain Module System](#domain-module-system) for details.
 
@@ -267,6 +268,26 @@ Wraps every spec-kit command with a **4-step protocol**: Assemble context → Ch
 
 **Five modes**: greenfield (`init`), incremental (`add`), rebuild (`pipeline` after `reverse-spec`), adoption (`adopt`), scope expansion (`expand`)
 
+### `/domain-extend` — Customize the Domain Module System
+
+Interactive toolkit for exploring, extending, and customizing the 5-axis domain module system. Use when existing modules don't cover your project's patterns, you have internal docs to codify as rules, or you need org-wide conventions.
+
+```bash
+/domain-extend browse                        # System overview: all axes, module counts
+/domain-extend browse concerns               # List all Concern modules
+/domain-extend detect                        # Profile gap analysis from sdd-state.md
+/domain-extend detect /path/to/code          # Scan codebase for uncovered patterns
+/domain-extend detect --from-explore ./specs # Cross-reference explore artifacts vs modules
+/domain-extend extend concerns/rate-limiting # Create new Concern module from scratch
+/domain-extend import /docs/style-guide.md   # Import internal doc as module sections
+/domain-extend customize auth --org          # Create org-level auth convention overlay
+/domain-extend validate                      # Check all modules for schema compliance
+```
+
+**Six commands**: `browse` (explore what exists), `detect` (find gaps), `extend` (create new modules), `import` (convert docs to modules), `customize` (org/project overlays), `validate` (schema compliance check)
+
+**Integration**: `detect` works with code-explore artifacts (`--from-explore`) and reverse-spec analysis to identify patterns not covered by existing modules. New modules created via `extend` or `import` are immediately available to smart-sdd and reverse-spec pipelines. You can also edit module files directly — domain-extend is a convenience tool, not a gatekeeper.
+
 ### How the Skills Connect
 
 ```mermaid
@@ -349,6 +370,10 @@ flowchart TD
     Per-step rules loaded
     from project type"]
 
+    DE["/domain-extend
+    browse · detect · extend
+    import · customize · validate"]
+
     CODE --> CE_ORIENT
     CE_TRACE --> EO
     IDEA --> INIT
@@ -367,12 +392,15 @@ flowchart TD
     GEL_FEAT -- "spec-draft seeds specify" --> SPECIFY
     GEL_PROJ --> pipeline_detail
     GEL_PROJ --> ADOPT_P
-    DP -.- pipeline_detail
-    DP -.- ADOPT_P
-    DP -.- ADD
+    DP -.-> pipeline_detail
+    DP -.-> ADOPT_P
+    DP -.-> ADD
+    DE -.->|detect gaps| CE_SYNTH
+    DE -.->|detect gaps| RS_CODE
+    DE -->|new modules feed| DP
 ```
 
-The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (which runs the source app and generates spec-drafts per Feature), **define** Features through the Brief process, then **build** through the spec-kit pipeline (where specify refines spec-drafts instead of generating from scratch). Source analysis artifacts live in `specs/_global/`, pipeline output lives in `specs/NNN-feature/` — clean separation.
+The diagram shows the full lifecycle: **understand** existing code with code-explore, **analyze** it with reverse-spec (which runs the source app and generates spec-drafts per Feature), **define** Features through the Brief process, then **build** through the spec-kit pipeline (where specify refines spec-drafts instead of generating from scratch). `/domain-extend` operates as an optional enhancement — detecting gaps from code-explore or reverse-spec analysis, creating new modules, and feeding them into the Domain Profile that shapes every pipeline step. Source analysis artifacts live in `specs/_global/`, pipeline output lives in `specs/NNN-feature/` — clean separation.
 
 ---
 
@@ -508,7 +536,7 @@ Do you already have SDD docs for this project?
 | Build/Tooling | Config files, CI scripts | No |
 | Cloud/Infrastructure | SDK calls, deployment | Possible |
 
-> See `shared/domains/contexts/migration.md` for the full M0-M4 framework (signal detection, scale classification, impact assessment, pipeline depth modifiers).
+> See `shared/domains/contexts/modifiers/migration.md` for the full M0-M4 framework (signal detection, scale classification, impact assessment, pipeline depth modifiers).
 
 ### S7: Rebuild → Extend
 
@@ -516,7 +544,10 @@ Do you already have SDD docs for this project?
 Goal: Rewrite first, then add features beyond the original scope.
 
 Phase 1 — Rebuild:
-/reverse-spec ./old-source → /smart-sdd pipeline --all → /smart-sdd parity
+/reverse-spec ./old-source
+  → /smart-sdd init --from-reverse-spec specs/reverse-spec/   (with review checkpoint)
+  or: /smart-sdd pipeline --all                                (direct, no review)
+  → /smart-sdd parity
 
 Phase 2 — Extend (now in incremental mode):
 /smart-sdd add                  → Define + build new Feature(s)
@@ -946,7 +977,7 @@ When rebuilding existing software (stack migration, framework upgrade, etc.), re
 | Source available | Side-by-side comparison strategy | `running` (original app accessible) |
 | Migration strategy | Regression gate scope, merge policy | `incremental` (Feature-by-Feature) |
 
-These are stored in `sdd-state.md` and automatically read by relevant pipeline steps — see `domains/scenarios/rebuild.md` for the full consumption matrix.
+These are stored in `sdd-state.md` and automatically read by relevant pipeline steps — see `domains/contexts/modes/rebuild.md` for the full consumption matrix.
 
 ### Key Artifacts
 
@@ -972,20 +1003,24 @@ The Domain Profile concept from [What It Solves](#domain-profile) is implemented
 ### Available Modules
 
 ```
-Interfaces (9):   gui, http-api, cli, data-io, tui, mobile, library, embedded, grpc
-Concerns (33):    auth, authorization, async-state, codegen, cqrs-eventsourcing,
-                  dag-orchestration, distributed-consensus, ecs, external-sdk,
-                  graceful-lifecycle, gpu-compute, hardware-io, i18n, infra-as-code,
-                  ipc, k8s-operator, llm-agents, message-queue, multi-tenancy,
-                  observability, plugin-system, polyglot, protocol-integration,
-                  realtime, resilience, connection-pool, task-worker, wire-protocol,
-                  webrtc, tls-management, schema-registry, cryptography, udp-transport
+Interfaces (10):  gui, http-api, cli, data-io, tui, mobile, library, embedded, grpc, k8s-api
+Concerns (47):    async-state, audit-logging, auth, authorization, codegen,
+                  compliance, connection-pool, content-moderation, cqrs-eventsourcing,
+                  cryptography, dag-orchestration, distributed-consensus, ecs,
+                  external-sdk, geospatial, gpu-compute, graceful-lifecycle,
+                  hardware-io, i18n, infra-as-code, iot-protocol, ipc, k8s-operator,
+                  llm-agents, media-streaming, message-queue, multi-tenancy,
+                  observability, offline-sync, payment-processing, plugin-system,
+                  polyglot, protocol-integration, push-notification, realtime,
+                  resilience, scheduling-algorithm, schema-registry, search-engine,
+                  simulation-engine, speech-processing, stream-processing,
+                  task-worker, tls-management, udp-transport, webrtc, wire-protocol
 Archetypes (15):  ai-assistant, browser-extension, cache-server, compiler,
                   database-engine, game-engine, infra-tool, inference-server,
                   media-server, message-broker, microservice, network-server,
                   public-api, sdk-framework, workflow-engine
 Foundations (21): electron, nextjs, express, django, spring-boot, tauri, ...
-Scenarios (4):    greenfield, rebuild, incremental, adoption
+Contexts (4 modes): greenfield, rebuild, incremental, adoption
 ```
 
 ### How Detection Works
@@ -1034,7 +1069,9 @@ Each module isn't just a tag that says "this project uses auth." It's a file con
 | **F2** | Infrastructure checklist items | `init` (decisions before coding) / `analyze` (extract existing decisions) |
 | **F7** | Framework philosophy principles | `constitution` (framework-endorsed patterns) |
 
-**Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Scenario → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
+**Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Context Mode → Context Modifiers → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
+
+**Extending with `/domain-extend`**: Use `/domain-extend extend concerns/rate-limiting` to create a new concern module from a guided template. Use `/domain-extend import ./docs/style-guide.md` to convert existing internal documentation into module sections. Use `/domain-extend detect` to find gaps between your project's patterns and available modules. You can also edit module files directly — see the manual examples below.
 
 ### Platform Foundation & Tier System
 
@@ -1044,9 +1081,9 @@ Projects built on specific frameworks (Electron, Express, Next.js, etc.) have in
 Profile (desktop-app, web-api, fullstack-web, cli-tool, ml-platform, sdk-library)
    │
    ├── Interface modules (gui, http-api, cli, data-io, tui)
-   ├── Concern modules (33: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
+   ├── Concern modules (47: auth, async-state, codegen, ipc, i18n, infra-as-code, ...)
    ├── Archetype modules (15: ai-assistant, browser-extension, cache-server, compiler, ...)
-   ├── Scenario (greenfield, rebuild, incremental, adoption)
+   ├── Context Mode (greenfield, rebuild, incremental, adoption)
    ├── Foundation (electron, express, nextjs, tauri, vite-react, ...)
    │     └── F7 Philosophy: framework-specific guiding principles (distinct from F0–F6 checklists)
    ├── Org Convention (organization-level shared rules)
@@ -1158,6 +1195,8 @@ Long pipeline sessions face two systemic risks: **context window loss** (agent f
 **Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
 
 **Context Budget Protocol** — When assembled injection context for a pipeline step approaches the context window limit, sections are triaged via a 3-tier priority system: **P1** (must-inject — spec.md, tasks.md, Pattern Constraints), **P2** (summarizable to ≤30% — business-logic-map, referenced entities, preceding Feature results), **P3** (skip-safe — naming remapping, CSS value map, visual references). The overflow protocol: Summarize P2 → Skip P3 → Split (reduce parallel task batches). Each Checkpoint displays a budget indicator so the user sees what context was trimmed.
+
+**Context Reset Protocol** — When a pipeline session becomes irrecoverable (repeated tool failures, circular loops, corrupted state), `pipeline.md` defines a structured reset sequence: halt current step, persist progress to `sdd-state.md`, and resume from the last stable checkpoint. This avoids losing work from long sessions.
 
 ---
 
@@ -1534,6 +1573,7 @@ mkdir -p .claude/skills
 cp -r /path/to/spec-kit-skills/.claude/skills/code-explore .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/reverse-spec .claude/skills/
 cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
+cp -r /path/to/spec-kit-skills/.claude/skills/domain-extend .claude/skills/
 ```
 
 **Manual Symlinks**:
@@ -1542,6 +1582,7 @@ cp -r /path/to/spec-kit-skills/.claude/skills/smart-sdd .claude/skills/
 ln -s /path/to/spec-kit-skills/.claude/skills/code-explore ~/.claude/skills/code-explore
 ln -s /path/to/spec-kit-skills/.claude/skills/reverse-spec ~/.claude/skills/reverse-spec
 ln -s /path/to/spec-kit-skills/.claude/skills/smart-sdd ~/.claude/skills/smart-sdd
+ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/domain-extend
 ```
 
 ### Path Conventions
@@ -1616,7 +1657,7 @@ specs/
 
 ## File Map
 
-3 skills + 1 shared module. See [FILE-MAP.md](FILE-MAP.md) for the complete file inventory.
+4 skills + 1 shared module. See [FILE-MAP.md](FILE-MAP.md) for the complete file inventory.
 
 For the complete file inventory with relationship diagrams, execution flow charts, and domain module hierarchy, see **[FILE-MAP.md](FILE-MAP.md)**.
 
@@ -1635,14 +1676,14 @@ Each skill follows the same internal directory convention:
 │   ├── runtime/                   Shared runtime protocols (Playwright, app launch, observation)
 │   └── reference/                 Shared templates (Completion Analysis Report)
 │
-├── {skill}/                       Per-skill directory (code-explore, reverse-spec, smart-sdd)
+├── {skill}/                       Per-skill directory (code-explore, reverse-spec, smart-sdd, domain-extend)
 │   ├── SKILL.md                   Entry point — command routing and mandatory rules
 │   ├── commands/                  User commands — one file per command workflow
 │   ├── domains/                   Skill-specific behavioral rules (S1-S8 or R3-R7)
 │   │   ├── interfaces/            Per-interface rules (reference shared/ for S0/R1)
 │   │   ├── concerns/              Per-concern rules (reference shared/ for S0/R1)
 │   │   ├── archetypes/            Per-archetype rules (reference shared/ for A0)
-│   │   ├── scenarios/             Project context rules (smart-sdd only)
+│   │   ├── contexts/              Project context rules — modes + modifiers (smart-sdd only)
 │   │   ├── profiles/              Preset combinations (smart-sdd only)
 │   │   └── foundations/           Framework checklists (reverse-spec only)
 │   ├── reference/                 Pipeline mechanics — protocols and standards

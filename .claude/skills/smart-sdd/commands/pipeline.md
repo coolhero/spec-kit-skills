@@ -102,6 +102,11 @@ Feature: [Feature ID] - [Feature Name]
 
 [Met / Not met — with details if not met]
 
+── Context Budget ────────────────────────────────
+
+📊 Domain: [N] modules → [M] sections active ([list]) | [K] skipped
+   Context: [total lines] assembled | Budget: [%] used
+
 ──────────────────────────────────────────────────
 
 Review the above content. You can:
@@ -404,6 +409,8 @@ When pipeline is re-run from a mid-point (`--start specify`, `--start plan`, etc
 > **Domain Profile condition**: The audit depth is adjusted by Scale modifier — `prototype` mode may classify semantic stubs as ⚠️ WARNING instead of 🚫 BLOCKING if the external service is intentionally deferred. `mvp` and `production` modes treat all semantic stubs as BLOCKING.
 
 ### Pipeline Initialization
+
+> **💡 Alternative**: If you want to review/modify the Domain Profile, constitution principles, or Feature catalog before starting the pipeline, use `/smart-sdd init --from-reverse-spec <path>` first. This adds an explicit approval checkpoint between reverse-spec analysis and pipeline execution. Jump to `pipeline` directly when the reverse-spec output is trusted as-is.
 
 Before Feature processing, initialize the state and validate the source path.
 
@@ -1365,9 +1372,9 @@ When the user reports a problem with phrases like "there's an error", "it doesn'
 
 **Domain Profile conditions** (determines "Required?" value):
 - `(GUI)` = active when `gui` or `tui` is in Interfaces (Axis 1)
-- `(rebuild+GUI)` = active when Scenario (Axis 5) = `rebuild` AND GUI is active
+- `(rebuild+GUI)` = active when Context Mode (Axis 5) = `rebuild` AND GUI is active
 - `(if F002+)` = active when current Feature is not the first Feature
-- Scale modifier (project_maturity) affects enforcement WITHIN phases (SC depth, test coverage thresholds) but does NOT allow skipping entire phases. Even `prototype` mode must execute all Required phases — the difference is in pass/fail criteria, not in whether the phase runs.
+- Context Scale (project_maturity) affects enforcement WITHIN phases (SC depth, test coverage thresholds) but does NOT allow skipping entire phases. Even `prototype` mode must execute all Required phases — the difference is in pass/fail criteria, not in whether the phase runs.
 
 > **Domain Profile independent**: The Checklist structure itself (must display, blank=BLOCKING) applies regardless of Domain Profile. This is a pipeline integrity rule, not a domain-specific rule.
 
@@ -1489,15 +1496,29 @@ After the Feature completes all steps through merge:
 
 The pipeline STOPS here. The user runs `pipeline` again when ready for the next Feature.
 
+> **💡 Context Reset Recommended**: When proceeding to the next Feature (whether now or later), **clear the conversation context** (e.g., `/clear` or start a new session). This is safe because all state is persisted to files (P3: File over Memory). See § Context Reset Protocol below.
+
 **Batch mode (`--all`)**:
 
 After each Feature completes, ask whether to continue to the next:
 
 **HARD STOP**: Use AskUserQuestion:
-- "Proceed to next Feature ([next-FID]-[next-name])"
+- "Proceed to next Feature ([next-FID]-[next-name]) — with context reset (Recommended)"
+- "Proceed to next Feature — without context reset"
 - "Stop here — I'll continue later"
 
 **If response is empty → re-ask** (per MANDATORY RULE 1).
+
+If "with context reset" is selected:
+```
+🔄 Context reset recommended before [next-FID]-[next-name].
+
+All state is saved to files — no information will be lost.
+💡 Please run /clear, then type: /smart-sdd pipeline [next-FID]
+```
+The pipeline STOPS here. The user clears context and re-invokes.
+
+If "without context reset" is selected: proceed immediately to the next Feature (existing behavior).
 
 If "Stop here":
 ```
@@ -1553,6 +1574,70 @@ After all Features are completed, generate the Pipeline Completion Report automa
 > **Pipeline continuity rule**: Within a single Feature, the pipeline is a CONTINUOUS flow. The only reasons to stop are: (1) HARD STOP checkpoints requiring user approval, (2) BLOCK conditions (verify/merge gates), (3) Feature completed, or (4) Unrecoverable error. Never display "Next steps" with commands unless the pipeline is actually stopping.
 >
 > **Common violation**: After a step's Review is approved and Update completes, the agent displays a "✅ step completed" message and stops — forcing the user to type "continue". This is WRONG. After Update, immediately begin the next step's Assemble/Checkpoint. The user should only see HARD STOP prompts (AskUserQuestion), not "continue" prompts between steps.
+
+---
+
+## Context Reset Protocol
+
+> **Principle**: Context reset between work units prevents context saturation, hallucination from stale in-memory state, and Execute+Review failures from insufficient context budget. This is safe because **all pipeline state is persisted to files** (P3: File over Memory) — `sdd-state.md`, registries, pre-context, constitution, and per-Feature artifacts are the single source of truth, not agent memory.
+
+### When to Reset
+
+Context reset is **recommended** at these transition boundaries:
+
+| Transition | When | Reset Method |
+|-----------|------|-------------|
+| **Feature → Feature** | After merge completes (single-mode) or at batch HARD STOP | `/clear` then `/smart-sdd pipeline [next-FID]` |
+| **reverse-spec → pipeline/adopt** | After reverse-spec completes all phases | `/clear` then `/smart-sdd pipeline` or `/smart-sdd adopt` |
+| **code-explore → init** | After synthesis is complete | `/clear` then `/smart-sdd init --from-explore <path>` |
+| **add → pipeline** (auto-chain) | After Briefing completes for 3+ Features | `/clear` then `/smart-sdd pipeline` |
+| **Mid-Feature recovery** | After context compaction warning or degraded Review quality | `/clear` then `/smart-sdd pipeline [FID]` (resumes from sdd-state.md) |
+
+### When NOT to Reset
+
+🚫 **Never reset within a Feature's step sequence** (specify → plan → tasks → analyze → implement → verify → merge). Inter-step continuity (Rule 9) requires unbroken flow between steps. The only valid pause points within a Feature are HARD STOPs, BLOCKs, and errors.
+
+🚫 **Never reset between Phase 0 (Constitution) and Phase 1 (first Feature)** in a fresh pipeline run — constitution context is needed for the first Feature's specify injection.
+
+### What Gets Preserved (P3 Guarantee)
+
+After context reset, the agent re-reads these files via Context Injection Protocol:
+
+| File | Contains |
+|------|----------|
+| `sdd-state.md` | Domain Profile, Feature statuses, current step, Verify Progress, toolchain |
+| `entity-registry.md` | All entities with cross-Feature ownership |
+| `api-registry.md` | All API contracts with consumers |
+| `constitution.md` | Architecture principles, quality rules |
+| `pre-context*.md` | Source analysis (rebuild/adopt only) |
+| `specs/{FID}/spec.md`, `plan.md` | Preceding Features' decisions (via progressive summarization) |
+| `specs/history.md` | Design decisions, strategy choices |
+
+### What Gets Lost (Acceptable)
+
+- In-memory conversation history (user's feedback nuances, informal decisions not recorded in artifacts)
+- Agent's "feel" for the project (rebuilt from files within 1-2 steps)
+
+> **Mitigation**: If a user made an important informal decision during conversation that is NOT captured in any artifact, record it in `specs/history.md` BEFORE context reset.
+
+### Anti-patterns
+
+```
+❌ WRONG: 5 Features in one session → context saturated → F005 verify
+   skips Playwright because "context limit" → F005 marked ✅ with Level 1 verification only
+
+❌ WRONG: reverse-spec (2000+ lines of source analysis) still in context
+   when pipeline starts → specify assembles partial injection → spec quality drops
+
+❌ WRONG: Context reset mid-Feature (between plan Review and tasks Checkpoint)
+   → tasks step loses plan context → tasks quality drops
+
+✅ RIGHT: F001 merge → context reset → F002 pipeline start
+   → fresh context → full injection → full Review + verify rigor
+
+✅ RIGHT: reverse-spec complete → context reset → pipeline start
+   → reads roadmap.md + sdd-state.md + pre-context from files → no information loss
+```
 
 ---
 

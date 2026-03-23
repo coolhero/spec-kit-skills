@@ -65,13 +65,15 @@ Agentic 코딩 도구가 임계점을 넘었습니다. Claude Code, Cursor, Copi
 
 ## spec-kit-skills가 실제로 하는 것
 
-세 개의 Claude Code 스킬이 spec-kit을 프로젝트 전체 인식으로 감쌉니다:
+네 개의 Claude Code 스킬이 spec-kit을 프로젝트 전체 인식으로 감쌉니다. 파이프라인을 구성합니다:
 
-- `/code-explore` → 빌드 전에 기존 코드를 이해
-- `/reverse-spec` → 기존 코드베이스에서 스펙을 추출
-- `/smart-sdd` → 크로스 Feature 메모리로 전체 SDD 파이프라인 실행
+**이해** (`/code-explore`: orient → trace → synthesis)
+→ **분석** (`/reverse-spec`: scan → classify → extract → generate)
+→ **명세+빌드** (`/smart-sdd`: init → add → specify → plan → implement)
+→ **검증** (`/smart-sdd`: 4단계 런타임 검증)
+→ *피드백 루프*
 
-**이해** (code-explore) → **명세화** (smart-sdd: init → add → specify → plan) → **빌드** (implement) → **검증** (4단계 런타임 검증) → *피드백 루프*
+네 번째 스킬 `/domain-extend`는 다르게 작동합니다 — 파이프라인 안에 있지 않고 **파이프라인을 감쌉니다**. 세 파이프라인 스킬 중 하나가 기존 모듈이 커버하지 않는 패턴(WebRTC 시그널링, 커스텀 프로토콜, 블록체인 컨센서스)을 만나면, domain-extend가 시스템에 그 새 도메인을 가르칩니다. 팀의 ADR, 스타일 가이드, 포스트모템도 모듈 형식으로 임포트할 수 있습니다. 세 파이프라인 스킬이 도메인 지식을 소비하고, domain-extend가 그 지식을 생산합니다.
 
 ---
 
@@ -89,9 +91,9 @@ Agentic 코딩 도구가 임계점을 넘었습니다. Claude Code, Cursor, Copi
 - **Concern** — 횡단 관심사: `auth`, `realtime`, `resilience`
 - **Archetype** — 도메인 철학: `ai-assistant`, `microservice`
 - **Foundation** — 프레임워크: `electron`, `fastapi`, `go`
-- **Scenario** — 생명주기: `greenfield`, `rebuild`, `adoption`
+- **Context** — 프로젝트 상황: `greenfield`, `rebuild`, `adoption` + scale + modifiers
 
-프로젝트가 실시간 기능이 있는 Electron 앱이라고 알려주면, 이후의 모든 단계가 적응합니다.
+프로젝트가 실시간 기능이 있는 Electron 앱이라고 알려주면, 이후의 모든 단계가 적응합니다. 기존 모듈이 커버하지 않는 패턴이 있을 때는 위에서 설명한 `/domain-extend`가 역할합니다.
 
 **3. Brief — 구조화된 Feature 접수**
 
@@ -147,9 +149,9 @@ Agentic 코딩 도구가 임계점을 넘었습니다. Claude Code, Cursor, Copi
 
 **제안이 아니라 강제.** HARD STOP 게이트는 명시적 승인을 요구합니다. 에이전트는 응답 없이 절대 진행할 수 없습니다.
 
-**도메인에 적응.** 48개 관심사 모듈, 15개 아키타입, 40개 이상의 프레임워크 파운데이션.
+**도메인에 적응.** 47개 관심사 모듈, 15개 아키타입, 40개 이상의 프레임워크 파운데이션.
 
-**조합 가능.** 각 스킬은 독립적으로 동작하고, 함께 사용하면 파이프라인을 형성합니다.
+**조합 가능.** 각 스킬은 독립적으로 동작하고, 네 개를 함께 사용하면 파이프라인을 형성합니다.
 
 ---
 
@@ -182,10 +184,11 @@ skills:
   code-explore: 문서화된 이해를 생산하는 인터랙티브 소스 코드 탐색
   reverse-spec: 기존 코드베이스에서 Global Evolution Layer 추출
   smart-sdd: 크로스 Feature 메모리로 전체 SDD 파이프라인 오케스트레이션
+  domain-extend: 기존 모듈이 커버하지 않는 패턴에 대해 도메인 어휘 확장
 
 core concepts:
   GEL: 파일에 저장되는 Feature 간 메모리
-  Domain Profile: 5축 (Interface, Concern, Archetype, Foundation, Scenario)
+  Domain Profile: 5축 (Interface, Concern, Archetype, Foundation, Context)
   Brief: 6단계 구조화된 Feature 접수
 
 enforcement:
@@ -202,6 +205,14 @@ scenarios:
 
 ---
 
-*다음 편: **2편 — 세 가지 스킬 상세** — code-explore, reverse-spec, smart-sdd의 단계별 워크스루.*
-
 *이 글은 Claude Code (Claude Opus 4.6)를 사용하여 작성되었습니다. 사람이 하네스를 설계하고, AI가 그 안에서 동작했습니다.*
+
+---
+
+**시리즈 네비게이션:**
+
+→ **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d) — 각 스킬 상세 워크스루
+
+→ **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — 설계 철학, 파일 구조, 확장성
+
+→ **4편**: 실패 패턴과 힘들게 얻은 지혜 — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁

@@ -236,11 +236,13 @@ Accumulated edge cases from real usage. Check this list when hitting unexpected 
 code-explore is designed to work with the other spec-kit skills:
 
 ```
-code-explore → /smart-sdd init --from-explore    (new project informed by exploration)
-code-explore → /reverse-spec --from-explore       (rebuild informed by exploration)
-code-explore → /smart-sdd add --from-explore      (add Features from exploration)
-/smart-sdd adopt → code-explore                    (deepen understanding after adoption)
-/smart-sdd pipeline → code-explore --no-branch     (mid-pipeline investigation)
+code-explore → [context reset] → /smart-sdd init --from-explore    (new project)
+code-explore → [context reset] → /reverse-spec --from-explore       (rebuild)
+code-explore → [context reset] → /smart-sdd add --from-explore      (add Features)
+/smart-sdd adopt → code-explore                                      (deepen understanding)
+/smart-sdd pipeline → code-explore --no-branch                       (mid-pipeline investigation)
 ```
+
+> **💡 Context reset** (`/clear`) is recommended when transitioning from code-explore to init/reverse-spec/add. Exploration produces extensive source analysis that fills the context window. All exploration outputs (architecture map, traces, synthesis) are persisted to files and read by downstream commands via `--from-explore`.
 
 All transitions preserve Domain Profile continuity via `sdd-state.md`.

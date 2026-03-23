@@ -5,14 +5,14 @@
 
 ---
 
-## Three Core Concepts
+## Three Design Principles, Four Skills
 
-spec-kit-skills is built on three concepts, each addressing a structural gap in agentic coding at scale:
+spec-kit-skills is built on three design principles, each addressing a structural gap in agentic coding at scale. These principles are implemented through four Claude Code skills (code-explore, reverse-spec, smart-sdd, domain-extend):
 
 | Concept | Problem It Solves | Implementation |
 |---------|------------------|----------------|
 | **Global Evolution Layer (GEL)** | Agents manage context differently; none track cross-Feature relationships systematically | Project-wide artifacts (roadmap, registries, pre-contexts) + automatic context injection per pipeline step |
-| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 5-axis + 1 modifier system (Interface × Concern × Archetype × Foundation × Scenario + Scale) that loads project-type-specific rules |
+| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 5-axis system (Interface × Concern × Archetype × Foundation × Context) that loads project-type-specific rules |
 | **Brief** | Agents accept whatever Feature description they receive, with no quality gate | Structured Feature intake process that validates completeness across key dimensions before spec generation |
 
 **How they connect**: Brief produces complete Feature definitions → stored as pre-contexts in the GEL → injected into the spec-kit pipeline → where Domain Profile rules shape each step's behavior. This guide focuses on the **Domain Profile** module system — the most extensible of the three concepts.
@@ -23,14 +23,14 @@ spec-kit-skills is built on three concepts, each addressing a structural gap in 
 
 1. [Module System Overview](#1-module-system-overview)
    - [Signal Keywords: Shared Architecture](#signal-keywords-shared-architecture)
-2. [5-Axis + 1 Modifier Domain Composition](#2-5-axis--1-modifier-domain-composition)
+2. [5-Axis Domain Composition](#2-5-axis-domain-composition)
 2b. [How Composed Modules Drive the Pipeline](#2b-how-composed-modules-drive-the-pipeline)
 3. [Adding a New Interface](#3-adding-a-new-interface)
 4. [Adding a New Concern](#4-adding-a-new-concern)
 5. [Adding a New Archetype](#5-adding-a-new-archetype)
 6. [Adding a New Foundation](#6-adding-a-new-foundation)
 7. [Adding a New Profile](#7-adding-a-new-profile)
-8. [Adding a New Scenario](#8-adding-a-new-scenario)
+8. [Adding a New Context Mode](#8-adding-a-new-context-mode)
 9. [Sophistication Levels](#9-sophistication-levels)
 10. [API Server Refinement Example](#10-api-server-refinement-example)
 11. [Cross-Reference Map](#11-cross-reference-map)
@@ -62,7 +62,8 @@ Modules are loaded at skill invocation based on the project's `sdd-state.md` con
 3. concerns/{name}.md          (for EACH listed concern)
 4. archetypes/{name}.md        (for EACH listed archetype)
 5. org-convention.md           (if specified — org-level shared conventions)
-6. scenarios/{scenario}.md     (ONE scenario)
+6. contexts/modes/{mode}.md    (ONE context mode)
+6b. contexts/modifiers/*.md   (active modifiers, e.g. migration)
 7. domain-custom.md            (if specified — project-level customization)
 ```
 
@@ -114,15 +115,15 @@ Each Interface module's **S8 section** defines specific start/verify/stop method
 
 ---
 
-## 2. 5-Axis + 1 Modifier Domain Composition
+## 2. 5-Axis Domain Composition
 
-The domain composition system has **5 axes** that produce rules and **1 modifier** that adjusts their depth. Each component answers a different question:
+The domain composition system has **5 axes** that produce rules and adjust their depth. Each component answers a different question:
 
 ```
                     ┌─────────────────────────────────────┐
                     │       Domain Profile                │
                     │                                     │
-                    │  5 AXES (rule producers)             │
+                    │  5 AXES                              │
   INTERFACE ────────┤  What does the app expose?          │──── http-api, gui, cli, tui, data-io
                     │                                     │
   CONCERN ──────────┤  What cross-cutting patterns?       │──── auth, async-state, ipc, i18n, realtime
@@ -131,17 +132,18 @@ The domain composition system has **5 axes** that produce rules and **1 modifier
                     │                                     │
   FOUNDATION ───────┤  What framework constraints?        │──── React, Electron, Next.js (21 frameworks)
                     │                                     │
-  SCENARIO ─────────┤  Why are we building?               │──── greenfield, rebuild, incremental, adoption
-                    │                                     │
-                    │  1 MODIFIER (rule filter)            │
-  SCALE ────────────┤  How much rigor?                    │──── prototype/mvp/production × solo/small-team/large-team
+  CONTEXT ─────────┤  What project situation?             │──── Mode: greenfield/rebuild/incremental/adoption
+                    │                                     │     Scale: prototype/mvp/production × solo/small-team/large-team
+                    │                                     │     Modifiers: +migration, +compliance, ...
                     └─────────────────────────────────────┘
 ```
 
-### Axis vs Modifier
+### Axes 1-4 vs Axis 5 (Context)
 
-- An **axis** produces rules: "IPC calls must have timeout handling SCs"
-- A **modifier** adjusts depth: "in prototype mode, timeout SCs are optional"
+- Axes 1-4 produce **domain rules**: "IPC calls must have timeout handling SCs"
+- Context's **mode** selects pipeline behavior: rebuild adds preservation rules, migration gates
+- Context's **scale** adjusts depth: "in prototype mode, timeout SCs are optional"
+- Context's **modifiers** add situational overlays: +migration activates the M0-M4 framework
 
 Scale doesn't add rules — it dials enforcement up or down. A `production` + `large-team` project gets mandatory observability, code ownership, and full edge-case coverage. A `prototype` + `solo` project gets functional-level SCs with optional tests.
 
@@ -153,7 +155,7 @@ Scale doesn't add rules — it dials enforcement up or down. A `production` + `l
 | 2 | **Concern** | The _mechanism_ — internal cross-cutting patterns | Auth defines authentication flows, token management, session handling |
 | 3 | **Archetype** | The _philosophy_ — domain-specific guiding principles | AI Assistant defines Streaming-First, Model Agnosticism, Token Awareness |
 | 4 | **Foundation** | The _toolchain_ — framework-specific constraints | Electron defines process model, IPC patterns, security boundaries |
-| 5 | **Scenario** | The _context_ — why this project exists | Rebuild defines preservation rules, migration gates, parity checks |
+| 5 | **Context** | The _situation_ — mode, scale, and modifiers | Rebuild mode defines preservation rules; production scale enforces full coverage; +migration adds M0-M4 gates |
 
 ### Archetype ↔ Concern Relationship
 
@@ -185,17 +187,18 @@ Interfaces:  [gui]                    ← Axis 1
 Concerns:    [async-state, ipc]       ← Axis 2
 Archetype:   ai-assistant             ← Axis 3
 Foundation:  electron                 ← Axis 4
-Scenario:    rebuild                  ← Axis 5
-Scale:       mvp / solo              ← Modifier
+Context:     rebuild / mvp / solo     ← Axis 5 (mode / scale)
 ```
 
-This loads 6 domain modules + 2 Foundation files = 8 file reads, all cached for the session. The Scale modifier then adjusts: MVP means full SC coverage for critical paths but optional for edge cases; solo means no code review requirements.
+This loads 6 domain modules + 2 Foundation files = 8 file reads, all cached for the session. The Context scale then adjusts: MVP means full SC coverage for critical paths but optional for edge cases; solo means no code review requirements.
 
 ### Evolution History
 
 **3-Axis → 4-Axis (Archetype addition)**: The original model (Interface × Concern × Scenario) lacked structured domain philosophy. Principles like "Streaming-First" were generated ad-hoc. Archetype modules standardized these into reusable, versionable vocabularies.
 
 **4-Axis → 5-Axis + Modifier (Foundation promotion + Scale)**: MECE analysis revealed Foundation was operating as a de facto axis (21 files, own resolver step, own verification gate) without formal recognition. Scale parameters existed in `greenfield.md` but weren't wired into the pipeline. Promoting Foundation to an axis and operationalizing Scale as a modifier completed the model.
+
+**5-Axis + Modifier → 5-Axis (Context unification)**: The separate Scenario axis and Scale modifier were unified into a single **Context** axis with three sub-components: Mode (pipeline structure), Scale (depth adjustment), and Modifiers (situational overlays like +migration). This eliminated the asymmetry of "5 axes + 1 modifier" and provided a natural home for cross-cutting situational concerns.
 
 ---
 
@@ -205,7 +208,7 @@ This loads 6 domain modules + 2 Foundation files = 8 file reads, all cached for 
 
 ### The Core Mechanism
 
-Domain modules are **not** compiled into an output file. They are loaded into the agent's working memory at session start and act as **behavioral modifiers** — each S-section tells the agent to do something *additional* or *different* at a specific pipeline step.
+Domain modules are **not** compiled into an output file. They are loaded into the agent's working memory at session start and act as **behavioral rules** — each S-section tells the agent to do something *additional* or *different* at a specific pipeline step.
 
 Think of it like CSS for a pipeline: modules cascade, merge, and the combined rules "style" each step's behavior.
 
@@ -324,8 +327,7 @@ With modules: verify runs **5 phases** — test/build/lint → Playwright UI tes
 When multiple modules contribute to the same section, the merge follows a simple rule:
 
 ```
-Load order: _core → interfaces → concerns → archetypes → foundations → org-convention → scenarios → custom
-Then apply: Scale modifier (adjusts depth)
+Load order: _core → interfaces → concerns → archetypes → foundations → org-convention → context modes → context modifiers → custom
 
 Merge behavior:
   S1 (SC Rules)        → APPEND  (accumulate all rules)
@@ -345,14 +347,14 @@ No conflicts arise because each module contributes **additive** domain knowledge
                                     ▼
 Merged output:  NOT a file — a behavioral ruleset in agent memory
                                     │
-                              Scale modifier
+                         Context scale adjustment
                          (mvp/solo → adjust depth)
                                     │
                     ┌───────────────┼───────────────┐
                     ▼               ▼               ▼
               SC Rules ×18    Probes ×30+     Bug Checks ×15
               (S1+A2)         (S5+A3)         (S7 B1-B4)
-              + Foundation    + Scale-adj.    + Foundation
+              + Foundation    + Context adj.  + Foundation
                 (F2,F7)                        (F8)
                     │               │               │
                     ▼               ▼               ▼
@@ -360,7 +362,7 @@ Merged output:  NOT a file — a behavioral ruleset in agent memory
               specify         clarify         plan/impl/verify
 ```
 
-The agent doesn't "generate" a composition artifact. It **behaves differently** at each step because the merged rules tell it: "when writing SCs, also check for IPC patterns" or "during verify, also run Playwright UI tests." The Scale modifier then adjusts: in `prototype` mode, non-critical checks become optional; in `production` mode, all checks are blocking. The modules are invisible infrastructure — the user sees better specs, more thorough plans, and more reliable implementations.
+The agent doesn't "generate" a composition artifact. It **behaves differently** at each step because the merged rules tell it: "when writing SCs, also check for IPC patterns" or "during verify, also run Playwright UI tests." The Context scale then adjusts: in `prototype` mode, non-critical checks become optional; in `production` mode, all checks are blocking. The modules are invisible infrastructure — the user sees better specs, more thorough plans, and more reliable implementations.
 
 ---
 
@@ -370,7 +372,7 @@ Interfaces define the app's external surface — the protocol through which user
 
 ### When to Add
 
-Add a new interface when a project has a distinct interaction surface not covered by existing interfaces (gui, http-api, cli, data-io, tui).
+Add a new interface when a project has a distinct interaction surface not covered by existing interfaces (gui, http-api, cli, data-io, tui, mobile, library, embedded, grpc, k8s-api).
 
 ### Steps
 
@@ -599,6 +601,10 @@ Current Foundation coverage across languages and frameworks:
 | **PHP** | Laravel | `laravel.md` | Compact |
 | **Elixir** | Phoenix | `phoenix.md` | Compact |
 | **C#** | ASP.NET Core | `dotnet.md` | Compact |
+| **Python** (language) | (language-level rules) | `python.md` | Compact |
+| **Go** (language) | (language-level rules) | `go.md` | Compact |
+| **Rust** (language) | (language-level rules) | `rust-cargo.md` | Compact |
+| **Erlang/OTP** (language) | (language-level rules) | `erlang-otp.md` | Compact |
 | **Dart** | Flutter | `flutter.md` | TODO scaffold |
 | **JS (Mobile)** | React Native | `react-native.md` | TODO scaffold |
 | **JS (Desktop)** | Electron, Tauri | `electron.md`, `tauri.md` | Full |
@@ -630,7 +636,7 @@ Profiles are ~10-line manifests that compose interfaces and concerns into named 
 interfaces: [{comma-separated list}]
 concerns: [{comma-separated list}]
 
-# Scenario is determined by sdd-state.md Origin field, not by profile.
+# Context mode is determined by sdd-state.md Origin field, not by profile.
 ```
 
 ### When to Add
@@ -656,19 +662,19 @@ Add a profile when a common project configuration (interface + concern combinati
 
 ---
 
-## 8. Adding a New Scenario
+## 8. Adding a New Context Mode
 
-Scenarios define pipeline behavior variations based on _why_ the project is being built.
+Context modes define pipeline behavior variations based on _why_ the project is being built.
 
 ### When to Add
 
-Rarely. The four scenarios (greenfield, rebuild, incremental, adoption) cover most use cases. Only add a new scenario if the pipeline needs fundamentally different behavior for a new project context.
+Rarely. The four context modes (greenfield, rebuild, incremental, adoption) cover most use cases. Only add a new context mode if the pipeline needs fundamentally different behavior for a new project situation.
 
 ### Steps
 
-1. Create `.claude/skills/smart-sdd/domains/scenarios/{name}.md`
-2. Define which S-sections the scenario contributes (typically S1, S3, S5, S7)
-3. Update `_resolver.md` if the scenario has special resolution rules
+1. Create `.claude/skills/smart-sdd/domains/contexts/modes/{name}.md`
+2. Define which S-sections the context mode contributes (typically S1, S3, S5, S7)
+3. Update `_resolver.md` if the context mode has special resolution rules
 
 ---
 
@@ -681,7 +687,7 @@ Modules evolve through 5 levels of sophistication. This model helps prioritize i
 | Level | Status | Notes |
 |-------|--------|-------|
 | **Level 1** | ✅ ~90% | Most modules complete. Remaining: `react-native`, `flutter` Foundation files have TODO scaffolds |
-| **Level 2** | 🔶 ~60% | Cross-Concern Integration Rules defined in `_resolver.md` Step 3.5 (50 rules). Enforcement recently wired to `context-injection-rules.md` and all injection files. Scale modifier enforcement added. Conflict resolution rules still limited to documented pairs |
+| **Level 2** | 🔶 ~60% | Cross-Concern Integration Rules defined in `_resolver.md` Step 3.5 (61 rules). Enforcement recently wired to `context-injection-rules.md` and all injection files. Context scale enforcement added. Conflict resolution rules still limited to documented pairs |
 | **Level 3** | 🔶 ~40% | Per-archetype verify/specify behavior exists for `ai-assistant`, `desktop-app`. Most archetypes lack pipeline behavior customization |
 | **Level 4** | ⬜ ~10% | Anti-pattern examples exist in lessons-learned.md and injection files, but no structured pattern library per module combination |
 | **Level 5** | ⬜ ~15% | skill-feedback.md intake process exists; 65+ SKF items processed. No automated tracking of rule effectiveness yet |
@@ -756,7 +762,7 @@ A project with `web-api` profile + `express` Foundation. Currently:
 
 1. Verify Foundation files for relevant frameworks are implemented (e.g., `nestjs.md`, `fastapi.md`, `spring-boot.md`)
 2. Add `public-api` archetype to the project's sdd-state.md
-3. Now the pipeline loads: `_core → http-api → auth → public-api → scenarios/greenfield`
+3. Now the pipeline loads: `_core → http-api → auth → public-api → contexts/modes/greenfield`
 
 ### Level 2: Add Composition Intelligence
 
@@ -852,7 +858,7 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Foundation files (frontend)** | `reverse-spec/domains/foundations/{nextjs,vite-react,solidjs}.md` |
 | **Foundation files (runtime)** | `reverse-spec/domains/foundations/{bun}.md` |
 | **Foundation files (mobile)** | `reverse-spec/domains/foundations/{react-native,flutter}.md` (TODO scaffolds) |
-| **S4 Data Integrity** | `smart-sdd/domains/_core.md` § S4a-S4c (universal), `smart-sdd/domains/scenarios/rebuild.md` § S4d (rebuild-specific), `smart-sdd/domains/concerns/ipc.md` § S7 IPC N-Layer (S4 extension), `smart-sdd/domains/_schema.md` § S4 (schema definition) |
+| **S4 Data Integrity** | `smart-sdd/domains/_core.md` § S4a-S4c (universal), `smart-sdd/domains/contexts/modes/rebuild.md` § S4d (rebuild-specific), `smart-sdd/domains/concerns/ipc.md` § S7 IPC N-Layer (S4 extension), `smart-sdd/domains/_schema.md` § S4 (schema definition) |
 | **Verify file split** | `smart-sdd/commands/verify-phases.md` (hub + common gates), `verify-preflight.md` (Phase 0), `verify-build-test.md` (Phase 1), `verify-cross-feature.md` (Phase 2), `verify-sc-verification.md` (Phase 3 WHAT), `verify-sc-rebuild.md` (rebuild-only), `verify-evidence-update.md` (Evidence + Phase 4-5), `smart-sdd/reference/runtime-verification.md` (Phase 3 HOW) |
 | **Pipeline Integrity Guards** | `smart-sdd/reference/pipeline-integrity-guards.md` (7 guard patterns), `smart-sdd/reference/injection/implement.md` (Guards 1,2,5,6,7), `smart-sdd/reference/injection/plan.md` (Guard 7), `smart-sdd/reference/injection/analyze.md` (Guard 4), `smart-sdd/commands/verify-phases.md` (Guards 2,3,5,6), `reverse-spec/commands/analyze.md` (Guards 4,7) |
 | **Component Tree flow** | `reverse-spec/commands/analyze.md` § Phase 2-7c, `reverse-spec/templates/pre-context-template.md` § Component Tree, `smart-sdd/reference/injection/plan.md` § Source Component Mapping, `smart-sdd/reference/injection/implement.md` § Source-First Implementation |
@@ -882,7 +888,7 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Multi-ecosystem build** | `smart-sdd/commands/adopt.md` § Dependency Install Detection + Multi-Language Build, `smart-sdd/commands/pipeline.md` § Foundation Gate multi-ecosystem |
 | **Hardware I/O concern** | `shared/domains/concerns/hardware-io.md` (S0/R1 detection stub) |
 | **Foundation files (extension)** | `reverse-spec/domains/foundations/chrome-extension.md` (detection stub) |
-| **Foundation files (rust)** | `reverse-spec/domains/foundations/rust-cargo.md` (detection stub) |
+| **Foundation files (rust)** | `reverse-spec/domains/foundations/rust-cargo.md` (full module) |
 | **Foundation files (svelte)** | `reverse-spec/domains/foundations/svelte.md` (detection stub) |
 | **Container-as-product SBI** | `reverse-spec/commands/analyze-deep.md` § Infrastructure-as-Product SBI Rule |
 | **Instrumentation SDK** | `shared/domains/archetypes/sdk-framework.md` § Instrumentation/Wrapper Variant |
@@ -895,7 +901,8 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **Foundation files (C/C++ build)** | `reverse-spec/domains/foundations/cmake.md`, `reverse-spec/domains/foundations/makefile.md` |
 | **Hexagonal architecture** | `reverse-spec/commands/analyze-classify.md` § Architectural Pattern Detection |
 | **Reactive vs Servlet stack** | `reverse-spec/domains/foundations/spring-boot.md` § SB-BST-06, § F9 reactive patterns |
-| **Foundation files (multi-platform)** | `reverse-spec/domains/foundations/{python,go,swift-spm,erlang-otp,nuxt,angular,remix,qt,gtk,symfony,wordpress,android-native}.md` (detection stubs) |
+| **Foundation files (multi-platform, full)** | `reverse-spec/domains/foundations/{python,go,erlang-otp}.md` (full modules) |
+| **Foundation files (multi-platform, stubs)** | `reverse-spec/domains/foundations/{swift-spm,nuxt,angular,remix,qt,gtk,symfony,wordpress,android-native}.md` (detection stubs) |
 | **Database engine archetype** | `shared/domains/archetypes/database-engine.md` (A0 storage/query signals) |
 | **Network server archetype** | `shared/domains/archetypes/network-server.md` (A0 proxy/LB/gateway signals) |
 | **Message broker archetype** | `shared/domains/archetypes/message-broker.md` (A0 broker/streaming signals) |
@@ -909,5 +916,5 @@ Which files touch which concepts — use this when modifying a concept to find a
 | **K8s operator concern** | `shared/domains/concerns/k8s-operator.md` (S0/R1), `reverse-spec/domains/concerns/k8s-operator.md` (R3 CRD/controller extraction) |
 | **R2 project types (expanded)** | `reverse-spec/domains/_core.md` § R2 (`infrastructure`, `desktop`, `platform` added) |
 | **R5 Feature boundary heuristics** | `reverse-spec/domains/_core.md` § R5 (protocol boundaries, workspace/package boundaries added) |
-| **Migration context (shared)** | `shared/domains/contexts/migration.md` — M0 signal detection, M1 scale classification (Hotfix→Platform), M2 target layer, M3 impact assessment, M4 pipeline depth modifier |
-| **Migration context (reverse-spec)** | `reverse-spec/domains/contexts/migration.md` — R3 Feature boundary per migration type, R4 dependency/data flow extraction, R5 scope estimation |
+| **Migration context (shared)** | `shared/domains/contexts/modifiers/migration.md` — M0 signal detection, M1 scale classification (Hotfix→Platform), M2 target layer, M3 impact assessment, M4 pipeline depth modifier |
+| **Migration context (reverse-spec)** | `reverse-spec/domains/contexts/modifiers/migration.md` — R3 Feature boundary per migration type, R4 dependency/data flow extraction, R5 scope estimation |

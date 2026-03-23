@@ -5,6 +5,14 @@
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+Domain modules are NOT needed for `tasks` — plan.md is the primary input and already contains domain-informed architecture decisions.
+
+Display in Checkpoint: `📊 Domain: skipped (plan.md is primary input)`
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

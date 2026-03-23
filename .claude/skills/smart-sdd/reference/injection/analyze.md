@@ -5,6 +5,14 @@
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+Domain modules are NOT needed for `analyze` — this command performs cross-artifact consistency checks only, not domain-specific generation.
+
+Display in Checkpoint: `📊 Domain: skipped (cross-artifact analysis only)`
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

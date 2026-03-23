@@ -17,7 +17,8 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 - Multiple inputs can be combined: `init requirements.md "add real-time chat"` → file parsed for project structure, text used as supplementary intent
 - When both files and text are provided: merge extracted information, use text as priority signal for Proposal Mode
 3. **Code-explore artifacts** (`--from-explore path/to/specs/explore/`): Reads code-explore synthesis to seed project identity, Domain Profile, and Feature candidates. Triggers Explore-Informed Mode. See § Explore-Informed Mode below.
-4. **Conversational input**: If no idea string, no `--prd`, and no `--from-explore` is specified, gathers all information through interactive Q&A with the user (original flow)
+4. **Reverse-spec artifacts** (`--from-reverse-spec path/to/specs/reverse-spec/`): Reads reverse-spec output (roadmap.md, sdd-state.md, constitution-seed.md) to seed the full project setup with analyzed Domain Profile, Feature catalog, and architecture principles. Triggers Reverse-Spec-Informed Mode. See § Reverse-Spec-Informed Mode below.
+5. **Conversational input**: If no idea string, no `--prd`, no `--from-explore`, and no `--from-reverse-spec` is specified, gathers all information through interactive Q&A with the user (original flow)
 5. **Artifact language** (`--lang <code>`): Sets the language for all pipeline-generated artifacts (spec.md, plan.md, tasks.md, roadmap.md, registries, etc.). Default: `en`. Stored in `sdd-state.md` as `**Artifact Language**: <code>`. Examples: `--lang ko` (Korean), `--lang ja` (Japanese). Skill source files (SKILL.md, commands/, reference/) are always English regardless of this setting.
 
 ### Mode Selection
@@ -28,6 +29,7 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 | `--prd` with rich detail (CI ≥ 40%) | **Proposal Mode** | PRD signals → CI scoring → Proposal → auto-chain |
 | `--prd` with sparse detail (CI < 40%) | **Standard Mode** | Fall back to Phase 1 Q&A with PRD as seed |
 | `--from-explore` | **Explore-Informed Mode** | Synthesis artifacts → Domain Profile seed → Proposal → auto-chain to add |
+| `--from-reverse-spec` | **Reverse-Spec-Informed Mode** | Reverse-spec artifacts → full project setup → Proposal → auto-chain to pipeline |
 | No arguments | **Standard Mode** | Full interactive Phase 1 Q&A |
 
 ### Proposal Mode
@@ -42,7 +44,7 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 3. **Match signals**: Map extracted keywords against S0 Primary/Secondary keywords
 4. **Score CI**: Calculate Clarity Index across 7 dimensions (see `reference/clarity-index.md` § 1)
 5. **Infer Domain Profile**: Build candidate Interfaces + Concerns from signal matches
-6. **Infer Project Maturity & Team Context** (greenfield only — see `domains/scenarios/greenfield.md` § Configuration Parameters):
+6. **Infer Project Maturity & Team Context** (greenfield only — see `domains/contexts/modes/greenfield.md` § Configuration Parameters):
    - **Project Maturity**: Infer from CI Scale & Scope dimension:
      - CI Scale = 0–1 or keywords "personal tool", "experiment", "POC" → `prototype`
      - CI Scale = 2 or keywords "MVP", "startup", "first version" → `mvp`
@@ -239,6 +241,127 @@ After Domain Profile confirmation:
 >   (Domain Profile hint)      (project setup + profile)           (Feature definition)
 > ```
 > Each step consumes explore artifacts AND passes them forward. The user's exploration understanding flows continuously from code-explore through init to add, with no information loss.
+
+---
+
+### Reverse-Spec-Informed Mode (`--from-reverse-spec`)
+
+> Activated when `--from-reverse-spec <path>` is provided. The user has already run `/reverse-spec` and wants to set up the project with an explicit review checkpoint — confirming Domain Profile, constitution principles, and Feature catalog — before entering the pipeline.
+>
+> **When to use this vs. jumping to `pipeline` directly**: Use `--from-reverse-spec` when you want to (a) review and potentially modify the Domain Profile or constitution before pipeline starts, (b) add Features beyond what reverse-spec identified, or (c) have an explicit approval gate between analysis and execution. Jump to `pipeline` directly when the reverse-spec output is trusted as-is.
+
+#### RS Step 1: Artifact Validation (🚫 BLOCKING)
+
+1. Verify `{path}/roadmap.md` exists. If missing:
+   → 🚫 BLOCKING: "`roadmap.md` not found at `{path}`. Run `/reverse-spec` first."
+
+2. Verify `{path}/sdd-state.md` exists. If missing:
+   → 🚫 BLOCKING: "`sdd-state.md` not found at `{path}`. Reverse-spec must complete all phases."
+
+3. Verify `{path}/constitution-seed.md` exists. If missing:
+   → ⚠️ WARNING (non-blocking): "constitution-seed.md not found. Constitution will need interactive definition during pipeline."
+
+4. Read & parse:
+   - `sdd-state.md` → Domain Profile (Interfaces, Concerns, Archetype, Framework, Scenario) + Scale modifiers
+   - `roadmap.md` → Project Overview, Rebuild/Adoption Strategy, Feature Catalog (F### with Tiers), Dependency Graph
+   - `constitution-seed.md` → Architecture principles, technical constraints, coding conventions, recommended practices
+   - `entity-registry.md`, `api-registry.md` → validate existence (non-blocking, read for display)
+
+5. Validate Origin consistency:
+   - Read `sdd-state.md` → `**Origin**:` field
+   - If Origin is `greenfield` → warn: "Reverse-spec origin is greenfield. Consider `/smart-sdd init` without `--from-reverse-spec` for pure greenfield setup."
+   - Expected: `rebuild` or `adoption`
+
+❌ WRONG: Accept --from-reverse-spec but ignore artifacts → generate Proposal from scratch
+❌ WRONG: Copy roadmap.md verbatim into display → overwhelming and unstructured
+✅ RIGHT: Parse artifacts → map to Proposal fields → display structured summary with approval gate
+
+#### RS Step 2: Build Reverse-Spec-Informed Proposal
+
+Generate a Proposal (same display format as Proposal Mode Step 3), populated from reverse-spec artifacts. **No CI scoring** — trust the reverse-spec analysis.
+
+| Proposal Section | Source |
+|-----------------|--------|
+| Project Overview | roadmap.md § Project Overview |
+| Domain Profile | sdd-state.md header fields (Interfaces, Concerns, Archetype, Framework, Scenario) |
+| Scale | sdd-state.md § Scale (project_maturity, team_context) |
+| Strategy | roadmap.md § Rebuild/Adoption Strategy |
+| Features | roadmap.md § Feature Catalog (F### table with Tiers and Release Groups) |
+| Architecture Principles | constitution-seed.md § Architecture Principles |
+| Quality Rules | constitution-seed.md § Recommended Practices |
+| Technical Constraints | constitution-seed.md § Technical Constraints |
+| Cross-Concern Rules | Auto-loaded from Domain Profile via `_resolver.md` |
+
+Display format:
+```
+📋 Reverse-Spec-Informed Proposal
+
+Project: [name from roadmap overview]
+Origin: [rebuild/adoption]
+Strategy: [strategy summary]
+
+── Domain Profile ──────────────────────────────
+| Axis | Value |
+|------|-------|
+| Interfaces | [detected] |
+| Concerns | [detected] |
+| Archetype | [detected] |
+| Framework | [detected] |
+| Scenario | [rebuild/adoption] |
+| Scale | [maturity] / [team] |
+
+── Feature Catalog ([N] Features) ─────────────
+| ID | Name | Tier | Release Group |
+| F001 | ... | T1 | RG1 |
+| ... | | | |
+
+── Architecture Principles ─────────────────────
+[Top 3-5 principles from constitution-seed]
+
+── Cross-Concern Integration Rules ─────────────
+[Auto-loaded rules from active concern combinations]
+```
+
+#### RS Step 3: Confirmation (HARD STOP)
+
+Use AskUserQuestion:
+- "Approve and run pipeline" (Recommended) — accept everything and auto-chain to `/smart-sdd pipeline`
+- "Modify Domain Profile" — enter interactive Domain Profile editing, then re-display Proposal
+- "Edit constitution principles" — enter interactive constitution editing (principles from constitution-seed as starting point)
+- "Add more Features first" — auto-chain to `/smart-sdd add` with reverse-spec Features pre-populated in sdd-state.md
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+#### RS Step 4: Auto-Chain
+
+**If "Approve and run pipeline"**:
+1. Ensure all reverse-spec artifacts are accessible from CWD:
+   - If `{path}` is already within CWD → no copy needed
+   - If `{path}` is external → copy artifacts to `specs/reverse-spec/` in CWD
+2. Ensure `sdd-state.md` is in `specs/reverse-spec/` (or wherever pipeline expects it)
+3. Display:
+   ```
+   ✅ Project initialized from reverse-spec artifacts.
+   💡 Recommended: /clear then /smart-sdd pipeline
+      Or continue directly: /smart-sdd pipeline
+   ```
+4. If user continues in same session → auto-chain to `/smart-sdd pipeline`
+
+**If "Add more Features first"**:
+1. Same artifact setup as above
+2. Auto-chain to `/smart-sdd add` — Features from roadmap.md are already in sdd-state.md, user adds new ones on top
+
+**If "Modify Domain Profile" or "Edit constitution principles"**:
+1. Enter interactive editing flow
+2. After editing, write updated values back to sdd-state.md / constitution-seed.md
+3. Re-display Proposal with changes → return to RS Step 3
+
+> **The complete reverse-spec-informed flow**:
+> ```
+> /reverse-spec .        →  /smart-sdd init --from-reverse-spec  →  /smart-sdd pipeline
+>   (source analysis)         (review + approve + optional edits)      (build Features)
+> ```
+> This adds an explicit approval checkpoint between analysis and execution. Context reset (`/clear`) is recommended between reverse-spec and init — all state is in files (P3).
 
 ---
 

@@ -1,4 +1,4 @@
-# Scenario: rebuild
+# Context Mode: rebuild
 
 > Preserve existing behavior while changing the implementation environment.
 > Covers: stack migration, platform migration, framework upgrade, language migration, architecture refactoring, vendor switch.

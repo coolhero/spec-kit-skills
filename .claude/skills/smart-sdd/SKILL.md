@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec. Use this skill whenever the user mentions spec-kit, SDD, specification-driven development, Feature pipeline, spec generation, or wants to systematically break down a project into Features with specs, plans, and implementations. Typical flow — greenfield: init → add → pipeline. Brownfield: /reverse-spec first (or auto-chained via adopt), then pipeline. Composable with /code-explore for feature discovery before building.
-argument-hint: "<command> [feature-id] [--from path|step] [--from-explore path] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app] [--lang <code>]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path|step] [--from-explore path] [--from-reverse-spec path] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app] [--lang <code>]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -177,7 +177,8 @@ $ARGUMENTS parsing rules:
   --from <path|step> → artifacts path (for pipeline/init/adopt, defaults to ./specs/_global/) OR reset step name (for reset command: specify/plan/tasks/implement/verify)
   --delete        → Permanent Feature deletion (only for reset command: reset --delete F007)
   --prd <path>    → Path to PRD document (for init and add commands)
-  --from-explore <path> → Path to code-explore artifacts directory (for add command — seeds Features from synthesis)
+  --from-explore <path> → Path to code-explore artifacts directory (for init/add — seeds from synthesis)
+  --from-reverse-spec <path> → Path to reverse-spec artifacts directory (for init — seeds from reverse-spec analysis). See init.md § Reverse-Spec-Informed Mode
   --gap           → Start add in gap-driven mode (analyze unmapped SBI + parity gaps)
   --source <path> → Original source path for parity check (only for parity command)
   --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify
@@ -231,7 +232,8 @@ The `--profile` argument (or `--domain` for backward compatibility) selects the 
 3. `domains/concerns/{concern}.md` — For each active concern (see `shared/domains/_taxonomy.md` for complete list)
 4. `domains/archetypes/{archetype}.md` — For each active archetype
 5. Organization convention file (if specified in sdd-state.md `**Org Convention**` field)
-6. `domains/scenarios/{scenario}.md` — One scenario (greenfield, rebuild, incremental, adoption)
+6. `domains/contexts/modes/{mode}.md` — One context mode (greenfield, rebuild, incremental, adoption)
+6b. `domains/contexts/modifiers/{modifier}.md` — Zero or more context modifiers (migration, compliance, etc.)
 7. Project customization file (if specified in sdd-state.md `**Custom**` field)
 
 Loaded modules provide: **SC Generation Rules** (S1), **Parity Dimensions** (S2), **Verify Steps** (S3), **Elaboration Probes** (S5), **UI Testing** (S6), **Bug Prevention Rules** (S7), **Brief Completion Criteria** (S9/A5).
@@ -339,6 +341,7 @@ Accumulated edge cases from real pipeline runs. Check this list when hitting une
 | G8 | Forgetting `--lang` on first command | Artifacts default to English → switching language mid-pipeline requires regeneration | Set `--lang` on `init`, `adopt`, or first `add` |
 | G9 | App requires user configuration (API keys, model selection) for verify | Playwright launches app but features don't work without setup | Agent asks user to configure the app, then continues verification (Phase 0-2b) |
 | G10 | `pipeline F001 --step specify` on completed Feature without checking branch | May modify code on wrong branch (main vs feature branch) | Branch management auto-handles: creates fresh branch from main for re-opened Features |
+| G11 | Processing 3+ Features without context reset | Context saturates → later Features get shallow specify/verify, Review quality drops, hallucination risk increases | Reset context at Feature boundaries (`/clear` then re-invoke). All state is in files (P3). See `pipeline.md` § Context Reset Protocol |
 
 ---
 
@@ -347,11 +350,13 @@ Accumulated edge cases from real pipeline runs. Check this list when hitting une
 smart-sdd works with the other spec-kit skills:
 
 ```
-/code-explore → /smart-sdd init --from-explore    (new project from exploration)
-/code-explore → /smart-sdd add --from-explore      (add Features from exploration)
-/smart-sdd adopt → /reverse-spec (auto-chained)    (adopt triggers reverse-spec)
-/smart-sdd adopt → /code-explore                    (deepen understanding after adoption)
-/smart-sdd pipeline → /code-explore --no-branch     (mid-pipeline investigation)
+/code-explore → /smart-sdd init --from-explore         (new project from exploration)
+/code-explore → /smart-sdd add --from-explore           (add Features from exploration)
+/reverse-spec → /smart-sdd init --from-reverse-spec     (rebuild with review checkpoint)
+/reverse-spec → /smart-sdd pipeline                     (rebuild direct — skip review)
+/smart-sdd adopt → /reverse-spec (auto-chained)         (adopt triggers reverse-spec)
+/smart-sdd adopt → /code-explore                         (deepen understanding after adoption)
+/smart-sdd pipeline → /code-explore --no-branch          (mid-pipeline investigation)
 ```
 
 Inter-skill data flow is file-based (P3: File over Memory): `sdd-state.md`, registries, and pre-context files serve as the handoff medium.

@@ -1,4 +1,4 @@
-# Scenario: incremental
+# Context Mode: incremental
 
 > Adding features to an existing SDD-managed project.
 > Module type: scenario

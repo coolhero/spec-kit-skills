@@ -91,13 +91,28 @@
 | media-server | `archetypes/media-server.md` | SFU/MCU media servers, streaming, transcoding | http-api, grpc |
 | inference-server | `archetypes/inference-server.md` | ML inference serving (vLLM, Triton, TGI, Ollama) | http-api, grpc |
 
-## Contexts
+## Contexts (Axis 5)
 
-> Contexts differ from Concerns: Concerns describe what the app *does*. Contexts describe what you're *doing to* the app. Contexts modify pipeline depth and dynamically activate relevant Concern/Foundation modules.
+> Contexts differ from Concerns: Concerns describe what the app *does*. Contexts describe what you're *doing to* the app. Context is a composite axis with three components: **Mode** (pipeline structure), **Scale** (depth calibration), and **Modifiers** (situational overlays).
+
+### Modes (4)
+
+Pipeline structure — determines which steps run and how. Exactly ONE mode is active.
 
 | Module | File | Description | Activated by |
 |--------|------|-------------|-------------|
-| migration | `contexts/migration.md` | Modernization, version upgrades, platform moves (M0-M4 framework) | S6 scenario, `--migration` flag, migration signals in codebase |
+| greenfield | `contexts/modes/greenfield.md` | Building from scratch, no existing codebase | Origin = greenfield |
+| rebuild | `contexts/modes/rebuild.md` | Rebuilding existing app with preservation rules | Origin = rebuild |
+| incremental | `contexts/modes/incremental.md` | Adding Features to an existing SDD project | Subsequent `add` after initial setup |
+| adoption | `contexts/modes/adoption.md` | Wrapping existing code with SDD documentation | Origin = adoption |
+
+### Modifiers (1+)
+
+Situational overlays — zero or more active simultaneously. Extensible via domain-extend.
+
+| Module | File | Description | Activated by |
+|--------|------|-------------|-------------|
+| migration | `contexts/modifiers/migration.md` | Modernization, version upgrades, platform moves (M0-M4 framework) | `--migration` flag, migration signals in codebase |
 
 ## Profiles (smart-sdd only)
 

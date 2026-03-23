@@ -215,10 +215,10 @@ If `CONTEXT_AWARE = false` (Fresh Mode), derive the **user's target project Doma
    - 🔧 "Add streaming support" → Axis 2 Concern addition (`realtime`)
    - 💡 "Keep provider abstraction" → Axis 3 Archetype confirmation (Archetype can be comma-separated if both source and target show multiple archetype signals, e.g., `ai-assistant,sdk-framework`)
    - 🔧 "TypeScript + React" → Axis 4 Foundation change
-   - (Axis 5 Scenario is not inherited — it's determined by the user's project mode)
-   - 🔧 "This should be production-grade" → Scale modifier change
+   - (Axis 5 Context Mode is not inherited — it's determined by the user's project mode)
+   - 🔧 "This should be production-grade" → Context Scale change
 3. **Build target profile**:
-   - Start from source profile axes 1-4 (Scenario is always user-determined)
+   - Start from source profile axes 1-4 (Context Mode is always user-determined)
    - Apply differentiation: additions, removals, modifications
    - Flag uncertain items (where the user hasn't explicitly decided)
 4. **Check Cross-Concern Integration**: Using the target profile's active modules, look up `_resolver.md` § Step 3.5. If any combination triggers, note the activated integration patterns.

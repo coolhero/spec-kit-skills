@@ -35,7 +35,9 @@ If validation fails:
 **Interfaces**: [comma-separated list, e.g., http-api, gui]
 **Concerns**: [comma-separated list, e.g., async-state, auth, i18n]
 **Archetype**: [comma-separated list, e.g., ai-assistant, public-api | "none"]
-**Scenario**: [greenfield | rebuild | incremental | adoption]
+**Context Mode**: [greenfield | rebuild | incremental | adoption]
+**Context Scale**: [project_maturity × team_context, e.g., mvp × solo]
+**Context Modifiers**: [comma-separated list, e.g., migration | "none"]
 **Custom**: [path to domain-custom.md | "none"]
 **Org Convention**: [path to org-convention.md | "none"]
 **Artifact Language**: [en | ko | ja | zh | es | fr | de | pt | ... ] ← Language for pipeline-generated artifacts (spec.md, plan.md, tasks.md, etc.). Default: en. Set via --lang argument during init/reverse-spec/add.
@@ -51,15 +53,13 @@ If validation fails:
 **State Schema Version**: 2.0
 **Framework**: electron | tauri | express | nestjs | fastapi | nextjs | vite-react | react-native | flutter | custom | none
 **Structure**: single-package | monorepo
-**Project Maturity**: prototype | mvp | production
-**Team Context**: solo | small-team | large-team
 
 ---
 
 ## Rebuild Configuration (rebuild only)
 
 > Only present when Origin is `rebuild`. Omit this section for greenfield/adoption.
-> Set during reverse-spec Phase 0 (from `roadmap.md` Strategy line). Read by pipeline steps per `domains/scenarios/rebuild.md`.
+> Set during reverse-spec Phase 0 (from `roadmap.md` Strategy line). Read by pipeline steps per `domains/contexts/modes/rebuild.md`.
 
 | Parameter | Value |
 |-----------|-------|

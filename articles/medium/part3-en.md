@@ -4,7 +4,23 @@
 
 ![Part 3 Cover](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part3.png)
 
-*Continued from Part 2: Three Skills, One Pipeline — (link to Part 2 on Medium)*
+*Continued from [Part 2: Four Skills, One Pipeline](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)*
+
+*This article was written with Claude Code — drafting, revision, number-checking, and EN/KO synchronization, all in the same tool. This is what "controllable AI development" looks like in practice.*
+
+---
+
+## Why 400 Markdown Files?
+
+Cursor, Windsurf, Claude Code — today's agentic coding tools are stunningly capable. They plan across files, refactor with context, and iterate based on test results. So why would you spend weeks writing 400 markdown files to "teach" an agent how to work?
+
+Here's the honest answer: **because capable and controllable are different things.**
+
+A capable agent can build your authentication system in 30 seconds. A controllable agent builds it *the way your team decided* — using sessions (not JWT), storing tokens server-side (not localStorage), referencing the User model that Feature 1 already defined (not inventing a new one). The gap between those two outcomes is everything.
+
+And here's the part that surprised us most: **the smarter the agent, the harder it is to control.** A basic autocomplete that generates one line is easy to review. An agent that scaffolds 12 files with authentication, error handling, and database migrations? You can't review that line by line. You need to trust the *process* that generated it.
+
+That process is what this article is about. Not the skills themselves (Part 2 covered that), but the **architectural principles** that make 400 files work as a coherent system — and why those principles matter for anyone building agent workflows.
 
 ---
 
@@ -14,29 +30,27 @@ Here's the strange truth about building tools for AI agents: **the agent is both
 
 When you write a React component, React runs it. When you write a Claude Code skill, Claude *reads* it — as markdown — and decides how to behave. Your "code" is natural language. Your "compiler" is an LLM. Your "bugs" are behavioral: the agent does the wrong thing not because of a syntax error, but because it misunderstood your intent.
 
-This means you can't debug with a stack trace. You can't set breakpoints. You can't write unit tests for "the agent follows instruction X." Your only testing method is: run the pipeline, watch what happens, iterate.
+You can't debug with a stack trace. You can't set breakpoints. You can't write unit tests for "the agent follows instruction X." Your only testing method is: run the pipeline, watch what happens, iterate.
 
-And there's an additional constraint that makes this uniquely difficult: **context windows are finite and get compressed.** The beautifully written rule you put at the top of your skill file? After 50 messages, it may be compressed into a single summary sentence — or dropped entirely.
+And there's an additional constraint: **context windows are finite and get compressed.** The rule you wrote at the top of your skill file? After 50 messages, it may be compressed into a single summary — or dropped entirely.
 
-Here's a concrete example of how this plays out. Early in development, we wrote a rule: "always verify before merge." Clear, simple, correct. For the first five Features, the agent followed it faithfully — reading verify-phases.md, executing all four phases of verification, asking for user approval at each checkpoint.
+Here's a concrete example. We wrote a rule: "always verify before merge." Clear, simple, correct. For Features 1 through 5, the agent followed it faithfully. Then came Feature 6. By that point, context compression had degraded the rule to something like "verify = run build." The agent ran `npm run build`, saw zero errors, reported "verify complete," and moved on. Four phases of verification — UI testing, scenario coverage, regression detection, demo validation — all silently skipped. We only caught it because the demo crashed during a live walkthrough.
 
-Then came Feature 6. By that point, the conversation had accumulated over 50 messages. Context compression kicked in. The agent's internal summary of our verification rule had degraded to something like "verify = run build." It executed `npm run build`, saw zero errors, reported "verify complete," and moved on. Four phases of verification — UI interaction testing, scenario coverage checking, regression detection, demo script validation — all silently skipped. We only caught it because the demo script crashed during a live walkthrough.
+That incident shaped everything. You can't write a rule once and trust it to survive. You have to engineer rules that *resist compression* — rules that work not because the agent remembers them, but because the pipeline structure makes it impossible to proceed without following them.
 
-That incident shaped everything about how we design skills. You can't write a rule once and trust it to survive. You have to engineer rules that *resist compression*. Rules that work not because the agent remembers them, but because the pipeline structure makes it impossible to proceed without following them.
+If you're building agent skills and your instructions work for the first 10 messages but fail after 40, you've hit the same wall. The solution isn't louder instructions — we tried that three times. It's structurally unavoidable gates. That's what the three philosophies below are about.
 
-This realization — that natural language instructions degrade in reliability over time within a single conversation — is the fundamental insight that separates naive skill design from robust skill engineering. It's not about writing clearer instructions. It's not about using stronger language or adding more emphasis markers. It's about building a system where the instructions are re-loaded at the exact moment they're needed, backed by structural gates that block progress when they're not followed.
+---
 
-If you're building agent skills and your instructions work perfectly for the first 10 messages but fail after 40, you've hit the same wall we hit. The solution isn't to make the instructions louder — we tried that, three times, with increasingly emphatic language. It's to make them structurally unavoidable. That's what the three foundational philosophies below are ultimately about: engineering reliability into a fundamentally probabilistic system.
+## For Humans — Three Philosophies and Seven Guards
 
-This changes everything about how you design.
+> As with the previous parts, this article has two halves. **"For Humans"** tells the story of why we designed the system this way — through real failures, real fixes, and the principles we extracted. **"For Agents"** (at the bottom) presents the same architecture as structured data that an AI agent can consume directly. Same information, two representations. This duality is, itself, the point of the whole project.
 
 ---
 
 ## Three Foundational Philosophies
 
-Every design decision in spec-kit-skills traces back to three principles. We didn't start with these principles — we discovered them through hundreds of failed pipeline runs, each failure revealing a pattern that no amount of "write better instructions" could fix.
-
-If you're building your own agent workflows, these principles will save you months of trial and error. They apply far beyond spec-kit-skills — to any system where an LLM is the execution engine and natural language is the instruction set. Whether you're building a code generation pipeline, an automated testing workflow, or a document processing system, the same fundamental challenges apply: context degrades, agents rationalize, and memory is ephemeral.
+Every design decision traces back to three principles. We didn't start with them — we discovered them through hundreds of failed pipeline runs. They apply to any system where an LLM is the execution engine and natural language is the instruction set.
 
 ---
 
@@ -96,6 +110,22 @@ The entity registry eliminates this entirely — Feature 3 sees the canonical Us
 The API registry works the same way but for contracts. When Feature 1 defines `POST /api/auth/login` with specific request/response shapes, that contract is registered. Feature 3 can reference it when it needs authenticated endpoints. Without the registry, Feature 3 might assume a different auth token format, a different header name, or a different error response shape — all of which surface as integration bugs late in the pipeline.
 
 Together, these registries form the backbone of cross-Feature consistency. They're not just documentation — they're the canonical reference that every pipeline stage consults. When a new spec references an existing entity, the entity registry is the authoritative source. When an implementation needs to call an existing API, the API registry provides the exact contract. The registries grow richer with each Feature, creating a compounding advantage: later Features have more context to work with, and less room for contradictory assumptions.
+
+**Context Reset Protocol — Operationalizing P1 Across Work Units**
+
+There's a counterintuitive implication of File over Memory: if everything is in files, you should periodically *throw away* the conversation context. After completing a Feature (merge to main), the agent's context window is filled with that Feature's conversation history — spec reviews, plan discussions, implementation details, verify results. Starting the next Feature with all that baggage means less room for the new Feature's injection and review.
+
+The Context Reset Protocol says: clear context between work units. `/clear`, then re-invoke. The agent re-reads sdd-state.md, loads the updated registries, and starts fresh. Nothing is lost because everything was written to files. What's gained is a full context budget for the next Feature.
+
+When NOT to reset: never mid-Feature (between specify and plan). The inter-step continuity requires unbroken flow. Reset only at Feature boundaries, skill transitions, or after context compaction warnings. *(For practical implementation details — when to reset, what persists, how to test — see Part 4's "Context Reset Protocol" section.)*
+
+**The Fourth Skill's Architectural Role**
+
+The three pipeline skills (code-explore, reverse-spec, smart-sdd) consume domain modules. But who creates them? Initially, the framework ships with 47 concerns, 15 archetypes, and 40+ foundations. That's a solid starting vocabulary — but every project eventually encounters patterns that aren't covered.
+
+`/domain-extend` closes this loop. It's not a pipeline stage — it's a **meta-tool** that enriches the vocabulary the pipeline draws from. When code-explore detects an unknown pattern, domain-extend can create a module for it. When a team imports their ADRs and postmortems, domain-extend converts that institutional knowledge into structured rules. The result: each project that uses spec-kit-skills makes the system smarter for the next project.
+
+This is P1 (Context Continuity) applied across projects, not just across Features.
 
 ---
 
@@ -237,9 +267,9 @@ domains/
   _core.md            — Universal rules (always loaded with domain)
   _resolver.md        — Module loading logic + 46 cross-concern patterns
   interfaces/         — 9 modules (gui, cli, http-api, grpc, tui, embedded, mobile, library, data-io)
-  concerns/           — 48 modules (auth, realtime, resilience, connection-pool, tls-management, ...)
+  concerns/           — 47 modules (auth, realtime, resilience, connection-pool, tls-management, ...)
   archetypes/         — 15 modules (ai-assistant, microservice, network-server, ...)
-  scenarios/          — 4 modules (greenfield, rebuild, adoption, incremental)
+  contexts/modes/     — 4 modules (greenfield, rebuild, adoption, incremental)
   profiles/           — 15 pre-built profiles
 ```
 
@@ -259,7 +289,7 @@ Here's the math for a typical pipeline step:
 
 Compare that to loading everything: ~15,000+ lines. The agent would spend its context budget reading instructions instead of doing work. Worse, with that much instruction text, the agent would face conflicting or overlapping rules and have to decide which ones apply — a decision that LLMs handle poorly when overwhelmed with options.
 
-The selective loading is what makes this practical. The agent reads 1,300 lines of highly relevant context instead of 15,000 lines of mostly irrelevant rules. Every loaded line earns its place because the domain profile selected it specifically for this project's combination of interface, concerns, archetype, and scenario.
+The selective loading is what makes this practical. The agent reads 1,300 lines of highly relevant context instead of 15,000 lines of mostly irrelevant rules. Every loaded line earns its place because the domain profile selected it specifically for this project's combination of interface, concerns, archetype, and context.
 
 There's a useful analogy to compiled code here. In a large C++ project, you don't compile every header for every translation unit — you include what you need. The `#include` directive is a selective loading mechanism. Our domain module system serves the same purpose: it's the `#include` for natural language instruction sets. And just as unnecessary includes bloat compile times, unnecessary module loads bloat context windows and degrade agent performance.
 
@@ -273,7 +303,7 @@ When the pipeline runs, modules load in a specific order. Each layer can extend 
 4. **archetypes/{name}.md** — Domain philosophy rules (ai-assistant, microservice, network-server, etc.)
 5. **foundations/{framework}.md** — Framework-specific rules (electron, fastapi, go, etc.)
 6. **org-convention.md** — Organization-wide rules (optional, shared across projects)
-7. **scenarios/{name}.md** — Lifecycle rules (greenfield, rebuild, adoption)
+7. **contexts/modes/{name}.md** — Lifecycle rules (greenfield, rebuild, adoption)
 8. **domain-custom.md** — Project-level overrides (optional)
 
 Modules use standardized section numbering. Interfaces and concerns use S0-S9. Archetypes use A0-A5 (separate numbering to avoid collision). When multiple modules are active, their sections **merge** — `gui.md`'s S1 (SC generation rules) accumulates with `realtime.md`'s S1 and `ai-assistant`'s A2 (SC extensions).
@@ -346,7 +376,7 @@ No code changes. No registration step. No config file update. If the file exists
 
 And here's the interesting part: if `rate-limiting` frequently co-occurs with `auth` or `http-api`, you can add a cross-concern integration rule in the resolver. The pattern "rate-limiting + auth" might trigger an emergent rule: "rate limit responses must include Retry-After headers and the auth layer must not count rate-limited requests as failed auth attempts." This emergent behavior is what elevates the module system from a simple file loader to a domain knowledge engine.
 
-The zero-registration design is also what makes the system resilient to partial knowledge. You don't need all 48 concern modules to use the system. A project might use only `auth`, `realtime`, and `external-sdk`. The other 45 modules exist but are never loaded — they add zero cost. And when someone contributes a new module, it's immediately available to any project that declares it in their profile. No version bump, no release cycle, no migration.
+The zero-registration design is also what makes the system resilient to partial knowledge. You don't need all 47 concern modules to use the system. A project might use only `auth`, `realtime`, and `external-sdk`. The other 44 modules exist but are never loaded — they add zero cost. And when someone contributes a new module, it's immediately available to any project that declares it in their profile. No version bump, no release cycle, no migration.
 
 ### Adding a New Foundation
 
@@ -378,11 +408,11 @@ scale:
 
 Save to `domains/profiles/my-ai-chat.md`. Use with `/smart-sdd init --profile my-ai-chat`. The resolver reads the profile and loads all declared modules. For common project archetypes, 15 pre-built profiles are included — covering patterns like web SaaS applications, CLI developer tools, desktop Electron apps, mobile backends, and AI-powered assistants. These serve both as ready-to-use configurations and as examples for creating custom profiles.
 
-### The Scale Modifier
+### The Scale Component
 
-Notice the `scale` section in the profile above. This is the sixth axis — not a domain axis, but a *modifier* that adjusts the depth and rigor of every other axis's output.
+Notice the `scale` section in the profile above. This is part of the Context axis (Axis 5) — it adjusts the depth and rigor of every other axis's output.
 
-**Project Maturity** controls how thorough the generated Scenarios are:
+**Project Maturity** controls how thorough the generated Success Criteria are:
 - `prototype` — functional-only SCs. Skip performance SCs, edge-case SCs, and observability requirements. Get to a working demo fast.
 - `mvp` — functional + critical edge-case SCs. Add error handling for user-facing flows, skip internal monitoring.
 - `production` — full SC coverage. Performance SCs with measurable thresholds, edge-case SCs for all identified failure modes, observability requirements (logging, metrics, alerting).
@@ -396,9 +426,9 @@ The difference is significant. A prototype-maturity spec for an AI chat Feature 
 
 These modifiers don't add new domain modules — they adjust the *depth* at which existing modules operate. The `gui` module's S1 section always generates UI interaction SCs, but how many and how detailed depends on whether you're building a prototype or a production system.
 
-Think of it as a volume knob on each axis. The axes determine *what kind of music plays* (SC rules for GUI vs. CLI, auth vs. realtime). The scale modifier determines *how loud it plays* — how many SCs, how much edge-case coverage, how much documentation overhead. A solo developer building a prototype gets a lean, fast pipeline. A large team building a production system gets comprehensive coverage with collaboration guardrails. Same pipeline, same modules, different depth.
+Think of it as a volume knob on each axis. The axes determine *what kind of music plays* (SC rules for GUI vs. CLI, auth vs. realtime). The scale component determines *how loud it plays* — how many SCs, how much edge-case coverage, how much documentation overhead. A solo developer building a prototype gets a lean, fast pipeline. A large team building a production system gets comprehensive coverage with collaboration guardrails. Same pipeline, same modules, different depth.
 
-This prevents a common frustration with opinionated tools: the "one size fits all" problem. A tool that generates 24 SCs per Feature is thorough but crushing for a prototype. A tool that generates 8 SCs is fast but dangerously thin for production. The scale modifier lets the same system serve both contexts without maintaining two separate rule sets.
+This prevents a common frustration with opinionated tools: the "one size fits all" problem. A tool that generates 24 SCs per Feature is thorough but crushing for a prototype. A tool that generates 8 SCs is fast but dangerously thin for production. The scale component lets the same system serve both contexts without maintaining two separate rule sets.
 
 And the scale can evolve with the project. A common pattern: start with `project_maturity: prototype` and `team_context: solo` to move fast. When the prototype is validated, switch to `mvp` maturity — the pipeline retroactively identifies which Features need additional SCs for error handling and edge cases. When the project goes to production with a team, switch to `production` and `small-team` — the pipeline flags Features that lack the rigor expected at that maturity level. The project grows, and the pipeline's expectations grow with it.
 
@@ -452,7 +482,9 @@ Together, these seven guards form what we call the Pipeline Integrity System. Ea
 
 ---
 
-## For Agents — Architecture Reference
+## 🤖 For Agents — Architecture Reference
+
+> Everything above told the *story* of how and why. Everything below encodes the *same information* in a format an AI agent can directly consume — file paths, loading orders, section schemas, guard conditions. If you're building your own skill system, this is the specification. Copy it, adapt it, or use it as a checklist.
 
 ```
 architecture:
@@ -513,7 +545,7 @@ architecture:
       4: Read UI Component Features — map library capabilities
       5: Read Runtime Exploration Results
       6: Read Dependency Stubs from preceding Features
-      7: Apply Scale Modifier + Cross-Concern Integration Rules
+      7: Apply Context Scale + Cross-Concern Integration Rules
 
   context_budget:
     typical: ~1,300 lines (SKILL.md + command + 3-5 modules + Feature context)
@@ -536,6 +568,7 @@ architecture:
     add_foundation: create domains/foundations/{name}.md with F2-F3 -> auto-loaded
     add_profile: create domains/profiles/{name}.md -> usable via --profile
     convention_hierarchy: skill-level -> org-level -> project-level (later overrides earlier)
+    domain_extend: /domain-extend skill automates module creation, import from ADRs/docs, and validation
     scale_modifier:
       project_maturity: prototype (functional-only SCs) | mvp (+ critical edge-cases) | production (full coverage + observability)
       team_context: solo (minimal docs) | small-team (boundary docs) | large-team (ownership probes, PR review docs)
@@ -545,10 +578,24 @@ architecture:
 
 ## Looking Ahead
 
-The architecture described here — three philosophies, seven guards, selective module loading, context injection — represents the current state of a system that's still evolving. Every production pipeline run teaches us something new. Some lessons become new guards. Others become new cross-concern integration rules. A few become fundamental changes to the loading order or injection protocol.
+The architecture described here — three philosophies, seven guards, selective module loading, context injection — is the current state of a system that keeps evolving. Every pipeline run teaches something. Some lessons become guards. Others become cross-concern rules. A few reshape the fundamentals.
 
-What we've found is that the principles are stable even as the implementation changes. Context Continuity, Enforce Don't Reference, and File over Memory have held up through every iteration. The specific mechanisms that implement them — the guards, the injection files, the state machine — continue to be refined. But the principles haven't needed revision since we discovered them. That's how you know you've found the right abstractions: the implementation evolves, the principles endure.
+But here's what hasn't changed: the three principles. Context Continuity, Enforce Don't Reference, and File over Memory have held through every iteration. The mechanisms that implement them keep being refined. The principles haven't needed revision since we discovered them. That's how you know you've found the right abstractions.
+
+And this is ultimately the answer to "why 400 files?" — because controllable AI development isn't about writing one perfect prompt. It's about building a system where the right behavior emerges from structure, not from the agent's goodwill. The agent is incredibly capable. The 400 files make sure that capability is channeled toward *your* goals, *your* architecture, *your* quality standards.
+
+As agentic coding tools get smarter — and they will — the value of this kind of harness only increases. A more capable agent without guardrails produces more impressive-looking code that's harder to review. A more capable agent *with* guardrails produces better code, faster, with full traceability. The investment in harness engineering pays compound interest as the underlying models improve.
 
 ---
 
-*Next: **Part 4 — Lessons Learned** — 19 gap patterns and 50+ specific lessons from building AI agent skills. If this article described the architecture and philosophy, Part 4 is the field guide — the specific failures we encountered, the patterns those failures revealed, and the fixes that actually worked. Real production incidents, real fixes, and universal takeaways for anyone building their own agent workflows.*
+*This article was written using Claude Code (Claude Opus 4.6). The entire spec-kit-skills project, including this series, was developed through human-AI collaboration.*
+
+---
+
+**Series Navigation:**
+
+← **Part 1**: [Why Your Agent Needs a Harness](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)
+
+← **Part 2**: [Four Skills, One Pipeline](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)
+
+→ **Part 4**: Failure Patterns and Hard-Won Wisdom — 19 gap patterns, 50+ lessons, practical tips

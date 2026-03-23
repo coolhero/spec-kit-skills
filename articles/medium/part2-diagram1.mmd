@@ -1,0 +1,75 @@
+flowchart TD
+    subgraph entry["Entry Points"]
+        direction LR
+        IDEA["💡 Idea / PRD"]
+        CODE["📦 Existing Code"]
+    end
+
+    subgraph explore["1. UNDERSTAND — /code-explore"]
+        CE_ORIENT["Orient\nArchitecture map\nModule discovery"]
+        CE_TRACE["Trace (×N)\nEnd-to-end flow tracing\nEntity/API/Rule observations"]
+        CE_SYNTH["Synthesis\nFeature candidates (C001...)\nAccumulated insights"]
+        CE_ORIENT --> CE_TRACE --> CE_SYNTH
+    end
+
+    subgraph explore_out["specs/explore/"]
+        EO["orientation.md\ntraces/*.md\nsynthesis.md"]
+    end
+
+    subgraph analyze["2. ANALYZE"]
+        INIT["/smart-sdd init\nDomain Profile detection\nFeature candidates"]
+        subgraph rs_detail["/reverse-spec"]
+            RS_RUN["Phase 1.5: Run source app\nCapture UI flows, controls, error paths"]
+            RS_CODE["Phase 2-3: Code analysis\nSBI, entities, APIs, Features"]
+            RS_DRAFT["Phase 4: Generate per Feature\npre-context + spec-draft.md"]
+            RS_RUN --> RS_CODE --> RS_DRAFT
+        end
+        ADOPT_RS["/reverse-spec --adopt\nDocument existing code"]
+    end
+
+    subgraph define["3. DEFINE"]
+        ADD["/smart-sdd add (Brief)\n6-perspective validation\nIntent verification gate\nC001 → F001 confirmation"]
+    end
+
+    subgraph gel["Global Evolution Layer — specs/_global/"]
+        GEL_PROJ["Project-wide:\nroadmap · registries · constitution"]
+        GEL_FEAT["Per Feature:\npre-context · UI Flow Spec · spec-draft"]
+    end
+
+    subgraph build["4. BUILD"]
+        subgraph pipeline_detail["/smart-sdd pipeline"]
+            SPECIFY["specify\nRefines spec-draft (not from scratch)\nUI control downgrade = BLOCKING"]
+            PLAN["plan → tasks → analyze"]
+            IMPL["implement\nWiring Check (7-point)"]
+            VERIFY["verify\nSC Evidence Gate (runtime proof required)"]
+            SPECIFY --> PLAN --> IMPL --> VERIFY
+        end
+        ADOPT_P["/smart-sdd adopt\nspecify → plan → analyze → verify"]
+    end
+
+    DP["⚙️ Domain Profile\nPer-step rules loaded\nfrom project type"]
+
+    DE["/domain-extend\nbrowse · detect · extend\nimport · customize · validate"]
+
+    CODE --> CE_ORIENT
+    CE_TRACE --> EO
+    IDEA --> INIT
+    CE_SYNTH -- "--from-explore" --> RS_RUN
+    CE_SYNTH -- "--from-explore" --> ADD
+    CE_SYNTH -- "--from-explore" --> ADOPT_RS
+    CODE --> RS_RUN
+    CODE --> ADOPT_RS
+    INIT --> ADD
+    RS_DRAFT --> GEL_PROJ
+    RS_DRAFT --> GEL_FEAT
+    ADOPT_RS --> GEL_PROJ
+    ADD --> GEL_PROJ
+    GEL_FEAT -- "spec-draft seeds specify" --> SPECIFY
+    GEL_PROJ --> pipeline_detail
+    GEL_PROJ --> ADOPT_P
+    DP -.-> pipeline_detail
+    DP -.-> ADOPT_P
+    DP -.-> ADD
+    DE -.->|"detect gaps"| CE_SYNTH
+    DE -.->|"detect gaps"| RS_CODE
+    DE -->|"new modules feed"| DP

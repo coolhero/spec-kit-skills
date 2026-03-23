@@ -24,6 +24,20 @@
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+After domain modules are merged (Steps 1-4), retain ONLY these sections for `plan`:
+
+| Active (retain) | Skipped (discard from context) |
+|-----------------|-------------------------------|
+| S7 (B-1 bug prevention only), Foundation F2/F3 | S0, S1, S2, S3, S5, S6, S8, S9 |
+
+Display in Checkpoint: `📊 Domain: [N] modules → S7(B-1)+F2/F3 active | all other sections skipped`
+
+🚫 Do NOT retain skipped sections. Plan uses spec.md (which already embeds S1 rules) — re-loading S1 is redundant.
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |
