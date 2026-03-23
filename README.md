@@ -407,7 +407,9 @@ The diagram shows the full lifecycle: **understand** existing code with code-exp
 ## Scenario Guide
 
 Every project falls into one of these scenarios. Find yours and follow the workflow.
-For the exhaustive list of 57 detailed scenarios with preconditions and expected outcomes, see [SCENARIO-CATALOG.md](SCENARIO-CATALOG.md).
+For the exhaustive list of 37 detailed scenarios with preconditions and expected outcomes, see [SCENARIO-CATALOG.md](SCENARIO-CATALOG.md).
+
+> **💡 `/domain-extend` in any scenario**: At any point in S1–S9, if the pipeline encounters a pattern no existing module covers, use `/domain-extend detect` to identify the gap and `/domain-extend extend` to create a new module. You can also import your team's ADRs and style guides with `/domain-extend import`. See [SCENARIO-CATALOG.md § H](SCENARIO-CATALOG.md#h-advanced--customization) for domain extension scenarios (SH05–SH09).
 
 | # | Scenario | When to Use | Modifies Code? |
 |---|----------|-------------|---------------|
@@ -595,6 +597,8 @@ S6 (Modernize) ──────────── adopt → add ────�
 S7 (Rebuild+) ──────────── pipeline → add ──┤
 S8 (New Project) ─────────── init → add ────┤
 S9 (Explore→Decide) ──────── (any above) ───┘
+                                             │
+         /domain-extend ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  (at any point: detect gaps → extend → import)
 ```
 
 ### Mid-Pipeline Navigation: Step-Back & Spec Revision

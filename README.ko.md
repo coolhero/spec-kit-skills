@@ -405,7 +405,9 @@ flowchart TD
 ## 시나리오 가이드
 
 모든 프로젝트는 아래 시나리오 중 하나에 해당합니다. 본인의 상황을 찾아 워크플로우를 따르세요.
-전제 조건과 기대 결과가 포함된 57개 상세 시나리오는 [SCENARIO-CATALOG.md](SCENARIO-CATALOG.md)를 참조하세요.
+전제 조건과 기대 결과가 포함된 37개 상세 시나리오는 [SCENARIO-CATALOG.ko.md](SCENARIO-CATALOG.ko.md)를 참조하세요.
+
+> **💡 어떤 시나리오에서든 `/domain-extend`**: S1~S9 진행 중 파이프라인이 기존 모듈에 없는 패턴을 만나면, `/domain-extend detect`로 갭을 식별하고 `/domain-extend extend`로 새 모듈을 생성하세요. 팀 ADR이나 스타일 가이드도 `/domain-extend import`로 임포트할 수 있습니다. [SCENARIO-CATALOG.ko.md § H](SCENARIO-CATALOG.ko.md#h-고급--커스터마이징)에서 도메인 확장 시나리오(SH05–SH09)를 확인하세요.
 
 | # | 시나리오 | 사용 시점 | 코드 수정 여부 |
 |---|---------|----------|--------------|
@@ -593,6 +595,8 @@ S6 (현대화) ─────────── adopt → add ────┤  
 S7 (리빌드+) ────────── pipeline → add ─┤
 S8 (새 프로젝트) ─────── init → add ────┤
 S9 (파악→결정) ────────── (위 중 선택) ─┘
+                                        │
+      /domain-extend ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  (언제든: 갭 감지 → 확장 → 임포트)
 ```
 
 ### 파이프라인 중간 탐색: Step-Back & Spec 보완
