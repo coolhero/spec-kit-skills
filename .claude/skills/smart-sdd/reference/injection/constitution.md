@@ -5,6 +5,14 @@
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+Domain modules are NOT needed for `constitution` — constitution defines principles from constitution-seed.md, not from domain-specific rules.
+
+Display in Checkpoint: `📊 Domain: skipped (constitution uses constitution-seed.md)`
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

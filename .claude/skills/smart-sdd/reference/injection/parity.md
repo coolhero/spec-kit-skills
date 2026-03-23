@@ -6,6 +6,18 @@
 
 ---
 
+## Domain Module Filtering (per _resolver.md Step 5)
+
+Parity uses S2 (Parity Dimensions) from domain modules. Retain ONLY S2; skip all other sections.
+
+| Active (retain) | Skipped (discard from context) |
+|-----------------|-------------------------------|
+| S2 | S0, S1, S3, S5, S6, S7, S8, S9 |
+
+Display in Checkpoint: `📊 Domain: [N] modules → S2 active | all other sections skipped`
+
+---
+
 ## Read Targets
 
 | File | Section | Filtering |

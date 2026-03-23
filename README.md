@@ -409,7 +409,7 @@ The diagram shows the full lifecycle: **understand** existing code with code-exp
 Every project falls into one of these scenarios. Find yours and follow the workflow.
 For the exhaustive list of 37 detailed scenarios with preconditions and expected outcomes, see [SCENARIO-CATALOG.md](SCENARIO-CATALOG.md).
 
-> **💡 `/domain-extend` in any scenario**: At any point in S1–S9, if the pipeline encounters a pattern no existing module covers, use `/domain-extend detect` to identify the gap and `/domain-extend extend` to create a new module. You can also import your team's ADRs and style guides with `/domain-extend import`. See [SCENARIO-CATALOG.md § H](SCENARIO-CATALOG.md#h-advanced--customization) for domain extension scenarios (SH05–SH09).
+> **💡 `/domain-extend` in any scenario**: At any point in S1–S10, if the pipeline encounters a pattern no existing module covers, use `/domain-extend detect` to identify the gap and `/domain-extend extend` to create a new module. You can also import your team's ADRs and style guides with `/domain-extend import`. See [SCENARIO-CATALOG.md § H](SCENARIO-CATALOG.md#h-advanced--customization) for domain extension scenarios (SH05–SH09).
 
 | # | Scenario | When to Use | Modifies Code? |
 |---|----------|-------------|---------------|
@@ -422,6 +422,7 @@ For the exhaustive list of 37 detailed scenarios with preconditions and expected
 | **S7** | [Rebuild → Extend](#s7-rebuild--extend) | Rewrite first, then add new features beyond original scope | Full + new |
 | **S8** | [New Project](#s8-new-project) | Start from scratch — no existing code | Full |
 | **S9** | [Explore → Decide](#s9-explore--decide) | Study code first, then decide what to do | Depends on choice |
+| **S10** | [Customize Domain](#s10-customize-domain) | Add custom modules, import team docs, set org conventions | Module files only |
 
 ### S1: Explore Only
 
@@ -583,6 +584,41 @@ Then choose:
   → Spec only: /reverse-spec --adopt --from-explore specs/explore/ → adopt
 ```
 
+### S10: Customize Domain
+
+```
+Goal: Teach the pipeline your project's specific patterns, import team knowledge,
+      or set organization-wide conventions.
+
+Browse what exists:
+/domain-extend browse                        → See all modules, file paths, sections
+/domain-extend browse profile desktop-app    → See what a profile activates
+
+Detect gaps (standalone or from code-explore):
+/domain-extend detect                        → Analyze current Domain Profile for gaps
+/domain-extend detect --from-explore ./specs/explore/  → Find patterns code-explore discovered but no module covers
+
+Create new modules:
+/domain-extend extend concern "video-encoding"         → New concern (3-file set)
+/domain-extend extend foundation "fastify"             → New Foundation
+/domain-extend extend rule gui+video-encoding          → New cross-concern integration rule
+
+Import team knowledge:
+/domain-extend import ./docs/adr/            → Convert ADRs to module rules
+/domain-extend import ./postmortems/         → Convert incidents to S7 bug prevention
+/domain-extend import --org ./wiki/          → Create org-convention.md from wiki
+
+Set org/project conventions:
+/domain-extend customize org                 → Create/edit org-convention.md
+/domain-extend customize project             → Create/edit domain-custom.md
+/domain-extend customize profile "fintech-api" → Create reusable profile
+
+Validate:
+/domain-extend validate                      → Check all modules for format consistency
+```
+
+> S10 can be used **standalone** (before any pipeline) or **mid-pipeline** (when a gap is discovered). Created modules are immediately available to all subsequent pipeline runs.
+
 ### Scenario Convergence
 
 All scenarios converge to **incremental mode** as the steady state:
@@ -597,8 +633,7 @@ S6 (Modernize) ──────────── adopt → add ────�
 S7 (Rebuild+) ──────────── pipeline → add ──┤
 S8 (New Project) ─────────── init → add ────┤
 S9 (Explore→Decide) ──────── (any above) ───┘
-                                             │
-         /domain-extend ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  (at any point: detect gaps → extend → import)
+S10 (Domain) ─── detect → extend → import ──── enriches all of the above
 ```
 
 ### Mid-Pipeline Navigation: Step-Back & Spec Revision
@@ -875,7 +910,7 @@ This works at **every HARD STOP** — whether the user gives feedback during pla
 
 ### Shared Runtime
 
-All three skills need to run apps (source app for analysis, target app for verification). Instead of duplicating this logic, `shared/runtime/` provides common protocols:
+The three pipeline skills (code-explore, reverse-spec, smart-sdd) need to run apps (source app for analysis, target app for verification). Instead of duplicating this logic, `shared/runtime/` provides common protocols:
 
 - **Playwright detection** — find available backend (CLI, MCP, CDP)
 - **Data storage map** — detect where the app stores data + userData path

@@ -407,7 +407,7 @@ flowchart TD
 모든 프로젝트는 아래 시나리오 중 하나에 해당합니다. 본인의 상황을 찾아 워크플로우를 따르세요.
 전제 조건과 기대 결과가 포함된 37개 상세 시나리오는 [SCENARIO-CATALOG.ko.md](SCENARIO-CATALOG.ko.md)를 참조하세요.
 
-> **💡 어떤 시나리오에서든 `/domain-extend`**: S1~S9 진행 중 파이프라인이 기존 모듈에 없는 패턴을 만나면, `/domain-extend detect`로 갭을 식별하고 `/domain-extend extend`로 새 모듈을 생성하세요. 팀 ADR이나 스타일 가이드도 `/domain-extend import`로 임포트할 수 있습니다. [SCENARIO-CATALOG.ko.md § H](SCENARIO-CATALOG.ko.md#h-고급--커스터마이징)에서 도메인 확장 시나리오(SH05–SH09)를 확인하세요.
+> **💡 어떤 시나리오에서든 `/domain-extend`**: S1~S10 어떤 시나리오에서든 파이프라인이 기존 모듈에 없는 패턴을 만나면, `/domain-extend detect`로 갭을 식별하고 `/domain-extend extend`로 새 모듈을 생성하세요. 팀 ADR이나 스타일 가이드도 `/domain-extend import`로 임포트할 수 있습니다. [SCENARIO-CATALOG.ko.md § H](SCENARIO-CATALOG.ko.md#h-고급--커스터마이징)에서 도메인 확장 시나리오(SH05–SH09)를 확인하세요.
 
 | # | 시나리오 | 사용 시점 | 코드 수정 여부 |
 |---|---------|----------|--------------|
@@ -420,6 +420,7 @@ flowchart TD
 | **S7** | [리빌드 → 확장](#s7-리빌드--확장) | 먼저 재작성, 그 다음 원본 범위 넘어 새 기능 추가 | 전체 + 추가 |
 | **S8** | [새 프로젝트](#s8-새-프로젝트) | 기존 코드 없이 처음부터 시작 | 전체 |
 | **S9** | [파악 → 결정](#s9-파악--결정) | 코드를 먼저 이해하고 방향 결정 | 선택에 따라 |
+| **S10** | [도메인 커스터마이징](#s10-도메인-커스터마이징) | 커스텀 모듈 추가, 팀 문서 임포트, 조직 컨벤션 설정 | 모듈 파일만 |
 
 ### S1: 파악만
 
@@ -581,6 +582,41 @@ Phase 2 — 확장 (이제 점진적 추가 모드):
   → Spec만:  /reverse-spec --adopt --from-explore specs/explore/ → adopt
 ```
 
+### S10: 도메인 커스터마이징
+
+```
+목표: 파이프라인에 프로젝트 고유 패턴을 가르치고, 팀 지식을 임포트하고,
+      조직 전체 컨벤션을 설정합니다.
+
+둘러보기:
+/domain-extend browse                        → 전체 모듈, 파일 경로, 섹션 확인
+/domain-extend browse profile desktop-app    → 프로필이 활성화하는 모듈 확인
+
+갭 감지 (단독 또는 code-explore 연계):
+/domain-extend detect                        → 현재 Domain Profile 갭 분석
+/domain-extend detect --from-explore ./specs/explore/  → code-explore가 발견했지만 모듈이 없는 패턴
+
+새 모듈 생성:
+/domain-extend extend concern "video-encoding"         → 새 concern (3파일 세트)
+/domain-extend extend foundation "fastify"             → 새 Foundation
+/domain-extend extend rule gui+video-encoding          → 새 cross-concern 통합 규칙
+
+팀 지식 임포트:
+/domain-extend import ./docs/adr/            → ADR을 모듈 규칙으로 변환
+/domain-extend import ./postmortems/         → 장애 분석을 S7 버그 예방으로 변환
+/domain-extend import --org ./wiki/          → 위키에서 org-convention.md 생성
+
+조직/프로젝트 컨벤션:
+/domain-extend customize org                 → org-convention.md 생성/편집
+/domain-extend customize project             → domain-custom.md 생성/편집
+/domain-extend customize profile "fintech-api" → 재사용 가능한 프로필 생성
+
+검증:
+/domain-extend validate                      → 전체 모듈 포맷 일관성 검사
+```
+
+> S10은 **단독** (파이프라인 시작 전) 또는 **파이프라인 중간** (갭 발견 시)에 사용할 수 있습니다. 생성된 모듈은 이후 모든 파이프라인 실행에서 즉시 사용 가능합니다.
+
 ### 시나리오 수렴
 
 모든 시나리오는 **점진적 추가 모드**로 수렴합니다:
@@ -595,8 +631,7 @@ S6 (현대화) ─────────── adopt → add ────┤  
 S7 (리빌드+) ────────── pipeline → add ─┤
 S8 (새 프로젝트) ─────── init → add ────┤
 S9 (파악→결정) ────────── (위 중 선택) ─┘
-                                        │
-      /domain-extend ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  (언제든: 갭 감지 → 확장 → 임포트)
+S10 (도메인) ─── detect → extend → import ── 위 모든 시나리오를 강화
 ```
 
 ### 파이프라인 중간 탐색: Step-Back & Spec 보완
@@ -871,7 +906,7 @@ cd ~/my-project
 
 ### Shared Runtime (공유 런타임)
 
-세 스킬 모두 앱을 실행해야 합니다 (소스 앱 분석용, 타겟 앱 검증용). 이 로직을 중복하지 않고 `shared/runtime/`에서 공통 프로토콜을 제공합니다:
+세 파이프라인 스킬(code-explore, reverse-spec, smart-sdd)은 앱을 실행해야 합니다 (소스 앱 분석용, 타겟 앱 검증용). 이 로직을 중복하지 않고 `shared/runtime/`에서 공통 프로토콜을 제공합니다:
 
 - **Playwright 감지** — 사용 가능한 백엔드 탐색 (CLI, MCP, CDP)
 - **Data Storage Map** — 앱이 어디에 데이터를 저장하는지 + userData 경로
