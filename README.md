@@ -162,6 +162,8 @@ See [Domain Module System](#domain-module-system) for details.
 
 A Brief is **not** the same as a PRD. A PRD is one possible *input* to the Brief process; a casual conversation or a gap analysis result are equally valid inputs. The Brief is the *output* — a normalized, quality-checked Feature definition that has been validated for both **completeness** (all key dimensions covered) and **accuracy** (the agent's interpretation confirmed by the user through an explicit approval gate).
 
+**How the three concepts reinforce each other**: Domain Profile injects domain-specific questions into the Brief — if your project has an `auth` concern, the Brief automatically asks "What auth strategy? JWT, session, OAuth?" If `realtime` is active, it asks "What happens when the connection drops?" These questions come from domain module S5 (Elaboration Probes), which means the richer your Domain Profile, the deeper your Briefs become. And when the pipeline discovers a gap no module covers, `/domain-extend` creates a new module — whose S5 probes make the *next* Brief smarter. The three concepts form a reinforcing cycle: GEL remembers, Domain Profile shapes, Brief validates — and domain-extend grows the vocabulary that drives all three.
+
 ```
 /smart-sdd init                      /smart-sdd add (= Briefing)
 Sets up the PROJECT:                 Defines each FEATURE:

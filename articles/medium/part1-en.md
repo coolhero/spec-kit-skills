@@ -111,6 +111,8 @@ Instead of "add auth," you go through a structured consultation:
 
 This takes 2 minutes instead of 2 seconds. The payoff is that every downstream artifact — spec, plan, implementation — is grounded in explicit decisions, not assumptions.
 
+These three concepts reinforce each other. Domain Profile injects **domain-specific questions** into the Brief — if your project has an `auth` concern, the Brief automatically asks "What auth strategy?" If `realtime` is active, it asks "What happens on disconnect?" The richer your Domain Profile, the deeper your Briefs. And when `/domain-extend` adds a new module, its questions make the *next* Brief smarter. GEL remembers, Domain Profile shapes, Brief validates — and domain-extend grows the vocabulary that drives all three.
+
 ---
 
 ## Real-World Scenarios

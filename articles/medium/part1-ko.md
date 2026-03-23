@@ -107,6 +107,8 @@ Agentic 코딩 도구가 임계점을 넘었습니다. Claude Code, Cursor, Copi
 
 2초 대신 2분이 걸립니다. 그 대가로 모든 산출물이 가정이 아닌 명시적 결정에 기반하게 됩니다.
 
+세 개념은 서로를 강화합니다. Domain Profile이 Brief에 **도메인 특화 질문**을 주입해요 — 프로젝트에 `auth` concern이 있으면 Brief가 자동으로 "인증 전략은?"을 묻고, `realtime`이 활성화되면 "연결 끊기면 어떻게 되나요?"를 묻습니다. Domain Profile이 풍부할수록 Brief가 깊어지고, `/domain-extend`로 새 모듈을 추가하면 그 질문이 *다음* Brief를 더 똑똑하게 만듭니다. GEL이 기억하고, Domain Profile이 규칙을 정하고, Brief가 검증하고 — domain-extend가 이 셋을 움직이는 어휘를 키웁니다.
+
 ---
 
 ## 실전 시나리오
