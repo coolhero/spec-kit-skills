@@ -80,9 +80,9 @@ Before explaining the mechanism, a quick note on **the Section System** — the 
 
 Here's the concrete mechanism: domain modules have standardized sections (S1 for SC generation rules, S5 for elaboration probes, S7 for bug prevention rules, S8 for runtime verification strategy). When the pipeline runs, the injection file loads the relevant modules and merges their sections. An `ai-assistant` archetype adds A2 (SC extensions for token management, streaming interruption). A `gui` interface adds S6 (UI testing integration). They accumulate — the final context for specify is the union of all active modules' S1 sections.
 
-But the real power emerges when modules *combine*. The resolver doesn't just load modules independently — it detects specific combinations and activates Cross-Concern Integration Rules. There are 62 combination patterns defined in the resolver. For example, when a project's profile includes both `gui` and `realtime`, the resolver triggers emergent rules that neither module alone contains: optimistic update patterns (show the user's action immediately, reconcile when the server responds), reconnection UI states (disconnected banner, reconnecting spinner, stale-data indicator), and critically, "stale UI after reconnect" prevention — the subtle bug where the UI shows pre-disconnect data after the WebSocket reconnects because the component didn't re-fetch. Neither the `gui` module nor the `realtime` module alone would generate SCs for this scenario. It only appears when both are active simultaneously.
+But the real power emerges when modules *combine*. The resolver doesn't just load modules independently — it detects specific combinations and activates Cross-Concern Integration Rules. There are 61 combination patterns defined in the resolver. For example, when a project's profile includes both `gui` and `realtime`, the resolver triggers emergent rules that neither module alone contains: optimistic update patterns (show the user's action immediately, reconcile when the server responds), reconnection UI states (disconnected banner, reconnecting spinner, stale-data indicator), and critically, "stale UI after reconnect" prevention — the subtle bug where the UI shows pre-disconnect data after the WebSocket reconnects because the component didn't re-fetch. Neither the `gui` module nor the `realtime` module alone would generate SCs for this scenario. It only appears when both are active simultaneously.
 
-This is what makes Domain Profiles more than a configuration switch. They're a combinatorial system where the intersection of axes produces richer behavior than the union of individual parts. The 62 patterns aren't arbitrary — each was discovered through a real pipeline failure where two concerns interacted in a way that neither module anticipated. Every time we found an emergent bug pattern at the intersection of two axes, we codified it as a cross-concern rule so the next project wouldn't hit the same wall.
+This is what makes Domain Profiles more than a configuration switch. They're a combinatorial system where the intersection of axes produces richer behavior than the union of individual parts. The 61 patterns aren't arbitrary — each was discovered through a real pipeline failure where two concerns interacted in a way that neither module anticipated. Every time we found an emergent bug pattern at the intersection of two axes, we codified it as a cross-concern rule so the next project wouldn't hit the same wall.
 
 **P1-b: Artifact Separation (Source Code Fidelity).** This principle was born from a painful failure. During a rebuild project, the spec for Feature 3 described the source app's implementation details instead of the desired behavior. When we tried to implement it differently (better data model, different API design), the spec fought us — it kept pulling toward the old implementation.
 
@@ -125,7 +125,7 @@ When NOT to reset: never mid-Feature (between specify and plan). The inter-step 
 
 **The Fourth Skill's Architectural Role**
 
-The three pipeline skills (code-explore, reverse-spec, smart-sdd) consume domain modules. But who creates them? Initially, the framework ships with 48 concerns, 15 archetypes, and 40+ foundations. That's a solid starting vocabulary — but every project eventually encounters patterns that aren't covered.
+The three pipeline skills (code-explore, reverse-spec, smart-sdd) consume domain modules. But who creates them? Initially, the framework ships with 47 concerns, 15 archetypes, and 40+ foundations. That's a solid starting vocabulary — but every project eventually encounters patterns that aren't covered.
 
 `/domain-extend` closes this loop. It's not a pipeline stage — it's a **meta-tool** that enriches the vocabulary the pipeline draws from. When code-explore detects an unknown pattern, domain-extend can create a module for it. When a team imports their ADRs and postmortems, domain-extend converts that institutional knowledge into structured rules. The result: each project that uses spec-kit-skills makes the system smarter for the next project.
 
@@ -269,8 +269,8 @@ reference/
   pipeline-integrity-guards.md
 domains/
   _core.md            — Universal rules (always loaded with domain)
-  _resolver.md        — Module loading logic + 62 cross-concern patterns
-  interfaces/         — 9 modules (gui, cli, http-api, grpc, tui, embedded, mobile, library, data-io)
+  _resolver.md        — Module loading logic + 61 cross-concern patterns
+  interfaces/         — 10 modules (gui, cli, http-api, grpc, tui, embedded, mobile, library, data-io, k8s-api)
   concerns/           — 47 modules (auth, realtime, resilience, connection-pool, tls-management, ...)
   archetypes/         — 15 modules (ai-assistant, microservice, network-server, ...)
   contexts/modes/     — 4 modules (greenfield, rebuild, adoption, incremental)
@@ -389,7 +389,7 @@ No code changes. No registration step. No config file update. If the file exists
 
 And here's the interesting part: if `rate-limiting` frequently co-occurs with `auth` or `http-api`, you can add a cross-concern integration rule in the resolver. The pattern "rate-limiting + auth" might trigger an emergent rule: "rate limit responses must include Retry-After headers and the auth layer must not count rate-limited requests as failed auth attempts." This emergent behavior is what elevates the module system from a simple file loader to a domain knowledge engine.
 
-The zero-registration design is also what makes the system resilient to partial knowledge. You don't need all 48 concern modules to use the system. A project might use only `auth`, `realtime`, and `external-sdk`. The other 45 modules exist but are never loaded — they add zero cost. And when someone contributes a new module, it's immediately available to any project that declares it in their profile. No version bump, no release cycle, no migration.
+The zero-registration design is also what makes the system resilient to partial knowledge. You don't need all 47 concern modules to use the system. A project might use only `auth`, `realtime`, and `external-sdk`. The other 44 modules exist but are never loaded — they add zero cost. And when someone contributes a new module, it's immediately available to any project that declares it in their profile. No version bump, no release cycle, no migration.
 
 ### Adding a New Foundation
 
@@ -504,7 +504,7 @@ architecture:
   principles:
     P1 Context Continuity:
       P1-a: Domain Profile is first-class (shapes every pipeline stage via module sections)
-        mechanism: 62 cross-concern integration patterns in _resolver.md
+        mechanism: 61 cross-concern integration patterns in _resolver.md
         example: gui + realtime triggers emergent rules (optimistic update, reconnection UI, stale-data prevention)
       P1-b: Artifact Separation (specs describe WHAT, not WHERE FROM)
         mechanism: Source Code Reference Injection as BLOCKING gate at implement
@@ -547,7 +547,7 @@ architecture:
       interfaces_concerns: S0 (keywords), S1 (SC rules), S3 (verify), S5 (probes), S7 (bugs), S8 (runtime)
       archetypes: A0 (keywords), A1 (philosophy), A2 (SC extensions), A3 (probes), A4 (constitution), A5 (brief criteria)
     merge_rule: append semantics (accumulate, don't override)
-    cross_concern: 62 combination patterns in _resolver.md (emergent rules from axis intersections)
+    cross_concern: 61 combination patterns in _resolver.md (emergent rules from axis intersections)
     selection: only modules matching active Domain Profile
 
   context_injection:

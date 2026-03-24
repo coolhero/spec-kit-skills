@@ -315,7 +315,7 @@ Playwright를 사용할 수 없으면 에이전트가 **사용자에게 위임**
 
 ## /domain-extend — 어휘를 키우다
 
-위의 세 스킬 — code-explore, reverse-spec, smart-sdd — 은 모두 공유된 도메인 모듈 시스템을 활용합니다. 48개 concern 모듈, 15개 archetype, 40개 이상의 foundation이 기본 탑재되어 있죠. 그런데 프로젝트가 이 모듈 중 어느 것도 커버하지 않는 패턴을 쓴다면?
+위의 세 스킬 — code-explore, reverse-spec, smart-sdd — 은 모두 공유된 도메인 모듈 시스템을 활용합니다. 47개 concern 모듈, 15개 archetype, 40개 이상의 foundation이 기본 탑재되어 있죠. 그런데 프로젝트가 이 모듈 중 어느 것도 커버하지 않는 패턴을 쓴다면?
 
 `/domain-extend`가 이 문제를 해결합니다. 세 가지 소스에서 새 도메인 모듈을 생성할 수 있습니다:
 
@@ -510,15 +510,15 @@ pipeline F003 (막힘) → code-explore trace → (이해 획득)
 code_explore:
   orient:
     감지 대상: 언어, 프레임워크, 프로젝트 유형, 진입점, 동시성 모델, Domain Profile
-    인터페이스 유형: gui, http-api, grpc, cli, tui, embedded, mobile, library, data-io, message-consumer
+    인터페이스 유형: gui, http-api, grpc, cli, tui, embedded, mobile, library, data-io, k8s-api
     출력: specs/explore/orientation.md
 
   trace:
     전략:
-      순차: 요청 → 응답 (REST, CLI)
       커넥션 생명주기: accept → handshake → request → response → close (TCP, WS, gRPC)
       상태 머신: 상태 + 전환을 소스에 매핑 (프레즌스, 리컨실러)
       pub/sub 팬아웃: 발행 경로 + 소비 경로 + 팬아웃 (브로커, 이벤트)
+      에러/재시도 경로: error → timeout → retry → backoff → circuit breaker → fallback/DLQ
       동시 액터: goroutine/task별 주석 (병렬 시스템)
     출력: specs/explore/traces/{NNN}-{slug}.md
     필수 포함: mermaid 다이어그램, 흐름 테이블, 엔티티, API, 비즈니스 규칙, 관찰

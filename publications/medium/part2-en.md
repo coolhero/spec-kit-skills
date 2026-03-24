@@ -315,7 +315,7 @@ The `add --to` flow solves this with SC Preservation:
 
 ## /domain-extend — Growing the Vocabulary
 
-The three skills above — code-explore, reverse-spec, and smart-sdd — all draw on a shared domain module system: 48 concern modules, 15 archetypes, 40+ foundations. But what happens when your project uses a pattern that none of those modules cover?
+The three skills above — code-explore, reverse-spec, and smart-sdd — all draw on a shared domain module system: 47 concern modules, 15 archetypes, 40+ foundations. But what happens when your project uses a pattern that none of those modules cover?
 
 `/domain-extend` solves this. It creates new domain modules from three sources:
 
@@ -510,15 +510,15 @@ The `--from-explore` and `--from-reverse-spec` flags carry context seamlessly �
 code_explore:
   orient:
     detects: language, framework, project_type, entry_points, concurrency_model, domain_profile
-    interface_types: gui, http-api, grpc, cli, tui, embedded, mobile, library, data-io, message-consumer
+    interface_types: gui, http-api, grpc, cli, tui, embedded, mobile, library, data-io, k8s-api
     output: specs/explore/orientation.md
 
   trace:
     strategies:
-      sequential: request → response (REST, CLI)
       connection_lifecycle: accept → handshake → request → response → close (TCP, WS, gRPC)
       state_machine: states + transitions mapped to source (presence, reconcilers)
       pub_sub_fanout: publish path + consume path + fan-out (brokers, events)
+      error_retry_path: error → timeout → retry → backoff → circuit breaker → fallback/DLQ
       concurrent_actors: per-goroutine/task annotation (parallel systems)
     output: specs/explore/traces/{NNN}-{slug}.md
     must_include: mermaid_diagram, flow_table, entities, apis, business_rules, observations

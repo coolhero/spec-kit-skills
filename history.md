@@ -5,6 +5,25 @@
 
 ---
 
+## [2026-03-25] TRM vs Implementation audit — publication corrections
+
+### What Changed
+- **Medium articles (EN+KO)**: Corrected numeric discrepancies found during TRM-to-implementation audit
+  - Concern module count: 48 → **47** (part1, part2, part3 — all EN+KO)
+  - Cross-concern integration rules: 62 → **61** (part3 EN+KO, all occurrences)
+  - Interface count: 9 → **10** (part3 EN+KO, k8s-api was missing)
+  - Interface name: `message-consumer` → **`k8s-api`** (part2 EN+KO, architecture spec block)
+  - Trace strategies: removed `sequential` (basic mode, not a named strategy), added **`error_retry_path`** (part2 EN+KO)
+  - Guard names in TRM remain simplified for reader accessibility (documented as intentional)
+
+### Why
+TRM audit against actual implementation revealed 7 numeric/naming discrepancies. All were cases where the publication was written before final module additions (k8s-api interface, resolver table cleanup) and not updated. No implementation gaps found — all discrepancies were documentation-only.
+
+### Audit Score
+93/100 — Core mechanisms (HARD STOP, Execute+Review, SC Preservation, Artifact Separation, GEL, P1/P2/P3) are 100% implemented. Gaps were exclusively in publication numbers.
+
+---
+
 ## [2026-03-25] Domain Profile Instance + Guard ID normalization + integrity fixes
 
 ### What Changed

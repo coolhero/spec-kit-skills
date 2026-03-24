@@ -170,7 +170,7 @@ There are plenty of "prompt libraries" and "AI workflow tools." Here's what's di
 
 **It enforces, not suggests.** HARD STOP gates require your explicit approval. The agent literally cannot proceed without your response. This isn't a "best practice" — it's a blocking gate.
 
-**It adapts to your domain.** 48 concern modules, 15 archetypes, 40+ framework foundations. The verification rules for an Electron app are different from a Django server. This isn't a generic checklist.
+**It adapts to your domain.** 47 concern modules, 15 archetypes, 40+ framework foundations. The verification rules for an Electron app are different from a Django server. This isn't a generic checklist.
 
 **It composes.** Use code-explore alone to study a codebase. Use smart-sdd alone for greenfield. Use all four together for a full rebuild. Each skill works independently; together they form a pipeline.
 
