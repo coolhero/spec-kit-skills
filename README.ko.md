@@ -347,7 +347,8 @@ flowchart TD
 
     subgraph gel["Global Evolution Layer — specs/_global/"]
         GEL_PROJ["프로젝트 전체:
-        roadmap · registries · constitution"]
+        roadmap · registries · constitution
+        domain-profile-instance"]
         GEL_FEAT["Feature별:
         pre-context · UI Flow Spec · spec-draft"]
     end
