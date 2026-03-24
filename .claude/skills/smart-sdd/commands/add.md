@@ -379,6 +379,35 @@ If domain criteria are not met but base perspectives are covered, ask targeted q
 
 **Do NOT propose Feature structure yet** — just ensure the definition is rich enough to scope in Phase 3.
 
+
+### 1c-post. Domain Profile Instance Update
+
+After Elaboration completes and S5/A3 probe answers are gathered, persist the decisions to the Domain Profile Instance file:
+
+1. **Read or create**: Read `BASE_PATH/domain-profile-instance.md`. If the file does not exist, create it from `smart-sdd/templates/domain-profile-instance-template.md` and populate the Project-Level Profile section from `sdd-state.md` header fields (Interfaces, Concerns, Archetype, Foundation, Context Mode/Scale/Modifiers).
+
+2. **Record S5 answers**: For each S5 probe answer gathered during Elaboration (1c), append a row to the Per-Concern Decisions table under the matching `### [concern-name]` subsection. If the concern subsection does not exist yet, create it from the template pattern.
+
+   | Probe (S5) | Decision | Decided At | Feature |
+   |------------|----------|------------|---------|
+   | [the S5 probe question] | [user's answer] | [ISO timestamp] | [current FID] |
+
+3. **Record A3 answers** (if Archetype is active): Same process for the Per-Archetype Decisions table.
+
+4. **Feature 2+ — Display inherited constraints**: If this is NOT the first Feature (i.e., Per-Feature Domain Summary already has entries), display a summary of preceding Features' key decisions that may constrain this Feature:
+
+   ```
+   📋 Inherited Domain Constraints (from domain-profile-instance.md)
+
+   F001-auth:
+     - auth concern: JWT with refresh tokens, session-based for GUI
+     - async-state concern: Zustand for client state, React Query for server state
+
+   These prior decisions may constrain the current Feature's design choices.
+   ```
+
+   This display is informational only — it does NOT require a HARD STOP. The user sees it as part of the Elaboration flow.
+
 ### 1d. Create Draft
 
 Create `specs/add-draft.md` with the gathered information:

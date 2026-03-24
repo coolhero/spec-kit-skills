@@ -74,13 +74,15 @@ Context Continuity has three sub-principles:
 
 **P1-a: Domain Profile is a First-Class Citizen.** It's not a one-time configuration. The Domain Profile actively shapes every stage — which probes get asked during `add`, which rules activate during `specify`, which verification steps run during `verify`. If the profile says `gui + realtime`, then specify generates SCs for optimistic UI updates and reconnection handling. If it says `cli + resilience`, completely different SCs emerge.
 
+An important distinction: the Domain Profile *framework* (the 5-axis module system with S0-S9 sections) is the profiling *tool*. The Domain Profile *Instance* (stored in `domain-profile-instance.md`) is the profiling *result* — your project's actual decisions. The framework asks "What auth strategy?"; the Instance records "JWT + OAuth2, decided during F001 Brief." This separation means Feature 3 can query Feature 1's auth decisions programmatically, not by parsing prose in spec documents.
+
 Before explaining the mechanism, a quick note on **the Section System** — the numbered labels you'll see throughout this article. Each domain module is divided into numbered sections, and each section feeds a specific pipeline stage. Think of it like a recipe card with labeled tabs: the "ingredients" tab (S0) is read when detecting the project type, the "cooking steps" tab (S1) is read when generating test scenarios, the "questions" tab (S5) is read when consulting the user. The number tells you *when* it's used. (Full details in the "Module Architecture" section below.)
 
 Here's the concrete mechanism: domain modules have standardized sections (S1 for SC generation rules, S5 for elaboration probes, S7 for bug prevention rules, S8 for runtime verification strategy). When the pipeline runs, the injection file loads the relevant modules and merges their sections. An `ai-assistant` archetype adds A2 (SC extensions for token management, streaming interruption). A `gui` interface adds S6 (UI testing integration). They accumulate — the final context for specify is the union of all active modules' S1 sections.
 
-But the real power emerges when modules *combine*. The resolver doesn't just load modules independently — it detects specific combinations and activates Cross-Concern Integration Rules. There are 46 combination patterns defined in the resolver. For example, when a project's profile includes both `gui` and `realtime`, the resolver triggers emergent rules that neither module alone contains: optimistic update patterns (show the user's action immediately, reconcile when the server responds), reconnection UI states (disconnected banner, reconnecting spinner, stale-data indicator), and critically, "stale UI after reconnect" prevention — the subtle bug where the UI shows pre-disconnect data after the WebSocket reconnects because the component didn't re-fetch. Neither the `gui` module nor the `realtime` module alone would generate SCs for this scenario. It only appears when both are active simultaneously.
+But the real power emerges when modules *combine*. The resolver doesn't just load modules independently — it detects specific combinations and activates Cross-Concern Integration Rules. There are 62 combination patterns defined in the resolver. For example, when a project's profile includes both `gui` and `realtime`, the resolver triggers emergent rules that neither module alone contains: optimistic update patterns (show the user's action immediately, reconcile when the server responds), reconnection UI states (disconnected banner, reconnecting spinner, stale-data indicator), and critically, "stale UI after reconnect" prevention — the subtle bug where the UI shows pre-disconnect data after the WebSocket reconnects because the component didn't re-fetch. Neither the `gui` module nor the `realtime` module alone would generate SCs for this scenario. It only appears when both are active simultaneously.
 
-This is what makes Domain Profiles more than a configuration switch. They're a combinatorial system where the intersection of axes produces richer behavior than the union of individual parts. The 46 patterns aren't arbitrary — each was discovered through a real pipeline failure where two concerns interacted in a way that neither module anticipated. Every time we found an emergent bug pattern at the intersection of two axes, we codified it as a cross-concern rule so the next project wouldn't hit the same wall.
+This is what makes Domain Profiles more than a configuration switch. They're a combinatorial system where the intersection of axes produces richer behavior than the union of individual parts. The 62 patterns aren't arbitrary — each was discovered through a real pipeline failure where two concerns interacted in a way that neither module anticipated. Every time we found an emergent bug pattern at the intersection of two axes, we codified it as a cross-concern rule so the next project wouldn't hit the same wall.
 
 **P1-b: Artifact Separation (Source Code Fidelity).** This principle was born from a painful failure. During a rebuild project, the spec for Feature 3 described the source app's implementation details instead of the desired behavior. When we tried to implement it differently (better data model, different API design), the spec fought us — it kept pulling toward the old implementation.
 
@@ -267,7 +269,7 @@ reference/
   pipeline-integrity-guards.md
 domains/
   _core.md            — Universal rules (always loaded with domain)
-  _resolver.md        — Module loading logic + 46 cross-concern patterns
+  _resolver.md        — Module loading logic + 62 cross-concern patterns
   interfaces/         — 9 modules (gui, cli, http-api, grpc, tui, embedded, mobile, library, data-io)
   concerns/           — 47 modules (auth, realtime, resilience, connection-pool, tls-management, ...)
   archetypes/         — 15 modules (ai-assistant, microservice, network-server, ...)
@@ -502,7 +504,7 @@ architecture:
   principles:
     P1 Context Continuity:
       P1-a: Domain Profile is first-class (shapes every pipeline stage via module sections)
-        mechanism: 46 cross-concern integration patterns in _resolver.md
+        mechanism: 62 cross-concern integration patterns in _resolver.md
         example: gui + realtime triggers emergent rules (optimistic update, reconnection UI, stale-data prevention)
       P1-b: Artifact Separation (specs describe WHAT, not WHERE FROM)
         mechanism: Source Code Reference Injection as BLOCKING gate at implement
@@ -545,7 +547,7 @@ architecture:
       interfaces_concerns: S0 (keywords), S1 (SC rules), S3 (verify), S5 (probes), S7 (bugs), S8 (runtime)
       archetypes: A0 (keywords), A1 (philosophy), A2 (SC extensions), A3 (probes), A4 (constitution), A5 (brief criteria)
     merge_rule: append semantics (accumulate, don't override)
-    cross_concern: 46 combination patterns in _resolver.md (emergent rules from axis intersections)
+    cross_concern: 62 combination patterns in _resolver.md (emergent rules from axis intersections)
     selection: only modules matching active Domain Profile
 
   context_injection:

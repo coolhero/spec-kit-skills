@@ -143,6 +143,8 @@ Each axis contributes rules (SC quality criteria, bug prevention patterns, verif
 
 When multiple concerns are active together, **Cross-Concern Integration Rules** activate emergent patterns — for example, `gui` + `realtime` triggers optimistic update and reconnection UI rules that neither module produces alone.
 
+When you run `init` or `add`, the system infers your project's **Domain Profile Instance** — the concrete combination of axes that applies to YOUR project (e.g., `gui + auth + realtime + electron + rebuild`). This Instance is stored in `sdd-state.md` and detailed domain decisions are recorded in `domain-profile-instance.md`. The Instance determines which module rules are loaded at each pipeline stage. Think of Domain Profile as the questionnaire template; the Instance is your filled-out form.
+
 Domain Profile is a **first-class citizen** — not a configuration that's set once and forgotten, but a living context that actively influences every step of every skill:
 
 - **code-explore**: detects the source project's profile (all 5 axes) during orientation, guides which flows to trace, and derives your target profile during synthesis

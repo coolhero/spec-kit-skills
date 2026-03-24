@@ -198,7 +198,27 @@ Active Domain Profile (from sdd-state.md)
 (N) = number of rules/items in that command's section
 ```
 
-5. Ask via AskUserQuestion:
+5. **Domain Profile Instance display** (conditional):
+   If `specs/_global/domain-profile-instance.md` exists, read it and display Per-Concern Decisions and Cross-Concern Integrations Applied:
+
+   ```
+   Domain Profile Instance (from domain-profile-instance.md)
+
+   ── Per-Concern Decisions ─────────────────────────
+   [concern-name]:
+     | Probe | Decision | Feature |
+     | [S5 probe] | [answer] | [FID] |
+     ...
+
+   ── Cross-Concern Integrations Applied ───────────
+   | Combination | Rule Injected | Feature |
+   | [modules] | [rule] | [FID] |
+   ...
+   ```
+
+   If the file does not exist, skip this display silently (no error — the file is created during the first `add` Brief).
+
+6. Ask via AskUserQuestion:
    - **"View module details"** → read and display full module
    - **"Detect gaps"** → chain to `/domain-extend detect`
    - **"Done"** → exit

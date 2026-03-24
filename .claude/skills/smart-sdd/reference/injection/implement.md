@@ -144,16 +144,16 @@ Display before each API-related task: `📋 API Compatibility Matrix: [N] provid
 
 ## Source Reference Injection (rebuild/adoption mode) — BLOCKING for rebuild+GUI
 
-> 🚫 G1: Guideline → Gate Escalation. Source Reference Injection is a BLOCKING gate
+> 🚫 G1 [G1]: Guideline → Gate Escalation. Source Reference Injection is a BLOCKING gate
 > (not a guideline) because its violation causes Major+ quality regression in rebuild projects.
 > See pipeline-integrity-guards.md § Guard 1.
 >
-> 🚫 G3: Cross-Stage Trust Breakers — Gate 2 (implement entry). Read Interaction Surface
+> 🚫 G3 [G3]: Cross-Stage Trust Breakers — Gate 2 (implement entry). Read Interaction Surface
 > Inventory + analyze source layout structure independently — do not blindly trust previous
 > stage assumptions about runtime defaults or UI structure.
 > See pipeline-integrity-guards.md § Guard 3.
 >
-> 🚫 G7: Rebuild Fidelity Chain. Source-First: read source BEFORE writing code.
+> 🚫 G7 [G7]: Rebuild Fidelity Chain. Source-First: read source BEFORE writing code.
 > Source structure is a first-class artifact at every pipeline stage, not a one-time
 > reverse-spec input. See pipeline-integrity-guards.md § Guard 7.
 
@@ -356,7 +356,7 @@ Even when the source app cannot be launched (dependency issues, missing env, etc
 
 ### Rebuild Visual Reference Checkpoint (MANDATORY — rebuild + GUI)
 
-> 🚫 G1: Guideline → Gate Escalation. This checkpoint was promoted from guideline to
+> 🚫 G1 [G1]: Guideline → Gate Escalation. This checkpoint was promoted from guideline to
 > BLOCKING gate because prior violations (SKF-024) caused Major+ quality regression.
 > See pipeline-integrity-guards.md § Guard 1.
 
@@ -601,7 +601,7 @@ After each task that creates/modifies UI files:
 
 **Step 2 — Runtime Check** (when Playwright CLI or MCP available):
 
-> Guard 2: Static ≠ Runtime — Level 1. App launches without crash (smoke check).
+> Guard 2 [G2]: Static ≠ Runtime — Level 1. App launches without crash (smoke check).
 > Static build pass alone is insufficient for GUI projects.
 > See pipeline-integrity-guards.md § Guard 2.
 
@@ -1226,7 +1226,7 @@ When a store/config that is **asynchronously hydrated** (e.g., from electron-sto
 
 ### Data Persistence Round-Trip Verification
 
-> (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 2: Static ≠ Runtime, Level 4)
+> [G2] (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 2: Static ≠ Runtime, Level 4)
 
 **Trigger**: Feature writes data that must survive app restart (DB, electron-store, localStorage, file system).
 
@@ -1269,7 +1269,7 @@ This rule prevents the class of bugs where "data works during session but vanish
 
 ### Interaction Surface Preservation (UI Features — when modifying/replacing previous Feature components)
 
-> 🚫 G1: Guideline → Gate Escalation. Reading the Interaction Surface Inventory before
+> 🚫 G1 [G1]: Guideline → Gate Escalation. Reading the Interaction Surface Inventory before
 > modifying shared components is BLOCKING — not advisory.
 > See pipeline-integrity-guards.md § Guard 1.
 

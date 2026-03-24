@@ -39,7 +39,7 @@
 
 4. **Result**:
    - **Default (greenfield/incremental/adoption)**: ⚠️ HARD STOP — unimplemented Guarantees are presented to the user via AskUserQuestion with options: "Return to implement to fix", "Defer to next Feature (document reason)", "Accept risk and proceed". **If response is empty → re-ask** (per MANDATORY RULE 1). This ensures the user explicitly acknowledges each unimplemented Guarantee rather than silently proceeding.
-   > **🚫 G6**: Silent skipping of unimplemented Guarantees causes downstream Features to build against missing interfaces. Even in greenfield mode, the user must make an explicit decision.
+   > **🚫 G6 [G6]**: Silent skipping of unimplemented Guarantees causes downstream Features to build against missing interfaces. Even in greenfield mode, the user must make an explicit decision.
    - **BLOCKING escalation for rebuild mode**: When Origin=`rebuild` AND this Feature has `Provides →` interfaces (i.e., at least one C-[FID]-G## Guarantee), unimplemented Guarantees are **❌ BLOCKING**, not warnings. The agent MUST halt and report:
      ```
      🔴 BLOCKING: Contract C-[FID]-G## not implemented — rebuild mode requires all Guarantees to be fulfilled.

@@ -20,6 +20,21 @@ This document defines shared patterns that apply to ALL per-command context inje
 
 ---
 
+## GEL Artifact Registry
+
+The Global Evolution Layer (GEL) consists of 4 project-wide registries stored at BASE_PATH:
+
+| Registry | File | Written By | Read By |
+|----------|------|-----------|---------|
+| State | `sdd-state.md` | All pipeline steps | All pipeline steps |
+| Entity Registry | `entity-registry.md` | plan Post-Update, verify Post-Update | specify, plan, implement |
+| API Registry | `api-registry.md` | plan Post-Update, verify Post-Update | specify, plan, implement |
+| Domain Profile Instance | `domain-profile-instance.md` | add Brief (S5/A3 answers), specify Post-Update (cross-concern integrations, Feature summary) | specify Assemble (Feature 2+), plan Assemble |
+
+> The Domain Profile Instance separates profiling RESULTS (user decisions) from profiling TOOLS (domain module S0/S1/S5/S7 rules). See `state-schema.md` § Domain Profile Instance for full schema.
+
+---
+
 ## Shared Patterns
 
 The following patterns apply to ALL commands:
@@ -182,7 +197,7 @@ After individual modules are loaded (Step 3), check for active concern combinati
 
 ---
 
-**BASE_PATH**: `./specs/_global/` relative to CWD (project-wide GEL artifacts: roadmap, registries, state)
+**BASE_PATH**: `./specs/_global/` relative to CWD (project-wide GEL artifacts: roadmap, registries, state, domain-profile-instance)
 **SPEC_PATH**: `./specs/` relative to CWD (per-Feature artifacts. Format: `specs/{NNN-feature}/` — contains ALL Feature artifacts: pre-context, spec-draft, spec, plan, tasks)
 
 ---

@@ -32,6 +32,9 @@ If validation fails:
 **Project**: [Project name]
 **Origin**: [greenfield | rebuild | adoption]
 **Domain Profile**: [profile-name or "custom"]
+
+> **Domain Profile Instance**: The fields below collectively define the Domain Profile Instance for this project — they determine which domain modules are loaded during pipeline execution. The profiling *framework* (S0-S9 modules) defines what to ask; these fields record the *result*. Detailed per-Feature domain decisions are stored in `domain-profile-instance.md` (see § Domain Profile Instance below).
+
 **Interfaces**: [comma-separated list, e.g., http-api, gui]
 **Concerns**: [comma-separated list, e.g., async-state, auth, i18n]
 **Archetype**: [comma-separated list, e.g., ai-assistant, public-api | "none"]
@@ -308,6 +311,44 @@ Update history of Global Evolution Layer files.
 |-----------|----------------|-------------|-------------------|
 | 2024-01-16 | F001-auth (plan) | entity-registry.md | Finalized User, Session entities applied |
 | 2024-01-17 | F001-auth (implement) | pre-context.md (F002) | Updated entity/API drafts to match actual implementation |
+
+---
+
+## Domain Profile Instance
+
+> The 4th GEL registry alongside `entity-registry.md`, `api-registry.md`, and `sdd-state.md`.
+> Separates profiling RESULTS (the user's actual decisions) from profiling TOOLS (S0/S1/S5/S7 module rules).
+
+**File location**: `./specs/_global/domain-profile-instance.md` relative to CWD (or under the BASE_PATH specified with `--from`)
+
+**Template**: `smart-sdd/templates/domain-profile-instance-template.md`
+
+### Schema Overview
+
+| Section | Purpose |
+|---------|---------|
+| Project-Level Profile | Mirrors the 5-axis profile from sdd-state.md for quick reference |
+| Per-Concern Decisions | S5 probe answers recorded during Brief (add Phase 1c) |
+| Per-Archetype Decisions | A3 probe answers recorded during Brief (add Phase 1c) |
+| Cross-Concern Integrations Applied | Which _resolver.md Step 3.5 rules were activated per Feature |
+| Per-Feature Domain Summary | Active modules, key decisions, inherited constraints per Feature |
+
+### Lifecycle
+
+| Event | Action |
+|-------|--------|
+| **First `add` Brief** (Feature 1) | Create file from template. Populate Project-Level Profile from sdd-state.md. Record S5/A3 probe answers in Per-Concern/Per-Archetype Decisions tables |
+| **Subsequent `add` Brief** (Feature 2+) | Append new S5/A3 answers. Display inherited constraints from previous Feature entries |
+| **`specify` Post-Step Update** | Record cross-concern integrations activated during this Feature's specify. Add Per-Feature Domain Summary entry |
+| **`specify` Assemble (Feature 2+)** | Read Per-Concern Decisions for consistency with preceding Features' choices |
+| **`plan` Assemble** | Read for cross-concern context when assembling architecture decisions |
+
+### Population Rules
+
+- **Per-Concern Decisions**: One row per S5 probe answer. `Decided At` = ISO timestamp. `Feature` = FID that first answered this probe. If a later Feature re-answers the same probe, add a new row (do not overwrite — both decisions are preserved for traceability).
+- **Per-Archetype Decisions**: Same rules as Per-Concern, but for A3 probes.
+- **Cross-Concern Integrations Applied**: One row per activated integration rule from `_resolver.md` Step 3.5. `First Applied At` records the pipeline step (e.g., "F001 specify"). Subsequent Features that also activate the same rule do NOT add duplicate rows.
+- **Per-Feature Domain Summary**: One subsection per Feature. `Inherited constraints from` lists FIDs whose decisions constrain this Feature. `New decisions made` summarizes what this Feature decided that was not determined by preceding Features.
 
 ---
 

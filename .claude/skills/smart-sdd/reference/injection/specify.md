@@ -52,6 +52,7 @@ Display in Checkpoint: `📊 Domain: [N] modules → [M] sections active (S0,S1,
 | `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | Reference to original file list. **If N/A (greenfield), skip** |
 | `SPEC_PATH/[NNN-feature]/pre-context.md` | "Runtime Exploration Results" section | **If present (Phase 1.5 completed)** — reference observed UI layouts, user flows, and errors when drafting FR/SC. **If section says "Skipped"**, proceed without runtime context |
 | `SPEC_PATH/[NNN-feature]/pre-context.md` | "Naming Remapping" section | **If present (project identity changed)** — use new identifiers in requirements |
+| `BASE_PATH/domain-profile-instance.md` | Per-Concern Decisions, Per-Feature Domain Summary | **Feature 2+ only.** Check Per-Concern Decisions for consistency with preceding Features' choices. Read Per-Feature Domain Summary to understand inherited constraints |
 
 ### Source Reference Path Resolution
 
@@ -223,7 +224,7 @@ Feature: [FID] - [Feature Name]
 [If section empty, absent, or "None": skip this block entirely]
 
 ── Runtime-Verified Defaults ──────────────────────
-> 🚫 G3: Cross-Stage Trust Breakers — Gate 1 (specify entry). Runtime config defaults
+> 🚫 G3 [G3]: Cross-Stage Trust Breakers — Gate 1 (specify entry). Runtime config defaults
 > must be independently verified at specify entry, not blindly trusted from code analysis.
 > See pipeline-integrity-guards.md § Guard 3.
 
@@ -386,7 +387,7 @@ If spec.md FR-### descriptions mention 2+ external API providers:
 
 ### Runtime Default Coverage Check (rebuild mode)
 
-> Guard 7: Rebuild Fidelity Chain. Source app defaults must flow into FR/SC at specify —
+> Guard 7 [G7]: Rebuild Fidelity Chain. Source app defaults must flow into FR/SC at specify —
 > not be invented or assumed. This check is part of the fidelity chain from reverse-spec
 > through specify. See pipeline-integrity-guards.md § Guard 7.
 
@@ -1052,4 +1053,8 @@ Update `sdd-state.md` per generic step-completion rules in [state-schema.md](../
   - Update `sdd-state.md` → Source Behavior Coverage table: set FR column to the FR-### ID, Feature column to the Feature ID, Status to `🔄 in_progress`
   - This establishes the SBI → FR mapping that will be confirmed during verify
   - For NEW entries (Origin=`new`): same process, but these entries are tracked separately in coverage metrics
-- No other Global Evolution Layer artifact updates
+- **Domain Profile Instance Update**: After specify completes, update `BASE_PATH/domain-profile-instance.md`:
+  - Record cross-concern integrations that were activated during this Feature's specify in the Cross-Concern Integrations Applied table (one row per activated rule from `_resolver.md` Step 3.5; skip if already recorded by a preceding Feature)
+  - Add a Per-Feature Domain Summary entry: active modules, key decisions from the generated spec.md, inherited constraints from preceding Features, and new decisions made by this Feature
+  - If the file does not exist (e.g., legacy project without add Brief), create it from `smart-sdd/templates/domain-profile-instance-template.md` and populate Project-Level Profile from sdd-state.md
+- No other Global Evolution Layer artifact updates beyond the above

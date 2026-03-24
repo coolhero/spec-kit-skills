@@ -12,7 +12,7 @@ spec-kit-skills is built on three design principles, each addressing a structura
 | Concept | Problem It Solves | Implementation |
 |---------|------------------|----------------|
 | **Global Evolution Layer (GEL)** | Agents manage context differently; none track cross-Feature relationships systematically | Project-wide artifacts (roadmap, registries, pre-contexts) + automatic context injection per pipeline step |
-| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 5-axis system (Interface × Concern × Archetype × Foundation × Context) that loads project-type-specific rules |
+| **Domain Profile** | Agents apply the same generic approach regardless of project type | Composable 5-axis system (Interface × Concern × Archetype × Foundation × Context) that loads project-type-specific rules. Each project gets a concrete Instance stored in sdd-state.md + domain-profile-instance.md |
 | **Brief** | Agents accept whatever Feature description they receive, with no quality gate | Structured Feature intake process that validates completeness across key dimensions before spec generation |
 
 **How they connect**: Brief produces complete Feature definitions → stored as pre-contexts in the GEL → injected into the spec-kit pipeline → where Domain Profile rules shape each step's behavior. This guide focuses on the **Domain Profile** module system — the most extensible of the three concepts.

@@ -50,6 +50,7 @@ Display in Checkpoint: `📊 Domain: [N] modules → S7(B-1)+F2/F3 active | all 
 | `BASE_PATH/stack-migration.md` | Category Details + Per-Feature row | **Only if New Stack strategy**. See rules below |
 | `SPEC_PATH/[NNN-feature]/spec.md` | Entire file | Finalized spec for the current Feature |
 | `SPEC_PATH/[NNN-feature]/ui-flows.md` | Entire file | **If exists (GUI Features)** — UI Flow Specs drive Interaction Chain design. Each flow step should map to a chain row. See [ui-flow-spec.md](../ui-flow-spec.md) § Pipeline Integration |
+| `BASE_PATH/domain-profile-instance.md` | Cross-Concern Integrations Applied, Per-Feature Domain Summary | **Feature 2+ only. If absent, skip.** Read cross-concern integration context and preceding Features' domain decisions for architectural consistency |
 
 ## Entity Registry Filtering Rules
 
@@ -656,11 +657,11 @@ This section is **informational for implement** — it tells the implement step 
 
 ## Source → Target Component Mapping (rebuild mode, BLOCKING)
 
-> Guard 1: Guideline → Gate Escalation. Plan Review rejects if source components are
+> Guard 1 [G1]: Guideline → Gate Escalation. Plan Review rejects if source components are
 > unmapped — this is a BLOCKING gate, not a guideline.
 > See pipeline-integrity-guards.md § Guard 1.
 >
-> (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
+> [G7] (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
 > **Skip for**: greenfield, add mode, or backend-only Features.
 
 When pre-context.md contains a `## Component Tree` section (populated by reverse-spec Phase 2-7c), the plan MUST include a `## Source → Target Component Mapping` section in plan.md.
@@ -720,7 +721,7 @@ During plan Review HARD STOP:
 
 ## Data Lifecycle Mapping (rebuild mode, BLOCKING)
 
-> (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
+> [G7] (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 7: Rebuild Fidelity Chain)
 > **Skip for**: greenfield, add mode, or Features with no managed entities.
 
 When pre-context.md contains a `### Data Lifecycle Patterns` section (populated by reverse-spec Phase 2-7d), the plan MUST include a `## Data Lifecycle Mapping` section in plan.md.

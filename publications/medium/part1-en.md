@@ -99,6 +99,8 @@ Not all projects are the same. An Electron desktop app has different concerns th
 
 When you tell the system your project is an Electron app with real-time features, every subsequent spec, plan, and verification step adapts — IPC gets checked, renderer/main process boundaries are enforced, and Playwright launches via Electron-specific protocols. And when a pattern isn't covered by any existing module, that's where `/domain-extend` comes in — as described above.
 
+This creates your project's **Domain Profile Instance** — stored in `sdd-state.md`. As you define Features through the Brief, your domain-specific decisions (auth strategy, protocol choices, error handling approach) are recorded in a dedicated `domain-profile-instance.md` file. This separation matters: the *module files* define what to ask; the *Instance file* records what you answered. Feature 2 can look up Feature 1's auth decisions without parsing spec documents.
+
 **3. Brief — Structured Feature intake**
 
 Instead of "add auth," you go through a structured consultation:

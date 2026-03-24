@@ -326,6 +326,7 @@ Updates global artifacts to reflect the command execution results. For detailed 
 | verify | `sdd-state.md` | Record verification results |
 | verify | `entity-registry.md` | Verify and update if actual implementation differs from registry |
 | verify | `api-registry.md` | Verify and update if actual implementation differs from registry |
+| specify | `domain-profile-instance.md` | Record cross-concern integrations activated during this Feature's specify; add Per-Feature Domain Summary entry |
 | merge | `sdd-state.md` | Record merge completion, update Feature Mapping, change Status to `completed` |
 
 Reports the changes to the user after the update.

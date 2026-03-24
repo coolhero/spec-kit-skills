@@ -74,7 +74,7 @@ Running `/smart-sdd init` sets up a new greenfield project by defining project i
 Generate the Proposal document (format in `reference/clarity-index.md` § 7) containing:
 - **Overview**: 1–2 sentence summary
 - **Clarity Index**: Score breakdown per dimension
-- **Inferred Domain Profile**: Interfaces, Concerns, and rationale
+- **Inferred Domain Profile**: Interfaces, Concerns, and rationale. When the user approves the Proposal, the Inferred Domain Profile becomes the project's **Domain Profile Instance** — written to `sdd-state.md` fields (Interfaces, Concerns, Archetype, Foundation, Context). This is the transition from inference to commitment.
 - **Inferred Archetype**: Matched archetype(s) from A0 keywords or `"none"` (see `domains/_resolver.md` § S0/A0 Aggregation). Multiple archetypes may match — store comma-separated (e.g., `ai-assistant,sdk-framework`). All matched archetypes are activated with merge-by-append semantics (see `domains/_schema.md` § Archetype Section Schema).
 - **Proposed Features**: Extracted from signals + inferred from domain knowledge
 - **Quality Rules Activated**: S1/S7 rules from active modules

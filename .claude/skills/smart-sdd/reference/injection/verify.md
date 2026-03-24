@@ -8,7 +8,7 @@
 
 ---
 
-## Scale & Cross-Concern Adjustments (🚫 BLOCKING)
+## Scale & Cross-Concern Adjustments (🚫 BLOCKING) [G5]
 
 > Apply [`context-injection-rules.md`](../context-injection-rules.md) § Scale Modifier Enforcement + § Cross-Concern Integration Enforcement before proceeding. If not applied → output will not match project maturity/team context.
 
@@ -162,7 +162,7 @@ dependencies (e.g., requires another Feature's code), you may
 
 After verification execution completes:
 
-**Execution Evidence Requirement** (🚫 BLOCKING — Review without evidence is invalid):
+**Execution Evidence Requirement** (🚫 BLOCKING — Review without evidence is invalid) [G2]:
 
 Every verify Review MUST contain **execution evidence, not agent claims**. The distinction:
 - ❌ **Claim**: "Cross-Feature: No regressions" (agent's assertion without proof)
