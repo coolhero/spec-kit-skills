@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-23 15:39 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [기술 레퍼런스 매뉴얼 (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-ko.pdf) | Last updated: 2026-03-23 15:39 KST
 
 **네 개의 Claude Code 스킬로 AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 — 세 가지 설계 원칙 ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief))과 [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 

@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | Last updated: 2026-03-23 15:39 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-23 15:39 KST
 
 **Four Claude Code skills that turn AI coding agents into reliable software engineers — built on three design principles ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief)) and [spec-kit](https://github.com/github/spec-kit) SDD**
 
