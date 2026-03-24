@@ -553,7 +553,7 @@ After `speckit-implement` completes, if Demo-Ready Delivery is **active** (const
 
 ## Runtime Verification + Fix Loop
 
-> **Purpose**: Resolve G4 — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
+> **Purpose**: Resolve [G4] — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.
 > **App Session Management**: Start app at first task verification → subsequent tasks use Navigate for screen switching only → shut down after Review complete. See [PLAYWRIGHT-GUIDE.md](../../../../../PLAYWRIGHT-GUIDE.md) for Runtime Capability Map.
 > **Runtime backend architecture**: See [runtime-verification.md](../runtime-verification.md) for the full multi-backend detection protocol and interface-specific verification strategies.
 
@@ -601,7 +601,7 @@ After each task that creates/modifies UI files:
 
 **Step 2 — Runtime Check** (when Playwright CLI or MCP available):
 
-> Guard 2 [G2]: Static ≠ Runtime — Level 1. App launches without crash (smoke check).
+> 🚫 G2 [G2]: Static ≠ Runtime — Level 1. App launches without crash (smoke check).
 > Static build pass alone is insufficient for GUI projects.
 > See pipeline-integrity-guards.md § Guard 2.
 

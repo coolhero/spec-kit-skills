@@ -387,7 +387,7 @@ If spec.md FR-### descriptions mention 2+ external API providers:
 
 ### Runtime Default Coverage Check (rebuild mode)
 
-> Guard 7 [G7]: Rebuild Fidelity Chain. Source app defaults must flow into FR/SC at specify —
+> 🚫 G7 [G7]: Rebuild Fidelity Chain. Source app defaults must flow into FR/SC at specify —
 > not be invented or assumed. This check is part of the fidelity chain from reverse-spec
 > through specify. See pipeline-integrity-guards.md § Guard 7.
 

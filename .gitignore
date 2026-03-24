@@ -1,4 +1,5 @@
 .claude/worktrees/
+.DS_Store
 
 # LaTeX build artifacts
 publications/technical-reference/*.aux

@@ -5,6 +5,33 @@
 
 ---
 
+## [2026-03-25] Domain Profile Instance + Guard ID normalization + integrity fixes
+
+### What Changed
+- **Domain Profile Instance**: Introduced as the 4th GEL registry (`domain-profile-instance.md`). Separates profiling RESULTS (user decisions) from profiling TOOLS (module S0/S1/S5/S7 rules). Template added to `smart-sdd/templates/`. Lifecycle: created during first `add` Brief, updated during `specify` Post-Step, read by `specify`/`plan` Assemble for Feature 2+
+- **state-schema.md**: Added § Domain Profile Instance with full schema, lifecycle, and population rules
+- **Injection files**: `specify.md` and `plan.md` now read `domain-profile-instance.md` for Feature 2+ consistency. `specify.md` Post-Step Update writes cross-concern integrations and Per-Feature Domain Summary
+- **add.md**: Added Phase 1c-post (Domain Profile Instance Update) — persists S5/A3 probe answers and displays inherited constraints for Feature 2+
+- **Guard ID normalization**: All 7 guards (G1–G7) now consistently tagged with `[GN]` format. BLOCKING guards use `🚫 GN [GN]:` prefix. G4 was missing tags in analyze.md/implement.md — fixed
+- **analyze.md**: G4 interactive element gap escalated from warning to BLOCKING with anti-pattern examples
+- **verify-cross-feature.md**: Unimplemented Guarantees escalated from silent warning to HARD STOP with AskUserQuestion (greenfield/incremental/adoption)
+- **Domain modules**: compiler.md A5 (Brief Completion Criteria) added, resilience.md S9 added, grpc.md S1→S1b fixed
+- **Terminology**: Remaining `Scenario` references in init.md changed to `Context Mode`/`Context Scale`
+- **publications/**: Renamed from `articles/` directory. Technical Reference Manual PDFs added
+- **FILE-MAP.md**: Added smart-sdd templates (1 file), publications directory, .gitignore, SCENARIO-CATALOG files. Updated smart-sdd file count (105→106)
+- **_resolver.md**: Fixed rule count (62→61 — actual table row count)
+- **.gitignore**: Added .DS_Store; removed tracked .DS_Store from git
+
+### Why
+Domain Profile Instance closes the gap between profiling framework (module files) and profiling results (project decisions). Previously, S5/A3 probe answers lived only in agent memory and were lost between sessions. Guard ID normalization enables grep-based audit of guard coverage across all pipeline files. The Scenario→Context rename completes the 5th axis unification started in v0.2.0.
+
+### Design Decision
+- Domain Profile Instance is a **file-based artifact** (P3: File over Memory) — not agent memory
+- Guard format convention: `🚫 GN [GN]:` for BLOCKING, `[GN]` for cross-references — enables both human readability and machine searchability
+- G4 escalation to BLOCKING prevents silent omission of interactive elements discovered in behavioral fidelity audit
+
+---
+
 ## [2026-03-23] Post-release integrity fixes (v0.1.0)
 
 ### What Changed

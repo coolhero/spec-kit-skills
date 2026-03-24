@@ -52,6 +52,7 @@ graph TB
         SS_CMD["commands/ (16)"]
         SS_DOM["domains/ (55)"]
         SS_REF["reference/ (26)"]
+        SS_TPL["templates/ (1)"]
         SS_SCR["scripts/ (7)"]
     end
 
@@ -211,8 +212,12 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `history.md` | Design decision history |
 | `lessons-learned.md` | Failure patterns and countermeasures |
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for UI verification |
+| `SCENARIO-CATALOG.md` | Scenario catalog (EN) — 38 scenarios across 10 categories |
+| `SCENARIO-CATALOG.ko.md` | Scenario catalog (KO) — Korean mirror |
 | `SOFTWARE-CATALOG.md` | Target project types catalog with code-explore simulation results |
+| `.gitignore` | Git ignore rules (worktrees, LaTeX artifacts, .DS_Store) |
 | `install.sh` | Symlink installer for skills → ~/.claude/skills/ |
+| `publications/` | Medium articles (part1-4, EN/KO) + Technical Reference Manual (EN/KO PDF) |
 
 ### reverse-spec (98 files)
 
@@ -242,7 +247,7 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | **Reference** (1) | `reference/speckit-compatibility.md` | reverse-spec → spec-kit command mapping |
 | **Templates** (10) | `templates/*.md` | Artifact templates: roadmap, constitution-seed, entity/api/business-logic registries, coverage-baseline, pre-context, spec-draft, speckit-prompt, stack-migration |
 
-### smart-sdd (105 files)
+### smart-sdd (106 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
@@ -314,6 +319,8 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
 | `scripts/validate.sh` | Artifact validation |
 | `scripts/semantic-stub-check.sh` | Semantic stub detector (Math.random, placeholder text) |
 | `scripts/wiring-check.sh` | Wiring integrity checker (IPC/API audit) |
+| **Templates** (1) | | |
+| `templates/domain-profile-instance-template.md` | Domain Profile Instance artifact template (4th GEL registry) |
 
 ### shared (50 files)
 

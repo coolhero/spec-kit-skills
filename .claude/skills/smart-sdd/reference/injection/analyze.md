@@ -53,7 +53,7 @@ FR→Task coverage gaps are classified by the following severity rules:
 
 **MEDIUM rule**: If an FR has task(s) that cover the core behavioral intent but the task description doesn't specify implementation approach (e.g., visual preview method, data source, rendering technique). The agent can resolve these details during implement. Example: FR says "avatar style with visual previews" and a task covers avatar style, but doesn't specify how previews are rendered — this is MEDIUM, not HIGH.
 
-**FR Element Decomposition** (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 4b):
+**FR Element Decomposition** [G4] (See [pipeline-integrity-guards.md](../pipeline-integrity-guards.md) § Guard 4b):
 
 When verifying FR→Task coverage, decompose each FR into its constituent **interactive elements**:
 
@@ -71,7 +71,7 @@ FR-003: "Chat header with assistant name, model selector dropdown, and topic inf
 
 This rule prevents coarse FR→Task mapping from hiding missing interactive components.
 
-> **🚫 G4 BLOCKING**: If any interactive element identified in Step 3 above has **no corresponding task AND no Interaction Chain**, this is a BLOCKING gap — not a warning. The agent must halt and present the gap to the user. Proceeding to implement with missing interactive elements produces components that silently omit user-visible controls.
+> **🚫 G4 [G4] BLOCKING**: If any interactive element identified in Step 3 above has **no corresponding task AND no Interaction Chain**, this is a BLOCKING gap — not a warning. The agent must halt and present the gap to the user. Proceeding to implement with missing interactive elements produces components that silently omit user-visible controls.
 >
 > ❌ WRONG: FR has "model selector dropdown" → no task for it → classify as MEDIUM → proceed to implement → dropdown missing in UI
 > ✅ RIGHT: FR has "model selector dropdown" → no task for it → BLOCKING → add task before proceeding

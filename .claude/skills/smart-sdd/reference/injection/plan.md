@@ -657,7 +657,7 @@ This section is **informational for implement** — it tells the implement step 
 
 ## Source → Target Component Mapping (rebuild mode, BLOCKING)
 
-> Guard 1 [G1]: Guideline → Gate Escalation. Plan Review rejects if source components are
+> 🚫 G1 [G1]: Guideline → Gate Escalation. Plan Review rejects if source components are
 > unmapped — this is a BLOCKING gate, not a guideline.
 > See pipeline-integrity-guards.md § Guard 1.
 >
