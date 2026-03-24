@@ -6,7 +6,7 @@
 
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if Demo-Ready Delivery is active)
 
-> Guard 2: Static ≠ Runtime — Level 3. Interactions produce correct state (functional
+> 🚫 G2: Static ≠ Runtime — Level 3. Interactions produce correct state (functional
 > verification via Playwright). Static checks + smoke launch are insufficient — Playwright
 > SC verification confirms runtime behavior matches specification.
 > See pipeline-integrity-guards.md § Guard 2.
@@ -720,7 +720,7 @@ Display:
     - Blank area with no content and no empty-state indicator = `⚠️ Empty State — data area has no content and no empty-state indicator. Possible missing data source or unimplemented empty state UI.`
   - This check helps catch cross-Feature data dependency issues (e.g., Feature depends on AI model data that isn't populated)
 
-**Seeded State Verification** — "Dual-Mode: Clean + Seeded" (See pipeline-integrity-guards.md § Guard 5):
+**Seeded State Verification** — "Dual-Mode: Clean + Seeded" (🚫 G5: Environment Parity. See pipeline-integrity-guards.md § Guard 5):
 
 > Principle: Clean-state verification alone is INSUFFICIENT. Features that read from persistent
 > storage pass in Playwright's isolated `_electron.launch()` environment but fail in the user's

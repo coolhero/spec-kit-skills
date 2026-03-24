@@ -40,7 +40,7 @@ If visual references don't exist or no screens match this Feature: skip silently
 
 ### Step 3-rebuild-b — Source App Comparative Verification (rebuild mode only)
 
-> Guard 3: Cross-Stage Trust Breakers — Gate 3 (verify Phase 3e). MANDATORY source app
+> 🚫 G3: Cross-Stage Trust Breakers — Gate 3 (verify Phase 3e). MANDATORY source app
 > comparison for rebuild+GUI — independently verifies runtime-configurable settings against
 > the source app, catching trust breaker errors that propagated through earlier stages.
 > See pipeline-integrity-guards.md § Guard 3.

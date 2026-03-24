@@ -121,7 +121,7 @@ When NOT to reset: never mid-Feature (between specify and plan). The inter-step 
 
 **The Fourth Skill's Architectural Role**
 
-The three pipeline skills (code-explore, reverse-spec, smart-sdd) consume domain modules. But who creates them? Initially, the framework ships with 47 concerns, 15 archetypes, and 40+ foundations. That's a solid starting vocabulary — but every project eventually encounters patterns that aren't covered.
+The three pipeline skills (code-explore, reverse-spec, smart-sdd) consume domain modules. But who creates them? Initially, the framework ships with 48 concerns, 15 archetypes, and 40+ foundations. That's a solid starting vocabulary — but every project eventually encounters patterns that aren't covered.
 
 `/domain-extend` closes this loop. It's not a pipeline stage — it's a **meta-tool** that enriches the vocabulary the pipeline draws from. When code-explore detects an unknown pattern, domain-extend can create a module for it. When a team imports their ADRs and postmortems, domain-extend converts that institutional knowledge into structured rules. The result: each project that uses spec-kit-skills makes the system smarter for the next project.
 
@@ -385,7 +385,7 @@ No code changes. No registration step. No config file update. If the file exists
 
 And here's the interesting part: if `rate-limiting` frequently co-occurs with `auth` or `http-api`, you can add a cross-concern integration rule in the resolver. The pattern "rate-limiting + auth" might trigger an emergent rule: "rate limit responses must include Retry-After headers and the auth layer must not count rate-limited requests as failed auth attempts." This emergent behavior is what elevates the module system from a simple file loader to a domain knowledge engine.
 
-The zero-registration design is also what makes the system resilient to partial knowledge. You don't need all 47 concern modules to use the system. A project might use only `auth`, `realtime`, and `external-sdk`. The other 44 modules exist but are never loaded — they add zero cost. And when someone contributes a new module, it's immediately available to any project that declares it in their profile. No version bump, no release cycle, no migration.
+The zero-registration design is also what makes the system resilient to partial knowledge. You don't need all 48 concern modules to use the system. A project might use only `auth`, `realtime`, and `external-sdk`. The other 45 modules exist but are never loaded — they add zero cost. And when someone contributes a new module, it's immediately available to any project that declares it in their profile. No version bump, no release cycle, no migration.
 
 ### Adding a New Foundation
 

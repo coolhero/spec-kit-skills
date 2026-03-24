@@ -315,7 +315,7 @@ The `add --to` flow solves this with SC Preservation:
 
 ## /domain-extend — Growing the Vocabulary
 
-The three skills above — code-explore, reverse-spec, and smart-sdd — all draw on a shared domain module system: 47 concern modules, 15 archetypes, 40+ foundations. But what happens when your project uses a pattern that none of those modules cover?
+The three skills above — code-explore, reverse-spec, and smart-sdd — all draw on a shared domain module system: 48 concern modules, 15 archetypes, 40+ foundations. But what happens when your project uses a pattern that none of those modules cover?
 
 `/domain-extend` solves this. It creates new domain modules from three sources:
 

@@ -223,7 +223,7 @@ Feature: [FID] - [Feature Name]
 [If section empty, absent, or "None": skip this block entirely]
 
 ── Runtime-Verified Defaults ──────────────────────
-> Guard 3: Cross-Stage Trust Breakers — Gate 1 (specify entry). Runtime config defaults
+> 🚫 G3: Cross-Stage Trust Breakers — Gate 1 (specify entry). Runtime config defaults
 > must be independently verified at specify entry, not blindly trusted from code analysis.
 > See pipeline-integrity-guards.md § Guard 3.
 

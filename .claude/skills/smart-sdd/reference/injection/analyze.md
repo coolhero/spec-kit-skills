@@ -71,6 +71,11 @@ FR-003: "Chat header with assistant name, model selector dropdown, and topic inf
 
 This rule prevents coarse FR→Task mapping from hiding missing interactive components.
 
+> **🚫 G4 BLOCKING**: If any interactive element identified in Step 3 above has **no corresponding task AND no Interaction Chain**, this is a BLOCKING gap — not a warning. The agent must halt and present the gap to the user. Proceeding to implement with missing interactive elements produces components that silently omit user-visible controls.
+>
+> ❌ WRONG: FR has "model selector dropdown" → no task for it → classify as MEDIUM → proceed to implement → dropdown missing in UI
+> ✅ RIGHT: FR has "model selector dropdown" → no task for it → BLOCKING → add task before proceeding
+
 ### SC→Task Reverse Mapping
 
 > **Purpose**: FR→Task coverage checks that every requirement has implementation tasks. But SCs define the **verification criteria** — and if an SC has no task that would produce the testable behavior, verify will fail. This reverse mapping catches SCs that are "orphaned" from implementation.

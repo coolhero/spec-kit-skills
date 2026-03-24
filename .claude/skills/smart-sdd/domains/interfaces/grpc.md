@@ -35,7 +35,7 @@
 
 ---
 
-## S1. Demo Pattern (override)
+## S1b. Demo Pattern (override)
 
 - **Type**: gRPC client script (grpcurl or language-specific client)
 - **Default mode**: Call key RPCs with sample Protobuf messages → verify responses → exercise streaming

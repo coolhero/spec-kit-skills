@@ -13,7 +13,7 @@
 
 ---
 
-## A1. Domain Philosophy
+## A1. Philosophy Principles
 
 | Principle | Description |
 |-----------|-------------|
@@ -25,7 +25,7 @@
 
 ---
 
-## A2. SC Extensions
+## A2. SC Generation Extensions
 
 When this archetype is active, add these SC requirements to relevant Features:
 
@@ -38,7 +38,7 @@ When this archetype is active, add these SC requirements to relevant Features:
 
 ---
 
-## A3. Probes
+## A3. Elaboration Probes
 
 | Area | Probe Questions |
 |------|----------------|
@@ -62,7 +62,19 @@ When this archetype activates, inject these rules into the project constitution:
 
 ---
 
-## A5. Bug Prevention Extensions
+## A5. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| **Compilation phases** | At least lex → parse → emit identified; intermediate representations (AST, IR) specified if applicable |
+| **Input/output** | Source language and target output (machine code, bytecode, transpiled source, diagnostics) defined |
+| **Error recovery strategy** | Parser recovery approach stated (panic mode, synchronization tokens, error productions) |
+| **Performance budget** | Target latency for IDE operations (< 100ms) and full build (< Ns for representative input) stated |
+| **Incremental scope** | Whether file-level or sub-tree incremental recomputation is required — stated or explicitly deferred |
+
+---
+
+## A2b. Bug Prevention Extensions
 
 | ID | Pattern | Detection | Prevention |
 |----|---------|-----------|------------|

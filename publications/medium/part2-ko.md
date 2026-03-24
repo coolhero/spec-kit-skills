@@ -315,7 +315,7 @@ Playwright를 사용할 수 없으면 에이전트가 **사용자에게 위임**
 
 ## /domain-extend — 어휘를 키우다
 
-위의 세 스킬 — code-explore, reverse-spec, smart-sdd — 은 모두 공유된 도메인 모듈 시스템을 활용합니다. 47개 concern 모듈, 15개 archetype, 40개 이상의 foundation이 기본 탑재되어 있죠. 그런데 프로젝트가 이 모듈 중 어느 것도 커버하지 않는 패턴을 쓴다면?
+위의 세 스킬 — code-explore, reverse-spec, smart-sdd — 은 모두 공유된 도메인 모듈 시스템을 활용합니다. 48개 concern 모듈, 15개 archetype, 40개 이상의 foundation이 기본 탑재되어 있죠. 그런데 프로젝트가 이 모듈 중 어느 것도 커버하지 않는 패턴을 쓴다면?
 
 `/domain-extend`가 이 문제를 해결합니다. 세 가지 소스에서 새 도메인 모듈을 생성할 수 있습니다:
 

@@ -55,3 +55,14 @@ When this concern is active, every Feature involving external calls or failure-p
 | RS-003 | Timeout without cleanup | Request times out but server-side operation continues → resource leak, orphaned work | Implement cancellation propagation (AbortController, context.Context, CancellationToken); server checks cancellation and cleans up |
 | RS-004 | Circuit breaker too sensitive | Single transient error opens circuit → healthy service gets cut off → unnecessary downtime | Use sliding window (not single-failure); require N failures in M seconds; half-open probes resume traffic gradually |
 | RS-005 | Unbounded retry backoff | Backoff grows to minutes/hours → requests stuck in retry queue → memory exhaustion | Cap max backoff interval (e.g., 30s); add jitter; give up after max retries with clear error |
+
+---
+
+## S9. Brief Completion Criteria
+
+| Required Element | Completion Signal |
+|-----------------|-------------------|
+| **Retry strategy** | Max retries, backoff algorithm, and retryable error categories stated |
+| **Timeout values** | Connect/read/overall timeout values specified for each external dependency |
+| **Circuit breaker scope** | Per-endpoint or per-service decision made; failure thresholds stated |
+| **Fallback behavior** | At least one fallback path defined for primary failure scenarios |

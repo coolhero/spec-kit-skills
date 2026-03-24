@@ -1,1 +1,13 @@
 .claude/worktrees/
+
+# LaTeX build artifacts
+publications/technical-reference/*.aux
+publications/technical-reference/*.log
+publications/technical-reference/*.out
+publications/technical-reference/*.toc
+publications/technical-reference/*.lot
+publications/technical-reference/*.lof
+publications/technical-reference/*.fls
+publications/technical-reference/*.fdb_latexmk
+publications/technical-reference/*.synctex.gz
+publications/technical-reference/*.tex
