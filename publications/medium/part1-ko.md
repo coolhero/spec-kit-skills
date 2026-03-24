@@ -219,4 +219,4 @@ scenarios:
 
 → **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — 설계 철학, 파일 구조, 확장성
 
-→ **4편**: 실패 패턴과 힘들게 얻은 지혜 — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁
+→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁

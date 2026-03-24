@@ -616,4 +616,4 @@ architecture:
 
 ← **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)
 
-→ **4편**: 실패 패턴과 힘들게 얻은 지혜 — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁
+→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁
