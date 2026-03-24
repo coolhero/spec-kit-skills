@@ -380,7 +380,7 @@ skill development checklist:
 
 **시리즈 네비게이션:**
 
-← **1편**: [AI 코더 길들이기: 왜 에이전트에겐 하네스가 필요한가](https://medium.com/@thejihoonchoi/taming-the-ai-coder-why-your-agent-needs-a-harness-not-just-a-prompt-0869fa51da34)
+← **1편**: [AI 코더 길들이기: 왜 에이전트에겐 하네스가 필요한가](https://medium.com/@thejihoonchoi/ai-%EC%BD%94%EB%94%A9-%EC%97%90%EC%9D%B4%EC%A0%84%ED%8A%B8-%EA%B8%B8%EB%93%A4%EC%9D%B4%EA%B8%B0-%ED%94%84%EB%A1%AC%ED%94%84%ED%8A%B8%EA%B0%80-%EC%95%84%EB%8B%88%EB%9D%BC-%ED%95%98%EB%84%A4%EC%8A%A4%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0-dcdd752d2e8b)
 
 ← **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)
 
