@@ -4,7 +4,7 @@
 
 ![4편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part4.png)
 
-*[3편: 생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f)에서 이어집니다*
+*[3편: 생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/%EC%83%9D%EA%B0%81%ED%95%98%EB%8A%94-400%EA%B0%9C%EC%9D%98-%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4-%ED%8C%8C%EC%9D%BC-spec-kit-skills%EC%9D%98-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-17055e89796e)에서 이어집니다*
 
 *Claude Code로 작성되었습니다 — AI 에이전트를 통제하는 것에 관한 이 글 자체가 같은 AI 에이전트로, 이 시리즈가 설명하는 같은 하네스 안에서 작성되었습니다.*
 
@@ -384,4 +384,4 @@ skill development checklist:
 
 ← **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/%EB%84%A4-%EA%B0%80%EC%A7%80-%EC%8A%A4%ED%82%AC-%ED%95%98%EB%82%98%EC%9D%98-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-code-explore-reverse-spec-smart-sdd-domain-extend%EC%9D%98-%ED%98%91%EC%97%85-f6b028d4b17d)
 
-← **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f)
+← **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/%EC%83%9D%EA%B0%81%ED%95%98%EB%8A%94-400%EA%B0%9C%EC%9D%98-%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4-%ED%8C%8C%EC%9D%BC-spec-kit-skills%EC%9D%98-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-17055e89796e)

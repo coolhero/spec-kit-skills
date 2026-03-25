@@ -581,6 +581,6 @@ domain_extend:
 
 ← **1편**: [AI 코더 길들이기: 왜 에이전트에겐 하네스가 필요한가](https://medium.com/@thejihoonchoi/ai-%EC%BD%94%EB%94%A9-%EC%97%90%EC%9D%B4%EC%A0%84%ED%8A%B8-%EA%B8%B8%EB%93%A4%EC%9D%B4%EA%B8%B0-%ED%94%84%EB%A1%AC%ED%94%84%ED%8A%B8%EA%B0%80-%EC%95%84%EB%8B%88%EB%9D%BC-%ED%95%98%EB%84%A4%EC%8A%A4%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0-dcdd752d2e8b)
 
-→ **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — 설계 철학, 파일 구조, 확장성
+→ **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/%EC%83%9D%EA%B0%81%ED%95%98%EB%8A%94-400%EA%B0%9C%EC%9D%98-%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4-%ED%8C%8C%EC%9D%BC-spec-kit-skills%EC%9D%98-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-17055e89796e) — 설계 철학, 파일 구조, 확장성
 
 → **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁
