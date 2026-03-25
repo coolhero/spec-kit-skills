@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-03-26] Verify report quality — Method column, lint status, test growth (aegis P9)
+
+### What Changed
+1. **verify-report-template.md**: Replaced Method column guidance with a closed 3-value set (runtime/RUNTIME_BLOCKED/RUNTIME_DELEGATED) + explicit invalid examples. Added Test Growth row to Phase 1 table.
+2. **_foundation-core.md**: Added BST Verification Gate section — lint/formatter/test-runner verification at verify Phase 1, with Foundation-aware blocking rules (lint is BLOCKING for F001 but WARNING for F002+).
+3. **verify-build-test.md**: Added Lint Status Check (Foundation-aware lint gap reporting) and Test Growth Check (cross-Feature test count comparison, WARNING not BLOCKING).
+4. **lessons-learned.md**: Added L66 (Verify Report Quality — Three Subtle Gaps That Pass Unnoticed).
+
+### Design Decision
+Fifth verify quality escalation in the aegis pilot series. P2-P8 focused on ensuring verify *happens* and *produces a report*. P9 focuses on verify report *quality* — three subtle gaps that pass unnoticed even when the report exists and shows PASS:
+- **Method column drift**: Free-text Method allows agents to write "unit test" instead of using the runtime/BLOCKED/DELEGATED vocabulary. Fix: closed value set with explicit invalid examples.
+- **Lint status gap**: When lint is not installed, it was silently skipped. For Foundation Features (F001), this is a spec gap. Fix: Foundation-aware lint reporting with different severity for F001 vs F002+.
+- **Test count stagnation**: Test count staying flat across Features (37/37/37) indicates no Feature-specific tests were written. Fix: cross-Feature test count comparison as a WARNING (not BLOCKING) in verify Phase 1.
+
+### Files Changed
+- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Method column + Test Growth row
+- `.claude/skills/reverse-spec/domains/foundations/_foundation-core.md` — BST Verification Gate
+- `.claude/skills/smart-sdd/commands/verify-build-test.md` — Lint Status Check + Test Growth Check
+- `lessons-learned.md` — L66
+
+---
+
 ## [2026-03-26] Fix merge without verify-report.md — inline pre-gate checklist (aegis P8)
 
 ### What Changed

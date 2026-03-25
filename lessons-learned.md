@@ -460,6 +460,12 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 **Universal takeaway**: Three defenses: (1) SC evidence must be ✅/❌/⚠️PARTIAL — never report partial as full pass. (2) Demo requires user seeing and confirming a working feature, not just a script. (3) Environment requirements must be delegated to the user (Gotcha G9), never silently skipped. The verify-report template enforces this with a "Method" column that must say "runtime" or "RUNTIME_BLOCKED (reason)" — no "unit test" option.
 
+#### L66. Verify Report Quality — Three Subtle Gaps That Pass Unnoticed
+
+**What happened**: aegis F001-F003 verify-reports were generated correctly (a victory over P2-P8), but three subtle quality issues slipped through: (1) F001 used "unit test" as SC Method instead of RUNTIME_BLOCKED with explanation. (2) All three Features skipped lint because "eslint not installed" — a Foundation spec gap that went unreported. (3) Test count was 37/37 across all three Features despite F002 adding gateway code and F003 adding auth/RBAC — no Feature-specific tests were written.
+
+**Universal takeaway**: verify-report existence and PASS status are necessary but not sufficient. Three additional quality checks: (a) Method column must be from a closed set (runtime/BLOCKED/DELEGATED), not free text. (b) Foundation Features must verify their own BST setup (lint, format, test runner). (c) Test count growth should be tracked across Features — zero growth with new code indicates missing regression tests. These are warnings, not blockers, but they must be visible in the report so project owners can act.
+
 ---
 
 ### Theme D: Cross-System Coordination `[P1]`

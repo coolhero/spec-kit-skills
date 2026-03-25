@@ -30,6 +30,7 @@
 | TypeScript | | `npx tsc --noEmit` output |
 | Lint | | `npm run lint` output |
 | Unit Tests | | [N]/[N] passed |
+| Test Growth | | [N] tests (was [M] in preceding Feature). [+X new / unchanged] |
 
 ---
 
@@ -47,7 +48,16 @@
 
 > Application started on [host:port]. Database: [status]. Redis: [status].
 
-> **Method column**: MUST be one of: `runtime` (with specific command/action) or `RUNTIME_BLOCKED (reason)`. "Unit test" is NOT a valid Phase 3 method — unit tests belong to Phase 1.
+> **Method column — ONLY these 3 values are valid:**
+>
+> | Value | When to use | Example |
+> |-------|------------|---------|
+> | `runtime: [specific method]` | SC verified against running application | `runtime: curl POST /auth/login → 200` |
+> | `RUNTIME_BLOCKED: [reason]` | Cannot verify at runtime, reported to user | `RUNTIME_BLOCKED: requires external API key not configured` |
+> | `RUNTIME_DELEGATED: [reason]` | Delegated to user for manual verification | `RUNTIME_DELEGATED: OS-native drag&drop, user confirmed` |
+>
+> ❌ **NOT VALID**: `unit test`, `test`, `code review`, `by design`, or any other method.
+> If an SC can only be verified by unit test (e.g., env validation error on missing var), use `RUNTIME_BLOCKED: requires process restart with invalid env — verified via unit test as proxy` and note this in the Evidence Log.
 
 | SC | Description | Method | Expected | Actual | Result |
 |----|-------------|--------|----------|--------|--------|

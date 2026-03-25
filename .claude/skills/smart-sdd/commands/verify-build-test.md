@@ -36,6 +36,14 @@ Run each check and record results. **If any check fails, verification is BLOCKED
         This IS a Phase 1 failure — **BLOCKS** per normal rules.
       - **Lint passes** (exit code 0): Display: `✅ Lint: passed`
 
+#### Lint Status Check
+
+If `npm run lint` or equivalent fails with "command not found" or "not installed":
+- **For F001 (Foundation Feature)**: This is a **spec gap** — lint should be part of Foundation setup. Report as ⚠️ in verify-report and note: "Recommend adding ESLint to F001 spec via /smart-sdd pipeline F001 --start specify"
+- **For F002+**: Report as ⚠️ "Lint skipped — not installed by Foundation Feature" in verify-report. NOT blocking for this Feature.
+
+Either way, lint status MUST appear in the verify-report Phase 1 table. Do NOT silently omit it.
+
 4. **i18n coverage check** (skip if project has no i18n / translation framework):
 
    Detect i18n framework: search for `i18next`, `react-intl`, `vue-i18n`, `@angular/localize`, `gettext` in config/package files. If none found → skip entirely.
@@ -100,6 +108,21 @@ Run each check and record results. **If any check fails, verification is BLOCKED
      Plugin registration: [✅ all registered / ❌ MISSING — {framework}: {expected plugin} not in {config}]
      Runtime check: [✅ output verified / ⚠️ output missing / skipped (not applicable)]
    ```
+
+#### Test Growth Check (⚠️ WARNING, not BLOCKING)
+
+After running tests, compare the test count against the preceding Feature's verify-report:
+
+1. Read preceding Feature's `verify-report.md` → extract test count (e.g., F002 had 37 tests)
+2. Compare with current Feature's test count
+3. If test count did NOT increase despite new code:
+   - ⚠️ WARNING: "F003 added auth/RBAC/cross-tenant code but test count is 37 (same as F002). No new tests were added."
+   - This does NOT block merge, but MUST be noted in verify-report Phase 1 table
+   - Add row: `| Test Growth | ⚠️ | 37 tests (unchanged from F002) — consider adding Feature-specific tests |`
+
+4. If test count increased: Note positively: `| Test Growth | ✅ | 37 → 52 tests (+15 for auth/RBAC) |`
+
+**Why WARNING not BLOCKING**: Test writing is an implement responsibility. If implement didn't write tests but the runtime SC verification passes, the Feature works — but lacks regression protection. The warning ensures the project owner knows.
 
 **If ANY check fails** (test, build, lint errors, missing i18n keys, or build plugin missing), display and STOP:
 ```

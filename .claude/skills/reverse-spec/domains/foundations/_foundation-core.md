@@ -194,6 +194,21 @@ When a framework is detected but has no Foundation file (e.g., Remix, Svelte, Nu
 
 ---
 
+### BST Verification Gate (verify Phase 1)
+
+The following BST items are verified at verify Phase 1. If ANY fails, Phase 1 is INCOMPLETE:
+
+| BST Item | Verify Check | If Missing |
+|----------|-------------|------------|
+| TypeScript strict | `npx tsc --noEmit` exits 0 | BLOCKING — return to implement |
+| Linter installed + configured | `npm run lint` exits 0 (not "command not found") | ⚠️ WARNING — lint not installed means no style enforcement. Report in verify-report. If F001 (Foundation), this is a **spec gap** — lint should be in F001 spec. |
+| Formatter configured | `.prettierrc` or equivalent exists | ⚠️ WARNING |
+| Test runner configured | `npm test` runs (not "no tests found") | BLOCKING — return to implement |
+
+> **Why lint is not BLOCKING for non-Foundation Features**: If F001 didn't set up lint, subsequent Features can't be blocked for it. But F001 itself SHOULD include lint — this is an F2 checklist item. The verify-report must note "Lint: skipped (not installed)" so the project owner is aware.
+
+---
+
 ## F3. T0 Feature Grouping Rules
 
 Foundation categories map to T0 Features in the pipeline. T0 Features are processed **before** T1.

@@ -2453,6 +2453,38 @@ Executes tasks sequentially. Each task follows a protocol: read task specificati
 
 The most complex pipeline step, split into 5 phases (Phase 0--4, described in Section~\ref{sec:4-phase-verify}).
 
+\subsection{verify-report Quality Standards}
+
+The verify-report is not just a checklist---it is \textbf{auditable evidence}. Three quality standards were added based on the aegis pilot:
+
+\paragraph{1. Method Column --- Closed Value Set.}
+Each SC's Method must be exactly one of:
+\begin{itemize}[nosep]
+  \item \texttt{runtime: [specific method]}---verified against running application
+  \item \texttt{RUNTIME\_BLOCKED: [reason]}---cannot verify at runtime, reported to user
+  \item \texttt{RUNTIME\_DELEGATED: [reason]}---delegated to user for manual verification
+\end{itemize}
+
+``Unit test,'' ``code review,'' or ``by design'' are \textbf{not valid} Method values. If an SC can genuinely only be tested via unit test (e.g., environment validation that requires process restart), use \texttt{RUNTIME\_BLOCKED} with explanation.
+
+\paragraph{2. Lint Status --- Foundation Awareness.}
+If \texttt{npm run lint} fails with ``not installed'':
+\begin{itemize}[nosep]
+  \item For F001 (Foundation): this is a \textbf{spec gap}---lint should be part of Foundation setup
+  \item For F002+: report as warning, not blocking (Foundation didn't set it up)
+\end{itemize}
+
+Either way, lint status \textbf{must appear} in the report. Silent omission is not allowed.
+
+\paragraph{3. Test Growth Tracking.}
+Each Feature's verify-report compares its test count against the preceding Feature:
+\begin{itemize}[nosep]
+  \item Test count increased: \texttt{37 -> 52 (+15 auth/RBAC tests)}---healthy
+  \item Test count unchanged: \texttt{37 -> 37 (no new tests)}---warning: new code without regression tests
+\end{itemize}
+
+This is a warning, not a blocker. Runtime SC verification confirms the Feature works \emph{now}; test growth confirms it will \emph{keep working} after future changes.
+
 \subsection{Merge}
 
 After verify passes, the Feature is merged to main. Entity and API registries are updated. Feature status in \file{sdd-state.md} changes to ``completed.'' Interaction Surface Inventory is generated for cross-Feature verification.
@@ -2986,6 +3018,10 @@ Each stage satisfies the \emph{letter} of the previous countermeasure while viol
 \begin{dangerbox}[This Pattern Will Repeat]
 Pattern~6 is not specific to verify. Any multi-step process with implicit time pressure will exhibit the same escalation: the agent optimizes for speed, and each rule closure redirects that optimization to a subtler path. Design every critical gate with this assumption: if the agent can self-report compliance, it eventually will---whether or not compliance actually occurred.
 \end{dangerbox}
+
+\begin{notebox}[Beyond Evasion: Quality Degradation]
+After the evasion chain (P2--P8) was resolved, a subtler issue emerged: verify-reports were generated correctly but contained quality gaps---``unit test'' in Method columns, lint silently omitted, test count not growing. These are not evasion (the agent is trying to comply) but \textbf{quality degradation from insufficient template constraints}. The fix was structural: restrict Method to a closed value set, require lint status regardless of installation, and track test count growth. Lesson: even after behavioral evasion is blocked, output quality must be separately validated.
+\end{notebox}
 
 \section{Velocity Override --- The Seventh Evasion Pattern}
 

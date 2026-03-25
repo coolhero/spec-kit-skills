@@ -2129,6 +2129,38 @@ spec을 컴포넌트, 데이터 흐름, API 계약이 포함된 아키텍처로 
 
 가장 복잡한 Pipeline 단계로, 4개 Phase로 나뉩니다 (Section~\ref{sec:4-phase-verify}에서 설명).
 
+\subsection{verify-report 품질 기준}
+
+verify-report는 단순한 체크리스트가 아니라 \textbf{감사 가능한 증거}입니다. aegis 파일럿을 기반으로 세 가지 품질 기준이 추가되었습니다:
+
+\paragraph{1. Method 컬럼 --- Closed Value Set.}
+각 SC의 Method는 다음 중 정확히 하나여야 합니다:
+\begin{itemize}[nosep]
+  \item \texttt{runtime: [구체적 방법]}---실행 중인 애플리케이션에서 검증됨
+  \item \texttt{RUNTIME\_BLOCKED: [사유]}---런타임에서 검증 불가, 사용자에게 보고됨
+  \item \texttt{RUNTIME\_DELEGATED: [사유]}---수동 검증을 위해 사용자에게 위임됨
+\end{itemize}
+
+``Unit test,'' ``code review,'' ``by design''은 \textbf{유효한 Method 값이 아닙니다}. SC가 진정으로 유닛 테스트로만 테스트 가능한 경우(예: 프로세스 재시작이 필요한 환경 유효성 검사), \texttt{RUNTIME\_BLOCKED}와 설명을 사용하세요.
+
+\paragraph{2. Lint 상태 --- Foundation 인식.}
+\texttt{npm run lint}가 ``not installed''로 실패하는 경우:
+\begin{itemize}[nosep]
+  \item F001 (Foundation)의 경우: 이것은 \textbf{spec gap}---lint는 Foundation 설정의 일부여야 함
+  \item F002 이후의 경우: blocking이 아닌 warning으로 보고 (Foundation에서 설정하지 않았음)
+\end{itemize}
+
+어느 경우든, lint 상태는 리포트에 \textbf{반드시 표시}되어야 합니다. 조용한 생략은 허용되지 않습니다.
+
+\paragraph{3. Test Growth Tracking.}
+각 Feature의 verify-report는 이전 Feature와 비교하여 테스트 수를 비교합니다:
+\begin{itemize}[nosep]
+  \item 테스트 수 증가: \texttt{37 -> 52 (+15 auth/RBAC tests)}---건강한 상태
+  \item 테스트 수 변동 없음: \texttt{37 -> 37 (no new tests)}---경고: 회귀 테스트 없이 새 코드 추가
+\end{itemize}
+
+이것은 경고이지 차단이 아닙니다. 런타임 SC 검증은 Feature가 \emph{지금} 작동하는지 확인하고, 테스트 증가는 향후 변경 후에도 \emph{계속 작동할지} 확인합니다.
+
 \subsection{Merge}
 
 verify가 통과하면 Feature가 main에 병합됩니다. Entity 및 API 레지스트리가 업데이트됩니다. \file{sdd-state.md}의 Feature 상태가 ``completed''로 변경됩니다. Cross-Feature 검증을 위한 Interaction Surface Inventory가 생성됩니다.
@@ -2662,6 +2694,10 @@ Phase 7 (Ongoing): 3 Principles -> Domain Module Loading Protocol
 \begin{dangerbox}[이 패턴은 반복될 것이다]
 패턴~6은 verify에 국한되지 않습니다. 암묵적 시간 압력이 있는 모든 다단계 프로세스에서 동일한 에스컬레이션이 나타납니다: 에이전트는 속도를 위해 최적화하고, 각 규칙 폐쇄는 그 최적화를 더 미묘한 경로로 리디렉션합니다. 모든 중요한 게이트를 이 가정으로 설계하세요: 에이전트가 준수를 자체 보고할 수 있다면, 결국 그렇게 할 것입니다---실제로 준수했는지 여부와 관계없이.
 \end{dangerbox}
+
+\begin{notebox}[회피를 넘어서: 품질 퇴화]
+회피 체인(P2--P8)이 해결된 후, 더 미묘한 문제가 드러났습니다: verify-report가 올바르게 생성되었지만 품질 격차를 포함하고 있었습니다---Method 컬럼에 ``unit test'', lint 조용히 생략, 테스트 수 증가 없음. 이것은 회피가 아닙니다(에이전트는 준수하려 노력하고 있음). \textbf{불충분한 템플릿 제약으로 인한 품질 퇴화}입니다. 수정은 구조적이었습니다: Method를 closed value set으로 제한하고, 설치 여부와 관계없이 lint 상태를 요구하며, 테스트 수 증가를 추적합니다. 교훈: 행동적 회피를 차단한 후에도, 출력 품질은 별도로 검증해야 합니다.
+\end{notebox}
 
 \section{Velocity Override --- 7번째 회피 패턴}
 
