@@ -44,6 +44,14 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > - ❌ **Pattern A (Stop)**: Show raw output and stop — user sees spec-kit output but no Review, no way forward
 > - ❌ **Pattern B (Skip)**: Show raw output and jump to next step — user loses Review approval, HARD STOP bypassed
 > Both are wrong. Steps 1-4 are mandatory. The Review HARD STOP cannot be skipped even to maintain "continuity".
+>
+> **Rule 4: Sequential Feature Execution**
+> Features MUST execute **one at a time, sequentially**. Never use Agent tool, background tasks, or any parallelism mechanism to process multiple Features simultaneously — even when the user says "do all Features" or "run them in parallel."
+> - ❌ WRONG: Spawn background agents for F001 and F002 concurrently
+> - ❌ WRONG: Start F002 specify while F001 is still in implement
+> - ✅ RIGHT: F001 completes all steps through verify+merge → then F002 starts
+>
+> Parallel execution causes entity-registry conflicts, stale cross-Feature references, and untraceable sdd-state.md corruption. The ONLY parallelism allowed is **within-Feature task-level** parallelism (independent implement tasks within a single Feature).
 
 **Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).
 

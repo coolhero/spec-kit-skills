@@ -93,7 +93,7 @@
 | SH03 | 모든 문서를 한국어나 일본어로 생성하고 싶을 때 | `init --lang ko` 또는 `adopt --lang ja` | 모든 산출물이 지정 언어 |
 | SH04 | 모노레포에서 서비스별로 각각 SDD를 적용하고 싶을 때 | 서비스별 `adopt --scope services/api` 반복 | 서비스별 독립 SDD 문서 |
 | SH05 | 어떤 도메인 모듈이 있는지 보고 싶을 때 | `domain-extend browse` 또는 `domain-extend browse concerns` | 파일 경로 포함 전체 모듈 목록 |
-| SH06 | 내 프로젝트 패턴이 기존 모듈에 없을 때 | `domain-extend detect` → `domain-extend extend concern "video-encoding"` | 새 concern 모듈 (3파일 세트) |
+| SH06 | 내 프로젝트 패턴이 기존 모듈에 없을 때 | `domain-extend detect` → `domain-extend extend concern "video-encoding"` | `specs/domains/`에 새 concern 모듈 (프로젝트 로컬 기본) |
 | SH07 | 팀 ADR이나 스타일 가이드를 도메인 규칙으로 바꾸고 싶을 때 | `domain-extend import ./docs/adr/` | ADR이 S1/S7 규칙으로 변환된 모듈 |
 | SH08 | 조직 전체 코딩 컨벤션을 적용하고 싶을 때 | `domain-extend customize org` | 모든 프로젝트에 적용되는 org-convention.md |
 | SH09 | code-explore가 미커버 패턴을 발견했을 때 | `domain-extend detect --from-explore ./specs/explore/` → `extend` | 탐색 갭에서 생성된 새 모듈 |

@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-26] Post-pull integrity audit — MANDATORY RULE 4, FILE-MAP, SCENARIO-CATALOG
+
+### What Changed
+- **SKILL.md**: Added MANDATORY RULE 4 (Sequential Feature Execution) — previously only defined in pipeline.md as inline BLOCKING rule, now elevated to SKILL.md mandatory rules per P2 (Enforce, Don't Reference). Prevents parallel Feature processing via Agent tool or background tasks
+- **FILE-MAP.md**: Added `project-domains-readme.md` template, updated template count (1→2), file count (106→107)
+- **SCENARIO-CATALOG**: Updated SH06 to reflect project-local output (`specs/domains/`) as default for `domain-extend extend`. EN/KO synchronized
+
+### Why
+Post-pull integrity audit of 11 commits (f0d8abd..1dd4eeb) found: (1) parallel Feature execution prevention rule existed only in pipeline.md — per P2 principle, critical rules must be inline at always-loaded entry points (SKILL.md), not only in on-demand command files; (2) `project-domains-readme.md` template added in 8696838 but not reflected in FILE-MAP.md; (3) SH06 scenario didn't mention project-local output path change from same commit.
+
+---
+
 ## [2026-03-25] Project-local domain modules
 
 ### What Changed

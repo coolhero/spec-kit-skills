@@ -252,7 +252,7 @@ specs/domains/              ← Project-local custom modules (created by /domain
 | **Reference** (1) | `reference/speckit-compatibility.md` | reverse-spec → spec-kit command mapping |
 | **Templates** (10) | `templates/*.md` | Artifact templates: roadmap, constitution-seed, entity/api/business-logic registries, coverage-baseline, pre-context, spec-draft, speckit-prompt, stack-migration |
 
-### smart-sdd (106 files)
+### smart-sdd (107 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|
@@ -324,8 +324,9 @@ specs/domains/              ← Project-local custom modules (created by /domain
 | `scripts/validate.sh` | Artifact validation |
 | `scripts/semantic-stub-check.sh` | Semantic stub detector (Math.random, placeholder text) |
 | `scripts/wiring-check.sh` | Wiring integrity checker (IPC/API audit) |
-| **Templates** (1) | | |
+| **Templates** (2) | | |
 | `templates/domain-profile-instance-template.md` | Domain Profile Instance artifact template (4th GEL registry) |
+| `templates/project-domains-readme.md` | Project-local domains README template (specs/domains/ listing) |
 
 ### shared (50 files)
 
