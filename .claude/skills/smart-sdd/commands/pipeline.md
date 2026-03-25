@@ -245,7 +245,14 @@ Executes the corresponding spec-kit command with the approved context:
 3. Suppress spec-kit's completion messages (per MANDATORY RULE 3)
 4. Continue IMMEDIATELY to Step 3b (Review) in the same response
 
-**Fallback**: If `.claude/commands/speckit.*.md` files don't exist, run `specify init --here --ai claude --force` first. If `specify` CLI is not available, the agent should generate artifacts directly following the templates in `.specify/templates/`.
+**Fallback**: If `.claude/commands/speckit.*.md` files don't exist, run `specify init --here --ai claude --force` first. If `specify` CLI is not available, generate artifacts following the **templates in `.specify/templates/`** — you MUST read the template files and match their exact structure (sections, headings, field names). Do NOT improvise a simpler format.
+
+🚫 **BLOCKING**: Before writing ANY spec-kit artifact (spec.md, plan.md, tasks.md), verify that the template exists at `.specify/templates/`. If the template has sections (User Scenarios, Acceptance Scenarios, Edge Cases, etc.), the generated artifact MUST include ALL those sections — even if some are initially marked "TBD". Skipping template sections to save time is a pipeline integrity violation.
+
+❌ WRONG: Write spec.md with FR/SC only because "it's faster"
+❌ WRONG: Put data-model content inline in plan.md instead of creating data-model.md
+❌ WRONG: Skip research.md, quickstart.md, contracts/ because "they're optional"
+✅ RIGHT: Read `.specify/templates/spec.md`, match every section, generate all companion files
 
 #### Execute Error Handling
 
@@ -931,6 +938,10 @@ Executes the following steps **strictly in order** for each Feature.
 ```
 
 > **Reminder**: `(STOP)` means you MUST call AskUserQuestion, display the content, and WAIT for the user's response. Do NOT auto-approve. Do NOT skip.
+>
+> 🚫 **VERIFY IS NEVER OPTIONAL**: Even when the user says "do everything", "skip to the end", or "just finish it" — verify Phase 0-4 MUST execute. verify is CRITICAL classification and cannot be auto-approved or skipped. A Feature without verify is NOT complete — merge gate will BLOCK.
+>
+> 🚫 **TEMPLATE COMPLIANCE IS NEVER OPTIONAL**: Every spec-kit artifact MUST match the structure in `.specify/templates/`. If the template has 8 sections and you generate 3, that is a pipeline integrity violation — not a "simplified version."
 >
 > **CRITICAL**: After each `speckit-*` command completes, it prints its own "Next phase:" or "Next step:" message. **IGNORE these messages completely — do NOT show them to the user.** smart-sdd controls the flow: after Execute, you MUST immediately proceed to the Review(STOP) step, not follow spec-kit's suggestions.
 
