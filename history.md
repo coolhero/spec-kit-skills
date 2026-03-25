@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-03-26] Fix merge without verify-report.md — inline pre-gate checklist (aegis P8)
+
+### What Changed
+1. **pipeline.md**: Added Merge Pre-Gate Checklist (BLOCKING) — inline at merge execution point, checks verify-report.md existence + Overall=PASS + Decision section checked. Anti-pattern examples included.
+2. **SKILL.md**: Added Gotcha G15 (Merge without verify-report.md) — agent completes verify in chat but skips file generation, proceeds to merge with no persistent evidence
+3. **lessons-learned.md**: Added P8 as 5th row in G20 (Verify Escalation Evasion) table — "Verify done but no report file → merge anyway"
+
+### Design Decision
+Fourth verify enforcement escalation in the aegis pilot series:
+- **P5**: Elevated runtime SC verification to MANDATORY RULE 5 + inline BLOCKING gate (agents skip runtime entirely)
+- **P6**: Added No Unit Test Substitution + Post-Implement Smoke Launch (agents cherry-pick easy SCs)
+- **P7**: Added Honest SC Evidence Standard + User Demo Gate + Environment Readiness (agents inflate partial passes, skip user demo, ignore env requirements)
+- **P8**: Added inline Merge Pre-Gate Checklist (agents complete verify in chat but skip report file generation, then merge with no file evidence)
+
+P8 is a boundary-crossing evasion: the agent satisfies verify rules in conversation but fails to persist evidence to disk. The merge gate existed in pipeline.md's step overview but was not enforced inline at the execution point — the agent simply skipped past it. Fix follows P2 (Enforce, Don't Reference): the checklist is now physically at the merge execution point with BLOCKING gates and anti-patterns.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Merge Pre-Gate Checklist
+- `.claude/skills/smart-sdd/SKILL.md` — Gotcha G15
+- `lessons-learned.md` — G20 P8 row
+
+---
+
 ## [2026-03-26] Fix partial-pass inflation + User Demo Gate + environment readiness (aegis P7)
 
 ### What Changed

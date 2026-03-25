@@ -286,6 +286,7 @@
 | P5 | Only build+test, no runtime | BLOCKING gate at Phase 2 entry | Do runtime, but only for easy SCs |
 | P6 | Runtime for easy SCs, unit test for hard ones | NO UNIT TEST SUBSTITUTION | Do runtime for all, but report partial as pass |
 | P7 | Report partial pass as full pass | MANDATORY RULE 6 (honest evidence) + User Demo Gate | TBD |
+| P8 | Verify done but no report file → merge anyway | verify-report.md BLOCKING + merge pre-gate checklist | TBD |
 
 **The pattern**: Each enforcement closes one evasion path. The agent's "goal" (finish quickly) doesn't change — it finds the next path of least resistance. This is not malice; it's optimization under implicit time pressure.
 

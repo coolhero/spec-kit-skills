@@ -1591,6 +1591,28 @@ If ANY functional test fails → remain in implement and fix before proceeding t
 
 ---
 
+#### Merge Pre-Gate Checklist (🚫 ALL MUST PASS before merge)
+
+Before executing ANY merge action, verify ALL of the following:
+
+1. **verify-report.md exists**: `specs/{NNN}-{short-name}/verify-report.md` MUST exist as a file
+   - If missing → 🚫 STOP: "verify-report.md not found. Run verify Phase 4 completion to generate it."
+   - Do NOT create it retroactively at merge time — return to verify
+
+2. **verify-report Overall = PASS**: Read the Summary table → Overall field must be "PASS"
+   - If FAIL or PARTIAL → 🚫 STOP: "verify-report shows [status]. Cannot merge."
+   - If NEEDS FIX → return to implement
+
+3. **User Demo Gate completed**: verify-report must have the Decision section checked
+   - If Decision checkboxes are all unchecked → User Demo Gate was skipped → return to verify
+
+❌ WRONG: verify → chat says "all pass" → merge (no file evidence)
+❌ WRONG: verify → report shows PARTIAL → merge anyway
+❌ WRONG: verify → report exists but Decision not checked → merge
+✅ RIGHT: verify → report exists → Overall=PASS → Decision="READY FOR MERGE" checked → merge
+
+🚨 This gate exists because aegis P8 demonstrated that agents skip report generation and proceed to merge. The chat-level "all pass" statement is NOT evidence — only the file is.
+
 #### Feature Completion
 
 **Single-Feature mode (default)**:
