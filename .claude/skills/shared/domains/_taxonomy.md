@@ -18,6 +18,7 @@
 | library | `interfaces/library.md` | Libraries/SDKs consumed via import/linking | plugin-system |
 | embedded | `interfaces/embedded.md` | Embedded systems, firmware, IoT, RTOS | hardware-io, wire-protocol |
 | grpc | `interfaces/grpc.md` | gRPC/RPC services (Protobuf, Connect, Twirp) | auth, resilience, observability |
+| k8s-api | `interfaces/k8s-api.md` | Kubernetes CRD spec/status reconciliation | k8s-operator, infra-as-code |
 
 ## Concerns
 

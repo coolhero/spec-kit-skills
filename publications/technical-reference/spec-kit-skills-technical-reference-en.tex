@@ -417,7 +417,7 @@ Agents do not just ignore rules---they \emph{rationalize} around them:
   \item \textbf{The keyword downgrade}: Rules marked \texttt{MANDATORY} were treated as strong suggestions and skipped under context pressure.
   \item \textbf{The explicit ignore}: ``Do NOT skip under any circumstances'' was skipped when context compression reduced it to a summary.
   \item \textbf{The premature completion}: After implementing 5 of 7 tasks, the agent declared ``implementation complete''---the remaining 2 tasks had vanished from compressed context.
-  \item \textbf{The silent substitution}: Instead of executing the required 4-phase verification protocol, the agent substituted a simpler version: ``build passes, TypeScript passes, therefore verified.'' It never announced the substitution. The user saw ``verify complete'' with a checkmark.
+  \item \textbf{The silent substitution}: Instead of executing the required 5-phase verification protocol, the agent substituted a simpler version: ``build passes, TypeScript passes, therefore verified.'' It never announced the substitution. The user saw ``verify complete'' with a checkmark.
 \end{enumerate}
 
 \subsection{The Three-Generation Evolution}
@@ -856,9 +856,9 @@ S0 & Signal Keywords & \texttt{init}: profile detection via semantic keyword mat
 S1 & SC Generation Rules & \texttt{specify}: required SC patterns, anti-patterns, measurability criteria \\
 S2 & Parity Dimensions & \texttt{parity}: additional structural/logic comparison dimensions \\
 S3 & Verify Steps & \texttt{verify}: additional verification steps when this module is active \\
-S4 & (Reserved) & --- \\
+S4 & Data Integrity Principles & Universal data handling rules (S4a--S4d in \texttt{\_core.md}) \\
 S5 & Elaboration Probes & \texttt{add} (Brief): domain-specific questions to ask the user \\
-S6 & Pattern Rules & \texttt{plan}/\texttt{implement}: pattern constraints and idioms \\
+S6 & UI Testing Integration & \texttt{implement}: UI testing rules (active only when \texttt{gui} interface is loaded) \\
 S7 & Bug Prevention & \texttt{plan}/\texttt{implement}/\texttt{verify}: known anti-patterns for this domain \\
 S8 & Runtime Verification Strategy & \texttt{verify}: how to launch and verify the running application \\
 S9 & Brief Completion Criteria & \texttt{add}: what makes a Feature definition ``complete'' for this module \\
@@ -915,8 +915,9 @@ R-sections tell reverse-spec how to \emph{read} existing code for this pattern.
 R1 & Code Pattern Keywords & Source code signals (imports, annotations, file patterns) \\
 R2 & Project Type Classification & How to classify the project type from code evidence \\
 R3 & Analysis Axes & Specific analysis dimensions for this module \\
-R4 & Data Flow Rules & Entity and API extraction rules specific to this module \\
+R4 & Registries & Entity and API registry extraction rules \\
 R5 & Feature Boundary Heuristics & How to identify Feature boundaries in code \\
+R6 & Tier Classification Axes & Feature importance and tier assignment heuristics \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -934,15 +935,19 @@ F-sections define framework-specific platform rules.
 \textbf{ID} & \textbf{Name} & \textbf{Purpose} \\
 \midrule
 F0 & Detection & Framework identification signals \\
-F1 & (Reserved) & --- \\
-F2 & Specify-time Items & Framework constraints that affect spec generation \\
-F3 & Implement-time Rules & Framework idioms, anti-patterns, toolchain setup \\
+F1 & Foundation Category Taxonomy & Categories (BST, SEC, FWK) for Foundation items \\
+F2 & Foundation Checklist Items & Per-framework checklist (BST/SEC/FWK items for T0 Features) \\
+F3 & T0 Feature Grouping Rules & How Foundation items map to T0 Features \\
 F7 & Philosophy & Framework-endorsed principles (distinct from operational checklists) \\
 F8 & Toolchain Commands & Build, test, lint commands for this framework \\
 F9 & Scan Targets & Directories and files to scan during analysis \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{notebox}[Foundation File F-numbers]
+Individual foundation files (e.g., \texttt{react.md}, \texttt{spring-boot.md}) reuse some F-numbers with framework-specific meanings. F2 in a foundation file contains the actual checklist items; F3 contains extraction rules. See \texttt{\_foundation-core.md} for the protocol-level definitions.
+\end{notebox}
 
 
 %% ────────────────────────────────────────────────────────────────────
@@ -1612,11 +1617,11 @@ Each pipeline command loads only the S-sections it needs. This is the lazy-loadi
 \toprule
 \textbf{Command} & \textbf{Sections Loaded} \\
 \midrule
-specify & S0, S1, S5, S9, A2, A3, A5, F2 \\
-plan & S6, S7, A2, F2, F3 \\
+specify & S0, S1, S5, S9, A2, A3, A5 \\
+plan & S7 (B-1 only), F2, F3 \\
 tasks & S7 (Bug Prevention subset B-3) \\
-implement & S7 (B-3), S6, F3, F8 \\
-verify & S1 (for SC compliance check), S3, S7, S8, F8, F9 \\
+implement & S7 (B-3), S6, F8 \\
+verify & S1, S3, S7 (B-4), S8, F8 \\
 add (Brief) & S5, S9, A3, A5 \\
 constitution & A4, F7 \\
 analyze & S1, S7 \\
@@ -1786,7 +1791,7 @@ Major-Spec & Return to specify & Missing requirement, wrong scope definition \\
 \label{ch:gel}
 %% ────────────────────────────────────────────────────────────────────
 
-\textit{This chapter explains the four files that serve as the project's shared memory across Features. Without them, each Feature would start from zero.}
+\textit{This chapter explains the four registries (within a larger set of GEL artifacts) that serve as the project's shared memory across Features. GEL also includes additional artifacts such as roadmap, constitution, and per-Feature pre-context. Without them, each Feature would start from zero.}
 
 The Global Evolution Layer (GEL) is the set of project-wide artifacts that carry information across Features. It is the implementation of P1-c (Cross-Feature Memory).
 
@@ -1974,7 +1979,7 @@ After module loading, Scale adjusts enforcement depth. This is BLOCKING---not op
 S1 (SC Rules) & Functional-only SCs & Full edge-case coverage \\
 S5 (Probes) & Basic completeness & + collaboration, ownership probes \\
 S7 (Bug Prevention) & Disabled (speed over safety) & All patterns + observability \\
-S3 (Verify Steps) & Build + smoke test & Full 4-phase verification \\
+S3 (Verify Steps) & Build + smoke test & Full 5-phase verification (Phase 0--4) \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2110,16 +2115,15 @@ The Software Catalog feeds into reverse-spec for foundation detection and into s
 
 \cmd{reverse-spec} is the automated extraction skill---a systematic audit that produces the Global Evolution Layer from existing source code.
 
-\section{Five Phases}
+\section{Six Phases (Phase 0--4 + Phase 1.5)}
 
 \begin{description}
-  \item[Phase 0: Strategy] User answers scope (core/full), stack (same/new), naming questions.
-  \item[Phase 1: Code Pattern Analysis] File structure scan, dependency graphs, architectural pattern identification. Produces structural map.
-  \item[Phase 1.5: Runtime Exploration] Launches the source app, captures real UI flows. Required for rebuild mode. Produces screenshots and interaction recordings.
-  \item[Phase 2: Source Behavior Inventory (SBI)] Catalogs every user-facing behavior as B\#\#\# entries mapped to source code locations.
-  \item[Phase 3: Entity and API Extraction] Produces \file{entity-registry.md} and \file{api-registry.md} in the same formats smart-sdd uses.
-  \item[Phase 4: Roadmap Construction] Groups behaviors into Features ordered by dependency. Produces \file{roadmap.md}.
-  \item[Phase 5: Constitution Seed] Extracts architectural principles. Produces \file{constitution-seed.md}.
+  \item[Phase 0: Strategy Questions] User answers scope (core/full), stack (same/new), naming questions. Defined in \file{analyze.md}.
+  \item[Phase 1: Project Scan] File structure scan, dependency graphs, architectural pattern identification. Produces structural map. Defined in \file{analyze-scan.md}.
+  \item[Phase 1.5: Runtime Exploration] Launches the source app, captures real UI flows. Required for rebuild mode. Produces screenshots and interaction recordings. Defined in \file{analyze-runtime.md}.
+  \item[Phase 2: Deep Analysis] Source Behavior Inventory (SBI) plus entity/API extraction. Catalogs every user-facing behavior as B\#\#\# entries mapped to source code locations. Defined in \file{analyze-deep.md}.
+  \item[Phase 3: Feature Classification and Importance Analysis] Groups behaviors into Features, assigns tiers and dependency ordering. Defined in \file{analyze-classify.md}.
+  \item[Phase 4: Deliverable Generation] Produces \file{roadmap.md}, \file{entity-registry.md}, \file{api-registry.md}, and \file{constitution-seed.md}. Defined in \file{analyze-generate.md}.
 \end{description}
 
 \section{Source Behavior Inventory (SBI)}
@@ -2242,20 +2246,20 @@ Three mandatory rules are always loaded in SKILL.md:
 \textbf{Rule~3}: After any spec-kit command: suppress raw output, read artifact, display review, call AskUserQuestion.
 \end{dangerbox}
 
-\section{The Brief: 6-Perspective Validation}
+\section{The Brief: 6-Phase Briefing}
 
-The \texttt{add} command implements a structured consultation:
+The \texttt{add} command implements a structured 6-phase consultation:
 
 \begin{enumerate}
-  \item \textbf{Parse input}---text, files, or both.
-  \item \textbf{Identify perspective gaps}---actors? Error paths? Data model? Dependencies?
-  \item \textbf{Elaborate via domain-specific probes}---loaded from S5 sections based on Domain Profile.
-  \item \textbf{Draft Brief}---scope, actors, entities, interaction patterns, error scenarios, cross-Feature dependencies.
-  \item \textbf{Review HARD STOP}---user approves or modifies the Brief.
-  \item \textbf{Create artifacts}---pre-context generated, Feature registered in sdd-state.md.
+  \item \textbf{Phase 1: Briefing}---parse input (text, files, or both) and identify perspective gaps.
+  \item \textbf{Phase 2: Overlap \& Impact}---check cross-Feature dependencies and entity/API conflicts.
+  \item \textbf{Phase 3: Scope Negotiation}---elaborate via domain-specific probes (S5 sections) and refine scope.
+  \item \textbf{Phase 4: SBI Match}---match against Source Behavior Inventory entries (rebuild/migration mode).
+  \item \textbf{Phase 5: Demo Group}---define demo scenarios for the Feature.
+  \item \textbf{Phase 6: Finalization}---review HARD STOP, create artifacts (pre-context, sdd-state registration).
 \end{enumerate}
 
-\section{The 4-Phase Verify}
+\section{The 5-Phase Verify (Phase 0--4)}
 
 \begin{description}
   \item[Phase 0: Preflight] Playwright availability check (CLI probe $\rightarrow$ library import $\rightarrow$ MCP probe).
@@ -2314,7 +2318,7 @@ Executes tasks sequentially. Each task follows a protocol: read task specificati
 
 \subsection{Verify}
 
-The most complex pipeline step, split into 4 phases (described in Section~\ref{sec:4-phase-verify}).
+The most complex pipeline step, split into 5 phases (Phase 0--4, described in Section~\ref{sec:4-phase-verify}).
 
 \subsection{Merge}
 
@@ -2473,7 +2477,7 @@ k8s-api & Kubernetes CRD spec/status reconciliation. Pairs with k8s-operator. \\
 \bottomrule
 \end{longtable}
 
-\section{Concerns (48 modules)}
+\section{Concerns (47 modules)}
 
 The full list of concerns is organized into five categories. Each module provides S0 (signal keywords), S1 (SC rules), S5 (elaboration probes), and S7 (bug prevention). For the complete list with descriptions and common pairings, see Table~\ref{tab:concerns-full} in Appendix~A.
 
@@ -3645,8 +3649,8 @@ Read targets:
   4. specs/{FID}/spec-draft.md (rebuild only)
   5. .specify/memory/constitution.md
 
-Domain sections loaded: S0, S1, S5, S9, A2, A3, A5, F2
-Sections discarded: S2, S3, S4, S6, S7, S8, F0, F1, F3-F9
+Domain sections loaded: S0, S1, S5, S9, A2, A3, A5
+Sections discarded: S2, S3, S4, S6, S7, S8, F0-F9
 
 Injected content:
   - Brief-to-SC mapping instructions
@@ -3678,12 +3682,13 @@ Read targets:
   3. specs/_global/api-registry.md
   4. specs/{FID}/pre-context.md (for source component mapping)
 
-Domain sections loaded: S6, S7, A2, F2, F3
-Sections discarded: S0, S1, S2, S3, S4, S5, S8, S9
+Domain sections loaded: S7 (B-1 only), F2, F3
+Sections discarded: S0, S1, S2, S3, S4, S5, S6, S8, S9
 
 Injected content:
-  - Pattern constraints from S6
-  - Bug prevention from S7 (plan-relevant subset)
+  - Bug prevention from S7 (B-1 plan-relevant subset)
+  - Foundation checklist items from F2
+  - T0 Feature grouping rules from F3
   - Source Component Mapping instructions (rebuild only)
   - Integration Contract template
 
@@ -3704,12 +3709,12 @@ Read targets:
   3. specs/{FID}/pre-context.md (BLOCKING for rebuild)
   4. Preceding Features' interaction-surfaces.md
 
-Domain sections loaded: S7 (B-3 subset), S6, F3, F8
+Domain sections loaded: S7 (B-3 subset), S6, F8
 Sections discarded: S0, S1, S2, S3, S4, S5, S8, S9
 
 Injected content:
   - Per-task bug prevention anti-patterns from S7
-  - Framework idioms from F3
+  - UI testing integration from S6 (when gui interface active)
   - Toolchain commands from F8
   - Source Reference Injection (BLOCKING for rebuild+GUI)
   - Visual Reference Checkpoint (BLOCKING for first UI task)
@@ -3731,8 +3736,8 @@ Read targets:
   3. verify-phases.md (Phase 0-4 protocol)
   4. sdd-state.md verify_progress (for resume)
 
-Domain sections loaded: S1, S3, S7, S8, F8, F9
-Sections discarded: S0, S2, S4, S5, S6
+Domain sections loaded: S1, S3, S7 (B-4), S8, F8
+Sections discarded: S0, S2, S4, S5, S6, S9, F9
 
 Injected content:
   - SC verification checklist from S1
@@ -3740,7 +3745,6 @@ Injected content:
   - Runtime verification strategy from S8
   - Bug regression patterns from S7
   - Toolchain commands from F8
-  - Scan targets from F9
 
 Phase structure:
   Phase 0: Playwright preflight
