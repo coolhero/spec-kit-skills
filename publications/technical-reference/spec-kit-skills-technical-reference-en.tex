@@ -628,6 +628,8 @@ Before diving into individual architectural components, Figure~\ref{fig:arch-ove
 \label{ch:domain-profile}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter explains the 5-axis system that makes spec-kit-skills adapt to your specific project type. By the end, you'll understand how to describe any project as a combination of Interface, Concern, Archetype, Foundation, and Context.}
+
 The Domain Profile is the compositional type system of spec-kit-skills. It captures the fundamental characteristics of a project across five independent axes, each contributing rules that shape how the pipeline operates.
 
 \begin{lstlisting}[title={Domain Profile Structure}]
@@ -685,6 +687,8 @@ embedded & Memory constraint SCs, interrupt handling, watchdog patterns. \\
 \end{description}
 
 Each concern module contributes S1 (SC generation rules), S3 (verify steps), S5 (elaboration probes for the Brief), and S7 (bug prevention rules).
+
+\textbf{How to read this list}: Core concerns (auth, async-state, i18n, etc.) address foundational patterns that most applications need. Integration concerns (external-sdk, message-queue, protocol-integration) handle connections to external systems. Code concerns (ipc, codegen, infra-as-code) deal with code generation and inter-process patterns. Protocol concerns (webrtc, wire-protocol, udp-transport, tls-management) manage low-level communication. Domain concerns (payment-processing, geospatial, simulation-engine, speech-processing) solve specialized business problems. Most projects activate 2--5 concerns; activating all 47 would be unusual and likely indicates over-classification.
 
 \section{Axis 3: Archetype}
 
@@ -832,6 +836,8 @@ The Domain Profile model evolved through three generations:
 \label{ch:sections}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter explains the numbering system inside domain modules. Each number maps to a pipeline stage --- understanding this mapping is the key to creating your own modules and understanding why rules load when they do.}
+
 Every domain module in spec-kit-skills uses standardized section numbering across four families. This is not arbitrary---each family serves a different purpose, and each section maps to exactly one pipeline stage. This mapping enables lazy loading: each pipeline step loads only the sections it needs.
 
 \section{S-Family: Pipeline Execution Rules (S0--S9)}
@@ -859,6 +865,18 @@ S9 & Brief Completion Criteria & \texttt{add}: what makes a Feature definition `
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{warnbox}[What Happens When Sections Are Missing]
+Each section's absence causes a specific failure:
+\begin{itemize}[nosep]
+\item Without S0: The module is never activated --- the pipeline doesn't know your project uses auth
+\item Without S1: specify generates generic SCs (``authentication works'') instead of specific ones (``login with invalid credentials returns 401 with error message'')
+\item Without S5: The Brief doesn't ask domain-specific questions --- the agent picks defaults (JWT instead of your team's sessions)
+\item Without S7: implement produces working code with known anti-patterns (plaintext passwords, missing token expiry) that pass build and tests
+\item Without S9: The Brief accepts incomplete Feature definitions --- missing error handling, missing edge cases
+\end{itemize}
+The Section System isn't about organizing files --- it's about \textbf{preventing specific categories of failure} at specific pipeline stages.
+\end{warnbox}
 
 \section{A-Family: Archetype Philosophy (A0--A5)}
 
@@ -926,6 +944,625 @@ F9 & Scan Targets & Directories and files to scan during analysis \\
 \end{tabularx}
 \end{table}
 
+
+%% ────────────────────────────────────────────────────────────────────
+\section{Concrete Examples: \texttt{auth} Concern Through All Four Families}
+\label{sec:auth-example}
+%% ────────────────────────────────────────────────────────────────────
+
+To make the section system tangible, let us trace a single domain---\textbf{authentication}---through all four families. The same concern appears in four different files, each serving a different purpose at a different pipeline stage.
+
+\subsection{S-Family: \file{smart-sdd/concerns/auth.md}}
+
+The S-family file defines how smart-sdd \emph{builds} authentication features.
+
+\begin{description}[style=nextline, leftmargin=1.8cm, labelwidth=1.4cm]
+  \item[S0 --- Signal Keywords] \texttt{auth}, \texttt{authentication}, \texttt{login}, \texttt{JWT}, \texttt{OAuth}, \texttt{session}, \texttt{passport}
+
+  Used during \cmd{init} to detect that the project involves authentication and activate this concern module.
+
+  \item[S1 --- SC Generation Rules]
+  Domain-specific rules that constrain Scenario (SC) generation during \cmd{specify}:
+  \begin{itemize}[nosep]
+    \item Login SC \emph{must} specify credentials format, success response, \emph{and} failure response.
+    \item Protected resource SC \emph{must} specify both 401 (unauthenticated) and 403 (unauthorized) responses.
+    \item Token lifecycle SC \emph{must} specify issuance, expiration, and refresh behavior.
+  \end{itemize}
+
+  \item[S5 --- Elaboration Probes]
+  Domain-specific questions asked during \cmd{add} (Brief creation):
+\end{description}
+
+\begin{table}[H]
+\centering
+\caption{S5 Elaboration Probes for auth concern}
+\label{tab:auth-s5-probes}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Dimension} & \textbf{Probe Question} \\
+\midrule
+Auth method    & JWT-based? Session-based? OAuth provider? Multi-factor? \\
+Authorization  & Role-based access control? Permission-based? Attribute-based? \\
+Token management & Expiration policy? Refresh token rotation? Revocation strategy? \\
+Session        & Server-side sessions? Cookie-based? Concurrent session limits? \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{description}[style=nextline, leftmargin=1.8cm, labelwidth=1.4cm]
+  \item[S7 --- Bug Prevention]
+  Known anti-patterns injected during \cmd{plan}, \cmd{implement}, and \cmd{verify}:
+\end{description}
+
+\begin{table}[H]
+\centering
+\caption{S7 Bug Prevention rules for auth concern}
+\label{tab:auth-s7-bugs}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{ID} & \textbf{Anti-Pattern} \\
+\midrule
+AUTH-001 & Plaintext password storage (must use bcrypt/scrypt/argon2) \\
+AUTH-002 & Token expiration not implemented (tokens must have finite TTL) \\
+AUTH-003 & Logout without token revocation (server must invalidate the token) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{A-Family: \file{smart-sdd/archetypes/ai-assistant.md}}
+
+The A-family file adds \emph{philosophy}---principles that extend the concern rules when this archetype is active.
+
+\begin{description}[style=nextline, leftmargin=1.8cm, labelwidth=1.4cm]
+  \item[A1 --- Philosophy]
+  ``All authentication must go through the provider abstraction layer.'' This ensures that switching between LLM providers does not break auth flows.
+
+  \item[A2 --- SC Extensions]
+  Extends the auth concern's S1 rules: ``Every SC involving LLM API calls must carry authenticated session context.'' This adds SCs that S1 alone would not generate.
+
+  \item[A4 --- Constitution Injection]
+  Injects the principle ``Tokens are managed server-side; client never sees raw API keys'' into the project constitution during \cmd{init}.
+\end{description}
+
+\begin{tipbox}[How A-family extends S-family]
+S1 says ``Login SC must specify credentials + success + failure.'' A2 adds ``LLM calls must carry session context.'' The two are not alternatives---A2 \emph{extends} S1. At \cmd{specify} time, both sets of rules are loaded, and the resulting SC list is the union.
+\end{tipbox}
+
+\subsection{R-Family: \file{reverse-spec/concerns/auth.md}}
+
+The R-family file tells reverse-spec how to \emph{read} authentication patterns in existing code.
+
+\begin{description}[style=nextline, leftmargin=1.8cm, labelwidth=1.4cm]
+  \item[R1 --- Code Pattern Keywords]
+  Source code signals that indicate authentication logic:
+  \begin{itemize}[nosep]
+    \item Package imports: \texttt{passport}, \texttt{next-auth}, \texttt{@auth0/*}, \texttt{express-session}
+    \item File patterns: \texttt{**/middleware/auth.*}, \texttt{**/guards/*}, \texttt{**/strategies/*}
+  \end{itemize}
+
+  \item[R2 --- Analysis Dimensions] \hfill \\
+  What to examine once auth code is located:
+  \begin{itemize}[nosep]
+    \item Auth flow tracing: login $\to$ token issuance $\to$ protected access $\to$ refresh $\to$ logout
+    \item Storage method: database sessions vs.\ JWT vs.\ external provider
+    \item Middleware chain: order and composition of auth middleware
+    \item Error responses: 401/403 distinction, error message format
+  \end{itemize}
+
+  \item[R4 --- SBI Extraction]
+  Scenario-Behavior Inventory entries to extract from existing code:
+  \begin{itemize}[nosep]
+    \item Login success/failure (credentials, response codes, redirect targets)
+    \item Protected route access check (middleware presence, role verification)
+    \item Token expiry handling (refresh flow, re-login prompt)
+    \item Logout behavior (token invalidation, session cleanup, redirect)
+  \end{itemize}
+\end{description}
+
+\subsection{F-Family: \file{foundations/react.md}}
+
+The F-family file defines how the React framework affects auth implementation.
+
+\begin{description}[style=nextline, leftmargin=1.8cm, labelwidth=1.4cm]
+  \item[F3 --- Implement-time Rules]
+  ``Auth state managed via Zustand store or React Context. Tokens stored in httpOnly cookies---never in localStorage.''
+
+  \item[F4 --- Toolchain Commands]
+  ``Auth tests use React Testing Library + MSW (Mock Service Worker) for API mocking. No real network calls in unit tests.''
+
+  \item[F7 --- Philosophy]
+  ``No \texttt{useMemo} on \texttt{ProtectedRoute}---auth checks must run on every render. Stale auth state is a security vulnerability.''
+\end{description}
+
+\begin{warnbox}[F-family is framework-specific]
+The rules above are specific to React. A \file{foundations/django.md} would instead specify ``Auth via Django's built-in authentication framework, tokens in server-side sessions, tests with \texttt{pytest} + \texttt{factory\_boy}.'' The S-family and A-family rules remain identical---only the F-family changes when the framework changes.
+\end{warnbox}
+
+
+%% ────────────────────────────────────────────────────────────────────
+\section{Four Families Working Together}
+\label{sec:families-collaboration}
+%% ────────────────────────────────────────────────────────────────────
+
+No family operates in isolation. At each pipeline stage, multiple families contribute rules simultaneously. This section shows the merging in action.
+
+\subsection{At \texttt{specify}: Generating SCs for an Auth Feature}
+
+When the agent runs \cmd{specify} for an authentication feature, three sources of SC rules converge:
+
+\begin{enumerate}[nosep]
+  \item \textbf{S1 (auth concern):} ``Login failure SC required. Token expiry SC required.''
+  \item \textbf{A2 (ai-assistant archetype):} ``LLM API calls must carry authenticated session context---add SC.''
+  \item \textbf{Cross-concern (auth $\times$ realtime):} ``WebSocket reconnection must re-authenticate---add SC.''
+\end{enumerate}
+
+All three merge into the final SC list. The agent does not choose one source over another; it takes the \emph{union}.
+
+\begin{patternbox}[SC Merge at specify]
+\begin{lstlisting}
+Final SC list for F-002 (Auth):
+  SC-001: Login success         <- S1 (auth concern)
+  SC-002: Login failure         <- S1 (auth concern)
+  SC-003: Token expiry + refresh <- S1 (auth concern)
+  SC-004: Protected route 401   <- S1 (auth concern)
+  SC-005: Protected route 403   <- S1 (auth concern)
+  SC-006: LLM call with session <- A2 (ai-assistant archetype)
+  SC-007: Re-auth on reconnect  <- cross-concern (auth x realtime)
+\end{lstlisting}
+\end{patternbox}
+
+\subsection{At \texttt{implement}: Writing Auth Code}
+
+During \cmd{implement}, the agent receives constraints from three families simultaneously:
+
+\begin{enumerate}[nosep]
+  \item \textbf{S7 (auth concern):} ``No plaintext passwords (AUTH-001). Must implement token expiry (AUTH-002). Logout must revoke token (AUTH-003).''
+  \item \textbf{F3 (React foundation):} ``Auth state in Zustand store. Tokens in httpOnly cookies.''
+  \item \textbf{F7 (React foundation):} ``No \texttt{useMemo} on \texttt{ProtectedRoute}---check auth on every render.''
+\end{enumerate}
+
+Bug prevention rules (S7) and framework idioms (F3, F7) combine. The agent writes code that satisfies \emph{all} constraints---there is no priority ordering between families.
+
+\subsection{At \texttt{verify}: Testing Auth}
+
+Verification draws from the widest range of families:
+
+\begin{enumerate}[nosep]
+  \item \textbf{S1 (auth concern):} ``Verify all 7 auth SCs pass---every SC must have a corresponding test.''
+  \item \textbf{F4 (React foundation):} ``Use React Testing Library + MSW for API mocking.''
+  \item \textbf{F8 (React foundation):} ``Run \texttt{npm run test} and \texttt{npm run build}.''
+  \item \textbf{R4 (rebuild only):} ``SBI check---do all original auth behaviors from the source app exist in the new code?''
+\end{enumerate}
+
+\begin{tipbox}[R-family at verify time]
+R4 (SBI extraction) is only active in \texttt{rebuild} mode, where a source application exists. In greenfield projects, R-family sections are not loaded. This is an example of Context-dependent activation: the \texttt{+migration} context modifier determines whether R-family participates in verification.
+\end{tipbox}
+
+\begin{table}[H]
+\centering
+\caption{Family contributions at each pipeline stage (auth example)}
+\label{tab:family-pipeline-merge}
+\begin{tabularx}{\textwidth}{lXXXX}
+\toprule
+\textbf{Stage} & \textbf{S-family} & \textbf{A-family} & \textbf{R-family} & \textbf{F-family} \\
+\midrule
+\texttt{specify}   & S1: SC rules  & A2: SC extensions  & ---  & F2: specify-time constraints \\
+\texttt{implement} & S7: bug prevention  & A1: philosophy  & ---  & F3: framework idioms, F7: philosophy \\
+\texttt{verify}    & S1: SC verification, S3: verify steps  & ---  & R4: SBI check\textsuperscript{*}  & F4/F8: test toolchain \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{*}R-family active only in rebuild/migration mode.}
+\end{tabularx}
+\end{table}
+
+
+%% ────────────────────────────────────────────────────────────────────
+\section{Migration Scenario: How All Families Collaborate}
+\label{sec:migration-scenario}
+%% ────────────────────────────────────────────────────────────────────
+
+To see the full section system in action, consider three migration scenarios that span different dimensions of change: data layer, architecture, and interface. Each scenario activates all four families \emph{plus} the \texttt{+migration} context modifier, demonstrating how the same framework adapts to fundamentally different migration challenges.
+
+The \texttt{+migration} context modifier adds a ``source comparison'' layer \emph{on top of} all four families. It does not replace any family---it augments each one with behavioral parity requirements: ensuring the \emph{new} system preserves the behaviors of the \emph{old} system.
+
+%% ── Example 1: Oracle → PostgreSQL ──────────────────────────────────
+\subsection{Example 1: Oracle $\to$ PostgreSQL (Database Migration)}
+
+\textbf{Domain Profile:}
+\begin{verbatim}
+http-api + auth + data-integrity | microservice archetype
+| java-spring foundation | rebuild + production×small-team
+| +migration
+\end{verbatim}
+
+This migration changes the data layer while keeping the application layer and architecture intact. The challenge is not building new features but \emph{translating} decades of Oracle-specific idioms into PostgreSQL equivalents without losing any data or business logic.
+
+\paragraph{reverse-spec.}
+R1 detects Oracle-specific patterns throughout the codebase: PL/SQL stored procedures, Oracle sequences, \texttt{CONNECT BY} hierarchical queries, \texttt{DECODE} functions, and \texttt{NUMBER(38)} type declarations. R2 analyzes stored procedures line by line, extracting business logic that is embedded directly in PL/SQL rather than in the application layer. This is critical because many Oracle shops encode core business rules inside the database---rules that will need to move to application code during migration. R4 extracts the Source Behavior Inventory: ``47 stored procedures, 12 views, 8 triggers, 23 sequences, 4 materialized views.'' R5 generates pre-context documenting every Oracle-specific pattern that requires a PostgreSQL equivalent, organized by migration difficulty (direct mapping, semantic difference, no equivalent).
+
+\paragraph{init/add.}
+S5 (data-integrity concern) fires elaboration probes: ``What consistency guarantees does the application rely on? Read-after-write? Serializable isolation?'' F-family (java-spring foundation) detects Spring Data JPA with Oracle dialect configuration, HikariCP connection pooling, and Flyway migration scripts containing Oracle DDL. The \texttt{+migration} modifier adds its own probes: ``Data migration strategy? Big bang cutover or incremental dual-write? Rollback plan if data corruption is detected post-migration? What is the acceptable downtime window?''
+
+\paragraph{specify.}
+S1 generates data integrity success criteria: ``All ACID guarantees preserved under PostgreSQL'', ``Concurrent write operations produce identical outcomes to Oracle behavior.'' The \texttt{+migration} modifier layers on parity requirements: ``Each migrated table must pass row count verification \emph{and} checksum comparison between Oracle and PostgreSQL.'' ``Oracle \texttt{DECODE} $\to$ PostgreSQL \texttt{CASE WHEN} mapping must cover all branches, including \texttt{NULL} handling differences.'' ``Hierarchical queries using \texttt{CONNECT BY} must produce identical tree traversal order when rewritten as recursive CTEs.''
+
+\paragraph{implement.}
+F3 applies Spring Boot + PostgreSQL patterns: \texttt{spring.datasource} configuration for PostgreSQL, HikariCP pool tuning for PostgreSQL connection characteristics, Flyway migration scripts rewritten in PostgreSQL DDL. S7 fires prevention rules for common Oracle$\to$PostgreSQL bugs: ORA-type error handling code that references Oracle-specific error codes which do not exist in PostgreSQL; implicit \texttt{NUMBER}$\to$\texttt{DECIMAL} precision loss where Oracle's \texttt{NUMBER(38)} silently truncates differently than PostgreSQL's \texttt{NUMERIC}; \texttt{NVL}$\to$\texttt{COALESCE} semantic differences (Oracle's \texttt{NVL} evaluates \emph{both} arguments; PostgreSQL's \texttt{COALESCE} short-circuits). The \texttt{+migration} modifier enforces: ``Every stored procedure converted to application-layer logic must have an equivalent unit test that verifies identical input/output behavior.''
+
+\paragraph{verify.}
+R4 performs SBI verification: ``All 47 stored procedures have equivalent application logic with passing tests.'' F4 runs integration tests against a live PostgreSQL instance. The \texttt{+migration} modifier adds its own verification layer: ``Row counts match between Oracle and PostgreSQL for all 85 migrated tables.'' ``Checksum verification passes for all tables containing financial data.'' S1 success criteria verification confirms all data integrity guarantees hold under the new database.
+
+%% ── Example 2: Monolith → Microservices ─────────────────────────────
+\subsection{Example 2: Monolith $\to$ Microservices (Architecture Migration)}
+
+\textbf{Domain Profile:}
+\begin{verbatim}
+http-api + grpc + auth + resilience + message-queue
+| microservice archetype | spring-boot foundation
+| rebuild + production×large-team | +migration
+\end{verbatim}
+
+This migration changes the \emph{architecture} while potentially keeping the same technology stack. The challenge is decomposing a single deployable unit into independent services without breaking the implicit contracts that modules relied on when they shared a process and a database.
+
+\paragraph{reverse-spec.}
+R1 detects monolith patterns: a single deployable artifact, a shared database with 85 tables, in-process method calls between modules that would become network calls after decomposition. R2 identifies module boundaries by analyzing package structure, class dependency graphs, and database table ownership---which module reads and writes which tables. R3 proposes Feature boundaries aligned with service boundaries: ``UserService (12 tables), OrderService (23 tables), PaymentService (8 tables), NotificationService (5 tables), InventoryService (15 tables).'' R4 extracts SBI for each proposed service, counting cross-module interactions: ``OrderService calls UserService 14 times, PaymentService 8 times.'' R5 pre-context documents: ``Shared database with 85 tables. Cross-module joins in 12 queries. 3 distributed transactions that currently rely on single-database ACID.''
+
+\paragraph{init/add.}
+S5 (resilience concern) asks: ``Circuit breaker strategy? (Hystrix, Resilience4j, Sentinel) Retry policy? (fixed, exponential backoff, jitter) Default timeout for inter-service calls?'' S5 (message-queue concern) asks: ``Async communication pattern? Event sourcing with full event replay, or event notification with eventual consistency? Dead letter queue strategy?'' A3 (microservice archetype) asks: ``Service mesh or direct service-to-service? API gateway for external traffic? Service discovery mechanism? (Eureka, Consul, Kubernetes DNS)'' The \texttt{+migration} modifier adds: ``Decomposition strategy? Strangler fig pattern (gradual extraction) or big bang rewrite? Which service is extracted first? How will the partially-decomposed system operate during the transition?''
+
+\paragraph{specify.}
+S1 (resilience) generates success criteria: ``Circuit breaker opens after 5 consecutive failures $\to$ fallback response returned within 100ms'', ``Retry with exponential backoff does not exceed 3 attempts.'' S1 (auth) generates: ``JWT token propagation across service boundaries maintains user context.'' Cross-concern interaction (auth + resilience) produces: ``When auth service is down, services with cached tokens continue operating; services without cached tokens return 503 with retry-after header.'' A2 (microservice archetype) generates: ``Inter-service contracts verified via consumer-driven contract tests.'' The \texttt{+migration} modifier adds: ``Each extracted service must maintain an API contract identical to the monolith endpoint it replaces. No client-visible behavior change during extraction.''
+
+\paragraph{implement.}
+F3 (Spring Boot foundation) applies: service bootstrap template with Eureka registration, Feign client declarations for inter-service communication, Spring Cloud Config for externalized configuration. S7 (resilience) fires prevention rules: ``Distributed transaction without saga pattern detected---this will cause data inconsistency under partial failure'', ``Synchronous call chain deeper than 3 services detected---latency will compound multiplicatively.'' S7 (message-queue) prevents: ``Message consumption without idempotency key---duplicate delivery will cause duplicate side effects.'' The \texttt{+migration} modifier enforces: ``Shared database tables must be split with clear ownership. No cross-service direct database access. Services must communicate through defined API contracts, not shared tables.''
+
+\paragraph{verify.}
+S1 verifies all resilience success criteria: circuit breaker behavior under simulated failure, retry behavior, timeout enforcement. F4 runs contract tests via Spring Cloud Contract: each service's API contract is verified against consumer expectations. R4 SBI verification: ``All 47 monolith behaviors exist across the decomposed services---no behavior was lost during extraction.'' The \texttt{+migration} modifier adds: ``End-to-end latency comparison: monolith vs.\ microservices for the same 10 critical user journeys. Latency regression must not exceed 200ms for any journey.''
+
+%% ── Example 3: REST → GraphQL ───────────────────────────────────────
+\subsection{Example 3: REST $\to$ GraphQL (Interface Migration)}
+
+\textbf{Domain Profile:}
+\begin{verbatim}
+http-api + graphql + auth + async-state
+| public-api archetype | typescript + apollo-server foundation
+| incremental + mvp×small-team | +migration
+\end{verbatim}
+
+This migration changes the \emph{interface layer} while keeping the business logic and data layer intact. The challenge is providing a new API paradigm (graph-based queries) while maintaining backward compatibility for existing REST clients during the transition period.
+
+\paragraph{reverse-spec.}
+R1 detects REST patterns: Express route handlers organized by resource, controller files following RESTful conventions, Swagger/OpenAPI specification files documenting each endpoint. R2 analyzes each endpoint in detail: HTTP method, path, path parameters, query parameters, request body schema, response schema, authentication requirements, and rate limiting rules. R4 extracts the Source Behavior Inventory: ``32 REST endpoints across 5 resource groups (users, orders, products, payments, notifications). 8 endpoints require admin auth, 20 require user auth, 4 are public.'' R5 pre-context documents: ``RESTful CRUD with custom actions (e.g., POST /orders/\{id\}/cancel). Pagination via offset/limit with total count header. Auth via Bearer JWT with 1-hour expiry. Rate limiting: 100 req/min for authenticated, 20 req/min for public.''
+
+\paragraph{init/add.}
+S5 (graphql, or generic API concern if no dedicated graphql module) asks: ``Query vs.\ Mutation boundary---are there read operations with side effects that need reclassification? Subscription support needed? Real-time requirements? N+1 prevention strategy---DataLoader, query complexity analysis, or depth limiting?'' S5 (async-state) asks: ``Optimistic update strategy? Cache invalidation pattern?'' The \texttt{+migration} modifier adds: ``Which endpoints migrate first? High-traffic reads (benefiting most from GraphQL's flexible queries) or low-traffic admin endpoints (lower risk)? How long is the parallel REST+GraphQL operation period? What triggers REST deprecation?''
+
+\paragraph{specify.}
+S1 generates: ``GraphQL query for user profile returns correct shape with only requested fields'', ``Mutation for order creation returns created order with server-generated fields (id, createdAt, status)'', ``Subscription for order status emits event within 500ms of status change.'' S1 (auth): ``GraphQL context correctly extracts and validates JWT from Authorization header.'' The \texttt{+migration} modifier adds: ``Every migrated endpoint must have a GraphQL equivalent returning data identical in structure and content to the REST response.'' ``All 32 REST endpoints remain fully operational during the transition period---no REST endpoint may be removed until its GraphQL equivalent passes all verification.''
+
+\paragraph{implement.}
+F3 (Apollo Server foundation) applies: resolver pattern with clear separation between query resolution and data fetching, DataLoader instances for batching database queries to prevent N+1, schema-first approach with SDL files and generated TypeScript types. S7 fires prevention rules: ``N+1 query pattern detected---resolver fetches related entities in a loop without DataLoader'', ``Resolver returns full database object when client requested partial fields---over-fetching defeats GraphQL's purpose'', ``Subscription handler does not clean up on client disconnect---memory leak under sustained connections.'' The \texttt{+migration} modifier enforces: ``GraphQL response schema must be backward-compatible with existing REST response shapes. Shared clients consuming both APIs must not need adaptation logic.''
+
+\paragraph{verify.}
+S1 success criteria are verified against the GraphQL endpoint using automated integration tests. F4 runs schema validation (ensuring no breaking changes between schema versions) and integration tests against the running Apollo Server. R4 SBI verification: ``All 32 REST behaviors are accessible via GraphQL queries and mutations.'' The \texttt{+migration} modifier adds: ``Parallel operation test---identical requests sent to both REST and GraphQL endpoints must return semantically identical data. Response shape comparison automated for all 32 endpoint pairs.''
+
+%% ── Concluding insight ──────────────────────────────────────────────
+\begin{tipbox}[Four Dimensions of Migration, One Framework]
+These four migrations represent different dimensions of change: \textbf{data layer} (Oracle$\to$PostgreSQL), \textbf{architecture} (monolith$\to$microservices), \textbf{interface} (REST$\to$GraphQL), and \textbf{runtime/language version} (Java~8$\to$21). In each case, the \texttt{+migration} Context Modifier adds the same core capability: ensuring the \emph{new} system preserves the behaviors of the \emph{old} system, verified through SBI tracking. The four section families provide the domain-specific rules; \texttt{+migration} provides the cross-cutting ``did we lose anything?'' verification.
+\end{tipbox}
+
+%% ── Example 4: Java 8 → Java 21 ─────────────────────────────────────
+\subsection{Example 4: Java 8 $\to$ Java 21 (Runtime/Language Version Upgrade)}
+
+This migration doesn't change the architecture, database, or interface---the application stays the same. What changes is the \emph{language runtime} and the idioms available. This is the most deceptively simple migration: ``just upgrade the JDK version.'' In practice, it involves deprecated API replacements, new language feature adoption, library compatibility verification, and subtle behavioral differences in the runtime itself.
+
+\textbf{Domain Profile}: \texttt{http-api + auth + async-state | microservice | spring-boot | rebuild + production$\times$large-team | +migration}
+
+\textbf{reverse-spec} (Analyzing the Java 8 Codebase):
+
+R1 detects the Java ecosystem: \texttt{pom.xml} or \texttt{build.gradle} with \texttt{sourceCompatibility = '1.8'}, javax.* imports (pre-Jakarta), Java 8 Stream API patterns, \texttt{Optional} usage. F0 identifies Spring Boot 2.x with Java 8. The \texttt{+migration} modifier triggers source version detection: ``Source is Java 8 (1.8), target is Java 21.''
+
+R2 performs deep analysis of Java 8-specific patterns: anonymous inner classes that could become lambdas (already migrated in most codebases, but some remain), \texttt{Date}/\texttt{Calendar} usage (should become \texttt{java.time}), reflection-based access to internal APIs (\texttt{sun.misc.Unsafe}, \texttt{--add-opens} requirements), \texttt{javax.*} imports that must become \texttt{jakarta.*} (if Spring Boot 3.x is the target). R4 extracts the SBI: ``156 API endpoints, 43 scheduled jobs, 12 integration points with external systems.''
+
+\textbf{init/add} (Planning the Upgrade):
+
+S5 asks domain-specific questions about the upgrade scope: ``Target Java version? (17 LTS or 21 LTS)'' ``Spring Boot version change? (2.x$\to$3.x includes jakarta namespace migration)'' ``Module system adoption? (JPMS or classpath mode)'' ``GC strategy change? (G1$\to$ZGC for low-latency services)''
+
+The \texttt{+migration} modifier adds: ``Deprecated API inventory---which Java 8 APIs are used that were removed or deprecated in 9-21?'' ``Library compatibility matrix---which dependencies have Java 21-compatible versions?'' ``Build tool version requirements---does Maven/Gradle need upgrading first?''
+
+\textbf{specify} (Defining Upgrade Scenarios):
+
+S1 generates SCs for all behavioral contracts: ``All 156 API endpoints return identical responses after upgrade.'' ``All 43 scheduled jobs execute with identical timing and results.'' The \texttt{+migration} modifier adds upgrade-specific SCs: ``javax.* $\to$ jakarta.* namespace migration covers all 287 import statements.'' ``java.util.Date $\to$ java.time conversion maintains timezone consistency (critical for financial calculations).'' ``Removed --illegal-access=permit flag---all reflection-based access replaced with supported APIs.''
+
+S7 generates Java version-specific bug prevention: ``\texttt{String.trim()} vs \texttt{String.strip()} behavioral difference (Unicode whitespace handling).'' ``\texttt{Pattern.matches()} backtracking behavior changed in Java 11.'' ``\texttt{HashMap} iteration order not guaranteed---code depending on insertion order will break silently.''
+
+\textbf{implement} (Executing the Upgrade):
+
+F3 applies Spring Boot 3.x idioms: \texttt{jakarta.*} namespace, \texttt{@ConstructorBinding} removal, \texttt{spring.config.import} for config files. F8 updates build commands: JDK 21 toolchain, updated Maven/Gradle plugins. S7 prevents common upgrade bugs: ``Do not use \texttt{var} for method parameters (only local variables).'' ``Records are value-based---do not synchronize on them.'' ``Sealed classes require \texttt{permits} clause or same-file subclasses.''
+
+The \texttt{+migration} modifier adds: ``For each deprecated API replacement, verify the replacement produces identical output for the same input. Example: \texttt{new Date()} $\to$ \texttt{Instant.now()} conversion must preserve millisecond precision.''
+
+\textbf{verify} (Confirming Behavioral Parity):
+
+S1 verifies all SCs---every API endpoint, every scheduled job, every integration point. F4 runs the existing test suite against JDK 21 (this alone catches ~60\% of issues). F5 builds with \texttt{mvn clean verify -Dmaven.compiler.release=21}. R4 SBI verification: ``156/156 endpoints return identical responses. 43/43 jobs produce identical results. 12/12 integrations pass.''
+
+The \texttt{+migration} modifier runs its own verification: ``Performance comparison---JDK 21 response times within 10\% of JDK 8 baseline (or better, thanks to JIT improvements).'' ``Memory footprint comparison---ZGC pause times under 10ms.'' ``Startup time comparison---CDS (Class Data Sharing) applied for container deployments.''
+
+\begin{warnbox}[Why Version Upgrades Are Deceptive]
+A version upgrade appears to be the simplest migration---``same code, new JDK.'' But the failure modes are the most insidious because they are \emph{silent}. A database migration fails loudly (queries error out). An architecture migration fails visibly (services can't communicate). A version upgrade fails \emph{subtly}---the application starts, tests pass, but \texttt{HashMap} iteration order changed and a report that used to list items alphabetically now lists them in hash order. The customer notices three weeks later. The \texttt{+migration} modifier's SBI behavioral verification catches these silent regressions by comparing \emph{output}, not just \emph{compilation success}.
+\end{warnbox}
+
+
+%% ════════════════════════════════════════════════════════════════════
+\section{Complete Scenario Reference}
+\label{sec:complete-scenario-reference}
+%% ════════════════════════════════════════════════════════════════════
+
+The Domain Profile's \textbf{Context axis} determines which pipeline scenario applies. Each scenario activates a different combination of the four section families. This section provides a comprehensive reference for all six scenarios, showing exactly how R-, S-, A-, and F-families participate in each one.
+
+%% ── Scenario 1: Greenfield ──────────────────────────────────────────
+\subsection{Scenario 1: Greenfield --- ``Building from Scratch''}
+\label{sec:scenario-greenfield}
+
+\textbf{Example:} A team building a new real-time collaboration tool (multiplayer document editor with presence indicators, conflict resolution, and role-based access control).
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & No & No existing code to analyze \\
+S-family & Full & Drives entire pipeline from detection to verification \\
+A-family & Full & Shapes project philosophy and constitution \\
+F-family & Full & Sets up toolchain, patterns, and platform constraints \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes Greenfield unique.}
+There is no prior art. Every decision---from data model to API shape to error handling strategy---is made fresh. The Domain Profile Instance starts empty and fills up Feature by Feature as the pipeline executes. This means the Brief phase is especially important: S5 elaboration probes and A3 archetype probes must extract maximum information from the user because there is no codebase to analyze for implicit answers.
+
+\paragraph{reverse-spec.}
+Not used. There is no source code to analyze. The pipeline begins at \cmd{init}.
+
+\paragraph{init/add.}
+S0 detects concerns from the user's project description: ``real-time collaboration'' triggers \texttt{realtime} and \texttt{websocket}; ``role-based access'' triggers \texttt{auth} and \texttt{rbac}; ``conflict resolution'' triggers \texttt{data-integrity}. S5 fires elaboration probes for each detected concern: ``What conflict resolution strategy? OT, CRDT, or last-write-wins?'' ``Authentication provider? OAuth, SAML, or custom?'' ``Real-time transport? WebSocket, SSE, or long-polling?'' A3 asks archetype probes: ``Is this a SaaS platform with multi-tenancy, or a self-hosted tool?'' ``What is the scaling target---10 concurrent users or 10,000?'' F0 detects the chosen foundation from user input or project files: ``React + Node.js + Socket.io'' or ``SvelteKit + Supabase Realtime.'' S9 validates brief completeness---all detected concerns have sufficient elaboration.
+
+\paragraph{specify.}
+S1 generates success criteria for each concern. For \texttt{realtime}: ``Cursor position updates propagate to all participants within 200ms.'' For \texttt{auth}: ``Users with `viewer' role cannot trigger mutation operations.'' For \texttt{data-integrity}: ``Concurrent edits to the same paragraph resolve deterministically---no data loss.'' A2 adds archetype-specific criteria: ``Multi-tenant data isolation---Tenant A's queries never return Tenant B's documents.'' F2 adds framework constraints to success criteria: ``WebSocket reconnection uses exponential backoff with jitter.''
+
+\paragraph{implement.}
+F3 provides foundation-specific implementation patterns: project structure, recommended libraries, configuration templates. S7 fires bug prevention rules: ``WebSocket handler without heartbeat timeout will leak connections'', ``CRDT merge without vector clock comparison will produce phantom conflicts.'' A1 enforces architectural philosophy: ``All real-time events flow through the event bus---no direct inter-component mutation.''
+
+\paragraph{verify.}
+S1 success criteria are verified through automated tests. F4 provides foundation-specific test patterns (e.g., testing WebSocket with mock server). F8 runs build and toolchain verification. No R4 SBI check---there is no source behavior to preserve. The verify phase focuses entirely on ``does the new code do what the spec says?'' rather than ``does the new code match the old code?''
+
+\paragraph{Key characteristic.}
+S-family and A-family carry the heaviest load. Without existing code, domain rules and architectural philosophy are the primary sources of implementation guidance. The GEL layer (entity-registry, api-registry) starts empty and grows organically as Features are added.
+
+%% ── Scenario 2: Rebuild (Same Stack) ────────────────────────────────
+\subsection{Scenario 2: Rebuild (Same Stack) --- ``Rewriting with the Same Technology''}
+\label{sec:scenario-rebuild-same}
+
+\textbf{Example:} Rewriting a messy Express.js monolith as a clean, well-structured Express.js application with proper separation of concerns, test coverage, and documentation.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Extracts all existing behaviors for SBI tracking \\
+S-family & Full & SC generation informed by pre-context from R-family \\
+A-family & Full & Constitution may change even if archetype stays the same \\
+F-family & Partial & Same foundation---patterns carry over, toolchain identical \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes same-stack rebuild unique.}
+The technology does not change, but the \emph{architecture} does. The danger is subtle: because the stack is familiar, teams assume they understand the existing system. R-family analysis is critical precisely because the same Express.js code can be organized in wildly different ways, and implicit behaviors (middleware ordering, error propagation chains, request lifecycle hooks) are easy to miss.
+
+\paragraph{reverse-spec.}
+R1 scans the source codebase and detects Express.js patterns: route definitions, middleware chains, error handlers, database models, authentication middleware. R2 traces data flows through the middleware pipeline---request enters at \texttt{app.use(cors())}, passes through \texttt{authMiddleware}, reaches the route handler, queries the database, and returns through error handling middleware. R4 extracts SBI: ``87 route handlers across 14 router files. 23 middleware functions. 45 database models. 12 background jobs via node-cron.'' R5 generates pre-context documenting patterns that the rewrite must preserve: ``Custom error middleware catches Mongoose validation errors and transforms them to 422 responses with field-level error messages.''
+
+\paragraph{init/add.}
+S0 detects concerns from the pre-context (not from scratch---R-family has already identified them). S5 elaboration probes are \emph{informed} by pre-context: instead of asking ``Do you use authentication?'' (which R-family already answered), S5 asks ``The source uses Passport.js with local + Google strategies. Preserve both, or consolidate to OAuth only?'' A3 archetype probes may propose a change: ``The source is a monolith. Rebuild as monolith with cleaner boundaries, or decompose into modules?'' F0 detects the same Express.js foundation---no change needed. F8 toolchain is already known.
+
+\paragraph{specify.}
+S1 generates success criteria that reference pre-context directly: ``User login with email/password returns JWT (matching source behavior R5-AUTH-001).'' The success criteria are not invented from scratch---they are \emph{extracted and formalized} from the R-family analysis. A2 may add new architectural criteria that the messy original lacked: ``All route handlers delegate to service layer---no database queries in route files.''
+
+\paragraph{implement.}
+F3 applies the same Express.js patterns but in the new, clean structure. Because the foundation has not changed, F3 patterns are identical to what the source code uses (or should have used). S7 fires prevention rules relevant to Express.js: ``Route handler with async operation but no try/catch will crash the process on rejection'', ``Middleware order matters---CORS must come before auth.'' The key difference from greenfield: S7 can reference pre-context to flag deviations from source behavior: ``Source handles file uploads with multer using memory storage. New implementation uses disk storage---behavior change detected.''
+
+\paragraph{verify.}
+R4 SBI verification is the star of this scenario: ``All 87 route behaviors exist in the rewritten application.'' This is the definitive check that the rewrite preserved everything. F4 runs the same test patterns (Mocha/Jest + Supertest) against the new code. F8 runs build verification. S1 verifies success criteria. The combination of R4 (``did we lose anything from the old code?'') and S1 (``does the new code meet its spec?'') provides complete coverage.
+
+\paragraph{Key characteristic.}
+R4 SBI is the critical artifact. The entire point of a same-stack rebuild is to produce cleaner code that does the same thing. F-family contributes less than in other scenarios because the foundation is unchanged---the same libraries, the same runtime, the same deployment target.
+
+%% ── Scenario 3: Rebuild (New Stack) ─────────────────────────────────
+\subsection{Scenario 3: Rebuild (New Stack) --- ``Rewriting with Different Technology''}
+\label{sec:scenario-rebuild-new}
+
+\textbf{Example:} Rewriting a Django application as a FastAPI application to gain async capability and better performance for I/O-bound workloads.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Analyzes Django-specific patterns for translation \\
+S-family & Full & SC generation bridges old and new paradigms \\
+A-family & Partial & Archetype may shift (e.g., adding async capability) \\
+F-family & Dual & Source (Django, read-only) + Target (FastAPI, write) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes new-stack rebuild unique.}
+Two foundations are active simultaneously. The source foundation (Django) is read-only---used for understanding patterns. The target foundation (FastAPI) is write---used for implementation. This creates a translation layer: Django ORM models become SQLAlchemy models, Django views become FastAPI route handlers, Django middleware becomes FastAPI middleware with different lifecycle semantics. The \texttt{+migration} modifier is almost always appropriate here to enforce behavioral parity during the translation.
+
+\paragraph{reverse-spec.}
+R1 analyzes Django-specific patterns: URL conf routing (\texttt{urls.py}), class-based views, Django ORM models with field definitions and relationships, Django REST Framework serializers, middleware classes, template rendering, Django signals, management commands, and Celery task definitions. R2 traces the Django request lifecycle: URL resolution $\to$ middleware stack $\to$ view dispatch $\to$ serializer validation $\to$ ORM query $\to$ response rendering. R4 extracts SBI: ``42 URL patterns across 6 apps. 28 model classes. 15 serializers. 8 middleware classes. 12 Celery tasks. 5 management commands.'' R5 pre-context maps Django patterns to their FastAPI equivalents at a conceptual level: ``Django signals (post\_save, pre\_delete) have no direct FastAPI equivalent---must be converted to explicit event dispatching or SQLAlchemy event listeners.''
+
+\paragraph{init/add.}
+S5 probes are informed by both the source analysis and the target foundation. Questions bridge the two worlds: ``Django uses synchronous ORM throughout. FastAPI supports async---migrate all database access to async SQLAlchemy, or use sync fallback with \texttt{run\_in\_executor}?'' ``Django REST Framework provides automatic pagination, filtering, and schema generation. Which of these features do you want to replicate in FastAPI?'' A3 may detect an archetype shift: ``The Django app is synchronous. FastAPI enables an event-driven architecture---do you want to adopt this, or maintain the synchronous request-response pattern?'' F0 detects the target foundation (FastAPI) and notes the source foundation (Django) for reference.
+
+\paragraph{specify.}
+S1 generates success criteria that account for both worlds. For translated features: ``User registration endpoint accepts the same payload shape as Django's /api/users/ and returns the same response structure.'' For new capabilities unlocked by the stack change: ``Async database queries do not block the event loop---verified by concurrent request test.'' A2 adds criteria for any architectural shift: ``All I/O operations use async/await---no synchronous blocking calls in route handlers.''
+
+\paragraph{implement.}
+F3 applies FastAPI patterns: Pydantic models for request/response validation, dependency injection for database sessions, async route handlers. Simultaneously, the pre-context from R5 guides the translation: ``Django's \texttt{@login\_required} decorator maps to FastAPI's \texttt{Depends(get\_current\_user)} dependency.'' S7 fires prevention rules specific to the Django$\to$FastAPI translation: ``Django ORM lazy loading pattern translated directly will cause N+1 queries in SQLAlchemy---use eager loading or selectinload'', ``Django's implicit CSRF protection does not exist in FastAPI---add explicit CSRF middleware or document the API-only (no browser form) decision.''
+
+\paragraph{verify.}
+R4 SBI verification maps Django behaviors to FastAPI equivalents: ``All 42 URL patterns have corresponding FastAPI routes.'' ``All 12 Celery tasks have equivalent async task implementations.'' F4 runs FastAPI-specific tests (pytest + httpx async client). The source foundation (Django) is consulted one final time: response payloads from the Django app are compared against FastAPI responses for shape and content parity.
+
+\paragraph{Key characteristic.}
+The dual-foundation tension is the defining challenge. Every Django pattern must be consciously translated, not just reimplemented. S7's bug prevention rules are especially valuable here because they catch the subtle semantic differences between frameworks that developers often miss---differences that produce code that \emph{compiles} but \emph{behaves differently}.
+
+%% ── Scenario 4: Incremental ─────────────────────────────────────────
+\subsection{Scenario 4: Incremental --- ``Adding Features to an Existing SDD Project''}
+\label{sec:scenario-incremental}
+
+\textbf{Example:} Adding a notification system (email, in-app, push) to an application that already has 5 Features built through the SDD pipeline.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & No & Project is already SDD-managed; no reverse-engineering needed \\
+S-family & Full & Pipeline runs fully, inheriting decisions from prior Features \\
+A-family & Partial & Same archetype; constitution already exists \\
+F-family & Partial & Same foundation; toolchain established \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes Incremental unique.}
+The Global Evolution Layer (GEL) is the star. When Feature 6 (notifications) enters the pipeline, it does not start from zero. The entity-registry already contains User, Order, Payment, and Product entities from Features 1--5. The api-registry documents all existing endpoints. The domain-profile-instance records all decisions made so far. Feature 6 \emph{inherits} this context, which means the Brief is shorter (many questions are already answered), the spec is more precise (it references existing entities), and implementation avoids conflicts with existing code.
+
+\paragraph{reverse-spec.}
+Not used. The project is already managed through SDD artifacts. The spec files, plan files, and entity registries \emph{are} the documentation. There is no need to reverse-engineer what already has forward-engineered specifications. If the team needs to understand existing behavior, they read the spec files---not the code.
+
+\paragraph{init/add.}
+S0 detects concerns for the notification Feature: \texttt{message-queue} (async delivery), \texttt{email} (SMTP integration), \texttt{push-notification} (FCM/APNs). S5 fires elaboration probes, but many are pre-answered by GEL: ``User model?'' $\to$ already defined in entity-registry as \texttt{E003} with email, preferences, and deviceTokens fields. S5 focuses on \emph{new} decisions: ``Notification preferences---per-channel opt-in/opt-out? Quiet hours? Batching/digest mode?'' A3 does not re-ask archetype questions---the constitution already exists and applies. F0 does not re-detect the foundation---it is recorded in \texttt{sdd-state.md}.
+
+\paragraph{specify.}
+S1 generates success criteria that reference GEL entities: ``When Order (E005) status changes to `shipped', User (E003) receives notification via all opted-in channels within 30 seconds.'' ``Notification preferences respect User.notificationPreferences field from entity-registry.'' The success criteria naturally compose with existing Features because they share the same entity vocabulary. A2 adds: ``Notification service follows the same provider abstraction pattern as PaymentService (Feature 3).''
+
+\paragraph{implement.}
+F3 applies the established project patterns---same directory structure, same naming conventions, same dependency injection pattern. S7 fires prevention rules: ``Email sending in request handler will block response---use message queue for async delivery.'' ``Push notification without retry on FCM 429 response will silently drop messages.'' The key advantage of incremental: F3 patterns are not theoretical recommendations but \emph{observed conventions} from the existing 5 Features. Consistency is nearly automatic.
+
+\paragraph{verify.}
+S1 verifies notification success criteria. F4 runs tests using the established test patterns. F8 confirms that the new Feature does not break existing Features (regression test suite). No R4 SBI check---this is new functionality, not a rewrite. Cross-Feature verification is especially important: ``Does the notification system correctly integrate with the authentication system from Feature 1? Does it respect the rate limiting from Feature 4?''
+
+\paragraph{Key characteristic.}
+GEL eliminates redundant work. Feature 6 does not re-decide what Feature 1 already decided. The pipeline is shorter (no reverse-spec, no archetype discovery), more precise (entities and APIs are already defined), and more consistent (patterns are inherited, not reinvented). This is the scenario where SDD's incremental investment pays compound returns.
+
+%% ── Scenario 5: Adoption ────────────────────────────────────────────
+\subsection{Scenario 5: Adoption --- ``Documenting Existing Working Code''}
+\label{sec:scenario-adoption}
+
+\textbf{Example:} A working Node.js REST API with 40+ endpoints, zero documentation, and a new team member joining next month. The team wants SDD documentation wrapped around the existing code for onboarding, maintenance, and future development.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Core driver---extracts specs from existing code \\
+S-family & Modified & Extracts behavior rather than defining new behavior \\
+A-family & Detected & Archetype detected from code, not chosen \\
+F-family & Detected & Foundation detected from code, toolchain already exists \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes Adoption unique.}
+The code already exists and \emph{works}. The pipeline's job is not to build anything but to \emph{wrap documentation around working code}. This inverts the normal flow: instead of spec $\to$ code, the flow is code $\to$ spec. The \cmd{specify} step \emph{extracts} behavior (documenting what the code does) rather than \emph{defining} behavior (deciding what the code should do). The \cmd{plan} step \emph{documents} architecture (recording how the code is structured) rather than \emph{designing} architecture (deciding how the code should be structured).
+
+\paragraph{reverse-spec.}
+R-family is the primary driver. R1 scans the Node.js codebase: Express routes, middleware, Mongoose/Sequelize models, authentication strategy, test files (if any). R2 performs deep analysis of each module: request validation patterns, error handling conventions, logging practices, environment configuration. R4 produces a comprehensive SBI: ``43 route handlers, 18 models, 12 middleware functions, 7 background jobs, 3 WebSocket handlers.'' R5 generates pre-context that becomes the foundation for all subsequent documentation. This is the most thorough R-family execution of any scenario---every nuance matters because the pre-context \emph{is} the documentation source.
+
+\paragraph{init/add.}
+S0 detects concerns from the R-family analysis, not from user description. The user does not need to enumerate concerns---the code reveals them. S5 probes are confirmatory rather than exploratory: ``R-family detected JWT authentication with refresh tokens. Is this the intended auth strategy, or is it legacy?'' ``R-family found rate limiting middleware on 8 endpoints. Should this be documented as a system-wide concern?'' A3 detects the archetype from code structure: REST API with background jobs suggests a ``backend-service'' archetype. F0 detects the foundation from package.json and configuration files.
+
+\paragraph{specify.}
+S1 \emph{extracts} success criteria from existing behavior rather than inventing them: ``GET /api/users returns paginated list with limit/offset parameters (extracted from source: route handler applies default limit=20).'' ``Invalid JWT returns 401 with \{error: `Token expired'\} body (extracted from source: auth middleware error handler).'' The spec documents what the code \emph{actually does}, not what it \emph{should do}. Discrepancies between apparent intention and actual behavior are flagged as notes, not failures.
+
+\paragraph{plan.}
+The plan documents the existing architecture rather than designing a new one. Component boundaries are recorded as they exist in the code. Data flow diagrams reflect actual implementation, not ideal architecture. If the architecture has known issues (circular dependencies, God objects), these are documented as technical debt items---not redesigned.
+
+\paragraph{implement.}
+\textbf{Not executed.} The code already exists. There is nothing to implement. The pipeline skips directly from plan to verify. This is the only scenario where the implement step is entirely absent.
+
+\paragraph{verify.}
+Verify runs in \textbf{non-blocking mode}. Failures found during verification are \emph{pre-existing bugs} in the working code, not regressions introduced by the pipeline. They are documented as known issues, not treated as blockers. R4 SBI verification confirms that the generated documentation covers all detected behaviors: ``All 43 route handlers have corresponding success criteria in the spec.'' F8 runs the existing test suite (if any) to establish a baseline.
+
+\paragraph{Key characteristic.}
+The direction of information flow is reversed. In every other scenario, the pipeline generates specs and then generates code. In Adoption, the pipeline reads code and then generates specs. The implement step is skipped entirely. Verify is non-blocking because failures are pre-existing, not new. The value delivered is not working software but \emph{comprehensive documentation of already-working software}.
+
+%% ── Scenario 6: +migration ──────────────────────────────────────────
+\subsection{Scenario 6: +migration --- ``Technology Transition''}
+\label{sec:scenario-migration}
+
+\textbf{Example:} See the three detailed migration walkthroughs in Section~\ref{sec:migration-scenario}: Oracle$\to$PostgreSQL, Monolith$\to$Microservices, REST$\to$GraphQL.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Analyzes source system for behavioral inventory \\
+S-family & Full & Generates SCs with parity requirements \\
+A-family & Variable & May change if architecture shifts \\
+F-family & Dual & Source (read-only) + Target (write) \\
++migration & Active & Adds cross-cutting parity verification \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes +migration unique.}
+The \texttt{+migration} context modifier is not a standalone scenario---it is an \textbf{overlay} applied on top of a Rebuild scenario (same-stack or new-stack). It adds three capabilities that no other scenario provides:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Source$\leftrightarrow$Target mapping:} Every source behavior is explicitly mapped to its target equivalent. Not ``we rewrote it'' but ``source behavior X is implemented as target behavior Y, verified by test Z.''
+  \item \textbf{SBI preservation verification:} R4's Source Behavior Inventory becomes a checklist. Verify does not pass until every SBI item has a corresponding implementation in the target system.
+  \item \textbf{Transition-period coexistence rules:} For incremental migrations (strangler fig pattern), the modifier enforces rules about parallel operation: ``Both old and new systems must handle this request identically during the transition period.''
+\end{enumerate}
+
+\paragraph{When to use +migration vs.\ plain rebuild.}
+Use \texttt{+migration} when behavioral parity is a hard requirement---when losing even one behavior from the source system is unacceptable. Use plain rebuild when the rewrite is an opportunity to intentionally drop behaviors (``we don't need feature X anymore''). The modifier adds overhead (SBI tracking, parity verification, parallel operation tests), so it should be applied deliberately, not by default.
+
+\paragraph{Key characteristic.}
+The \texttt{+migration} modifier demonstrates the Context axis's power: it adds cross-cutting rules that weave through all four families without modifying any family's internal logic. S1 generates success criteria as usual; \texttt{+migration} annotates them with parity requirements. F3 applies patterns as usual; \texttt{+migration} adds source-comparison checks. The modifier is \emph{composable}---it works with any combination of Interface, Concern, Archetype, and Foundation axes.
+
+%% ── Summary ─────────────────────────────────────────────────────────
+\subsection{Scenario Comparison Summary}
+
+\begin{longtable}{lccccl}
+\caption{Section family activation across all six scenarios} \\
+\toprule
+\textbf{Scenario} & \textbf{R} & \textbf{S} & \textbf{A} & \textbf{F} & \textbf{Defining Artifact} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Scenario} & \textbf{R} & \textbf{S} & \textbf{A} & \textbf{F} & \textbf{Defining Artifact} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+Greenfield        & ---  & Full & Full & Full    & Constitution \\
+Rebuild (same)    & Full & Full & Full & Partial & SBI (R4) \\
+Rebuild (new)     & Full & Full & Partial & Dual & Pre-context translation map \\
+Incremental       & ---  & Full & Partial & Partial & GEL registries \\
+Adoption          & Full & Extract & Detect & Detect & Generated spec from code \\
++migration        & Full & Full & Variable & Dual & SBI parity report \\
+
+\end{longtable}
+
+
 \section{The Philosophy Behind the Division}
 
 The four families exist because of three design requirements:
@@ -941,6 +1578,8 @@ The four families exist because of three design requirements:
 \chapter{Module Loading and Context Injection}
 \label{ch:injection}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter explains how modules are loaded, merged, and delivered to the pipeline. If Chapter~5 is what's inside each module, Chapter~6 is how those modules compose into the final rule set the agent sees.}
 
 \section{The 8-Step Loading Order}
 \label{sec:loading-order}
@@ -999,6 +1638,8 @@ Here is the math for a typical pipeline step:
 
 Compare to loading everything: $\sim$15,000+ lines. The agent would spend its context budget reading instructions instead of doing work. Selective loading means the agent reads 1,300 lines of highly relevant context instead of 15,000 lines of mostly irrelevant rules.
 
+What happens when context budget is exceeded? The agent doesn't crash --- it \textbf{silently degrades}. Rules loaded early in the context get compressed or dropped. The carefully written S7 bug prevention rules disappear from the agent's working memory. The result: the agent produces code that would have been caught by rules it once knew but forgot. This is why lazy loading isn't an optimization --- it's a \textbf{correctness requirement}.
+
 \section{Merge Semantics}
 
 When multiple modules are active, their sections merge via \textbf{append} semantics: \texttt{gui.md}'s S1 accumulates with \texttt{realtime.md}'s S1 and \texttt{ai-assistant}'s A2.
@@ -1035,7 +1676,13 @@ constitution.md & Use default project principles \\
 \label{ch:guards}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter describes the safety gates that prevent the pipeline from proceeding with bad data. Each guard was added in response to a specific production failure.}
+
 Seven generalized guard patterns extracted from 44 field-discovered failure cases (SKF-001 through SKF-044). Each guard addresses a \emph{class} of pipeline failure---not a single instance.
+
+\begin{tipbox}[Guards Work as a System, Not Individually]
+Consider a rebuild project where Feature 3 depends on Feature 1's API. Multiple guards fire simultaneously: Guard~1 (is this gate blocking, not just a warning?), Guard~3 (was the runtime default verified independently?), Guard~5 (does the test environment match production?), Guard~6 (does Feature 3's usage match Feature 1's contract?), Guard~7 (does the rebuilt code match the source app's behavior?). Each guard catches a different category of failure. Together, they form a safety net where no single point of failure can slip through.
+\end{tipbox}
 
 \section{Guard 1: Guideline to Gate Escalation}
 
@@ -1139,6 +1786,8 @@ Major-Spec & Return to specify & Missing requirement, wrong scope definition \\
 \label{ch:gel}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter explains the four files that serve as the project's shared memory across Features. Without them, each Feature would start from zero.}
+
 The Global Evolution Layer (GEL) is the set of project-wide artifacts that carry information across Features. It is the implementation of P1-c (Cross-Feature Memory).
 
 \section{Core Artifacts}
@@ -1152,6 +1801,8 @@ The Global Evolution Layer (GEL) is the set of project-wide artifacts that carry
   \item[pre-context.md] (per Feature) What each Feature needs to know about the rest of the project, including source analysis details, cross-Feature dependencies, and augmented requirements.
   \item[\file{domain-profile-instance.md}] Records profiling \emph{results}---the concrete domain decisions made for this project. S5 probe answers, cross-concern integration activations, and per-Feature domain summaries. Written during \cmd{add} Brief and \cmd{specify} Post-Update. The 4th GEL registry alongside entity-registry, api-registry, and sdd-state.
 \end{description}
+
+Think of the four registries as different memory systems: \texttt{entity-registry.md} remembers \emph{what data exists} (User has email, role, teamId). \texttt{api-registry.md} remembers \emph{how services communicate} (POST /auth/login expects email+password, returns session token). \texttt{sdd-state.md} remembers \emph{where the project is} (Feature 3 is at implement step, Feature 4 is pending). \texttt{domain-profile-instance.md} remembers \emph{why decisions were made} (we chose sessions over JWT because of XSS concerns, decided at Feature 1 Brief). Without these four files, every Feature would start from zero --- reinventing data models, guessing API contracts, losing the reasoning behind architectural choices.
 
 \section{Data Flow Example: F001 to F003}
 
@@ -1339,6 +1990,8 @@ S3 (Verify Steps) & Build + smoke test & Full 4-phase verification \\
 \label{ch:code-explore}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter covers the code-explore skill --- your tool for systematically understanding an unfamiliar codebase before building or rebuilding.}
+
 \cmd{code-explore} is the understanding skill---interactive, human-guided source code exploration that produces persistent, structured documentation.
 
 \section{Commands}
@@ -1378,6 +2031,17 @@ Not all code flows linearly. The agent selects the appropriate strategy:
 \end{enumerate}
 
 Each trace produces: summary, Mermaid sequence diagram, flow table with source references, entities discovered, APIs discovered, business rules, and categorized observations.
+
+\begin{tipbox}[How to Choose a Trace Strategy]
+\begin{itemize}[nosep]
+\item \textbf{Sequential flow}: Default for most features. Use when tracing CRUD operations, request-response APIs, or any ``user does X, system responds with Y'' flow.
+\item \textbf{Connection Lifecycle}: Use when the code manages long-lived connections --- TCP servers, WebSocket handlers, database connection pools. Look for connect/disconnect/reconnect patterns.
+\item \textbf{State Machine}: Use when the code has explicit state transitions --- order processing (pending$\rightarrow$paid$\rightarrow$shipped), document workflows, game states. Look for switch/case on status fields.
+\item \textbf{Pub/Sub Fan-out}: Use when one event triggers multiple handlers --- event buses, message queues, webhook dispatchers. Look for publish/subscribe/emit patterns.
+\item \textbf{Concurrent Actors}: Use when the code spawns parallel workers --- goroutines, thread pools, actor systems. Look for \texttt{go func()}, \texttt{pool.submit()}, \texttt{ActorRef} patterns.
+\end{itemize}
+When unsure, start with Sequential flow. If the trace feels incomplete (important code paths are missed), switch to a more appropriate strategy.
+\end{tipbox}
 
 \section{Synthesis: From Understanding to Action}
 
@@ -1441,6 +2105,8 @@ The Software Catalog feeds into reverse-spec for foundation detection and into s
 \chapter{reverse-spec}
 \label{ch:reverse-spec}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter covers reverse-spec --- the skill that extracts structured specifications from existing source code.}
 
 \cmd{reverse-spec} is the automated extraction skill---a systematic audit that produces the Global Evolution Layer from existing source code.
 
@@ -1543,6 +2209,8 @@ For projects with 1000+ files:
 \chapter{smart-sdd}
 \label{ch:smart-sdd}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter covers smart-sdd --- the orchestrator that runs the full specify-plan-implement-verify pipeline with cross-Feature awareness.}
 
 \cmd{smart-sdd} is the main pipeline skill---the full Specification-Driven Development workflow with cross-Feature memory.
 
@@ -1673,6 +2341,8 @@ Common step-back patterns:
 \chapter{domain-extend}
 \label{ch:domain-extend}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter covers domain-extend --- the meta-tool that grows the vocabulary the other three skills draw from.}
 
 \cmd{domain-extend} is the meta-tool that grows the domain vocabulary.
 
