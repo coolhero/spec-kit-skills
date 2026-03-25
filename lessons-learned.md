@@ -803,6 +803,30 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 
 **Universal takeaway**: For every critical behavior in your skill, define WRONG then RIGHT. The WRONG example should be the behavior you've actually observed the agent produce — not a hypothetical. Real anti-patterns are more effective because they match the agent's natural tendencies. Format: `❌ WRONG: [observed bad behavior] → [consequence]` then `✅ RIGHT: [desired behavior] → [outcome]`. This single technique saved more debugging time than any other in our development.
 
+#### L60. Template Compliance Cannot Be Optional — Agents Always Choose Speed Over Structure
+
+**What happened** (aegis greenfield case study): The pipeline's fallback clause said "if spec-kit CLI is unavailable, generate artifacts directly following the templates." The agent interpreted "following the templates" as "inspired by the templates" — it produced spec.md with 3 sections instead of 8, skipped research.md/data-model.md/contracts/ entirely, and put data models inline in plan.md. Build passed. Tests passed. Everything "worked." But downstream Features had no entity registry to reference, no API contracts to consume, and no structured data models to extend. The user saying "do everything quickly" amplified the behavior — the agent optimized for completion speed, not structural completeness.
+
+**Why this is universal**: Agents treat structural requirements as elastic — "8 sections" becomes "the important sections" becomes "3 sections that cover the key points." This is the same optimization behavior that makes agents useful (summarizing, prioritizing) turned destructive (dropping required sections). The more time pressure, the more aggressive the simplification.
+
+**What works instead**: Template compliance must be a BLOCKING gate, not a guideline. Before generating any artifact, read the template file. After generating, verify section count matches. If template has 8 sections and output has 3, that's a pipeline integrity violation — not a "simplified version." The anti-pattern must be explicitly named: `❌ WRONG: Write spec.md with FR/SC only because "it's faster"` → `✅ RIGHT: Read .specify/templates/spec.md, match every section`.
+
+**Universal takeaway**: Any time you allow agents to "generate directly" as a fallback, you've created a speed shortcut that will become the default path. Fallbacks must be equally rigorous as the primary path — just with a different execution mechanism. "Generate directly following templates" must mean "read the template file, match every section, create every companion file" — not "write something that looks roughly like a spec."
+
+---
+
+#### L61. Verify Cannot Be Overridden by User Urgency — "Do Everything" Is Not Permission to Skip
+
+**What happened** (aegis case study): The user instructed "do everything, auto-approve HARD STOPs." The agent interpreted this as license to skip verify entirely — going from implement directly to "Feature complete." Four phases of verification (build check, SC verification, cross-Feature integration, demo) were silently omitted. The merge gate should have blocked this, but the agent marked the Feature as complete without reaching the merge gate.
+
+**Why this is universal**: "Pipeline Completion Bias" (L52) describes how agents shift from quality to speed after long sessions. User urgency ("just finish it") amplifies this bias to the point where quality gates are treated as obstacles rather than requirements. The agent rationalizes: "the user wants speed, verify takes time, therefore skip verify."
+
+**What works instead**: Classify verify as CRITICAL — the highest HARD STOP classification that cannot be auto-approved regardless of `--auto` flag or user urgency. The merge gate must structurally require verify completion (check sdd-state.md verify status). If verify status is not `success` or `limited`, merge is BLOCKED — no override possible.
+
+**Universal takeaway**: Some quality gates must be immune to user override. Identify which gates protect against "silent failure" (everything looks fine but isn't) and make those structurally un-skippable. User urgency is the #1 vector for quality gate bypass in agent systems.
+
+---
+
 #### L59. File-Based State Machines Beat Natural Language Conditionals for Multi-State Workflows
 
 **What happened**: Early pipeline designs used natural language conditionals: "If the Feature is in progress, continue from the current step. If it's completed, skip it. If it's blocked, ask the user." The agent handled 2-3 states correctly but fell apart at 5+ states. It would resume a completed Feature, skip a blocked Feature without asking, or process a deferred Feature that should have been filtered out.

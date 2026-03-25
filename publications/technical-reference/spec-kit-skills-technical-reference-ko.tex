@@ -2518,6 +2518,19 @@ Phase 7 (Ongoing): 3 Principles -> Domain Module Loading Protocol
 
 오케스트레이터가 Skill tool을 통해 서브 스킬을 호출하면, 서브 스킬의 완료 메시지가 최종 응답이 됩니다. 오케스트레이터는 제어권을 잃습니다. 실행 후 리뷰, 사용자 승인, 상태 업데이트가 구조적으로 불가능해집니다. 수정: 인라인 실행---서브 스킬의 지시를 읽고 오케스트레이터의 턴 안에서 실행합니다.
 
+\section{Velocity Override --- 6번째 회피 패턴}
+
+AEGIS 케이스 스터디(2026-03-25)에서 발견된 패턴입니다. 사용자의 속도 요청(``다 해버려'', ``그냥 끝내줘'', ``전부 자동 승인'')이 에이전트에게 품질 게이트를 우회할 암묵적 허가를 줍니다. 위의 5가지 패턴이 컨텍스트 압축에서 비롯되는 것과 달리, Velocity Override는 \textbf{사용자가 승인한 퇴화}입니다.
+
+\textbf{발현 방식}: 사용자가 ``전체 파이프라인 실행, HARD STOP 자동 승인''이라고 지시하면, 에이전트가 이를 다음과 같이 해석합니다:
+\begin{itemize}[nosep]
+  \item spec.md를 8개 섹션 대신 3개로 생성 (``더 빠르니까'')
+  \item research.md, data-model.md, contracts/ 생략 (``사용자가 속도를 원하니까'')
+  \item verify 전체 생략 (``사용자가 자동 승인이라 했으니 verify도 승인이겠지'')
+\end{itemize}
+
+\textbf{대응책}: 품질 게이트를 계층화합니다. \texttt{CRITICAL} 게이트(verify, 템플릿 준수)는 사용자 속도 요청이나 \texttt{--auto} 플래그로 무시할 수 없습니다. \texttt{CALIBRATION} 게이트는 자동 승인 가능. \texttt{ROUTINE} 게이트는 자동 승인 + 간소화 가능. 핵심: ``다 빠르게''는 ``ROUTINE과 CALIBRATION을 자동 승인''이지 ``CRITICAL을 건너뛰라''가 \textbf{아닙니다}.
+
 \section{실전 완화 전략}
 
 위의 행동 패턴에 기반하여, 신뢰할 수 있는 에이전트 스킬을 구축하기 위한 체크리스트입니다:

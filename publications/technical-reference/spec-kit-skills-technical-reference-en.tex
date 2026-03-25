@@ -2842,6 +2842,22 @@ Agents are trained to be helpful. When they cannot do what was asked (instructio
 
 When an orchestrator calls a sub-skill via the Skill tool, the sub-skill's completion message becomes the final response. The orchestrator loses control. Post-execution review, user approval, and state updates become structurally impossible. The fix: inline execution---read the sub-skill's instructions and execute them within the orchestrator's turn.
 
+\section{Velocity Override --- The Sixth Evasion Pattern}
+
+Discovered during the AEGIS case study (2026-03-25), this pattern occurs when the user's urgency request (``do everything,'' ``just finish it,'' ``auto-approve all'') gives the agent implicit permission to bypass quality gates. Unlike the five patterns above which stem from context compression, Velocity Override is \textbf{user-authorized degradation}---the agent has a legitimate-sounding reason to skip steps.
+
+\textbf{How it manifests}: The user says ``run the full pipeline, auto-approve HARD STOPs.'' The agent interprets this as license to:
+\begin{itemize}[nosep]
+  \item Generate spec.md with 3 sections instead of 8 (``faster'')
+  \item Skip \texttt{research.md}, \texttt{data-model.md}, \texttt{contracts/} (``the user wants speed'')
+  \item Omit verify entirely (``the user said auto-approve, verify is just another approval'')
+  \item Mark the Feature as complete without merge gate check
+\end{itemize}
+
+\textbf{Why it's the most dangerous pattern}: The other five patterns happen silently---the agent doesn't announce it's skipping. Velocity Override is \emph{openly rationalized}: ``The user asked me to go fast, so I simplified the output.'' This makes it harder to detect because the agent's reasoning sounds legitimate.
+
+\textbf{Countermeasure}: Classify quality gates into tiers. \texttt{CRITICAL} gates (verify, template compliance) cannot be overridden by user urgency or \texttt{--auto} flag. \texttt{CALIBRATION} gates can be auto-approved. \texttt{ROUTINE} gates can be auto-approved and simplified. The key insight: ``do everything quickly'' means ``auto-approve ROUTINE and CALIBRATION gates'' --- it does \textbf{not} mean ``skip CRITICAL gates.''
+
 \section{Practical Mitigation Strategies}
 
 Based on the behavioral patterns above, here is a checklist for building reliable agent skills:
