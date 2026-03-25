@@ -16,6 +16,8 @@
 
 > **Demo-Ready Delivery is active** when: VI. Demo-Ready Delivery is in the constitution, OR `demos/` directory already contains Feature demo scripts from previous pipeline runs.
 > **If Demo-Ready Delivery is NOT active**: Skip this phase entirely.
+
+**Greenfield check**: If Origin = greenfield → skip Phase 3e (Source App Comparative Verification). If Playwright is not available → fall back to code-level SC verification with warning.
 > Demo standards referenced in this phase are defined in [reference/demo-standard.md](../reference/demo-standard.md).
 > **quickstart.md reference**: If `specs/{NNN-feature}/quickstart.md` exists, use it as the authoritative source for how the Feature should be launched and verified. The demo script must follow quickstart.md's run instructions.
 

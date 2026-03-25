@@ -22,6 +22,26 @@ The pipeline is single-direction (reverse-spec → specify → plan → tasks �
 
 ## Common Protocol: Assemble → Checkpoint → Execute+Review → Update
 
+
+### HARD STOP Classification
+
+Each HARD STOP in the pipeline has a classification that determines whether it can be auto-approved:
+
+| Classification | Behavior | When | Examples |
+|---------------|----------|------|----------|
+| **CRITICAL** | Always ask — never auto-approve | One-time decisions that shape the entire project | Constitution Review, first Feature's specify Review |
+| **CALIBRATION** | Ask for first Feature, then auto-approve if pattern matches | Repeating decisions where first Feature sets the pattern | Checkpoint display, plan Review (after first Feature) |
+| **ROUTINE** | Auto-approve when artifacts pass validation | Mechanical checks with clear pass/fail criteria | tasks Review (SC count matches), analyze Review (no CRITICAL issues) |
+
+**Default**: All HARD STOPs are CRITICAL unless explicitly classified below. This ensures safety — a new HARD STOP is never accidentally auto-approved.
+
+**Validation criteria for ROUTINE auto-approval**:
+- specify Review: SC count ≥ S1 minimum, no `[NEEDS CLARIFICATION]` markers, all S9 criteria met
+- plan Review: All entities from spec present in data model, API contracts match spec endpoints
+- tasks Review: Task count matches plan components, no orphan tasks
+- analyze Review: Zero CRITICAL issues
+- implement Review: Build passes, all tasks marked complete, SC evidence present
+
 **All spec-kit command executions follow this 4-step protocol. Each step MUST be executed in order. No step may be skipped. In particular, Execute (Step 3) includes a mandatory Review HARD STOP — the spec-kit command runs, then the Review is presented, all in one continuous action.**
 
 > ⚠️ **The most common failure mode is skipping Review.** After executing a spec-kit command (Step 3), you MUST stop, display the generated artifacts, and ask the user for approval. Do NOT proceed to Update without Review. Do NOT combine Execute and Update into a single flow.
@@ -133,6 +153,15 @@ PROCEDURE ApprovalGate(type):
     OTHERWISE → re-ask with valid options
 ```
 
+**Auto-approve behavior** (when `--auto` is active):
+1. Check HARD STOP classification (CRITICAL / CALIBRATION / ROUTINE)
+2. If CRITICAL → always call AskUserQuestion (--auto does not override)
+3. If CALIBRATION → auto-approve if this is NOT the first Feature, AND previous Feature's same step was approved without changes
+4. If ROUTINE → auto-approve if validation criteria pass (see classification table above)
+5. Log auto-approved decision: `[AUTO] {step} approved — {classification}, validation: {pass/fail details}`
+6. If validation fails for ROUTINE → escalate to user (treat as CALIBRATION)
+
+
 **⚠️ CRITICAL**: If response is empty — you have NOT received approval. Call AskUserQuestion AGAIN. Do NOT proceed.
 
 ### Step-Back Protocol
@@ -204,10 +233,19 @@ Executes the corresponding spec-kit command with the approved context:
 **Why not the Skill tool?** The Skill tool creates a response boundary — when the speckit skill completes, its output becomes the final response, and smart-sdd loses the ability to continue with Review in the same turn. This structurally violates the Execute + Review Continuity Rule (see below). Inline execution keeps everything in smart-sdd's response context.
 
 **How to execute inline**:
-1. Read the skill's SKILL.md file directly: `.claude/skills/speckit-[command]/SKILL.md`
-2. Execute the instructions contained in the SKILL.md as inline workflow steps
+1. Read the corresponding spec-kit command file directly:
+   - `speckit-specify` → `.claude/commands/speckit.specify.md`
+   - `speckit-plan` → `.claude/commands/speckit.plan.md`
+   - `speckit-tasks` → `.claude/commands/speckit.tasks.md`
+   - `speckit-implement` → `.claude/commands/speckit.implement.md`
+   - `speckit-constitution` → `.claude/commands/speckit.constitution.md`
+   - `speckit-clarify` → `.claude/commands/speckit.clarify.md`
+   - `speckit-analyze` → `.claude/commands/speckit.analyze.md`
+2. Execute the instructions contained in the command file as inline workflow steps
 3. Suppress spec-kit's completion messages (per MANDATORY RULE 3)
 4. Continue IMMEDIATELY to Step 3b (Review) in the same response
+
+**Fallback**: If `.claude/commands/speckit.*.md` files don't exist, run `specify init --here --ai claude --force` first. If `specify` CLI is not available, the agent should generate artifacts directly following the templates in `.specify/templates/`.
 
 #### Execute Error Handling
 
@@ -344,6 +382,8 @@ Running `/smart-sdd pipeline` processes **one Feature at a time** by default. Us
 /smart-sdd pipeline F003 --start verify    → F003, from verify
 /smart-sdd pipeline --all                  → all eligible Features (batch)
 /smart-sdd pipeline --all --start verify   → all eligible Features, from verify
+/smart-sdd pipeline --auto                 → auto-approve CALIBRATION+ROUTINE HARD STOPs
+/smart-sdd pipeline --all --auto           → batch + auto-approve
 /smart-sdd pipeline F001 --step specify,plan → run only specified steps
 /smart-sdd pipeline merge F003 F004        → merge two Features into one
 /smart-sdd constitution                    → finalize constitution (standalone)
@@ -776,7 +816,7 @@ This covers:
 Execute the **full Common Protocol** — same 4-step flow as Features:
 
 ```
-constitution → Assemble → Checkpoint(STOP) → speckit-constitution + Review(STOP) → Update
+constitution → Assemble → Checkpoint(STOP) [CRITICAL] → speckit-constitution + Review(STOP) [CRITICAL] → Update
 ```
 
 #### Phase 0-1. Assemble
@@ -787,7 +827,7 @@ Read `BASE_PATH/constitution-seed.md`:
 
 #### Phase 0-2. Checkpoint (HARD STOP)
 
-Display the constitution-seed content per [injection/constitution.md → Checkpoint Display Content](../reference/injection/constitution.md). Then follow **PROCEDURE CheckpointApproval** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
+Display the constitution-seed content per [injection/constitution.md → Checkpoint Display Content](../reference/injection/constitution.md). Then follow **PROCEDURE ApprovalGate(checkpoint)** (defined in Step 2 of the Common Protocol). Do NOT proceed to Phase 0-3 until the user explicitly approves.
 
 #### Phase 0-3. Execute + Review (HARD STOP)
 
@@ -800,7 +840,7 @@ Display the constitution-seed content per [injection/constitution.md → Checkpo
 3. **In the SAME response** — read `.specify/memory/constitution.md` — the **entire file**
 4. Display the Review content per [injection/constitution.md → Review Display Content](../reference/injection/constitution.md)
 5. Show the "Files You Can Edit" block with the absolute path to `constitution.md`
-6. Follow **PROCEDURE ReviewApproval** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
+6. Follow **PROCEDURE ApprovalGate(review)** (defined in Step 3c of the Common Protocol). If the response is empty — re-ask. Do NOT proceed.
 7. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ speckit-constitution executed.\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to Phase 1.
 
 Constitution is the most critical artifact — it governs all subsequent Features.
@@ -878,14 +918,14 @@ Executes the following steps **strictly in order** for each Feature.
 
 ```
 0. pre-flight → Ensure on main branch (clean state) → Create Feature branch {NNN}-{short-name}
-1. specify    → Assemble → Checkpoint(STOP) → speckit-specify → Review(STOP) → Update
+1. specify    → Assemble → Checkpoint(STOP) [CALIBRATION] → speckit-specify → Review(STOP) [CRITICAL 1st / CALIBRATION 2nd+] → Update
    1b. clarify → Auto-scan spec.md for ambiguities → speckit-clarify (conditional sub-step of specify)
-2. plan       → Assemble → Checkpoint(STOP) → speckit-plan → Review(STOP) → Update
-3. tasks      → Checkpoint(STOP) → speckit-tasks → Review(STOP) → Update
-4. analyze    → Checkpoint(STOP) → speckit-analyze → Review(STOP) (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
-5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → **Completeness Gate(BLOCK)** → Demo-Ready Delivery → Review(STOP)
-6. verify     → Checkpoint(STOP) → Phase 1(BLOCK) → Phase 2 → Phase 3(SC Verify) → Evidence Gate(BLOCK) → Review(STOP) → Phase 4(Update)
-7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) → Merge Feature branch to main → Cleanup
+2. plan       → Assemble → Checkpoint(STOP) [CALIBRATION] → speckit-plan → Review(STOP) [CALIBRATION] → Update
+3. tasks      → Checkpoint(STOP) [ROUTINE] → speckit-tasks → Review(STOP) [ROUTINE] → Update
+4. analyze    → Checkpoint(STOP) [ROUTINE] → speckit-analyze → Review(STOP) [ROUTINE] (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
+5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) [CALIBRATION] → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → **Completeness Gate(BLOCK)** → Demo-Ready Delivery → Review(STOP) [CALIBRATION]
+6. verify     → Checkpoint(STOP) [CRITICAL] → Phase 1(BLOCK) → Phase 2 → Phase 3(SC Verify) → Evidence Gate(BLOCK) → Review(STOP) [CRITICAL] → Phase 4(Update)
+7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) [ROUTINE] → Merge Feature branch to main → Cleanup
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
@@ -1091,6 +1131,28 @@ When using background agents (Agent tool) to parallelize implement tasks:
 2. **Shared entry point reservation**: Files that multiple tasks naturally touch (e.g., app entry point, router/navigation config, service registry, dependency injection root) are **not assigned to any parallel agent**. The main agent writes these files after all parallel agents complete, integrating their outputs
 3. **Conflict detection**: After all agents complete, run `git diff --name-only` per agent. If any file appears in multiple agents' diffs → the main agent must manually reconcile before proceeding
 4. **Sequential fallback**: If clean file separation is not feasible (too many shared files), execute tasks sequentially instead of in parallel. Note: sequential is the default — parallel is an optimization, not a requirement
+
+### Parallel vs Sequential Execution
+
+**Default: Sequential.** Features are processed one at a time, in Release Group order. This is the safe default because:
+- Each Feature's registry updates must complete before the next Feature reads them
+- Cross-Feature dependency stubs must be resolved sequentially
+- The 4-step protocol (Assemble→Checkpoint→Execute→Update) assumes single-Feature context
+
+**When parallel is safe**: Tasks WITHIN a single Feature's implement step may be parallelized when:
+1. Tasks have no shared files (each task owns a disjoint set of files)
+2. Tasks don't modify shared configuration (package.json, tsconfig.json, prisma schema)
+3. Tasks don't depend on each other's output
+
+**When parallel is NOT safe**:
+- ❌ Multiple Features in parallel — registry staleness, entity conflicts
+- ❌ Tasks that modify shared files (database schema, dependency manifests, routing config)
+- ❌ Tasks where one creates an interface that another consumes
+
+**If parallel execution was attempted and created conflicts**:
+1. Run registry freshness check (pipeline.md Step 3b)
+2. Run `/domain-extend validate` to check entity/API consistency
+3. Resolve conflicts manually, then continue pipeline
 
 #### Dependency Stub Enforcement Gate
 
@@ -1593,6 +1655,22 @@ Context reset is **recommended** at these transition boundaries:
 | **code-explore → init** | After synthesis is complete | `/clear` then `/smart-sdd init --from-explore <path>` |
 | **add → pipeline** (auto-chain) | After Briefing completes for 3+ Features | `/clear` then `/smart-sdd pipeline` |
 | **Mid-Feature recovery** | After context compaction warning or degraded Review quality | `/clear` then `/smart-sdd pipeline [FID]` (resumes from sdd-state.md) |
+
+
+### Context Budget Warning (HARD STOP when critical)
+
+After each Feature's merge, estimate context usage:
+1. Count messages in current conversation (approximate via turn count)
+2. If 3+ Features processed in this session → **HARD STOP**:
+   ```
+   ⚠️ Context budget warning: [N] Features processed in this session.
+   Quality may degrade for subsequent Features.
+
+   💡 Recommended: /clear then /smart-sdd pipeline [next-FID]
+   All state is saved to files (P3 guarantee).
+   ```
+   Options: "Clear context and continue (Recommended)", "Continue without clearing (risk quality degradation)"
+3. This HARD STOP is classified as **CALIBRATION** — auto-approved as "Clear context" when --auto is active.
 
 ### When NOT to Reset
 

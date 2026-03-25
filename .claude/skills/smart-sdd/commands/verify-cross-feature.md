@@ -237,6 +237,8 @@ If `pre-context.md` contains a "Source Behavior Inventory" section, perform a pe
      - `incremental` / `strangler-fig`: P1 coverage required for current Feature only. Cross-Feature P1 coverage tracked but not blocking per-Feature
 6. If no Source Behavior Inventory exists (greenfield/add), skip this step
 
+**Greenfield check**: If Origin = greenfield AND no `coverage-baseline.md` exists → skip SBI coverage verification. Cross-Feature registry consistency check still applies (entities and APIs from preceding Features must be consistent).
+
 **Step 3 — Interaction Chain Completeness** (UI Features with Interaction Chains in plan.md):
 
 If `plan.md` contains an `## Interaction Chains` section:

@@ -1,7 +1,7 @@
 ---
 name: smart-sdd
 description: Orchestrates the spec-kit SDD workflow for greenfield and brownfield projects. Supports new project setup, adding Features to existing projects, SDD adoption of existing code, and full rebuild via reverse-spec. Use this skill whenever the user mentions spec-kit, SDD, specification-driven development, Feature pipeline, spec generation, or wants to systematically break down a project into Features with specs, plans, and implementations. Typical flow — greenfield: init → add → pipeline. Brownfield: /reverse-spec first (or auto-chained via adopt), then pipeline. Composable with /code-explore for feature discovery before building.
-argument-hint: "<command> [feature-id] [--from path|step] [--from-explore path] [--from-reverse-spec path] [--prd path] [--gap] [--source path] [--start step] [--all] [--delete] [--domain app] [--lang <code>]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
+argument-hint: "<command> [feature-id] [--from path|step] [--from-explore path] [--from-reverse-spec path] [--prd path] [--gap] [--source path] [--start step] [--all] [--auto] [--delete] [--domain app] [--lang <code>]  # commands: init|add|adopt|pipeline|constitution|coverage|expand|parity|reset|status"
 allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 ---
 
@@ -97,6 +97,8 @@ Does not replace spec-kit commands, but wraps them with a 4-step protocol: **Con
 /smart-sdd pipeline F003 --start verify  # F003, re-run from verify
 /smart-sdd pipeline --all                # All eligible Features (batch mode)
 /smart-sdd pipeline --all --start impl   # Batch, from implement step
+/smart-sdd pipeline --auto               # Auto-approve CALIBRATION+ROUTINE HARD STOPs
+/smart-sdd pipeline --all --auto         # Batch + auto-approve
 /smart-sdd pipeline --from ./path        # Read artifacts from specified path
 
 # Constitution (standalone)
@@ -183,6 +185,7 @@ $ARGUMENTS parsing rules:
   --source <path> → Original source path for parity check (only for parity command)
   --start <step>  → Start pipeline from a specific step (only for pipeline command). Valid: specify, plan, tasks, analyze, implement, verify
   --all           → For pipeline: process all eligible Features in batch mode. For reset (no FID): include logs in reset. Not valid with other commands.
+  --auto          → Auto-approve CALIBRATION and ROUTINE HARD STOPs. CRITICAL HARD STOPs still require user approval. Recommended for experienced users on subsequent pipeline runs. Auto-approved decisions are logged in sdd-state.md Feature Detail Log.
   --domain <val>  → Project domain profile: "app" (default). Backward-compatible alias for --profile
   --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
   --lang <code>   → Artifact language (ko, en, ja, etc.). Stored in sdd-state.md as Artifact Language.
@@ -211,7 +214,7 @@ $ARGUMENTS parsing rules:
 3. `pip install git+https://github.com/github/spec-kit.git` (fallback)
 Verify with `which specify` again. CLI binary is `specify` (not `speckit`); skill names use hyphens (`speckit-specify`).
 
-**Step 0c. spec-kit project init check**: Look for `.claude/skills/speckit-specify/SKILL.md`. If not found → `specify init --here --ai claude --force --no-git --ai-skills`. If skills aren't registered in current session, use Skill Invocation Fallback (see [pipeline.md](commands/pipeline.md)).
+**Step 0c. spec-kit project init check**: Look for `.claude/commands/speckit.specify.md`. If not found → run `specify init --here --ai claude --force`. This creates `.claude/commands/speckit.*.md` files (spec-kit's slash commands). If `specify` CLI is not installed, display: "⚠️ spec-kit CLI not found. Install: `pip install speckit-cli` (or see https://github.com/github/spec-kit)". **spec-kit Fallback**: if `.claude/commands/speckit.*.md` files don't exist and `specify` CLI is not available, generate artifacts directly using `.specify/templates/` as format reference. The pipeline continues — spec-kit commands are an enhancement, not a requirement.
 
 **Step 1. roadmap.md check** (skip for `init` and `status`): Verify `roadmap.md` exists at BASE_PATH. If not found:
 - **If command is `adopt`**: Auto-run `/reverse-spec . --adopt --lang {current lang}` inline (read `reverse-spec/SKILL.md` → `commands/analyze.md` → execute Phase 0–4). The `--adopt` flag forces `--scope full --stack same` and skips Phase 0 questions (scope, stack, rename), so no user interaction is needed before analysis begins. After reverse-spec completes, continue with the adopt pipeline.
@@ -246,7 +249,7 @@ For reverse-spec domain modules (analysis axes, detection signals), see `../reve
 
 All spec-kit command executions follow a mandatory 4-step protocol: **(1) Assemble** context per [`reference/injection/{command}.md`](reference/injection/) → **(2) Checkpoint** HARD STOP for user approval → **(3) Execute** spec-kit + **Review** artifacts (HARD STOP) → **(4) Update** global artifacts.
 
-Full procedures (CheckpointApproval, ReviewApproval, Skill Invocation Fallback) are defined in `commands/pipeline.md`.
+Full procedures (`ApprovalGate(checkpoint)`, `ApprovalGate(review)`, spec-kit Fallback) are defined in `commands/pipeline.md`.
 
 ---
 

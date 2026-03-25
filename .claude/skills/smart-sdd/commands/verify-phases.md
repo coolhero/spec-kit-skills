@@ -8,6 +8,28 @@
 
 ---
 
+### Origin-Based Verify Behavior
+
+The verify phases adapt based on project Origin (from sdd-state.md):
+
+| Phase | Greenfield | Rebuild | Adoption |
+|-------|-----------|---------|----------|
+| Phase 0 (Preflight) | ✅ Build + start app | ✅ Build + start app | ✅ Build + start app |
+| Phase 1 (Build/Test/Lint) | ✅ BLOCKING | ✅ BLOCKING | ⚠️ Non-blocking (failures are pre-existing) |
+| Phase 2 (Cross-Feature) | ✅ Registry consistency only (no SBI) | ✅ Full: Registry + SBI coverage | ✅ SBI coverage check |
+| Phase 3 (SC Verification) | ✅ Runtime verify (if Playwright available) | ✅ Runtime verify + Source comparison (3e) | ⚠️ Runtime verify (non-blocking) |
+| Phase 3e (Source Comparison) | ⛔ SKIP (no source app) | ✅ MANDATORY (BLOCKING for rebuild+GUI) | ⛔ SKIP |
+| Phase 4 (Evidence + Demo) | ✅ Evidence gate + Demo delivery | ✅ Evidence gate + Demo + Parity report | ✅ Evidence gate (relaxed) |
+
+**Greenfield-specific rules**:
+- **No SBI**: Greenfield has no Source Behavior Inventory — skip all SBI-related checks
+- **No source comparison**: Phase 3e is entirely skipped
+- **No pre-context from reverse-spec**: Interaction Surface Inventory may not exist — skip if absent
+- **Playwright optional**: If Playwright is not configured, Phase 3 SC verification uses code-level review (Level 1) instead of runtime verification (Level 3). Display: "⚠️ Playwright not available — using code-level SC verification. For runtime verification, install Playwright."
+
+---
+
+
 ## Verify Command
 
 Running `/smart-sdd verify [FID]` performs post-implementation verification. This step runs **after implement** to validate that the actual code works correctly and is consistent with the broader project.
