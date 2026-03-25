@@ -318,6 +318,8 @@ Update history of Global Evolution Layer files.
 
 > The 4th GEL registry alongside `entity-registry.md`, `api-registry.md`, and `sdd-state.md`.
 > Separates profiling RESULTS (the user's actual decisions) from profiling TOOLS (S0/S1/S5/S7 module rules).
+>
+> **Project Modules**: Custom domain modules created by `/domain-extend` are stored in `specs/domains/` and automatically loaded by the resolver alongside built-in modules. The resolver applies project-local modules as an overlay on skill-level modules (see `_resolver.md` Step 6b). Project modules are committed to the project's git and do not affect other projects sharing the same skill installation.
 
 **File location**: `./specs/_global/domain-profile-instance.md` relative to CWD (or under the BASE_PATH specified with `--from`)
 

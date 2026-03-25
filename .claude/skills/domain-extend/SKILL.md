@@ -21,10 +21,12 @@ Interactive toolkit for exploring, extending, and customizing the 5-axis domain 
 - You have internal documentation (style guides, architecture docs) to codify as modules
 - You need org-wide or project-specific conventions layered on top of standard modules
 
-**Output paths**:
-- **Domain modules**: `.claude/skills/shared/domains/{axis}/` (shared across all skills)
-- **Skill-specific modules**: `.claude/skills/{skill}/domains/` (smart-sdd or reverse-spec only)
+**Output paths** (three-tier module resolution):
+- **Project-level (default)**: `specs/domains/{axis}/` in project CWD — committed to project git, per-project
+- **Skill-level (`--skill` flag)**: `~/.claude/skills/{shared,reverse-spec,smart-sdd}/domains/{axis}/` — built-in, read-only for projects
 - **Org-convention**: Path configured in `sdd-state.md` → `**Org Convention Path**:` field (e.g., `specs/_global/org-convention.md`)
+
+> The resolver loads skill-level modules first, then project-level modules override/extend via append semantics. See `smart-sdd/domains/_resolver.md` Step 6b.
 
 ---
 
@@ -61,7 +63,8 @@ $ARGUMENTS parsing rules:
   --org                       → target org-convention layer (for customize)
   --active                    → show only active modules from sdd-state.md (for browse)
   --full                      → show full module content instead of summary (for browse)
-  --skill <name>              → target a specific skill's domains/ (smart-sdd|reverse-spec)
+  --skill                     → install to skill directory (~/.claude/skills/) instead of project directory (specs/domains/).
+                                Use only when contributing built-in modules to spec-kit-skills itself.
   --dry-run                   → preview changes without writing files (for extend/import)
 ```
 
@@ -99,7 +102,7 @@ Accumulated edge cases from real usage. Check this list when hitting unexpected 
 
 | # | Gotcha | What Goes Wrong | Fix |
 |---|--------|----------------|-----|
-| G1 | Creating module in wrong directory | Module placed in `smart-sdd/domains/` instead of `shared/domains/` → only one skill sees it | Always create in `shared/domains/{axis}/` unless explicitly targeting a single skill with `--skill` |
+| G1 | Creating module in wrong directory | Module placed in skill directory instead of project directory → affects all projects sharing the skill | Default output is `specs/domains/{axis}/` (project-local). Use `--skill` only when contributing built-in modules to spec-kit-skills |
 | G2 | Forgetting to update `_taxonomy.md` | New module exists but resolver cannot find it → module never loads | After manual module creation, always add entry to `_taxonomy.md` in the correct axis table |
 | G3 | Duplicate S0 keywords across modules | Resolver activates wrong module when keywords overlap (e.g., "cache" in both `cache-server` and `connection-pool`) | Use `validate` command to detect keyword collisions; make Primary keywords unique per module |
 | G4 | Using `extend` when `import` is better | User has existing docs (style guide, architecture decisions) → `extend` starts from blank template | Use `import /path/to/doc.md` to extract relevant sections into module format |

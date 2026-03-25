@@ -19,6 +19,8 @@ Parse existing documents (ADRs, style guides, postmortems, coding standards, cod
   --type <t>     Force document type (adr | style-guide | postmortem | api-standard | explore)
   --target <m>   Force target module name (skip auto-mapping)
   --from-explore Import from code-explore synthesis artifacts
+  --skill        Install to skill directory (~/.claude/skills/) instead of project directory.
+                 Use only when contributing built-in modules to spec-kit-skills itself.
 ```
 
 ---
@@ -109,6 +111,7 @@ For each extraction, record:
 {source_file} § {section_name} → {target_module} {section_id} ({action})
 
   action = EXTEND (add to existing) | NEW (create new module)
+  location = project-local (specs/domains/) | skill-level (--skill flag)
 ```
 
 ### Step 4 — Module Mapping
@@ -164,8 +167,10 @@ AskUserQuestion:
 
 ### Step 6 — Generate / Merge Files
 
+**Output location**: Same as `extend` command — default is project-local (`specs/domains/`), use `--skill` for skill directory. See `extend.md` Step 4 for details.
+
 **For EXTEND actions:**
-1. Read existing module file
+1. Read existing module file (check project-local first, then skill-level)
 2. Locate target section (e.g., S1, S7)
 3. Append new content with source attribution:
    ```markdown

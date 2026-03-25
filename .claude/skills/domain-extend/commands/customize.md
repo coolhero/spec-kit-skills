@@ -244,7 +244,7 @@ Based on the axis selections, show what modules would be activated:
 ```
 
 AskUserQuestion:
-- **"Save profile"** → write to `smart-sdd/domains/profiles/{name}.md`
+- **"Save profile"** → write to `specs/domains/profiles/{name}.md` (project-local) or `smart-sdd/domains/profiles/{name}.md` (`--skill`)
 - **"Adjust"** → go back to Step PR1
 - **"Cancel"** → abort
 
@@ -252,11 +252,13 @@ AskUserQuestion:
 
 ### Step PR3 — Install
 
-1. Write profile file to `smart-sdd/domains/profiles/{name}.md`
+1. Write profile file:
+   - Default: `specs/domains/profiles/{name}.md` (project-local)
+   - `--skill`: `smart-sdd/domains/profiles/{name}.md` (skill-level — for contributing to spec-kit-skills)
 2. Display:
    ```
    ✅ Profile "{name}" saved.
-     Path: smart-sdd/domains/profiles/{name}.md
+     Path: specs/domains/profiles/{name}.md
      Usage: Set Domain Profile to "{name}" in sdd-state.md
             or pass --profile {name} during init/add.
    ```

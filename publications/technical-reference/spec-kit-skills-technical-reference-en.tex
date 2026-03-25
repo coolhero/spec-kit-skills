@@ -1598,9 +1598,16 @@ When the pipeline runs, modules load in a defined order. Each layer can extend t
   \item \file{archetypes/\{name\}.md}---For each active Archetype (Axis~3).
   \item \file{foundations/\{framework\}.md}---Framework-specific rules (Axis~4).
   \item \file{org-convention.md}---Organization-wide rules (optional).
+  \item[Step 6b] \textbf{Project Module Overlay.} If \file{specs/domains/} exists in the project directory, scan for project-local modules. For each: if a skill-level module with the same name exists, merge (append); if new, load as-is. Project modules are single-file (all sections in one file) unlike the triple-structure of built-in modules.
   \item \file{contexts/modes/\{mode\}.md}---Lifecycle rules (Axis~5 Mode).
   \item \file{domain-custom.md}---Project-level overrides (optional).
 \end{enumerate}
+
+\begin{tipbox}[Three-Tier Module Resolution]
+Built-in modules (skill directory) provide baseline rules for common patterns like auth and resilience. Project modules (\file{specs/domains/}) extend these with project-specific patterns like \texttt{token-budget} or \texttt{ai-gateway}. Org conventions (\file{org-convention.md}) add organization-wide standards. Each tier appends to the previous---later tiers never silently replace earlier ones.
+
+This separation means: (1) \texttt{git pull} on spec-kit-skills never conflicts with your custom modules, (2) team members get your custom modules when they clone the project, (3) different projects can have different custom modules without interference.
+\end{tipbox}
 
 Three levels of customization: Skill (steps 1--5), Org (step 6), Project (step 8). Later levels can override earlier ones, but the override semantics differ by purpose.
 
@@ -2372,6 +2379,17 @@ When creating a new concern module (e.g., \texttt{rate-limiting}):
 \end{enumerate}
 
 The module is immediately available to all pipelines. No code changes, no registration step, no config file update.
+
+\begin{warnbox}[Where Do Custom Modules Go?]
+By default, \cmd{domain-extend extend} creates modules in \file{specs/domains/} (project-local), not in the skill installation directory. This means:
+\begin{itemize}[nosep]
+\item Custom modules are committed to your project's git repository
+\item Team members get them automatically on clone
+\item Updating spec-kit-skills never overwrites your custom modules
+\item Different projects can have different custom modules
+\end{itemize}
+Use \texttt{--skill} only when contributing built-in modules back to spec-kit-skills itself.
+\end{warnbox}
 
 \section{Convention Hierarchy}
 
@@ -3547,6 +3565,8 @@ H: Advanced and Customization & 10 \\
   \item[Module] A markdown file containing domain-specific rules organized by standardized section numbers (S0--S9, A0--A5, R1--R5, F0--F8).
 
   \item[Pre-context] A per-Feature file containing what that Feature needs to know about the project, source analysis, cross-Feature dependencies, and augmented requirements.
+
+  \item[Project Module] A domain module stored in \file{specs/domains/} rather than in the skill installation directory. Created by \cmd{domain-extend extend} (default) or \cmd{domain-extend import}. Loaded by the resolver at Step 6b, after built-in modules, using append merge semantics.
 
   \item[Resolver] The module loading protocol (\file{\_resolver.md}) that reads the Domain Profile and loads modules in a defined 8-step order, applying cross-concern rules and scale adjustments.
 

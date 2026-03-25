@@ -113,15 +113,16 @@ Plus:
 
 **Loading order** (later modules extend earlier):
 ```
-1. domains/_core.md                              (ALWAYS — universal rules)
-2. domains/interfaces/{interface}.md              (Axis 1 — for EACH listed interface)
-3. domains/concerns/{concern}.md                  (Axis 2 — for EACH listed concern)
-4. domains/archetypes/{archetype}.md              (Axis 3 — for EACH listed archetype)
+1.  domains/_core.md                              (ALWAYS — universal rules)
+2.  domains/interfaces/{interface}.md              (Axis 1 — for EACH listed interface)
+3.  domains/concerns/{concern}.md                  (Axis 2 — for EACH listed concern)
+4.  domains/archetypes/{archetype}.md              (Axis 3 — for EACH listed archetype)
 4b. ../../reverse-spec/domains/foundations/{framework}.md  (Axis 4 — Foundation F2 items + F3 T0 rules)
-5. {Org convention path}/org-convention.md        (if specified and file exists)
-6. domains/contexts/modes/{mode}.md               (Axis 5 — ONE mode: greenfield|rebuild|incremental|adoption)
-7. domains/contexts/modifiers/{modifier}.md       (Axis 5 — ZERO or more: migration, compliance, etc.)
-8. {Custom path}/domain-custom.md                 (if specified and file exists)
+5.  {Org convention path}/org-convention.md        (if specified and file exists)
+6.  domains/contexts/modes/{mode}.md               (Axis 5 — ONE mode: greenfield|rebuild|incremental|adoption)
+6b. specs/domains/{axis}/*.md                      (Project Module Overlay — project-local extends/overrides)
+7.  domains/contexts/modifiers/{modifier}.md       (Axis 5 — ZERO or more: migration, compliance, etc.)
+8.  {Custom path}/domain-custom.md                 (if specified and file exists)
 ```
 
 > **Signal Keywords resolution**: Each module's S0/A0 section references `shared/domains/` for signal keywords. During S0/A0 aggregation (init inference), read keywords from `../../shared/domains/{type}/{name}.md § Signal Keywords` instead of the skill-local module. See `shared/domains/_taxonomy.md` for the complete module registry.
@@ -274,6 +275,20 @@ Not every pipeline command needs every S-section. To optimize context budget, lo
 ### Step 6. Cache in Working Memory
 
 Once loaded (and optionally filtered by lazy loading), the merged domain profile is used for the entire command session. No need to re-read module files mid-command.
+
+### Step 6b. Project Module Overlay
+
+If `specs/domains/` exists in the project CWD, scan for project-local modules that extend or override skill-level modules:
+
+1. Scan `specs/domains/concerns/*.md`, `specs/domains/archetypes/*.md`, `specs/domains/interfaces/*.md`, `specs/domains/foundations/*.md`, `specs/domains/contexts/modifiers/*.md`, `specs/domains/profiles/*.md`
+2. For each project-local module found:
+   a. If a skill-level module with the same name exists → **merge** (project appends to skill, following existing merge semantics from Step 3)
+   b. If no skill-level module exists → **new module** (loaded as-is, project-only)
+3. Project-local `domain-custom.md` (already handled in Step 8 of the loading order) takes highest precedence
+
+> **Why project-local**: Custom modules created by `/domain-extend extend` are project-specific. Placing them in the skill directory would affect all projects sharing the same skill installation. Project-local modules are committed to the project's git, shared with the team, and don't interfere with skill updates.
+
+**When to apply**: Step 6b runs AFTER Step 6 (cache) but BEFORE the cached profile is consumed by per-command filtering (Step 5). In practice, project modules are loaded during Step 3 alongside skill-level modules — Step 6b is documented separately for clarity but is part of the same loading pass.
 
 ---
 

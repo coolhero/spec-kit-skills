@@ -18,6 +18,8 @@ Create new domain module files (concern, interface, archetype, foundation, profi
 
   --from-explore    Seed from code-explore artifacts (traces/orientation)
   --from-detect     Seed from auto-detected patterns in current codebase
+  --skill           Install to skill directory (~/.claude/skills/) instead of project directory.
+                    Use only when contributing built-in modules to spec-kit-skills itself.
 ```
 
 ---
@@ -128,8 +130,26 @@ Ask 2-4 questions via AskUserQuestion, adapting based on `<type>`:
 
 Based on template + source ingestion + user answers, generate the module files.
 
-**For concern/interface/archetype (3-file set):**
+**Output location** (determines where module files are created):
+- **Default (project-local)**: `specs/domains/{axis}/{name}.md` — committed to project git, shared with team
+  - Smart-sdd sections (S1/S5/S7 etc.) go to `specs/domains/{axis}/{name}.md`
+  - Shared keywords go to the same file (unified — project modules don't split across 3 directories)
+  - Reverse-spec sections (R2-R5) included in the same file if applicable
+- **`--skill` flag**: `~/.claude/skills/{shared,reverse-spec,smart-sdd}/domains/{axis}/{name}.md` — triple-file structure for contributing back to spec-kit-skills
 
+> **Why single-file for project modules**: Built-in modules use triple structure (shared/reverse-spec/smart-sdd) because they're maintained by different experts. Project-local modules are typically authored by one person for one project — a single file with all sections is simpler and sufficient. The resolver handles both formats.
+
+**For concern/interface/archetype:**
+
+*Project-local (default):*
+1. **Single file** (`specs/domains/{type}s/{name}.md`):
+   - S0/A0: Detection keywords
+   - S1/A1: Structural rules (universal, framework-agnostic)
+   - S7: Failure modes and prevention
+   - Implementation-specific sections (S3, S5, S6, S8, S9)
+   - Analysis-specific sections (R2-R5, if applicable)
+
+*Skill-level (`--skill`):*
 1. **Shared file** (`shared/domains/{type}s/{name}.md`):
    - S0/A0: Detection keywords
    - S1/A1: Structural rules (universal, framework-agnostic)
@@ -144,10 +164,12 @@ Based on template + source ingestion + user answers, generate the module files.
    - Verification rules for verify phase
 
 **For foundation (1 file):**
-- `smart-sdd/domains/foundations/{name}.md` with F0-F9 sections
+- Default: `specs/domains/foundations/{name}.md` with F0-F9 sections
+- `--skill`: `smart-sdd/domains/foundations/{name}.md` with F0-F9 sections
 
 **For profile (1 file):**
-- `smart-sdd/domains/profiles/{name}.md` with axis combinations + activation rules
+- Default: `specs/domains/profiles/{name}.md` with axis combinations + activation rules
+- `--skill`: `smart-sdd/domains/profiles/{name}.md` with axis combinations + activation rules
 
 ### Step 5 — HARD STOP Review
 
@@ -158,7 +180,10 @@ Display generated content summary:
 ```
 📄 Generated Module: {name} ({type})
 
-Files to create:
+Files to create (project-local):
+  1. specs/domains/{type}s/{name}.md (all sections unified)
+
+Files to create (--skill):
   1. shared/domains/{type}s/{name}.md (S0-S9)
   2. reverse-spec/domains/{type}s/{name}.md
   3. smart-sdd/domains/{type}s/{name}.md
@@ -183,9 +208,10 @@ AskUserQuestion:
 
 ### Step 6 — Install
 
-1. **Write files** to their target paths
-2. **Update `_taxonomy.md`** — add the new module entry under the correct category
-3. **Suggest cross-concern rules** — if the new module commonly combines with existing modules:
+1. **Create directory structure** (if project-local): `mkdir -p specs/domains/{type}s/` (and `specs/domains/README.md` from template if first module)
+2. **Write files** to their target paths (project-local or skill-level per `--skill` flag)
+3. **Update `_taxonomy.md`** (skill-level only, when `--skill` is used) — add the new module entry under the correct category
+4. **Suggest cross-concern rules** — if the new module commonly combines with existing modules:
    ```
    💡 Suggested cross-concern rules:
      {name} + auth → Consider: "authenticated message handling" rule
@@ -257,7 +283,7 @@ They adjust rule depth for a specific situation without producing new structural
 ### Step M1 — Validate
 
 1. Verify `<name>` is kebab-case
-2. Check `smart-sdd/domains/contexts/modifiers/` for duplicates
+2. Check for duplicates in both `specs/domains/contexts/modifiers/` (project-local) and `smart-sdd/domains/contexts/modifiers/` (skill-level)
 3. Load template from `templates/context-modifier-template.md`
 
 ### Step M2 — Interactive Elaboration (HARD STOP)
@@ -275,7 +301,9 @@ Describe the context modifier "{name}":
 
 ### Step M3 — Generate + Review (HARD STOP)
 
-1. Generate single file: `smart-sdd/domains/contexts/modifiers/{name}.md`
+1. Generate single file:
+   - Default: `specs/domains/contexts/modifiers/{name}.md` (project-local)
+   - `--skill`: `smart-sdd/domains/contexts/modifiers/{name}.md` (skill-level)
 2. Show preview -> HARD STOP for approval
 3. Write file on approval
 
@@ -286,6 +314,6 @@ Describe the context modifier "{name}":
 3. Display:
    ```
    ✅ Context Modifier "{name}" installed.
-     File: smart-sdd/domains/contexts/modifiers/{name}.md
+     File: specs/domains/contexts/modifiers/{name}.md (project-local)
      Note: Activated by condition, not keyword detection.
    ```

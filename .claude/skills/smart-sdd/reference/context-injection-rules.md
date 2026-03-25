@@ -70,7 +70,7 @@ Every pipeline command that uses Domain Profile rules (specify, plan, tasks, imp
            **Context Scale**: [project_maturity × team_context]
            **Context Modifiers**: [comma-separated list or "none"]
 
-2. Resolve via domains/_resolver.md Steps 1–5:
+2. Resolve via domains/_resolver.md Steps 1–6b:
    - Load _core.md (always)
    - Load Axis 1: interfaces/{name}.md for each Interface
    - Load Axis 2: concerns/{name}.md for each Concern
@@ -78,11 +78,12 @@ Every pipeline command that uses Domain Profile rules (specify, plan, tasks, imp
    - Load Axis 4: foundations/{framework}.md § F2 + _foundation-core.md § F3
    - Load org convention if specified
    - Load Axis 5: contexts/modes/{mode}.md
-   - Load Axis 5: contexts/modifiers/{modifier}.md for each Context Modifier
+   - Load Step 6b: Project Module Overlay from `specs/domains/` (if exists — project-local modules extend/override skill-level)
+   - Load Axis 5: contexts/modifiers/{modifier}.md for each Context Modifier (skill-level + project-level)
    - Apply Step 3.5: Cross-Concern Integration Rules
    - Apply Step 4: Context Scale (adjusts rule depth per maturity/team)
 
-3. Cache merged profile (5 axes) in working memory.
+3. Cache merged profile (5 axes + project overlay) in working memory.
 
 4. Sections available to injection files:
    - S1 SC Rules → specify (SC compliance check), verify (SC verification)
