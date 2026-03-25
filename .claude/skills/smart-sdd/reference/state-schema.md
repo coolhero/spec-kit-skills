@@ -127,9 +127,9 @@ If the user skips Environment Bootstrap, record a single row:
 
 | Tool | Command | Status | Detected At |
 |------|---------|--------|-------------|
-| Build | npm run build | ✅ available | 2024-01-15T10:00:00 |
-| Test | npm test | ✅ available | 2024-01-15T10:00:00 |
-| Lint | npx eslint . | ⚠️ not installed | 2024-01-15T10:00:00 |
+| Build | (e.g., npm run build / go build / cargo build) | ✅ available | 2024-01-15T10:00:00 |
+| Test | (e.g., npm test / pytest / go test) | ✅ available | 2024-01-15T10:00:00 |
+| Lint | (e.g., npm run lint / ruff check / go vet) | ⚠️ not installed | 2024-01-15T10:00:00 |
 
 **Status values**:
 - `✅ available` : Tool detected and executable

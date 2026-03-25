@@ -466,6 +466,12 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 
 **Universal takeaway**: verify-report existence and PASS status are necessary but not sufficient. Three additional quality checks: (a) Method column must be from a closed set (runtime/BLOCKED/DELEGATED), not free text. (b) Foundation Features must verify their own BST setup (lint, format, test runner). (c) Test count growth should be tracked across Features — zero growth with new code indicates missing regression tests. These are warnings, not blockers, but they must be visible in the report so project owners can act.
 
+#### L67. Foundation Features Must Complete Their Own Mission
+
+**What happened**: aegis F001 (Foundation Setup) installed ESLint v10 but did not create `eslint.config.js` because "ESLint v10 requires flat config." The verify reported "ℹ️ not configured" and merged. Result: F002 and F003 also had no lint — the Foundation Feature failed its core mission (establishing development infrastructure) and every subsequent Feature inherited the gap.
+
+**Universal takeaway**: Foundation Features have a higher completion bar than regular Features. A Foundation Feature that installs a tool without configuring it is like building a house with electrical wiring but no circuit breaker panel. verify for Foundation Features must check not just "tool installed" but "tool configured and functional." This is why BST (Build/Style/Test) items in the Foundation Checklist are BLOCKING for Foundation Features but WARNING for others — the Foundation is supposed to solve this for everyone.
+
 ---
 
 ### Theme D: Cross-System Coordination `[P1]`

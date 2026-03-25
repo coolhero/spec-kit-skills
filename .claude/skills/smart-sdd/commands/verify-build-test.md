@@ -38,11 +38,21 @@ Run each check and record results. **If any check fails, verification is BLOCKED
 
 #### Lint Status Check
 
-If `npm run lint` or equivalent fails with "command not found" or "not installed":
-- **For F001 (Foundation Feature)**: This is a **spec gap** — lint should be part of Foundation setup. Report as ⚠️ in verify-report and note: "Recommend adding ESLint to F001 spec via /smart-sdd pipeline F001 --start specify"
-- **For F002+**: Report as ⚠️ "Lint skipped — not installed by Foundation Feature" in verify-report. NOT blocking for this Feature.
+After lint execution:
 
-Either way, lint status MUST appear in the verify-report Phase 1 table. Do NOT silently omit it.
+**For Foundation Features (F001 or any Feature with Foundation tag in roadmap):**
+- Lint tool installed but **not configured** (no config file) → 🚫 **BLOCKING — return to implement**
+  - Foundation's purpose is to establish development infrastructure. A linter without configuration is incomplete infrastructure.
+  - The agent MUST create the appropriate lint config file during implement. Consult the active Foundation file's F8 (Toolchain Commands) for the specific tool and config format.
+  - "Tool X requires config format Y" is NOT an excuse to skip — creating that config IS the implement task.
+
+  ❌ WRONG: "Linter installed but no config → ℹ️ not configured" → merge
+  ✅ RIGHT: "Linter installed but no config → BLOCKING → return to implement → create config → re-verify"
+
+**For non-Foundation Features (F002+):**
+- Lint not installed or not configured → ⚠️ WARNING (Foundation didn't set it up)
+- Report in verify-report: "Lint: ⚠️ not configured by Foundation Feature"
+- NOT blocking for this Feature
 
 4. **i18n coverage check** (skip if project has no i18n / translation framework):
 
@@ -123,6 +133,11 @@ After running tests, compare the test count against the preceding Feature's veri
 4. If test count increased: Note positively: `| Test Growth | ✅ | 37 → 52 tests (+15 for auth/RBAC) |`
 
 **Why WARNING not BLOCKING**: Test writing is an implement responsibility. If implement didn't write tests but the runtime SC verification passes, the Feature works — but lacks regression protection. The warning ensures the project owner knows.
+
+🚫 **MANDATORY**: The Test Growth row MUST appear in the verify-report Phase 1 table. If this row is missing, the verify-report is INCOMPLETE and the Merge Pre-Gate Checklist will flag it.
+
+❌ WRONG: Run tests → "37/37 passed" → no Test Growth row in report
+✅ RIGHT: Run tests → "37/37 passed (unchanged from F002 — ⚠️ no new tests)" → Test Growth row in report
 
 **If ANY check fails** (test, build, lint errors, missing i18n keys, or build plugin missing), display and STOP:
 ```

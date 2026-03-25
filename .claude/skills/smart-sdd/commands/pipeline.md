@@ -1606,6 +1606,11 @@ Before executing ANY merge action, verify ALL of the following:
 3. **User Demo Gate completed**: verify-report must have the Decision section checked
    - If Decision checkboxes are all unchecked → User Demo Gate was skipped → return to verify
 
+4. **Test Growth row exists**: verify-report Phase 1 table must contain a "Test Growth" row
+   - If missing → ⚠️ WARNING (not blocking, but noted): "Test Growth not tracked in verify-report"
+   - If present and shows "unchanged" → ⚠️ WARNING: "Consider adding Feature-specific tests"
+   - If present and shows growth → ✅
+
 ❌ WRONG: verify → chat says "all pass" → merge (no file evidence)
 ❌ WRONG: verify → report shows PARTIAL → merge anyway
 ❌ WRONG: verify → report exists but Decision not checked → merge

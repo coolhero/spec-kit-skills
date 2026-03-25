@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-26] Foundation lint BLOCKING + Test Growth in Merge Pre-Gate (aegis P9 escalation)
+
+### What Changed
+1. **verify-build-test.md**: Replaced Lint Status Check — Foundation Features now get 🚫 BLOCKING (not ⚠️ WARNING) when lint is installed but not configured. Added MANDATORY enforcement for Test Growth row in verify-report.
+2. **_foundation-core.md**: Updated BST Verification Gate Linter row — 🚫 BLOCKING for Foundation, ⚠️ WARNING for non-Foundation.
+3. **pipeline.md**: Added 4th check to Merge Pre-Gate Checklist — Test Growth row existence in verify-report.
+4. **lessons-learned.md**: Added L67 (Foundation Features Must Complete Their Own Mission).
+
+### Design Decision
+Escalation from P9 findings. Two issues from aegis pilot:
+- **Lint config gap**: F001 installed ESLint v10 but created no config file. verify reported "ℹ️ not configured" (WARNING) and merged. Every subsequent Feature inherited no lint. Fix: Foundation Features get BLOCKING severity for lint config — their job is to establish infrastructure, and a linter without config is incomplete.
+- **Test Growth invisible**: Test count stayed 37/37 across F001-F003 but this was only visible if you compared reports manually. Fix: Test Growth row is now MANDATORY in verify-report, and Merge Pre-Gate Checklist checks for it.
+
+### Files Changed
+-  — Lint Status Check (Foundation BLOCKING) + Test Growth MANDATORY
+-  — BST Verification Gate Linter row
+-  — Merge Pre-Gate Checklist item 4
+-  — L67
+
+---
+
 ## [2026-03-26] Verify report quality — Method column, lint status, test growth (aegis P9)
 
 ### What Changed

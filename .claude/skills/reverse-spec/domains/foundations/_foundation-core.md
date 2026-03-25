@@ -200,12 +200,14 @@ The following BST items are verified at verify Phase 1. If ANY fails, Phase 1 is
 
 | BST Item | Verify Check | If Missing |
 |----------|-------------|------------|
-| TypeScript strict | `npx tsc --noEmit` exits 0 | BLOCKING — return to implement |
-| Linter installed + configured | `npm run lint` exits 0 (not "command not found") | ⚠️ WARNING — lint not installed means no style enforcement. Report in verify-report. If F001 (Foundation), this is a **spec gap** — lint should be in F001 spec. |
-| Formatter configured | `.prettierrc` or equivalent exists | ⚠️ WARNING |
-| Test runner configured | `npm test` runs (not "no tests found") | BLOCKING — return to implement |
+| Type checker | Type check command exits 0 (e.g., `tsc --noEmit`, `mypy`, `go vet`) | BLOCKING — return to implement |
+| Linter installed + configured | Lint command exits 0 with config file present (not "command not found", not "no config found") | 🚫 BLOCKING for Foundation Feature — lint config is Foundation's job. ⚠️ WARNING for non-Foundation. |
+| Formatter configured | Formatter config exists (language-specific) | ⚠️ WARNING |
+| Test runner configured | Test command runs and finds tests (not "no tests found") | BLOCKING — return to implement |
 
-> **Why lint is not BLOCKING for non-Foundation Features**: If F001 didn't set up lint, subsequent Features can't be blocked for it. But F001 itself SHOULD include lint — this is an F2 checklist item. The verify-report must note "Lint: skipped (not installed)" so the project owner is aware.
+> **Framework-specific commands**: The actual commands (e.g., `npm run lint`, `ruff check`, `go vet`) are defined in each Foundation file's F8 (Toolchain Commands) section. This table defines the **principle** — "linter must be installed AND configured"; the Foundation file defines the **tool**.
+>
+> **Why lint is not BLOCKING for non-Foundation Features**: If F001 didn't set up lint, subsequent Features can't be blocked for it. But F001 itself MUST complete lint setup — installing a linter without a config file is incomplete Foundation work. The verify-report must note lint status regardless.
 
 ---
 
