@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-03-25] Project-local domain modules
+
+### What Changed
+domain-extend now creates modules in `specs/domains/` (project-local) by default instead of the skill installation directory.
+
+### Design Decisions
+1. Three-tier resolution: built-in (skill) → project (`specs/domains/`) → org (`org-convention.md`)
+2. Project modules use single-file format (all S/A/R/F sections in one file)
+3. `--skill` flag for contributing built-in modules back to spec-kit-skills
+4. `_resolver.md` Step 6b scans project directory after skill directory
+
+### Documentation Updated
+README.md, README.ko.md, ARCHITECTURE-EXTENSIBILITY.md/.ko.md, FILE-MAP.md, and all 6 Medium publication articles (part1-3 EN+KO) updated to reflect three-tier architecture and project-local module storage.
+
+---
+
 ## [2026-03-25] TRM vs Implementation audit — publication corrections
 
 ### What Changed

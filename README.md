@@ -2,14 +2,14 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-23 15:39 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-25 13:37 KST
 
 **Four Claude Code skills that turn AI coding agents into reliable software engineers — built on three design principles ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief)) and [spec-kit](https://github.com/github/spec-kit) SDD**
 
 - **Code-Explore** helps you understand an existing codebase through interactive, source-level exploration. Scan a project to get an architecture map, then trace specific flows end-to-end — each session produces documented traces with call chains, entity maps, and flow diagrams. When you've understood enough, synthesize your traces into Feature candidates that feed directly into the SDD pipeline. *(Under development)*
 - **Reverse-Spec** analyzes an existing codebase and reverse-engineers the spec — from source code all the way to draft spec.md per Feature. It runs the source app to capture real UI flows (form fields, dropdowns, auto-fill, error paths), then converts those observations into detailed requirements. The pipeline receives specs that already describe exact interaction patterns, not vague one-liners that the agent has to guess. Use it when you want to rebuild an existing app from scratch, or when you want to add SDD documentation to code you already have.
 - **Smart-SDD** wraps each spec-kit command with project-wide awareness. When you run `/speckit-plan` for Feature 3, it automatically feeds in Feature 1's data models and Feature 2's API contracts — so the plan is grounded in what actually exists, not assumptions.
-- **Domain-Extend** customizes the domain module system to your project's needs. Browse existing modules, detect gaps from code or explore artifacts, create new modules from scratch, import from internal docs, and manage org/project conventions — all without manually editing module files.
+- **Domain-Extend** customizes the domain module system to your project's needs. Browse existing modules, detect gaps from code or explore artifacts, create new modules from scratch, import from internal docs, and manage org/project conventions — all without manually editing module files. Custom modules are stored in your project's `specs/domains/` directory — committed to git, shared with your team, and isolated from other projects.
 
 ---
 
@@ -1139,6 +1139,8 @@ S-sections tell the pipeline *what to do* (generate SCs, prevent bugs, verify). 
 **Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Context Mode → Context Modifiers → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
 **Extending with `/domain-extend`**: Use `/domain-extend extend concern "rate-limiting"` to create a new concern module from a guided template. Use `/domain-extend extend context-modifier "compliance"` to add a situational overlay (S1 rules + S5 probes + S7 prevention for compliance scenarios). Use `/domain-extend import ./docs/style-guide.md` to convert existing internal documentation into module sections. Use `/domain-extend detect` to find gaps between your project's patterns and available modules. You can also edit module files directly — see the manual examples below.
+
+**Project-local modules**: When you create custom modules via `/domain-extend`, they're stored in `specs/domains/` within your project — not in the skill installation directory. This means your custom modules are version-controlled with your project and don't affect other projects. The resolver scans three tiers in order: **built-in** (skill installation dir) → **project** (`specs/domains/`) → **org** (`org-convention.md`). Use the `--skill` flag to contribute a module back to the shared spec-kit-skills installation instead. Project-local modules use a single-file format (all S/A/R/F sections in one file), unlike built-in modules which use the triple-structure across shared/reverse-spec/smart-sdd directories.
 
 ### Platform Foundation & Tier System
 

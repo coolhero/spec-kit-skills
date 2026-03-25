@@ -193,6 +193,11 @@ smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
   contexts/modes/ (4)       greenfield, rebuild, incremental, adoption
   contexts/modifiers/ (1)   migration (S1/S3/S5/S7 pipeline rules)
   _resolver.md              7-step module loading order
+
+specs/domains/              ← Project-local custom modules (created by /domain-extend)
+  {name}.md                   Single-file format (all S/A/R/F sections in one file)
+                              Committed to git, isolated per project
+                              Resolver scans at Step 6b (after built-in, before org)
 ```
 
 ---

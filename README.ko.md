@@ -2,14 +2,14 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [기술 레퍼런스 매뉴얼 (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-ko.pdf) | Last updated: 2026-03-23 15:39 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [기술 레퍼런스 매뉴얼 (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-ko.pdf) | Last updated: 2026-03-25 13:37 KST
 
 **네 개의 Claude Code 스킬로 AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 — 세 가지 설계 원칙 ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief))과 [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
 - **Code-Explore** — 기존 코드베이스를 인터랙티브하게 탐색하며 이해할 수 있게 도와줍니다. 프로젝트를 스캔하여 아키텍처 맵을 얻고, 특정 흐름을 소스 레벨에서 end-to-end로 트레이싱합니다. 각 탐색 세션은 호출 체인, 엔티티 맵, 흐름도가 포함된 trace를 생성합니다. 충분히 이해했으면, trace들을 Feature 후보로 합성하여 SDD 파이프라인에 직접 연결합니다. *(개발 중)*
 - **Reverse-Spec** — 기존 코드베이스를 분석하고 spec을 역설계합니다 — 소스 코드에서 Feature별 spec.md 초안까지. 소스 앱을 실행하여 실제 UI 흐름(폼 필드, 드롭다운, 자동완성, 에러 경로)을 캡처한 후, 이 관찰을 상세한 요구사항으로 변환합니다. 파이프라인은 에이전트가 추측해야 하는 모호한 한 줄이 아닌, 정확한 인터랙션 패턴이 기술된 spec을 받습니다. 기존 앱을 처음부터 재구축하거나, 이미 작성된 코드에 SDD 문서를 추가할 때 사용합니다.
 - **Smart-SDD** — 각 spec-kit 명령에 프로젝트 전체 맥락을 자동으로 주입합니다. Feature 3에 대해 `/speckit-plan`을 실행하면, Feature 1의 데이터 모델과 Feature 2의 API 계약이 자동으로 전달되어 — 가정이 아닌 실제 존재하는 것에 기반하여 계획을 세울 수 있습니다.
-- **Domain-Extend** — 도메인 모듈 시스템을 프로젝트에 맞게 커스터마이즈합니다. 기존 모듈 탐색, 코드나 explore 아티펙트에서 gap 감지, 새 모듈 생성, 내부 문서를 모듈로 변환, 조직/프로젝트 convention 관리 — 모듈 파일을 수동 편집하지 않고 모두 수행할 수 있습니다.
+- **Domain-Extend** — 도메인 모듈 시스템을 프로젝트에 맞게 커스터마이즈합니다. 기존 모듈 탐색, 코드나 explore 아티펙트에서 gap 감지, 새 모듈 생성, 내부 문서를 모듈로 변환, 조직/프로젝트 convention 관리 — 모듈 파일을 수동 편집하지 않고 모두 수행할 수 있습니다. 커스텀 모듈은 프로젝트의 `specs/domains/` 디렉토리에 저장되어 git으로 관리되고, 팀과 공유되며, 다른 프로젝트에 영향을 주지 않습니다.
 
 ## 목차
 
@@ -1187,6 +1187,8 @@ S-section은 파이프라인에 *무엇을 해야 하는지* (SC 생성, 버그 
 **모듈 로딩 순서**: `_core.md` (항상) → 활성 Interface → 활성 Concern → 활성 Archetype → Org Convention (지정된 경우) → Context Mode → Context Modifiers → 프로젝트 커스텀 (`domain-custom.md`).
 
 **`/domain-extend`로 확장**: `/domain-extend extend concern "rate-limiting"`으로 새 Concern 모듈을 생성합니다. `/domain-extend extend context-modifier "compliance"`로 상황별 오버레이(compliance용 S1 규칙 + S5 질문 + S7 예방)를 추가합니다. `/domain-extend import ./docs/style-guide.md`로 내부 문서를 모듈 섹션으로 변환합니다. `/domain-extend detect`로 프로젝트 패턴과 기존 모듈 간의 gap을 찾습니다. 모듈 파일을 직접 편집할 수도 있습니다 — 아래 수동 예시를 참조하세요.
+
+**프로젝트 로컬 모듈**: `/domain-extend`로 커스텀 모듈을 생성하면, 스킬 설치 디렉토리가 아닌 프로젝트 내부 `specs/domains/`에 저장됩니다. 커스텀 모듈이 프로젝트와 함께 버전 관리되며, 다른 프로젝트에 영향을 주지 않습니다. Resolver는 3단계 순서로 스캔합니다: **built-in** (스킬 설치 디렉토리) → **project** (`specs/domains/`) → **org** (`org-convention.md`). `--skill` 플래그를 사용하면 공유 spec-kit-skills 설치에 모듈을 기여할 수 있습니다. 프로젝트 로컬 모듈은 단일 파일 형식(모든 S/A/R/F 섹션을 하나의 파일에 포함)을 사용하며, 이는 shared/reverse-spec/smart-sdd 디렉토리에 분산된 built-in 모듈의 triple-structure와 다릅니다.
 
 ### 플랫폼 파운데이션 & Tier 시스템
 

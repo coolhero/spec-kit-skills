@@ -327,6 +327,8 @@ The three skills above — code-explore, reverse-spec, and smart-sdd — all dra
 
 The key constraint: domain-extend creates modules that follow the same conventions as built-in modules. They're auto-discovered by the resolver, they merge with existing modules via append semantics, and they participate in cross-concern integration. No special handling required — once created, they're indistinguishable from modules that shipped with the system.
 
+Importantly, modules created by domain-extend are stored in your project directory (`specs/domains/`), not in the skill installation. This means your team gets them on `git clone`, they don't interfere with other projects, and updating spec-kit-skills never overwrites your custom modules. Use the `--skill` flag when you want to contribute a module back to the shared installation instead.
+
 This creates a compounding effect. When Feature 1's pipeline discovers a rate-limiting gap and domain-extend creates a `rate-limiting.md` concern module, Feature 2 automatically inherits those SC rules, bug prevention patterns, and elaboration probes. The vocabulary grows with each pipeline run. Over time, a project's domain modules become a living knowledge base — not just of what the *code* does, but of what *matters* in this domain.
 
 ---

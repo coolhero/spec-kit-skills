@@ -129,6 +129,8 @@ The three pipeline skills (code-explore, reverse-spec, smart-sdd) consume domain
 
 `/domain-extend` closes this loop. It's not a pipeline stage — it's a **meta-tool** that enriches the vocabulary the pipeline draws from. When code-explore detects an unknown pattern, domain-extend can create a module for it. When a team imports their ADRs and postmortems, domain-extend converts that institutional knowledge into structured rules. The result: each project that uses spec-kit-skills makes the system smarter for the next project.
 
+A key architectural detail: project-local modules created by domain-extend use a **single-file format** — all S/A/R/F sections in one file, stored in `specs/domains/`. This contrasts with built-in modules, which split across three directories (shared, reverse-spec, smart-sdd). The single-file format is simpler to create and maintain for project-specific patterns, while the triple-structure allows lazy loading optimizations for the larger built-in module library.
+
 This is P1 (Context Continuity) applied across projects, not just across Features.
 
 ---

@@ -69,6 +69,14 @@ Modules are loaded at skill invocation based on the project's `sdd-state.md` con
 
 Three levels of customization (Skill → Org → Project), where later levels override earlier ones. Org conventions share rules across projects in an organization; project conventions are specific to one project. Merge rules vary by section — see `_schema.md` in each skill for details.
 
+**Three-tier module resolution**: The resolver scans modules from three locations in order:
+
+1. **Built-in** (skill installation directory) — the 47 concerns, 15 archetypes, 40+ foundations that ship with spec-kit-skills. Split across shared/reverse-spec/smart-sdd directories for lazy loading.
+2. **Project** (`specs/domains/` in the target project) — custom modules created by `/domain-extend`. These use a single-file format (all S/A/R/F sections in one file), are committed to git, and isolated per project. The resolver scans this directory at Step 6b.
+3. **Org** (`org-convention.md`) — organization-wide shared rules that apply across all projects.
+
+Use `/domain-extend extend` to create project-local modules (default), or `/domain-extend extend --skill` to contribute built-in modules back to the spec-kit-skills installation.
+
 ### Signal Keywords: Shared Architecture
 
 Signal keywords (S0/A0 for init inference, R1/A0 for source analysis) are **shared across skills** — they live in a single location rather than being duplicated in each skill's domain modules.

@@ -93,7 +93,7 @@ Agentic 코딩 도구가 임계점을 넘었습니다. Claude Code, Cursor, Copi
 - **Foundation** — 프레임워크: `electron`, `fastapi`, `go`
 - **Context** — 프로젝트 상황: `greenfield`, `rebuild`, `adoption` + scale + modifiers
 
-프로젝트가 실시간 기능이 있는 Electron 앱이라고 알려주면, 이후 모든 단계가 그에 맞게 적응합니다. 기존 모듈이 커버하지 않는 패턴이 나올 때는 위에서 설명한 `/domain-extend`가 역할을 합니다.
+프로젝트가 실시간 기능이 있는 Electron 앱이라고 알려주면, 이후 모든 단계가 그에 맞게 적응합니다. 기존 모듈이 커버하지 않는 패턴이 나올 때는 위에서 설명한 `/domain-extend`가 역할을 합니다. 커스텀 모듈은 공유 스킬 설치가 아닌 프로젝트의 `specs/domains/` 디렉토리에 저장되어, 프로젝트마다 독립적인 도메인 어휘를 유지합니다.
 
 이렇게 프로젝트의 **Domain Profile Instance**가 생성됩니다 — `sdd-state.md`에 저장됩니다. Brief를 통해 Feature를 정의하면서 도메인별 결정(인증 전략, 프로토콜 선택, 에러 처리 접근법)이 전용 `domain-profile-instance.md` 파일에 기록됩니다. 이 분리가 중요합니다: *모듈 파일*은 무엇을 물어볼지 정의하고, *Instance 파일*은 무엇을 답했는지 기록합니다. Feature 2가 Feature 1의 인증 결정을 spec 문서를 파싱하지 않고 조회할 수 있습니다.
 
