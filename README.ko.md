@@ -1589,11 +1589,11 @@ Phase 1~N: Feature별 (Release Group 순서):
    4. tasks      → /speckit-tasks → Pre-Approval Validation (BLOCK)
    5. analyze    → /speckit-analyze (일관성 검사)
    6. implement  → 환경 변수 확인 (HARD STOP) → /speckit-implement → Smoke Launch → Completeness Gate (BLOCK) → 런타임 검증 + 수정 루프
-   7. verify     → 4단계 검증 (+ Phase 3b 버그 예방)
+   7. verify     → 5단계 검증 (Phase 0-4)
    8. merge      → 체크포인트 (HARD STOP) → main에 머지
 ```
 
-### 4단계 검증
+### 5단계 검증 (Phase 0-4)
 
 merge 전에 verify가 잡아내는 것들:
 
@@ -1695,7 +1695,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/dom
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd 상태 파일 | `specs/_global/sdd-state.md` |
 | 결정 이력 | `history.md` |
-| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 19개 갭 패턴 + 52개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
+| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 20개 갭 패턴 + 66개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
 
 ### Feature 네이밍 규약
 

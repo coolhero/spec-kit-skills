@@ -280,7 +280,7 @@ smart-sdd는 spec-kit을 세 가지로 감쌉니다:
 
 5. **Update** — 새 엔티티/API를 GEL에 등록하고, sdd-state.md를 업데이트합니다.
 
-### 4단계 검증
+### 5단계 검증
 
 검증은 "빌드가 되는가?"가 아닙니다. 이것은 우리가 가장 먼저 발견한 실패 패턴이었습니다 — 빌드 통과는 Feature가 실제로 동작하는지에 대해 아무것도 말해주지 않습니다.
 
@@ -361,7 +361,7 @@ Playwright를 사용할 수 없으면 에이전트가 **사용자에게 위임**
 
 **Step 3 — pipeline.** 이제 머신이 돌아갑니다. `specify`가 Brief에서 Success Criteria를 생성합니다 — 범용이 아니라 도메인에 맞춰진 것들. `gui`가 활성화되어 있으니 로딩 인디케이터, 에러 피드백, 빈 상태에 대한 SC가 나옵니다. `ai-assistant`가 활성화되어 있으니 프로바이더 추상화와 토큰 관리 SC가 나옵니다. 각 SC를 검토할 수 있습니다. 승인합니다.
 
-`plan`이 스펙을 컴포넌트, 데이터 흐름, API 계약을 가진 아키텍처로 분해합니다. `tasks`가 의존성 순서의 구현 태스크를 만듭니다. `implement`가 태스크별로 실제 코드를 작성합니다. `verify`가 4단계 검증을 실행합니다 — 빌드, 테스트, 런타임 UI 확인, Feature 간 통합.
+`plan`이 스펙을 컴포넌트, 데이터 흐름, API 계약을 가진 아키텍처로 분해합니다. `tasks`가 의존성 순서의 구현 태스크를 만듭니다. `implement`가 태스크별로 실제 코드를 작성합니다. `verify`가 5단계 검증을 실행합니다 — 빌드, 테스트, 런타임 UI 확인, Feature 간 통합.
 
 **핵심 통찰:** 에이전트가 혼자 추측하는 순간이 없습니다. 모든 전환에 HARD STOP이 있어서, 무슨 일이 일어나는지 보고 승인하게 됩니다. 파이프라인은 자율적이지만 무감독은 아닙니다.
 
@@ -583,4 +583,4 @@ domain_extend:
 
 → **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/%EC%83%9D%EA%B0%81%ED%95%98%EB%8A%94-400%EA%B0%9C%EC%9D%98-%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4-%ED%8C%8C%EC%9D%BC-spec-kit-skills%EC%9D%98-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-17055e89796e) — 설계 철학, 파일 구조, 확장성
 
-→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁
+→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20가지 갭 패턴, 66개 교훈, 실전 팁

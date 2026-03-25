@@ -280,7 +280,7 @@ At each step, a 4-phase protocol executes:
 
 5. **Update** — Register new entities/APIs in the GEL, update sdd-state.md.
 
-### The 4-Phase Verify
+### The 5-Phase Verify
 
 Verification is not "does it build?" That was the very first failure pattern we discovered — build passes mean nothing about whether the feature actually works.
 
@@ -583,4 +583,4 @@ domain_extend:
 
 → **Part 3**: [400 Markdown Files That Think](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — design philosophy, file structure, extensibility
 
-→ **Part 4**: [Failure Patterns and Hard-Won Wisdom](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 19 gap patterns, 50+ lessons, practical tips
+→ **Part 4**: [Failure Patterns and Hard-Won Wisdom](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20 gap patterns, 66 lessons, practical tips

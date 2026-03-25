@@ -1560,7 +1560,7 @@ Phase 1~N: Per Feature (in Release Group order):
    8. merge      → Checkpoint (HARD STOP) → Merge to main
 ```
 
-### 4-Phase Verification
+### 5-Phase Verification
 
 What verify catches — before merge:
 
@@ -1664,7 +1664,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/dom
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd state file | `specs/_global/sdd-state.md` |
 | Decision history | `history.md` |
-| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 19 gap patterns + 52 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
+| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 66 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
 
 ### Feature Naming Convention
 
