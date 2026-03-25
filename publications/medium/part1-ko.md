@@ -217,7 +217,7 @@ scenarios:
 
 **시리즈 네비게이션:**
 
-→ **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d) — 각 스킬 상세 워크스루
+→ **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/%EB%84%A4-%EA%B0%80%EC%A7%80-%EC%8A%A4%ED%82%AC-%ED%95%98%EB%82%98%EC%9D%98-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-code-explore-reverse-spec-smart-sdd-domain-extend%EC%9D%98-%ED%98%91%EC%97%85-f6b028d4b17d) — 각 스킬 상세 워크스루
 
 → **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — 설계 철학, 파일 구조, 확장성
 

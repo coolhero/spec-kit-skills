@@ -4,7 +4,7 @@
 
 ![3편 커버](https://raw.githubusercontent.com/coolhero/spec-kit-skills/main/articles/medium/part3.png)
 
-*[2편: 네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)에서 이어집니다*
+*[2편: 네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/%EB%84%A4-%EA%B0%80%EC%A7%80-%EC%8A%A4%ED%82%AC-%ED%95%98%EB%82%98%EC%9D%98-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-code-explore-reverse-spec-smart-sdd-domain-extend%EC%9D%98-%ED%98%91%EC%97%85-f6b028d4b17d)에서 이어집니다*
 
 *이 글은 Claude Code로 작성되었습니다 — 초안, 수정, 숫자 검증, EN/KO 동기화까지 모두 같은 도구로. 이것이 "통제 가능한 AI 개발"이 실제로 어떤 모습인지를 보여줍니다.*
 
@@ -620,6 +620,6 @@ architecture:
 
 ← **1편**: [AI 코더 길들이기: 왜 에이전트에겐 하네스가 필요한가](https://medium.com/@thejihoonchoi/ai-%EC%BD%94%EB%94%A9-%EC%97%90%EC%9D%B4%EC%A0%84%ED%8A%B8-%EA%B8%B8%EB%93%A4%EC%9D%B4%EA%B8%B0-%ED%94%84%EB%A1%AC%ED%94%84%ED%8A%B8%EA%B0%80-%EC%95%84%EB%8B%88%EB%9D%BC-%ED%95%98%EB%84%A4%EC%8A%A4%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0-dcdd752d2e8b)
 
-← **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)
+← **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/%EB%84%A4-%EA%B0%80%EC%A7%80-%EC%8A%A4%ED%82%AC-%ED%95%98%EB%82%98%EC%9D%98-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-code-explore-reverse-spec-smart-sdd-domain-extend%EC%9D%98-%ED%98%91%EC%97%85-f6b028d4b17d)
 
 → **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 19가지 갭 패턴, 50개 이상의 교훈, 실전 팁
