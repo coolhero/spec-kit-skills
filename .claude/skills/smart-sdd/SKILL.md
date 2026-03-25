@@ -52,6 +52,33 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > - ✅ RIGHT: F001 completes all steps through verify+merge → then F002 starts
 >
 > Parallel execution causes entity-registry conflicts, stale cross-Feature references, and untraceable sdd-state.md corruption. The ONLY parallelism allowed is **within-Feature task-level** parallelism (independent implement tasks within a single Feature).
+>
+> **Rule 5: Runtime SC Verification**
+> `npm run build` + `npm test` passing is NOT verify completion. Verify Phase 3 REQUIRES:
+> 1. Start the actual application (server, app, or service)
+> 2. Execute each SC against the running application (curl, Playwright, or equivalent)
+> 3. Record pass/fail evidence per SC
+> - ❌ WRONG: "build passes, 12 unit tests pass → verify complete"
+> - ❌ WRONG: "skipping runtime because Docker isn't running" (start it or ask user)
+> - ✅ RIGHT: "server started on port 3000 → POST /auth/login returns 200 with token → SC-001 ✅"
+>
+> If infrastructure (DB, Redis, etc.) is required but not running, start it (`docker compose up -d`) or ask the user. NEVER skip runtime verification because of infrastructure absence.
+>
+> **Rule 6: Honest SC Evidence + User Demo**
+> An SC is ✅ ONLY when the COMPLETE behavior specified in the SC is verified. Partial verification = ❌ (with notes).
+> - ❌ WRONG: SC says "API Key → 200 + LLM response" but only auth layer passed (LLM returned 400) → report as ✅
+> - ❌ WRONG: SC says "end-to-end" but only tested middleware → report as ✅
+> - ✅ RIGHT: SC partially verified → report as ⚠️ PARTIAL with exact scope: "Auth ✅, LLM call ❌ (Provider API Key not configured)"
+>
+> **Demo requires user participation.** Writing a demo script is NOT the demo. The user must:
+> 1. See the running application
+> 2. Receive the URL/commands to try
+> 3. Confirm the Feature works
+>
+> If environment setup is needed (API keys, DB seeds, external services):
+> - ASK the user to configure it (P2: Delegate, Don't Skip)
+> - Do NOT silently skip or report "N/A"
+> - Reference: Gotcha G9 (User App Configuration Gate)
 
 **Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).
 

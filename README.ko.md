@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [기술 레퍼런스 매뉴얼 (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-ko.pdf) | Last updated: 2026-03-25 13:37 KST
+[English README](README.md) | [Playwright 설정 가이드](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [기술 레퍼런스 매뉴얼 (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-ko.pdf) | Last updated: 2026-03-26 08:00 KST
 
 **네 개의 Claude Code 스킬로 AI 코딩 에이전트를 신뢰할 수 있는 소프트웨어 엔지니어로 — 세 가지 설계 원칙 ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief))과 [spec-kit](https://github.com/github/spec-kit) SDD 기반**
 
@@ -1034,6 +1034,7 @@ verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 
 | Spec Draft | `specs/NNN-feature/spec-draft.md` | reverse-spec의 초기 spec (rebuild 모드) |
 | Constitution | `.specify/memory/constitution.md` | 프로젝트 전역 원칙 및 Best Practices |
 | State | `specs/_global/sdd-state.md` | 파이프라인 진행, 툴체인, Foundation 결정 |
+| Verify Report | `specs/NNN-feature/verify-report.md` | 런타임 검증 증거: SC별 결과, 데모 실행, merge 준비 상태 판단 |
 
 ---
 

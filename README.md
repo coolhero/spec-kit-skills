@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-25 13:37 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-26 08:00 KST
 
 **Four Claude Code skills that turn AI coding agents into reliable software engineers — built on three design principles ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief)) and [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1038,6 +1038,7 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 | Spec Draft | `specs/NNN-feature/spec-draft.md` | Initial spec from reverse-spec (rebuild mode) |
 | Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
 | State | `specs/_global/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
+| Verify Report | `specs/NNN-feature/verify-report.md` | Runtime verification evidence: per-SC results, demo execution, merge readiness decision |
 
 ---
 

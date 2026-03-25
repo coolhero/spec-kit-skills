@@ -934,7 +934,9 @@ Executes the following steps **strictly in order** for each Feature.
 4. analyze    → Checkpoint(STOP) [ROUTINE] → speckit-analyze → Review(STOP) [ROUTINE] (CRITICAL issues block implement) (simplified — Assemble/Update are no-ops)
 5. implement  → Env check(STOP if missing) → Checkpoint(STOP, file plan + parallel plan + B-3 remind) [CALIBRATION] → speckit-implement (parallel file ownership) + Per-Task Runtime Verify + Fix Loop → Post-Implement SC Verify → Smoke Launch → **Completeness Gate(BLOCK)** → Demo-Ready Delivery → Review(STOP) [CALIBRATION]
 6. verify     → Checkpoint(STOP) [CRITICAL] → Phase 1(BLOCK) → Phase 2 → Phase 3(SC Verify) → Evidence Gate(BLOCK) → Review(STOP) [CRITICAL] → Phase 4(Update)
-7. merge      → Verify-gate(BLOCK if not success/limited) → Checkpoint(STOP) [ROUTINE] → Merge Feature branch to main → Cleanup
+7. merge      → Verify-gate(BLOCK if not success/limited) → Verify-Report-gate(BLOCK if missing/FAIL) → Checkpoint(STOP) [ROUTINE] → Merge Feature branch to main → Cleanup
+
+> **Verify Report Gate** (🚫 BLOCKING): Before merge, confirm `specs/F00N-name/verify-report.md` exists AND its Overall status is PASS. If FAIL or PARTIAL or file missing → merge BLOCKED.
 
 ── Feature DONE ── only now proceed to the next Feature ──
 ```
@@ -1243,9 +1245,14 @@ The implement Checkpoint MUST show the following before user approval:
 
 If tasks are executed sequentially (default), the parallel execution plan is omitted.
 
-#### Post-Implement Smoke Launch
+#### Post-Implement Smoke Launch (🚫 BLOCKING)
 
 > **⚠️ implement is NOT complete until Smoke Launch passes.** Do NOT mark implement ✅ and defer failures to verify. If the app cannot launch, implement is still in progress.
+>
+> 🚨 **Why this matters** (from aegis P6): Three bugs (Redis circular import, TypeORM nullable type, ioredis ESM/CJS) were only discovered at verify because implement never started the server. These are basic integration bugs that a single server startup would catch instantly. Starting the server at implement-end catches them 1 step earlier, when the code is fresh in context.
+>
+> ❌ WRONG: implement → build passes → test passes → proceed to verify → server won't start
+> ✅ RIGHT: implement → build passes → test passes → server starts → health check → proceed to verify
 
 After build succeeds and before proceeding to the Review step, perform a **smoke launch** to catch build-pass-but-runtime-crash issues:
 
@@ -1414,6 +1421,31 @@ When the user reports a problem with phrases like "there's an error", "it doesn'
 
 #### Verify Execute (MANDATORY — verify-phases.md Required Reading)
 
+> 🚨 **MOST COMMON VERIFY FAILURE** (from aegis pilot, 2026-03-26):
+> The agent runs `npm run build` + `npm test`, sees all green, reports "verify complete."
+> This is **NOT verify**. This is Phase 1 only. Phase 3 (SC runtime verification) and
+> Phase 4 (demo execution) are STILL REQUIRED.
+>
+> Verify checklist — ALL must be done:
+> - [ ] Phase 1: build + test + lint pass
+> - [ ] Phase 3: application RUNNING + each SC verified via actual API calls/UI interaction
+> - [ ] Phase 4: demo script executes successfully
+> - [ ] Phase 5: cross-Feature integration check (if applicable)
+>
+> If you are about to report "verify complete" without checking these boxes, STOP.
+
+#### Verify Environment Readiness (Phase 0-2b enforcement)
+
+Before SC runtime verification, check environment requirements:
+
+1. **Read spec.md** for external dependencies (LLM API keys, third-party services, database seeds)
+2. **Check .env or config** for required values
+3. **If missing**: AskUserQuestion — "SC-001 requires [OpenAI API Key] for end-to-end verification. Please add to .env and confirm."
+4. **Do NOT proceed** with SC verification for SCs that depend on unconfigured services
+5. **Do NOT report** unconfigured SCs as ✅ — report as ⚠️ PARTIAL or RUNTIME_BLOCKED
+
+This is Gotcha G9 (User App Configuration Gate) applied at verify time.
+
 > **🚨 CRITICAL: The detailed verify procedures are in `commands/verify-phases.md`, NOT in this file (pipeline.md).**
 > **You MUST read `commands/verify-phases.md` before starting verify.**
 > **Performing only "build + TS + lint" without reading verify-phases.md does NOT constitute verify.**
@@ -1472,6 +1504,8 @@ When the user reports a problem with phrases like "there's an error", "it doesn'
 3. Assemble Review Display: filled Verify Execution Checklist (above) + per-SC verification results + bug severity classifications
 4. **HARD STOP**: Call AskUserQuestion with ReviewApproval options
 5. **Catch-all**: If this response ends without AskUserQuestion (for ANY reason), you MUST show: `✅ Verification executed for [FID] - [Feature Name].\n💡 Type "continue" to review the results.` — Do NOT end silently. Do NOT skip to merge.
+
+**Verify Output Artifact**: After verify phases complete, `specs/F00N-name/verify-report.md` is generated with per-SC evidence. This report is checked by the merge step's verify-gate — if any SC shows ❌, merge is BLOCKED.
 
 #### Verify Structural Enforcement Gates (SKF-053)
 

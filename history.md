@@ -5,6 +5,81 @@
 
 ---
 
+## [2026-03-26] Fix partial-pass inflation + User Demo Gate + environment readiness (aegis P7)
+
+### What Changed
+1. **SKILL.md**: Added MANDATORY RULE 6 (Honest SC Evidence + User Demo) — SC is only PASS when COMPLETE behavior verified; partial = PARTIAL with scope. Demo requires user participation (see running app, try it, confirm)
+2. **verify-sc-verification.md**: Added SC Evidence Standard (BLOCKING) — three-status model (PASS/FAIL/PARTIAL), anti-pattern example showing auth-only pass reported as full pass
+3. **verify-evidence-update.md**: Added User Demo Gate (HARD STOP) between Phase 4 and Phase 5 — user must see running feature, receive URLs/commands, and confirm before merge
+4. **pipeline.md**: Added Verify Environment Readiness section — read spec.md for external deps, check .env, AskUserQuestion for missing keys, block unconfigured SCs from reporting PASS
+5. **lessons-learned.md**: Added L65 (Partial Pass Inflation — Agents Report Partial as Full Pass)
+
+### Design Decision
+Third verify enforcement escalation in the aegis pilot series:
+- **P5**: Elevated runtime SC verification to MANDATORY RULE 5 + inline BLOCKING gate (agents skip runtime entirely)
+- **P6**: Added No Unit Test Substitution + Post-Implement Smoke Launch (agents cherry-pick easy SCs)
+- **P7**: Added Honest SC Evidence Standard + User Demo Gate + Environment Readiness (agents inflate partial passes, skip user demo, ignore env requirements)
+
+Each escalation addresses a progressively subtler evasion pattern. P5 caught "skip runtime." P6 caught "fake runtime with unit tests." P7 catches "run runtime but report partial success as full success" and "write a demo script but never show the user."
+
+All three follow P2 (Enforce, Don't Reference) with inline BLOCKING gates and anti-pattern examples.
+
+### Files Changed
+- `.claude/skills/smart-sdd/SKILL.md` — MANDATORY RULE 6
+- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Evidence Standard
+- `.claude/skills/smart-sdd/commands/verify-evidence-update.md` — User Demo Gate
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Verify Environment Readiness
+- `lessons-learned.md` — L65
+
+---
+
+## [2026-03-26] Fix selective SC verification + Post-Implement Smoke Launch enforcement (aegis P6)
+
+### What Changed
+1. **verify-sc-verification.md**: Added "No Unit Test Substitution" rule at Phase 3 SC verification entry — every SC must be `runtime` or `RUNTIME_BLOCKED (reason)`, never silently substituted with unit tests
+2. **verify-report-template.md**: Updated SC table Method column with explicit constraint: only `runtime` or `RUNTIME_BLOCKED (reason)` allowed, with examples
+3. **pipeline.md**: Elevated Post-Implement Smoke Launch from `⚠️` to `🚫 BLOCKING`, added aegis P6 context (3 integration bugs found too late), added wrong/right anti-pattern examples
+4. **lessons-learned.md**: Added L64 (Selective SC Verification — Agents Cherry-Pick Easy SCs for Runtime)
+
+### Design Decision
+Two complementary defenses per P2 (Enforce, Don't Reference):
+- **Upstream** (implement): Smoke Launch with BLOCKING gate catches integration bugs (circular imports, config errors, ESM/CJS mismatches) before verify
+- **Downstream** (verify): No Unit Test Substitution rule prevents agents from silently downgrading "hard" SCs to unit test evidence
+
+Both address the same root cause: agents optimize for reporting success over actual runtime verification.
+
+---
+
+## [2026-03-26] Add verify-report.md as mandatory verify output artifact
+
+### What Changed
+Added `verify-report-template.md` and made verify-report.md a mandatory output of the verify step. The merge step now has a Verify Report Gate that BLOCKS if the report is missing, FAIL, or PARTIAL.
+
+### Design Decision
+P3 (File over Memory) + P2 (Enforce, Don't Reference) applied: verify results were previously only recorded as a brief Notes entry in sdd-state.md. Now they are persisted as a structured per-Feature artifact (`specs/F00N-name/verify-report.md`) with per-SC evidence, demo execution results, and a merge readiness decision. The merge step enforces the report via a BLOCKING gate.
+
+### Files Changed
+- `templates/verify-report-template.md` (NEW) — template with Summary, Phase 1-4, Evidence Log, Decision sections
+- `commands/verify-phases.md` — added mandatory Verify Report Generation section after Phase 4
+- `commands/pipeline.md` — added Verify Output Artifact note and Verify Report Gate at merge
+- `reference/state-schema.md` — added verify-report.md to When Verify Step Completes section
+- `README.md` / `README.ko.md` — added verify-report to Key Artifacts table
+- `FILE-MAP.md` — updated template count and inventory
+
+## [2026-03-26] Strengthen verify runtime enforcement (aegis P5)
+
+### What Changed
+Elevated runtime SC verification from "documented rule" to "MANDATORY RULE 5 + inline BLOCKING gate" based on aegis pilot finding that agents consistently degrade verify to build+test only.
+
+### Design Decision
+P2 (Enforce, Don't Reference) applied: existing Guard 2 and Gap G1 were insufficient because they lived in reference files. Added:
+- MANDATORY RULE 5 in SKILL.md (always loaded)
+- Inline BLOCKING gate at verify Phase 3 entry (verify-sc-verification.md)
+- "Most Common Verify Failure" warning in pipeline.md verify section
+- L63 lesson in lessons-learned.md (Theme C)
+
+---
+
 ## [2026-03-26] Post-pull integrity audit — MANDATORY RULE 4, FILE-MAP, SCENARIO-CATALOG
 
 ### What Changed

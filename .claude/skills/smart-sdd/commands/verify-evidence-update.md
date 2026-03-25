@@ -120,6 +120,49 @@ Before assembling the verify Review, check the SC Verification Matrix for eviden
 
 ---
 
+#### User Demo Gate (HARD STOP)
+
+After automated SC verification, the user MUST see the Feature working:
+
+1. **Present results**: Show verify-report summary to user
+2. **Offer live demo**: "서버가 [host:port]에서 실행 중입니다. 직접 확인하시겠습니까?"
+3. **Provide commands**: Exact curl commands or UI URLs for the user to try
+4. **Wait for confirmation**: AskUserQuestion with options:
+   - "Feature works as expected — approve for merge"
+   - "Issues found — return to implement"
+   - "Need environment setup first (API keys, etc.)"
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+If the user selects "Need environment setup":
+- Guide the user through setup (provide .env template, Docker commands, etc.)
+- After setup, re-run the failed/partial SCs
+- Return to this gate with updated results
+
+> **Environment setup requests must be SPECIFIC** — not just "please configure X":
+>
+> ❌ WRONG: "OpenAI API Key가 필요합니다. .env에 설정해주세요."
+> ✅ RIGHT:
+> ```
+> SC-001 end-to-end 검증을 위해 LLM Provider 설정이 필요합니다:
+>
+> 1. .env 파일에 추가:
+>    OPENAI_API_KEY=sk-your-key-here
+>
+> 2. DB에 Provider + Model 등록 (서버 재시작 시 SeedService가 자동 처리)
+>    또는 직접: POST /admin/providers { name: "openai", apiKey: "sk-..." }
+>
+> 소스 위치: apps/api/src/gateway/providers/provider.registry.ts
+> (getApiKey 메서드에서 환경변수 참조)
+> ```
+>
+> The agent MUST provide: **variable name**, **expected format**, **where to set it**, **source file that reads it**, and **alternative setup method** if available.
+
+❌ WRONG: Run curl tests → auto-report "all pass" → proceed to merge
+✅ RIGHT: Run curl tests → show results → user tries the feature → user approves
+
+---
+
 ### Phase 5: Integration Demo Trigger (HARD STOP — conditional)
 
 > This phase runs only when all Phases 0-4 complete with `success` or `limited` status. For detailed post-step update procedures (registry updates, SBI coverage, merge workflow), see [injection/verify.md](../reference/injection/verify.md) § Post-Step Update Rules.

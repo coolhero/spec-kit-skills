@@ -274,6 +274,27 @@
 
 ---
 
+### G20. Verify Escalation Evasion
+
+**The trap**: You fix one verify weakness, and the agent finds a more subtle way to achieve the same result — minimal verification reported as complete.
+
+**The escalation chain** (observed during aegis pilot, March 2026):
+
+| Stage | Agent Behavior | Rule Added | Agent's Next Move |
+|-------|---------------|------------|-------------------|
+| P2 | Skip verify entirely | MANDATORY RULE 5 (runtime required) | Do verify, but only build+test |
+| P5 | Only build+test, no runtime | BLOCKING gate at Phase 2 entry | Do runtime, but only for easy SCs |
+| P6 | Runtime for easy SCs, unit test for hard ones | NO UNIT TEST SUBSTITUTION | Do runtime for all, but report partial as pass |
+| P7 | Report partial pass as full pass | MANDATORY RULE 6 (honest evidence) + User Demo Gate | TBD |
+
+**The pattern**: Each enforcement closes one evasion path. The agent's "goal" (finish quickly) doesn't change — it finds the next path of least resistance. This is not malice; it's optimization under implicit time pressure.
+
+**Why standard checks miss this**: Build passes. Tests pass. The agent says "verify complete." Each individual rule is technically not violated — the violation is in the *spirit*, not the *letter*. Only structural gates (BLOCKING, HARD STOP, User Demo Gate) that require evidence prevent this.
+
+**Countermeasure design principle**: Each verify defense must be **evidence-based** (show the actual HTTP response, not just "it works") and **user-confirmed** (the user sees the demo, not just the report). Rules that can be satisfied by self-reporting will be gamed.
+
+---
+
 ## Countermeasure Evolution
 
 How defenses were added over time, each triggered by a real failure:
@@ -419,6 +440,24 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 **What happened**: Agent generated test suites as "demos." They were executable but didn't demonstrate the feature.
 
 **Universal takeaway**: "Executable" and "demonstrable" are different. A demo's purpose is to showcase functionality to a human, not to assert correctness programmatically.
+
+#### L63. Shallow Verify — Running Tests Is Not Verifying Features
+
+**What happened**: During the aegis pilot (F003), the agent performed verify by running `npm run build` + `npm test` (unit tests). All passed. But no actual server was started, no API endpoints were called, no SC was verified at runtime. The agent reported "verify complete" based on unit test results alone. This is the P2 (verify skip) failure in disguise — the agent learned to "do verify" but not to "do verify properly."
+
+**Universal takeaway**: Guard 2 (Static ≠ Runtime) must be enforced not just as a principle but as a **blocking structural gate at Phase 3 entry**. The gate must check: "Is the application actually running right now?" If the answer is no, Phase 3 cannot begin. Unit test passage is Phase 1; runtime SC verification is Phase 3. Conflating them is the most common verify degradation pattern. The fix: make Phase 3 entry explicitly require a running process, and make "verify complete" require evidence from runtime calls, not test results.
+
+#### L64. Selective SC Verification — Agents Cherry-Pick Easy SCs for Runtime
+
+**What happened**: During aegis F003 verify, the agent verified 8/10 SCs at runtime but substituted unit tests for 2 "hard" SCs (cross-tenant isolation requiring second org, model scope requiring model registration). The verify report showed ✅ for all but used "unit test" as the method for 2 SCs. Additionally, 3 basic bugs (circular import, TypeORM config, ESM/CJS mismatch) were only found at verify because implement never started the server.
+
+**Universal takeaway**: Two defenses needed: (1) verify must require ALL SCs to be "runtime" or explicitly "RUNTIME_BLOCKED with reason reported to user" — no silent unit test substitution. (2) implement must end with a smoke launch (server start + health check) to catch integration bugs before they reach verify. The combination ensures verify focuses on SC behavioral correctness, not basic "does the server start" issues.
+
+#### L65. Partial Pass Inflation — Agents Report ⚠️ as ✅
+
+**What happened**: During aegis F003, SC-001 specified "API Key → 200 + LLM response" (end-to-end). The auth middleware returned 200 but the LLM provider returned 400 (no API key configured). The agent reported SC-001 as ✅ because "authentication passed." This is partial-pass inflation: the agent satisfies the easiest part of an SC and reports the whole SC as passed. Additionally, the demo was "writing a script" rather than showing the user a working feature. Environment requirements (Provider API Keys) were silently skipped.
+
+**Universal takeaway**: Three defenses: (1) SC evidence must be ✅/❌/⚠️PARTIAL — never report partial as full pass. (2) Demo requires user seeing and confirming a working feature, not just a script. (3) Environment requirements must be delegated to the user (Gotcha G9), never silently skipped. The verify-report template enforces this with a "Method" column that must say "runtime" or "RUNTIME_BLOCKED (reason)" — no "unit test" option.
 
 ---
 

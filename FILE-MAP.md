@@ -52,7 +52,7 @@ graph TB
         SS_CMD["commands/ (16)"]
         SS_DOM["domains/ (55)"]
         SS_REF["reference/ (26)"]
-        SS_TPL["templates/ (1)"]
+        SS_TPL["templates/ (3)"]
         SS_SCR["scripts/ (7)"]
     end
 
@@ -324,9 +324,10 @@ specs/domains/              ← Project-local custom modules (created by /domain
 | `scripts/validate.sh` | Artifact validation |
 | `scripts/semantic-stub-check.sh` | Semantic stub detector (Math.random, placeholder text) |
 | `scripts/wiring-check.sh` | Wiring integrity checker (IPC/API audit) |
-| **Templates** (2) | | |
+| **Templates** (3) | | |
 | `templates/domain-profile-instance-template.md` | Domain Profile Instance artifact template (4th GEL registry) |
 | `templates/project-domains-readme.md` | Project-local domains README template (specs/domains/ listing) |
+| `templates/verify-report-template.md` | Verify report template — per-SC evidence, demo execution, merge readiness (generated at verify completion) |
 
 ### shared (50 files)
 

@@ -6,6 +6,21 @@
 
 ### Phase 3: Demo-Ready Verification (BLOCKING — only if Demo-Ready Delivery is active)
 
+🚫 **BLOCKING [G2]**: Phase 3 requires a RUNNING application. Before proceeding:
+1. Confirm application is running (check health endpoint or process)
+2. If not running → start it (`npm run start:dev`, `docker compose up -d`, etc.)
+3. If infrastructure missing → ask user to configure (P2: Delegate, Don't Skip)
+4. If application cannot start → this is a Phase 1 failure, return to implement
+
+**Phase 3 is NOT unit test execution.** Unit tests run in Phase 1. Phase 3 is RUNTIME verification:
+- Start the real server
+- Call real endpoints with real (or seed) data
+- Verify responses match SC definitions
+- Record evidence (HTTP status codes, response bodies, screenshots)
+
+❌ WRONG: "Unit tests cover SC-001 through SC-010 → Phase 3 complete"
+✅ RIGHT: "Server running on :3000 → curl POST /auth/login → 200 → SC-001 ✅"
+
 > 🚫 G2: Static ≠ Runtime — Level 3. Interactions produce correct state (functional
 > verification via Playwright). Static checks + smoke launch are insufficient — Playwright
 > SC verification confirms runtime behavior matches specification.
@@ -47,6 +62,36 @@ Phase 3 Checklist (must complete ALL in order):
   □ Phase 3b: Bug Prevention (B-4)
 
 ---
+
+> 🚫 **NO UNIT TEST SUBSTITUTION [G2]**: Every SC MUST be verified at runtime against the running application. "Unit test covers this SC" is NOT acceptable evidence for Phase 3.
+>
+> If an SC genuinely cannot be verified at runtime (e.g., requires hardware, external paid API with no sandbox):
+> 1. Mark it as `RUNTIME_BLOCKED` with specific reason
+> 2. Report to user via AskUserQuestion: "SC-007 cannot be runtime-verified because [reason]. Manual verification needed."
+> 3. Do NOT silently substitute a unit test and report ✅
+>
+> ❌ WRONG: "SC-007 (cross-tenant isolation) — unit test ✅"
+> ❌ WRONG: "SC-009 (model scope) — skipped, model not registered"
+> ✅ RIGHT: "SC-007 — RUNTIME_BLOCKED: requires second Organization in seed data. Asking user to create test org."
+> ✅ RIGHT: "SC-009 — RUNTIME_BLOCKED: model 'claude-sonnet-4-20250514' not registered. Asking user to register test model."
+
+#### SC Evidence Standard (🚫 BLOCKING)
+
+Each SC in the verify-report MUST have one of exactly three statuses:
+
+| Status | Meaning | Requirement |
+|--------|---------|-------------|
+| ✅ PASS | Complete SC behavior verified at runtime | Full end-to-end evidence (request → response matching SC definition) |
+| ❌ FAIL | SC behavior does not match at runtime | Failure details + severity classification |
+| ⚠️ PARTIAL | Part of SC verified, part blocked | Exact scope of what passed + what's blocked + why + action needed |
+
+🚫 **NEVER report ⚠️ PARTIAL as ✅ PASS.** If any part of the SC's defined behavior was not verified, it is NOT ✅.
+
+Example:
+- SC-001: "Valid API Key → POST /v1/chat/completions → 200 + streamed LLM response"
+- Auth middleware returns 200 ✅, but LLM Provider returns 400 (no API key configured) ❌
+- Correct report: ⚠️ PARTIAL — "Auth layer ✅, LLM call ❌ (Provider API Key not in .env)"
+- Wrong report: ✅ — "Authentication verified successfully"
 
 **Step 0 — SC Verification Planning** (classify ALL SCs — not just those in demo Coverage header):
 

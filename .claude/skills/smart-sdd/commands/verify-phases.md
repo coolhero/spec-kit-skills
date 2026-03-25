@@ -430,6 +430,22 @@ Each phase is in a separate file to fit within context budget. Read ONLY the pha
 | Phase 3 + 3b | [verify-sc-verification.md](verify-sc-verification.md) | After Phase 2 — SC-level runtime verification + bug prevention |
 | Evidence + Phase 4-5 | [verify-evidence-update.md](verify-evidence-update.md) | After Phase 3b — evidence gate, registry update, integration demo |
 
+### Verify Report Generation (MANDATORY — after all phases complete)
+
+After Phase 4 completes, generate `specs/F00N-name/verify-report.md` using the template at `templates/verify-report-template.md`. Populate ALL sections with actual results:
+
+1. **Phase 1 results**: Build/test/lint pass/fail with actual command output
+2. **Phase 2 results**: Cross-Feature checks performed
+3. **Phase 3 results**: Each SC with actual HTTP status codes, response bodies, or UI verification evidence
+4. **Phase 4 results**: Demo execution with exit codes
+
+🚫 **BLOCKING**: verify-report.md MUST be generated before the merge step. If verify-report shows ANY ❌, the merge step's verify-gate BLOCKS.
+
+The verify-report serves three purposes:
+- **PM review evidence**: PM can objectively judge "what was verified" based on concrete evidence
+- **Case Study evidence**: Demonstrates the pipeline's verification quality as an artifact
+- **Regression baseline**: Future changes can compare against previous verify results
+
 **Do NOT read all phase files at once.** Read one phase file, execute it, then read the next. This keeps context budget under control.
 
 **The gates in THIS file (Bug Fix Severity Rule, Source Modification Gate, Verify Initialization, Process Lifecycle) apply to ALL phases.** They are in this hub file because they must always be in context.

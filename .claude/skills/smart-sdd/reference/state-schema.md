@@ -606,7 +606,15 @@ When smart-sdd runs for the first time (when sdd-state.md does not exist), the i
 
 ### When Verify Step Completes — Result Recording
 
-When the verify step is completed, record the following information in the Notes column of the Feature Detail Log:
+When the verify step is completed:
+
+1. **Generate verify-report.md**: Write `specs/F00N-name/verify-report.md` from `templates/verify-report-template.md` with actual results from all phases. This report is required for the merge gate.
+
+| Artifact | Purpose |
+|----------|---------|
+| `verify-report.md` | Verify evidence — per-SC runtime results, demo execution, overall PASS/FAIL. Generated at verify completion, required for merge gate. |
+
+2. **Record in Notes**: Record the following information in the Notes column of the Feature Detail Log:
 
 ```
 Tests: [passed count]/[total count] passed

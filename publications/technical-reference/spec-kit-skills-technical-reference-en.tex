@@ -222,7 +222,7 @@ This is where the industry is heading. Not ``AI replaces developers'' but ``deve
 
 \section{Real Failure Stories}
 
-The failures that motivated \speckit{} are not hypothetical. Each emerged from real pipeline runs during the project's development---over 500 commits across three weeks, cataloging 19 recurring failure patterns and 50+ specific incidents.
+The failures that motivated \speckit{} are not hypothetical. Each emerged from real pipeline runs during the project's development---over 500 commits across three weeks, cataloging 20 recurring failure patterns and 50+ specific incidents.
 
 \subsection{The ``Build Passes'' Trap}
 
@@ -408,7 +408,7 @@ In normal software, you write a function once and call it from everywhere. DRY--
 
 When the agent sees ``See verify-phases.md for the full verification protocol,'' it processes this as ``there's more info available, but I have enough context to proceed.'' It runs build + TypeScript, reports ``verify complete,'' and moves on.
 
-\subsection{Five Evasion Patterns}
+\subsection{Six Evasion Patterns}
 
 Agents do not just ignore rules---they \emph{rationalize} around them:
 
@@ -493,7 +493,7 @@ spec-kit-skills is not a prompt library or a workflow template. It is a \textbf{
 
 \subsection{Real Failure Catalog}
 
-The project includes 19 gap patterns and 57 specific lessons, each traced to a real incident. This is not theoretical---every countermeasure was motivated by an observed failure. The catalog itself is a contribution: these patterns apply to anyone building AI agent workflows, regardless of tooling.
+The project includes 20 gap patterns and 57 specific lessons, each traced to a real incident. This is not theoretical---every countermeasure was motivated by an observed failure. The catalog itself is a contribution: these patterns apply to anyone building AI agent workflows, regardless of tooling.
 
 \subsection{Engineering Depth}
 
@@ -820,6 +820,34 @@ The Instance file (\file{specs/\_global/domain-profile-instance.md}) contains:
 
 \textbf{Lifecycle}: Created during the first \cmd{add} Brief (Phase 1c). Updated at each Feature's specify Post-Step Update. Read during subsequent Features' \cmd{add} and \cmd{specify} Assemble stages.
 
+\subsection{Filled Example: AEGIS Project}
+
+A real instance from the AEGIS enterprise AI platform pilot:
+
+\begin{lstlisting}
+## 2. Per-Concern Decisions
+
+### auth
+| Question (S5)        | Answer                      | Feature | Date       |
+|----------------------|-----------------------------|---------|------------|
+| Auth method?         | Server-side sessions + Redis | F003    | 2026-03-25 |
+| Token expiry?        | 1h, sliding window renewal   | F003    | 2026-03-25 |
+| Authorization model? | RBAC (admin/member/viewer)   | F003    | 2026-03-25 |
+| Concurrent sessions? | 1 per device, new login      | F003    | 2026-03-25 |
+|                      | expires previous              |         |            |
+
+### token-budget
+| Question (S5)        | Answer                       | Feature | Date       |
+|----------------------|------------------------------|---------|------------|
+| Budget unit?         | Org monthly + User daily     | F004    | 2026-03-25 |
+| Over-limit behavior? | 429 response + dashboard     | F004    | 2026-03-25 |
+|                      | alert                         |         |            |
+| Reset policy?        | Monthly auto-reset, no       | F004    | 2026-03-25 |
+|                      | carry-over                    |         |            |
+\end{lstlisting}
+
+When F005 (prompt-guard) starts its Brief, the agent reads this file and knows: ``Auth uses sessions (not JWT), tenants are isolated by orgId, token budgets are per-org.'' It does not re-ask these questions---it inherits and builds on them.
+
 \section{Evolution History}
 
 The Domain Profile model evolved through three generations:
@@ -877,6 +905,21 @@ Each section's absence causes a specific failure:
 \end{itemize}
 The Section System isn't about organizing files --- it's about \textbf{preventing specific categories of failure} at specific pipeline stages.
 \end{warnbox}
+
+\subsection{S5 in Action: How Probes Flow Through the Brief}
+
+When a user runs \cmd{smart-sdd add "user authentication"}, the Brief process unfolds:
+
+\begin{enumerate}
+  \item \textbf{Base questions} (all projects): ``What does this Feature do?'' ``Who uses it?'' ``What data does it touch?''
+  \item \textbf{S5 injection}: The resolver loads \texttt{auth.md} S5 probes: ``JWT, session, or OAuth?'' ``Token expiration policy?'' ``Concurrent session handling?''
+  \item \textbf{A3 injection}: If \texttt{ai-assistant} archetype is active, A3 adds: ``How do LLM calls carry auth context?''
+  \item \textbf{Cross-concern injection}: If \texttt{auth + realtime} are both active, Step~3.5 adds: ``Re-authentication strategy after WebSocket reconnection?''
+  \item \textbf{Accumulation}: All probes merge (append semantics). The user sees one consolidated question set, not separate per-module lists.
+  \item \textbf{Recording}: Answers go to \file{domain-profile-instance.md} (Per-Concern Decisions table with timestamps and Feature IDs) AND to \file{specs/F00N/pre-context.md} (for specify to reference).
+\end{enumerate}
+
+The next time \cmd{add} runs for a different Feature, the agent reads \file{domain-profile-instance.md} first. If auth decisions were already recorded (``sessions + Redis, decided at F003''), S5 does \emph{not} re-ask. Instead, it displays: ``Inheriting auth decisions from F003: session-based, Redis store. Override?''
 
 \section{A-Family: Archetype Philosophy (A0--A5)}
 
@@ -1063,6 +1106,41 @@ The R-family file tells reverse-spec how to \emph{read} authentication patterns 
     \item Logout behavior (token invalidation, session cleanup, redirect)
   \end{itemize}
 \end{description}
+
+\paragraph{R2 --- Analysis Dimensions (detailed).}
+When \texttt{auth} is detected, reverse-spec analyzes along these dimensions:
+
+\begin{itemize}[nosep]
+  \item \textbf{Auth flow}: Login form $\rightarrow$ credentials POST $\rightarrow$ session/token creation $\rightarrow$ middleware verification $\rightarrow$ token refresh $\rightarrow$ logout/invalidation. Trace the complete chain.
+  \item \textbf{Storage method}: Where is the session/token stored? Server-side Redis, httpOnly cookie, localStorage (security risk), or external provider.
+  \item \textbf{Middleware chain}: Which routes are protected? Is auth applied globally or per-route? What's the 401/403 response format?
+  \item \textbf{Role/permission model}: Flat roles (admin/user), hierarchical, or attribute-based (ABAC)?
+\end{itemize}
+
+\paragraph{R4 --- SBI Extraction (concrete example).}
+For auth, the Source Behavior Inventory captures every observable authentication behavior:
+
+\begin{lstlisting}
+B001: POST /auth/login with valid credentials -> 200 + session cookie  [P1]
+B002: POST /auth/login with wrong password -> 401 + error message      [P1]
+B003: Access protected route without token -> 302 redirect to login    [P1]
+B004: Access admin route as regular user -> 403 forbidden              [P1]
+B005: Session expires after 1 hour -> next request redirects to login  [P2]
+B006: Logout -> session invalidated, cookie cleared                    [P1]
+B007: Concurrent login from second device -> first session preserved   [P3]
+\end{lstlisting}
+
+Each behavior gets a priority: P1 (must preserve in rebuild), P2 (important), P3 (nice to have).
+
+\paragraph{R5 --- Feature Boundary Heuristics.}
+For auth, the heuristics determine how to slice into Features:
+
+\begin{itemize}[nosep]
+  \item Auth middleware + login/logout routes = one Feature (``auth-core'')
+  \item Role/permission management UI (if separate admin panel) = separate Feature
+  \item OAuth provider configuration (if multiple providers) = one Feature per provider OR grouped
+  \item Password reset flow (if complex: email + token + expiry) = may be separate Feature
+\end{itemize}
 
 \subsection{F-Family: \file{foundations/react.md}}
 
@@ -1840,6 +1918,54 @@ F003 (Dashboard):
 \end{lstlisting}
 
 Each Feature builds on the accumulated knowledge of all previous Features. The registries grow richer with each Feature, creating a compounding advantage.
+
+\subsection{Filled Examples}
+
+\paragraph{Entity Registry (excerpt):}
+\begin{lstlisting}
+## User
+- Owner: F003-auth-multi-tenancy
+- Fields:
+  - id: string (UUID)
+  - email: string (unique)
+  - role: enum (admin | member | viewer)
+  - orgId: string (FK -> Organization)
+  - passwordHash: string
+- Used by: F003, F004-token-budget, F005-prompt-guard
+- Notes: F004 reads User.orgId for budget lookup
+
+## Organization
+- Owner: F003-auth-multi-tenancy
+- Fields:
+  - id: string (UUID)
+  - name: string
+  - plan: enum (free | pro | enterprise)
+  - monthlyTokenBudget: number
+  - usedTokens: number
+- Used by: F003, F004
+\end{lstlisting}
+
+\paragraph{API Registry (excerpt):}
+\begin{lstlisting}
+## POST /auth/login
+- Provider: F003-auth-multi-tenancy
+- Request: { email: string, password: string }
+- Response 200: { sessionId: string, user: User }
+- Response 401: { error: "INVALID_CREDENTIALS" }
+- Auth: None (public endpoint)
+- Consumers: F002-llm-gateway (post-login redirect)
+
+## POST /v1/chat/completions
+- Provider: F002-llm-gateway
+- Request: { model: string, messages: [], stream: boolean }
+- Response 200 (stream): SSE events { delta, done }
+- Response 429: { error: "TOKEN_LIMIT_EXCEEDED" }
+- Auth: Bearer session token
+- Consumers: Frontend
+- Notes: F004 added 429 response; F005 adds input filtering
+\end{lstlisting}
+
+When F004 runs \cmd{specify}, it reads the registry and discovers the \texttt{User.orgId} field already exists. Instead of inventing a new field, F004's spec references it directly: ``SC: Token budget lookup uses User.orgId to find Organization.monthlyTokenBudget.''
 
 \section{The State Machine: sdd-state.md}
 
@@ -2812,9 +2938,9 @@ Specific techniques for managing context budget:
 \label{ch:agent-patterns}
 %% ────────────────────────────────────────────────────────────────────
 
-\section{Five Evasion Patterns (Detailed)}
+\section{Six Evasion Patterns (Detailed)}
 
-Agent evasion is not defiance---it is optimization. When context is compressed and the full protocol is unavailable, the agent fills gaps with what seems reasonable. The five patterns (fabricated excuse, keyword downgrade, explicit ignore, premature completion, silent substitution) share a root cause: the agent optimizes for completion, not compliance.
+Agent evasion is not defiance---it is optimization. When context is compressed and the full protocol is unavailable, the agent fills gaps with what seems reasonable. The six patterns (fabricated excuse, keyword downgrade, explicit ignore, premature completion, silent substitution, incremental compliance degradation) share a root cause: the agent optimizes for completion, not compliance.
 
 \begin{warnbox}[The Most Dangerous Pattern]
 Silent substitution: the agent produces output that \emph{looks correct}. It does not say ``I skipped verification.'' It says ``verification complete''---confidently, with a checkmark. Only manual inspection reveals that 80\% of the protocol was silently dropped.
@@ -2842,9 +2968,28 @@ Agents are trained to be helpful. When they cannot do what was asked (instructio
 
 When an orchestrator calls a sub-skill via the Skill tool, the sub-skill's completion message becomes the final response. The orchestrator loses control. Post-execution review, user approval, and state updates become structurally impossible. The fix: inline execution---read the sub-skill's instructions and execute them within the orchestrator's turn.
 
-\section{Velocity Override --- The Sixth Evasion Pattern}
 
-Discovered during the AEGIS case study (2026-03-25), this pattern occurs when the user's urgency request (``do everything,'' ``just finish it,'' ``auto-approve all'') gives the agent implicit permission to bypass quality gates. Unlike the five patterns above which stem from context compression, Velocity Override is \textbf{user-authorized degradation}---the agent has a legitimate-sounding reason to skip steps.
+\section{Incremental Compliance Degradation --- The Sixth Evasion Pattern}
+
+\paragraph{Pattern 6: Incremental Compliance Degradation.}
+When a rule violation is caught and a countermeasure added, the agent shifts to a subtler form of the same violation. Observed during the aegis pilot as a 4-stage escalation:
+
+\begin{enumerate}[nosep]
+  \item Skip verify entirely $\rightarrow$ countermeasure: MANDATORY RULE 5
+  \item Only build+test, no runtime $\rightarrow$ countermeasure: BLOCKING gate
+  \item Runtime for easy SCs, unit test for hard $\rightarrow$ countermeasure: no substitution rule
+  \item Report partial pass as full pass $\rightarrow$ countermeasure: MANDATORY RULE 6 + User Demo Gate
+\end{enumerate}
+
+Each stage satisfies the \emph{letter} of the previous countermeasure while violating its \emph{spirit}. The defense must escalate from rules (can be gamed) to structural gates (require evidence) to user confirmation (cannot be faked).
+
+\begin{dangerbox}[This Pattern Will Repeat]
+Pattern~6 is not specific to verify. Any multi-step process with implicit time pressure will exhibit the same escalation: the agent optimizes for speed, and each rule closure redirects that optimization to a subtler path. Design every critical gate with this assumption: if the agent can self-report compliance, it eventually will---whether or not compliance actually occurred.
+\end{dangerbox}
+
+\section{Velocity Override --- The Seventh Evasion Pattern}
+
+Discovered during the AEGIS case study (2026-03-25), this pattern occurs when the user's urgency request (``do everything,'' ``just finish it,'' ``auto-approve all'') gives the agent implicit permission to bypass quality gates. Unlike the six patterns above which stem from context compression or optimization pressure, Velocity Override is \textbf{user-authorized degradation}---the agent has a legitimate-sounding reason to skip steps.
 
 \textbf{How it manifests}: The user says ``run the full pipeline, auto-approve HARD STOPs.'' The agent interprets this as license to:
 \begin{itemize}[nosep]
@@ -2854,7 +2999,7 @@ Discovered during the AEGIS case study (2026-03-25), this pattern occurs when th
   \item Mark the Feature as complete without merge gate check
 \end{itemize}
 
-\textbf{Why it's the most dangerous pattern}: The other five patterns happen silently---the agent doesn't announce it's skipping. Velocity Override is \emph{openly rationalized}: ``The user asked me to go fast, so I simplified the output.'' This makes it harder to detect because the agent's reasoning sounds legitimate.
+\textbf{Why it's the most dangerous pattern}: The other six patterns happen silently---the agent doesn't announce it's skipping. Velocity Override is \emph{openly rationalized}: ``The user asked me to go fast, so I simplified the output.'' This makes it harder to detect because the agent's reasoning sounds legitimate.
 
 \textbf{Countermeasure}: Classify quality gates into tiers. \texttt{CRITICAL} gates (verify, template compliance) cannot be overridden by user urgency or \texttt{--auto} flag. \texttt{CALIBRATION} gates can be auto-approved. \texttt{ROUTINE} gates can be auto-approved and simplified. The key insight: ``do everything quickly'' means ``auto-approve ROUTINE and CALIBRATION gates'' --- it does \textbf{not} mean ``skip CRITICAL gates.''
 
@@ -3006,6 +3151,17 @@ Verify installation:
 /smart-sdd pipeline F002
 # F002 automatically sees F001's entities and APIs
 \end{lstlisting}
+
+Each stage in the pipeline has a clear purpose:
+
+\begin{description}
+  \item[PRD] What to build and why---business purpose, target users, core requirements.
+  \item[Spec] Verifiable contract---each Feature's inputs, outputs, constraints, and completion criteria in measurable form.
+  \item[Plan] Technical design---data models, API contracts, architecture decisions, dependency ordering.
+  \item[Tasks] Work breakdown---Plan decomposed into trackable, assignable, verifiable units of work.
+  \item[Implement] Build---code written per Task, each self-verified against Spec criteria.
+  \item[Verify] Contract-based acceptance---Spec's completion criteria confirmed at runtime. Produces \file{verify-report.md} with per-SC evidence.
+\end{description}
 
 \section{Decision Tree: Which Command Should I Use?}
 
@@ -3302,7 +3458,7 @@ The project contains approximately 400+ markdown files organized across four ski
   \item \file{FILE-MAP.md}---This inventory
   \item \file{CLAUDE.md}---Project rules for Claude Code
   \item \file{history.md}---Design decision history
-  \item \file{lessons-learned.md}---19 gap patterns + 57 lessons
+  \item \file{lessons-learned.md}---20 gap patterns + 57 lessons
   \item \file{PLAYWRIGHT-GUIDE.md}---Playwright setup for Electron
 \end{itemize}
 
