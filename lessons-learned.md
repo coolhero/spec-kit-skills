@@ -827,6 +827,18 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 
 ---
 
+#### L62. Feature-Level Parallelism Destroys Cross-Feature Integrity
+
+**What happened** (aegis case study): The agent launched 3 background agents to implement F003, F004, F005 simultaneously. F004 depended on F003's Organization/Team/User entities. F005 depended on F002+F003's APIs. All 3 agents wrote to shared files (app.module.ts, entity-registry.md, api-registry.md) concurrently. Caught and stopped before merge, but the damage pattern was clear: entity definitions conflicted, API contracts were inconsistent, and sdd-state.md had incoherent status entries.
+
+**Why this is universal**: The Agent tool makes parallelism trivially easy — "launch 3 agents in background." But cross-Feature dependencies mean Features are NOT independent work units. Feature B's specify needs Feature A's entity-registry output. Feature B's implement needs Feature A's API contracts. Parallelizing Features is like running database migrations in parallel — technically possible, semantically catastrophic.
+
+**What works instead**: Features are ALWAYS sequential. The pipeline rule is absolute: F001 verify+merge → F002 start → F002 verify+merge → F003 start. The ONLY parallelism allowed is within-Feature task-level parallelism (multiple files within the same Feature, with disjoint ownership). Context Reset between Features further reinforces the sequential boundary.
+
+**Universal takeaway**: In any agent workflow with shared state (registries, config files, state machines), work units that read/write shared state must be sequential. Parallelism is safe only when work units are truly independent — no shared files, no dependency ordering, no state coupling. The ease of launching parallel agents is inversely correlated with the safety of doing so.
+
+---
+
 #### L59. File-Based State Machines Beat Natural Language Conditionals for Multi-State Workflows
 
 **What happened**: Early pipeline designs used natural language conditionals: "If the Feature is in progress, continue from the current step. If it's completed, skip it. If it's blocked, ask the user." The agent handled 2-3 states correctly but fell apart at 5+ states. It would resume a completed Feature, skip a blocked Feature without asking, or process a deferred Feature that should have been filtered out.

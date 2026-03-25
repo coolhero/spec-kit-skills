@@ -347,6 +347,7 @@ Accumulated edge cases from real pipeline runs. Check this list when hitting une
 | G11 | Processing 3+ Features without context reset | Context saturates → later Features get shallow specify/verify, Review quality drops, hallucination risk increases | Reset context at Feature boundaries (`/clear` then re-invoke). All state is in files (P3). See `pipeline.md` § Context Reset Protocol |
 | G12 | Generating artifacts without reading spec-kit templates | spec.md has 3 sections instead of 8, data-model.md missing, contracts/ missing → downstream steps work with incomplete data | ALWAYS read `.specify/templates/` before generating. Match every section. |
 | G13 | Skipping verify when user says "do everything" or "just finish it" | Feature marked complete without SC verification → bugs ship → trust lost | verify is CRITICAL classification. User urgency does NOT override. merge gate blocks without verify. |
+| G14 | Running multiple Features in parallel via Agent tool or background tasks | Entity registry conflicts, shared file overwrites, Feature B references Feature A's incomplete entities → cascading inconsistency | Features are ALWAYS sequential. F001 verify+merge → F002 start. Only within-Feature task parallelism is allowed. |
 
 ---
 

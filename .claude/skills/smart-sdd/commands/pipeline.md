@@ -919,6 +919,8 @@ Processes the Feature(s) selected in Step 4 (Feature Selection). In single-Featu
 
 **CRITICAL: Each Feature must complete ALL steps (from its starting step through verify and merge) before moving to the next Feature.** Do NOT skip implement or verify. Do NOT start the next Feature until the current Feature's merge step is complete.
 
+🚫 **PARALLEL FEATURE EXECUTION IS FORBIDDEN**: Never use Agent tool, background tasks, or any other mechanism to process multiple Features simultaneously. Even when the user says "do all Features" or "run them in parallel" — Features MUST execute sequentially. Parallel execution causes: (1) entity-registry conflicts from concurrent writes, (2) Feature B referencing Feature A's entities before A is complete, (3) file conflicts in shared files (app.module.ts, package.json), (4) untraceable state in sdd-state.md. The ONLY parallelism allowed is within-Feature task-level parallelism (see § Parallel vs Sequential Execution).
+
 Executes the following steps **strictly in order** for each Feature.
 
 **Every "Review" below is a HARD STOP — you MUST use AskUserQuestion and WAIT for explicit user approval before continuing.**
