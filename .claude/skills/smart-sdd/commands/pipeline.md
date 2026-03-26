@@ -374,6 +374,11 @@ Updates global artifacts to reflect the command execution results. For detailed 
 | specify | `domain-profile-instance.md` | Record cross-concern integrations activated during this Feature's specify; add Per-Feature Domain Summary entry |
 | merge | `sdd-state.md` | Record merge completion, update Feature Mapping, change Status to `completed` |
 
+**Feature Detail Log update**: After each step completes, update the Feature Detail Log in `sdd-state.md`:
+- Set current step Status to `completed` with timestamp and notes
+- Set next step Status to `pending` (if not already)
+- If Impact Analysis was performed (or skipped), record below the Step table
+
 Reports the changes to the user after the update.
 
 ---
@@ -468,6 +473,35 @@ If `BASE_PATH/sdd-state.md` does not exist, create it:
 2. Generate `sdd-state.md` following the [state-schema.md](../reference/state-schema.md) format
 3. Set Origin based on the project type (`greenfield`, `rebuild`, or `adoption`)
 4. Set Source Path (see state-schema.md for rules per mode)
+5. Include the Feature Detail Log section after the Feature Progress table:
+   ```markdown
+   ## Feature Detail Log
+
+   (Populated as Features enter pipeline. Each Feature gets a subsection with Step table.)
+   ```
+
+#### Feature Detail Log Initialization (per Feature)
+
+When a Feature enters the pipeline (pre-flight Step 0), initialize its Detail Log subsection in `sdd-state.md` if not already present:
+
+```markdown
+### F00N-name
+
+| Step | Status | Started | Completed | Notes |
+|------|--------|---------|-----------|-------|
+| specify | pending | | | |
+| plan | pending | | | |
+| tasks | pending | | | |
+| analyze | pending | | | |
+| implement | pending | | | |
+| verify | pending | | | |
+| merge | pending | | | |
+```
+
+Update each row as the step progresses:
+- Step starts → `Status: in_progress`, `Started: [timestamp]`
+- Step completes → `Status: completed`, `Completed: [timestamp]`, `Notes: [summary]`
+- Impact Analysis → append `📋 IMPACT ANALYSIS: [result]` below the Step table
 
 **Step 2 — Source Path verification (HARD STOP)**:
 Read the `Source Path` from `sdd-state.md` and verify based on the project mode:

@@ -4,6 +4,26 @@
 > Records key architectural and design decisions that shaped the project.
 
 ---
+## [2026-03-26] P19: Feature Detail Log Auto-Creation in Pipeline + Init
+
+### What Changed
+1. **commands/pipeline.md § Pipeline Initialization Step 1**: Added item 5 — include Feature Detail Log section (with placeholder text) when creating sdd-state.md.
+2. **commands/pipeline.md § Feature Detail Log Initialization (per Feature)**: New subsection after Step 1. When a Feature enters pipeline (pre-flight Step 0), initialize its Detail Log subsection with a 7-row Step table (specify through merge). Rows update as steps progress (in_progress/completed with timestamps). Impact Analysis appended below the table.
+3. **commands/pipeline.md § 4. Update — Global Evolution Layer Refresh**: Added Feature Detail Log update instruction — after each step completes, update current step to completed and set next step to pending.
+4. **commands/init.md § Phase 3 item 5**: sdd-state.md creation now includes the Feature Detail Log section in the template.
+5. **lessons-learned.md**: Added L78 (Schema Without Initialization Is Dead Code).
+
+### Design Decision
+state-schema.md defined Feature Detail Log with per-step timing, Impact Analysis recording, and Verify Progress — but neither pipeline initialization nor init created this section. The schema was dead code: defined but never instantiated. Fix adds initialization triggers at two points: (1) sdd-state.md creation (empty section), (2) Feature pre-flight (per-Feature subsection with Step table). Post-step updates keep the table current.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Feature Detail Log initialization + post-step update
+- `.claude/skills/smart-sdd/commands/init.md` — Feature Detail Log in sdd-state template
+- `lessons-learned.md` — L78
+- `history.md` — This entry
+
+
+---
 ## [2026-03-26] Add Case Study Update Trigger to Pipeline Merge Step
 
 ### What Changed

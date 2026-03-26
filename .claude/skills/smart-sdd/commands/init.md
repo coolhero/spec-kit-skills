@@ -545,7 +545,12 @@ Generate all artifacts at BASE_PATH (defaults to `./specs/_global/`):
 4. **`api-registry.md`**: Empty registry with headers only
    - Note: "Endpoints will be populated as Features are planned via speckit-plan."
 
-5. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Feature Progress table empty (no Features defined yet — Features will be added via `/smart-sdd add`).
+5. **`sdd-state.md`**: Initialize with Origin: `greenfield`, Scope: `full`, Feature Progress table empty (no Features defined yet — Features will be added via `/smart-sdd add`). Include the Feature Detail Log section after the Feature Progress table:
+   ```markdown
+   ## Feature Detail Log
+
+   (Populated as Features enter pipeline. Each Feature gets a subsection with Step table.)
+   ```
    - **Org Convention**: Ask via AskUserQuestion: "Do you have an organization convention file?" with options:
      - "Yes — specify path" → record path in `**Org Convention**` field
      - "No" → set `**Org Convention**: none`

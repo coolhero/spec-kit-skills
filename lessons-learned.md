@@ -975,3 +975,9 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: aegis case study was repeatedly forgotten after Feature merges. F001-F003 results were batch-recorded later by user request. F004-F005 results and DG1/DG2 Integration Demo results were also not auto-recorded. The case study existed as a file but the pipeline had no trigger to update it.
 
 **Universal takeaway**: If a project maintains a case study or execution log, the pipeline's merge step should include a "case study update" trigger — same as sdd-state update. It doesn't need to be BLOCKING (context may be limited), but it should be attempted. An incomplete case study defeats its purpose: documenting the full pipeline experience for future reference.
+
+#### L78. Schema Without Initialization Is Dead Code
+
+**What happened**: state-schema.md defined Feature Detail Log with Step tables, Verify Progress, Minor Fix Accumulator, and Impact Analysis recording. But pipeline initialization created sdd-state.md without this section. Result: 5 Features completed with no per-step timing, no Impact Analysis records, no Verify Progress persistence. The schema existed but was never instantiated — dead code in documentation form.
+
+**Universal takeaway**: Every schema section needs TWO things: (1) the definition (what it contains), (2) the initialization trigger (when/where it gets created). If a schema section has no initialization trigger in the pipeline, it will never exist in real projects. Check: for every section in state-schema.md, can you point to the exact pipeline step that creates it? If not, add the initialization.
