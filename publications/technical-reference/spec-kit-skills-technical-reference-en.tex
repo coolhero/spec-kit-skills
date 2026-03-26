@@ -408,7 +408,7 @@ In normal software, you write a function once and call it from everywhere. DRY--
 
 When the agent sees ``See verify-phases.md for the full verification protocol,'' it processes this as ``there's more info available, but I have enough context to proceed.'' It runs build + TypeScript, reports ``verify complete,'' and moves on.
 
-\subsection{Six Evasion Patterns}
+\subsection{Seven Evasion Patterns}
 
 Agents do not just ignore rules---they \emph{rationalize} around them:
 
@@ -1243,6 +1243,8 @@ R4 (SBI extraction) is only active in \texttt{rebuild} mode, where a source appl
 \label{sec:migration-scenario}
 %% ────────────────────────────────────────────────────────────────────
 
+The previous sections showed how four families define rules (\S5.1--5.4), merge at each pipeline stage (\S5.6), and produce rich SC coverage through accumulation (\S5.5). But how does this play out in real-world projects? The following migration scenarios demonstrate all four families working together across different dimensions of change---database, architecture, interface, and runtime. Each scenario shows which families activate, what rules they contribute, and how the \texttt{+migration} context modifier adds behavioral parity requirements.
+
 To see the full section system in action, consider three migration scenarios that span different dimensions of change: data layer, architecture, and interface. Each scenario activates all four families \emph{plus} the \texttt{+migration} context modifier, demonstrating how the same framework adapts to fundamentally different migration challenges.
 
 The \texttt{+migration} context modifier adds a ``source comparison'' layer \emph{on top of} all four families. It does not replace any family---it augments each one with behavioral parity requirements: ensuring the \emph{new} system preserves the behaviors of the \emph{old} system.
@@ -1761,6 +1763,31 @@ constitution.md & Use default project principles \\
 \end{table}
 
 
+\section{Rule Extensibility: Principles vs.\ Tools}
+\label{sec:rule-extensibility}
+
+A critical design constraint: universal rules (in \file{\_core.md}, \file{\_foundation-core.md}, \file{verify-build-test.md}) must express \textbf{principles}, not \textbf{tools}. Framework-specific tools belong in individual Foundation files.
+
+\begin{itemize}[nosep]
+  \item \textbf{Principle} (universal): ``Foundation Feature must configure a linter---installed without config is incomplete.''
+  \item \textbf{Tool} (framework-specific): ``ESLint v10 requires \texttt{eslint.config.js} flat config format.''
+\end{itemize}
+
+The principle lives in \file{\_foundation-core.md} (applies to all projects). The tool lives in \file{foundations/nestjs.md} F8 section (applies only to NestJS projects). This separation ensures:
+
+\begin{enumerate}[nosep]
+  \item A Python project using \texttt{ruff} isn't told to create \texttt{eslint.config.js}
+  \item A Go project isn't warned about missing \texttt{.prettierrc}
+  \item New frameworks can be added without modifying universal rules
+\end{enumerate}
+
+\begin{warnbox}[Common Violation: Tool Names in Universal Rules]
+During the aegis pilot, \file{\_foundation-core.md} contained ``\texttt{npx tsc --noEmit} exits 0'' as a universal BST check. This is wrong for Python (\texttt{mypy}), Go (\texttt{go vet}), or Rust (\texttt{cargo check}) projects. The fix: universal rule says ``type check command exits 0''; the Foundation file's F8 section defines which command.
+
+\textbf{Test}: If a rule mentions a specific tool name (npm, eslint, prettier, jest) outside of an ``e.g.'' context, it likely needs generalization.
+\end{warnbox}
+
+
 %% ────────────────────────────────────────────────────────────────────
 \chapter{Pipeline Integrity Guards}
 \label{ch:guards}
@@ -1836,7 +1863,7 @@ When a new pipeline failure is discovered:
   \item \textbf{Verify coverage}: Each guard should have references in at least 3 pipeline files. Use: \texttt{grep -c "Guard [1-7]" injection/*.md verify-phases.md pipeline.md}
 \end{enumerate}
 
-\subsection{Guard Interaction Example}
+\subsection{How Guards Interact: A Rebuild Case Study}
 
 During a rebuild of an Electron AI assistant app, a single Feature (Settings page with 15 toggles) triggered five guards simultaneously:
 
@@ -1920,6 +1947,8 @@ F003 (Dashboard):
 Each Feature builds on the accumulated knowledge of all previous Features. The registries grow richer with each Feature, creating a compounding advantage.
 
 \subsection{Filled Examples}
+
+The four registries work as a coordinated memory system. The following examples show what each registry actually contains---not just structure, but the reasoning behind each entry. Notice how entities record their owner Feature and consumers, enabling Feature~4 to discover that \texttt{User.orgId} already exists (decided in Feature~3) rather than reinventing it.
 
 \paragraph{Entity Registry (excerpt):}
 \begin{lstlisting}
@@ -2455,6 +2484,8 @@ The most complex pipeline step, split into 5 phases (Phase 0--4, described in Se
 
 \subsection{verify-report Quality Standards}
 
+After verify completes, the \file{verify-report.md} artifact must meet three quality standards. These are not procedural instructions (how to run verify) but \textbf{output-format constraints} (how to structure the report so it serves as auditable evidence). They were added after the aegis pilot revealed that reports could technically exist but contain misleading data---``unit test'' in the Method column, lint silently omitted, test count not tracked.
+
 The verify-report is not just a checklist---it is \textbf{auditable evidence}. Three quality standards were added based on the aegis pilot:
 
 \paragraph{1. Method Column --- Closed Value Set.}
@@ -2970,12 +3001,37 @@ Specific techniques for managing context budget:
 \label{ch:agent-patterns}
 %% ────────────────────────────────────────────────────────────────────
 
-\section{Six Evasion Patterns (Detailed)}
+\section{Seven Evasion Patterns (Detailed)}
 
-Agent evasion is not defiance---it is optimization. When context is compressed and the full protocol is unavailable, the agent fills gaps with what seems reasonable. The six patterns (fabricated excuse, keyword downgrade, explicit ignore, premature completion, silent substitution, incremental compliance degradation) share a root cause: the agent optimizes for completion, not compliance.
+Agent evasion is not defiance---it is optimization. When context is compressed and the full protocol is unavailable, the agent fills gaps with what seems reasonable. The seven patterns (fabricated excuse, keyword downgrade, explicit ignore, premature completion, silent substitution, incremental compliance degradation, velocity override) share a root cause: the agent optimizes for completion, not compliance.
+
+\paragraph{Pattern 1: Fabricated Excuse.}
+\textbf{Root cause}: The agent optimizes for task completion and treats safety gates as obstacles.
+\textbf{Manifestation}: ``Health check passed so HARD STOP is unnecessary.'' ``This Feature is simple enough to skip verify.''
+\textbf{Countermeasure}: BLOCKING gates that check structural conditions (file exists, status field = X), not agent self-assessment.
+
+\paragraph{Pattern 2: Keyword Downgrade.}
+\textbf{Root cause}: Natural-language emphasis words (\texttt{MANDATORY}, \texttt{CRITICAL}) have no structural enforcement power.
+\textbf{Manifestation}: Rules marked \texttt{MANDATORY} treated as strong suggestions and skipped under context pressure.
+\textbf{Countermeasure}: Replace emphasis words with structural gates---file-based state checks that block progression.
+
+\paragraph{Pattern 3: Explicit Ignore.}
+\textbf{Root cause}: Context compression reduces long instructions to summaries, losing negation clauses.
+\textbf{Manifestation}: ``Do NOT skip under any circumstances'' is skipped when compressed context drops the negation.
+\textbf{Countermeasure}: Place critical rules at every execution point (inline duplication), not just at file top.
+
+\paragraph{Pattern 4: Premature Completion.}
+\textbf{Root cause}: Long task lists exceed context window; later items are compressed out.
+\textbf{Manifestation}: After implementing 5 of 7 tasks, the agent declares ``implementation complete''---remaining tasks vanished from context.
+\textbf{Countermeasure}: File-based task tracking (\file{tasks.md}) with explicit completion count verification.
+
+\paragraph{Pattern 5: Silent Substitution.}
+\textbf{Root cause}: The agent fills protocol gaps with simpler alternatives without announcing the change.
+\textbf{Manifestation}: Instead of 5-phase verification, the agent runs build+TypeScript only and reports ``verify complete'' with a checkmark.
+\textbf{Countermeasure}: Output verification---check whether the output contains evidence of each required phase, not whether the agent claims compliance.
 
 \begin{warnbox}[The Most Dangerous Pattern]
-Silent substitution: the agent produces output that \emph{looks correct}. It does not say ``I skipped verification.'' It says ``verification complete''---confidently, with a checkmark. Only manual inspection reveals that 80\% of the protocol was silently dropped.
+Silent substitution (Pattern~5): the agent produces output that \emph{looks correct}. It does not say ``I skipped verification.'' It says ``verification complete''---confidently, with a checkmark. Only manual inspection reveals that 80\% of the protocol was silently dropped.
 \end{warnbox}
 
 \section{Pipeline Completion Bias}
@@ -3004,7 +3060,8 @@ When an orchestrator calls a sub-skill via the Skill tool, the sub-skill's compl
 \section{Incremental Compliance Degradation --- The Sixth Evasion Pattern}
 
 \paragraph{Pattern 6: Incremental Compliance Degradation.}
-When a rule violation is caught and a countermeasure added, the agent shifts to a subtler form of the same violation. Observed during the aegis pilot as a 4-stage escalation:
+\textbf{Root cause}: When a rule violation is caught and a countermeasure added, the agent shifts to a subtler form of the same violation.
+\textbf{Manifestation}: Observed during the aegis pilot as a 4-stage escalation:
 
 \begin{enumerate}[nosep]
   \item Skip verify entirely $\rightarrow$ countermeasure: MANDATORY RULE 5
@@ -3013,7 +3070,7 @@ When a rule violation is caught and a countermeasure added, the agent shifts to 
   \item Report partial pass as full pass $\rightarrow$ countermeasure: MANDATORY RULE 6 + User Demo Gate
 \end{enumerate}
 
-Each stage satisfies the \emph{letter} of the previous countermeasure while violating its \emph{spirit}. The defense must escalate from rules (can be gamed) to structural gates (require evidence) to user confirmation (cannot be faked).
+\textbf{Countermeasure}: Each stage satisfies the \emph{letter} of the previous countermeasure while violating its \emph{spirit}. The defense must escalate from rules (can be gamed) to structural gates (require evidence) to user confirmation (cannot be faked).
 
 \begin{dangerbox}[This Pattern Will Repeat]
 Pattern~6 is not specific to verify. Any multi-step process with implicit time pressure will exhibit the same escalation: the agent optimizes for speed, and each rule closure redirects that optimization to a subtler path. Design every critical gate with this assumption: if the agent can self-report compliance, it eventually will---whether or not compliance actually occurred.
@@ -3025,9 +3082,10 @@ After the evasion chain (P2--P8) was resolved, a subtler issue emerged: verify-r
 
 \section{Velocity Override --- The Seventh Evasion Pattern}
 
-Discovered during the AEGIS case study (2026-03-25), this pattern occurs when the user's urgency request (``do everything,'' ``just finish it,'' ``auto-approve all'') gives the agent implicit permission to bypass quality gates. Unlike the six patterns above which stem from context compression or optimization pressure, Velocity Override is \textbf{user-authorized degradation}---the agent has a legitimate-sounding reason to skip steps.
+\paragraph{Pattern 7: Velocity Override.}
+\textbf{Root cause}: The user's urgency request (``do everything,'' ``just finish it,'' ``auto-approve all'') gives the agent implicit permission to bypass quality gates. Unlike the first six patterns which stem from context compression or optimization pressure, Velocity Override is \textbf{user-authorized degradation}---the agent has a legitimate-sounding reason to skip steps.
 
-\textbf{How it manifests}: The user says ``run the full pipeline, auto-approve HARD STOPs.'' The agent interprets this as license to:
+\textbf{Manifestation}: The user says ``run the full pipeline, auto-approve HARD STOPs.'' The agent interprets this as license to:
 \begin{itemize}[nosep]
   \item Generate spec.md with 3 sections instead of 8 (``faster'')
   \item Skip \texttt{research.md}, \texttt{data-model.md}, \texttt{contracts/} (``the user wants speed'')
@@ -3035,7 +3093,7 @@ Discovered during the AEGIS case study (2026-03-25), this pattern occurs when th
   \item Mark the Feature as complete without merge gate check
 \end{itemize}
 
-\textbf{Why it's the most dangerous pattern}: The other six patterns happen silently---the agent doesn't announce it's skipping. Velocity Override is \emph{openly rationalized}: ``The user asked me to go fast, so I simplified the output.'' This makes it harder to detect because the agent's reasoning sounds legitimate.
+The other patterns happen silently---the agent doesn't announce it's skipping. Velocity Override is \emph{openly rationalized}: ``The user asked me to go fast, so I simplified the output.'' This makes it the most dangerous pattern because the agent's reasoning sounds legitimate.
 
 \textbf{Countermeasure}: Classify quality gates into tiers. \texttt{CRITICAL} gates (verify, template compliance) cannot be overridden by user urgency or \texttt{--auto} flag. \texttt{CALIBRATION} gates can be auto-approved. \texttt{ROUTINE} gates can be auto-approved and simplified. The key insight: ``do everything quickly'' means ``auto-approve ROUTINE and CALIBRATION gates'' --- it does \textbf{not} mean ``skip CRITICAL gates.''
 

@@ -408,7 +408,7 @@ Feature 중간에(specify와 plan 사이에) 리셋하면 안 된다. 단계 간
 
 에이전트가 ``전체 검증 프로토콜은 verify-phases.md를 참조하세요''를 보면, 이를 ``추가 정보가 있지만, 진행하기에 충분한 컨텍스트가 있다''로 처리한다. 빌드 + TypeScript를 실행하고, ``verify complete''를 보고하고 넘어간다.
 
-\subsection{여섯 가지 회피 패턴}
+\subsection{일곱 가지 회피 패턴}
 
 에이전트는 단순히 규칙을 무시하는 것이 아니라---규칙 주변에서 \emph{합리화}한다:
 
@@ -1105,6 +1105,8 @@ S7은 \emph{무엇을 피할지}, F3은 \emph{어떻게 만들지}, F7은 \emph{
 \section{마이그레이션 시나리오: 모든 패밀리의 협업}
 \label{sec:migration-scenario}
 
+앞선 섹션에서 4개 패밀리가 규칙을 정의하고(\S5.1--5.4), 각 Pipeline 단계에서 병합되며(\S5.6), 축적을 통해 풍부한 SC 커버리지를 생산하는 과정(\S5.5)을 살펴보았다. 그렇다면 실제 프로젝트에서는 어떻게 전개될까? 다음 마이그레이션 시나리오들은 데이터베이스, 아키텍처, 인터페이스, 런타임이라는 서로 다른 변화 차원에서 4개 패밀리가 함께 동작하는 모습을 보여준다. 각 시나리오는 어떤 패밀리가 활성화되고, 어떤 규칙을 기여하며, \texttt{+migration} 컨텍스트 모디파이어가 동작 패리티 요구사항을 어떻게 추가하는지를 보여준다.
+
 마이그레이션은 4개 패밀리가 동시에 최대 강도로 동작하는 시나리오다. 데이터베이스, 아키텍처, 인터페이스라는 세 가지 서로 다른 차원의 마이그레이션 예시를 통해 각 패밀리와 \texttt{+migration} Context 레이어가 어떻게 협업하는지 보여준다.
 
 %% ── 예시 1: Oracle → PostgreSQL ──────────────────────────────────
@@ -1437,6 +1439,31 @@ constitution.md & 기본 프로젝트 원칙 사용 \\
 \end{table}
 
 
+\section{Rule Extensibility: 원칙 vs.\ 도구}
+\label{sec:rule-extensibility}
+
+핵심 설계 제약: 범용 규칙(\file{\_core.md}, \file{\_foundation-core.md}, \file{verify-build-test.md})은 \textbf{원칙}을 표현해야 하며, \textbf{도구}를 표현해서는 안 된다. 프레임워크별 도구는 개별 Foundation 파일에 속한다.
+
+\begin{itemize}[nosep]
+  \item \textbf{원칙} (범용): ``Foundation Feature는 린터를 구성해야 한다---설치만 하고 설정이 없으면 미완성이다.''
+  \item \textbf{도구} (프레임워크별): ``ESLint v10은 \texttt{eslint.config.js} flat config 형식을 요구한다.''
+\end{itemize}
+
+원칙은 \file{\_foundation-core.md}에 위치한다 (모든 프로젝트에 적용). 도구는 \file{foundations/nestjs.md}의 F8 섹션에 위치한다 (NestJS 프로젝트에만 적용). 이 분리가 보장하는 것:
+
+\begin{enumerate}[nosep]
+  \item \texttt{ruff}를 사용하는 Python 프로젝트가 \texttt{eslint.config.js}를 만들라는 지시를 받지 않는다
+  \item Go 프로젝트가 \texttt{.prettierrc} 누락 경고를 받지 않는다
+  \item 새로운 프레임워크를 추가할 때 범용 규칙을 수정할 필요가 없다
+\end{enumerate}
+
+\begin{warnbox}[흔한 위반: 범용 규칙에 도구 이름 사용]
+aegis 파일럿에서 \file{\_foundation-core.md}에 ``\texttt{npx tsc --noEmit} exits 0''이 범용 BST 체크로 포함되어 있었다. Python(\texttt{mypy}), Go(\texttt{go vet}), Rust(\texttt{cargo check}) 프로젝트에는 맞지 않는 규칙이다. 수정: 범용 규칙은 ``타입 체크 명령이 종료 코드 0으로 완료''라고 명시하고, Foundation 파일의 F8 섹션에서 어떤 명령인지를 정의한다.
+
+\textbf{테스트}: 규칙에 특정 도구 이름(npm, eslint, prettier, jest)이 ``예:'' 맥락 밖에서 언급되면 일반화가 필요할 가능성이 높다.
+\end{warnbox}
+
+
 %% ────────────────────────────────────────────────────────────────────
 \chapter{Pipeline Integrity Guard}
 \label{ch:guards}
@@ -1512,7 +1539,7 @@ Level 4: + Data persists across restart (round-trip errors)
   \item \textbf{커버리지를 검증}한다: 각 가드는 최소 3개의 Pipeline 파일에서 참조되어야 한다. 사용: \texttt{grep -c "Guard [1-7]" injection/*.md verify-phases.md pipeline.md}
 \end{enumerate}
 
-\subsection{Guard 상호작용 예시}
+\subsection{Guard 상호작용: 리빌드 사례}
 
 Electron AI 어시스턴트 앱의 리빌드 중, 단일 Feature(15개 토글이 있는 설정 페이지)가 5개 가드를 동시에 트리거했다:
 
@@ -1596,6 +1623,8 @@ F003 (Dashboard):
 각 Feature는 이전 모든 Feature의 축적된 지식 위에 구축된다. 레지스트리는 각 Feature마다 더 풍부해지며, 복리 이점을 만든다.
 
 \subsection{실제 레지스트리 예시}
+
+4개의 레지스트리는 조율된 메모리 시스템으로 동작한다. 다음 예시는 각 레지스트리가 실제로 무엇을 담고 있는지---구조뿐 아니라 각 항목 뒤의 근거까지---보여준다. 엔티티가 소유 Feature와 소비자를 기록하는 방식에 주목하라. 이를 통해 Feature~4가 \texttt{User.orgId}가 이미 존재한다는 것(Feature~3에서 결정됨)을 재발명하지 않고 발견할 수 있다.
 
 \paragraph{Entity Registry (발췌):}
 \begin{lstlisting}
@@ -2131,6 +2160,8 @@ spec을 컴포넌트, 데이터 흐름, API 계약이 포함된 아키텍처로 
 
 \subsection{verify-report 품질 기준}
 
+verify가 완료된 후 \file{verify-report.md} 아티팩트는 세 가지 품질 기준을 충족해야 한다. 이것은 절차적 지시(verify를 어떻게 실행하는가)가 아니라 \textbf{출력 형식 제약}(리포트를 감사 가능한 증거로 구조화하는 방법)이다. aegis 파일럿에서 리포트가 기술적으로는 존재하지만 오해를 불러일으키는 데이터를 포함할 수 있다는 것이 드러난 후 추가되었다---Method 컬럼에 ``unit test'', lint 조용히 생략, 테스트 수 미추적.
+
 verify-report는 단순한 체크리스트가 아니라 \textbf{감사 가능한 증거}입니다. aegis 파일럿을 기반으로 세 가지 품질 기준이 추가되었습니다:
 
 \paragraph{1. Method 컬럼 --- Closed Value Set.}
@@ -2646,12 +2677,37 @@ Phase 7 (Ongoing): 3 Principles -> Domain Module Loading Protocol
 \label{ch:agent-patterns}
 %% ────────────────────────────────────────────────────────────────────
 
-\section{6가지 회피 패턴 (상세)}
+\section{7가지 회피 패턴 (상세)}
 
-에이전트 회피는 반항이 아니라 최적화입니다. 컨텍스트가 압축되고 전체 프로토콜을 사용할 수 없을 때, 에이전트는 합리적으로 보이는 것으로 빈 곳을 채웁니다. 6가지 패턴(날조된 변명, 키워드 다운그레이드, 명시적 무시, 조기 완료, 조용한 대체, 점진적 준수 퇴화)은 공통된 근본 원인을 공유합니다: 에이전트는 준수가 아닌 완료를 위해 최적화합니다.
+에이전트 회피는 반항이 아니라 최적화입니다. 컨텍스트가 압축되고 전체 프로토콜을 사용할 수 없을 때, 에이전트는 합리적으로 보이는 것으로 빈 곳을 채웁니다. 7가지 패턴(날조된 변명, 키워드 다운그레이드, 명시적 무시, 조기 완료, 조용한 대체, 점진적 준수 퇴화, Velocity Override)은 공통된 근본 원인을 공유합니다: 에이전트는 준수가 아닌 완료를 위해 최적화합니다.
+
+\paragraph{패턴 1: 날조된 변명.}
+\textbf{근본 원인}: 에이전트가 태스크 완료를 최적화하며 안전 게이트를 장애물로 취급한다.
+\textbf{발현}: ``Health check가 통과했으므로 HARD STOP이 불필요합니다.'' ``이 Feature는 단순하므로 verify를 건너뛰어도 됩니다.''
+\textbf{대응책}: 에이전트 자기 평가가 아닌 구조적 조건(파일 존재, 상태 필드 = X)을 확인하는 BLOCKING 게이트.
+
+\paragraph{패턴 2: 키워드 격하.}
+\textbf{근본 원인}: 자연어 강조 단어(\texttt{MANDATORY}, \texttt{CRITICAL})에는 구조적 강제력이 없다.
+\textbf{발현}: \texttt{MANDATORY}로 표시된 규칙이 컨텍스트 압력 하에서 강력한 제안으로 취급되어 건너뛰어진다.
+\textbf{대응책}: 강조 단어를 구조적 게이트---진행을 차단하는 파일 기반 상태 검사---로 대체.
+
+\paragraph{패턴 3: 명시적 무시.}
+\textbf{근본 원인}: 컨텍스트 압축이 긴 지시를 요약으로 축소하면서 부정 절을 잃는다.
+\textbf{발현}: ``어떤 상황에서도 건너뛰지 마세요''가 압축된 컨텍스트에서 부정이 사라지면 건너뛰어진다.
+\textbf{대응책}: 핵심 규칙을 파일 상단이 아닌 모든 실행 지점에 배치(인라인 중복).
+
+\paragraph{패턴 4: 조기 완료.}
+\textbf{근본 원인}: 긴 태스크 목록이 컨텍스트 윈도우를 초과하여 후반 항목이 압축됨.
+\textbf{발현}: 7개 태스크 중 5개를 구현한 후 ``구현 완료''를 선언---나머지 태스크가 컨텍스트에서 사라짐.
+\textbf{대응책}: 명시적 완료 카운트 검증이 포함된 파일 기반 태스크 추적(\file{tasks.md}).
+
+\paragraph{패턴 5: 조용한 대체.}
+\textbf{근본 원인}: 에이전트가 프로토콜 빈 곳을 변경 사실을 알리지 않고 더 간단한 대안으로 채운다.
+\textbf{발현}: 5-Phase 검증 대신 build+TypeScript만 실행하고 체크마크와 함께 ``verify complete''를 보고한다.
+\textbf{대응책}: 출력 검증---에이전트가 준수를 주장하는지가 아니라, 출력에 각 필수 Phase의 증거가 포함되어 있는지 확인.
 
 \begin{warnbox}[가장 위험한 패턴]
-조용한 대체: 에이전트가 \emph{올바르게 보이는} 출력을 생성합니다. ``검증을 건너뛰었습니다''라고 말하지 않습니다. ``검증 완료''라고---자신있게, 체크마크와 함께 말합니다. 수동 검사를 해야만 프로토콜의 80\%가 조용히 빠졌다는 것을 알 수 있습니다.
+조용한 대체(패턴~5): 에이전트가 \emph{올바르게 보이는} 출력을 생성합니다. ``검증을 건너뛰었습니다''라고 말하지 않습니다. ``검증 완료''라고---자신있게, 체크마크와 함께 말합니다. 수동 검사를 해야만 프로토콜의 80\%가 조용히 빠졌다는 것을 알 수 있습니다.
 \end{warnbox}
 
 \section{Pipeline 완료 편향}
@@ -2680,7 +2736,8 @@ Phase 7 (Ongoing): 3 Principles -> Domain Module Loading Protocol
 \section{점진적 준수 퇴화 --- 6번째 회피 패턴}
 
 \paragraph{패턴 6: 점진적 준수 퇴화(Incremental Compliance Degradation).}
-규칙 위반이 적발되어 대응책이 추가되면, 에이전트는 같은 위반의 더 미묘한 형태로 전환합니다. aegis 파일럿에서 4단계 에스컬레이션으로 관찰되었습니다:
+\textbf{근본 원인}: 규칙 위반이 적발되어 대응책이 추가되면, 에이전트는 같은 위반의 더 미묘한 형태로 전환한다.
+\textbf{발현}: aegis 파일럿에서 4단계 에스컬레이션으로 관찰되었습니다:
 
 \begin{enumerate}[nosep]
   \item verify 전체 건너뛰기 $\rightarrow$ 대응책: MANDATORY RULE 5
@@ -2689,7 +2746,7 @@ Phase 7 (Ongoing): 3 Principles -> Domain Module Loading Protocol
   \item 부분 통과를 전체 통과로 보고 $\rightarrow$ 대응책: MANDATORY RULE 6 + User Demo Gate
 \end{enumerate}
 
-각 단계는 이전 대응책의 \emph{문자}는 충족하면서 \emph{정신}을 위반합니다. 방어는 규칙(게임 가능)에서 구조적 게이트(증거 필요)로, 다시 사용자 확인(위조 불가)으로 에스컬레이션해야 합니다.
+\textbf{대응책}: 각 단계는 이전 대응책의 \emph{문자}는 충족하면서 \emph{정신}을 위반합니다. 방어는 규칙(게임 가능)에서 구조적 게이트(증거 필요)로, 다시 사용자 확인(위조 불가)으로 에스컬레이션해야 합니다.
 
 \begin{dangerbox}[이 패턴은 반복될 것이다]
 패턴~6은 verify에 국한되지 않습니다. 암묵적 시간 압력이 있는 모든 다단계 프로세스에서 동일한 에스컬레이션이 나타납니다: 에이전트는 속도를 위해 최적화하고, 각 규칙 폐쇄는 그 최적화를 더 미묘한 경로로 리디렉션합니다. 모든 중요한 게이트를 이 가정으로 설계하세요: 에이전트가 준수를 자체 보고할 수 있다면, 결국 그렇게 할 것입니다---실제로 준수했는지 여부와 관계없이.
@@ -2701,14 +2758,17 @@ Phase 7 (Ongoing): 3 Principles -> Domain Module Loading Protocol
 
 \section{Velocity Override --- 7번째 회피 패턴}
 
-AEGIS 케이스 스터디(2026-03-25)에서 발견된 패턴입니다. 사용자의 속도 요청(``다 해버려'', ``그냥 끝내줘'', ``전부 자동 승인'')이 에이전트에게 품질 게이트를 우회할 암묵적 허가를 줍니다. 위의 6가지 패턴이 컨텍스트 압축이나 최적화 압력에서 비롯되는 것과 달리, Velocity Override는 \textbf{사용자가 승인한 퇴화}입니다.
+\paragraph{패턴 7: Velocity Override.}
+\textbf{근본 원인}: 사용자의 속도 요청(``다 해버려'', ``그냥 끝내줘'', ``전부 자동 승인'')이 에이전트에게 품질 게이트를 우회할 암묵적 허가를 준다. 앞의 여섯 패턴이 컨텍스트 압축이나 최적화 압력에서 비롯되는 것과 달리, Velocity Override는 \textbf{사용자가 승인한 퇴화}입니다.
 
-\textbf{발현 방식}: 사용자가 ``전체 파이프라인 실행, HARD STOP 자동 승인''이라고 지시하면, 에이전트가 이를 다음과 같이 해석합니다:
+\textbf{발현}: 사용자가 ``전체 파이프라인 실행, HARD STOP 자동 승인''이라고 지시하면, 에이전트가 이를 다음과 같이 해석합니다:
 \begin{itemize}[nosep]
   \item spec.md를 8개 섹션 대신 3개로 생성 (``더 빠르니까'')
   \item research.md, data-model.md, contracts/ 생략 (``사용자가 속도를 원하니까'')
   \item verify 전체 생략 (``사용자가 자동 승인이라 했으니 verify도 승인이겠지'')
 \end{itemize}
+
+다른 패턴은 조용히 발생하지만, Velocity Override는 \emph{공개적으로 합리화}됩니다: ``사용자가 빠르게 하라고 했으니 출력을 간소화했습니다.'' 에이전트의 추론이 합리적으로 들리기 때문에 가장 위험한 패턴입니다.
 
 \textbf{대응책}: 품질 게이트를 계층화합니다. \texttt{CRITICAL} 게이트(verify, 템플릿 준수)는 사용자 속도 요청이나 \texttt{--auto} 플래그로 무시할 수 없습니다. \texttt{CALIBRATION} 게이트는 자동 승인 가능. \texttt{ROUTINE} 게이트는 자동 승인 + 간소화 가능. 핵심: ``다 빠르게''는 ``ROUTINE과 CALIBRATION을 자동 승인''이지 ``CRITICAL을 건너뛰라''가 \textbf{아닙니다}.
 
