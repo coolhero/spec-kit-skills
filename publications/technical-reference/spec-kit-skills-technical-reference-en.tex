@@ -2443,7 +2443,7 @@ The \texttt{add} command implements a structured 6-phase consultation:
   \item \textbf{Phase 6: Finalization}---review HARD STOP, create artifacts (pre-context, sdd-state registration).
 \end{enumerate}
 
-\section{The 5-Phase Verify (Phase 0--4)}
+\section{The 6-Phase Verify (Phase 0--5)}
 
 \begin{description}
   \item[Phase 0: Preflight] Playwright availability check (CLI probe $\rightarrow$ library import $\rightarrow$ MCP probe).
@@ -2451,6 +2451,7 @@ The \texttt{add} command implements a structured 6-phase consultation:
   \item[Phase 2: Automated Tests] Unit + integration. Fix code, not tests.
   \item[Phase 3: UI/Runtime Verification] Launch application via Playwright. Verify each SC against running UI. Delegate to user if Playwright unavailable---never skip.
   \item[Phase 4: Cross-Feature Integration] Verify Features work together.
+  \item[Phase 5: Integration Demo (conditional)] If this Feature completes a Demo Group, run the Integration Demo script. Skipped if no DG is completed.
 \end{description}
 
 \section{SC Preservation (add --to)}
@@ -2502,7 +2503,7 @@ Executes tasks sequentially. Each task follows a protocol: read task specificati
 
 \subsection{Verify}
 
-The most complex pipeline step, split into 5 phases (Phase 0--4, described in Section~\ref{sec:4-phase-verify}).
+The most complex pipeline step, split into 6 phases (Phase 0--5, described in Section~\ref{sec:4-phase-verify}).
 
 \subsection{verify-report Quality Standards}
 
@@ -2639,11 +2640,71 @@ Common step-back patterns:
 
 \texttt{/smart-sdd adopt} wraps existing code with SDD documentation without rewriting. It auto-chains reverse-spec if artifacts do not exist, then runs a lighter consultation for each Feature.
 
+\section{Release Groups vs Demo Groups}
+
+Two independent grouping mechanisms manage Features at different levels:
+
+\begin{description}
+  \item[Release Group (RG)] Dependency-based execution order. Generated automatically by reverse-spec analyze-classify. RG1 Features have no dependencies; RG2 Features depend on RG1. Determines \emph{build order}. Stored in \file{roadmap.md}.
+  \item[Demo Group (DG)] User-scenario-based demo grouping. Defined during \cmd{add} Phase~5. Groups Features that together demonstrate a meaningful business scenario. Determines \emph{demo scope}. Stored in \file{sdd-state.md}.
+\end{description}
+
+They are \textbf{independent}: an RG1 Feature can be in DG2 (buildable first, but demo value comes later), and an RG2 Feature can be in DG1 (depends on RG1 technically, but serves a high-priority demo).
+
+\begin{tipbox}[Example: AEGIS Project]
+\begin{itemize}[nosep]
+  \item RG1: F001 (Foundation), F002 (Gateway), F003 (Auth), F004 (Budget), F005 (Logging)
+  \item RG2: F006 (Security), F007 (Dashboard)
+  \item DG1: F002+F003+F004 --- ``Login $\rightarrow$ LLM call $\rightarrow$ Budget check''
+  \item DG2: F003+F005 --- ``Authenticated request $\rightarrow$ Logging with trace ID''
+\end{itemize}
+F002 is in RG1 (no deps) and DG1 (business scenario). F007 is in RG2 (depends on F003) but could be in DG1 if the dashboard is part of the demo.
+\end{tipbox}
+
+\section{Integration Demo: Cross-Feature Verification}
+
+Individual Feature demos (\file{demos/F004-token-budget.sh}) verify Features in isolation. Integration Demos verify Features \emph{as a user journey}.
+
+\paragraph{Lifecycle.}
+\begin{enumerate}[nosep]
+  \item \textbf{Define}: During \cmd{add} Phase~5, Features are assigned to Demo Groups with scenario descriptions
+  \item \textbf{Create}: When the \emph{last} Feature in a DG completes implement, the agent creates \file{demos/DG\{N\}-\{scenario\}.sh}
+  \item \textbf{Verify}: At verify Phase~5, if this Feature completes the DG, a HARD STOP offers Integration Demo execution
+  \item \textbf{Execute}: The script runs in \texttt{--ci} mode first (automated), then interactive mode (user sees and confirms)
+  \item \textbf{Record}: Result stored in \file{sdd-state.md} Demo Group Progress
+\end{enumerate}
+
+\paragraph{Script structure.}
+Integration Demo scripts follow the same convention as individual demos:
+\begin{itemize}[nosep]
+  \item Default mode: start server + seed data + print ``Try it'' instructions + keep running
+  \item \texttt{--ci} mode: automated curl-based checks + exit code
+  \item Difference: the scenario crosses Feature boundaries (login from F003 $\rightarrow$ LLM call from F002 $\rightarrow$ budget check from F004)
+\end{itemize}
+
+\begin{warnbox}[Integration Demo Is Not Optional]
+If a Demo Group exists, the Integration Demo script is a deliverable. ``verify Phase~5 couldn't find the script'' means implement was incomplete---return to implement and create it.
+\end{warnbox}
+
+\subsection{Phase 5: Integration Demo (conditional)}
+
+After Phase~4 completes, the agent checks whether this Feature completes a Demo Group. If yes:
+\begin{enumerate}[nosep]
+  \item Locate \file{demos/DG\{N\}-\{scenario\}.sh} (BLOCKING if missing)
+  \item Run \texttt{--ci} mode (must exit 0)
+  \item Run interactive mode --- user sees the cross-Feature demo
+  \item HARD STOP: user confirms the Integration Demo works
+  \item Record result in \file{sdd-state.md} Demo Group Progress
+\end{enumerate}
+If this Feature does not complete any DG, Phase~5 is skipped.
+
 \begin{tipbox}[Chapter 11 Key Takeaways]
 \begin{itemize}[nosep]
   \item 4-step protocol: Assemble $\rightarrow$ Checkpoint $\rightarrow$ Execute+Review $\rightarrow$ Update
   \item 6-Phase Brief validates Feature definitions from multiple perspectives
-  \item 5-Phase Verify (Phase 0--4) requires runtime evidence, not just test results
+  \item 6-Phase Verify (Phase 0--5) requires runtime evidence, not just test results
+  \item Release Groups (build order) and Demo Groups (demo scope) are independent
+  \item Integration Demos verify cross-Feature user journeys; Phase~5 triggers when a DG completes
   \item verify-report.md is mandatory; merge gate checks file existence + PASS status
   \item Features execute sequentially---never in parallel (MANDATORY RULE 4)
 \end{itemize}

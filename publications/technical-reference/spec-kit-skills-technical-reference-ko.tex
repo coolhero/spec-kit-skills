@@ -2119,7 +2119,7 @@ init -> add -> constitution -> specify -> plan -> tasks
   \item \textbf{아티팩트 생성}---pre-context가 생성되고, Feature가 sdd-state.md에 등록됩니다.
 \end{enumerate}
 
-\section{5-Phase Verify (Phase 0--4)}
+\section{6-Phase Verify (Phase 0--5)}
 
 \begin{description}
   \item[Phase 0: Preflight] Playwright 가용성 확인 (CLI 프로브 $\rightarrow$ 라이브러리 import $\rightarrow$ MCP 프로브).
@@ -2127,6 +2127,7 @@ init -> add -> constitution -> specify -> plan -> tasks
   \item[Phase 2: 자동화된 테스트] 유닛 + 통합. 테스트가 아닌 코드를 수정합니다.
   \item[Phase 3: UI/런타임 검증] Playwright를 통해 애플리케이션을 실행합니다. 실행 중인 UI에서 각 SC를 검증합니다. Playwright를 사용할 수 없으면 사용자에게 위임합니다---절대 건너뛰지 않습니다.
   \item[Phase 4: Cross-Feature 통합] Feature들이 함께 작동하는지 검증합니다.
+  \item[Phase 5: Integration Demo (조건부)] 이 Feature가 Demo Group을 완성하면 Integration Demo 스크립트를 실행합니다. 완성되는 DG가 없으면 생략됩니다.
 \end{description}
 
 \section{SC 보존 (add --to)}
@@ -2178,7 +2179,7 @@ spec을 컴포넌트, 데이터 흐름, API 계약이 포함된 아키텍처로 
 
 \subsection{Verify}
 
-가장 복잡한 Pipeline 단계로, 4개 Phase로 나뉩니다 (Section~\ref{sec:4-phase-verify}에서 설명).
+가장 복잡한 Pipeline 단계로, 6개 Phase (Phase 0--5)로 나뉩니다 (Section~\ref{sec:4-phase-verify}에서 설명).
 
 \subsection{verify-report 품질 기준}
 
@@ -2315,11 +2316,71 @@ verify가 통과하면 Feature가 main에 병합됩니다. Entity 및 API 레지
 
 \texttt{/smart-sdd adopt}은 기존 코드를 재작성하지 않고 SDD 문서로 감싸줍니다. 아티팩트가 존재하지 않으면 reverse-spec을 자동으로 연쇄 실행한 다음, 각 Feature에 대해 가벼운 상담을 진행합니다.
 
+\section{Release Group vs Demo Group}
+
+두 가지 독립적인 그룹화 메커니즘이 서로 다른 수준에서 Feature를 관리합니다:
+
+\begin{description}
+  \item[Release Group (RG)] 의존성 기반 실행 순서. reverse-spec analyze-classify가 자동 생성합니다. RG1 Feature는 의존성이 없고, RG2 Feature는 RG1에 의존합니다. \emph{빌드 순서}를 결정합니다. \file{roadmap.md}에 저장됩니다.
+  \item[Demo Group (DG)] 사용자 시나리오 기반 데모 그룹화. \cmd{add} Phase~5에서 정의됩니다. 의미 있는 비즈니스 시나리오를 함께 시연하는 Feature들을 그룹화합니다. \emph{데모 범위}를 결정합니다. \file{sdd-state.md}에 저장됩니다.
+\end{description}
+
+이 둘은 \textbf{독립적}입니다: RG1 Feature가 DG2에 있을 수 있고 (먼저 빌드 가능하지만 데모 가치는 나중에 발휘), RG2 Feature가 DG1에 있을 수 있습니다 (기술적으로 RG1에 의존하지만 높은 우선순위 데모를 지원).
+
+\begin{tipbox}[예시: AEGIS 프로젝트]
+\begin{itemize}[nosep]
+  \item RG1: F001 (Foundation), F002 (Gateway), F003 (Auth), F004 (Budget), F005 (Logging)
+  \item RG2: F006 (Security), F007 (Dashboard)
+  \item DG1: F002+F003+F004 --- ``로그인 $\rightarrow$ LLM 호출 $\rightarrow$ 예산 확인''
+  \item DG2: F003+F005 --- ``인증된 요청 $\rightarrow$ trace ID가 포함된 로깅''
+\end{itemize}
+F002는 RG1 (의존성 없음)이면서 DG1 (비즈니스 시나리오)에 속합니다. F007은 RG2 (F003에 의존)이지만, 대시보드가 데모의 일부라면 DG1에 속할 수 있습니다.
+\end{tipbox}
+
+\section{Integration Demo: Cross-Feature 검증}
+
+개별 Feature 데모(\file{demos/F004-token-budget.sh})는 Feature를 격리 상태에서 검증합니다. Integration Demo는 Feature를 \emph{사용자 여정으로서} 검증합니다.
+
+\paragraph{생명주기.}
+\begin{enumerate}[nosep]
+  \item \textbf{정의}: \cmd{add} Phase~5에서 Feature가 시나리오 설명과 함께 Demo Group에 할당됩니다
+  \item \textbf{생성}: DG의 \emph{마지막} Feature가 implement를 완료하면 에이전트가 \file{demos/DG\{N\}-\{scenario\}.sh}를 생성합니다
+  \item \textbf{검증}: verify Phase~5에서 이 Feature가 DG를 완성하면 Integration Demo 실행을 제안하는 HARD STOP이 발생합니다
+  \item \textbf{실행}: 스크립트가 먼저 \texttt{--ci} 모드(자동화)로 실행된 다음, 대화형 모드(사용자가 보고 확인)로 실행됩니다
+  \item \textbf{기록}: 결과가 \file{sdd-state.md} Demo Group Progress에 저장됩니다
+\end{enumerate}
+
+\paragraph{스크립트 구조.}
+Integration Demo 스크립트는 개별 데모와 동일한 규약을 따릅니다:
+\begin{itemize}[nosep]
+  \item 기본 모드: 서버 시작 + 시드 데이터 + ``직접 해보세요'' 안내 출력 + 계속 실행
+  \item \texttt{--ci} 모드: 자동화된 curl 기반 검사 + 종료 코드
+  \item 차이점: 시나리오가 Feature 경계를 넘나듦 (F003의 로그인 $\rightarrow$ F002의 LLM 호출 $\rightarrow$ F004의 예산 확인)
+\end{itemize}
+
+\begin{warnbox}[Integration Demo는 선택 사항이 아닙니다]
+Demo Group이 존재하면 Integration Demo 스크립트는 산출물입니다. ``verify Phase~5에서 스크립트를 찾을 수 없음''은 implement가 불완전하다는 의미입니다---implement로 돌아가서 생성하세요.
+\end{warnbox}
+
+\subsection{Phase 5: Integration Demo (조건부)}
+
+Phase~4가 완료된 후, 에이전트는 이 Feature가 Demo Group을 완성하는지 확인합니다. 완성하는 경우:
+\begin{enumerate}[nosep]
+  \item \file{demos/DG\{N\}-\{scenario\}.sh}를 찾습니다 (없으면 BLOCKING)
+  \item \texttt{--ci} 모드를 실행합니다 (종료 코드 0이어야 함)
+  \item 대화형 모드를 실행합니다 --- 사용자가 Cross-Feature 데모를 봅니다
+  \item HARD STOP: 사용자가 Integration Demo가 작동하는지 확인합니다
+  \item 결과를 \file{sdd-state.md} Demo Group Progress에 기록합니다
+\end{enumerate}
+이 Feature가 어떤 DG도 완성하지 않으면 Phase~5는 생략됩니다.
+
 \begin{tipbox}[챕터 11 핵심 요약]
 \begin{itemize}[nosep]
   \item 4단계 프로토콜: Assemble $\rightarrow$ Checkpoint $\rightarrow$ Execute+Review $\rightarrow$ Update
   \item 6-Phase Brief가 여러 관점에서 Feature 정의를 검증
-  \item 5-Phase Verify (Phase 0--4)는 테스트 결과뿐 아니라 런타임 증거를 요구
+  \item 6-Phase Verify (Phase 0--5)는 테스트 결과뿐 아니라 런타임 증거를 요구
+  \item Release Group (빌드 순서)과 Demo Group (데모 범위)은 독립적
+  \item Integration Demo는 Cross-Feature 사용자 여정을 검증; DG가 완성되면 Phase~5가 트리거
   \item verify-report.md는 필수; merge 게이트가 파일 존재 + PASS 상태를 확인
   \item Feature는 순차 실행---병렬 실행 금지 (MANDATORY RULE 4)
 \end{itemize}
