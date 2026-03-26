@@ -2335,6 +2335,61 @@ verify가 통과하면 Feature가 main에 병합됩니다. Entity 및 API 레지
   \item \textbf{verify 중}: ``spec에서 요구사항을 놓쳤다'' $\rightarrow$ specify로 돌아감 (Major-Spec 심각도).
 \end{itemize}
 
+\section{Impact Analysis + Flow Proposal}
+
+사용자 피드백이 \emph{어떤} HARD STOP에서든---verify만이 아니라---도착하면, 에이전트는 분석과 함께 구체적인 다음 단계를 제시해야 합니다. ``뭐가 문제인가요?'' $\rightarrow$ ``그래서 어떻게 해야 하나요?'' $\rightarrow$ ``그런데 spec을 먼저 바꿔야 합니다''의 세 번 왕복은 파이프라인 사용성 실패입니다.
+
+\paragraph{프로토콜 (4단계).}
+
+\begin{enumerate}[nosep]
+  \item \textbf{분류}: Bug (코드 오류), Spec Gap (요구사항 누락), Improvement (개선), New Requirement (범위 밖)
+  \item \textbf{영향 분석}: 어떤 FR, SC, 파일, Cross-Feature 표면이 영향을 받는지
+  \item \textbf{흐름 제안}: 분류를 파이프라인 액션에 매핑:
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{피드백 분류에 따른 파이프라인 흐름}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{분류} & \textbf{흐름} & \textbf{명령어} \\
+\midrule
+Bug, $\leq$2개 파일 & 현재 위치에서 수정 & (현재 단계에서 인라인 수정) \\
+Bug, 3개 이상 파일 & Major-Implement & \texttt{pipeline F00N --start implement} \\
+Bug, 아키텍처 수준 & Major-Plan & \texttt{pipeline F00N --start plan} \\
+Spec Gap & Major-Spec & \texttt{pipeline F00N --start specify} \\
+Improvement (범위 내) & Augment & \texttt{add --to F00N} $\rightarrow$ \texttt{--start specify} \\
+New Requirement & New Feature & \texttt{add "description"} $\rightarrow$ 새 Feature \\
+Deferred & Roadmap 기록 & roadmap에 기록하고 현재 파이프라인 계속 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{enumerate}[nosep]
+  \setcounter{enumi}{3}
+  \item \textbf{제시 + 질문}: 분류, 영향, 제안 흐름, 대안을 AskUserQuestion으로 표시
+\end{enumerate}
+
+\begin{tipbox}[예시: aegis F004 Token Estimation]
+사용자: ``토큰 추정에 출력 토큰이 포함되지 않습니다.''
+
+에이전트 응답 (올바른 예):
+\begin{lstlisting}
+Classification: Spec Gap
+Impact: FR-004 (estimation), SC-003 (deduction flow), SC-006 (concurrency)
+Files: ~2 (budget.guard.ts, Lua script)
+
+Proposed: pipeline F004 --start specify
+  -> FR-004 update + SC cascade
+
+Alternative: New Feature F008 (T2 scope)
+
+Proceed?
+\end{lstlisting}
+
+잘못된 예: ``맞습니다, 출력 토큰이 빠져 있네요.'' (분석만 있고 흐름 제안 없음)
+\end{tipbox}
+
 \section{Adopt Pipeline}
 
 \texttt{/smart-sdd adopt}은 기존 코드를 재작성하지 않고 SDD 문서로 감싸줍니다. 아티팩트가 존재하지 않으면 reverse-spec을 자동으로 연쇄 실행한 다음, 각 Feature에 대해 가벼운 상담을 진행합니다.

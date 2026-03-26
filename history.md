@@ -4,30 +4,26 @@
 > Records key architectural and design decisions that shaped the project.
 
 ---
-
-
-## [2026-03-26] Extend F8 Toolchain Commands with Runtime Environment (F8b)
+## [2026-03-26] Add Impact Analysis + Flow Proposal to Cascading Update Protocol
 
 ### What Changed
-1. **_foundation-core.md § F8b**: Added Runtime Environment subsection with 7 fields (server_start, server_port, health_check, env_loading, prerequisites, seed_data, cleanup). Documents consumers (demo scripts, verify Phase 3, implement Smoke Launch) and shell-vs-application .env loading distinction.
-2. **nestjs.md § F8b**: Added NestJS-specific Runtime Environment values with note about dotenv/bash script interaction.
-3. **demo-standard.md**: Added "Runtime Environment (F8b Foundation)" section after Demo Philosophy, requiring demo scripts to use F8b fields instead of hardcoded commands.
-4. **verify-phases.md**: Added "Server Startup via F8b" section before Phase Execution table, defining 4-step startup protocol (prerequisites → server_start → health_check → env verification) with anti-pattern examples.
-5. **pipeline.md**: Added F8b Integration note to Post-Implement Smoke Launch section.
-6. **lessons-learned.md**: Added L73 (Runtime Environment Is a First-Class Toolchain Concern).
+1. **reference/cascading-update.md § Step 2b**: New mandatory step between Step 1 (Classify) and Step 2 (Update). When user feedback arrives at any HARD STOP, the agent must: classify feedback (Bug/Spec Gap/Improvement/New Requirement), analyze impact (affected FRs/SCs/files), propose flow (which --start level or new Feature), present options via AskUserQuestion, then execute chosen flow. Includes anti-pattern examples.
+2. **commands/pipeline.md § Cascading Update Protocol**: Added Flow Proposal note requiring agents to present Impact Analysis + Flow Proposal before executing any cascading update. User decides the flow, not the agent.
+3. **commands/verify-evidence-update.md § User Demo Gate**: Added "User Feedback at Demo Gate → Flow Proposal" subsection. All user feedback at verify Demo (not just bugs) triggers Flow Proposal treatment.
+4. **lessons-learned.md**: Added L76 (Every User Feedback Deserves a Flow Proposal).
 
 ### Design Decision
-F8 covered build-time commands (build, test, lint) but not runtime commands (server start, health check, prerequisites). Demo scripts, verify Phase 3, and implement Smoke Launch all needed the same runtime information but each hardcoded framework-specific values independently. F8b centralizes runtime environment knowledge in the Foundation module, matching the existing F8 pattern. When Foundation changes (e.g., NestJS → FastAPI), F8b changes once and all consumers adapt. The shell-vs-application .env loading distinction addresses a recurring failure where framework-managed dotenv loading doesn't apply to bash scripts.
+User feedback at HARD STOPs was producing analysis without actionable next steps — users had to figure out pipeline routing themselves. The Flow Proposal step ensures every piece of feedback gets classified, impact-analyzed, and presented with concrete pipeline options (fix in place, --start specify/plan/implement, new Feature, or deferred). This closes the gap between "agent understands the problem" and "agent proposes a solution within the pipeline framework."
 
 ### Files Changed
-- `.claude/skills/reverse-spec/domains/foundations/_foundation-core.md` — F8b Runtime Environment section
-- `.claude/skills/reverse-spec/domains/foundations/nestjs.md` — NestJS F8b values
-- `.claude/skills/smart-sdd/reference/demo-standard.md` — F8b Foundation reference
-- `.claude/skills/smart-sdd/commands/verify-phases.md` — Server Startup via F8b
-- `.claude/skills/smart-sdd/commands/pipeline.md` — F8b Integration in Smoke Launch
-- `lessons-learned.md` — L73
+- `.claude/skills/smart-sdd/reference/cascading-update.md` — Step 2b: Impact Analysis + Flow Proposal
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Flow Proposal note in Cascading Update section
+- `.claude/skills/smart-sdd/commands/verify-evidence-update.md` — User Feedback at Demo Gate → Flow Proposal
+- `lessons-learned.md` — L76
 
 ---
+
+
 
 
 

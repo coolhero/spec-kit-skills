@@ -1062,6 +1062,8 @@ Executes the following steps **strictly in order** for each Feature.
 >    → tasks (T012) → implement T012 → verify SC-008"
 > ```
 >
+> **Flow Proposal**: When user feedback triggers a Cascading Update, the agent MUST present an Impact Analysis + Flow Proposal before executing. See `reference/cascading-update.md` § Step 2b. The user decides the flow — the agent does NOT silently choose between "fix in place" vs "return to specify."
+>
 > **Read [`reference/cascading-update.md`](../reference/cascading-update.md) when**:
 > - User requests changes at any Review HARD STOP
 > - User says "this should also do X" or "X is missing"

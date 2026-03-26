@@ -55,6 +55,77 @@ Is the user pointing out a bug in existing code?
   → code level (use Bug Fix Severity Rule)
 ```
 
+### Step 2b — Impact Analysis + Flow Proposal (MANDATORY at all HARD STOPs)
+
+When user feedback is received at ANY HARD STOP (specify Review, plan Review, tasks Review, verify Demo, etc.), the agent MUST:
+
+**1. Classify the feedback:**
+
+| Classification | Definition | Example |
+|---------------|-----------|---------|
+| **Bug** | Current implementation doesn't match current spec | "Login returns 500 instead of 401" |
+| **Spec Gap** | Spec is missing a requirement | "Token estimation doesn't include output tokens" |
+| **Improvement** | Spec is correct but could be better | "Could we add Korean chars/token ratio?" |
+| **New Requirement** | Outside current Feature scope | "We need a model cost dashboard" |
+
+**2. Analyze impact:**
+
+```
+Affected artifacts:
+  FR: [list affected FRs]
+  SC: [list affected SCs]
+  Files: [estimated file count]
+  Other Features: [cross-Feature impact if any]
+```
+
+**3. Propose flow:**
+
+| Classification | Severity | Proposed Flow | Command |
+|---------------|----------|--------------|---------|
+| Bug, ≤2 files | Minor | Fix in current step | (inline fix) |
+| Bug, 3+ files | Major-Implement | Return to implement | `pipeline F00N --start implement` |
+| Bug, architecture | Major-Plan | Return to plan | `pipeline F00N --start plan` |
+| Spec Gap | Major-Spec | Return to specify | `pipeline F00N --start specify` |
+| Improvement (in scope) | Enhancement | Augment Feature | `add --to F00N "description"` → `pipeline F00N --start specify` |
+| New Requirement | New Feature | Separate Feature | `add "description"` → new F00M |
+| New Requirement (T2+) | Deferred | Record in roadmap | Note in roadmap.md, continue current pipeline |
+
+**4. Present to user (HARD STOP):**
+
+```
+📋 Feedback Analysis:
+
+Classification: [Spec Gap]
+Impact: FR-004 (estimation logic), SC-003 (deduction flow), SC-006 (concurrency)
+Files: ~2 (budget.guard.ts, budget-engine.service.ts Lua script)
+
+Proposed Flow:
+  → pipeline F004 --start specify
+  → Spec에 output token estimation + message overhead FR 수정
+  → Plan, Tasks, Implement, Verify cascade
+
+Alternative:
+  → 새 Feature F008로 분리 (T2 scope)
+
+어떻게 진행할까요?
+```
+
+AskUserQuestion options:
+- "Proposed Flow로 진행" (Recommended)
+- "Alternative로 진행"
+- "다른 방법 제안"
+
+**If response is empty → re-ask** (per MANDATORY RULE 1).
+
+**5. Execute chosen flow.**
+
+---
+
+❌ WRONG: User says "estimation이 부정확해" → Agent: "맞습니다. output 누락입니다." → (stops, waits for user to figure out next steps)
+✅ RIGHT: User says "estimation이 부정확해" → Agent: "Spec Gap. FR-004/SC-003 영향. --start specify 권장. 진행할까요?"
+
+---
+
 ### Step 2 — Update the Origin Artifact
 
 Update ONLY the artifact at the identified level:

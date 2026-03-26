@@ -2659,6 +2659,61 @@ Common step-back patterns:
   \item \textbf{During verify}: ``The spec missed a requirement'' $\rightarrow$ back to specify (Major-Spec severity).
 \end{itemize}
 
+\section{Impact Analysis + Flow Proposal}
+
+When user feedback arrives at \emph{any} HARD STOP---not just verify---the agent must respond with analysis AND a concrete next step. Three rounds of ``what's wrong?'' $\rightarrow$ ``so what do we do?'' $\rightarrow$ ``but spec needs to change first'' is a pipeline usability failure.
+
+\paragraph{The protocol (4 steps).}
+
+\begin{enumerate}[nosep]
+  \item \textbf{Classify}: Bug (code wrong), Spec Gap (requirement missing), Improvement (enhancement), New Requirement (out of scope)
+  \item \textbf{Analyze impact}: Which FRs, SCs, files, and cross-Feature surfaces are affected
+  \item \textbf{Propose flow}: Map classification to pipeline action:
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Feedback classification to pipeline flow}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Classification} & \textbf{Flow} & \textbf{Command} \\
+\midrule
+Bug, $\leq$2 files & Fix in place & (inline during current step) \\
+Bug, 3+ files & Major-Implement & \texttt{pipeline F00N --start implement} \\
+Bug, architecture & Major-Plan & \texttt{pipeline F00N --start plan} \\
+Spec Gap & Major-Spec & \texttt{pipeline F00N --start specify} \\
+Improvement (in scope) & Augment & \texttt{add --to F00N} $\rightarrow$ \texttt{--start specify} \\
+New Requirement & New Feature & \texttt{add "description"} $\rightarrow$ new Feature \\
+Deferred & Roadmap note & Record in roadmap, continue current pipeline \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{enumerate}[nosep]
+  \setcounter{enumi}{3}
+  \item \textbf{Present + ask}: Display classification, impact, proposed flow, and alternatives via AskUserQuestion
+\end{enumerate}
+
+\begin{tipbox}[Example: aegis F004 Token Estimation]
+User: ``Token estimation doesn't include output tokens.''
+
+Agent response (correct):
+\begin{lstlisting}
+Classification: Spec Gap
+Impact: FR-004 (estimation), SC-003 (deduction flow), SC-006 (concurrency)
+Files: ~2 (budget.guard.ts, Lua script)
+
+Proposed: pipeline F004 --start specify
+  -> FR-004 update + SC cascade
+
+Alternative: New Feature F008 (T2 scope)
+
+Proceed?
+\end{lstlisting}
+
+NOT: ``You're right, output tokens are missing.'' (analysis only, no flow)
+\end{tipbox}
+
 \section{Adopt Pipeline}
 
 \texttt{/smart-sdd adopt} wraps existing code with SDD documentation without rewriting. It auto-chains reverse-spec if artifacts do not exist, then runs a lighter consultation for each Feature.

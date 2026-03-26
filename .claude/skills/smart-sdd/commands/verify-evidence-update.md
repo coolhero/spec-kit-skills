@@ -166,6 +166,18 @@ If the user selects "Need environment setup":
 ❌ WRONG: Run curl tests → auto-report "all pass" → proceed to merge
 ✅ RIGHT: Run curl tests → show results → user tries the feature → user approves
 
+#### User Feedback at Demo Gate → Flow Proposal
+
+If the user provides feedback instead of approval (e.g., "이 동작이 이상해", "이 기능이 빠져있어", "이거 개선해야 해"):
+
+1. Do NOT proceed with merge
+2. Trigger **Impact Analysis + Flow Proposal** (see `cascading-update.md` § Step 2b)
+3. Present classification, impact, and proposed flow
+4. Wait for user decision (HARD STOP)
+5. Execute chosen flow
+
+This applies to ALL user feedback at verify Demo — not just bugs. Feature improvement suggestions and new requirements also get Flow Proposal treatment.
+
 ---
 
 ### Phase 5: Integration Demo Trigger (HARD STOP — conditional)

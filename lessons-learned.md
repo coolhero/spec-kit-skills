@@ -953,3 +953,11 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: aegis DG1/DG2 Integration Demo `--ci` mode was debugged through 10+ iterations (P15, P16 fixes) and worked perfectly. But interactive mode was never tested — it instant-exited due to a `wait` bug (P17), and its output was raw curl commands without context (P18). The agent declared "demo complete" after --ci passed. Result: 50% of the demo (the human-facing half) was broken and unusable.
 
 **Universal takeaway**: Demo scripts serve two audiences with different needs. `--ci` serves machines (automated regression). Interactive serves humans (understanding + verification). Verifying only one and declaring complete is like testing only the API and shipping without checking the UI. Both modes must be independently verified before "demo complete." And interactive mode is a tutorial, not a curl dump — each step needs purpose, expected result, and integration point explanation.
+
+---
+
+#### L76. Every User Feedback Deserves a Flow Proposal
+
+**What happened**: During aegis F004 verify, the user pointed out "token estimation doesn't include output tokens." The agent analyzed the problem correctly but stopped at analysis — the user had to ask "so what do we do?" and then "spec needs to change first, right?" before the agent proposed a concrete flow. Three rounds of conversation to reach what should have been one response: "Spec Gap → FR-004 impact → --start specify recommended → proceed?"
+
+**Universal takeaway**: When user feedback arrives at any HARD STOP, the agent's response must include not just WHAT's wrong but HOW to fix it within the pipeline. Classify (bug/gap/improvement/new), analyze impact (which FRs/SCs), propose flow (which --start or new Feature), and ask for approval. The user should never have to figure out the pipeline routing themselves — that's the agent's job.
