@@ -1044,3 +1044,11 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: aegis F007 cascading update added FR-015 (Team CRUD) + SC-015 to spec.md, updated plan/tasks, and implemented the code. But the new SC-015 was never runtime-verified — the agent proposed merge immediately after implement. The cascade was complete on paper but the new functionality was untested.
 
 **Universal takeaway**: Cascading Update has 5 steps: spec→plan→tasks→implement→**verify**. Step e (re-verify) must be BLOCKING — the merge gate checks that ALL SCs in the report (including newly added ones) have verification results. A cascade without re-verify is equivalent to writing code without testing — the spec is updated but the contract is unverified.
+
+#### L87. Missing API in Preceding Feature — Implement Here, Don't Reopen
+
+**What happened**: aegis F007 (Admin Dashboard) needed `PUT /users/:id` but F003 (Auth) only implemented GET. F003 was already merged and verified. Options: (A) reopen F003 with `add --to F003` → full re-pipeline, (B) implement the API in F007 with spec update, (C) mark SC as RUNTIME_BLOCKED.
+
+**The decision**: Option B. Reopening a merged Feature for one endpoint is disproportionate — full specify→plan→tasks→implement→verify cycle for a PATCH endpoint. Instead, F007 spec documents: "PATCH /users/:id implemented here as supplementary (F003 scope gap)" and api-registry notes the actual provider as F007.
+
+**Universal takeaway**: Feature Boundary Clarification Gate catches this at specify time ("API not in registry → add to In-Scope or Out-of-Scope?"). When it's caught at verify time (spec predates the gate), the pragmatic fix is: implement in the current Feature with spec documentation. Reopen a merged Feature only for architectural changes, not individual endpoints. The cost of re-pipeline (6+ steps) must justify the change.

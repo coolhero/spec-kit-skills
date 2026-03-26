@@ -9968,3 +9968,7 @@ Strengthened Cascading Update step e from text instruction to BLOCKING gate. New
 ### Files Changed
 - `commands/verify-phases.md` — step e elevated to BLOCKING with anti-pattern
 - `lessons-learned.md` — L86 + G20 P11c row
+
+## [2026-03-26] L87: Cross-Feature API gap resolution pattern
+
+Added lesson documenting when to implement a missing API in the current Feature vs reopening the producing Feature. Pragmatic rule: reopen only for architectural changes; individual endpoints go in the consuming Feature with spec documentation.
