@@ -64,6 +64,7 @@
 | SE04 | Add new requirements to an existing Feature | `add --to F001 "add OAuth"` or `add --to F001 requirements.md` — text and files both work, can be mixed. Then `pipeline F001` to re-specify | Existing SCs preserved + new SCs added |
 | SE05 | Split a Feature that's too big, or merge overlapping Features | Split: decide during `add`. Merge: `pipeline merge F003 F004` | Right-sized Features |
 | SE06 | Generate only specs/plans without implementation | `pipeline F001 --step specify,plan` — pick the steps you want | spec.md + plan.md (no code) |
+| SE07 | Resume a verify that was interrupted by context limit or crash | `pipeline F001 --start verify` — verify progress is saved in sdd-state.md, resumes from the exact phase that was interrupted | Verification continues from where it stopped |
 
 ## F. Manage Multiple Features
 
@@ -73,6 +74,7 @@
 |----|-------------------|---------|---------|
 | SF01 | Handle Feature dependencies (F002 needs F001) | `pipeline F001` first → then `pipeline F002` — if independent, order doesn't matter | Correct dependency ordering |
 | SF02 | Revisit an earlier Feature after completing later ones | `pipeline F001 --step specify` — creates a fresh branch from main for rework | Previous Feature reopened |
+| SF03 | Test multiple Features together as one user scenario | Assign Features to a Demo Group during `add` Phase 5 — integration demo triggers when the last Feature in the group completes verify | End-to-end integration demo script |
 
 ## G. Check Status
 
@@ -99,6 +101,7 @@
 | SH08 | Set org-wide coding conventions | `domain-extend customize org` | org-convention.md applied to all projects |
 | SH09 | code-explore found uncovered patterns | `domain-extend detect --from-explore ./specs/explore/` → `extend` | New modules from exploration gaps |
 | SH10 | Validate custom modules before using in pipeline | `domain-extend validate` | Validation report: schema compliance, taxonomy sync, cross-concern rules |
+| SH11 | Re-run pipeline from a specific step (not from scratch) | `reset F007 --from plan` — keeps specify results, re-runs plan → tasks → implement → verify | Granular re-execution from chosen step |
 
 ---
 
@@ -110,11 +113,11 @@
 | B: Start New Project | 5 |
 | C: Apply SDD to Existing Code | 5 |
 | D: Rewrite from Scratch | 3 |
-| E: Revise and Iterate | 6 |
-| F: Manage Multiple Features | 2 |
+| E: Revise and Iterate | 7 |
+| F: Manage Multiple Features | 3 |
 | G: Check Status | 2 |
-| H: Advanced & Customization | 10 |
-| **Total** | **39** |
+| H: Advanced & Customization | 11 |
+| **Total** | **42** |
 
 ---
 
@@ -124,3 +127,4 @@
 |------|--------|
 | 2026-03-22 | Initial creation |
 | 2026-03-22 | Consolidated similar scenarios (59 → 32), user-friendly descriptions |
+| 2026-03-27 | Added SE07 (mid-verify recovery), SF03 (Demo Group integration), SH11 (reset --from step). 39 → 42 |

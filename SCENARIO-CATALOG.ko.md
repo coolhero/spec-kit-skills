@@ -64,6 +64,7 @@
 | SE04 | 이미 정의한 Feature에 새 요구사항을 추가하고 싶을 때 | `add --to F001 "add OAuth"` 또는 `add --to F001 요구사항.md` — 텍스트와 파일 모두 가능. 이후 `pipeline F001`로 재명세 | 기존 SC는 유지 + 새 SC 추가 |
 | SE05 | Feature가 너무 커서 나누거나, 겹치는 Feature를 합치고 싶을 때 | 나누기: add 중 분할 결정. 합치기: `pipeline merge F003 F004` | 적절한 크기의 Feature |
 | SE06 | 구현 없이 스펙과 계획만 만들고 싶을 때 (문서 목적) | `pipeline F001 --step specify,plan` — 원하는 단계만 골라서 실행 가능 | spec.md + plan.md (구현 없음) |
+| SE07 | verify가 컨텍스트 한계나 크래시로 중단됐을 때 | `pipeline F001 --start verify` — verify 진행 상황이 sdd-state.md에 저장되어 중단된 Phase부터 재개 | 중단 지점부터 verify 이어서 실행 |
 
 ## F. 여러 Feature 관리하기
 
@@ -73,6 +74,7 @@
 |----|---------------|-------------|---------|
 | SF01 | Feature 간 순서가 중요할 때 (F002가 F001을 필요로 함) | `pipeline F001` 완료 → `pipeline F002` — 의존성이 없으면 순서 무관하게 실행해도 됩니다 | 올바른 순서로 구현됨 |
 | SF02 | 완료한 Feature를 다시 개선하고 싶을 때 | `pipeline F001 --step specify` — main에서 새 브랜치가 만들어지고 F001이 재작업됩니다 | 이전 Feature 다시 열기 |
+| SF03 | 여러 Feature를 하나의 시나리오로 통합 테스트하고 싶을 때 | `add` Phase 5에서 Demo Group에 Feature를 배정 — 그룹의 마지막 Feature verify 완료 시 통합 데모가 자동 실행 | 엔드투엔드 통합 데모 스크립트 |
 
 ## G. 상태 확인하기
 
@@ -99,6 +101,7 @@
 | SH08 | 조직 전체 코딩 컨벤션을 적용하고 싶을 때 | `domain-extend customize org` | 모든 프로젝트에 적용되는 org-convention.md |
 | SH09 | code-explore가 미커버 패턴을 발견했을 때 | `domain-extend detect --from-explore ./specs/explore/` → `extend` | 탐색 갭에서 생성된 새 모듈 |
 | SH10 | 커스텀 모듈을 파이프라인에서 사용하기 전에 검증하고 싶을 때 | `domain-extend validate` | 검증 리포트: 스키마 준수, 택소노미 동기화, 크로스-컨선 규칙 |
+| SH11 | pipeline을 처음부터가 아니라 특정 단계부터 다시 실행하고 싶을 때 | `reset F007 --from plan` — specify 결과는 유지하고 plan → tasks → implement → verify를 재실행 | 선택한 단계부터 세밀한 재실행 |
 
 ---
 
@@ -110,11 +113,11 @@
 | B: 새 프로젝트 시작하기 | 5 |
 | C: 기존 코드에 SDD 적용 | 5 |
 | D: 코드 전면 재작성 | 3 |
-| E: 수정하고 다시 하기 | 6 |
-| F: 여러 Feature 관리 | 2 |
+| E: 수정하고 다시 하기 | 7 |
+| F: 여러 Feature 관리 | 3 |
 | G: 상태 확인 | 2 |
-| H: 고급 & 커스터마이징 | 10 |
-| **합계** | **39** |
+| H: 고급 & 커스터마이징 | 11 |
+| **합계** | **42** |
 
 ---
 
@@ -124,3 +127,4 @@
 |------|-----------|
 | 2026-03-22 | 최초 생성 |
 | 2026-03-22 | 사용자 관점 설명으로 재작성 + 유사 시나리오 통합 (59 → 32) |
+| 2026-03-27 | SE07 (mid-verify 재개), SF03 (Demo Group 통합), SH11 (reset --from step) 추가. 39 → 42 |
