@@ -389,13 +389,7 @@ Without GEL, in one early pipeline run, Feature~1 defined a User entity with \te
 
 \subsection{Context Reset Protocol}
 
-Counterintuitively, if everything is in files, you should periodically \emph{throw away} the conversation context. After completing a Feature, the agent's context window is filled with conversation history. Starting the next Feature with all that baggage means less room for new injection and review.
-
-The protocol: clear context between Features. The agent re-reads \file{sdd-state.md}, loads updated registries, and starts fresh. Nothing is lost because everything was written to files.
-
-\begin{dangerbox}[When NOT to Reset]
-Never reset mid-Feature (between specify and plan). Inter-step continuity requires unbroken flow. Reset only at Feature boundaries, skill transitions, or after context compaction warnings.
-\end{dangerbox}
+This principle enables the Context Reset Protocol---clearing context between work units is safe because all state is in files. See Chapter~\ref{ch:advanced} \S~Context Reset Protocol for the full procedure.
 
 
 \section{P2: Enforce, Don't Reference}
@@ -1399,276 +1393,7 @@ The \texttt{+migration} modifier runs its own verification: ``Performance compar
 A version upgrade appears to be the simplest migration---``same code, new JDK.'' But the failure modes are the most insidious because they are \emph{silent}. A database migration fails loudly (queries error out). An architecture migration fails visibly (services can't communicate). A version upgrade fails \emph{subtly}---the application starts, tests pass, but \texttt{HashMap} iteration order changed and a report that used to list items alphabetically now lists them in hash order. The customer notices three weeks later. The \texttt{+migration} modifier's SBI behavioral verification catches these silent regressions by comparing \emph{output}, not just \emph{compilation success}.
 \end{warnbox}
 
-
-%% ════════════════════════════════════════════════════════════════════
-\section{Complete Scenario Reference}
-\label{sec:complete-scenario-reference}
-%% ════════════════════════════════════════════════════════════════════
-
-The Domain Profile's \textbf{Context axis} determines which pipeline scenario applies. Each scenario activates a different combination of the four section families. This section provides a comprehensive reference for all six scenarios, showing exactly how R-, S-, A-, and F-families participate in each one.
-
-%% ── Scenario 1: Greenfield ──────────────────────────────────────────
-\subsection{Scenario 1: Greenfield --- ``Building from Scratch''}
-\label{sec:scenario-greenfield}
-
-\textbf{Example:} A team building a new real-time collaboration tool (multiplayer document editor with presence indicators, conflict resolution, and role-based access control).
-
-\begin{center}
-\begin{tabular}{lcp{8cm}}
-\toprule
-\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
-\midrule
-R-family & No & No existing code to analyze \\
-S-family & Full & Drives entire pipeline from detection to verification \\
-A-family & Full & Shapes project philosophy and constitution \\
-F-family & Full & Sets up toolchain, patterns, and platform constraints \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{What makes Greenfield unique.}
-There is no prior art. Every decision---from data model to API shape to error handling strategy---is made fresh. The Domain Profile Instance starts empty and fills up Feature by Feature as the pipeline executes. This means the Brief phase is especially important: S5 elaboration probes and A3 archetype probes must extract maximum information from the user because there is no codebase to analyze for implicit answers.
-
-\paragraph{reverse-spec.}
-Not used. There is no source code to analyze. The pipeline begins at \cmd{init}.
-
-\paragraph{init/add.}
-S0 detects concerns from the user's project description: ``real-time collaboration'' triggers \texttt{realtime} and \texttt{websocket}; ``role-based access'' triggers \texttt{auth} and \texttt{rbac}; ``conflict resolution'' triggers \texttt{data-integrity}. S5 fires elaboration probes for each detected concern: ``What conflict resolution strategy? OT, CRDT, or last-write-wins?'' ``Authentication provider? OAuth, SAML, or custom?'' ``Real-time transport? WebSocket, SSE, or long-polling?'' A3 asks archetype probes: ``Is this a SaaS platform with multi-tenancy, or a self-hosted tool?'' ``What is the scaling target---10 concurrent users or 10,000?'' F0 detects the chosen foundation from user input or project files: ``React + Node.js + Socket.io'' or ``SvelteKit + Supabase Realtime.'' S9 validates brief completeness---all detected concerns have sufficient elaboration.
-
-\paragraph{specify.}
-S1 generates success criteria for each concern. For \texttt{realtime}: ``Cursor position updates propagate to all participants within 200ms.'' For \texttt{auth}: ``Users with `viewer' role cannot trigger mutation operations.'' For \texttt{data-integrity}: ``Concurrent edits to the same paragraph resolve deterministically---no data loss.'' A2 adds archetype-specific criteria: ``Multi-tenant data isolation---Tenant A's queries never return Tenant B's documents.'' F2 adds framework constraints to success criteria: ``WebSocket reconnection uses exponential backoff with jitter.''
-
-\paragraph{implement.}
-F3 provides foundation-specific implementation patterns: project structure, recommended libraries, configuration templates. S7 fires bug prevention rules: ``WebSocket handler without heartbeat timeout will leak connections'', ``CRDT merge without vector clock comparison will produce phantom conflicts.'' A1 enforces architectural philosophy: ``All real-time events flow through the event bus---no direct inter-component mutation.''
-
-\paragraph{verify.}
-S1 success criteria are verified through automated tests. F4 provides foundation-specific test patterns (e.g., testing WebSocket with mock server). F8 runs build and toolchain verification. No R4 SBI check---there is no source behavior to preserve. The verify phase focuses entirely on ``does the new code do what the spec says?'' rather than ``does the new code match the old code?''
-
-\paragraph{Key characteristic.}
-S-family and A-family carry the heaviest load. Without existing code, domain rules and architectural philosophy are the primary sources of implementation guidance. The GEL layer (entity-registry, api-registry) starts empty and grows organically as Features are added.
-
-%% ── Scenario 2: Rebuild (Same Stack) ────────────────────────────────
-\subsection{Scenario 2: Rebuild (Same Stack) --- ``Rewriting with the Same Technology''}
-\label{sec:scenario-rebuild-same}
-
-\textbf{Example:} Rewriting a messy Express.js monolith as a clean, well-structured Express.js application with proper separation of concerns, test coverage, and documentation.
-
-\begin{center}
-\begin{tabular}{lcp{8cm}}
-\toprule
-\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
-\midrule
-R-family & Full & Extracts all existing behaviors for SBI tracking \\
-S-family & Full & SC generation informed by pre-context from R-family \\
-A-family & Full & Constitution may change even if archetype stays the same \\
-F-family & Partial & Same foundation---patterns carry over, toolchain identical \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{What makes same-stack rebuild unique.}
-The technology does not change, but the \emph{architecture} does. The danger is subtle: because the stack is familiar, teams assume they understand the existing system. R-family analysis is critical precisely because the same Express.js code can be organized in wildly different ways, and implicit behaviors (middleware ordering, error propagation chains, request lifecycle hooks) are easy to miss.
-
-\paragraph{reverse-spec.}
-R1 scans the source codebase and detects Express.js patterns: route definitions, middleware chains, error handlers, database models, authentication middleware. R2 traces data flows through the middleware pipeline---request enters at \texttt{app.use(cors())}, passes through \texttt{authMiddleware}, reaches the route handler, queries the database, and returns through error handling middleware. R4 extracts SBI: ``87 route handlers across 14 router files. 23 middleware functions. 45 database models. 12 background jobs via node-cron.'' R5 generates pre-context documenting patterns that the rewrite must preserve: ``Custom error middleware catches Mongoose validation errors and transforms them to 422 responses with field-level error messages.''
-
-\paragraph{init/add.}
-S0 detects concerns from the pre-context (not from scratch---R-family has already identified them). S5 elaboration probes are \emph{informed} by pre-context: instead of asking ``Do you use authentication?'' (which R-family already answered), S5 asks ``The source uses Passport.js with local + Google strategies. Preserve both, or consolidate to OAuth only?'' A3 archetype probes may propose a change: ``The source is a monolith. Rebuild as monolith with cleaner boundaries, or decompose into modules?'' F0 detects the same Express.js foundation---no change needed. F8 toolchain is already known.
-
-\paragraph{specify.}
-S1 generates success criteria that reference pre-context directly: ``User login with email/password returns JWT (matching source behavior R5-AUTH-001).'' The success criteria are not invented from scratch---they are \emph{extracted and formalized} from the R-family analysis. A2 may add new architectural criteria that the messy original lacked: ``All route handlers delegate to service layer---no database queries in route files.''
-
-\paragraph{implement.}
-F3 applies the same Express.js patterns but in the new, clean structure. Because the foundation has not changed, F3 patterns are identical to what the source code uses (or should have used). S7 fires prevention rules relevant to Express.js: ``Route handler with async operation but no try/catch will crash the process on rejection'', ``Middleware order matters---CORS must come before auth.'' The key difference from greenfield: S7 can reference pre-context to flag deviations from source behavior: ``Source handles file uploads with multer using memory storage. New implementation uses disk storage---behavior change detected.''
-
-\paragraph{verify.}
-R4 SBI verification is the star of this scenario: ``All 87 route behaviors exist in the rewritten application.'' This is the definitive check that the rewrite preserved everything. F4 runs the same test patterns (Mocha/Jest + Supertest) against the new code. F8 runs build verification. S1 verifies success criteria. The combination of R4 (``did we lose anything from the old code?'') and S1 (``does the new code meet its spec?'') provides complete coverage.
-
-\paragraph{Key characteristic.}
-R4 SBI is the critical artifact. The entire point of a same-stack rebuild is to produce cleaner code that does the same thing. F-family contributes less than in other scenarios because the foundation is unchanged---the same libraries, the same runtime, the same deployment target.
-
-%% ── Scenario 3: Rebuild (New Stack) ─────────────────────────────────
-\subsection{Scenario 3: Rebuild (New Stack) --- ``Rewriting with Different Technology''}
-\label{sec:scenario-rebuild-new}
-
-\textbf{Example:} Rewriting a Django application as a FastAPI application to gain async capability and better performance for I/O-bound workloads.
-
-\begin{center}
-\begin{tabular}{lcp{8cm}}
-\toprule
-\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
-\midrule
-R-family & Full & Analyzes Django-specific patterns for translation \\
-S-family & Full & SC generation bridges old and new paradigms \\
-A-family & Partial & Archetype may shift (e.g., adding async capability) \\
-F-family & Dual & Source (Django, read-only) + Target (FastAPI, write) \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{What makes new-stack rebuild unique.}
-Two foundations are active simultaneously. The source foundation (Django) is read-only---used for understanding patterns. The target foundation (FastAPI) is write---used for implementation. This creates a translation layer: Django ORM models become SQLAlchemy models, Django views become FastAPI route handlers, Django middleware becomes FastAPI middleware with different lifecycle semantics. The \texttt{+migration} modifier is almost always appropriate here to enforce behavioral parity during the translation.
-
-\paragraph{reverse-spec.}
-R1 analyzes Django-specific patterns: URL conf routing (\texttt{urls.py}), class-based views, Django ORM models with field definitions and relationships, Django REST Framework serializers, middleware classes, template rendering, Django signals, management commands, and Celery task definitions. R2 traces the Django request lifecycle: URL resolution $\to$ middleware stack $\to$ view dispatch $\to$ serializer validation $\to$ ORM query $\to$ response rendering. R4 extracts SBI: ``42 URL patterns across 6 apps. 28 model classes. 15 serializers. 8 middleware classes. 12 Celery tasks. 5 management commands.'' R5 pre-context maps Django patterns to their FastAPI equivalents at a conceptual level: ``Django signals (post\_save, pre\_delete) have no direct FastAPI equivalent---must be converted to explicit event dispatching or SQLAlchemy event listeners.''
-
-\paragraph{init/add.}
-S5 probes are informed by both the source analysis and the target foundation. Questions bridge the two worlds: ``Django uses synchronous ORM throughout. FastAPI supports async---migrate all database access to async SQLAlchemy, or use sync fallback with \texttt{run\_in\_executor}?'' ``Django REST Framework provides automatic pagination, filtering, and schema generation. Which of these features do you want to replicate in FastAPI?'' A3 may detect an archetype shift: ``The Django app is synchronous. FastAPI enables an event-driven architecture---do you want to adopt this, or maintain the synchronous request-response pattern?'' F0 detects the target foundation (FastAPI) and notes the source foundation (Django) for reference.
-
-\paragraph{specify.}
-S1 generates success criteria that account for both worlds. For translated features: ``User registration endpoint accepts the same payload shape as Django's /api/users/ and returns the same response structure.'' For new capabilities unlocked by the stack change: ``Async database queries do not block the event loop---verified by concurrent request test.'' A2 adds criteria for any architectural shift: ``All I/O operations use async/await---no synchronous blocking calls in route handlers.''
-
-\paragraph{implement.}
-F3 applies FastAPI patterns: Pydantic models for request/response validation, dependency injection for database sessions, async route handlers. Simultaneously, the pre-context from R5 guides the translation: ``Django's \texttt{@login\_required} decorator maps to FastAPI's \texttt{Depends(get\_current\_user)} dependency.'' S7 fires prevention rules specific to the Django$\to$FastAPI translation: ``Django ORM lazy loading pattern translated directly will cause N+1 queries in SQLAlchemy---use eager loading or selectinload'', ``Django's implicit CSRF protection does not exist in FastAPI---add explicit CSRF middleware or document the API-only (no browser form) decision.''
-
-\paragraph{verify.}
-R4 SBI verification maps Django behaviors to FastAPI equivalents: ``All 42 URL patterns have corresponding FastAPI routes.'' ``All 12 Celery tasks have equivalent async task implementations.'' F4 runs FastAPI-specific tests (pytest + httpx async client). The source foundation (Django) is consulted one final time: response payloads from the Django app are compared against FastAPI responses for shape and content parity.
-
-\paragraph{Key characteristic.}
-The dual-foundation tension is the defining challenge. Every Django pattern must be consciously translated, not just reimplemented. S7's bug prevention rules are especially valuable here because they catch the subtle semantic differences between frameworks that developers often miss---differences that produce code that \emph{compiles} but \emph{behaves differently}.
-
-%% ── Scenario 4: Incremental ─────────────────────────────────────────
-\subsection{Scenario 4: Incremental --- ``Adding Features to an Existing SDD Project''}
-\label{sec:scenario-incremental}
-
-\textbf{Example:} Adding a notification system (email, in-app, push) to an application that already has 5 Features built through the SDD pipeline.
-
-\begin{center}
-\begin{tabular}{lcp{8cm}}
-\toprule
-\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
-\midrule
-R-family & No & Project is already SDD-managed; no reverse-engineering needed \\
-S-family & Full & Pipeline runs fully, inheriting decisions from prior Features \\
-A-family & Partial & Same archetype; constitution already exists \\
-F-family & Partial & Same foundation; toolchain established \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{What makes Incremental unique.}
-The Global Evolution Layer (GEL) is the star. When Feature 6 (notifications) enters the pipeline, it does not start from zero. The entity-registry already contains User, Order, Payment, and Product entities from Features 1--5. The api-registry documents all existing endpoints. The domain-profile-instance records all decisions made so far. Feature 6 \emph{inherits} this context, which means the Brief is shorter (many questions are already answered), the spec is more precise (it references existing entities), and implementation avoids conflicts with existing code.
-
-\paragraph{reverse-spec.}
-Not used. The project is already managed through SDD artifacts. The spec files, plan files, and entity registries \emph{are} the documentation. There is no need to reverse-engineer what already has forward-engineered specifications. If the team needs to understand existing behavior, they read the spec files---not the code.
-
-\paragraph{init/add.}
-S0 detects concerns for the notification Feature: \texttt{message-queue} (async delivery), \texttt{email} (SMTP integration), \texttt{push-notification} (FCM/APNs). S5 fires elaboration probes, but many are pre-answered by GEL: ``User model?'' $\to$ already defined in entity-registry as \texttt{E003} with email, preferences, and deviceTokens fields. S5 focuses on \emph{new} decisions: ``Notification preferences---per-channel opt-in/opt-out? Quiet hours? Batching/digest mode?'' A3 does not re-ask archetype questions---the constitution already exists and applies. F0 does not re-detect the foundation---it is recorded in \texttt{sdd-state.md}.
-
-\paragraph{specify.}
-S1 generates success criteria that reference GEL entities: ``When Order (E005) status changes to `shipped', User (E003) receives notification via all opted-in channels within 30 seconds.'' ``Notification preferences respect User.notificationPreferences field from entity-registry.'' The success criteria naturally compose with existing Features because they share the same entity vocabulary. A2 adds: ``Notification service follows the same provider abstraction pattern as PaymentService (Feature 3).''
-
-\paragraph{implement.}
-F3 applies the established project patterns---same directory structure, same naming conventions, same dependency injection pattern. S7 fires prevention rules: ``Email sending in request handler will block response---use message queue for async delivery.'' ``Push notification without retry on FCM 429 response will silently drop messages.'' The key advantage of incremental: F3 patterns are not theoretical recommendations but \emph{observed conventions} from the existing 5 Features. Consistency is nearly automatic.
-
-\paragraph{verify.}
-S1 verifies notification success criteria. F4 runs tests using the established test patterns. F8 confirms that the new Feature does not break existing Features (regression test suite). No R4 SBI check---this is new functionality, not a rewrite. Cross-Feature verification is especially important: ``Does the notification system correctly integrate with the authentication system from Feature 1? Does it respect the rate limiting from Feature 4?''
-
-\paragraph{Key characteristic.}
-GEL eliminates redundant work. Feature 6 does not re-decide what Feature 1 already decided. The pipeline is shorter (no reverse-spec, no archetype discovery), more precise (entities and APIs are already defined), and more consistent (patterns are inherited, not reinvented). This is the scenario where SDD's incremental investment pays compound returns.
-
-%% ── Scenario 5: Adoption ────────────────────────────────────────────
-\subsection{Scenario 5: Adoption --- ``Documenting Existing Working Code''}
-\label{sec:scenario-adoption}
-
-\textbf{Example:} A working Node.js REST API with 40+ endpoints, zero documentation, and a new team member joining next month. The team wants SDD documentation wrapped around the existing code for onboarding, maintenance, and future development.
-
-\begin{center}
-\begin{tabular}{lcp{8cm}}
-\toprule
-\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
-\midrule
-R-family & Full & Core driver---extracts specs from existing code \\
-S-family & Modified & Extracts behavior rather than defining new behavior \\
-A-family & Detected & Archetype detected from code, not chosen \\
-F-family & Detected & Foundation detected from code, toolchain already exists \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{What makes Adoption unique.}
-The code already exists and \emph{works}. The pipeline's job is not to build anything but to \emph{wrap documentation around working code}. This inverts the normal flow: instead of spec $\to$ code, the flow is code $\to$ spec. The \cmd{specify} step \emph{extracts} behavior (documenting what the code does) rather than \emph{defining} behavior (deciding what the code should do). The \cmd{plan} step \emph{documents} architecture (recording how the code is structured) rather than \emph{designing} architecture (deciding how the code should be structured).
-
-\paragraph{reverse-spec.}
-R-family is the primary driver. R1 scans the Node.js codebase: Express routes, middleware, Mongoose/Sequelize models, authentication strategy, test files (if any). R2 performs deep analysis of each module: request validation patterns, error handling conventions, logging practices, environment configuration. R4 produces a comprehensive SBI: ``43 route handlers, 18 models, 12 middleware functions, 7 background jobs, 3 WebSocket handlers.'' R5 generates pre-context that becomes the foundation for all subsequent documentation. This is the most thorough R-family execution of any scenario---every nuance matters because the pre-context \emph{is} the documentation source.
-
-\paragraph{init/add.}
-S0 detects concerns from the R-family analysis, not from user description. The user does not need to enumerate concerns---the code reveals them. S5 probes are confirmatory rather than exploratory: ``R-family detected JWT authentication with refresh tokens. Is this the intended auth strategy, or is it legacy?'' ``R-family found rate limiting middleware on 8 endpoints. Should this be documented as a system-wide concern?'' A3 detects the archetype from code structure: REST API with background jobs suggests a ``backend-service'' archetype. F0 detects the foundation from package.json and configuration files.
-
-\paragraph{specify.}
-S1 \emph{extracts} success criteria from existing behavior rather than inventing them: ``GET /api/users returns paginated list with limit/offset parameters (extracted from source: route handler applies default limit=20).'' ``Invalid JWT returns 401 with \{error: `Token expired'\} body (extracted from source: auth middleware error handler).'' The spec documents what the code \emph{actually does}, not what it \emph{should do}. Discrepancies between apparent intention and actual behavior are flagged as notes, not failures.
-
-\paragraph{plan.}
-The plan documents the existing architecture rather than designing a new one. Component boundaries are recorded as they exist in the code. Data flow diagrams reflect actual implementation, not ideal architecture. If the architecture has known issues (circular dependencies, God objects), these are documented as technical debt items---not redesigned.
-
-\paragraph{implement.}
-\textbf{Not executed.} The code already exists. There is nothing to implement. The pipeline skips directly from plan to verify. This is the only scenario where the implement step is entirely absent.
-
-\paragraph{verify.}
-Verify runs in \textbf{non-blocking mode}. Failures found during verification are \emph{pre-existing bugs} in the working code, not regressions introduced by the pipeline. They are documented as known issues, not treated as blockers. R4 SBI verification confirms that the generated documentation covers all detected behaviors: ``All 43 route handlers have corresponding success criteria in the spec.'' F8 runs the existing test suite (if any) to establish a baseline.
-
-\paragraph{Key characteristic.}
-The direction of information flow is reversed. In every other scenario, the pipeline generates specs and then generates code. In Adoption, the pipeline reads code and then generates specs. The implement step is skipped entirely. Verify is non-blocking because failures are pre-existing, not new. The value delivered is not working software but \emph{comprehensive documentation of already-working software}.
-
-%% ── Scenario 6: +migration ──────────────────────────────────────────
-\subsection{Scenario 6: +migration --- ``Technology Transition''}
-\label{sec:scenario-migration}
-
-\textbf{Example:} See the three detailed migration walkthroughs in Section~\ref{sec:migration-scenario}: Oracle$\to$PostgreSQL, Monolith$\to$Microservices, REST$\to$GraphQL.
-
-\begin{center}
-\begin{tabular}{lcp{8cm}}
-\toprule
-\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
-\midrule
-R-family & Full & Analyzes source system for behavioral inventory \\
-S-family & Full & Generates SCs with parity requirements \\
-A-family & Variable & May change if architecture shifts \\
-F-family & Dual & Source (read-only) + Target (write) \\
-+migration & Active & Adds cross-cutting parity verification \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{What makes +migration unique.}
-The \texttt{+migration} context modifier is not a standalone scenario---it is an \textbf{overlay} applied on top of a Rebuild scenario (same-stack or new-stack). It adds three capabilities that no other scenario provides:
-
-\begin{enumerate}[nosep]
-  \item \textbf{Source$\leftrightarrow$Target mapping:} Every source behavior is explicitly mapped to its target equivalent. Not ``we rewrote it'' but ``source behavior X is implemented as target behavior Y, verified by test Z.''
-  \item \textbf{SBI preservation verification:} R4's Source Behavior Inventory becomes a checklist. Verify does not pass until every SBI item has a corresponding implementation in the target system.
-  \item \textbf{Transition-period coexistence rules:} For incremental migrations (strangler fig pattern), the modifier enforces rules about parallel operation: ``Both old and new systems must handle this request identically during the transition period.''
-\end{enumerate}
-
-\paragraph{When to use +migration vs.\ plain rebuild.}
-Use \texttt{+migration} when behavioral parity is a hard requirement---when losing even one behavior from the source system is unacceptable. Use plain rebuild when the rewrite is an opportunity to intentionally drop behaviors (``we don't need feature X anymore''). The modifier adds overhead (SBI tracking, parity verification, parallel operation tests), so it should be applied deliberately, not by default.
-
-\paragraph{Key characteristic.}
-The \texttt{+migration} modifier demonstrates the Context axis's power: it adds cross-cutting rules that weave through all four families without modifying any family's internal logic. S1 generates success criteria as usual; \texttt{+migration} annotates them with parity requirements. F3 applies patterns as usual; \texttt{+migration} adds source-comparison checks. The modifier is \emph{composable}---it works with any combination of Interface, Concern, Archetype, and Foundation axes.
-
-%% ── Summary ─────────────────────────────────────────────────────────
-\subsection{Scenario Comparison Summary}
-
-\begin{longtable}{lccccl}
-\caption{Section family activation across all six scenarios} \\
-\toprule
-\textbf{Scenario} & \textbf{R} & \textbf{S} & \textbf{A} & \textbf{F} & \textbf{Defining Artifact} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Scenario} & \textbf{R} & \textbf{S} & \textbf{A} & \textbf{F} & \textbf{Defining Artifact} \\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-
-Greenfield        & ---  & Full & Full & Full    & Constitution \\
-Rebuild (same)    & Full & Full & Full & Partial & SBI (R4) \\
-Rebuild (new)     & Full & Full & Partial & Dual & Pre-context translation map \\
-Incremental       & ---  & Full & Partial & Partial & GEL registries \\
-Adoption          & Full & Extract & Detect & Detect & Generated spec from code \\
-+migration        & Full & Full & Variable & Dual & SBI parity report \\
-
-\end{longtable}
+For detailed walkthroughs of all six scenarios showing which families activate in each, see Chapter~\ref{ch:scenarios} \S~Complete Scenario Reference.
 
 
 \section{The Philosophy Behind the Division}
@@ -2465,13 +2190,21 @@ Every pipeline step follows the same protocol:
 \end{enumerate}
 
 \begin{dangerbox}[Mandatory Rules]
-Three mandatory rules are always loaded in SKILL.md:
+Seven mandatory rules are always loaded in SKILL.md:
 
 \textbf{Rule~1}: Every HARD STOP uses AskUserQuestion. Empty response = re-ask. Never treat silence as approval.
 
 \textbf{Rule~2}: Demos must be executable scripts that launch the real Feature, not test suites.
 
 \textbf{Rule~3}: After any spec-kit command: suppress raw output, read artifact, display review, call AskUserQuestion.
+
+\textbf{Rule~4}: Features execute sequentially. Never process multiple Features in parallel.
+
+\textbf{Rule~5}: Runtime SC verification required. Build+test passing is NOT verify completion.
+
+\textbf{Rule~6}: Honest SC evidence. Partial verification = PARTIAL, not PASS. User Demo required.
+
+\textbf{Rule~7}: Implement Completeness Gate. Before implement Review: all tasks done + demo script exists + smoke launch passes.
 \end{dangerbox}
 
 \section{The Brief: 6-Phase Briefing}
@@ -2493,7 +2226,7 @@ The \texttt{add} command implements a structured 6-phase consultation:
   \item[Phase 0: Preflight] Playwright availability check (CLI probe $\rightarrow$ library import $\rightarrow$ MCP probe).
   \item[Phase 1: Build + TypeScript + Lint] Baseline static checks.
   \item[Phase 2: Automated Tests] Unit + integration. Fix code, not tests.
-  \item[Phase 3: UI/Runtime Verification] Launch application via Playwright. Verify each SC against running UI. Delegate to user if Playwright unavailable---never skip.
+  \item[Phase 3: UI/Runtime Verification] Launch application via Playwright. Verify each SC against running UI. Delegate to user if Playwright unavailable---never skip. (Server startup uses F8b Runtime Environment fields from the active Foundation---see Chapter~5 \S~F8b.)
   \item[Phase 4: Cross-Feature Integration] Verify Features work together.
   \item[Phase 5: Integration Demo (conditional)] If this Feature completes a Demo Group, run the Integration Demo script. Skipped if no DG is completed.
 \end{description}
@@ -2680,7 +2413,11 @@ Common step-back patterns:
   \item \textbf{During verify}: ``The spec missed a requirement'' $\rightarrow$ back to specify (Major-Spec severity).
 \end{itemize}
 
+When a user provides feedback at a HARD STOP, the response often requires not just stepping back but also analyzing downstream impact and proposing the next pipeline action. The following section formalizes this as the Impact Analysis + Flow Proposal protocol.
+
 \section{Impact Analysis + Flow Proposal}
+
+At any pipeline HARD STOP (Checkpoint or Review), users may provide feedback about bugs, missing requirements, or improvement ideas. Rather than just analyzing the issue, the agent must classify the feedback, assess downstream impact, and propose a concrete pipeline action---so the user never has to figure out the routing themselves.
 
 When user feedback arrives at \emph{any} HARD STOP---not just verify---the agent must respond with analysis AND a concrete next step. Three rounds of ``what's wrong?'' $\rightarrow$ ``so what do we do?'' $\rightarrow$ ``but spec needs to change first'' is a pipeline usability failure.
 
@@ -3062,7 +2799,7 @@ The module system is the theory. Part~V is the practice---20~gap patterns and 65
 \part{Failure Patterns and Lessons}
 
 %% ────────────────────────────────────────────────────────────────────
-\chapter{19 Gap Patterns}
+\chapter{20 Gap Patterns}
 \label{ch:gaps}
 %% ────────────────────────────────────────────────────────────────────
 
@@ -3629,6 +3366,278 @@ my-project/
 %% ────────────────────────────────────────────────────────────────────
 
 \textit{This chapter walks through six real scenarios end-to-end, showing the exact commands and decision points for each project situation.}
+
+
+%% ════════════════════════════════════════════════════════════════════
+\section{Complete Scenario Reference}
+\label{sec:complete-scenario-reference}
+%% ════════════════════════════════════════════════════════════════════
+
+The Domain Profile's \textbf{Context axis} determines which pipeline scenario applies. Each scenario activates a different combination of the four section families. This section provides a comprehensive reference for all six scenarios, showing exactly how R-, S-, A-, and F-families participate in each one.
+
+%% ── Scenario 1: Greenfield ──────────────────────────────────────────
+\subsection{Scenario 1: Greenfield --- ``Building from Scratch''}
+\label{sec:scenario-greenfield}
+
+\textbf{Example:} A team building a new real-time collaboration tool (multiplayer document editor with presence indicators, conflict resolution, and role-based access control).
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & No & No existing code to analyze \\
+S-family & Full & Drives entire pipeline from detection to verification \\
+A-family & Full & Shapes project philosophy and constitution \\
+F-family & Full & Sets up toolchain, patterns, and platform constraints \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes Greenfield unique.}
+There is no prior art. Every decision---from data model to API shape to error handling strategy---is made fresh. The Domain Profile Instance starts empty and fills up Feature by Feature as the pipeline executes. This means the Brief phase is especially important: S5 elaboration probes and A3 archetype probes must extract maximum information from the user because there is no codebase to analyze for implicit answers.
+
+\paragraph{reverse-spec.}
+Not used. There is no source code to analyze. The pipeline begins at \cmd{init}.
+
+\paragraph{init/add.}
+S0 detects concerns from the user's project description: ``real-time collaboration'' triggers \texttt{realtime} and \texttt{websocket}; ``role-based access'' triggers \texttt{auth} and \texttt{rbac}; ``conflict resolution'' triggers \texttt{data-integrity}. S5 fires elaboration probes for each detected concern: ``What conflict resolution strategy? OT, CRDT, or last-write-wins?'' ``Authentication provider? OAuth, SAML, or custom?'' ``Real-time transport? WebSocket, SSE, or long-polling?'' A3 asks archetype probes: ``Is this a SaaS platform with multi-tenancy, or a self-hosted tool?'' ``What is the scaling target---10 concurrent users or 10,000?'' F0 detects the chosen foundation from user input or project files: ``React + Node.js + Socket.io'' or ``SvelteKit + Supabase Realtime.'' S9 validates brief completeness---all detected concerns have sufficient elaboration.
+
+\paragraph{specify.}
+S1 generates success criteria for each concern. For \texttt{realtime}: ``Cursor position updates propagate to all participants within 200ms.'' For \texttt{auth}: ``Users with `viewer' role cannot trigger mutation operations.'' For \texttt{data-integrity}: ``Concurrent edits to the same paragraph resolve deterministically---no data loss.'' A2 adds archetype-specific criteria: ``Multi-tenant data isolation---Tenant A's queries never return Tenant B's documents.'' F2 adds framework constraints to success criteria: ``WebSocket reconnection uses exponential backoff with jitter.''
+
+\paragraph{implement.}
+F3 provides foundation-specific implementation patterns: project structure, recommended libraries, configuration templates. S7 fires bug prevention rules: ``WebSocket handler without heartbeat timeout will leak connections'', ``CRDT merge without vector clock comparison will produce phantom conflicts.'' A1 enforces architectural philosophy: ``All real-time events flow through the event bus---no direct inter-component mutation.''
+
+\paragraph{verify.}
+S1 success criteria are verified through automated tests. F4 provides foundation-specific test patterns (e.g., testing WebSocket with mock server). F8 runs build and toolchain verification. No R4 SBI check---there is no source behavior to preserve. The verify phase focuses entirely on ``does the new code do what the spec says?'' rather than ``does the new code match the old code?''
+
+\paragraph{Key characteristic.}
+S-family and A-family carry the heaviest load. Without existing code, domain rules and architectural philosophy are the primary sources of implementation guidance. The GEL layer (entity-registry, api-registry) starts empty and grows organically as Features are added.
+
+%% ── Scenario 2: Rebuild (Same Stack) ────────────────────────────────
+\subsection{Scenario 2: Rebuild (Same Stack) --- ``Rewriting with the Same Technology''}
+\label{sec:scenario-rebuild-same}
+
+\textbf{Example:} Rewriting a messy Express.js monolith as a clean, well-structured Express.js application with proper separation of concerns, test coverage, and documentation.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Extracts all existing behaviors for SBI tracking \\
+S-family & Full & SC generation informed by pre-context from R-family \\
+A-family & Full & Constitution may change even if archetype stays the same \\
+F-family & Partial & Same foundation---patterns carry over, toolchain identical \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes same-stack rebuild unique.}
+The technology does not change, but the \emph{architecture} does. The danger is subtle: because the stack is familiar, teams assume they understand the existing system. R-family analysis is critical precisely because the same Express.js code can be organized in wildly different ways, and implicit behaviors (middleware ordering, error propagation chains, request lifecycle hooks) are easy to miss.
+
+\paragraph{reverse-spec.}
+R1 scans the source codebase and detects Express.js patterns: route definitions, middleware chains, error handlers, database models, authentication middleware. R2 traces data flows through the middleware pipeline---request enters at \texttt{app.use(cors())}, passes through \texttt{authMiddleware}, reaches the route handler, queries the database, and returns through error handling middleware. R4 extracts SBI: ``87 route handlers across 14 router files. 23 middleware functions. 45 database models. 12 background jobs via node-cron.'' R5 generates pre-context documenting patterns that the rewrite must preserve: ``Custom error middleware catches Mongoose validation errors and transforms them to 422 responses with field-level error messages.''
+
+\paragraph{init/add.}
+S0 detects concerns from the pre-context (not from scratch---R-family has already identified them). S5 elaboration probes are \emph{informed} by pre-context: instead of asking ``Do you use authentication?'' (which R-family already answered), S5 asks ``The source uses Passport.js with local + Google strategies. Preserve both, or consolidate to OAuth only?'' A3 archetype probes may propose a change: ``The source is a monolith. Rebuild as monolith with cleaner boundaries, or decompose into modules?'' F0 detects the same Express.js foundation---no change needed. F8 toolchain is already known.
+
+\paragraph{specify.}
+S1 generates success criteria that reference pre-context directly: ``User login with email/password returns JWT (matching source behavior R5-AUTH-001).'' The success criteria are not invented from scratch---they are \emph{extracted and formalized} from the R-family analysis. A2 may add new architectural criteria that the messy original lacked: ``All route handlers delegate to service layer---no database queries in route files.''
+
+\paragraph{implement.}
+F3 applies the same Express.js patterns but in the new, clean structure. Because the foundation has not changed, F3 patterns are identical to what the source code uses (or should have used). S7 fires prevention rules relevant to Express.js: ``Route handler with async operation but no try/catch will crash the process on rejection'', ``Middleware order matters---CORS must come before auth.'' The key difference from greenfield: S7 can reference pre-context to flag deviations from source behavior: ``Source handles file uploads with multer using memory storage. New implementation uses disk storage---behavior change detected.''
+
+\paragraph{verify.}
+R4 SBI verification is the star of this scenario: ``All 87 route behaviors exist in the rewritten application.'' This is the definitive check that the rewrite preserved everything. F4 runs the same test patterns (Mocha/Jest + Supertest) against the new code. F8 runs build verification. S1 verifies success criteria. The combination of R4 (``did we lose anything from the old code?'') and S1 (``does the new code meet its spec?'') provides complete coverage.
+
+\paragraph{Key characteristic.}
+R4 SBI is the critical artifact. The entire point of a same-stack rebuild is to produce cleaner code that does the same thing. F-family contributes less than in other scenarios because the foundation is unchanged---the same libraries, the same runtime, the same deployment target.
+
+%% ── Scenario 3: Rebuild (New Stack) ─────────────────────────────────
+\subsection{Scenario 3: Rebuild (New Stack) --- ``Rewriting with Different Technology''}
+\label{sec:scenario-rebuild-new}
+
+\textbf{Example:} Rewriting a Django application as a FastAPI application to gain async capability and better performance for I/O-bound workloads.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Analyzes Django-specific patterns for translation \\
+S-family & Full & SC generation bridges old and new paradigms \\
+A-family & Partial & Archetype may shift (e.g., adding async capability) \\
+F-family & Dual & Source (Django, read-only) + Target (FastAPI, write) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes new-stack rebuild unique.}
+Two foundations are active simultaneously. The source foundation (Django) is read-only---used for understanding patterns. The target foundation (FastAPI) is write---used for implementation. This creates a translation layer: Django ORM models become SQLAlchemy models, Django views become FastAPI route handlers, Django middleware becomes FastAPI middleware with different lifecycle semantics. The \texttt{+migration} modifier is almost always appropriate here to enforce behavioral parity during the translation.
+
+\paragraph{reverse-spec.}
+R1 analyzes Django-specific patterns: URL conf routing (\texttt{urls.py}), class-based views, Django ORM models with field definitions and relationships, Django REST Framework serializers, middleware classes, template rendering, Django signals, management commands, and Celery task definitions. R2 traces the Django request lifecycle: URL resolution $\to$ middleware stack $\to$ view dispatch $\to$ serializer validation $\to$ ORM query $\to$ response rendering. R4 extracts SBI: ``42 URL patterns across 6 apps. 28 model classes. 15 serializers. 8 middleware classes. 12 Celery tasks. 5 management commands.'' R5 pre-context maps Django patterns to their FastAPI equivalents at a conceptual level: ``Django signals (post\_save, pre\_delete) have no direct FastAPI equivalent---must be converted to explicit event dispatching or SQLAlchemy event listeners.''
+
+\paragraph{init/add.}
+S5 probes are informed by both the source analysis and the target foundation. Questions bridge the two worlds: ``Django uses synchronous ORM throughout. FastAPI supports async---migrate all database access to async SQLAlchemy, or use sync fallback with \texttt{run\_in\_executor}?'' ``Django REST Framework provides automatic pagination, filtering, and schema generation. Which of these features do you want to replicate in FastAPI?'' A3 may detect an archetype shift: ``The Django app is synchronous. FastAPI enables an event-driven architecture---do you want to adopt this, or maintain the synchronous request-response pattern?'' F0 detects the target foundation (FastAPI) and notes the source foundation (Django) for reference.
+
+\paragraph{specify.}
+S1 generates success criteria that account for both worlds. For translated features: ``User registration endpoint accepts the same payload shape as Django's /api/users/ and returns the same response structure.'' For new capabilities unlocked by the stack change: ``Async database queries do not block the event loop---verified by concurrent request test.'' A2 adds criteria for any architectural shift: ``All I/O operations use async/await---no synchronous blocking calls in route handlers.''
+
+\paragraph{implement.}
+F3 applies FastAPI patterns: Pydantic models for request/response validation, dependency injection for database sessions, async route handlers. Simultaneously, the pre-context from R5 guides the translation: ``Django's \texttt{@login\_required} decorator maps to FastAPI's \texttt{Depends(get\_current\_user)} dependency.'' S7 fires prevention rules specific to the Django$\to$FastAPI translation: ``Django ORM lazy loading pattern translated directly will cause N+1 queries in SQLAlchemy---use eager loading or selectinload'', ``Django's implicit CSRF protection does not exist in FastAPI---add explicit CSRF middleware or document the API-only (no browser form) decision.''
+
+\paragraph{verify.}
+R4 SBI verification maps Django behaviors to FastAPI equivalents: ``All 42 URL patterns have corresponding FastAPI routes.'' ``All 12 Celery tasks have equivalent async task implementations.'' F4 runs FastAPI-specific tests (pytest + httpx async client). The source foundation (Django) is consulted one final time: response payloads from the Django app are compared against FastAPI responses for shape and content parity.
+
+\paragraph{Key characteristic.}
+The dual-foundation tension is the defining challenge. Every Django pattern must be consciously translated, not just reimplemented. S7's bug prevention rules are especially valuable here because they catch the subtle semantic differences between frameworks that developers often miss---differences that produce code that \emph{compiles} but \emph{behaves differently}.
+
+%% ── Scenario 4: Incremental ─────────────────────────────────────────
+\subsection{Scenario 4: Incremental --- ``Adding Features to an Existing SDD Project''}
+\label{sec:scenario-incremental}
+
+\textbf{Example:} Adding a notification system (email, in-app, push) to an application that already has 5 Features built through the SDD pipeline.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & No & Project is already SDD-managed; no reverse-engineering needed \\
+S-family & Full & Pipeline runs fully, inheriting decisions from prior Features \\
+A-family & Partial & Same archetype; constitution already exists \\
+F-family & Partial & Same foundation; toolchain established \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes Incremental unique.}
+The Global Evolution Layer (GEL) is the star. When Feature 6 (notifications) enters the pipeline, it does not start from zero. The entity-registry already contains User, Order, Payment, and Product entities from Features 1--5. The api-registry documents all existing endpoints. The domain-profile-instance records all decisions made so far. Feature 6 \emph{inherits} this context, which means the Brief is shorter (many questions are already answered), the spec is more precise (it references existing entities), and implementation avoids conflicts with existing code.
+
+\paragraph{reverse-spec.}
+Not used. The project is already managed through SDD artifacts. The spec files, plan files, and entity registries \emph{are} the documentation. There is no need to reverse-engineer what already has forward-engineered specifications. If the team needs to understand existing behavior, they read the spec files---not the code.
+
+\paragraph{init/add.}
+S0 detects concerns for the notification Feature: \texttt{message-queue} (async delivery), \texttt{email} (SMTP integration), \texttt{push-notification} (FCM/APNs). S5 fires elaboration probes, but many are pre-answered by GEL: ``User model?'' $\to$ already defined in entity-registry as \texttt{E003} with email, preferences, and deviceTokens fields. S5 focuses on \emph{new} decisions: ``Notification preferences---per-channel opt-in/opt-out? Quiet hours? Batching/digest mode?'' A3 does not re-ask archetype questions---the constitution already exists and applies. F0 does not re-detect the foundation---it is recorded in \texttt{sdd-state.md}.
+
+\paragraph{specify.}
+S1 generates success criteria that reference GEL entities: ``When Order (E005) status changes to `shipped', User (E003) receives notification via all opted-in channels within 30 seconds.'' ``Notification preferences respect User.notificationPreferences field from entity-registry.'' The success criteria naturally compose with existing Features because they share the same entity vocabulary. A2 adds: ``Notification service follows the same provider abstraction pattern as PaymentService (Feature 3).''
+
+\paragraph{implement.}
+F3 applies the established project patterns---same directory structure, same naming conventions, same dependency injection pattern. S7 fires prevention rules: ``Email sending in request handler will block response---use message queue for async delivery.'' ``Push notification without retry on FCM 429 response will silently drop messages.'' The key advantage of incremental: F3 patterns are not theoretical recommendations but \emph{observed conventions} from the existing 5 Features. Consistency is nearly automatic.
+
+\paragraph{verify.}
+S1 verifies notification success criteria. F4 runs tests using the established test patterns. F8 confirms that the new Feature does not break existing Features (regression test suite). No R4 SBI check---this is new functionality, not a rewrite. Cross-Feature verification is especially important: ``Does the notification system correctly integrate with the authentication system from Feature 1? Does it respect the rate limiting from Feature 4?''
+
+\paragraph{Key characteristic.}
+GEL eliminates redundant work. Feature 6 does not re-decide what Feature 1 already decided. The pipeline is shorter (no reverse-spec, no archetype discovery), more precise (entities and APIs are already defined), and more consistent (patterns are inherited, not reinvented). This is the scenario where SDD's incremental investment pays compound returns.
+
+%% ── Scenario 5: Adoption ────────────────────────────────────────────
+\subsection{Scenario 5: Adoption --- ``Documenting Existing Working Code''}
+\label{sec:scenario-adoption}
+
+\textbf{Example:} A working Node.js REST API with 40+ endpoints, zero documentation, and a new team member joining next month. The team wants SDD documentation wrapped around the existing code for onboarding, maintenance, and future development.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Core driver---extracts specs from existing code \\
+S-family & Modified & Extracts behavior rather than defining new behavior \\
+A-family & Detected & Archetype detected from code, not chosen \\
+F-family & Detected & Foundation detected from code, toolchain already exists \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes Adoption unique.}
+The code already exists and \emph{works}. The pipeline's job is not to build anything but to \emph{wrap documentation around working code}. This inverts the normal flow: instead of spec $\to$ code, the flow is code $\to$ spec. The \cmd{specify} step \emph{extracts} behavior (documenting what the code does) rather than \emph{defining} behavior (deciding what the code should do). The \cmd{plan} step \emph{documents} architecture (recording how the code is structured) rather than \emph{designing} architecture (deciding how the code should be structured).
+
+\paragraph{reverse-spec.}
+R-family is the primary driver. R1 scans the Node.js codebase: Express routes, middleware, Mongoose/Sequelize models, authentication strategy, test files (if any). R2 performs deep analysis of each module: request validation patterns, error handling conventions, logging practices, environment configuration. R4 produces a comprehensive SBI: ``43 route handlers, 18 models, 12 middleware functions, 7 background jobs, 3 WebSocket handlers.'' R5 generates pre-context that becomes the foundation for all subsequent documentation. This is the most thorough R-family execution of any scenario---every nuance matters because the pre-context \emph{is} the documentation source.
+
+\paragraph{init/add.}
+S0 detects concerns from the R-family analysis, not from user description. The user does not need to enumerate concerns---the code reveals them. S5 probes are confirmatory rather than exploratory: ``R-family detected JWT authentication with refresh tokens. Is this the intended auth strategy, or is it legacy?'' ``R-family found rate limiting middleware on 8 endpoints. Should this be documented as a system-wide concern?'' A3 detects the archetype from code structure: REST API with background jobs suggests a ``backend-service'' archetype. F0 detects the foundation from package.json and configuration files.
+
+\paragraph{specify.}
+S1 \emph{extracts} success criteria from existing behavior rather than inventing them: ``GET /api/users returns paginated list with limit/offset parameters (extracted from source: route handler applies default limit=20).'' ``Invalid JWT returns 401 with \{error: `Token expired'\} body (extracted from source: auth middleware error handler).'' The spec documents what the code \emph{actually does}, not what it \emph{should do}. Discrepancies between apparent intention and actual behavior are flagged as notes, not failures.
+
+\paragraph{plan.}
+The plan documents the existing architecture rather than designing a new one. Component boundaries are recorded as they exist in the code. Data flow diagrams reflect actual implementation, not ideal architecture. If the architecture has known issues (circular dependencies, God objects), these are documented as technical debt items---not redesigned.
+
+\paragraph{implement.}
+\textbf{Not executed.} The code already exists. There is nothing to implement. The pipeline skips directly from plan to verify. This is the only scenario where the implement step is entirely absent.
+
+\paragraph{verify.}
+Verify runs in \textbf{non-blocking mode}. Failures found during verification are \emph{pre-existing bugs} in the working code, not regressions introduced by the pipeline. They are documented as known issues, not treated as blockers. R4 SBI verification confirms that the generated documentation covers all detected behaviors: ``All 43 route handlers have corresponding success criteria in the spec.'' F8 runs the existing test suite (if any) to establish a baseline.
+
+\paragraph{Key characteristic.}
+The direction of information flow is reversed. In every other scenario, the pipeline generates specs and then generates code. In Adoption, the pipeline reads code and then generates specs. The implement step is skipped entirely. Verify is non-blocking because failures are pre-existing, not new. The value delivered is not working software but \emph{comprehensive documentation of already-working software}.
+
+%% ── Scenario 6: +migration ──────────────────────────────────────────
+\subsection{Scenario 6: +migration --- ``Technology Transition''}
+\label{sec:scenario-migration}
+
+\textbf{Example:} See the three detailed migration walkthroughs in Section~\ref{sec:migration-scenario}: Oracle$\to$PostgreSQL, Monolith$\to$Microservices, REST$\to$GraphQL.
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Family} & \textbf{Active?} & \textbf{Key Role} \\
+\midrule
+R-family & Full & Analyzes source system for behavioral inventory \\
+S-family & Full & Generates SCs with parity requirements \\
+A-family & Variable & May change if architecture shifts \\
+F-family & Dual & Source (read-only) + Target (write) \\
++migration & Active & Adds cross-cutting parity verification \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What makes +migration unique.}
+The \texttt{+migration} context modifier is not a standalone scenario---it is an \textbf{overlay} applied on top of a Rebuild scenario (same-stack or new-stack). It adds three capabilities that no other scenario provides:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Source$\leftrightarrow$Target mapping:} Every source behavior is explicitly mapped to its target equivalent. Not ``we rewrote it'' but ``source behavior X is implemented as target behavior Y, verified by test Z.''
+  \item \textbf{SBI preservation verification:} R4's Source Behavior Inventory becomes a checklist. Verify does not pass until every SBI item has a corresponding implementation in the target system.
+  \item \textbf{Transition-period coexistence rules:} For incremental migrations (strangler fig pattern), the modifier enforces rules about parallel operation: ``Both old and new systems must handle this request identically during the transition period.''
+\end{enumerate}
+
+\paragraph{When to use +migration vs.\ plain rebuild.}
+Use \texttt{+migration} when behavioral parity is a hard requirement---when losing even one behavior from the source system is unacceptable. Use plain rebuild when the rewrite is an opportunity to intentionally drop behaviors (``we don't need feature X anymore''). The modifier adds overhead (SBI tracking, parity verification, parallel operation tests), so it should be applied deliberately, not by default.
+
+\paragraph{Key characteristic.}
+The \texttt{+migration} modifier demonstrates the Context axis's power: it adds cross-cutting rules that weave through all four families without modifying any family's internal logic. S1 generates success criteria as usual; \texttt{+migration} annotates them with parity requirements. F3 applies patterns as usual; \texttt{+migration} adds source-comparison checks. The modifier is \emph{composable}---it works with any combination of Interface, Concern, Archetype, and Foundation axes.
+
+%% ── Summary ─────────────────────────────────────────────────────────
+\subsection{Scenario Comparison Summary}
+
+\begin{longtable}{lccccl}
+\caption{Section family activation across all six scenarios} \\
+\toprule
+\textbf{Scenario} & \textbf{R} & \textbf{S} & \textbf{A} & \textbf{F} & \textbf{Defining Artifact} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Scenario} & \textbf{R} & \textbf{S} & \textbf{A} & \textbf{F} & \textbf{Defining Artifact} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+Greenfield        & ---  & Full & Full & Full    & Constitution \\
+Rebuild (same)    & Full & Full & Full & Partial & SBI (R4) \\
+Rebuild (new)     & Full & Full & Partial & Dual & Pre-context translation map \\
+Incremental       & ---  & Full & Partial & Partial & GEL registries \\
+Adoption          & Full & Extract & Detect & Detect & Generated spec from code \\
++migration        & Full & Full & Variable & Dual & SBI parity report \\
+
+\end{longtable}
+
 
 \section{Scenario 1: Greenfield Idea}
 
