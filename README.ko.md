@@ -1695,7 +1695,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/dom
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd 상태 파일 | `specs/_global/sdd-state.md` |
 | 결정 이력 | `history.md` |
-| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 20개 갭 패턴 + 66개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
+| 실패 패턴 & 대응책 | [`lessons-learned.md`](lessons-learned.md) — 20개 갭 패턴 + 65개 구체적 교훈. AI 에이전트 파이프라인을 설계하는 누구에게나 유용합니다. |
 
 ### Feature 네이밍 규약
 

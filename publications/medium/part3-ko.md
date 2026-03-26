@@ -518,7 +518,7 @@ BLOCKING gate를 추가했습니다. 에이전트가 새로운 회피 패턴을 
 
 이것은 "과설계"가 아니라 "실패 주도 설계(failure-driven design)"입니다. 모든 규칙, 모든 가드, 모든 반복된 텍스트 뒤에는 실제로 발생한 실패가 있습니다. 그리고 이 실패들은 spec-kit-skills에만 해당하는 게 아닙니다 — AI 에이전트를 위한 도구를 만드는 모든 사람이 결국 같은 문제를 만나게 됩니다. 컨텍스트 압축, 참조 무시, 상태 손실은 현재 LLM 기반 에이전트의 구조적 한계이며, 이 한계 위에서 안정적인 시스템을 구축하는 것이 이 시대의 새로운 엔지니어링 도전입니다.
 
-4편에서는 이 실패들을 체계적으로 정리합니다: 19개의 갭 패턴, 66개 구체적 교훈. "Context Compression이 규칙을 삼켰다", "에이전트가 참조를 무시했다", "Feature 간 정보가 단절되었다" — 여기서 다룬 아키텍처의 모든 요소가 구체적인 실패 사례에서 어떻게 태어났는지의 전체 이야기입니다.
+4편에서는 이 실패들을 체계적으로 정리합니다: 19개의 갭 패턴, 65개 구체적 교훈. "Context Compression이 규칙을 삼켰다", "에이전트가 참조를 무시했다", "Feature 간 정보가 단절되었다" — 여기서 다룬 아키텍처의 모든 요소가 구체적인 실패 사례에서 어떻게 태어났는지의 전체 이야기입니다.
 
 ---
 
@@ -622,4 +622,4 @@ architecture:
 
 ← **2편**: [네 가지 스킬, 하나의 파이프라인](https://medium.com/@thejihoonchoi/%EB%84%A4-%EA%B0%80%EC%A7%80-%EC%8A%A4%ED%82%AC-%ED%95%98%EB%82%98%EC%9D%98-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-code-explore-reverse-spec-smart-sdd-domain-extend%EC%9D%98-%ED%98%91%EC%97%85-f6b028d4b17d)
 
-→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20가지 갭 패턴, 66개 교훈, 실전 팁
+→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20가지 갭 패턴, 65개 교훈, 실전 팁

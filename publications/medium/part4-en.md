@@ -14,7 +14,7 @@
 
 The build passed. TypeScript was clean. Tests were green. And the app was completely unusable — infinite re-renders caused by a state selector creating new object references every frame, scroll broken during streaming, the UI locked in a death spiral. A "successful" pipeline run had produced a broken application.
 
-Building spec-kit-skills took over 500 commits across three weeks. We cataloged 19 recurring failure patterns and 66 specific lessons. Every single one came from a real pipeline run that produced wrong results.
+Building spec-kit-skills took over 500 commits across three weeks. We cataloged 19 recurring failure patterns and 65 specific lessons. Every single one came from a real pipeline run that produced wrong results.
 
 The insight: making AI agents *reliable* is fundamentally different from making them *capable*. The agent could always build features. The challenge was getting it to build the *right* features, the *right* way, *every time*.
 
@@ -282,7 +282,7 @@ Then:
 /smart-sdd pipeline F001
 ```
 
-The repository includes 32 user-facing scenarios in SCENARIO-CATALOG.md and a comprehensive lessons-learned file with all 19 patterns and 66 specific lessons.
+The repository includes 32 user-facing scenarios in SCENARIO-CATALOG.md and a comprehensive lessons-learned file with all 19 patterns and 65 specific lessons.
 
 ---
 
