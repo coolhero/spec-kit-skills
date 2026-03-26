@@ -947,3 +947,9 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: aegis DG1 Integration Demo passed on first run but failed on second. Three simultaneous bugs discovered: (1) Budget Guard used `>` instead of `>=` — off-by-one that only manifests with tiny budget values after prior usage. (2) Tier-specific budget and Global budget are independent DB records — setting Global budget doesn't reset Tier budget from previous test. (3) Redis `SCAN --pattern` via Docker pipe loses scan cursor — partial key deletion leaves stale counters.
 
 **Universal takeaway**: Integration Demos should be run TWICE: first to verify functionality, second to catch state pollution from the first run. Many bugs only appear when prior state exists — clean-slate tests miss them. This is why demo scripts need both `--ci` mode (repeatable) and proper cleanup/reset between runs. The `cleanup` field in F8b Runtime Environment supports this pattern.
+
+#### L75. Demo Has Two Audiences — Machine and Human
+
+**What happened**: aegis DG1/DG2 Integration Demo `--ci` mode was debugged through 10+ iterations (P15, P16 fixes) and worked perfectly. But interactive mode was never tested — it instant-exited due to a `wait` bug (P17), and its output was raw curl commands without context (P18). The agent declared "demo complete" after --ci passed. Result: 50% of the demo (the human-facing half) was broken and unusable.
+
+**Universal takeaway**: Demo scripts serve two audiences with different needs. `--ci` serves machines (automated regression). Interactive serves humans (understanding + verification). Verifying only one and declaring complete is like testing only the API and shipping without checking the UI. Both modes must be independently verified before "demo complete." And interactive mode is a tutorial, not a curl dump — each step needs purpose, expected result, and integration point explanation.

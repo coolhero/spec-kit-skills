@@ -279,6 +279,63 @@ wait || true
 - **Demo code separation**: `// @demo-only` and `// @demo-scaffold` markers
 - **Playwright header** (optional): For UI Features, include a `# Playwright` comment section with URLs and element assertions for automated UI verification. See [reference/ui-testing-integration.md](ui-testing-integration.md)
 
+### Demo Verification Checklist (before declaring "demo complete")
+
+Every demo script has TWO modes. Both must be independently verified:
+
+| Mode | Purpose | Verification |
+|------|---------|-------------|
+| `--ci` | Automated regression check | Run → exit 0 → PASS |
+| default (interactive) | User sees and tries the Feature | Run → stays alive → user can follow steps → Ctrl+C to stop |
+
+🚫 **BLOCKING**: Declaring "demo complete" after verifying only `--ci` is a P17 violation. Both modes must be tested.
+
+**Pre-completion checklist**:
+- [ ] `--ci` mode: runs and exits 0
+- [ ] `--ci` mode: run TWICE (catches state pollution — P16/L74)
+- [ ] Interactive mode: starts and stays alive (not instant exit)
+- [ ] Interactive mode: printed instructions are followable by a human
+- [ ] Interactive mode: prerequisite setup is automatic (login, seed data, API keys)
+
+❌ WRONG: Debug --ci for 10 rounds → passes → "demo complete" → interactive mode instant-exits
+✅ RIGHT: --ci passes → interactive starts → user follows steps → both verified → "demo complete"
+
+### Interactive Mode = Tutorial, Not Curl Dump
+
+Interactive mode's purpose is **user understanding**, not automated verification. The user should be able to follow the steps and understand what's happening at each point.
+
+**Required elements per step**:
+
+```
+Step N: [Action Name] (Feature: F00N)
+  Purpose: Why this step matters in the integration scenario
+  Command: curl -X POST http://localhost:3000/auth/login ...
+  Expected: 200 + { "accessToken": "eyJ...", "user": { "role": "admin" } }
+  Verify: Token received — copy accessToken for next step
+  Integration point: F003 Auth validates credentials → issues JWT for F002 Gateway
+```
+
+**Anti-patterns**:
+- ❌ `curl -X POST http://localhost:3000/auth/login -d '...'` (command only, no context)
+- ❌ `<API_KEY>` placeholder that user must manually find and replace
+- ❌ No mention of which Feature is involved at each step
+
+**Required for Integration Demos specifically**:
+- Each step MUST name the Feature(s) involved
+- Cross-Feature integration points MUST be explained ("F003's API Key authenticates F002's Gateway")
+- Prerequisite data (login, API keys, budget setup) MUST be auto-configured at script start
+- User should only need to copy-paste curl commands — no manual setup between steps
+
+**CI vs Interactive design intent**:
+| Aspect | `--ci` mode | Interactive mode |
+|--------|------------|-----------------|
+| Audience | Machine | Human |
+| Purpose | "Does it work?" | "How does it work?" |
+| Output | Exit code | Step-by-step tutorial |
+| Data setup | Automatic + hidden | Automatic + explained |
+| Placeholders | None (all auto-injected) | None (all auto-injected) |
+| Duration | Seconds | User-paced |
+
 ## 5. Requirements by Feature Type
 
 | Feature Type | Demo Approach |

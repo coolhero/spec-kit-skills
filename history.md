@@ -5421,3 +5421,18 @@ Simulated 3 greenfield projects through the init pipeline (Hono REST API, Electr
 |------|--------|
 | `README.md` | Renamed Design Philosophy → Design Discipline; added belief statement + concept taglines + rule↔concept connections |
 | `README.ko.md` | Same changes in Korean; 설계 철학 → 설계 규율 |
+
+## [2026-03-26] P17+P18 — Demo Dual-Mode Verification + Interactive Quality Standard
+
+| Decision | Rationale |
+|----------|-----------|
+| Add Demo Verification Checklist to demo-standard.md (P17) | Agent declared "demo complete" after --ci passed, but interactive mode was never tested and instant-exited. BLOCKING checklist requires both modes to be independently verified before "demo complete" |
+| Add Interactive Mode = Tutorial, Not Curl Dump standard to demo-standard.md (P18) | Interactive mode output was raw curl commands without context — no purpose, no expected result, no Feature identification. New standard requires per-step structure: Action Name, Purpose, Command, Expected, Verify, Integration point |
+| Add L75 to lessons-learned.md | Captures the dual-audience pattern: --ci serves machines, interactive serves humans. Verifying only one is like testing API without checking UI |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `smart-sdd/reference/demo-standard.md` | Added Demo Verification Checklist (P17) + Interactive Mode Quality Standard (P18) between § 4 Key Requirements and § 5 Requirements by Feature Type |
+| `lessons-learned.md` | Added L75: Demo Has Two Audiences — Machine and Human |
+| `history.md` | This entry |
