@@ -427,6 +427,30 @@ Foundation files MAY declare toolchain commands that the pipeline uses for build
 
 **Multiple frameworks**: When multiple Foundation files are loaded, F8 from the PRIMARY framework (first in `**Framework**` field) takes precedence for toolchain commands
 
+### F8b. Runtime Environment
+
+Runtime fields used by demo scripts, verify Phase 3 (SC runtime verification), and implement Post-Implement Smoke Launch. When present, these fields override auto-detection.
+
+| Field | Description | Example (NestJS) | Example (FastAPI) |
+|-------|-------------|-------------------|-------------------|
+| `server_start` | Development server start command | `npm run start:dev` | `uvicorn main:app --reload` |
+| `server_port` | Default server port | `3000` | `8000` |
+| `health_check` | Health check command (must exit 0 when healthy) | `curl -sf http://localhost:3000/health` | `curl -sf http://localhost:8000/health` |
+| `env_loading` | How the framework loads environment variables | `dotenv (@nestjs/config)` | `python-dotenv` |
+| `prerequisites` | Infrastructure start command (DB, cache, etc.) | `docker compose up -d` | `docker compose up -d` |
+| `seed_data` | Test data seeding command (optional) | `npm run seed` | `python manage.py loaddata` |
+| `cleanup` | Infrastructure teardown command | `docker compose down` | `docker compose down` |
+
+**Consumers**:
+- **Demo scripts** (`demos/F00N-*.sh`): Read F8b for server_start, health_check, prerequisites, seed_data
+- **Verify Phase 3**: Read F8b for server_start, health_check, prerequisites before SC runtime verification
+- **Implement Post-Implement Smoke Launch**: Read F8b for server_start, health_check
+- **Demo scripts (.env handling)**: If `env_loading` is `dotenv` or `python-dotenv`, demo/verify scripts must source `.env` explicitly (framework loads it but bash scripts do not)
+
+**If F8b is absent**: Pipeline falls back to auto-detection (same as F8 for build commands).
+
+> **Shell scripts vs Application runtime**: When `env_loading` is `dotenv` (Node.js), `python-dotenv` (Python), or similar framework-managed loading, the APPLICATION reads `.env` automatically but SHELL SCRIPTS (demos, verify curl commands) do NOT. Demo and verify scripts must explicitly source `.env` when running outside the application process. F8b documents this so the agent knows when `.env` sourcing is needed.
+
 ---
 
 ## F9. Scan Targets

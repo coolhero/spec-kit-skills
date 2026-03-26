@@ -106,6 +106,22 @@
 
 ---
 
+## F8b. Runtime Environment
+
+| Field | Command |
+|-------|---------|
+| `server_start` | `npm run start:dev` |
+| `server_port` | `3000` |
+| `health_check` | `curl -sf http://localhost:3000/health` |
+| `env_loading` | `dotenv` (@nestjs/config + ConfigModule) |
+| `prerequisites` | `docker compose up -d` (if DB/Redis used) |
+| `seed_data` | `npm run seed` (if SeedService exists) |
+| `cleanup` | `docker compose down` |
+
+> **Note**: NestJS uses `@nestjs/config` which reads `.env` via `dotenv`. Bash demo/verify scripts must `source .env` with `set -a` explicitly — the NestJS process reads it but child bash commands do not.
+
+---
+
 ## F9. Scan Targets
 
 #### Data Model

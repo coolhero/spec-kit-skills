@@ -1086,7 +1086,7 @@ Each module isn't just a tag that says "this project uses auth." It's a file con
 | **S** (S0–S9) | smart-sdd | How to **build** this domain | Construction manual |
 | **A** (A0–A5) | smart-sdd | *Why* certain decisions **matter** | Architecture philosophy |
 | **R** (R1–R5) | reverse-spec | How to **read** existing code for this domain | Reading comprehension guide |
-| **F** (F0–F8) | reverse-spec / smart-sdd | **Framework-specific** infrastructure decisions | Platform blueprint |
+| **F** (F0–F8b) | reverse-spec / smart-sdd | **Framework-specific** infrastructure decisions | Platform blueprint |
 
 S-sections tell the pipeline *what to do* (generate SCs, prevent bugs, verify). A-sections tell it *why* (streaming-first philosophy guides every SC). R-sections tell reverse-spec *how to recognize* the pattern in existing code. F-sections define the *platform* that business Features build on.
 
@@ -1135,7 +1135,7 @@ S-sections tell the pipeline *what to do* (generate SCs, prevent bugs, verify). 
 | **F2** | Decision Items | `init` / `analyze` | **Choices to make** — "CORS policy? Auth strategy? ORM?" |
 | **F3** | Extraction Rules | `analyze` | **How to extract** existing decisions from code |
 | **F7** | Philosophy | `constitution` | **Framework values** — "Middleware Composition", "Convention over Configuration" |
-| **F8** | Toolchain | `implement` / `verify` | **Build/test/lint commands** — `npm run build`, `cargo test` |
+| **F8/F8b** | Toolchain + Runtime Environment | `implement` / `verify` | **Build/test/lint commands** (F8) plus **server startup, health check, environment loading** (F8b). Demo scripts, verify, and implement smoke all read F8b |
 
 **Module loading order**: `_core.md` (always) → active Interfaces → active Concerns → active Archetypes → Org Convention (if specified) → Context Mode → Context Modifiers → Project Custom (`domain-custom.md`). When modules are loaded, their sections **merge by append** — an `http-api` project with `auth` concern and `ai-assistant` archetype accumulates S1 rules from all three, S5 probes from all three, and A4 principles from the archetype. The agent gets one combined ruleset, not three separate files to juggle. For the complete merge protocol and a worked example, see [ARCHITECTURE-EXTENSIBILITY.md § 2b](ARCHITECTURE-EXTENSIBILITY.md#2b-how-composed-modules-drive-the-pipeline).
 
@@ -1260,7 +1260,7 @@ Long pipeline sessions face two systemic risks: **context window loss** (agent f
 
 **Source Modification Gate** — During verify, every source edit must be classified (Minor / Major-Implement / Major-Plan / Major-Spec) *before* any code is touched. The classification determines whether the fix happens inline or routes back to the correct pipeline stage. A Minor Fix Accumulator tracks inline fixes per Feature — if the count reaches 3, the system auto-escalates to Major, preventing structural drift disguised as minor patches.
 
-**Pipeline Integrity Guards** — 7 guards enforce the three concepts at runtime. Each guard covers a specific failure class: G1 Guideline→Gate escalation, G2 Static≠Runtime 5-level verification, G3 Cross-Stage Trust Breakers, G4 Granularity Alignment, G5 Environment Parity (dual-mode), G6 Cross-Feature Interface verification, G7 Rebuild Fidelity Chain (Component Tree + Data Lifecycle → Source Mapping → Source-First gates). New failures extend existing guards rather than accumulate as ad-hoc rules.
+**Pipeline Integrity Guards** — 7 guards enforce the three concepts at runtime. Each guard covers a specific failure class: G1 Guideline→Gate escalation, G2 Static≠Runtime 6-level verification, G3 Cross-Stage Trust Breakers, G4 Granularity Alignment, G5 Environment Parity (dual-mode), G6 Cross-Feature Interface verification, G7 Rebuild Fidelity Chain (Component Tree + Data Lifecycle → Source Mapping → Source-First gates). New failures extend existing guards rather than accumulate as ad-hoc rules.
 
 **Context Window Management** — Skill files are decomposed into lazy-loaded units: `SKILL.md` (always loaded, ~60 lines) routes to `commands/{cmd}.md` (loaded per command), which references `injection/{cmd}.md` (loaded per pipeline step) and `domains/{module}.md` (loaded per project profile). A desktop Electron rebuild loads ~3,200 tokens of domain rules; a CLI greenfield loads ~800. Unused modules never enter the context.
 
@@ -1562,7 +1562,7 @@ Phase 1~N: Per Feature (in Release Group order):
 
 **Release Groups vs Demo Groups**: Release Groups determine Feature build order based on dependencies (generated automatically). Demo Groups determine which Features are demoed together based on user scenarios (defined during Feature Briefing). They are independent — a Feature's build priority and demo priority can differ.
 
-### 5-Phase Verification
+### 6-Phase Verification
 
 What verify catches — before merge:
 
@@ -1588,6 +1588,7 @@ Phase 3:  Demo-Ready — SC Verification Matrix (coverage gate if < 50%),
 Phase 3b: Bug Prevention — empty state smoke test (data presence check),
           smoke launch criteria
 Phase 4:  Global Evolution Update (registries, sdd-state)
+Phase 5:  Integration Demo (conditional — when all Features in a Demo Group pass verify)
 ```
 
 ### What Happens Automatically Between Steps
@@ -1666,7 +1667,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/dom
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd state file | `specs/_global/sdd-state.md` |
 | Decision history | `history.md` |
-| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 70 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
+| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 72 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
 
 ### Feature Naming Convention
 

@@ -965,7 +965,7 @@ R6 & Tier Classification Axes & Feature importance and tier assignment heuristic
 \end{tabularx}
 \end{table}
 
-\section{F-Family: Foundation Platform (F0--F8)}
+\section{F-Family: Foundation Platform (F0--F8b)}
 
 F-sections define framework-specific platform rules.
 
@@ -983,10 +983,33 @@ F2 & Foundation Checklist Items & Per-framework checklist (BST/SEC/FWK items for
 F3 & T0 Feature Grouping Rules & How Foundation items map to T0 Features \\
 F7 & Philosophy & Framework-endorsed principles (distinct from operational checklists) \\
 F8 & Toolchain Commands & Build, test, lint commands for this framework \\
+F8b & Runtime Environment & Server startup, health check, environment loading for demos and verify \\
 F9 & Scan Targets & Directories and files to scan during analysis \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\paragraph{F8b: Runtime Environment.}
+Runtime fields for demo scripts, verify Phase~3, and implement smoke launch. Centralizes server startup, health checks, and environment loading so all consumers read from one source.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Field} & \textbf{Purpose} \\
+\midrule
+server\_start & Development server start command \\
+server\_port & Default port number \\
+health\_check & Health check command (exit 0 = healthy) \\
+env\_loading & How framework loads env vars (dotenv, python-dotenv, shell-native) \\
+prerequisites & Infrastructure start (docker compose up -d) \\
+seed\_data & Test data seeding command \\
+cleanup & Infrastructure teardown \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Consumers: demo scripts read F8b for server startup; verify Phase~3 reads F8b before SC runtime verification; implement smoke launch reads F8b for health checks. When Foundation changes (NestJS $\rightarrow$ FastAPI), F8b changes once and all consumers adapt.
 
 \begin{notebox}[Foundation File F-numbers]
 Individual foundation files (e.g., \texttt{react.md}, \texttt{spring-boot.md}) reuse some F-numbers with framework-specific meanings. F2 in a foundation file contains the actual checklist items; F3 contains extraction rules. See \texttt{\_foundation-core.md} for the protocol-level definitions.
@@ -4023,7 +4046,7 @@ H: Advanced and Customization & 10 \\
 
   \item[Lazy Loading] Loading only the S-sections relevant to the current pipeline command, reducing context consumption by 40--95\%.
 
-  \item[Module] A markdown file containing domain-specific rules organized by standardized section numbers (S0--S9, A0--A5, R1--R5, F0--F8).
+  \item[Module] A markdown file containing domain-specific rules organized by standardized section numbers (S0--S9, A0--A5, R1--R5, F0--F8b).
 
   \item[Pre-context] A per-Feature file containing what that Feature needs to know about the project, source analysis, cross-Feature dependencies, and augmented requirements.
 

@@ -6,6 +6,31 @@
 ---
 
 
+## [2026-03-26] Extend F8 Toolchain Commands with Runtime Environment (F8b)
+
+### What Changed
+1. **_foundation-core.md § F8b**: Added Runtime Environment subsection with 7 fields (server_start, server_port, health_check, env_loading, prerequisites, seed_data, cleanup). Documents consumers (demo scripts, verify Phase 3, implement Smoke Launch) and shell-vs-application .env loading distinction.
+2. **nestjs.md § F8b**: Added NestJS-specific Runtime Environment values with note about dotenv/bash script interaction.
+3. **demo-standard.md**: Added "Runtime Environment (F8b Foundation)" section after Demo Philosophy, requiring demo scripts to use F8b fields instead of hardcoded commands.
+4. **verify-phases.md**: Added "Server Startup via F8b" section before Phase Execution table, defining 4-step startup protocol (prerequisites → server_start → health_check → env verification) with anti-pattern examples.
+5. **pipeline.md**: Added F8b Integration note to Post-Implement Smoke Launch section.
+6. **lessons-learned.md**: Added L73 (Runtime Environment Is a First-Class Toolchain Concern).
+
+### Design Decision
+F8 covered build-time commands (build, test, lint) but not runtime commands (server start, health check, prerequisites). Demo scripts, verify Phase 3, and implement Smoke Launch all needed the same runtime information but each hardcoded framework-specific values independently. F8b centralizes runtime environment knowledge in the Foundation module, matching the existing F8 pattern. When Foundation changes (e.g., NestJS → FastAPI), F8b changes once and all consumers adapt. The shell-vs-application .env loading distinction addresses a recurring failure where framework-managed dotenv loading doesn't apply to bash scripts.
+
+### Files Changed
+- `.claude/skills/reverse-spec/domains/foundations/_foundation-core.md` — F8b Runtime Environment section
+- `.claude/skills/reverse-spec/domains/foundations/nestjs.md` — NestJS F8b values
+- `.claude/skills/smart-sdd/reference/demo-standard.md` — F8b Foundation reference
+- `.claude/skills/smart-sdd/commands/verify-phases.md` — Server Startup via F8b
+- `.claude/skills/smart-sdd/commands/pipeline.md` — F8b Integration in Smoke Launch
+- `lessons-learned.md` — L73
+
+---
+
+
+
 ## [2026-03-26] Define Integration Demo script lifecycle across pipeline
 
 ### What Changed

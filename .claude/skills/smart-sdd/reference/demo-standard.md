@@ -14,6 +14,18 @@ A demo is an **executable script** that launches the real, working Feature so th
 - **`--ci` flag**: Quick health check → exit (for `verify` Phase 3 automation)
 - **Script location**: `demos/F00N-name.sh` (or `.ts`/`.py`/etc. matching the project's language)
 
+### Runtime Environment (F8b Foundation)
+
+Demo scripts MUST use the active Foundation's F8b Runtime Environment fields for:
+- **Server startup**: Use `server_start` field (not hardcoded `npm run start:dev`)
+- **Health check**: Use `health_check` field (not hardcoded `curl localhost:3000`)
+- **Prerequisites**: Use `prerequisites` field to start infrastructure before server
+- **Environment loading**: If `env_loading` is framework-managed (dotenv, python-dotenv), demo scripts must explicitly source `.env` — the framework's auto-loading does not apply to bash scripts
+
+See `_foundation-core.md` § F8b for field definitions. Individual Foundation files (e.g., `nestjs.md`, `fastapi.md`) provide project-type-specific values.
+
+This ensures demo scripts are **portable across frameworks** — changing Foundation from NestJS to FastAPI updates F8b, and all demo scripts adapt without rewriting.
+
 ## 2. Anti-Patterns (REJECT these)
 
 > **⚠️ DO NOT DO THIS:**

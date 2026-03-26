@@ -418,6 +418,21 @@ If sdd-state.md contains `#### Verify Progress` with pending phases:
 
 ---
 
+#### Server Startup via F8b
+
+Read the active Foundation's F8b Runtime Environment:
+1. Run `prerequisites` (e.g., `docker compose up -d`) — wait for infrastructure
+2. Run `server_start` (e.g., `npm run start:dev`) — wait for boot
+3. Run `health_check` (e.g., `curl -sf http://localhost:3000/health`) — confirm ready
+4. If `env_loading` is framework-managed: verify `.env` exists and contains required vars (per P13 Verify Environment Readiness)
+
+If F8b is absent, fall back to auto-detection (existing behavior).
+
+❌ WRONG: Hardcode `npm run start:dev` in verify-phases.md → breaks for Python/Go/Rust projects
+✅ RIGHT: Read F8b `server_start` → works for any Foundation
+
+---
+
 ## Phase Execution — Read Per-Phase Files
 
 Each phase is in a separate file to fit within context budget. Read ONLY the phase you are currently executing:

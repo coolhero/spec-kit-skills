@@ -1388,6 +1388,12 @@ Level 3 — HARD STOP (only after Level 1-2 exhausted):
 
 > This overlaps with verify Phase 0's Dev Mode Stability Probe but catches issues earlier, avoiding the verify → regression → re-implement cycle.
 
+
+**F8b Integration**: Smoke Launch uses the active Foundation's F8b Runtime Environment:
+- `prerequisites` → start infrastructure
+- `server_start` → start application
+- `health_check` → confirm running
+If F8b is absent, auto-detect from project files.
 #### Post-Implement Completeness Gate
 
 > **⚠️ implement is NOT complete until the Completeness Gate passes.** This gate catches incomplete implementations BEFORE they reach verify — where detection is too late and produces only non-blocking warnings.

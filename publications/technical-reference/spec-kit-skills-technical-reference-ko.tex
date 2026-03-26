@@ -965,7 +965,7 @@ R6 & Tier Classification Axes & Feature 중요도 및 티어 할당 휴리스틱
 \end{tabularx}
 \end{table}
 
-\section{F 패밀리: Foundation 플랫폼 (F0--F8)}
+\section{F 패밀리: Foundation 플랫폼 (F0--F8b)}
 
 F 섹션은 프레임워크별 플랫폼 규칙을 정의한다.
 
@@ -983,10 +983,33 @@ F2 & Foundation Checklist Items & 프레임워크별 체크리스트 (T0 Feature
 F3 & T0 Feature Grouping Rules & Foundation 항목이 T0 Feature에 매핑되는 방법 \\
 F7 & Philosophy & 프레임워크가 권장하는 원칙 (운영 체크리스트와 구별) \\
 F8 & Toolchain Commands & 이 프레임워크의 빌드, 테스트, 린트 명령 \\
+F8b & Runtime Environment & 데모와 verify를 위한 서버 시작, 헬스 체크, 환경 변수 로딩 \\
 F9 & Scan Targets & 분석 시 스캔할 디렉토리와 파일 \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\paragraph{F8b: Runtime Environment.}
+데모 스크립트, verify Phase~3, implement 스모크 런치를 위한 런타임 필드. 서버 시작, 헬스 체크, 환경 변수 로딩을 중앙화하여 모든 소비자가 하나의 소스에서 읽는다.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{필드} & \textbf{목적} \\
+\midrule
+server\_start & 개발 서버 시작 명령 \\
+server\_port & 기본 포트 번호 \\
+health\_check & 헬스 체크 명령 (exit 0 = 정상) \\
+env\_loading & 프레임워크의 환경 변수 로딩 방식 (dotenv, python-dotenv, shell-native) \\
+prerequisites & 인프라 시작 (docker compose up -d) \\
+seed\_data & 테스트 데이터 시딩 명령 \\
+cleanup & 인프라 정리 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+소비자: 데모 스크립트는 서버 시작을 위해 F8b를 읽고, verify Phase~3는 SC 런타임 검증 전에 F8b를 읽으며, implement 스모크 런치는 헬스 체크를 위해 F8b를 읽는다. Foundation이 변경되면 (NestJS $\rightarrow$ FastAPI), F8b만 한 번 수정하면 모든 소비자가 적응한다.
 
 \begin{notebox}[Foundation 파일의 F 번호]
 개별 Foundation 파일(예: \texttt{react.md}, \texttt{spring-boot.md})은 일부 F 번호를 프레임워크별 의미로 재사용한다. Foundation 파일의 F2는 실제 체크리스트 항목을, F3는 추출 규칙을 포함한다. 프로토콜 수준 정의는 \texttt{\_foundation-core.md} 참조.
@@ -4104,7 +4127,7 @@ H: 고급 및 커스터마이징 & 10 \\
 
   \item[Lazy Loading] 현재 Pipeline 명령에 관련된 S-섹션만 로드하여 컨텍스트 소비를 40--95\% 줄이는 기법.
 
-  \item[Module] 표준화된 섹션 번호(S0--S9, A0--A5, R1--R6, F0--F8)로 구성된 도메인별 규칙을 포함하는 마크다운 파일.
+  \item[Module] 표준화된 섹션 번호(S0--S9, A0--A5, R1--R6, F0--F8b)로 구성된 도메인별 규칙을 포함하는 마크다운 파일.
 
   \item[Pre-context] 해당 Feature가 프로젝트, 소스 분석, Cross-Feature 의존성, 보강된 요구사항에 대해 알아야 할 것을 포함하는 Feature별 파일.
 
