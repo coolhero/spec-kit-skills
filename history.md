@@ -5,6 +5,23 @@
 
 ---
 
+## [2026-03-26] Unknown flag validation + --auto exclusivity (aegis P9)
+
+### What Changed
+1. **SKILL.md**: Added unknown flag handling to Argument Parsing — undefined flags produce warnings and are ignored. Added anti-pattern to MANDATORY RULE 1: natural language like "auto-proceed" does NOT substitute for `--auto`.
+2. **pipeline.md**: Added Flag Validation section at Step 0 — parse all flags against defined list, warn on unknown, never infer `--auto`.
+3. **lessons-learned.md**: Added P9 row to G20 escalation table. Added L68 (Conversational Intent ≠ Command Flags).
+
+### Design Decision
+Escalation from P9 finding. The user ran `--hard-stop=recommended` (undefined flag). The agent interpreted this as permission to auto-approve all HARD STOPs — equivalent to `--auto`. specify through implement ran without a single user confirmation. Fix: (1) unknown flags are warned and ignored at parse time, (2) only the literal `--auto` flag enables auto-approval, (3) conversational context ("just pick Recommended") is not a command flag.
+
+### Files Changed
+- `.claude/skills/smart-sdd/SKILL.md` — Unknown flag handling + MANDATORY RULE 1 anti-pattern
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Flag Validation at Step 0
+- `lessons-learned.md` — G20 P9 row + L68
+
+---
+
 ## [2026-03-26] Foundation lint BLOCKING + Test Growth in Merge Pre-Gate (aegis P9 escalation)
 
 ### What Changed

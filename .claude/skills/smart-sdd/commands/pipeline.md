@@ -921,6 +921,15 @@ Processes the Feature(s) selected in Step 4 (Feature Selection). In single-Featu
 
 🚫 **PARALLEL FEATURE EXECUTION IS FORBIDDEN**: Never use Agent tool, background tasks, or any other mechanism to process multiple Features simultaneously. Even when the user says "do all Features" or "run them in parallel" — Features MUST execute sequentially. Parallel execution causes: (1) entity-registry conflicts from concurrent writes, (2) Feature B referencing Feature A's entities before A is complete, (3) file conflicts in shared files (app.module.ts, package.json), (4) untraceable state in sdd-state.md. The ONLY parallelism allowed is within-Feature task-level parallelism (see § Parallel vs Sequential Execution).
 
+#### Flag Validation (Step 0 — before any pipeline action)
+
+Parse the command arguments. For each flag:
+1. Check against the defined flag list in SKILL.md § Argument Parsing
+2. If unknown → display warning: `⚠️ Unknown flag: [flag]. Ignoring.`
+3. Continue with default behavior
+
+🚫 **NEVER infer `--auto` from undefined flags or conversational context.** Only the literal `--auto` in the command string enables auto-approval. "HARD STOP은 Recommended로 진행" in conversation = user will SELECT Recommended at each HARD STOP, NOT skip the HARD STOP.
+
 Executes the following steps **strictly in order** for each Feature.
 
 **Every "Review" below is a HARD STOP — you MUST use AskUserQuestion and WAIT for explicit user approval before continuing.**

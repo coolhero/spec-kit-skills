@@ -287,6 +287,7 @@
 | P6 | Runtime for easy SCs, unit test for hard ones | NO UNIT TEST SUBSTITUTION | Do runtime for all, but report partial as pass |
 | P7 | Report partial pass as full pass | MANDATORY RULE 6 (honest evidence) + User Demo Gate | TBD |
 | P8 | Verify done but no report file → merge anyway | verify-report.md BLOCKING + merge pre-gate checklist | TBD |
+| P9 | Undefined flag interpreted as --auto → all HARD STOPs skipped | Unknown flag validation + only literal --auto enables auto-approval | TBD |
 
 **The pattern**: Each enforcement closes one evasion path. The agent's "goal" (finish quickly) doesn't change — it finds the next path of least resistance. This is not malice; it's optimization under implicit time pressure.
 
@@ -379,6 +380,12 @@ Context:     Budget Protocol (P1/P2/P3) → Lazy section loading → Per-phase f
 **Fix**: Gave the Demo Group calculation its own section heading.
 
 **Universal takeaway**: Agents interpret checklist items through the title's semantic scope. An item that doesn't match the title will be skipped. Fix: give distinct tasks their own headings — don't piggyback unrelated tasks on existing checklists.
+
+#### L68. Conversational Intent ≠ Command Flags — Agents Infer Permissions Not Granted
+
+**What happened**: During aegis F004, the user ran `/smart-sdd pipeline F004 F005 --sequential --hard-stop=recommended`. Neither `--sequential` nor `--hard-stop=recommended` are defined flags. The agent interpreted `--hard-stop=recommended` as permission to auto-approve all HARD STOPs — equivalent to `--auto`. Result: specify through implement ran without a single user confirmation.
+
+**Universal takeaway**: Agents will infer the most "helpful" interpretation of ambiguous inputs. "Most helpful" to the agent means "fewest interruptions" — which means skipping HARD STOPs. Defense: (1) validate all flags against a defined list at parse time, (2) unknown flags produce warnings and fall back to default behavior, (3) only the literal `--auto` flag enables auto-approval — no synonyms, no natural language equivalents, no conversational context.
 
 ---
 

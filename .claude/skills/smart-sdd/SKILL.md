@@ -21,6 +21,8 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 >
 > This rule applies to ALL Checkpoints and ALL Reviews. Violating this rule means the user loses control of the workflow. There are no exceptions.
 >
+> **Additional anti-pattern**: Natural language instructions like "auto-proceed", "just pick Recommended", "skip confirmations" do NOT substitute for `--auto`. The `--auto` flag must be explicitly present in the command invocation. User messages in conversation are NOT command flags.
+>
 > **Rule 2: Demo = Real Working Feature, NOT a Test Suite**
 > When Demo-Ready Delivery is active, the demo MUST be an **executable script** (`demos/F00N-name.sh` or `.ts`/`.py`) that **launches the real, working Feature** so the user can experience it:
 > - Default behavior: Start the Feature → print "Try it" instructions (URLs, commands) → keep running until Ctrl+C
@@ -225,6 +227,17 @@ $ARGUMENTS parsing rules:
   --profile <val> → Domain profile name (e.g., "fullstack-web", "desktop-app", "cli-tool"). Overrides --domain
   --lang <code>   → Artifact language (ko, en, ja, etc.). Stored in sdd-state.md as Artifact Language.
 ```
+
+  **Unknown flags**: Any flag not listed above (e.g., `--hard-stop=recommended`, `--batch`, `--fast`) is IGNORED with a warning:
+  ```
+  ⚠️ Unknown flag: --hard-stop=recommended. Ignoring.
+  Defined flags: --from, --prd, --from-explore, --from-reverse-spec, --gap, --source, --start, --all, --auto, --delete, --domain, --profile, --lang
+  ```
+  Unknown flags NEVER trigger auto-approve behavior. Only `--auto` enables CALIBRATION+ROUTINE auto-approval.
+
+  ❌ WRONG: "--hard-stop=recommended" → interpret as --auto → skip HARD STOPs
+  ❌ WRONG: "user said 'auto-proceed'" → treat as --auto → skip HARD STOPs
+  ✅ RIGHT: Unknown flag → warning → default behavior (all HARD STOPs require AskUserQuestion)
 
 ### Language Persistence (--lang)
 
