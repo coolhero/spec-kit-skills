@@ -5,24 +5,18 @@
 
 ---
 
-## [2026-03-26] Constitution→Pipeline Binding for TDD enforcement (P15)
+## [2026-03-26] Quantitative Confidence Level Assignment Rules for Clarity Index
 
 ### What Changed
-1. **injection/tasks.md — Constitution Best Practices Activation**: Added BLOCKING section that reads constitution before tasks generation. If Test-First is active, injects "Tests are requested" context to activate spec-kit's built-in TDD support (test tasks generated, test→impl ordering per story phase). Post-generation check blocks if any story phase lacks test tasks. Added Constitution Binding Display table and TDD row to Pre-ReviewApproval Validation.
-2. **injection/analyze.md — Constitution Compliance Verification**: Added second-defense check after speckit-analyze runs. If Test-First is active, verifies tasks.md has correct test→impl ordering. Catches violations that slipped past tasks injection (e.g., manual edits).
-3. **injection/implement.md — TDD Execution Gate**: Added per-task gate that checks test task completion before allowing implementation task execution. Enforces Red-Green TDD cycle: test fails → implement → test passes. Only activates when Constitution Test-First is present.
-4. **pipeline.md — Constitution→Pipeline Binding Map**: Added mapping table showing how each of the 6 Constitution Best Practices maps to specific pipeline enforcement points. Design principle: no principle should rely solely on "the agent will remember this."
-5. **lessons-learned.md — L72**: "Constitution Without Pipeline Binding Is a Dead Letter" — captures the root cause pattern where declared principles had zero pipeline enforcement.
+1. **clarity-index.md § 1 — Confidence Level Assignment Rules**: Added per-dimension quantitative criteria table defining exactly what constitutes Confidence 0/1/2/3 for each of the 7 CI dimensions (Core Purpose, Key Capabilities, Project Type, Tech Stack, Target Users, Scale & Scope, Constraints). Previously only generic examples existed; now each dimension has specific thresholds.
+2. **clarity-index.md § 1 — Scoring Formula**: Added explicit formula showing weighted calculation (using existing ×3/×3/×2/×1/×1/×1/×1 weights, max 36) with a worked example (35/36 = 97%).
+3. **clarity-index.md § 1 — Transparency Requirement**: Added rule that Proposal CI display must show per-dimension breakdown with Confidence, Weight, Score, and Signal columns. Enables users to challenge specific dimension scores.
 
 ### Design Decision
-P15: Constitution principles were declarations without enforcement. spec-kit already supports TDD (opt-in via "if requested"), but smart-sdd's injection files never activated it. The fix adds a 3-layer enforcement chain: tasks (generation ordering) → analyze (second-defense verification) → implement (per-task TDD gate). This follows the same pattern that made Demo-Ready Delivery (P14) work — BLOCKING gates at specific pipeline stages, not prose instructions.
+CI scoring was previously subjective — different sessions or agents could assign different confidence levels for the same input. The quantitative rules create reproducible scores by defining concrete thresholds (e.g., Tech Stack: 1=language only, 2=language+framework, 3=language+framework+DB+infra). The transparency table lets users see exactly why each score was assigned and challenge any dimension they disagree with.
 
 ### Files Changed
-- `.claude/skills/smart-sdd/reference/injection/tasks.md` — Constitution Best Practices Activation + Pre-ReviewApproval TDD check
-- `.claude/skills/smart-sdd/reference/injection/analyze.md` — Constitution Compliance Verification
-- `.claude/skills/smart-sdd/reference/injection/implement.md` — TDD Execution Gate
-- `.claude/skills/smart-sdd/commands/pipeline.md` — Constitution→Pipeline Binding Map
-- `lessons-learned.md` — L72
+- `.claude/skills/smart-sdd/reference/clarity-index.md` — 3 new subsections in § 1
 
 ---
 

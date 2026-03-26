@@ -30,6 +30,59 @@
 | 2 | 2 | Partial clarity | "task management web app with Kanban boards" (partial specifics) |
 | 3 | 3 | Fully specified | "React + Node.js Kanban board with drag-drop, user auth, team workspaces" (detailed) |
 
+### Confidence Level Assignment Rules (per dimension)
+
+Quantitative criteria for assigning Confidence 0-3 to each dimension. These rules ensure reproducible CI scores across sessions and agents.
+
+| Dimension | 0 (None) | 1 (Vague) | 2 (Partial) | 3 (Full) |
+|-----------|----------|-----------|-------------|----------|
+| **Core Purpose** | No discernible purpose | Domain noun only ("chat app") | Domain noun + verb ("real-time chat with file sharing") | Specific problem + solution approach ("real-time team chat replacing Slack, with E2E encryption and offline sync") |
+| **Key Capabilities** | No features mentioned | 1-2 features implied | 3-5 features explicitly listed | 6+ features OR User Stories included OR priority ordering |
+| **Project Type** | Unknown | Generic ("app", "server") | Interface axis identified ("REST API", "desktop app") | Interface + archetype identified ("REST API microservice gateway") |
+| **Tech Stack** | Not mentioned | Language only ("TypeScript") | Language + framework ("TypeScript + NestJS") | Language + framework + DB + infra ("TypeScript + NestJS + PostgreSQL + Redis + Docker") |
+| **Target Users** | Not mentioned | Generic ("users") | 1-2 roles identified ("admin, member") | 3+ roles OR permission model described OR user personas |
+| **Scale & Scope** | Not mentioned | Qualitative ("small", "large") | One quantitative signal (deployment model OR user count) | Deployment + user count + growth strategy OR maturity level explicit |
+| **Constraints** | Not mentioned | Qualitative ("fast", "secure") | 1-2 specific constraints ("GDPR compliant", "<100ms latency") | 3+ specific constraints OR compliance framework named OR SLA defined |
+
+### Scoring Formula
+
+```
+Per-dimension score = Confidence × Weight
+Total CI = (Σ per-dimension scores / max possible) × 100%
+
+Weights (from § 1 table):
+  Core Purpose: ×3, Key Capabilities: ×3, Project Type: ×2,
+  Tech Stack: ×1, Target Users: ×1, Scale & Scope: ×1, Constraints: ×1
+
+Max possible = (3×3) + (3×3) + (3×2) + (3×1) + (3×1) + (3×1) + (3×1) = 36
+CI% = (total / 36) × 100
+
+Example:
+  Core Purpose: 3×3=9, Capabilities: 3×3=9, Project Type: 3×2=6,
+  Tech Stack: 3×1=3, Users: 2×1=2, Scale: 3×1=3, Constraints: 3×1=3
+  = 35/36 = 97%
+```
+
+### Transparency Requirement
+
+When displaying CI Score in the Proposal, show the per-dimension breakdown:
+
+```
+📊 Clarity Index: 97% (35/36)
+
+| Dimension | Confidence | Weight | Score | Signal |
+|-----------|-----------|--------|-------|--------|
+| Core Purpose | 3/3 | ×3 | 9 | "Enterprise AI gateway with multi-tenant budget management" |
+| Key Capabilities | 3/3 | ×3 | 9 | 7 features listed (LLM proxy, auth, budget, logging, guard, dashboard, knowledge) |
+| Project Type | 3/3 | ×2 | 6 | "http-api + microservice archetype" detected |
+| Tech Stack | 3/3 | ×1 | 3 | "TypeScript + NestJS + PostgreSQL + Redis + Next.js" |
+| Target Users | 2/3 | ×1 | 2 | "admin, member, viewer" (3 roles but no personas) |
+| Scale & Scope | 3/3 | ×1 | 3 | "production × small-team, multi-tenant SaaS" |
+| Constraints | 3/3 | ×1 | 3 | "PII masking, prompt injection defense, OWASP LLM Top 10" |
+```
+
+This ensures the user can challenge any dimension: "I think Target Users should be 3 — we have detailed personas in the PRD."
+
 ---
 
 ## 2. CI Tiers — Agent Behavior
