@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-26 15:10 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-26 18:43 KST
 
 **Four Claude Code skills that turn AI coding agents into reliable software engineers — built on three design principles ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief)) and [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -1672,7 +1672,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/dom
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd state file | `specs/_global/sdd-state.md` |
 | Decision history | `history.md` |
-| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 72 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
+| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 86 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
 
 ### Feature Naming Convention
 

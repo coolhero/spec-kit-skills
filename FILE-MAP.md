@@ -217,12 +217,12 @@ specs/domains/              ← Project-local custom modules (created by /domain
 | `history.md` | Design decision history |
 | `lessons-learned.md` | Failure patterns and countermeasures |
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for UI verification |
-| `SCENARIO-CATALOG.md` | Scenario catalog (EN) — 38 scenarios across 10 categories |
+| `SCENARIO-CATALOG.md` | Scenario catalog (EN) — 39 scenarios across 10 categories |
 | `SCENARIO-CATALOG.ko.md` | Scenario catalog (KO) — Korean mirror |
 | `SOFTWARE-CATALOG.md` | Target project types catalog with code-explore simulation results |
 | `.gitignore` | Git ignore rules (worktrees, LaTeX artifacts, .DS_Store) |
 | `install.sh` | Symlink installer for skills → ~/.claude/skills/ |
-| `publications/` | Medium articles (part1-4, EN/KO) + Technical Reference Manual (EN/KO PDF) |
+| `publications/` | Medium articles (part1-4, EN/KO) + Technical Reference Manual (EN/KO PDF/TEX) + Confluence AIDD intro |
 
 ### reverse-spec (98 files)
 
@@ -252,7 +252,7 @@ specs/domains/              ← Project-local custom modules (created by /domain
 | **Reference** (1) | `reference/speckit-compatibility.md` | reverse-spec → spec-kit command mapping |
 | **Templates** (10) | `templates/*.md` | Artifact templates: roadmap, constitution-seed, entity/api/business-logic registries, coverage-baseline, pre-context, spec-draft, speckit-prompt, stack-migration |
 
-### smart-sdd (107 files)
+### smart-sdd (153 files)
 
 | Category | Files | Description |
 |----------|-------|-------------|

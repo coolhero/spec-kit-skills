@@ -16,6 +16,7 @@
 | SA03 | Compare two projects' architectures | Run `code-explore A` then `code-explore B` — synthesis auto-activates comparison mode | Side-by-side comparison table |
 | SA04 | Go deeper after adopt or pipeline (with existing SDD docs) | Just run `code-explore .` — Context-Aware mode activates automatically when SDD artifacts exist, cross-referencing your specs and registries | Analysis enriched by existing SDD context |
 | SA05 | Audit code for security or performance concerns | Run `code-explore .` and trace auth/crypto/performance flows — use 🔒📊 observation icons | Observation catalog by concern |
+| SA06 | Learn/onboard an existing project without generating Feature candidates | Run `code-explore [path] --learn` — read-only mode, no Feature candidates, outputs to `specs/explore/learn/` | Architecture summary + existing Feature understanding map |
 
 ## B. Start a New Project
 
@@ -105,7 +106,7 @@
 
 | Category | Count |
 |----------|-------|
-| A: Understand Code | 5 |
+| A: Understand Code | 6 |
 | B: Start New Project | 5 |
 | C: Apply SDD to Existing Code | 5 |
 | D: Rewrite from Scratch | 3 |
@@ -113,7 +114,7 @@
 | F: Manage Multiple Features | 2 |
 | G: Check Status | 2 |
 | H: Advanced & Customization | 10 |
-| **Total** | **38** |
+| **Total** | **39** |
 
 ---
 
