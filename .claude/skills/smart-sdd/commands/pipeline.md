@@ -1894,6 +1894,25 @@ After context reset, the agent re-reads these files via Context Injection Protoc
 
 ---
 
+## Constitution → Pipeline Binding Map
+
+Constitution Best Practices are not just declarations — each one has a specific enforcement mechanism in the pipeline. This map ensures no Constitution principle is "declared but unenforced."
+
+| Constitution Principle | Pipeline Enforcement Point | Mechanism | Added |
+|----------------------|--------------------------|-----------|-------|
+| **I. Test-First** | tasks (injection), analyze, implement | TDD task ordering + analyze CRITICAL check + implement TDD gate | P15 |
+| **II. Think Before Coding** | specify → plan → tasks flow | Structural — pipeline order enforces this | Built-in |
+| **III. Simplicity First** | specify (S1 anti-patterns) | SC anti-patterns reject over-engineering | Built-in |
+| **IV. Surgical Changes** | implement (task-level execution) | Tasks are minimal units; implement follows task scope | Manual |
+| **V. Goal-Driven Execution** | verify (SC-based) | SC runtime verification = goal verification | Built-in |
+| **VI. Demo-Ready Delivery** | tasks (demo task injection) + implement (Completeness Gate) | BLOCKING if demo task missing | P14 |
+
+> **Design principle**: If a Constitution principle cannot be mapped to a specific pipeline enforcement point, it's either (a) inherently structural (pipeline flow guarantees it) or (b) a gap that needs a new gate. There should be NO principle that relies solely on "the agent will remember this."
+>
+> This map is checked during constitution finalization — when a new principle is added, the map should be updated. If no enforcement point exists, create one before proceeding.
+
+---
+
 ## Constitution Incremental Update
 
 When new architectural principles or conventions are discovered during Feature progression:

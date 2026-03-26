@@ -551,6 +551,28 @@ After `speckit-implement` completes, if Demo-Ready Delivery is **active** (const
    - **Playwright dependency check**: If the project's Playwright package is not installed (e.g., `@playwright/test` for JS/TS, `playwright` for Python), display:
      `ℹ️ Playwright not installed — VERIFY_STEPS test file not generated. Add @playwright/test to use CLI verification fallback.`
 
+## TDD Execution Gate (when Test-First is active in Constitution)
+
+Before executing each implementation task, check:
+
+1. **Read Constitution**: Is Test-First active?
+2. **If active**: For the current story phase, has the test task been completed?
+   - Test task completed (marked [X]) → proceed with implementation task
+   - Test task NOT completed → 🚫 BLOCKING: "Test-First: Complete test task T00N before implementing T00M"
+   - No test task exists for this story → ⚠️ WARNING: "No test task for [Story]. Consider adding tests."
+
+3. **TDD Verification per task**:
+   - After writing test → run test → confirm it FAILS (tests a not-yet-implemented feature)
+   - After writing implementation → run test → confirm it PASSES
+   - Display: "🧪 TDD: T005 (test) ❌ FAIL → T006 (impl) → T005 ✅ PASS"
+
+This gate activates ONLY when Constitution Test-First is present. Projects without Test-First in constitution skip this entirely.
+
+❌ WRONG: Test-First active → implement T003 (service code) → T007 (test for service) later
+✅ RIGHT: Test-First active → T003 (test for service) fails → T004 (service code) → T003 passes
+
+---
+
 ## Runtime Verification + Fix Loop
 
 > **Purpose**: Resolve [G4] — implement only generates code without running it. Per-task runtime verification prevents bug explosion at verify time.

@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-03-26] Constitution→Pipeline Binding for TDD enforcement (P15)
+
+### What Changed
+1. **injection/tasks.md — Constitution Best Practices Activation**: Added BLOCKING section that reads constitution before tasks generation. If Test-First is active, injects "Tests are requested" context to activate spec-kit's built-in TDD support (test tasks generated, test→impl ordering per story phase). Post-generation check blocks if any story phase lacks test tasks. Added Constitution Binding Display table and TDD row to Pre-ReviewApproval Validation.
+2. **injection/analyze.md — Constitution Compliance Verification**: Added second-defense check after speckit-analyze runs. If Test-First is active, verifies tasks.md has correct test→impl ordering. Catches violations that slipped past tasks injection (e.g., manual edits).
+3. **injection/implement.md — TDD Execution Gate**: Added per-task gate that checks test task completion before allowing implementation task execution. Enforces Red-Green TDD cycle: test fails → implement → test passes. Only activates when Constitution Test-First is present.
+4. **pipeline.md — Constitution→Pipeline Binding Map**: Added mapping table showing how each of the 6 Constitution Best Practices maps to specific pipeline enforcement points. Design principle: no principle should rely solely on "the agent will remember this."
+5. **lessons-learned.md — L72**: "Constitution Without Pipeline Binding Is a Dead Letter" — captures the root cause pattern where declared principles had zero pipeline enforcement.
+
+### Design Decision
+P15: Constitution principles were declarations without enforcement. spec-kit already supports TDD (opt-in via "if requested"), but smart-sdd's injection files never activated it. The fix adds a 3-layer enforcement chain: tasks (generation ordering) → analyze (second-defense verification) → implement (per-task TDD gate). This follows the same pattern that made Demo-Ready Delivery (P14) work — BLOCKING gates at specific pipeline stages, not prose instructions.
+
+### Files Changed
+- `.claude/skills/smart-sdd/reference/injection/tasks.md` — Constitution Best Practices Activation + Pre-ReviewApproval TDD check
+- `.claude/skills/smart-sdd/reference/injection/analyze.md` — Constitution Compliance Verification
+- `.claude/skills/smart-sdd/reference/injection/implement.md` — TDD Execution Gate
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Constitution→Pipeline Binding Map
+- `lessons-learned.md` — L72
+
+---
+
 ## [2026-03-26] Verify .env check-first + Demo script enforcement at implement and verify (aegis P13, P14)
 
 ### What Changed

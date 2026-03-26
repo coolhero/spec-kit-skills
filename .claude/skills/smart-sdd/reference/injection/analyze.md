@@ -173,6 +173,25 @@ directly, then select "I've finished editing" to re-analyze.
 
 ---
 
+## Constitution Compliance Verification (analyze step)
+
+spec-kit's analyze already checks "D. Constitution Alignment" — smart-sdd strengthens this:
+
+**After speckit-analyze runs**, verify its output for Constitution issues:
+
+1. **Check analyze report for Constitution Alignment section**: If any CRITICAL issues related to constitution → BLOCKING
+2. **Test-First specific check**: If Constitution has Test-First active:
+   - Verify tasks.md has test tasks BEFORE implementation tasks in each story phase
+   - If violation found but analyze didn't catch it: add to analyze findings as CRITICAL
+   - Display: "⚠️ Constitution: Test-First violation — [Story Phase N] has implementation tasks before test tasks"
+
+This is a SECOND defense — injection/tasks.md should have prevented this, but if tasks were manually edited or the generation missed it, analyze catches it here.
+
+❌ WRONG: analyze says "Constitution Alignment: No issues" but tasks.md has all tests at the end
+✅ RIGHT: analyze flags "CRITICAL: Test-First principle violated — Phase 3 (US1) has T005-T008 (implement) before T009 (test)"
+
+---
+
 ## Bug Prevention Checks (B-2)
 
 > Pre-detect cross-Feature potential bugs at the analyze stage.

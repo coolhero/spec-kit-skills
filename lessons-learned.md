@@ -928,3 +928,10 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: aegis F004 completed implement + verify with 13/20 SC runtime verified, but no demo script was created. tasks.md T008 explicitly listed "Demo script: demos/F004-token-budget.sh" but it was skipped during implement. verify didn't check for demo existence either.
 
 **Universal takeaway**: Feature completion = code + tests + demo. The demo script is not documentation — it's a deliverable that packages the user experience. Three enforcement points: (1) Post-Implement Completeness Gate checks demo file exists. (2) verify Pre-Demo Check confirms --ci mode works. (3) User Demo Gate requires user to see the running Feature via the demo. If any of these is missing, the agent will skip demo creation because "the code works."
+---
+
+#### L72. Constitution Without Pipeline Binding Is a Dead Letter
+
+**What happened**: aegis Constitution declared "I. Test-First (NON-NEGOTIABLE)" but F001-F004 all implemented code before tests (or without tests entirely for F004). Root cause: spec-kit's TDD support is opt-in ("if requested"), and smart-sdd's injection files never activated it. The Constitution was stored in `.specify/memory/constitution.md` but never read by tasks, implement, or analyze injection files. Demo-Ready Delivery (Principle VI) worked because it had explicit pipeline enforcement — a BLOCKING gate in tasks injection. Test-First (Principle I) was "NON-NEGOTIABLE" in words but had ZERO enforcement in the pipeline.
+
+**Universal takeaway**: Every Constitution principle needs a **Constitution→Pipeline Binding** — a specific enforcement mechanism at a specific pipeline stage. The binding map should be maintained alongside the Constitution. When a new principle is added, the question isn't "is this important?" (of course it is) but "which pipeline gate enforces this?" If the answer is "none — the agent will follow it because it's written down," the principle is dead on arrival. Agents optimize for task completion; they follow structure, not prose.

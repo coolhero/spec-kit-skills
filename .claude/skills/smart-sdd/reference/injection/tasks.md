@@ -21,10 +21,47 @@ Display in Checkpoint: `📊 Domain: skipped (plan.md is primary input)`
 | `SPEC_PATH/[NNN-feature]/pre-context.md` | "Source Reference" section | **Rebuild/adoption mode only** — for Source Complexity Annotation. Resolve file paths per `injection/specify.md` Source Reference Path Resolution rules |
 | Preceding Features' `SPEC_PATH/[NNN-feature]/stubs.md` | Rows where Dependent Feature = current FID | **If exists** — stubs that this Feature should resolve (see `context-injection-rules.md` § Dependency Stub Resolution Injection) |
 
+## Constitution Best Practices Activation (🚫 BLOCKING)
+
+Before tasks generation, read `.specify/memory/constitution.md` and extract Best Practices:
+
+1. **Check for Test-First principle**: Search for "Test-First", "TDD", "test-first", "테스트 우선" in constitution
+2. **If Test-First is active** (present and not explicitly disabled):
+   - Inject into speckit-tasks context: **"Tests are requested. Generate test tasks. TDD approach is active."**
+   - This activates spec-kit's built-in TDD support:
+     - Test tasks are generated (not optional)
+     - Within each story phase: Tests → Models → Services → Endpoints
+     - Contract tests before implementation in each story phase
+   - **Post-generation check** (BLOCKING): After tasks.md is generated, verify:
+     - Each User Story phase has test task(s) BEFORE implementation tasks
+     - If any story phase lacks test tasks → BLOCKING: "Test-First is active but [Story Phase N] has no test tasks"
+   - Display in Checkpoint: "🧪 Constitution: Test-First ACTIVE → TDD task ordering enforced"
+
+3. **If Test-First is NOT in constitution**: Standard task generation (tests optional per spec-kit default)
+
+4. **Constitution Binding Display** (add to tasks Checkpoint):
+   ```
+   ── Constitution Best Practices Binding ──
+
+   | Principle | Status | Pipeline Effect |
+   |-----------|--------|-----------------|
+   | I. Test-First | ✅ ACTIVE | TDD task ordering: test → implement per story |
+   | II. Think Before Coding | ✅ INHERENT | spec → plan → tasks flow |
+   | III. Simplicity First | ✅ INHERENT | YAGNI in SC generation |
+   | IV. Surgical Changes | ⚠️ MANUAL | Developer discipline |
+   | V. Goal-Driven Execution | ✅ ACTIVE | SC-based verify |
+   | VI. Demo-Ready Delivery | ✅ ACTIVE | Demo task injection |
+   ```
+
+❌ WRONG: Constitution says "Test-First (NON-NEGOTIABLE)" → tasks.md puts all tests at the end → implement runs code-first
+✅ RIGHT: Constitution says "Test-First" → injection activates TDD → tasks.md has test→code order per story → implement follows TDD
+
+---
+
 ## Injected Content
 
 - Automatically executes `speckit-tasks` based on plan.md
-- No additional context injection (all information is already included in the plan)
+- Constitution Best Practices are read and activated (see above)
 
 ## Checkpoint
 
@@ -408,6 +445,7 @@ Before displaying ReviewApproval options, verify all applicable blocking checks 
 | Integration wiring tasks present | Cross-boundary data flow detected | **YES** — add before approval |
 | Source complexity parity | Rebuild mode + task count < 70% estimate | **YES** — add tasks or acknowledge |
 | Source component references | Rebuild mode + UI tasks + plan.md has Source→Target mapping | **YES** — add Source: tags before approval |
+| TDD task ordering | Test-First active in constitution | **YES** — test tasks before impl tasks per story |
 | Pattern Audit task present | plan.md has Pattern Constraints | ⚠️ Warning — strongly recommended |
 | Integration test task present | UI Feature + Test-First active | ⚠️ Warning — strongly recommended |
 | Visual verification task present | UI Feature + rebuild mode | ⚠️ Warning — strongly recommended |
