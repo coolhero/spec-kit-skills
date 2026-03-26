@@ -9972,3 +9972,15 @@ Strengthened Cascading Update step e from text instruction to BLOCKING gate. New
 ## [2026-03-26] L87: Cross-Feature API gap resolution pattern
 
 Added lesson documenting when to implement a missing API in the current Feature vs reopening the producing Feature. Pragmatic rule: reopen only for architectural changes; individual endpoints go in the consuming Feature with spec documentation.
+
+## [2026-03-27] MANDATORY RULE 9: Session Separation (Pipeline Completion Bias)
+
+### What Changed
+- SKILL.md: Rule 9 — implement and verify MUST run in different sessions
+- TRM EN/KO: "The Fundamental Limit" section in Agent Behavioral Patterns chapter
+- L89: Pipeline Completion Bias — The Limit Rules Cannot Fix
+
+### Design Decision
+After 13+ aegis pilot feedback items (P1-P13), the pattern is clear: rules are necessary but insufficient. The agent's implicit completion goal overrides explicit rules after extended execution. The only structural fix is session separation — breaking the causal chain between implement fatigue and verify shortcuts.
+
+This is the most honest acknowledgment in the project: spec-kit-skills cannot fully control agent behavior. It can define, enforce, and audit — but the final quality gate is the human.

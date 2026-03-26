@@ -111,6 +111,14 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > 3. Present Flow Proposal to user before taking action
 > - ❌ WRONG: verify finds "Team UI missing" → write CreateTeamModal.tsx → "fixed"
 > - ✅ RIGHT: verify finds "Team UI missing" → "Major-Spec: no FR for Team CRUD. Add to spec?" → user approves → spec → plan → tasks → implement
+>
+> **Rule 9: Implement and Verify in Separate Sessions (Pipeline Completion Bias Prevention)**
+> After 2+ hours of continuous pipeline execution, the agent develops "Pipeline Completion Bias" — an implicit goal to finish quickly that overrides explicit quality rules. This is a model-level behavior, not a skill bug. It cannot be prevented by adding more rules.
+> The structural fix: **implement and verify MUST run in different sessions.**
+> - implement completes → user runs `/clear` → new session: `/smart-sdd pipeline F00N --start verify`
+> - The verify session has no implement fatigue, no sunk cost, no "I already know this works" bias
+> - ❌ WRONG: specify→plan→tasks→implement→verify all in one 3-hour session → verify becomes rubber stamp
+> - ✅ RIGHT: specify→plan→tasks→implement → /clear → verify in fresh session → rigorous runtime check
 
 
 **Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).

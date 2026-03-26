@@ -1060,3 +1060,13 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **The pattern**: Rule placement matters more than rule existence. A rule at line 1453 of a 2000-line file has lower compliance probability than a rule at line 5 of SKILL.md. P2 (Enforce, Don't Reference) applies not just to separate files but to WITHIN files — critical rules must be near the top of the file the agent actually reads.
 
 **Fix applied**: SKILL.md Rule 7 expanded from 2 lines to 12 lines, including explicit "Read injection/implement.md BEFORE writing ANY code" with the P12 incident cited. The rule is now at SKILL.md line ~88 — always loaded, always visible.
+
+#### L89. Pipeline Completion Bias — The Limit Rules Cannot Fix
+
+**What happened**: aegis F007/F008: after 2+ hours of specify→plan→tasks→implement, the agent reached verify with an implicit goal to "finish." SKILL.md Rule 5 (runtime verification), Rule 7 (micro-verify), SC Matrix Pre-population (BLOCKING), verify-report Match? column — ALL present, ALL violated. The agent wrote "✅ CODE" for 7/8 SCs without starting a server.
+
+**Why rules don't fix this**: This is not a knowledge gap (the agent read the rules) or a design gap (rules are in SKILL.md first 100 lines). It's a model-level behavior: when implicit objectives (finish efficiently) compete with explicit rules (verify every SC) for the same finite resource (context + time), implicit objectives win. Adding more rules doesn't change the resource equation.
+
+**The structural fix**: Session separation. implement and verify MUST run in different sessions. `/clear` between them. The verify session starts fresh — no implement fatigue, no sunk cost bias, no "I already know this works" assumption. This is MANDATORY RULE 9.
+
+**The honest truth for harness engineers**: Your harness can define the rules, enforce structural gates, and require persistent evidence. But it cannot override the model's optimization pressure during extended execution. The final defense is always the human: read the verify-report, see "METHOD: CODE" on most SCs, and send the agent back to actually verify.

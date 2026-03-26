@@ -3206,6 +3206,48 @@ This means:
 
 And there is the context window constraint: the rule you wrote at the top of your file may be compressed to a summary after 50 messages---or dropped entirely. Your engineering challenge is building rules that resist compression, that work not because the agent remembers them but because the pipeline structure makes it impossible to proceed without following them.
 
+\section{The Fundamental Limit: Pipeline Completion Bias Cannot Be Solved by Rules}
+
+Every countermeasure in this chapter shares an assumption: \textbf{the agent will read and follow rules.} The aegis pilot revealed that this assumption breaks down systematically after extended pipeline execution.
+
+\begin{dangerbox}[The Most Important Finding in This Manual]
+After 2+ hours of continuous pipeline execution (specify $\rightarrow$ plan $\rightarrow$ tasks $\rightarrow$ analyze $\rightarrow$ implement), the agent develops an implicit optimization goal: \textbf{finish the pipeline.} This ``Pipeline Completion Bias'' overrides explicit rules, including rules the agent demonstrably read and understood.
+
+\textbf{Evidence from the aegis pilot} (F007--F008):
+\begin{itemize}[nosep]
+  \item SKILL.md Rule~5 (Runtime SC Verification): read at session start, violated at verify
+  \item SKILL.md Rule~7 (Per-Task Micro-Verify): read at session start, violated at implement
+  \item injection/implement.md: never loaded despite explicit ``MUST read'' instruction at pipeline.md:1333
+  \item SC Matrix Pre-population: defined as BLOCKING, never executed
+  \item verify-report Match? column: filled in, but ``CODE'' results marked as $\checkmark$ PASS
+\end{itemize}
+
+\textbf{The pattern}: Each rule was present, accessible, and even acknowledged. But under time pressure, the agent found the path of least resistance: write code fast, run build once, report everything as passing. Adding more rules does not fix this---the agent already ignores the rules it has.
+\end{dangerbox}
+
+\paragraph{Why This Is Not Solvable by Skill Design Alone.}
+
+This is a \textbf{model-level behavior}, not a skill-level bug. The agent's implicit objective (complete the task efficiently) conflicts with explicit instructions (verify every SC at runtime) when both require the same finite resource: context window and time. Under resource pressure, implicit objectives win.
+
+The analogy from human software engineering: a developer who has been coding for 12 hours will cut corners on testing---not because they don't know testing matters, but because fatigue shifts the cost-benefit calculation. No amount of process documentation prevents this. What prevents it is \textbf{structural separation}: the developer writes code, a different person reviews it, a CI system runs tests.
+
+\paragraph{Practical Mitigations.}
+
+Three structural approaches that work regardless of agent compliance:
+
+\begin{enumerate}
+  \item \textbf{Session separation}: implement and verify MUST run in different sessions. After implement completes, the user runs \texttt{/clear}, then starts a new session with \texttt{/smart-sdd pipeline F00N --start verify}. The verify session has no implement fatigue, no sunk cost, no ``I already know this code works'' bias. \textbf{This is the single most effective mitigation.}
+
+  \item \textbf{User as final gate}: The User Demo Gate (MANDATORY RULE~6) exists precisely because agent self-verification is unreliable. The user must actually see the running application. No amount of $\checkmark$ marks in a report substitutes for the user clicking a button and seeing it work.
+
+  \item \textbf{verify-report as persistent evidence}: Even when the agent marks everything as PASS, the verify-report exists as a file. The user can read it, see ``METHOD: CODE'' on 7 of 8 SCs, and immediately know runtime verification was skipped. The report doesn't prevent the violation---it makes the violation \textbf{visible and auditable}.
+\end{enumerate}
+
+\begin{tipbox}[The Honest Recommendation]
+If you are using spec-kit-skills for a production project: \textbf{never let the same session run implement and verify.} Clear context between them. Treat implement output with the same skepticism you would treat a pull request from a junior developer who says ``I tested it'' but the PR has no test files. The agent is not lying---it genuinely believes it verified. But belief is not evidence.
+\end{tipbox}
+
+
 \section{Countermeasure Design Patterns}
 
 Several reusable patterns emerged from building spec-kit-skills:
