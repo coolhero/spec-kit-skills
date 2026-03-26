@@ -48,6 +48,11 @@ $ARGUMENTS parsing rules:
   --lang <code>             → artifact language (ko, en, ja, etc.). Stored in orientation.md header.
   --scope <path>            → Limit exploration to a specific directory or module (e.g., --scope src/auth)
   --no-branch               → Skip branch creation; explore in current working tree (useful when already on a feature branch)
+  --learn                   → Learn mode: understand existing project without generating Feature candidates.
+                              Implies --no-branch. Outputs go to specs/explore/learn/ (separate from pipeline artifacts).
+                              Reads existing sdd-state.md Domain Profile instead of inferring.
+                              synthesis produces architecture summary + existing Feature map, NOT new Feature candidates.
+                              Use when: onboarding to an existing project, reviewing after long absence, auditing architecture.
 ```
 
 ### Language Persistence
@@ -213,6 +218,28 @@ When SDD artifacts already exist (`specs/_global/sdd-state.md` or `specs/reverse
 
 This enables all post-adopt and mid-pipeline exploration scenarios without conflicting with existing SDD state.
 
+### Learn Mode (`--learn`)
+
+When `--learn` is active, code-explore operates in **read-only exploration** mode:
+
+- **orient**: Same as Context-Aware Mode but explicitly notes "Learn Mode — no changes will be made"
+- **trace**: Same behavior — traces are always read-only
+- **synthesis**: 
+  - ❌ Does NOT generate Feature candidates (C001~)
+  - ❌ Does NOT generate handoff prep for init/add
+  - ✅ DOES generate: Architecture Summary, Module Dependency Map, existing Feature → code mapping
+  - ✅ DOES generate: "How does Feature X work?" summaries for each existing Feature
+  - Output: `specs/explore/learn/synthesis.md` (separate directory)
+- **status**: Shows exploration coverage mapped to existing Features (not coverage for new Feature discovery)
+
+**When to use**:
+- New team member onboarding: "I need to understand this project"
+- Post-long-absence review: "What changed while I was away?"
+- Architecture audit: "Is the code still matching the specs?"
+- Pre-meeting preparation: "I need to explain this system to someone"
+
+**Relationship to Context-Aware Mode**: Context-Aware Mode adapts explore behavior when SDD artifacts exist. `--learn` goes further — it suppresses ALL generative output (Feature candidates, Domain Profile inference, handoff prep) and focuses exclusively on understanding.
+
 ---
 
 ## Gotchas
@@ -228,6 +255,7 @@ Accumulated edge cases from real usage. Check this list when hitting unexpected 
 | G5 | Expecting code-explore to generate SDD artifacts | code-explore produces understanding, not specs | Use `--from-explore` flag with `/smart-sdd init` or `/reverse-spec` to convert |
 | G6 | Large codebase (1000+ files) orient timeout | orient scan takes too long or hits context limits | Use `--scope` to limit initial scan area, then expand in subsequent traces |
 | G7 | Re-running orient after SDD artifacts exist | Orient overwrites previous orientation without Context-Aware Mode | Context-Aware Mode auto-detects SDD artifacts — let it merge, don't force fresh |
+| G8 | Using default explore on a completed SDD project | Generates Feature candidates that duplicate existing Features | Use `--learn` for understanding; default mode is for pre-pipeline discovery |
 
 ---
 

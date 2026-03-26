@@ -2282,6 +2282,22 @@ This mode is particularly useful for:
   \item Planning augmentation: gaps between code behavior and spec coverage suggest requirements for \texttt{add --to}.
 \end{itemize}
 
+\section{Learn Mode (\texttt{--learn})}
+
+For projects that are already implemented and SDD-managed, \texttt{--learn} provides read-only exploration without generating new Feature candidates or conflicting with existing pipeline state.
+
+\begin{description}
+  \item[Purpose] Understand an existing project's architecture and code structure
+  \item[Output] \file{specs/explore/learn/synthesis.md} --- architecture summary + existing Feature map
+  \item[Does NOT produce] Feature candidates (C001\ldots), Domain Profile inference, handoff prep
+  \item[Implies] \texttt{--no-branch} (no git branch created)
+  \item[Use cases] Team onboarding, architecture review, audit, pre-meeting preparation
+\end{description}
+
+\begin{tipbox}[Default vs Learn Mode]
+Default mode asks: ``What Features should we build?'' Learn mode asks: ``How does what we already built work?'' Use default before the pipeline; use \texttt{--learn} after.
+\end{tipbox}
+
 \section{Entity Conflict Resolution}
 
 When multiple traces discover entities with the same name but different fields, synthesis performs conflict resolution:

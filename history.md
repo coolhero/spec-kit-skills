@@ -4,6 +4,27 @@
 > Records key architectural and design decisions that shaped the project.
 
 ---
+## [2026-03-26] Add --learn mode to code-explore skill
+
+### What Changed
+1. **SKILL.md**: Added `--learn` flag to argument parsing. Added Learn Mode section describing read-only exploration behavior (no Feature candidates, no Domain Profile inference, no handoff prep). Added Gotcha G8 warning against running default explore on completed SDD projects.
+2. **commands/orient.md**: Added Learn Mode Adjustments subsection to Context-Aware Mode Detection — implies --no-branch, uses specs/explore/learn/ output directory, reads Domain Profile from sdd-state.md instead of inferring.
+3. **commands/synthesis.md**: Added Learn Mode Synthesis section — produces Architecture Summary, Module Map, Feature Understanding Map, and Architecture Observations. Skips Steps 5-7 (profile derivation, Feature candidates, handoff readiness).
+4. **README.md + README.ko.md**: Added --learn mention to code-explore skill description.
+5. **lessons-learned.md**: Added L79 (Exploration Has Two Purposes — Discovery and Understanding).
+
+### Design Decision
+code-explore was designed for pre-pipeline discovery but users also need it for understanding already-implemented projects. Running default explore on a completed SDD project generates Feature candidates that duplicate existing Features. `--learn` mode separates the two purposes: default mode asks "What should we build?" while learn mode asks "How does what we built work?" Learn mode shares the analysis engine (orient, trace) but suppresses all generative output (Feature candidates, Domain Profile inference, handoff prep) and writes to a separate directory (specs/explore/learn/) to avoid conflicting with pipeline artifacts.
+
+### Files Changed
+- `.claude/skills/code-explore/SKILL.md` — --learn flag, Learn Mode section, G8 gotcha
+- `.claude/skills/code-explore/commands/orient.md` — Learn Mode Adjustments
+- `.claude/skills/code-explore/commands/synthesis.md` — Learn Mode Synthesis
+- `README.md` + `README.ko.md` — --learn mention + timestamp update
+- `lessons-learned.md` — L79
+- `history.md` — This entry
+
+---
 ## [2026-03-26] P19: Feature Detail Log Auto-Creation in Pipeline + Init
 
 ### What Changed

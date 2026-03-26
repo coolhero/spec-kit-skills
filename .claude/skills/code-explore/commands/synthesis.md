@@ -35,6 +35,32 @@ If explore artifacts are in a **different directory** from where the user wants 
 
 ---
 
+## Learn Mode Synthesis (`--learn`)
+
+When `--learn` is active, synthesis produces a different output:
+
+**Output file**: `specs/explore/learn/synthesis.md`
+
+**Content**:
+1. **Architecture Summary**: High-level system description from all traces
+2. **Module Map**: Which source files belong to which Feature (based on specs/NNN-feature/ artifacts)
+3. **Feature Understanding Map**: For each existing Feature (from sdd-state.md):
+   - What it does (from spec.md summary)
+   - Key files (from plan.md file list)
+   - How it connects to other Features (from entity-registry, api-registry cross-references)
+   - Key traces that cover this Feature's code
+4. **Architecture Observations**: Patterns, potential concerns, technical debt signals
+5. **NOT generated**: Feature candidates (C001~), Domain Profile recommendation, handoff prep
+
+This output is useful for:
+- Team onboarding documentation
+- Architecture review meetings
+- Code audit reports
+
+When `--learn` is active, **skip Steps 5-7** (Target Domain Profile Derivation, Feature Candidate Derivation, Handoff Readiness Check) and proceed directly to Step 8 (Write) with the learn-mode content above, then Step 9 (HARD STOP) with learn-appropriate options.
+
+---
+
 ## Synthesis Process
 
 ### Comparison Mode

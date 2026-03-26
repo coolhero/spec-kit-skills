@@ -31,6 +31,15 @@ Before workspace setup, check for existing SDD artifacts:
 
 **If none exist → Fresh Mode** (current behavior unchanged).
 
+#### Learn Mode Adjustments
+
+When `--learn` is active:
+- Implies `--no-branch` (never create a branch for learning)
+- Output directory: `specs/explore/learn/` instead of `specs/explore/`
+- Orientation header includes: "🎓 Learn Mode — read-only exploration, no Feature generation"
+- Existing Feature list from sdd-state.md is displayed prominently
+- Domain Profile is READ from sdd-state.md, not inferred
+
 #### Branch Strategy
 
 - If `--no-branch` is specified: skip branch creation, work in current working tree
