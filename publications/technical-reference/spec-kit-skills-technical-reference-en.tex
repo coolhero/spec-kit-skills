@@ -354,7 +354,7 @@ This design emerged from a practical problem: early versions loaded entire modul
 
 The mechanism is concrete: domain modules have standardized sections (S1 for SC generation rules, S5 for elaboration probes, S7 for bug prevention). When the pipeline runs, the injection file loads relevant modules and merges their sections. An \texttt{ai-assistant} archetype adds A2 (SC extensions for token management). A \texttt{gui} interface adds S6 (UI testing integration). They accumulate.
 
-The real power emerges when modules \emph{combine}. The resolver detects specific combinations and activates Cross-Concern Integration Rules---61 combination patterns defined in \file{\_resolver.md}. When a project includes both \texttt{gui} and \texttt{realtime}, the resolver triggers emergent rules that neither module alone contains: optimistic update patterns, reconnection UI states, and ``stale UI after reconnect'' prevention.
+The real power emerges when modules \emph{combine}. The resolver detects specific combinations and activates Cross-Concern Integration Rules---65 combination patterns defined in \file{\_resolver.md}. When a project includes both \texttt{gui} and \texttt{realtime}, the resolver triggers emergent rules that neither module alone contains: optimistic update patterns, reconnection UI states, and ``stale UI after reconnect'' prevention.
 
 \begin{warnbox}[Failure Without P1-a]
 Project had \texttt{gui + realtime} active, triggering Cross-Concern Integration Rules for optimistic update + reconnection UI. But \texttt{specify} never loaded the combined rules. \texttt{plan} never referenced them. \texttt{implement} never saw the streaming-specific requirements. The Domain Profile was correctly detected but never actually influenced behavior.
@@ -491,7 +491,7 @@ The project includes 20 gap patterns and 65 specific lessons, each traced to a r
 
 \subsection{Engineering Depth}
 
-The module system (47 concerns, 15 archetypes, 10 interfaces, 40+ foundations, 61 cross-concern integration rules) represents genuine domain engineering. Each module encodes expert knowledge about what matters for a specific project type---knowledge that would otherwise exist only in senior engineers' heads.
+The module system (47 concerns, 15 archetypes, 10 interfaces, 40+ foundations, 65 cross-concern integration rules) represents genuine domain engineering. Each module encodes expert knowledge about what matters for a specific project type---knowledge that would otherwise exist only in senior engineers' heads.
 
 \subsection{Composability}
 
@@ -733,7 +733,7 @@ A \texttt{prototype + solo} project gets functional-only SCs with optional tests
 
 \section{How Axes Compose: Cross-Concern Integration}
 
-When multiple concerns are active, emergent patterns arise that neither module produces alone. These 61 rules are defined in \file{\_resolver.md} Step~3.5:
+When multiple concerns are active, emergent patterns arise that neither module produces alone. These 65 rules are defined in \file{\_resolver.md} Step~3.5:
 
 \begin{table}[H]
 \centering
@@ -2634,7 +2634,7 @@ Each skill-local module replaces its S0/R1 section with a cross-reference to the
 
 \begin{description}
   \item[\_core.md] Universal rules loaded for ALL projects. Contains baseline SC patterns, verification requirements, and anti-patterns that are domain-independent.
-  \item[\_resolver.md] The 7-step module loading protocol including cross-concern integration (Step~3.5, 61 rules), scale adjustment (Step~4), and lazy-loading section tables (Step~5).
+  \item[\_resolver.md] The 7-step module loading protocol including cross-concern integration (Step~3.5, 65 rules), scale adjustment (Step~4), and lazy-loading section tables (Step~5).
   \item[\_taxonomy.md] Single source of truth for all available modules. Referenced by the resolver and by domain-extend for validation.
   \item[\_schema.md] Section schema definitions. Documents what each S/A/R/F section should contain. Serves as both specification and contributor template.
 \end{description}
@@ -2759,7 +2759,7 @@ Framework-specific rules covering major ecosystems: React, Next.js, Electron, Ta
 
 \textit{This chapter describes the 61 integration rules that activate when specific module combinations are loaded together, producing emergent behavior no single module contains.}
 
-The resolver (\file{\_resolver.md} Step~3.5) defines 61 cross-concern integration rules that activate when specific combinations of modules are loaded together. These rules produce emergent behavior that no individual module contains.
+The resolver (\file{\_resolver.md} Step~3.5) defines 65 cross-concern integration rules that activate when specific combinations of modules are loaded together. These rules produce emergent behavior that no individual module contains.
 
 \section{Rule Structure}
 

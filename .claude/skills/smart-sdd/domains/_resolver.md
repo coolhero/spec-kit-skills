@@ -145,7 +145,7 @@ After loading all individual modules (Step 3), apply integration rules for conce
 - If 0 concern modules active → skip (archetypes alone don't produce cross-concern rules)
 - If Scale = `prototype` + `solo` → load only rows tagged [CORE] below (top 10 most-used combinations). Full table for `mvp`/`production` or `small-team`/`large-team`.
 
-> **Why conditional**: The 61-rule table below occupies ~1,200 lines of context. For a prototype with a single concern, loading all 61 rules wastes context budget on combinations that can never activate. The Pre-check ensures rules are loaded proportionally to project complexity.
+> **Why conditional**: The 65-rule table below occupies ~1,200 lines of context. For a prototype with a single concern, loading all 65 rules wastes context budget on combinations that can never activate. The Pre-check ensures rules are loaded proportionally to project complexity.
 
 | Active Combination | Integration Pattern | Injected Rule |
 |-------------------|-------------------|---------------|
