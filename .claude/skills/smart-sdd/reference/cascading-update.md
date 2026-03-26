@@ -275,7 +275,7 @@ User clicks citation badge [2] → tooltip displays source #2's file name and ma
 Read `entity-registry.md` and `api-registry.md`:
 - **Entities**: rows where `Owner Feature` = current FID → extract field list (this is the "before" snapshot)
 - **APIs**: rows where `Provider Feature` = current FID → extract endpoint signatures
-- If FID owns NO entities and provides NO APIs → **skip impact analysis** (no public surface)
+- If FID owns NO entities and provides NO APIs → **skip impact analysis** (no public surface). Record: `📋 IMPACT ANALYSIS: skipped — no public surface (no owned entities/APIs)`
 
 ### Step 2 — Identify Consumers
 
@@ -283,7 +283,7 @@ From entity-registry.md: `Referencing Features` column for each owned entity.
 From api-registry.md: `Consumer Features` column for each provided API.
 From roadmap.md: Dependency Table entries where `Depends On` includes current FID.
 
-Deduplicate all downstream FIDs. If none → **skip** (no consumers).
+Deduplicate all downstream FIDs. If none → **skip** (no consumers). Record: `📋 IMPACT ANALYSIS: skipped — no downstream consumers`
 
 ### Step 3 — Diff Classification (after spec/plan change completes)
 
@@ -300,6 +300,8 @@ Compare the changed artifact against the "before" snapshot from Step 1:
 | New API endpoint added | 🟡 ADDITIVE | New `GET /auth/profile` (consumers don't need to call it) |
 | Optional request param added | 🟡 ADDITIVE | New optional `limit` param |
 | Internal logic changed | 🟢 INTERNAL | Rate limiting logic, validation rules, implementation details |
+
+**If ALL changes are 🟢 INTERNAL**: Skip Steps 4-6 (no downstream impact). Record: `📋 IMPACT ANALYSIS: all changes INTERNAL — no downstream Features affected` in sdd-state.md Feature Detail Log. Do NOT silently skip — always record the classification result.
 
 ### Step 4 — Impact Report (HARD STOP)
 
