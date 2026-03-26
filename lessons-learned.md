@@ -1052,3 +1052,11 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **The decision**: Option B. Reopening a merged Feature for one endpoint is disproportionate — full specify→plan→tasks→implement→verify cycle for a PATCH endpoint. Instead, F007 spec documents: "PATCH /users/:id implemented here as supplementary (F003 scope gap)" and api-registry notes the actual provider as F007.
 
 **Universal takeaway**: Feature Boundary Clarification Gate catches this at specify time ("API not in registry → add to In-Scope or Out-of-Scope?"). When it's caught at verify time (spec predates the gate), the pragmatic fix is: implement in the current Feature with spec documentation. Reopen a merged Feature only for architectural changes, not individual endpoints. The cost of re-pipeline (6+ steps) must justify the change.
+
+#### L88. 2000-Line Files Are Unreadable — If the Agent Doesn't Reach Line 1453, the Rule Doesn't Exist
+
+**What happened**: aegis F007/F008 implement: pipeline.md has Per-Task Micro-Verify at line 1453 and injection/implement.md Required Reading at line 1333. The agent read pipeline.md to line ~900 and never reached either. injection/implement.md was never loaded at all. Result: 40+ files written without a single runtime check.
+
+**The pattern**: Rule placement matters more than rule existence. A rule at line 1453 of a 2000-line file has lower compliance probability than a rule at line 5 of SKILL.md. P2 (Enforce, Don't Reference) applies not just to separate files but to WITHIN files — critical rules must be near the top of the file the agent actually reads.
+
+**Fix applied**: SKILL.md Rule 7 expanded from 2 lines to 12 lines, including explicit "Read injection/implement.md BEFORE writing ANY code" with the P12 incident cited. The rule is now at SKILL.md line ~88 — always loaded, always visible.

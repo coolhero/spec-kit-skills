@@ -85,18 +85,24 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > - Do NOT silently skip or report "N/A"
 > - Reference: Gotcha G9 (User App Configuration Gate)
 >
-> **Rule 7: Implement Completeness Gate**
-> Before declaring implement "complete", ALL of the following must be verified:
-> - [ ] Every task in tasks.md is marked [X] AND the corresponding file exists in `git diff --name-only`
-> - [ ] Demo script exists (`demos/F00N-name.sh`) with both default and `--ci` modes
+> **Rule 7: Implement = Read injection/implement.md + Per-Task Micro-Verify + Completeness Gate**
+>
+> 🚨 **BEFORE writing ANY code**: Read `reference/injection/implement.md`. This is NOT optional. Skipping it is the #1 cause of implement quality failures (P12: F007/F008 wrote 40+ files without runtime checks because injection/implement.md was never loaded).
+>
+> **Per-Task Micro-Verify** (BLOCKING per task):
+> After EACH task (not at the end of all tasks):
+> - API endpoint → `curl` the endpoint → verify expected status
+> - UI page → start dev server → navigate → verify no runtime errors
+> - UI interaction → click/input → verify handler works (not placeholder)
+> - ❌ WRONG: Write 40 files → `npm run build` at end → "implement complete"
+> - ✅ RIGHT: Write T001 → curl → ✅ → Write T002 → navigate → ✅ → ... → all micro-verified
+>
+> **No Placeholders**: `<span>Edit</span>` without onClick = incomplete. `// TODO` in handler = incomplete.
+>
+> **Completeness Gate** (BLOCKING before Review):
+> - [ ] Every task in tasks.md marked [X] AND file exists in `git diff`
+> - [ ] Demo script exists (`demos/F00N-name.sh`) with default + `--ci` modes
 > - [ ] Post-Implement Smoke Launch passes (server starts + health check)
-> - ❌ WRONG: "All tasks done" → implement complete → verify discovers missing demo script
-> - ✅ RIGHT: Completeness Gate checks tasks + demo + smoke → all pass → implement complete
->
-> This gate runs BEFORE the implement Review HARD STOP. If any check fails, return to implement — do NOT proceed to Review.
->
-> **Per-Task Micro-Verify**: Each task is verified immediately after completion (curl for APIs, navigate for pages, click for interactions). "40 files written with no runtime check" is NOT implement complete — it's implement started.
-> **No Placeholders**: Interactive UI elements without real handlers are incomplete implementation, not "minor TODO." Don't show a button that does nothing.
 >
 > **Rule 8: No Code Without Spec (SDD Core Principle)**
 > When verify discovers missing functionality, the agent MUST NOT write code directly. Instead:
