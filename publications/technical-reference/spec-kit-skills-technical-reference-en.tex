@@ -1449,6 +1449,29 @@ This separation means: (1) \texttt{git pull} on spec-kit-skills never conflicts 
 
 Three levels of customization: Skill (steps 1--5), Org (step 6), Project (step 8). Later levels can override earlier ones, but the override semantics differ by purpose.
 
+\subsection{Concrete Loading Trace}
+
+For a project with Domain Profile: \texttt{gui + auth + realtime + ai-assistant + electron + rebuild}:
+
+\begin{lstlisting}[title={Module Loading Trace (specify step)}]
+Step 1: _core.md S1          -> 12 universal SC rules loaded
+Step 2: gui.md S1            -> "Every form needs validation SC" + 8 rules
+Step 2: http-api.md S1       -> (not loaded -- gui project, not http-api)
+Step 3: auth.md S1           -> "Login/logout/token SC required" + 6 rules
+Step 3: realtime.md S1       -> "Streaming lifecycle SC required" + 5 rules
+Step 4: ai-assistant.md A2   -> "Provider abstraction SC" + 4 extensions
+Step 4b: electron.md F2      -> "IPC bridge, main/renderer SC" + 3 constraints
+Step 5: (no org-convention)  -> skipped
+Step 6: rebuild.md           -> "Source parity SC required"
+Step 6b: specs/domains/      -> (no project-local modules)
+Step 7: (no domain-custom)   -> skipped
+
+Result: 38 rules from 6 modules + 1 context mode
+        (vs. 200+ rules if ALL modules loaded = 81% context savings)
+\end{lstlisting}
+
+Compare with a CLI project (\texttt{cli + resilience + microservice + go}): completely different modules load, producing completely different rules. Same pipeline, different domain knowledge.
+
 \section{Per-Step Injection Maps}
 \label{sec:lazy-loading}
 
@@ -1920,7 +1943,7 @@ S3 (Verify Steps) & Build + smoke test & Full 5-phase verification (Phase 0--4) 
 \end{itemize}
 \end{tipbox}
 
-Part~II described the architecture: how Domain Profile shapes rules, how modules load, how guards enforce correctness, and how GEL preserves cross-Feature memory. Part~III now shows how the four skills---code-explore, reverse-spec, smart-sdd, and domain-extend---use this architecture in practice.
+Part~II described the architecture: Domain Profile shapes rules, modules load selectively, guards enforce correctness, and GEL preserves cross-Feature memory. Part~III now shows how the four skills use this architecture. \texttt{code-explore} is the entry point---it generates the orientation artifacts and Feature candidates that \texttt{reverse-spec} refines and \texttt{smart-sdd} consumes. \texttt{domain-extend} grows the vocabulary that all three draw from. Each skill reads from and writes to the same GEL artifacts described in Chapter~8.
 
 %% ████████████████████████████████████████████████████████████████████
 %%  PART III: SKILLS REFERENCE
@@ -2220,6 +2243,16 @@ The \texttt{add} command implements a structured 6-phase consultation:
   \item \textbf{Phase 4: SBI Match}---match against Source Behavior Inventory entries (rebuild/migration mode).
   \item \textbf{Phase 5: Demo Group}---define demo scenarios for the Feature.
   \item \textbf{Phase 6: Finalization}---review HARD STOP, create artifacts (pre-context, sdd-state registration).
+\end{enumerate}
+
+The six phases are:
+\begin{enumerate}[nosep]
+  \item \textbf{Phase 1: Briefing}---parse input, identify perspective gaps, elaborate via S5/A3 probes
+  \item \textbf{Phase 2: Overlap \& Impact}---check for overlap with existing Features, assess GEL impact
+  \item \textbf{Phase 3: Scope Negotiation}---resolve ambiguities, confirm In-Scope/Out-of-Scope boundaries
+  \item \textbf{Phase 4: SBI Match}---map to Source Behavior Inventory (brownfield), confirm coverage
+  \item \textbf{Phase 5: Demo Group}---assign to Demo Group for Integration Demo coordination
+  \item \textbf{Phase 6: Finalization}---generate artifacts (pre-context, sdd-state update, add-draft)
 \end{enumerate}
 
 \section{The 6-Phase Verify (Phase 0--5)}
@@ -2680,6 +2713,20 @@ New modules can start at any stage and grow incrementally. A detection-only modu
 %% ────────────────────────────────────────────────────────────────────
 
 \textit{This chapter catalogs every module across all five axes: 10~interfaces, 47~concerns, 15~archetypes, 8~foundations, and context modifiers.}
+
+\begin{tipbox}[Finding the Right Modules for Your Project]
+Instead of reading all 47 concerns, start from your project type:
+
+\textbf{Building an AI assistant?} $\rightarrow$ \texttt{ai-assistant} archetype + \texttt{gui} + \texttt{realtime} + \texttt{external-sdk} + \texttt{auth}
+
+\textbf{Building a REST API?} $\rightarrow$ \texttt{public-api} or \texttt{microservice} archetype + \texttt{http-api} + \texttt{auth} + \texttt{resilience}
+
+\textbf{Building a CLI tool?} $\rightarrow$ \texttt{cli} interface + relevant concerns (no archetype needed for simple tools)
+
+\textbf{Rebuilding legacy code?} $\rightarrow$ \texttt{reverse-spec} detects modules automatically from source code. You rarely need to choose manually.
+
+\textbf{Not sure?} $\rightarrow$ Run \texttt{/smart-sdd init} with a project description. The CI scoring system infers your Domain Profile and shows which modules would activate.
+\end{tipbox}
 
 \section{Interfaces (10 modules)}
 
