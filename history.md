@@ -4,6 +4,25 @@
 > Records key architectural and design decisions that shaped the project.
 
 ---
+
+## [2026-03-26] New sub-app dependency check + verify Phase 0 server start triage
+
+### What Changed
+1. **pipeline.md**: Added item 6 to Post-Implement Completeness Gate — new sub-app dependency check. Scans tasks.md for app creation tasks, verifies node_modules/venv/target exists, runs dev server start, auto-installs if missing. BLOCKING if new app cannot start.
+2. **verify-preflight.md**: Added Server Start Failure Triage table (Phase 0-2) with 7 symptom→cause→action mappings. Only 2 of 7 are actual Playwright issues. Added Server Start Recovery Protocol with diagnose→fix→retry→ask flow. NEVER skip runtime verification because server won't start.
+3. **SKILL.md**: Added G16 gotcha — new sub-app created without dependency install.
+4. **lessons-learned.md**: Added L81 — "Playwright Not Configured" Is the New "It Works on My Machine".
+
+### Design Decision
+Agent repeatedly misclassified app startup failures (MODULE_NOT_FOUND, missing dependencies) as "Playwright not configured" and escaped to code-level-only verification. Root cause: (a) implement does not verify that newly created sub-apps have their dependencies installed, and (b) verify Phase 0 has no triage table to distinguish app issues from Playwright issues. Fix addresses both ends: Completeness Gate catches missing deps before verify, and Phase 0 triage forces proper diagnosis when server won't start.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Completeness Gate item 6
+- `.claude/skills/smart-sdd/commands/verify-preflight.md` — Server Start Failure Triage + Recovery Protocol
+- `.claude/skills/smart-sdd/SKILL.md` — G16 gotcha
+- `lessons-learned.md` — L81
+- `history.md` — This entry
+
 ## [2026-03-26] Add --learn mode to code-explore skill
 
 ### What Changed

@@ -407,6 +407,7 @@ Accumulated edge cases from real pipeline runs. Check this list when hitting une
 | G13 | Skipping verify when user says "do everything" or "just finish it" | Feature marked complete without SC verification → bugs ship → trust lost | verify is CRITICAL classification. User urgency does NOT override. merge gate blocks without verify. |
 | G14 | Running multiple Features in parallel via Agent tool or background tasks | Entity registry conflicts, shared file overwrites, Feature B references Feature A's incomplete entities → cascading inconsistency | Features are ALWAYS sequential. F001 verify+merge → F002 start. Only within-Feature task parallelism is allowed. |
 | G15 | Merge without verify-report.md | Agent completes verify in chat, skips file generation, proceeds to merge — no persistent evidence | verify-report.md is MANDATORY. Merge gate checks file existence + Overall=PASS. Chat-level "verify complete" is not evidence |
+| G16 | New sub-app created without dependency install | apps/web/ created with package.json but no npm install → verify: "can't start server" → agent blames Playwright | Completeness Gate checks new app dirs for node_modules. verify Phase 0 triage distinguishes app issues from Playwright issues |
 
 ---
 

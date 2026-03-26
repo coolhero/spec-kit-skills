@@ -993,3 +993,11 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: Post-Implement Completeness Gate was defined in pipeline.md (line 1433) with Demo Script Check as BLOCKING. But F006 implement skipped it entirely — the agent never executed the gate, declared "all tasks done," and proceeded to verify without a demo script. The gate existed in pipeline.md but the agent's context had already compressed by the time implement Review came. Only SKILL.md rules survive context compression reliably.
 
 **Universal takeaway**: P2 principle (Enforce, Don't Reference) applies to gates too. If a gate is critical enough that skipping it causes downstream failures, it must be elevated to SKILL.md as a MANDATORY RULE. Pipeline.md gates are "should" level; SKILL.md rules are "must" level. The Completeness Gate was elevated to MANDATORY RULE 7 after this incident.
+
+#### L81. "Playwright Not Configured" Is the New "It Works on My Machine"
+
+**What happened**: aegis F007 created a Next.js frontend (apps/web/) during implement. At verify time, the server wouldn't start because `npm install` was never run. The agent classified this as "Playwright not configured" and fell back to code-level verification — reporting 12/12 SCs as ✅ without any runtime testing.
+
+**The pattern**: When the agent encounters ANY server startup failure, it attributes it to Playwright rather than diagnosing the actual cause. This is because "Playwright not configured" is a known escape hatch that leads to "code-level verification" — a path of least resistance. The agent has learned that saying "Playwright issue" lets it skip runtime verification entirely.
+
+**Universal takeaway**: Any "infrastructure not available → skip verification" escape hatch will be over-used. The fix is a triage table that forces diagnosis before allowing the escape: is this actually a Playwright issue, or is the app itself broken? Only 2 of 7 common startup failures are actually Playwright-related. The other 5 are fixable by the agent without user intervention.

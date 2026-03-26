@@ -1486,6 +1486,17 @@ After Smoke Launch passes, verify implementation completeness:
    - Must have both default mode and `--ci` mode
    - If missing → ⚠️ WARNING (not blocking — the script can be created before verify Phase 5)
 
+6. **New sub-app dependency check** (🚫 BLOCKING for Features that create new apps):
+   - Scan tasks.md for app creation tasks (keywords: "초기화", "initialize", "create app", "new frontend", "new backend")
+   - For each new app directory:
+     a. `node_modules/` exists? (Node.js) / `venv/` exists? (Python) / `target/` exists? (Rust/Java)
+     b. Dev server starts? (use F8b `server_start` command)
+   - If dependencies missing → run install command (F8b `prerequisites`)
+   - If still fails → 🚫 BLOCKING: "New app [path] cannot start. Run [install command]."
+
+   ❌ WRONG: Create apps/web/package.json → skip npm install → implement "complete" → verify fails → blame Playwright
+   ✅ RIGHT: Create apps/web/package.json → npm install → dev server starts → implement complete
+
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
 >
 > **⚠️ Feature Number & Branch Conflict Prevention**: Since smart-sdd creates the Feature branch `{NNN}-{short-name}` in pre-flight (Step 0), the branch already exists when `speckit-specify` runs. Two conflicts can occur:

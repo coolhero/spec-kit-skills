@@ -93,6 +93,50 @@ Options:
 
 > **Note**: This probe tests startup stability only — it does NOT replace the full runtime verification in Phase 3, which uses the production build. The purpose is to surface environment-dependent crashes (module-scope side effects, lifecycle-dependent initialization, missing runtime prerequisites) that differ between dev and production code paths.
 
+### Server Start Failure Triage (Phase 0-2)
+
+When the application fails to start during verify Phase 0, diagnose the ACTUAL cause before proceeding:
+
+| Symptom | Actual Cause | Action | NOT This |
+|---------|-------------|--------|----------|
+| `MODULE_NOT_FOUND` or `Cannot find module` | Dependencies not installed | Run `npm install` (or equivalent) | ❌ NOT "Playwright issue" |
+| `EADDRINUSE` port already in use | Another process on the port | Kill process: `lsof -ti:PORT \| xargs kill -9` | ❌ NOT "app broken" |
+| Build/compile error | Code has errors | Return to implement (Major-Implement) | ❌ NOT "infrastructure issue" |
+| DB connection refused | Database not running | Run `docker compose up -d` or F8b prerequisites | ❌ NOT "skip runtime" |
+| `ENOENT` config file missing | .env or config not created | Read existing .env, create if missing | ❌ NOT "Playwright issue" |
+| Playwright `browser not found` | Playwright browsers not installed | `npx playwright install` | ✅ This IS a Playwright issue |
+| CDP connection refused | Electron app not launched | Use `_electron.launch()` | ✅ This IS a Playwright issue |
+
+🚫 **BLOCKING**: Do NOT classify app startup failures as "Playwright issues." Playwright is for BROWSER AUTOMATION. If the app itself won't start, the problem is the app, not Playwright.
+
+The ONLY legitimate Playwright issues are:
+- Browser binaries not installed (`npx playwright install` fixes it)
+- CDP connection to Electron (`_electron.launch()` fixes it)
+- MCP server not configured (MCP is optional; CLI is primary)
+
+Everything else — module not found, port in use, DB down, config missing — is an APP issue, not a Playwright issue.
+
+#### Server Start Recovery Protocol
+
+If the server fails to start:
+
+1. **Diagnose**: Read the error message. Classify per Server Start Failure Triage table above.
+2. **Fix automatically if possible**:
+   - Missing modules → `npm install` (or pip install, cargo build)
+   - Port in use → kill process
+   - DB not running → `docker compose up -d` / F8b prerequisites
+   - Missing .env → read existing .env or create from template
+3. **Retry**: After fix, attempt server start again.
+4. **If still fails after 2 attempts**: Ask user with specific error message.
+5. **NEVER skip runtime verification because the server won't start.** The server MUST start for verify to proceed. If it truly cannot start, the Feature is NOT ready for verify — return to implement.
+
+❌ WRONG: "Server won't start → Playwright not configured → code-level verification only"
+❌ WRONG: "Module not found → skip runtime → 12/12 SC via code review"
+✅ RIGHT: "Server won't start → diagnose: npm install missing → install → retry → server starts → runtime verify"
+✅ RIGHT: "Server won't start after 2 fixes → ask user: 'Server fails with [error]. Can you check?'"
+
+---
+
 **0-3. Verify CDP Connection** (Electron only — MCP backend path):
 - Skip this step if `RUNTIME_BACKEND = cli` or `cli-limited` (CLI uses `_electron.launch()`, no CDP needed)
 - Run `curl -s http://localhost:9222/json/version`
