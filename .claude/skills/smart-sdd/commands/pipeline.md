@@ -1404,11 +1404,20 @@ After Smoke Launch passes, verify implementation completeness:
      - "Acknowledge risk — proceed without visual reference" (recorded: `⚠️ NO-VISUAL-REF`)
      **If response is empty → re-ask** (per MANDATORY RULE 1)
 
-3. **Display gate result**:
+3. **Demo Script Check** (🚫 BLOCKING for Features with user-facing functionality):
+   1. Verify `demos/F00N-name.sh` (or `.ts`/`.py`) exists
+   2. Verify it has both modes:
+      - Default mode: starts server + prints "Try it" instructions
+      - `--ci` mode: health check + exit
+   3. If missing → BLOCKING: "Demo script not created. MANDATORY RULE 2 requires demos/F00N-name.sh"
+   - Only exception: pure infrastructure Features (e.g., F001 Foundation) where there's no user-facing interaction to demo.
+
+4. **Display gate result**:
    ```
    ✅ Completeness Gate:
      Tasks: [N]/[N] complete
      Visual reference: [✅ consulted / ⚠️ deferred / N/A (not rebuild)]
+     Demo script: [✅ exists / 🚫 MISSING / N/A (infra-only)]
    ```
 
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
@@ -1509,13 +1518,23 @@ When the user reports a problem with phrases like "there's an error", "it doesn'
 
 #### Verify Environment Readiness (Phase 0-2b enforcement)
 
-Before SC runtime verification, check environment requirements:
+**Step 1: Check existing environment FIRST** (before asking user):
 
-1. **Read spec.md** for external dependencies (LLM API keys, third-party services, database seeds)
-2. **Check .env or config** for required values
-3. **If missing**: AskUserQuestion — "SC-001 requires [OpenAI API Key] for end-to-end verification. Please add to .env and confirm."
-4. **Do NOT proceed** with SC verification for SCs that depend on unconfigured services
-5. **Do NOT report** unconfigured SCs as ✅ — report as ⚠️ PARTIAL or RUNTIME_BLOCKED
+1. Read `.env` file (if exists): extract all defined variables
+2. Read `spec.md` or `pre-context.md`: identify required external dependencies (API keys, DB URLs, etc.)
+3. Compare: which required variables are already set in `.env`?
+4. **Only ask user for MISSING variables** — do NOT re-ask for variables that already exist
+
+❌ WRONG: "OpenAI API Key가 필요합니다" (when OPENAI_API_KEY is already in .env)
+✅ RIGHT: Read .env → OPENAI_API_KEY ✅ exists, ANTHROPIC_API_KEY ✅ exists → proceed without asking
+✅ RIGHT: Read .env → OPENAI_API_KEY ✅ exists, WEBHOOK_URL ❌ missing → ask user only for WEBHOOK_URL
+
+**Step 2: Handle missing variables** (only for variables NOT found in .env):
+
+1. **If all required variables exist in .env**: proceed directly — no AskUserQuestion needed
+2. **If some are missing**: AskUserQuestion — "SC-001 requires [WEBHOOK_URL] for end-to-end verification. Please add to .env and confirm."
+3. **Do NOT proceed** with SC verification for SCs that depend on unconfigured services
+4. **Do NOT report** unconfigured SCs as ✅ — report as ⚠️ PARTIAL or RUNTIME_BLOCKED
 
 This is Gotcha G9 (User App Configuration Gate) applied at verify time.
 

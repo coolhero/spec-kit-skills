@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-03-26] Verify .env check-first + Demo script enforcement at implement and verify (aegis P13, P14)
+
+### What Changed
+1. **pipeline.md — Verify Environment Readiness**: Restructured into Step 1 (check existing .env first) and Step 2 (ask user only for missing variables). Added anti-pattern examples showing wrong (re-asking for existing vars) vs right (read .env, proceed or ask only for missing).
+2. **pipeline.md — Post-Implement Completeness Gate**: Added Demo Script Check as item 3 (BLOCKING for user-facing Features). Verifies demos/F00N-name.sh exists with both default and --ci modes. Updated gate result display to include demo script status.
+3. **verify-evidence-update.md — User Demo Gate**: Added Pre-Demo Check before the HARD STOP — verifies demo script exists and --ci mode exits 0 before presenting to user.
+4. **lessons-learned.md**: Added L71 (Demo Is a Deliverable, Not an Afterthought).
+
+### Design Decision
+P13: Verify was asking users for env vars that already existed in .env. Fix: read .env first, diff against required vars, only ask for truly missing ones. P14: Demo scripts were being skipped because neither implement nor verify checked for their existence. Fix: three enforcement points — Post-Implement Completeness Gate (creation), Pre-Demo Check (--ci validation), User Demo Gate (user sees it running).
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Verify Environment Readiness + Post-Implement Completeness Gate
+- `.claude/skills/smart-sdd/commands/verify-evidence-update.md` — Pre-Demo Check
+- `lessons-learned.md` — L71
+
+---
+
 ## [2026-03-26] Branch pre-flight for --start + cross-Feature change isolation (aegis P12)
 
 ### What Changed

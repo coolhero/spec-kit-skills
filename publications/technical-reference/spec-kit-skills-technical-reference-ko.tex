@@ -2214,6 +2214,87 @@ verify-report는 단순한 체크리스트가 아니라 \textbf{감사 가능한
 
 이것은 경고이지 차단이 아닙니다. 런타임 SC 검증은 Feature가 \emph{지금} 작동하는지 확인하고, 테스트 증가는 향후 변경 후에도 \emph{계속 작동할지} 확인합니다.
 
+\subsection{RUNTIME\_BLOCKED: 런타임에서 SC를 검증할 수 없는 경우}
+
+모든 SC가 실행 중인 애플리케이션에서 검증 가능한 것은 아닙니다. 일부는 인프라, 외부 서비스, 또는 개발 검증 중에 사용할 수 없는 조건을 필요로 합니다. \texttt{RUNTIME\_BLOCKED} 상태는 이러한 경우를 위해 존재합니다---이는 \textbf{솔직한 인정}이지, 지름길이 아닙니다.
+
+\paragraph{세 가지 유효한 SC Method.}
+
+\begin{description}
+  \item[\texttt{runtime: [method]}] 실행 중인 애플리케이션에서 SC가 검증됨. 가장 이상적인 기준. 예시: \texttt{runtime: curl POST /auth/login → 200 with token}
+  \item[\texttt{RUNTIME\_BLOCKED: [reason]}] 런타임에서 SC를 검증할 수 없음. 사유는 구체적이고 구조적이어야 함---``어렵다'' 또는 ``시간이 오래 걸린다''가 아님. 예시: \texttt{RUNTIME\_BLOCKED: requires 100 concurrent connections (load testing infrastructure)}
+  \item[\texttt{RUNTIME\_DELEGATED: [reason]}] SC 검증이 수동 확인을 위해 사용자에게 위임됨. OS 네이티브 상호작용, 시각적 판단, 하드웨어 의존 동작에 사용. 예시: \texttt{RUNTIME\_DELEGATED: drag-and-drop file upload requires manual browser interaction}
+\end{description}
+
+\paragraph{일반적인 RUNTIME\_BLOCKED 카테고리.}
+
+aegis 파일럿(F001--F004) 기반으로, 이 카테고리들이 대부분의 RUNTIME\_BLOCKED SC를 차지합니다:
+
+\begin{longtable}{p{3.5cm}p{4cm}p{5.5cm}}
+\toprule
+\textbf{카테고리} & \textbf{차단 사유} & \textbf{aegis 예시} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+\textbf{Concurrency / Load} (동시성/부하) &
+  동시 요청 생성 인프라 필요 (예: 100개 동시 요청) &
+  SC-006: ``100개 동시 예산 예약이 원자적이어야 함'' --- 부하 테스트 도구(k6, Artillery) 필요 \\
+\addlinespace
+
+\textbf{External Webhook} (외부 웹훅) &
+  콜백을 수신할 외부 HTTP 엔드포인트 필요 &
+  SC-008/009: ``80\%/90\% 임계값에서 알림 웹훅 발동'' --- 웹훅 수신기(예: webhook.site, ngrok 터널) 필요 \\
+\addlinespace
+
+\textbf{Scheduled Jobs} (예약 작업) &
+  시간 경과 또는 cron 트리거 필요 &
+  SC-010: ``월간 예산 리셋'' --- BullMQ cron 작업이 등록되었지만 월간 트리거를 기다릴 수 없음 \\
+\addlinespace
+
+\textbf{Failure Injection} (장애 주입) &
+  요청 중간에 서비스를 의도적으로 중단해야 함 &
+  SC-007: ``Provider 에러 → 예약된 토큰 해제'' --- LLM 응답 중간에 인터셉트 필요 \\
+\addlinespace
+
+\textbf{Streaming Lifecycle} (스트리밍 생명주기) &
+  SSE/WebSocket 장기 연결 테스트 필요 &
+  SC-014: ``스트리밍 정합성 확인'' --- 활성 SSE 스트림 중 토큰 카운팅 \\
+\addlinespace
+
+\textbf{Multi-Organization} (다중 조직) &
+  별도의 인증 컨텍스트를 가진 다중 테넌트 필요 &
+  SC-005: ``팀 예산 소진 시 팀원은 차단되지만 다른 팀은 차단되지 않음'' --- 테스트 데이터에 2개 이상 조직 필요 \\
+\addlinespace
+
+\textbf{External API Dependency} (외부 API 의존) &
+  개발 환경에서 사용 불가한 자격 증명 또는 서비스 필요 &
+  SC (일반): ``LLM provider가 500 반환'' --- 외부 제공자 에러를 강제할 수 없음 \\
+\bottomrule
+\end{longtable}
+
+\paragraph{RUNTIME\_BLOCKED 규칙.}
+
+\begin{enumerate}[nosep]
+  \item \textbf{구체적이어야 함}: ``RUNTIME\_BLOCKED: requires load testing infrastructure'' --- ``RUNTIME\_BLOCKED: hard to test''가 아님
+  \item \textbf{코드가 구현되어 있어야 함}: RUNTIME\_BLOCKED는 ``코드는 존재하지만 검증 환경이 없다''를 의미함. 코드도 없으면 해당 SC는 FAIL이지, RUNTIME\_BLOCKED가 아님.
+  \item \textbf{해소 경로를 명시해야 함}: ``Resolve in staging environment with k6 load test'' 또는 ``Resolve when webhook receiver is configured''
+  \item \textbf{Overall에 반영}: RUNTIME\_BLOCKED SC가 있는 verify-report도 런타임 검증 가능한 모든 SC가 통과하면 PASS일 수 있음. 리포트에 반드시 명시: ``13/20 runtime verified, 7/20 RUNTIME\_BLOCKED (infrastructure-dependent)''
+  \item \textbf{유닛 테스트로 대체 불가}: ``Verified via unit test''는 유효한 RUNTIME\_BLOCKED 사유가 아님. 유닛 테스트가 로직을 커버하는 경우 \texttt{RUNTIME\_BLOCKED: [실제 인프라 사유] --- unit test exists as proxy}를 사용
+\end{enumerate}
+
+\begin{tipbox}[RUNTIME\_BLOCKED가 Merge에 허용되는 경우]
+Feature는 다음 조건에서 RUNTIME\_BLOCKED SC가 있어도 merge할 수 있습니다:
+\begin{itemize}[nosep]
+  \item 모든 \texttt{runtime} 검증 가능한 SC가 통과 (쉬운 것만 골라서 통과가 아님)
+  \item 각 RUNTIME\_BLOCKED SC에 구체적 사유와 해소 경로가 있음
+  \item 사용자가 RUNTIME\_BLOCKED 목록을 검토하고 User Demo Gate를 통해 승인함
+  \item verify-report Overall이 ``PASS (Limited)'' --- ``PASS''가 아님
+\end{itemize}
+RUNTIME\_BLOCKED SC는 Feature가 staging 또는 production 환경으로 이동할 때 첫 번째 검증 대상이 됩니다.
+\end{tipbox}
+
 \subsection{Merge}
 
 verify가 통과하면 Feature가 main에 병합됩니다. Entity 및 API 레지스트리가 업데이트됩니다. \file{sdd-state.md}의 Feature 상태가 ``completed''로 변경됩니다. Cross-Feature 검증을 위한 Interaction Surface Inventory가 생성됩니다.

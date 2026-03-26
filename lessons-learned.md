@@ -920,3 +920,11 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: During aegis F004 pipeline, the user requested Korean language conversion of F001-F003 artifacts. This was performed on the `004-token-budget` branch. Result: F004's branch contained both token budget code AND language changes for 3 other Features. If F004 were reset or discarded, the language changes would also be lost.
 
 **Universal takeaway**: Feature branches should contain ONLY that Feature's changes. When mid-pipeline requests affect other Features, the agent must warn about bundling and offer branch separation. The safest approach: commit current Feature work, switch to main for cross-Feature changes, switch back. If the user accepts bundling, record it in sdd-state.md so the decision is traceable.
+
+---
+
+#### L71. Demo Is a Deliverable, Not an Afterthought
+
+**What happened**: aegis F004 completed implement + verify with 13/20 SC runtime verified, but no demo script was created. tasks.md T008 explicitly listed "Demo script: demos/F004-token-budget.sh" but it was skipped during implement. verify didn't check for demo existence either.
+
+**Universal takeaway**: Feature completion = code + tests + demo. The demo script is not documentation — it's a deliverable that packages the user experience. Three enforcement points: (1) Post-Implement Completeness Gate checks demo file exists. (2) verify Pre-Demo Check confirms --ci mode works. (3) User Demo Gate requires user to see the running Feature via the demo. If any of these is missing, the agent will skip demo creation because "the code works."

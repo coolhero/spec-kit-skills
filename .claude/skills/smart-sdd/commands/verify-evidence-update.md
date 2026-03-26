@@ -122,6 +122,11 @@ Before assembling the verify Review, check the SC Verification Matrix for eviden
 
 #### User Demo Gate (HARD STOP)
 
+**Pre-Demo Check** (before presenting to user):
+1. `demos/F00N-name.sh` exists? If not → "Demo script missing. Return to implement to create it."
+2. `demos/F00N-name.sh --ci` exits 0? If not → "Demo script --ci mode fails. Fix before proceeding."
+3. Only after both checks pass → proceed to User Demo Gate below.
+
 After automated SC verification, the user MUST see the Feature working:
 
 1. **Present results**: Show verify-report summary to user

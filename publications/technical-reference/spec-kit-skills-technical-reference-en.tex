@@ -2538,6 +2538,87 @@ Each Feature's verify-report compares its test count against the preceding Featu
 
 This is a warning, not a blocker. Runtime SC verification confirms the Feature works \emph{now}; test growth confirms it will \emph{keep working} after future changes.
 
+\subsection{RUNTIME\_BLOCKED: When SCs Cannot Be Verified at Runtime}
+
+Not every SC can be verified against a running application. Some require infrastructure, external services, or conditions that aren't available during development verification. The \texttt{RUNTIME\_BLOCKED} status exists for these cases---it is \textbf{honest acknowledgment}, not a shortcut.
+
+\paragraph{The Three Valid SC Methods.}
+
+\begin{description}
+  \item[\texttt{runtime: [method]}] SC verified against the running application. This is the gold standard. Example: \texttt{runtime: curl POST /auth/login → 200 with token}
+  \item[\texttt{RUNTIME\_BLOCKED: [reason]}] SC cannot be verified at runtime. The reason must be specific and structural---not ``too hard'' or ``takes too long.'' Example: \texttt{RUNTIME\_BLOCKED: requires 100 concurrent connections (load testing infrastructure)}
+  \item[\texttt{RUNTIME\_DELEGATED: [reason]}] SC verification delegated to the user for manual confirmation. Used for OS-native interactions, visual judgments, or hardware-dependent behaviors. Example: \texttt{RUNTIME\_DELEGATED: drag-and-drop file upload requires manual browser interaction}
+\end{description}
+
+\paragraph{Common RUNTIME\_BLOCKED Categories.}
+
+Based on the aegis pilot (F001--F004), these categories account for most RUNTIME\_BLOCKED SCs:
+
+\begin{longtable}{p{3.5cm}p{4cm}p{5.5cm}}
+\toprule
+\textbf{Category} & \textbf{Why Blocked} & \textbf{Example from aegis} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+\textbf{Concurrency / Load} &
+  Requires concurrent request generation infrastructure (e.g., 100 simultaneous requests) &
+  SC-006: ``100 concurrent budget reservations must be atomic'' --- requires load testing tool (k6, Artillery) \\
+\addlinespace
+
+\textbf{External Webhook} &
+  Requires an external HTTP endpoint to receive callbacks &
+  SC-008/009: ``Alert webhook fires at 80\%/90\% threshold'' --- requires webhook receiver (e.g., webhook.site, ngrok tunnel) \\
+\addlinespace
+
+\textbf{Scheduled Jobs} &
+  Requires time passage or cron trigger &
+  SC-010: ``Monthly budget reset'' --- BullMQ cron job registered but monthly trigger cannot be waited for \\
+\addlinespace
+
+\textbf{Failure Injection} &
+  Requires deliberately crashing a service mid-request &
+  SC-007: ``Provider error → release reserved tokens'' --- requires intercepting LLM response mid-stream \\
+\addlinespace
+
+\textbf{Streaming Lifecycle} &
+  Requires SSE/WebSocket long-lived connection testing &
+  SC-014: ``Streaming reconciliation'' --- token counting during active SSE stream \\
+\addlinespace
+
+\textbf{Multi-Organization} &
+  Requires multiple tenants with separate auth contexts &
+  SC-005: ``Team budget exhaustion blocks team members but not other teams'' --- requires 2+ organizations in test data \\
+\addlinespace
+
+\textbf{External API Dependency} &
+  Requires credentials or services not available in dev &
+  SC (general): ``LLM provider returns 500'' --- cannot force external provider errors \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Rules for RUNTIME\_BLOCKED.}
+
+\begin{enumerate}[nosep]
+  \item \textbf{Must be specific}: ``RUNTIME\_BLOCKED: requires load testing infrastructure'' --- not ``RUNTIME\_BLOCKED: hard to test''
+  \item \textbf{Code must be implemented}: RUNTIME\_BLOCKED means ``code exists but verification environment doesn't.'' If code is also missing, the SC is FAIL, not RUNTIME\_BLOCKED.
+  \item \textbf{Must note resolution path}: ``Resolve in staging environment with k6 load test'' or ``Resolve when webhook receiver is configured''
+  \item \textbf{Counts toward Overall}: A verify-report with RUNTIME\_BLOCKED SCs can still be PASS if all runtime-verifiable SCs pass. The report must clearly state: ``13/20 runtime verified, 7/20 RUNTIME\_BLOCKED (infrastructure-dependent)''
+  \item \textbf{Cannot substitute unit test}: ``Verified via unit test'' is NOT a valid RUNTIME\_BLOCKED reason. Use \texttt{RUNTIME\_BLOCKED: [actual infrastructure reason] --- unit test exists as proxy} if a unit test covers the logic.
+\end{enumerate}
+
+\begin{tipbox}[When RUNTIME\_BLOCKED Is Acceptable for Merge]
+A Feature can merge with RUNTIME\_BLOCKED SCs when:
+\begin{itemize}[nosep]
+  \item All \texttt{runtime}-verifiable SCs pass (no cherry-picking easy ones)
+  \item Each RUNTIME\_BLOCKED SC has a specific reason and resolution path
+  \item The user has reviewed the RUNTIME\_BLOCKED list and approved via User Demo Gate
+  \item The verify-report Overall says ``PASS (Limited)'' --- not ``PASS''
+\end{itemize}
+The RUNTIME\_BLOCKED SCs become the first verification targets when the Feature moves to staging or production environments.
+\end{tipbox}
+
 \subsection{Merge}
 
 After verify passes, the Feature is merged to main. Entity and API registries are updated. Feature status in \file{sdd-state.md} changes to ``completed.'' Interaction Surface Inventory is generated for cross-Feature verification.
