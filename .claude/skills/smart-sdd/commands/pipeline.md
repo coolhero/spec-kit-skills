@@ -1173,9 +1173,12 @@ Before running `speckit-implement`, read the current Feature's `pre-context.md` 
 Read `SPEC_PATH/{NNN-feature}/pre-context.md` → "Environment Variables" section.
 Include both Feature-owned variables AND shared variables listed in the "Shared variables" sub-table.
 
-**Step 2 — Check .env file**:
+**Step 2 — Check .env file FIRST** (🚫 do NOT skip this):
 - If `.env` exists: Check for the **presence** of each required variable name (do NOT read actual values)
 - If `.env` does not exist: All variables are missing
+
+❌ WRONG: Skip .env check → ask user "API Key가 필요합니다" → user: "이미 설정했는데?"
+✅ RIGHT: Read .env → OPENAI_API_KEY present ✅ → "All required variables set, proceeding"
 
 **Step 3 — Display and confirm (HARD STOP if missing required vars)**:
 
