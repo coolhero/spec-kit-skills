@@ -1034,7 +1034,12 @@ verify에서 버그를 발견하면 4단계 심각도로 분류합니다. Minor 
 | Spec Draft | `specs/NNN-feature/spec-draft.md` | reverse-spec의 초기 spec (rebuild 모드) |
 | Constitution | `.specify/memory/constitution.md` | 프로젝트 전역 원칙 및 Best Practices |
 | State | `specs/_global/sdd-state.md` | 파이프라인 진행, 툴체인, Foundation 결정 |
+| Domain Profile Instance | `specs/_global/domain-profile-instance.md` | Concern/Archetype별 도메인 결정: S5 프로브 답변, cross-concern 활성화, Feature별 요약 |
+| Constitution Seed | `specs/_global/constitution-seed.md` | init/reverse-spec에서 생성된 원칙 초안 — constitution 확정의 입력 |
+| Coverage Baseline | `specs/_global/coverage-baseline.md` | SBI 커버리지 추적 + 의도적 제외 항목 (rebuild/adoption) |
 | Verify Report | `specs/NNN-feature/verify-report.md` | 런타임 검증 증거: SC별 결과, 데모 실행, merge 준비 상태 판단 |
+| Feature Demo | `demos/F00N-name.sh` | Feature별 실행 데모 (interactive + --ci 모드) |
+| Integration Demo | `demos/DG{N}-scenario.sh` | Demo Group 완료 시 cross-Feature 데모 (interactive + --ci) |
 
 ---
 

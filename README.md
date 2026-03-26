@@ -1038,7 +1038,12 @@ The pipeline produces and maintains these shared artifacts — they're how Featu
 | Spec Draft | `specs/NNN-feature/spec-draft.md` | Initial spec from reverse-spec (rebuild mode) |
 | Constitution | `.specify/memory/constitution.md` | Project-wide principles & best practices |
 | State | `specs/_global/sdd-state.md` | Pipeline progress, toolchain, Foundation decisions |
+| Domain Profile Instance | `specs/_global/domain-profile-instance.md` | Per-concern/archetype domain decisions: S5 probe answers, cross-concern activations, per-Feature summaries |
+| Constitution Seed | `specs/_global/constitution-seed.md` | Draft principles from init/reverse-spec — input to constitution finalization |
+| Coverage Baseline | `specs/_global/coverage-baseline.md` | SBI coverage tracking with intentional exclusions (rebuild/adoption) |
 | Verify Report | `specs/NNN-feature/verify-report.md` | Runtime verification evidence: per-SC results, demo execution, merge readiness decision |
+| Feature Demo | `demos/F00N-name.sh` | Per-Feature executable demo (interactive + --ci modes) |
+| Integration Demo | `demos/DG{N}-scenario.sh` | Cross-Feature demo for Demo Group completion (interactive + --ci) |
 
 ---
 
