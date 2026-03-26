@@ -81,6 +81,16 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > - ASK the user to configure it (P2: Delegate, Don't Skip)
 > - Do NOT silently skip or report "N/A"
 > - Reference: Gotcha G9 (User App Configuration Gate)
+>
+> **Rule 7: Implement Completeness Gate**
+> Before declaring implement "complete", ALL of the following must be verified:
+> - [ ] Every task in tasks.md is marked [X] AND the corresponding file exists in `git diff --name-only`
+> - [ ] Demo script exists (`demos/F00N-name.sh`) with both default and `--ci` modes
+> - [ ] Post-Implement Smoke Launch passes (server starts + health check)
+> - ❌ WRONG: "All tasks done" → implement complete → verify discovers missing demo script
+> - ✅ RIGHT: Completeness Gate checks tasks + demo + smoke → all pass → implement complete
+>
+> This gate runs BEFORE the implement Review HARD STOP. If any check fails, return to implement — do NOT proceed to Review.
 
 **Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).
 
