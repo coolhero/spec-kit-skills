@@ -1658,6 +1658,16 @@ The four families exist because of three design requirements:
   \item \textbf{Skill separation}: S-sections drive smart-sdd (building). R-sections drive reverse-spec (reading). A-sections add philosophy. F-sections add platform constraints. No skill needs to load another skill's sections.
 \end{enumerate}
 
+\begin{tipbox}[Chapter 5 Key Takeaways]
+\begin{itemize}[nosep]
+  \item Four section families (S/A/R/F) separate pipeline execution, architecture philosophy, code analysis, and framework platform rules
+  \item Each section maps to exactly one pipeline stage---enabling lazy loading (55--70\% context savings)
+  \item Families merge by accumulation, not override---all relevant rules stack
+  \item Six project scenarios activate different family combinations
+\end{itemize}
+\end{tipbox}
+
+The Section System defines \emph{what knowledge exists} inside each module. The next chapter explains \emph{how that knowledge reaches the agent}---the loading order, injection protocol, context budget management, and merge semantics that compose hundreds of module sections into a focused, per-step context.
 
 %% ────────────────────────────────────────────────────────────────────
 \chapter{Module Loading and Context Injection}
@@ -1787,6 +1797,7 @@ During the aegis pilot, \file{\_foundation-core.md} contained ``\texttt{npx tsc 
 \textbf{Test}: If a rule mentions a specific tool name (npm, eslint, prettier, jest) outside of an ``e.g.'' context, it likely needs generalization.
 \end{warnbox}
 
+Module loading ensures the right rules reach the right pipeline step. But what if the agent ignores those rules, or the pipeline proceeds with stale data? The next chapter describes seven structural guards that enforce correctness at stage boundaries---the safety net beneath the module system.
 
 %% ────────────────────────────────────────────────────────────────────
 \chapter{Pipeline Integrity Guards}
@@ -1897,6 +1908,7 @@ Major-Spec & Return to specify & Missing requirement, wrong scope definition \\
 \end{tabularx}
 \end{table}
 
+Guards protect individual pipeline steps. But information must also survive \emph{across} Features---Entity~1's data model must be available when Feature~3 runs specify. The Global Evolution Layer provides this cross-Feature memory.
 
 %% ────────────────────────────────────────────────────────────────────
 \chapter{Global Evolution Layer}
@@ -2146,6 +2158,16 @@ S3 (Verify Steps) & Build + smoke test & Full 5-phase verification (Phase 0--4) 
 \end{tabularx}
 \end{table}
 
+\begin{tipbox}[Chapter 8 Key Takeaways]
+\begin{itemize}[nosep]
+  \item Four registries: entity-registry (data), api-registry (contracts), sdd-state (progress), domain-profile-instance (decisions)
+  \item Each Feature reads registries at specify, writes at plan Post-Update
+  \item Cross-Feature consistency is structural (registries), not memory-based (agent recall)
+  \item verify-report.md is a GEL artifact---persistent evidence, not chat-level claims
+\end{itemize}
+\end{tipbox}
+
+Part~II described the architecture: how Domain Profile shapes rules, how modules load, how guards enforce correctness, and how GEL preserves cross-Feature memory. Part~III now shows how the four skills---code-explore, reverse-spec, smart-sdd, and domain-extend---use this architecture in practice.
 
 %% ████████████████████████████████████████████████████████████████████
 %%  PART III: SKILLS REFERENCE
@@ -2536,6 +2558,16 @@ Common step-back patterns:
 
 \texttt{/smart-sdd adopt} wraps existing code with SDD documentation without rewriting. It auto-chains reverse-spec if artifacts do not exist, then runs a lighter consultation for each Feature.
 
+\begin{tipbox}[Chapter 11 Key Takeaways]
+\begin{itemize}[nosep]
+  \item 4-step protocol: Assemble $\rightarrow$ Checkpoint $\rightarrow$ Execute+Review $\rightarrow$ Update
+  \item 6-Phase Brief validates Feature definitions from multiple perspectives
+  \item 5-Phase Verify (Phase 0--4) requires runtime evidence, not just test results
+  \item verify-report.md is mandatory; merge gate checks file existence + PASS status
+  \item Features execute sequentially---never in parallel (MANDATORY RULE 4)
+\end{itemize}
+\end{tipbox}
+
 
 %% ────────────────────────────────────────────────────────────────────
 \chapter{domain-extend}
@@ -2590,6 +2622,7 @@ Three levels of customization, where later levels override earlier ones:
   \item \textbf{Project-level}: \file{domain-custom.md}---specific to one project.
 \end{enumerate}
 
+Part~III showed what each skill does. Part~IV opens the hood: the module architecture, the complete inventory of 47~concerns, 15~archetypes, and 10~interfaces, and the 61~cross-concern integration rules that make the whole system domain-aware.
 
 %% ████████████████████████████████████████████████████████████████████
 %%  PART IV: DOMAIN MODULE SYSTEM
@@ -2600,6 +2633,8 @@ Three levels of customization, where later levels override earlier ones:
 \chapter{Module Architecture}
 \label{ch:module-arch}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter explains the triple-file structure, key system files, and convention-over-configuration approach that makes adding new modules trivial.}
 
 \section{Triple Structure: Shared, Reverse-Spec, Smart-SDD}
 
@@ -2663,6 +2698,8 @@ New modules can start at any stage and grow incrementally. A detection-only modu
 \chapter{Complete Module Inventory}
 \label{ch:inventory}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter catalogs every module across all five axes: 10~interfaces, 47~concerns, 15~archetypes, 8~foundations, and context modifiers.}
 
 \section{Interfaces (10 modules)}
 
@@ -2740,6 +2777,8 @@ Framework-specific rules covering major ecosystems: React, Next.js, Electron, Ta
 \label{ch:cross-concern}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter describes the 61 integration rules that activate when specific module combinations are loaded together, producing emergent behavior no single module contains.}
+
 The resolver (\file{\_resolver.md} Step~3.5) defines 61 cross-concern integration rules that activate when specific combinations of modules are loaded together. These rules produce emergent behavior that no individual module contains.
 
 \section{Rule Structure}
@@ -2774,6 +2813,7 @@ The Context Scale adjusts how deeply cross-concern rules are enforced:
   \item \texttt{production + large-team}: All cross-concern rules are blocking. Observability cross-concerns are mandatory.
 \end{itemize}
 
+The module system is the theory. Part~V is the practice---20~gap patterns and 67~specific lessons discovered through hundreds of real pipeline runs. If Parts~II--IV explained \emph{how the system is designed}, Part~V explains \emph{why each design decision was made}---through the failures that motivated them.
 
 %% ████████████████████████████████████████████████████████████████████
 %%  PART V: FAILURE PATTERNS & LESSONS
@@ -2784,6 +2824,8 @@ The Context Scale adjusts how deeply cross-concern rules are enforced:
 \chapter{19 Gap Patterns}
 \label{ch:gaps}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter catalogs 20 recurring failure patterns---the specific ways pipelines break that build, test, and lint cannot detect.}
 
 Each gap pattern represents a \emph{class} of bugs that traditional software checks (build, test, lint) do not catch.
 
@@ -2934,6 +2976,8 @@ Each phase added approximately 5--10 countermeasures. The total system represent
 \label{ch:lessons}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter presents the most impactful lessons from hundreds of pipeline runs, organized by theme: agent interpretation, pipeline design, context management, and verification.}
+
 Organized by theme, with selected highlights from the 57 lessons.
 
 \section{Theme A: How Agents Interpret Instructions}
@@ -3000,6 +3044,8 @@ Specific techniques for managing context budget:
 \chapter{Agent Behavioral Patterns}
 \label{ch:agent-patterns}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter analyzes how AI agents behave under constraint pressure---seven evasion patterns, their root causes, and the structural countermeasures that neutralize each one.}
 
 \section{Seven Evasion Patterns (Detailed)}
 
@@ -3189,6 +3235,7 @@ Critical rules repeated at every execution point, not extracted to shared files.
 # Same text 30+ times. Intentional. Not a code smell.
 \end{lstlisting}
 
+Part~V cataloged what can go wrong. Part~VI shows how to get started, with step-by-step walkthroughs for six scenarios, advanced techniques like Context Reset and Step-Back Navigation, and practical guidance for building your own skills.
 
 %% ████████████████████████████████████████████████████████████████████
 %%  PART VI: PRACTICAL GUIDE
@@ -3199,6 +3246,8 @@ Critical rules repeated at every execution point, not extracted to shared files.
 \chapter{Getting Started}
 \label{ch:getting-started}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter gets you from zero to a running pipeline in 10 minutes.}
 
 \section{Prerequisites}
 
@@ -3338,6 +3387,8 @@ my-project/
 \label{ch:scenarios}
 %% ────────────────────────────────────────────────────────────────────
 
+\textit{This chapter walks through six real scenarios end-to-end, showing the exact commands and decision points for each project situation.}
+
 \section{Scenario 1: Greenfield Idea}
 
 You have an idea and no code.
@@ -3427,6 +3478,8 @@ The new module is immediately available. Future Features in this domain automati
 \chapter{Advanced Topics}
 \label{ch:advanced}
 %% ────────────────────────────────────────────────────────────────────
+
+\textit{This chapter covers power-user techniques: Context Reset between Features, Step-Back Navigation mid-pipeline, and guidance for building custom skills on top of the module system.}
 
 \section{Context Reset Protocol}
 
