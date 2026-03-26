@@ -1742,6 +1742,25 @@ Before executing ANY merge action, verify ALL of the following:
 
 🚨 This gate exists because aegis P8 demonstrated that agents skip report generation and proceed to merge. The chat-level "all pass" statement is NOT evidence — only the file is.
 
+#### Case Study Update (if `docs/case-study.md` exists)
+
+After merge completes, check if `docs/case-study.md` (or project-equivalent) exists in the project root. If it does:
+
+1. **Append Feature result** to the Pipeline Execution section:
+   - Feature name, SC pass rate, runtime vs limited, key findings
+   - Bugs found and fixed during verify
+   - Domain module activation (which S1/S5/S7 rules fired)
+   - HARD STOP decisions made by user
+2. **Update DG progress** (if this Feature completes a Demo Group):
+   - Integration Demo result (pass/fail)
+   - Cross-Feature integration observations
+3. **Update skill feedback summary** (if new P-issues were discovered)
+
+This is a **best-effort update** — not BLOCKING. If context is limited, note: "Case study update deferred — update manually or run `continue` in next session."
+
+❌ WRONG: F004 merge → sdd-state updated → case study forgotten → user asks "why isn't F004 in the case study?"
+✅ RIGHT: F004 merge → sdd-state updated → case study appended with F004 results → user sees complete record
+
 #### Feature Completion
 
 **Single-Feature mode (default)**:

@@ -4,6 +4,24 @@
 > Records key architectural and design decisions that shaped the project.
 
 ---
+## [2026-03-26] Add Case Study Update Trigger to Pipeline Merge Step
+
+### What Changed
+1. **commands/pipeline.md § Case Study Update**: New section before Feature Completion. After merge, if `docs/case-study.md` exists, append Feature result (SC pass rate, bugs, domain module activation, HARD STOP decisions), DG progress, and skill feedback summary. Best-effort, not BLOCKING.
+2. **commands/verify-evidence-update.md § Case Study: DG Completion Record**: After Integration Demo result is recorded in sdd-state, append DG result to case study if it exists.
+3. **lessons-learned.md**: Added L77 (Case Study Is a Pipeline Deliverable, Not an Afterthought).
+
+### Design Decision
+The case study file existed but the pipeline had no trigger to update it. Feature merge results and DG Integration Demo results were forgotten and batch-recorded later by user request. Adding a best-effort trigger at merge (same pattern as sdd-state update) ensures the case study stays current without blocking the pipeline when context is limited.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Case Study Update section before Feature Completion
+- `.claude/skills/smart-sdd/commands/verify-evidence-update.md` — Case Study: DG Completion Record after Integration Demo
+- `lessons-learned.md` — L77
+- `history.md` — This entry
+
+---
+
 ## [2026-03-26] Add Impact Analysis + Flow Proposal to Cascading Update Protocol
 
 ### What Changed

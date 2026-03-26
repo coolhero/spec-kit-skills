@@ -220,4 +220,12 @@ When "Run Integration Demo" is selected:
    - Status: `✅ verified` or `❌ failed`
    - Date, participating Features, user confirmation
 
+
+#### Case Study: DG Completion Record
+
+After Integration Demo result is recorded, if `docs/case-study.md` exists:
+- Append DG result: which Features, Integration Demo pass/fail, key observations
+- Note any P-issues discovered during Integration Demo
+- This creates a running record of the project's pipeline execution for future reference
+
 For the full Integration Demo script lifecycle (creation, naming, structure), see [demo-standard.md § 7](../reference/demo-standard.md).

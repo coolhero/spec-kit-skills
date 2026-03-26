@@ -961,3 +961,17 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **What happened**: During aegis F004 verify, the user pointed out "token estimation doesn't include output tokens." The agent analyzed the problem correctly but stopped at analysis — the user had to ask "so what do we do?" and then "spec needs to change first, right?" before the agent proposed a concrete flow. Three rounds of conversation to reach what should have been one response: "Spec Gap → FR-004 impact → --start specify recommended → proceed?"
 
 **Universal takeaway**: When user feedback arrives at any HARD STOP, the agent's response must include not just WHAT's wrong but HOW to fix it within the pipeline. Classify (bug/gap/improvement/new), analyze impact (which FRs/SCs), propose flow (which --start or new Feature), and ask for approval. The user should never have to figure out the pipeline routing themselves — that's the agent's job.
+
+---
+
+#### L77. Case Study Is a Pipeline Deliverable, Not an Afterthought
+
+**What happened**: aegis case study was repeatedly forgotten after Feature merges. F001-F003 results were batch-recorded later by user request. F004-F005 results and DG1/DG2 Integration Demo results were also not auto-recorded. The case study existed as a file but the pipeline had no trigger to update it.
+
+**Universal takeaway**: If a project maintains a case study or execution log, the pipeline's merge step should include a "case study update" trigger — same as sdd-state update. It doesn't need to be BLOCKING (context may be limited), but it should be attempted. An incomplete case study defeats its purpose: documenting the full pipeline experience for future reference.
+
+#### L77. Case Study Is a Pipeline Deliverable, Not an Afterthought
+
+**What happened**: aegis case study was repeatedly forgotten after Feature merges. F001-F003 results were batch-recorded later by user request. F004-F005 results and DG1/DG2 Integration Demo results were also not auto-recorded. The case study existed as a file but the pipeline had no trigger to update it.
+
+**Universal takeaway**: If a project maintains a case study or execution log, the pipeline's merge step should include a "case study update" trigger — same as sdd-state update. It doesn't need to be BLOCKING (context may be limited), but it should be attempted. An incomplete case study defeats its purpose: documenting the full pipeline experience for future reference.
