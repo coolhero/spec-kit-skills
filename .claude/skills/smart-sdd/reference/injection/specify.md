@@ -284,8 +284,29 @@ After `speckit-specify` completes and BEFORE assembling the Review Display, run 
       Compare: Do FR-001~003 cover all fields and controls above?
     ```
 
-14. **Assemble Review Display** (include any ⚠️/❌ from steps 1-13)
-15. **HARD STOP** (ReviewApproval)
+14. **US-SC Consistency Check** (BLOCKING if inconsistent)
+15. **Assemble Review Display** (include any ⚠️/❌ from steps 1-14)
+16. **HARD STOP** (ReviewApproval)
+
+### US-SC Consistency Check (BLOCKING if inconsistent)
+
+After spec.md is generated, verify that User Story Acceptance Scenarios and Success Criteria use consistent terminology:
+
+1. **State values**: If US2-AS4 says a record status becomes `failed`, but the entity definition's status enum is `reserved/reconciled/released`, and SC-007 says `released` — this is an inconsistency.
+2. **Error codes**: If US says "returns 400" but SC says "returns 422" for the same scenario — inconsistency.
+3. **Response formats**: If US describes `{error: "message"}` but SC expects `{code: "ERR_001", message: "..."}` — inconsistency.
+
+**Check procedure**:
+1. Extract all state values, error codes, and response formats from US Acceptance Scenarios
+2. Extract the same from SC descriptions
+3. Cross-reference: for each US-AS that maps to an SC, verify values match
+4. If mismatch found:
+   - Display: "⚠️ US-SC Inconsistency: US2-AS4 says `failed` but SC-007 says `released` for the same failure scenario. Entity status enum: `reserved/reconciled/released`"
+   - Fix inline: align US-AS to match SC (SC is authoritative because it references the entity definition)
+   - Record fix in verify-report or specify review notes
+
+❌ WRONG: US says `status: failed`, SC says `status: released`, entity has no `failed` — pass silently
+✅ RIGHT: Detect mismatch → fix US to say `released` → note in review: "US2-AS4 aligned to entity enum"
 
 ### SBI Accuracy Cross-Check (rebuild/adoption mode)
 

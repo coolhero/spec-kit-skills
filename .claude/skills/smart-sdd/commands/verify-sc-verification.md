@@ -112,7 +112,17 @@ Phase 3 Steps 3/6b currently only verify SCs mapped in the demo script's Coverag
 | `os-native` | OS-level interaction that Playwright cannot simulate (drag&drop files, system dialogs, clipboard, tray menu, keyboard shortcuts conflicting with OS) | Step 3f — user performs action, reports result |
 | `manual` | Requires visual/subjective judgment that automation cannot evaluate | User-assisted manual verification in Step 3g |
 
-3. Build the **SC Verification Matrix** with **Specific Test Scenarios**:
+3. **Pre-Verification: SC-Entity Cross-Reference**
+
+   Before building the matrix, verify that SC descriptions reference valid entity states:
+
+   1. Read data-model.md entity definitions (enum fields, status fields)
+   2. For each SC that mentions a state transition or status value:
+      - Confirm the value exists in the entity's enum/status definition
+      - If SC says `status: failed` but entity only has `reserved/reconciled/released` → flag before execution
+   3. This catches spec-level errors before they manifest as verify failures
+
+4. Build the **SC Verification Matrix** with **Specific Test Scenarios**:
 
    For each auto-category SC, derive a step-by-step test scenario from the SC description + plan.md Interaction Chains. Each step must be a concrete Playwright action or assertion — not a vague description.
 

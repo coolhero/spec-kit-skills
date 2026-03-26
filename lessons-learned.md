@@ -905,3 +905,18 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **Why it fails**: Natural language conditionals don't compose. Each new state adds interactions with every existing state. At 7 states (pending, in_progress, completed, adopted, blocked, deferred, restructured), there are 21 possible state transitions. Natural language can't encode 21 transitions clearly — the agent "merges" similar-sounding states and invents transitions that don't exist.
 
 **Universal takeaway**: When your workflow has 4+ states, model them as a file-based state machine, not natural language conditionals. The file gives three advantages: (1) it survives context compression (the agent reads it fresh), (2) you can inspect and edit it manually, (3) valid transitions are explicit (if a transition isn't in the file, it's invalid). Our sdd-state.md encodes Feature status, current step, verify progress, and bootstrap status — all as structured data the agent reads, not as conversational context it tries to remember. The cost is a file read at each step. The benefit is deterministic state management in a probabilistic system.
+---
+
+#### L69. Spec Internal Consistency — US and SC Must Agree
+
+**What happened**: aegis F004 spec.md had US2-AS4 describing a failure scenario with `status: failed`, while SC-007 described the same scenario with `status: released`. The entity definition only had `reserved/reconciled/released` — no `failed` state. The Post-Execution Verification sequence didn't catch this because it checked FR↔SC coverage but not US↔SC value consistency.
+
+**Universal takeaway**: When a spec contains both narrative descriptions (User Stories) and testable criteria (SCs), they can independently reference the same concepts with different values. Post-Execution Verification must cross-reference: same scenario → same state values, error codes, and response formats. SC is authoritative (it's what gets tested), so US descriptions should align to SC, not the other way around.
+
+---
+
+#### L70. Feature Branch Isolation — Cross-Feature Changes Must Not Silently Bundle
+
+**What happened**: During aegis F004 pipeline, the user requested Korean language conversion of F001-F003 artifacts. This was performed on the `004-token-budget` branch. Result: F004's branch contained both token budget code AND language changes for 3 other Features. If F004 were reset or discarded, the language changes would also be lost.
+
+**Universal takeaway**: Feature branches should contain ONLY that Feature's changes. When mid-pipeline requests affect other Features, the agent must warn about bundling and offer branch separation. The safest approach: commit current Feature work, switch to main for cross-Feature changes, switch back. If the user accepts bundling, record it in sdd-state.md so the decision is traceable.

@@ -5,6 +5,45 @@
 
 ---
 
+## [2026-03-26] Branch pre-flight for --start + cross-Feature change isolation (aegis P12)
+
+### What Changed
+1. **pipeline.md**: Added Branch Pre-Flight for `--start` — verifies correct Feature branch, clean working tree, and main sync status before re-execution begins. Added Cross-Feature Changes During Pipeline section — warns when mid-pipeline changes affect other Features' artifacts and offers branch separation or explicit bundling acknowledgment.
+2. **branch-management.md**: Added Pre-Flight for `--start` Re-execution table — summarizes branch handling for all situations (correct branch clean/dirty, on main, on different branch, already merged).
+3. **lessons-learned.md**: Added L70 (Feature Branch Isolation — Cross-Feature Changes Must Not Silently Bundle).
+
+### Design Decision
+Escalation from aegis P12 findings. P12a: `--start` re-execution skipped branch validation, risking work on wrong branch. Fix: BLOCKING branch pre-flight before any `--start` work. P12b: Cross-Feature artifact changes (F001-F003 language conversion) were silently bundled into F004's branch. If F004 were discarded, those changes would be lost. Fix: warn + recommend branch separation + record bundling decision.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Branch Pre-Flight + Cross-Feature Changes sections
+- `.claude/skills/smart-sdd/reference/branch-management.md` — --start Pre-Flight table
+- `lessons-learned.md` — L70
+
+---
+
+## [2026-03-26] Stale artifact handling + US-SC consistency check (aegis P10, P11)
+
+### What Changed
+1. **pipeline.md**: Added Stale Artifact Handling section to `--start` Pre-check — when `--start` re-executes a completed step, downstream artifacts are marked STALE (not deleted) with incremental vs full regeneration protocol.
+2. **reset.md**: Added `--start` vs `reset` comparison note clarifying the difference (STALE marking vs deletion).
+3. **injection/specify.md**: Added US-SC Consistency Check (step 14) to Post-Execution Verification — cross-references User Story Acceptance Scenarios against Success Criteria for state values, error codes, and response formats. SC is authoritative.
+4. **verify-sc-verification.md**: Added SC-Entity Cross-Reference pre-verification step — validates that SC descriptions reference valid entity states before SC execution.
+5. **lessons-learned.md**: Added L69 (Spec Internal Consistency — US and SC Must Agree).
+
+### Design Decision
+Escalation from aegis P10 and P11 findings. P10: `--start specify` re-ran specify but left stale plan.md/tasks.md referencing deleted FRs, causing downstream confusion. Fix: mark downstream artifacts STALE with incremental update protocol. P11: US2-AS4 said `status: failed` but entity had no `failed` state and SC-007 said `released`. Post-Execution Verification checked FR↔SC coverage but not US↔SC value consistency. Fix: add cross-reference check at specify time and pre-verification at SC execution time.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Stale Artifact Handling section
+- `.claude/skills/smart-sdd/commands/reset.md` — --start vs reset note
+- `.claude/skills/smart-sdd/reference/injection/specify.md` — US-SC Consistency Check
+- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC-Entity Cross-Reference
+- `lessons-learned.md` — L69
+
+---
+
+
 ## [2026-03-26] Unknown flag validation + --auto exclusivity (aegis P9)
 
 ### What Changed

@@ -12,6 +12,8 @@ All modes preserve reverse-spec artifacts (roadmap, pre-context, registries) unl
 
 > **reset vs step-back**: `reset` is **destructive** — it deletes artifacts (spec.md, plan.md, etc.) for the reset steps and starts fresh. **Step-back** (pipeline.md § Step-Back Protocol) is **incremental** — it preserves existing artifacts and modifies them via cascading update. Use reset when you want a clean slate; use step-back (via "Go back to earlier step" at any Review HARD STOP) when you want to fix something in an existing artifact.
 
+> **`--start` vs `reset`**: `--start` marks downstream artifacts as STALE and re-executes incrementally. `reset` DELETES artifacts and re-executes from scratch. Use `--start` when refining; use `reset` when starting over.
+
 ---
 
 ## Step 1 — Parse & Validate

@@ -772,6 +772,67 @@ Display the batch plan:
    **Cross-Feature Impact Analysis** (when `--start specify` or `--start plan`):
    After the re-executed step completes and BEFORE cascading downstream within this Feature, run the Impact Analysis Protocol from [`cascading-update.md`](../reference/cascading-update.md) § Cross-Feature Impact Analysis Protocol. This checks whether the spec/plan change affects entities or APIs that other Features reference, and lets the user choose which downstream Features to mark for re-run. Skip Impact Analysis for `--start tasks` or later (no public interface change).
 
+   #### Stale Artifact Handling (when `--start` re-executes a completed step)
+
+   When `--start` forces re-execution of a step that was previously ✅, downstream artifacts become potentially stale:
+
+   | --start | Stale artifacts (may need update) |
+   |---------|----------------------------------|
+   | specify | plan.md, tasks.md, data-model.md, contracts/, implement code |
+   | plan | tasks.md, implement code |
+   | tasks | implement code |
+   | implement | verify-report.md |
+
+   **Protocol**:
+
+   1. **Mark stale**: Add `<!-- STALE: re-execution from [step] pending since [date] -->` comment at the top of each downstream artifact
+   2. **Do NOT delete**: Stale artifacts contain valuable context for incremental updates
+   3. **Incremental vs Full regeneration** decision at each downstream step:
+      - If ≤3 FR/SC changed → **incremental update** (modify affected sections only, preserve unchanged)
+      - If >3 FR/SC changed OR architecture decision changed → **full regeneration** (rewrite from current spec/plan)
+      - Display in Checkpoint: "Incremental update (2 FRs changed)" or "Full regeneration (architecture change)"
+   4. **Clear stale marker**: When a downstream step completes, remove the STALE comment
+
+   ❌ WRONG: Re-run specify → old plan.md still references deleted FR-003 → tasks reference non-existent plan section → implement builds wrong thing
+   ✅ RIGHT: Re-run specify → plan.md marked STALE → plan step reads new spec + old plan → incremental update → stale marker removed
+
+
+   #### Branch Pre-Flight for --start (🚫 BLOCKING)
+
+   When `--start` re-executes a step on an existing Feature, branch state must be verified BEFORE any work begins:
+
+   1. **Current branch check**: `git branch --show-current`
+      - If on `{NNN}-{short-name}` (the Feature's branch) → ✅ continue on this branch
+      - If on `main` → check if `{NNN}-{short-name}` branch exists:
+        - Exists → `git checkout {NNN}-{short-name}`
+        - Doesn't exist → create: `git checkout -b {NNN}-{short-name}`
+      - If on a DIFFERENT Feature's branch → 🚫 BLOCKING: "Currently on branch [X] but targeting Feature [Y]. Switch to main first."
+
+   2. **Uncommitted changes check**: `git status --porcelain`
+      - If dirty → 🚫 BLOCKING: "Uncommitted changes detected. Commit or stash before re-executing."
+      - Display changed files so user can decide
+
+   3. **Main sync check** (if branch exists): `git log main..HEAD --oneline | wc -l`
+      - Display: "[N] commits ahead of main"
+      - If main has progressed (other Features merged): suggest `git rebase main` but do NOT auto-rebase
+
+   ❌ WRONG: `--start specify` → skip branch check → work on wrong branch → merge nightmare
+   ✅ RIGHT: `--start specify` → verify on 004-token-budget → uncommitted clean → proceed
+
+   #### Cross-Feature Changes During Pipeline (⚠️ WARNING)
+
+   If the user requests changes to OTHER Features' artifacts while a Feature pipeline is active:
+
+   1. **Warn**: "This change affects F001-F003 artifacts but we're on the 004-token-budget branch. Cross-Feature changes on a Feature branch will be bundled into F004's merge."
+   2. **Recommend**:
+      - Option A: "Commit F004 work → switch to main → make cross-Feature changes → switch back to 004-token-budget → continue"
+      - Option B: "Continue on this branch (cross-Feature changes merge with F004)" — user must explicitly acknowledge
+   3. **Record**: If user chooses Option B, note in sdd-state.md Feature Detail Log: "Cross-Feature changes (F001-F003 language conversion) bundled in F004 branch"
+
+   ❌ WRONG: Silently make cross-Feature changes on Feature branch → user doesn't know what's bundled
+   ✅ RIGHT: Warn → user chooses → record decision
+
+
 4. **Display confirmation (HARD STOP)**:
 
    **Single-Feature mode**:

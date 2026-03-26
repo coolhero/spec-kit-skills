@@ -43,6 +43,19 @@ Before executing `specify` for a new Feature:
 >
 > **⚠️ Auto-numbering conflict**: Because the Feature branch `{NNN}-{short-name}` already exists when `speckit-specify` runs, spec-kit's `create-new-feature.sh` auto-numbering may detect `{NNN}` as "in use" and assign the next number. When invoking `speckit-specify`, always pass the Feature name as `{NNN}-{short-name}` (e.g., `002-navigation`) to force the correct number. See `commands/pipeline.md` § Feature Number Conflict Prevention.
 
+### Pre-Flight for --start Re-execution
+
+When `--start` targets an existing Feature (not a new one):
+
+| Situation | Action |
+|-----------|--------|
+| On correct Feature branch, clean | Proceed |
+| On correct Feature branch, dirty | BLOCKING: commit or stash |
+| On main, Feature branch exists | Checkout Feature branch |
+| On main, Feature branch doesn't exist | Create Feature branch |
+| On different Feature's branch | BLOCKING: switch to main first |
+| Feature was already merged (completed/adopted) | Create fresh branch from current main (see § Revisiting a Completed Feature) |
+
 ### During Feature Development (specify → verify)
 
 All commands (`specify`, `plan`, `tasks`, `implement`, `verify`) execute on the Feature branch created by smart-sdd:
