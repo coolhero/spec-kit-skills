@@ -2190,7 +2190,7 @@ Every pipeline step follows the same protocol:
 \end{enumerate}
 
 \begin{dangerbox}[Mandatory Rules]
-Seven mandatory rules are always loaded in SKILL.md:
+Eight mandatory rules are always loaded in SKILL.md:
 
 \textbf{Rule~1}: Every HARD STOP uses AskUserQuestion. Empty response = re-ask. Never treat silence as approval.
 
@@ -2205,6 +2205,8 @@ Seven mandatory rules are always loaded in SKILL.md:
 \textbf{Rule~6}: Honest SC evidence. Partial verification = PARTIAL, not PASS. User Demo required.
 
 \textbf{Rule~7}: Implement Completeness Gate. Before implement Review: all tasks done + demo script exists + smoke launch passes.
+
+\textbf{Rule~8}: No Code Without Spec. When verify discovers missing functionality, update spec.md FIRST (Cascading Update Protocol), then implement. Never write code that has no FR/SC in the spec.
 \end{dangerbox}
 
 \section{The Brief: 6-Phase Briefing}

@@ -9930,3 +9930,32 @@ Added structural enforcement where verify-report Expected column is pre-filled f
 - `commands/verify-sc-verification.md` — SC Matrix Pre-population step (BLOCKING)
 - `SKILL.md` — Rule 6 structural enforcement
 - `lessons-learned.md` — G20 table row
+
+## [2026-03-26] P11 "code written = feature working" structural enforcement
+
+### Design Decision
+Added three structural defenses against the pattern where agents write 40+ files and declare implement complete without running any of them: (A) Per-Task Runtime Micro-Verify — each task is curl/navigate/click tested immediately after completion, not at the end. (B) No Placeholder Rule — interactive UI elements without real handlers are BLOCKING incomplete, and deferred paths should not show UI at all. (C) SC Full Scope Check — all entities mentioned in an SC must be implemented, not just the first one.
+
+### Files Changed
+- `commands/pipeline.md` — Per-Task Runtime Micro-Verify + No Placeholder Rule (before Completeness Gate)
+- `reference/injection/implement.md` — SC Full Scope Implementation Check (before Post-Step Update)
+- `SKILL.md` — MANDATORY RULE 7 updated with micro-verify + no-placeholder language
+- `lessons-learned.md` — L84 + G20 table P11 row
+- `history.md` — This entry
+
+---
+
+## [2026-03-26] P11b — Spec Boundary Gate + No Code Without Spec
+
+### Context
+aegis F007 verify discovered "Team creation UI missing." The agent wrote CreateTeamModal.tsx directly without updating spec/plan/tasks — violating SDD's spec-first principle. Root cause: specify didn't force explicit Feature boundaries (In-Scope/Out-of-Scope), so "Team 관리" was ambiguous.
+
+### Design Decision
+Two structural fixes: (1) Feature Boundary Clarification Gate at specify — forces explicit In-Scope/Out-of-Scope with cross-Feature dependency verification against api-registry. (2) No Code Without Spec rule at verify — Major-Spec findings must go through Cascading Update Protocol before any code is written. Added as MANDATORY RULE 8 in SKILL.md.
+
+### Files Changed
+- `reference/injection/specify.md` — Feature Boundary Clarification Gate (BLOCKING, before existing Post-Execution checks)
+- `commands/verify-phases.md` — MANDATORY RULE: No Code Fix Without Spec Update (after Bug Fix Severity Rule)
+- `SKILL.md` — MANDATORY RULE 8: No Code Without Spec
+- `lessons-learned.md` — L85 + G20 table P11b row
+- `history.md` — This entry

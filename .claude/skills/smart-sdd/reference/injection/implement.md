@@ -1462,6 +1462,22 @@ After static checks (1-4) pass, confirm wiring actually works at runtime:
 
 ---
 
+## SC Full Scope Implementation Check
+
+Before declaring implement complete, for EACH SC in spec.md:
+
+1. Read the SC description (e.g., "SC-005: Org/Team/User 예산 설정 UI에서 CRUD")
+2. Identify ALL entities mentioned (Org AND Team AND User)
+3. Verify implementation covers ALL entities, not just the first one
+4. If an entity is missing implementation → task is incomplete
+
+❌ WRONG (Pattern C): SC says "Org/Team/User CRUD" → implement only Org → "SC-005 구현 완료"
+✅ RIGHT: SC says "Org/Team/User CRUD" → implement Org + Team + User → all three work → "SC-005 구현 완료"
+
+This is the implement-time defense against partial SC coverage. verify catches it too (via Action Depth), but catching at implement saves a full verify cycle.
+
+---
+
 ## Post-Step Update Rules
 
 1. Subsequent Feature impact analysis:

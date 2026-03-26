@@ -1449,6 +1449,54 @@ This catches integration mismatches at implement time, not verify time.
 - `server_start` → start application
 - `health_check` → confirm running
 If F8b is absent, auto-detect from project files.
+
+#### Per-Task Runtime Micro-Verify (BLOCKING per task, not just at end)
+
+After EACH implement task completes (not just at the end of all tasks):
+
+1. **If the task creates a new endpoint**: `curl` the endpoint → verify 200/expected status
+2. **If the task creates a new UI page**: Start dev server → navigate to page → verify no runtime errors
+3. **If the task modifies existing code**: Run affected tests → verify no regression
+4. **If the task creates a UI component with interactions**: Verify EACH clickable element has a real handler (not placeholder)
+
+This catches broken code AT THE TASK LEVEL — not after 40+ files are written.
+
+❌ WRONG (Pattern A):
+  T001: Write auth module (5 files) → ✅
+  T002: Write budget module (8 files) → ✅
+  T003: Write dashboard pages (12 files) → ✅
+  → "All tasks complete" → Smoke Launch → server starts → "implement complete"
+  → Verify: 4 pages have runtime errors, 2 buttons are placeholders
+
+✅ RIGHT:
+  T001: Write auth module → curl POST /auth/login → 200 → ✅
+  T002: Write budget module → curl PUT /budgets/org/:id → 200 → ✅
+  T003: Write dashboard page 1 → navigate → renders → click Edit → modal opens → ✅
+  T003: Write dashboard page 2 → navigate → runtime error → FIX → ✅
+  → "All tasks complete + micro-verified"
+
+**Why per-task**: If you write 40 files and test at the end, any failure could be in any of the 40 files. If you test per task, the failure is in the 3-5 files you just wrote.
+
+#### No Placeholder Rule (BLOCKING)
+
+UI elements that appear interactive MUST have real handlers. Placeholder elements are considered INCOMPLETE implementation:
+
+| Element | Placeholder (❌ BLOCKING) | Implemented (✅) |
+|---------|--------------------------|-----------------|
+| Edit button | `<span>Edit</span>` or `<button disabled>` | `<button onClick={handleEdit}>Edit</button>` |
+| Link | `<a href="#">Details</a>` | `<Link href="/details/123">Details</Link>` |
+| Form submit | `<button type="submit">Save</button>` (no onSubmit) | `<form onSubmit={handleSubmit}>` |
+| Dropdown | `<select>` with no onChange | `<select onChange={handleChange}>` |
+
+**Detection**: Before Completeness Gate, scan all new/modified UI files:
+- Search for `onClick`, `onSubmit`, `onChange`, `href="#"`, `disabled` without condition
+- Any interactive element without a real handler → BLOCKING
+
+❌ WRONG: "Budget page complete" → `<span>Edit</span>` for Team budgets → not actually editable
+✅ RIGHT: "Budget page complete" → all Edit/Save/Delete buttons have handlers → all CRUD paths functional
+
+If a secondary path is intentionally deferred (e.g., Team management is T2 scope), the UI element should NOT exist at all — don't show a button that does nothing.
+
 #### Post-Implement Completeness Gate
 
 > **⚠️ implement is NOT complete until the Completeness Gate passes.** This gate catches incomplete implementations BEFORE they reach verify — where detection is too late and produces only non-blocking warnings.

@@ -290,6 +290,8 @@
 | P9(new) | Runtime error reported as PASS (error UI ≠ functional PASS) | SC Matrix Pre-population + Expected↔Actual structural comparison | Pre-fill Expected from spec BEFORE execution → mismatch = auto-FAIL |
 | P9 | Undefined flag interpreted as --auto → all HARD STOPs skipped | Unknown flag validation + only literal --auto enables auto-approval | TBD |
 | P10 | Page render reported as CRUD PASS | SC Action Depth column + Level mismatch = auto-FAIL | Classify depth BEFORE execution → L1 render cannot pass L3 CRUD |
+| P11 | Code written but not working (placeholders, missing handlers, untested) | Per-Task Micro-Verify + No Placeholder Rule + SC Full Scope Check | Each task verified immediately; interactive elements must have real handlers |
+| P11b | Code added without spec update (SDD principle violation) | Spec Boundary Gate + MANDATORY RULE 8 + Flow Proposal | Spec-first: missing FR → update spec → cascade → implement |
 
 **The pattern**: Each enforcement closes one evasion path. The agent's "goal" (finish quickly) doesn't change — it finds the next path of least resistance. This is not malice; it's optimization under implicit time pressure.
 
@@ -1019,3 +1021,19 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **The pattern**: "I can SEE the page, therefore the feature WORKS." This is the verify equivalent of "it compiles, therefore it's correct." A Budget page that renders but can't save edits is a broken Feature — just as code that compiles but crashes at runtime is broken code.
 
 **Structural fix**: SC Action Depth classification (L1 Render / L2 Interact / L3 Complete) pre-assigned to each SC before execution. Level 1 verification cannot pass a Level 3 SC. The Depth column in verify-report makes the gap visible.
+
+#### L84. Code Written ≠ Feature Working — Per-Task Micro-Verify Is Essential
+
+**What happened**: aegis F007 (Admin Dashboard) implement wrote 40+ files across 7 pages. The Completeness Gate checked "all tasks listed" and "smoke launch passes" (server starts). But when the user tried the dashboard: Logs page had runtime errors (API response mismatch), Team Budget Edit was a `<span>` placeholder (no click handler), Team management page didn't exist. The code was written but never run.
+
+**Three patterns in one incident**: (A) "code written = working" — the agent equates file creation with functional implementation. (B) "happy path only" — primary entity (Org) implemented, secondary entities (Team/User) left as placeholders. (C) "SC partial coverage" — SC says "Org/Team/User CRUD" but only Org was implemented.
+
+**Structural fix**: Per-Task Runtime Micro-Verify — after each task, verify the specific functionality works (curl for APIs, navigate+click for UI). No Placeholder Rule — interactive elements must have real handlers; if a path is deferred, don't show the UI for it. SC Full Scope Check — all entities mentioned in an SC must be implemented, not just the first one.
+
+#### L85. Spec Is the Contract — Code Without Spec Is Uncontracted Work
+
+**What happened**: aegis F007 verify discovered "Team creation UI missing." The agent immediately wrote a CreateTeamModal component without updating spec.md, plan.md, or tasks.md. The resulting code worked but existed outside the SDD contract — no FR referenced it, no SC tested it, no plan documented its architecture. When the next Feature checked spec.md for F007's capabilities, Team CRUD wasn't listed.
+
+**Root cause**: The specify step didn't include a Scope section (In-Scope/Out-of-Scope), so "Team 관리" was ambiguous. When verify found the gap, the path of least resistance was "write code" rather than "update spec then write code."
+
+**Two structural fixes**: (1) Feature Boundary Clarification Gate at specify — forces explicit In-Scope/Out-of-Scope with cross-Feature dependency verification. (2) No Code Without Spec rule at verify — Major-Spec findings must go through Cascading Update Protocol before any code is written.

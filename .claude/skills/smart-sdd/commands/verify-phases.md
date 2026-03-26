@@ -104,6 +104,44 @@ Track regression count per Feature in the Feature Detail Log. Each `↩️ REGRE
 
 **Rationale**: verify-phase fixes bypass spec/plan/tasks and have no checkpoint/review. Quick-patching a Major issue leads to suboptimal architecture — the kind of code that works but accumulates tech debt. Additionally, user feedback during verify Review often identifies issues that are not bugs but rather spec-level or plan-level problems. Without structured regression routing, these fixes happen ad-hoc, outside the pipeline's quality gates.
 
+### MANDATORY RULE: No Code Fix Without Spec Update (SDD Principle)
+
+When verify or User Demo discovers missing functionality:
+
+1. **STOP** — do NOT write code immediately
+2. **Classify** using Bug Fix Severity:
+   - Missing FR → **Major-Spec** (spec has no requirement for this)
+   - Wrong FR → **Major-Spec** (spec says X but should say Y)
+   - Missing implementation of existing FR → **Major-Implement** (spec is right, code is wrong)
+   - Code bug → **Minor** (fix in verify)
+
+3. **For Major-Spec**: Cascading Update Protocol MUST be followed:
+   a. Update spec.md (add FR + SC)
+   b. Update plan.md (add component/endpoint)
+   c. Update tasks.md (add task)
+   d. Implement the new task
+   e. Re-verify the new SC
+
+4. **Present Flow Proposal** to user (per cascading-update.md Step 2b):
+   ```
+   🔍 Missing functionality detected: Team creation UI
+   
+   Classification: Major-Spec (no FR for Team CRUD in spec.md)
+   Impact: SC-005 (Team Budget) depends on Team existence
+   
+   Proposed flow:
+   A. Add FR-015 (Team CRUD) to spec.md → cascade to plan/tasks → implement → verify
+   B. Declare Out-of-Scope (Team creation is F003's job) → verify SC-005 with seed data
+   
+   Which approach?
+   ```
+
+❌ WRONG: verify finds "Team creation missing" → agent writes CreateTeamModal.tsx → "fixed"
+✅ RIGHT: verify finds "Team creation missing" → Major-Spec → Flow Proposal → user decides → spec updated → cascade
+
+**Why this matters**: If code is added without spec, the spec no longer reflects the implementation. Future Features reading this spec will have wrong expectations. The spec IS the contract — code without spec is uncontracted work.
+
+
 ### Verify-time Change Recording — All Source Modifications
 
 The Bug Fix Severity Rule above handles **bugs** (wrong behavior). But verify may also discover **implementation gaps** — missing behavior that falls within the scope of an existing FR-### or task but was not completed during implement. Unlike a bug, an implementation gap is *absent* behavior, not *wrong* behavior (e.g., missing i18n keys, unimplemented edge case within a documented SC, missing config entry referenced in tasks).

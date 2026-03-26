@@ -94,6 +94,18 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 > - ✅ RIGHT: Completeness Gate checks tasks + demo + smoke → all pass → implement complete
 >
 > This gate runs BEFORE the implement Review HARD STOP. If any check fails, return to implement — do NOT proceed to Review.
+>
+> **Per-Task Micro-Verify**: Each task is verified immediately after completion (curl for APIs, navigate for pages, click for interactions). "40 files written with no runtime check" is NOT implement complete — it's implement started.
+> **No Placeholders**: Interactive UI elements without real handlers are incomplete implementation, not "minor TODO." Don't show a button that does nothing.
+>
+> **Rule 8: No Code Without Spec (SDD Core Principle)**
+> When verify discovers missing functionality, the agent MUST NOT write code directly. Instead:
+> 1. Classify: is the spec missing (Major-Spec) or the implementation missing (Major-Implement)?
+> 2. If Major-Spec: update spec.md FIRST → cascade to plan/tasks → then implement
+> 3. Present Flow Proposal to user before taking action
+> - ❌ WRONG: verify finds "Team UI missing" → write CreateTeamModal.tsx → "fixed"
+> - ✅ RIGHT: verify finds "Team UI missing" → "Major-Spec: no FR for Team CRUD. Add to spec?" → user approves → spec → plan → tasks → implement
+
 
 **Prerequisites**: [Playwright](https://playwright.dev) must be installed for runtime verification (`implement`) and UI testing (`verify`).
 

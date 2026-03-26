@@ -250,6 +250,46 @@ Review the above content. You can:
 
 After `speckit-specify` completes and BEFORE assembling the Review Display, run these checks in order:
 
+
+0. **Feature Boundary Clarification Gate** (BLOCKING — see below)
+
+### Feature Boundary Clarification Gate (BLOCKING — specify Review)
+
+After spec.md is generated, verify that Feature boundaries are EXPLICIT:
+
+1. **In-Scope / Out-of-Scope section**: spec.md MUST contain a section listing:
+   - In-Scope: specific capabilities this Feature provides
+   - Out-of-Scope: related capabilities explicitly excluded (with reason)
+
+   Example:
+   ```
+   ## Scope
+   ✅ In-Scope:
+   - Team budget 조회/설정/수정 (Team은 F003에서 이미 생성됨)
+   - User budget 조회/설정/수정
+
+   ❌ Out-of-Scope:
+   - Team 생성/삭제 (F003 범위 — api-registry에 POST /teams 존재)
+   - User 초대/삭제 (F003 범위)
+   ```
+
+2. **Cross-Feature Dependency Completeness**: For each entity this Feature CONSUMES from another Feature:
+   - Verify the producing Feature's api-registry has the required endpoint
+   - If the endpoint DOESN'T EXIST in api-registry → this Feature must provide it → add to In-Scope
+   - If the endpoint EXISTS → Out-of-Scope with reference
+
+   ❌ WRONG: spec says "Team 예산 관리" → assumes Team creation exists → implement: no Team creation UI → user can't create teams
+   ✅ RIGHT: spec says "Team 예산 관리" → checks api-registry: POST /teams exists in F003 → Out-of-Scope: "Team CRUD (F003)" → implement knows to only build budget UI
+
+3. **Pre-condition Section**: For each SC, list what must already exist:
+   ```
+   SC-005: Team Budget CRUD
+   Pre-conditions: Team must exist (created via F003 POST /teams)
+   ```
+
+🚫 **BLOCKING**: If spec.md has no Scope section or has ambiguous boundaries (e.g., "Team 관리" without specifying CRUD vs view-only), the specify Review cannot proceed.
+
+
 1. **SBI Accuracy Cross-Check** (if applicable — rebuild/adoption with SBI)
 2. **Platform Constraint FR Verification** (if applicable — pre-context has Platform Constraints)
 3. **Edge Case Coverage Check** (if applicable — pre-context has Edge Cases)

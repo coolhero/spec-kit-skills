@@ -2137,7 +2137,7 @@ init -> add -> constitution -> specify -> plan -> tasks
 \end{enumerate}
 
 \begin{dangerbox}[필수 규칙]
-일곱 가지 필수 규칙이 항상 SKILL.md에 로드됩니다:
+여덟 가지 필수 규칙이 항상 SKILL.md에 로드됩니다:
 
 \textbf{규칙~1}: 모든 HARD STOP에서 AskUserQuestion을 사용합니다. 빈 응답 = 재질문. 침묵을 승인으로 간주하지 않습니다.
 
@@ -2152,6 +2152,8 @@ init -> add -> constitution -> specify -> plan -> tasks
 \textbf{규칙~6}: 정직한 SC 증거. 부분 검증 = PARTIAL (PASS 아님). User Demo 필수.
 
 \textbf{규칙~7}: Implement Completeness Gate. Review 전: 모든 task 완료 + 데모 스크립트 존재 + smoke launch 통과.
+
+\textbf{규칙~8}: Spec 없이 코드 금지. verify에서 누락 기능 발견 시, spec.md를 먼저 업데이트(Cascading Update Protocol)한 후 구현. FR/SC가 없는 코드를 절대 작성하지 않는다.
 \end{dangerbox}
 
 \section{Brief: 6-Phase Briefing}
