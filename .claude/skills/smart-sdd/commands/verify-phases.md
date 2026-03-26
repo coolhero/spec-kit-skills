@@ -120,7 +120,10 @@ When verify or User Demo discovers missing functionality:
    b. Update plan.md (add component/endpoint)
    c. Update tasks.md (add task)
    d. Implement the new task
-   e. Re-verify the new SC
+   e. Re-verify the new SC (🚫 BLOCKING — new SCs MUST go through verify Phase 3 runtime verification before merge. verify-report.md must include the new SC rows with Expected/Actual/Match?/Result. Merge gate rejects if new SCs are missing from the report.)
+
+   ❌ WRONG: spec updated → code written → "cascade complete, ready for merge" (new SC never verified)
+   ✅ RIGHT: spec updated → code written → verify Phase 3 for new SC → verify-report updated → merge
 
 4. **Present Flow Proposal** to user (per cascading-update.md Step 2b):
    ```

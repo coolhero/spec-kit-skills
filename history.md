@@ -9959,3 +9959,12 @@ Two structural fixes: (1) Feature Boundary Clarification Gate at specify — for
 - `SKILL.md` — MANDATORY RULE 8: No Code Without Spec
 - `lessons-learned.md` — L85 + G20 table P11b row
 - `history.md` — This entry
+
+## [2026-03-26] P11 Pattern E: Cascade re-verify BLOCKING
+
+### Design Decision
+Strengthened Cascading Update step e from text instruction to BLOCKING gate. New SCs added during cascade must go through verify Phase 3 and appear in verify-report.md before merge is allowed.
+
+### Files Changed
+- `commands/verify-phases.md` — step e elevated to BLOCKING with anti-pattern
+- `lessons-learned.md` — L86 + G20 P11c row

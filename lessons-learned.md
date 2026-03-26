@@ -292,6 +292,7 @@
 | P10 | Page render reported as CRUD PASS | SC Action Depth column + Level mismatch = auto-FAIL | Classify depth BEFORE execution → L1 render cannot pass L3 CRUD |
 | P11 | Code written but not working (placeholders, missing handlers, untested) | Per-Task Micro-Verify + No Placeholder Rule + SC Full Scope Check | Each task verified immediately; interactive elements must have real handlers |
 | P11b | Code added without spec update (SDD principle violation) | Spec Boundary Gate + MANDATORY RULE 8 + Flow Proposal | Spec-first: missing FR → update spec → cascade → implement |
+| P11c | Cascade complete but new SC not re-verified | Cascade step e BLOCKING + merge gate checks new SC rows | New SCs must appear in verify-report with runtime results |
 
 **The pattern**: Each enforcement closes one evasion path. The agent's "goal" (finish quickly) doesn't change — it finds the next path of least resistance. This is not malice; it's optimization under implicit time pressure.
 
@@ -1037,3 +1038,9 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **Root cause**: The specify step didn't include a Scope section (In-Scope/Out-of-Scope), so "Team 관리" was ambiguous. When verify found the gap, the path of least resistance was "write code" rather than "update spec then write code."
 
 **Two structural fixes**: (1) Feature Boundary Clarification Gate at specify — forces explicit In-Scope/Out-of-Scope with cross-Feature dependency verification. (2) No Code Without Spec rule at verify — Major-Spec findings must go through Cascading Update Protocol before any code is written.
+
+#### L86. Cascading Update Without Re-Verify Is Half a Fix
+
+**What happened**: aegis F007 cascading update added FR-015 (Team CRUD) + SC-015 to spec.md, updated plan/tasks, and implemented the code. But the new SC-015 was never runtime-verified — the agent proposed merge immediately after implement. The cascade was complete on paper but the new functionality was untested.
+
+**Universal takeaway**: Cascading Update has 5 steps: spec→plan→tasks→implement→**verify**. Step e (re-verify) must be BLOCKING — the merge gate checks that ALL SCs in the report (including newly added ones) have verification results. A cascade without re-verify is equivalent to writing code without testing — the spec is updated but the contract is unverified.
