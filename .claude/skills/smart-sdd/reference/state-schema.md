@@ -412,12 +412,16 @@ Overall: 42/55 (76%)
 
 ## Demo Group Progress
 
+> **Demo Group ≠ Release Group**: Demo Groups are user-scenario-based groupings for integration demos. They are independent of Release Groups (which are dependency-based build order). A Demo Group is "complete" when ALL its member Features have passed verify. Completion triggers an Integration Demo HARD STOP (see verify-evidence-update.md § Phase 5).
+
 Tracks demo groups defined in `roadmap.md`. Each group represents a user scenario that spans multiple Features. Only populated when Demo Groups exist in the roadmap.
 
-| Group | Scenario | Features | Completed | Status | Last Demo |
-|-------|----------|----------|-----------|--------|-----------|
-| DG-01 | User Purchase Flow | F001,F002,F003,F005 | 3/4 | ⏳ F005 pending | — |
-| DG-02 | Admin Dashboard | F001,F004,F006 | 1/3 | ⏳ F004,F006 pending | 2024-01-20 |
+| Group | Scenario | Features | Completed | Status | Demo Script | Last Demo |
+|-------|----------|----------|-----------|--------|-------------|-----------|
+| DG-01 | User Purchase Flow | F001,F002,F003,F005 | 3/4 | ⏳ F005 pending | — | — |
+| DG-02 | Admin Dashboard | F001,F004,F006 | 1/3 | ⏳ F004,F006 pending | `demos/DG2-admin-dashboard.sh` | 2024-01-20 |
+
+**`Demo Script` column**: Path to Integration Demo script (e.g., `demos/DG1-login-to-budget.sh`). Created during the last Feature's implement step. Set to `—` until the last Feature begins implement.
 
 ### Demo Group Status Values
 - `✅ All verified` : All Features in group verified; Integration Demo completed

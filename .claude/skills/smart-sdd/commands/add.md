@@ -838,6 +838,10 @@ If no unmapped behaviors match the filter AND no new behaviors: display "No SBI 
 
 ## Phase 5: Demo Group Assignment (HARD STOP)
 
+> **What is a Demo Group?** A set of Features that together demonstrate a meaningful user scenario. Examples: "User registers → browses → purchases" spans 3 Features. "Admin configures budget → User gets blocked at limit" spans 2 Features. Demo Groups are independent of Release Groups — they group Features by business value, not technical dependency.
+>
+> **When does the Integration Demo run?** When the LAST Feature in a Demo Group completes verify, a HARD STOP offers to run the Integration Demo. The demo executes the full user scenario end-to-end across all Features in the group.
+
 > Uses `scripts/demo-status.sh` + agent analysis.
 
 ### 5a. Run demo-status.sh

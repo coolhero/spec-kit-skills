@@ -186,6 +186,26 @@ After the Feature passes verification, check whether it completes a Demo Group:
      ```
      Options: "Run Integration Demo", "Defer Integration Demo"
      **If response is empty → re-ask** (per MANDATORY RULE 1)
-   - If "Run Integration Demo": execute per [demo-standard.md § 7](../reference/demo-standard.md)
+   - If "Run Integration Demo": execute Integration Demo (procedure below)
    - If "Defer": record `⏳ deferred` in Demo Group Progress and continue to merge
 5. If this Feature does NOT complete any Demo Group: skip this phase entirely
+
+#### Integration Demo Execution
+
+When "Run Integration Demo" is selected:
+
+1. **Locate script**: `demos/DG{N}-{scenario-name}.sh`
+   - If missing → 🚫 BLOCKING: "Integration Demo script not found. Return to implement to create it."
+2. **Run --ci mode first**: `bash demos/DG{N}-{scenario-name}.sh --ci`
+   - Must exit 0
+   - If fails → display error, offer to fix
+3. **Run interactive mode** (User Demo Gate):
+   - Start the demo
+   - Display URLs/commands to user
+   - AskUserQuestion: "Integration Demo를 확인했습니까?"
+     **If response is empty → re-ask** (per MANDATORY RULE 1)
+4. **Record result** in sdd-state.md Demo Group Progress:
+   - Status: `✅ verified` or `❌ failed`
+   - Date, participating Features, user confirmation
+
+For the full Integration Demo script lifecycle (creation, naming, structure), see [demo-standard.md § 7](../reference/demo-standard.md).

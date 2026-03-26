@@ -961,6 +961,24 @@ After Phase 0-4 completes, **append** to `specs/history.md` (create with the sta
 >   Steps: specify → plan → tasks → analyze → implement → verify → merge
 > ```
 
+
+### Release Group vs Demo Group
+
+Two independent grouping mechanisms exist. They serve different purposes and should not be confused:
+
+| | Release Group (RG) | Demo Group (DG) |
+|---|---|---|
+| **Purpose** | Execution order | Demo grouping |
+| **Basis** | Feature dependencies (technical) | User scenarios (business) |
+| **Created by** | reverse-spec analyze-classify | smart-sdd add Phase 5 |
+| **Pipeline effect** | Determines Feature processing order in batch mode | Triggers Integration Demo when last Feature in group completes verify |
+| **Example** | RG1: Foundation, Auth (no deps) → RG2: Dashboard (depends on Auth) | DG1: "Login → LLM call → Budget check" (F002+F003+F004) |
+| **Stored in** | roadmap.md Release Groups section | sdd-state.md Demo Group Progress |
+
+**Key distinction**: RG answers "what CAN be built first?" (technical constraint). DG answers "what SHOULD be demoed together?" (business value).
+
+An RG1 Feature can be in DG2 (it is buildable first, but its demo value comes with later Features). An RG2 Feature can be in DG1 (it depends on RG1 technically, but the user scenario it serves is a high-priority demo).
+
 ### Phase 1~N: Process Features
 
 Processes the Feature(s) selected in Step 4 (Feature Selection). In single-Feature mode (default), only ONE Feature is processed. In batch mode (`--all`), Features are processed in Release Group order.
@@ -1418,7 +1436,13 @@ After Smoke Launch passes, verify implementation completeness:
      Tasks: [N]/[N] complete
      Visual reference: [✅ consulted / ⚠️ deferred / N/A (not rebuild)]
      Demo script: [✅ exists / 🚫 MISSING / N/A (infra-only)]
+     Integration Demo script: [✅ exists / ⚠️ not yet needed / N/A (not last in DG)]
    ```
+
+5. **Integration Demo script** (if this Feature is the last in a Demo Group):
+   - `demos/DG{N}-{scenario-name}.sh` must exist
+   - Must have both default mode and `--ci` mode
+   - If missing → ⚠️ WARNING (not blocking — the script can be created before verify Phase 5)
 
 > **Git branching**: smart-sdd creates the Feature branch during pre-flight (Step 0), before `speckit-specify`. All subsequent steps (specify through verify) execute on that branch. After verify completes, smart-sdd handles the merge back to main. See [branch-management.md](../reference/branch-management.md) for details.
 >

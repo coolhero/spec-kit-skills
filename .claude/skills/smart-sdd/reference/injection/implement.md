@@ -551,6 +551,22 @@ After `speckit-implement` completes, if Demo-Ready Delivery is **active** (const
    - **Playwright dependency check**: If the project's Playwright package is not installed (e.g., `@playwright/test` for JS/TS, `playwright` for Python), display:
      `ℹ️ Playwright not installed — VERIFY_STEPS test file not generated. Add @playwright/test to use CLI verification fallback.`
 
+### Integration Demo Script Creation (Demo Group)
+
+During implement, check if this Feature is the LAST pending Feature in any Demo Group:
+
+1. Read `sdd-state.md` Demo Group Progress
+2. For each Demo Group containing this Feature:
+   - Count pending Features in the group
+   - If this Feature is the ONLY remaining pending → this Feature's implement MUST create the Integration Demo script
+3. **Create**: `demos/DG{N}-{scenario-name}.sh` following demo-standard.md § 7
+4. **Add to Completeness Gate**: Integration Demo script existence check (if this is the last Feature)
+
+```
+❌ WRONG: Last Feature in DG completes → verify triggers Integration Demo → no script exists → "skip"
+✅ RIGHT: Last Feature's implement creates DG script → verify Phase 5 runs it → user sees end-to-end demo
+```
+
 ## TDD Execution Gate (when Test-First is active in Constitution)
 
 Before executing each implementation task, check:

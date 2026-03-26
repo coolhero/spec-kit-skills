@@ -1593,6 +1593,8 @@ Phase 1~N: Feature별 (Release Group 순서):
    8. merge      → 체크포인트 (HARD STOP) → main에 머지
 ```
 
+**Release Group vs Demo Group**: Release Group은 의존성 기반으로 Feature 빌드 순서를 결정합니다 (자동 생성). Demo Group은 사용자 시나리오 기반으로 함께 데모할 Feature를 묶습니다 (Feature Briefing 중 정의). 이 둘은 독립적입니다 — Feature의 빌드 우선순위와 데모 우선순위는 다를 수 있습니다.
+
 ### 5단계 검증 (Phase 0-4)
 
 merge 전에 verify가 잡아내는 것들:

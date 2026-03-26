@@ -5,6 +5,48 @@
 
 ---
 
+
+## [2026-03-26] Define Integration Demo script lifecycle across pipeline
+
+### What Changed
+1. **demo-standard.md § 7**: Added "Integration Demo Script Lifecycle" subsection defining file naming (`demos/DG{N}-{scenario-name}.sh`), creation timing (last Feature's implement step), script structure (cross-Feature bash template with --ci and interactive modes), relationship to individual Feature demos, and single-Feature DG exception. Updated execution procedure to reference the DG script instead of ad-hoc cross-Feature smoke test.
+2. **injection/implement.md**: Added "Integration Demo Script Creation (Demo Group)" section before TDD Execution Gate. During implement, agent checks sdd-state.md to determine if this Feature is the last pending in a DG; if so, creates the DG script as part of implement deliverables. Includes anti-pattern examples.
+3. **verify-evidence-update.md**: Strengthened Phase 5 with "Integration Demo Execution" sub-section. Defines 4-step procedure: locate script (BLOCKING if missing), run --ci mode, run interactive mode with AskUserQuestion, record result in sdd-state.md.
+4. **state-schema.md**: Added `Demo Script` column to Demo Group Progress table, tracking the path to the Integration Demo script created during the last Feature's implement.
+5. **pipeline.md**: Added Integration Demo script check (#5) to Post-Implement Completeness Gate. Non-blocking WARNING if missing (can be created before verify Phase 5). Added display line in gate result output.
+
+### Design Decision
+Integration Demo scripts previously had no defined lifecycle — the execution procedure in demo-standard.md assumed an ad-hoc cross-Feature smoke test at verify time, with no concrete script artifact. This created a gap: verify Phase 5 would trigger but have nothing to run. The fix establishes a complete lifecycle: the last Feature’s implement creates the DG script, the Completeness Gate warns if missing, and verify Phase 5 locates and runs it with a BLOCKING gate if absent.
+
+### Files Changed
+- `.claude/skills/smart-sdd/reference/demo-standard.md` — Integration Demo Script Lifecycle + updated Execution Procedure
+- `.claude/skills/smart-sdd/reference/injection/implement.md` — Integration Demo Script Creation section
+- `.claude/skills/smart-sdd/commands/verify-evidence-update.md` — Integration Demo Execution in Phase 5
+- `.claude/skills/smart-sdd/reference/state-schema.md` — Demo Script column in Demo Group Progress
+- `.claude/skills/smart-sdd/commands/pipeline.md` — Integration Demo check in Completeness Gate
+
+---
+
+## [2026-03-26] Clarify Release Group vs Demo Group semantics across documentation
+
+### What Changed
+1. **pipeline.md — Release Group vs Demo Group section**: Added a comparison table before "Phase 1~N: Process Features" explaining that RG (dependency-based execution order) and DG (user-scenario-based demo grouping) are independent mechanisms. Includes purpose, basis, creator, pipeline effect, examples, and storage location.
+2. **README.md + README.ko.md — Pipeline Flow section**: Added brief explanation that Release Groups and Demo Groups are independent — build priority and demo priority can differ.
+3. **state-schema.md — Demo Group Progress section**: Added blockquote clarifying that Demo Group is not Release Group, with cross-reference to verify-evidence-update.md Phase 5.
+4. **add.md — Phase 5 intro**: Added blockquote explaining what a Demo Group is, with examples of multi-Feature user scenarios and when the Integration Demo triggers.
+
+### Design Decision
+Release Group and Demo Group were implicitly assumed to be understood, but their independence was never explicitly documented. This led to potential confusion where users or agents might conflate build order (RG) with demo grouping (DG). The clarifications make the independence explicit: an RG1 Feature can be in DG2, and vice versa.
+
+### Files Changed
+- `.claude/skills/smart-sdd/commands/pipeline.md` — New "Release Group vs Demo Group" subsection
+- `README.md` — Brief explanation in Pipeline Flow section
+- `README.ko.md` — Korean translation of the same
+- `.claude/skills/smart-sdd/reference/state-schema.md` — Blockquote in Demo Group Progress
+- `.claude/skills/smart-sdd/commands/add.md` — Blockquote in Phase 5
+
+
+
 ## [2026-03-26] Quantitative Confidence Level Assignment Rules for Clarity Index
 
 ### What Changed

@@ -288,17 +288,79 @@ wait || true
 
 When all Features in a Demo Group complete verify, the trigger HARD STOP fires (see `reference/injection/verify.md` § Post-Step Update Rules). If the user selects **"Run Integration Demo"**:
 
-**Execution procedure**:
+### Integration Demo Script Lifecycle
+
+**File naming**: `demos/DG{N}-{scenario-name}.sh`
+- Example: `demos/DG1-login-to-budget.sh`, `demos/DG2-admin-dashboard.sh`
+- The scenario name comes from the Demo Group description in sdd-state.md
+
+**Creation timing**: During the LAST Feature's implement step in the Demo Group.
+- When implementing the last Feature, the agent checks: "Is this the last pending Feature in a Demo Group?"
+- If yes: create the Integration Demo script as part of implement deliverables
+- The script has access to ALL Features' code (they're all merged to main by this point, except the current one)
+
+**Script structure** (same as individual demos, but cross-Feature):
+```bash
+#!/bin/bash
+# DG1 Integration Demo: Login → LLM Call → Budget Check
+# Features: F002 (Gateway) + F003 (Auth) + F004 (Budget)
+
+MODE="${1:---interactive}"
+
+echo "🎬 DG1 Integration Demo: Login → LLM → Budget"
+
+# 1. Start server (if not running)
+# 2. Seed demo data (multi-tenant: 2 orgs, admin + member users)
+# 3. Execute end-to-end scenario:
+#    a. Login as admin → get token
+#    b. Set org budget (1000 tokens)
+#    c. Make LLM call → verify token deduction
+#    d. Exhaust budget → verify 429 rejection
+#    e. Login as member → verify RBAC restrictions
+
+if [ "" = "--ci" ]; then
+  # Automated: curl-based, exit codes
+  echo "Running CI mode..."
+  # ... automated checks ...
+  echo "✅ DG1 Integration Demo: PASS"
+  exit 0
+else
+  # Interactive: start server, print URLs
+  echo ""
+  echo "Server running on http://localhost:3000"
+  echo ""
+  echo "Try this scenario:"
+  echo "  1. POST /auth/login (admin@demo.org / demo123)"
+  echo "  2. PUT /budgets/org/:orgId (set 1000 token limit)"
+  echo "  3. POST /v1/chat/completions (watch token deduction)"
+  echo "  4. Repeat until 429 (budget exceeded)"
+  echo ""
+  echo "Press Ctrl+C to stop"
+  wait
+fi
+```
+
+**Relationship to individual Feature demos**:
+- Individual: `demos/F004-token-budget.sh` → tests F004 in isolation
+- Integration: `demos/DG1-login-to-budget.sh` → tests F002+F003+F004 as a user journey
+- Integration demo may CALL individual demos internally, but adds cross-Feature assertions
+
+**If the Demo Group has only 1 Feature**: The individual Feature demo IS the Integration Demo. No separate file needed.
+
+### Execution Procedure
+
 1. Read the Demo Group's Feature list from `sdd-state.md` Demo Group Progress
 2. For each Feature in the group (in roadmap order), run its demo in CI mode:
    ```
    demos/F00N-name.sh --ci
    ```
    - If any Feature demo fails: report the failure and STOP. The group status stays `⏳`
-3. If all Feature demos pass individually, run a **cross-Feature smoke test**:
-   - Start all Features' services (using each demo's setup/start logic)
-   - Execute the Demo Group's scenario description as an end-to-end flow (e.g., "User registers → browses products → adds to cart → checks out")
-   - Verify each step succeeds
+3. If all Feature demos pass individually, run the **Integration Demo script**:
+   ```
+   demos/DG{N}-{scenario-name}.sh --ci
+   ```
+   - This executes the cross-Feature end-to-end scenario
+   - Must exit 0 for the group to pass
 4. Display results:
    ```
    🎯 Integration Demo: [DG-0N] — [Scenario Name]

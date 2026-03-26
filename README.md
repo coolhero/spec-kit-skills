@@ -1560,6 +1560,8 @@ Phase 1~N: Per Feature (in Release Group order):
    8. merge      → Checkpoint (HARD STOP) → Merge to main
 ```
 
+**Release Groups vs Demo Groups**: Release Groups determine Feature build order based on dependencies (generated automatically). Demo Groups determine which Features are demoed together based on user scenarios (defined during Feature Briefing). They are independent — a Feature's build priority and demo priority can differ.
+
 ### 5-Phase Verification
 
 What verify catches — before merge:
