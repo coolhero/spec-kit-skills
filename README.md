@@ -2,7 +2,7 @@
 
 **Repository**: [coolhero/spec-kit-skills](https://github.com/coolhero/spec-kit-skills)
 
-[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-26 08:00 KST
+[한국어 README](README.ko.md) | [Playwright Setup Guide](PLAYWRIGHT-GUIDE.md) | [Lessons Learned](lessons-learned.md) | 📖 [Technical Reference Manual (PDF)](https://github.com/coolhero/spec-kit-skills/releases/download/v0.2.0/spec-kit-skills-technical-reference-en.pdf) | Last updated: 2026-03-26 10:41 KST
 
 **Four Claude Code skills that turn AI coding agents into reliable software engineers — built on three design principles ([Global Evolution Layer](#global-evolution-layer), [Domain Profile](#domain-profile), [Brief](#brief)) and [spec-kit](https://github.com/github/spec-kit) SDD**
 
@@ -136,7 +136,7 @@ A Domain Profile consists of **5 axes** that produce rules and adjust their dept
 | Axis 1 | **Interface** | What the app exposes to users | GUI, HTTP API, CLI, TUI |
 | Axis 2 | **Concern** | Cross-cutting patterns that span Features | auth, async-state, IPC, realtime, i18n |
 | Axis 3 | **Archetype** | Domain philosophy — *why* certain decisions matter | AI assistant, microservice, public API |
-| Axis 4 | **Foundation** | Framework-specific constraints and toolchain | React, Electron, Next.js (21 frameworks) |
+| Axis 4 | **Foundation** | Framework-specific constraints and toolchain | React, Electron, Next.js (40+ frameworks) |
 | Axis 5 | **Context** | Project situation (mode + scale + modifiers) | greenfield, rebuild, adoption + production×small-team + migration |
 
 Each axis contributes rules (SC quality criteria, bug prevention patterns, verification strategies). The Context axis has three components: **Mode** (which pipeline lifecycle — greenfield, rebuild, incremental, adoption), **Scale** (how deep to enforce — project_maturity × team_context, e.g., prototype×solo vs production×large-team), and **Modifiers** (what special situations apply — +migration, +compliance, etc.). A prototype gets functional-only SCs with optional tests, while a production project gets full edge-case coverage with mandatory observability.
@@ -1065,7 +1065,7 @@ Archetypes (15):  ai-assistant, browser-extension, cache-server, compiler,
                   database-engine, game-engine, infra-tool, inference-server,
                   media-server, message-broker, microservice, network-server,
                   public-api, sdk-framework, workflow-engine
-Foundations (21): electron, nextjs, express, django, spring-boot, tauri, ...
+Foundations (40+): electron, nextjs, express, django, spring-boot, tauri, ...
 Contexts (4 modes): greenfield, rebuild, incremental, adoption
 ```
 
@@ -1664,7 +1664,7 @@ ln -s /path/to/spec-kit-skills/.claude/skills/domain-extend ~/.claude/skills/dom
 | spec-kit constitution | `.specify/memory/constitution.md` |
 | smart-sdd state file | `specs/_global/sdd-state.md` |
 | Decision history | `history.md` |
-| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 65 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
+| Failure patterns & countermeasures | [`lessons-learned.md`](lessons-learned.md) — 20 gap patterns + 70 specific lessons from real pipeline executions. Useful for anyone building AI agent pipelines. |
 
 ### Feature Naming Convention
 

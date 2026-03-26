@@ -615,4 +615,4 @@ As agentic coding tools get smarter — and they will — the value of this kind
 
 ← **Part 2**: [Four Skills, One Pipeline](https://medium.com/@thejihoonchoi/four-skills-one-pipeline-how-code-explore-reverse-spec-smart-sdd-and-domain-extend-work-cfc33edf249d)
 
-→ **Part 4**: [Failure Patterns and Hard-Won Wisdom](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20 gap patterns, 65 lessons, practical tips
+→ **Part 4**: [Failure Patterns and Hard-Won Wisdom](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20 gap patterns, 70 lessons, practical tips

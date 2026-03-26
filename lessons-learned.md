@@ -180,7 +180,7 @@
 
 **How we catch it**: Foundation F7 Philosophy section separates framework-endorsed principles from operational checklists (F2). Philosophy principles guide *why*; checklists guide *what*.
 
-**Coverage**: ~85% — effective for the 21 frameworks with Foundation files; frameworks without F7 sections have no philosophy separation.
+**Coverage**: ~85% — effective for the 40+ frameworks with Foundation files; frameworks without F7 sections have no philosophy separation.
 
 ---
 

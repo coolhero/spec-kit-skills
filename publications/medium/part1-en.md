@@ -256,4 +256,4 @@ scenarios:
 
 → **Part 3**: [400 Markdown Files That Think](https://medium.com/@thejihoonchoi/400-markdown-files-that-think-the-architecture-of-spec-kit-skills-50047f0ecd1f) — design philosophy, file structure, extensibility
 
-→ **Part 4**: [Failure Patterns and Hard-Won Wisdom](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20 gap patterns, 65 lessons, practical tips
+→ **Part 4**: [Failure Patterns and Hard-Won Wisdom](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20 gap patterns, 70 lessons, practical tips

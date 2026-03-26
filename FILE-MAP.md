@@ -42,7 +42,7 @@ graph TB
     subgraph "reverse-spec/"
         RS_SKILL["SKILL.md"]
         RS_CMD["commands/ (6)"]
-        RS_DOM["domains/ (80)"]
+        RS_DOM["domains/ (120)"]
         RS_REF["reference/ (1)"]
         RS_TPL["templates/ (10)"]
     end
@@ -50,8 +50,8 @@ graph TB
     subgraph "smart-sdd/"
         SS_SKILL["SKILL.md"]
         SS_CMD["commands/ (16)"]
-        SS_DOM["domains/ (55)"]
-        SS_REF["reference/ (26)"]
+        SS_DOM["domains/ (98)"]
+        SS_REF["reference/ (28)"]
         SS_TPL["templates/ (3)"]
         SS_SCR["scripts/ (7)"]
     end
@@ -179,7 +179,7 @@ shared/domains/           ← Signal keywords (S0/A0) + Code patterns (R1)
 
 reverse-spec/domains/     ← Analysis rules (R3-R5)
   interfaces/ (10)          R3 analysis axes per interface
-  concerns/ (47)            R3 Feature boundary + R4 data flow rules
+  concerns/ (48)            R3 Feature boundary + R4 data flow rules
   archetypes/ (15)          R3 extraction patterns
   contexts/ (1)             R3 migration Feature boundary + R5 scope estimation
   foundations/ (40+2)       Framework-specific detection stubs (F0-F9)
@@ -187,7 +187,7 @@ reverse-spec/domains/     ← Analysis rules (R3-R5)
 
 smart-sdd/domains/        ← Pipeline rules (S1/S5/S7)
   interfaces/ (10)          SC rules, elaboration probes, bug prevention
-  concerns/ (47)            SC rules, elaboration probes, bug prevention
+  concerns/ (48)            SC rules, elaboration probes, bug prevention
   archetypes/ (15)          Domain philosophy, elaboration probes
   profiles/ (15)            Pre-configured axis combinations
   contexts/modes/ (4)       greenfield, rebuild, incremental, adoption

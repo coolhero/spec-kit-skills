@@ -138,7 +138,7 @@ The domain composition system has **5 axes** that produce rules and adjust their
                     │                                     │
   ARCHETYPE ────────┤  What domain philosophy?            │──── ai-assistant, public-api, microservice
                     │                                     │
-  FOUNDATION ───────┤  What framework constraints?        │──── React, Electron, Next.js (21 frameworks)
+  FOUNDATION ───────┤  What framework constraints?        │──── React, Electron, Next.js (40+ frameworks)
                     │                                     │
   CONTEXT ─────────┤  What project situation?             │──── Mode: greenfield/rebuild/incremental/adoption
                     │                                     │     Scale: prototype/mvp/production × solo/small-team/large-team
@@ -698,7 +698,7 @@ Modules evolve through 5 levels of sophistication. This model helps prioritize i
 | **Level 2** | 🔶 ~60% | Cross-Concern Integration Rules defined in `_resolver.md` Step 3.5 (61 rules). Enforcement recently wired to `context-injection-rules.md` and all injection files. Context scale enforcement added. Conflict resolution rules still limited to documented pairs |
 | **Level 3** | 🔶 ~40% | Per-archetype verify/specify behavior exists for `ai-assistant`, `desktop-app`. Most archetypes lack pipeline behavior customization |
 | **Level 4** | ⬜ ~10% | Anti-pattern examples exist in lessons-learned.md and injection files, but no structured pattern library per module combination |
-| **Level 5** | ⬜ ~15% | skill-feedback.md intake process exists; 65+ SKF items processed. No automated tracking of rule effectiveness yet |
+| **Level 5** | ⬜ ~15% | skill-feedback.md intake process exists; 70+ SKF items processed. No automated tracking of rule effectiveness yet |
 
 ### Level 1: Module Completeness
 
