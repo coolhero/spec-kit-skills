@@ -450,6 +450,12 @@ The probability of an agent following an instruction is inversely proportional t
 
 Implication: place rules where they will be executed, not where they are organizationally tidy. In agent skills, 30 inline repetitions beat 1 beautifully organized reference.
 
+\begin{warnbox}[P2 Corollary: Line Position Matters (L88)]
+P2 applies not only \emph{across} files (reference vs.\ inline) but \emph{within} files. A rule at line~1453 of a 2000-line file has near-zero compliance probability---the agent reads the first 800--1000 lines and stops. During the aegis pilot, Per-Task Micro-Verify was defined at \texttt{pipeline.md:1453} and \texttt{injection/implement.md:598}. The agent never reached either line. Result: 40+ files written without a single runtime check.
+
+\textbf{Design rule}: critical enforcement rules must appear in the first 100 lines of the file the agent actually loads (SKILL.md), not buried deep in a 2000-line reference file. The reference file provides detail; SKILL.md provides the trigger.
+\end{warnbox}
+
 
 \section{P3: File over Memory}
 

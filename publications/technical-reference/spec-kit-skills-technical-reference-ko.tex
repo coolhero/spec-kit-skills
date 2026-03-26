@@ -450,6 +450,12 @@ RIGHT: Read verify-phases.md -> execute Phase 0-4 ->
 
 함의: 규칙을 조직적으로 깔끔한 곳이 아니라, 실행될 곳에 배치하라. 에이전트 스킬에서는 30번의 인라인 반복이 1개의 아름답게 정리된 참조를 이긴다.
 
+\begin{warnbox}[P2 보조 원칙: 줄 위치가 중요하다 (L88)]
+P2는 파일 \emph{간}(참조 vs 인라인)뿐 아니라 파일 \emph{내}에도 적용된다. 2000줄 파일의 1453줄에 있는 규칙은 준수율이 거의 0이다 --- 에이전트는 처음 800\textasciitilde1000줄만 읽고 멈춘다. aegis 파일럿에서 Per-Task Micro-Verify가 \texttt{pipeline.md:1453}과 \texttt{injection/implement.md:598}에 정의되어 있었는데, 에이전트는 두 줄 모두 도달하지 못했다. 결과: 40개 이상 파일이 런타임 확인 한 번 없이 작성됐다.
+
+\textbf{설계 원칙}: 핵심 강제 규칙은 에이전트가 실제로 로드하는 파일(SKILL.md)의 처음 100줄에 있어야 한다. 2000줄짜리 참조 파일 깊숙이 묻어두면 안 된다. 참조 파일은 상세 내용을, SKILL.md는 트리거를 제공한다.
+\end{warnbox}
+
 
 \section{P3: File over Memory}
 
