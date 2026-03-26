@@ -583,4 +583,4 @@ domain_extend:
 
 → **3편**: [생각하는 400개의 마크다운 파일](https://medium.com/@thejihoonchoi/%EC%83%9D%EA%B0%81%ED%95%98%EB%8A%94-400%EA%B0%9C%EC%9D%98-%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4-%ED%8C%8C%EC%9D%BC-spec-kit-skills%EC%9D%98-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-17055e89796e) — 설계 철학, 파일 구조, 확장성
 
-→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/building-skills-for-ai-agents-failure-patterns-tips-and-hard-won-wisdom-507f3137a538) — 20가지 갭 패턴, 70개 교훈, 실전 팁
+→ **4편**: [실패 패턴과 힘들게 얻은 지혜](https://medium.com/@thejihoonchoi/ai-%EC%97%90%EC%9D%B4%EC%A0%84%ED%8A%B8%EB%A5%BC-%EC%9C%84%ED%95%9C-%EC%8A%A4%ED%82%AC-%EB%A7%8C%EB%93%A4%EA%B8%B0-%EC%8B%A4%ED%8C%A8-%ED%8C%A8%ED%84%B4-%ED%8C%81-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%ED%9E%98%EB%93%A4%EA%B2%8C-%EC%96%BB%EC%9D%80-%EC%A7%80%ED%98%9C-c434fbf84f0a) — 20가지 갭 패턴, 70개 교훈, 실전 팁

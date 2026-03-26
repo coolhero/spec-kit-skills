@@ -63,6 +63,33 @@ Phase 3 Checklist (must complete ALL in order):
 
 ---
 
+### SC Verification Matrix Pre-population (BEFORE runtime execution — BLOCKING)
+
+Before executing ANY SC, pre-fill the verify-report Phase 3 table from spec.md:
+
+1. **Read spec.md** — extract each SC's expected outcome
+2. **Pre-fill**:
+   - SC, Description, Method columns: from spec
+   - **Expected column: from spec.md SC description** (EXACT expected outcome)
+   - Actual column: EMPTY (filled during execution)
+   - Match? column: EMPTY (determined by comparison)
+   - Result column: EMPTY (determined by Match?)
+
+3. **Display pre-populated matrix**:
+   ```
+   📋 SC Verification Matrix (pre-populated from spec.md):
+   SC-001: Expected="200 + session token"     Method: runtime: curl
+   SC-003: Expected="chart with usage data"   Method: runtime: Playwright
+   [N] SCs to verify.
+   ```
+
+🚫 **BLOCKING**: Expected column MUST be pre-filled from spec.md BEFORE execution. The agent CANNOT write Expected AFTER seeing Actual — that's hindsight bias that enables error→PASS misclassification.
+
+❌ WRONG: Execute SC → see error → write Expected="error handling" → Actual="error" → ✅
+✅ RIGHT: Pre-fill Expected="chart with data" → execute → Actual="error message" → ❌ mismatch → ❌ FAIL → investigate
+
+---
+
 > 🚫 **NO UNIT TEST SUBSTITUTION [G2]**: Every SC MUST be verified at runtime against the running application. "Unit test covers this SC" is NOT acceptable evidence for Phase 3.
 >
 > If an SC genuinely cannot be verified at runtime (e.g., requires hardware, external paid API with no sandbox):
@@ -92,6 +119,77 @@ Example:
 - Auth middleware returns 200 ✅, but LLM Provider returns 400 (no API key configured) ❌
 - Correct report: ⚠️ PARTIAL — "Auth layer ✅, LLM call ❌ (Provider API Key not in .env)"
 - Wrong report: ✅ — "Authentication verified successfully"
+
+### SC Pass Judgment Rules (BLOCKING — misclassification = false evidence)
+
+An SC is ✅ PASS only when the INTENDED behavior occurs. Related but different behaviors do NOT count:
+
+| Scenario | SC Being Tested | What Happened | Correct Judgment |
+|----------|----------------|---------------|-----------------|
+| "Chart renders with data" | SC-003: Chart rendering | Error message displayed instead of chart | ❌ FAIL (chart didn't render) |
+| "Chart renders with data" | SC-009: Error handling | Error message displayed gracefully | ✅ PASS (error handling works) |
+| "Login returns 200" | SC-001: Login success | Login returns 401 | ❌ FAIL (not 200) |
+| "Login returns 200" | SC-002: Login failure handling | 401 with proper error message | ✅ PASS (failure handled) |
+
+**The rule**: Error state rendering is an error-handling SC's PASS, never a functional SC's PASS. If the user expected data and got an error — even a beautifully rendered error — the functional SC FAILED.
+
+❌ WRONG: Usage page shows "Failed to load data" → "UI renders correctly ✅" (error UI rendered, but that's SC-009, not SC-003)
+✅ RIGHT: Usage page shows "Failed to load data" → SC-003 ❌ FAIL (chart not rendered) + SC-009 ✅ PASS (error handled gracefully)
+
+
+### SC Action Depth: Render ≠ Interact ≠ Complete (BLOCKING)
+
+Each SC has an implicit action depth. The verification must reach that depth:
+
+| SC Type | Action Depth | What Must Be Verified | Example |
+|---------|-------------|----------------------|---------|
+| **Display/Read** | Level 1: Render | Page loads + data visible | "Dashboard shows usage chart" → chart visible with data |
+| **Navigate** | Level 1: Render | Target page loads correctly | "Click Budget → Budget page" → page navigates |
+| **Interact** | Level 2: Action | Click/type/select produces expected state change | "Click Edit → modal opens" → modal visible after click |
+| **CRUD** | Level 3: Complete | Full create→read or edit→save→verify cycle | "Edit budget → save → updated value shown" → edit field, type, save, verify new value |
+| **Flow** | Level 3: Complete | Multi-step workflow end-to-end | "Invite user → user appears in list" → fill form, submit, check list |
+| **Error** | Level 2: Action | Trigger error condition + verify error display | "Submit empty form → validation error" → submit, verify error message |
+
+🚫 **BLOCKING**: Level 1 verification (render only) CANNOT pass a Level 2 or Level 3 SC.
+
+❌ WRONG: SC says "Edit budget value" → Playwright opens Budget page → "page renders ✅" → SC PASS
+✅ RIGHT: SC says "Edit budget value" → Playwright opens page → clicks Edit → types new value → clicks Save → verifies updated value → SC PASS
+
+❌ WRONG: SC says "Invite user to org" → code review: "InviteForm component exists" → SC PASS
+✅ RIGHT: SC says "Invite user to org" → Playwright: fill email → fill role → click Invite → verify user appears in list (or verify API call succeeds)
+
+**Pre-verification step**: Before executing each SC, classify its Action Depth (1/2/3) from the SC description. Add to the SC Matrix:
+
+| SC | Description | Depth | Method | Expected | Actual | Match? | Result |
+|----|-------------|-------|--------|----------|--------|--------|--------|
+
+The Depth column forces the agent to acknowledge what level of interaction is needed before it starts.
+
+---
+
+### API Error Investigation (MANDATORY when runtime verification hits 4xx/5xx)
+
+When a runtime SC verification receives an HTTP error (400, 401, 403, 404, 500):
+
+1. **Read the actual error message**: `curl -v` to see the response body, not just the status code
+2. **Diagnose the root cause**:
+   - 400: Request parameters don't match API contract → check api-registry.md
+   - 401/403: Auth issue → check token validity, RBAC role
+   - 404: Wrong endpoint path → check api-registry.md
+   - 500: Server bug → check server logs
+3. **Fix if it's THIS Feature's bug** (not another Feature's):
+   - Wrong query parameters → fix frontend code
+   - Missing request headers → fix API call
+   - Response shape mismatch → fix data mapping
+4. **Report as RUNTIME_BLOCKED only if** the error is genuinely from another Feature's scope AND cannot be fixed without modifying that Feature's code
+5. **NEVER report as "범위 밖" or "out of scope" without checking** if the error originates from this Feature's code
+
+❌ WRONG: Frontend sends `period=last7d` → API returns 400 → "API doesn't support this parameter, out of scope"
+✅ RIGHT: Frontend sends `period=last7d` → API returns 400 → check: API expects `period=daily` → fix frontend parameter mapping → re-test → PASS
+
+Rule 3 applies (Empty Results → Investigate, Don't Report): a 400 error IS an investigation trigger, not a classification decision.
+
+---
 
 **Step 0 — SC Verification Planning** (classify ALL SCs — not just those in demo Coverage header):
 
@@ -311,6 +409,28 @@ For each SC in the SC Verification Matrix:
 - Runtime Degradation Flag Check (sdd-state.md `⚠️ RUNTIME-DEGRADED`)
 - Runtime Backend Check (use `RUNTIME_BACKEND` from Pre-flight)
 - For failure recovery during execution, see runtime-verification.md § 9
+
+### Playwright SC Execution Protocol (for gui Features)
+
+For each SC with Action Depth ≥ 2:
+
+1. **Navigate** to the target page
+2. **Wait** for page load (networkidle or specific element)
+3. **Execute the action** described in the SC:
+   - CRUD: click edit, type value, click save
+   - Flow: complete all steps in sequence
+   - Error: trigger the error condition
+4. **Verify the outcome**:
+   - Check visible text/values AFTER the action
+   - Check API response if applicable (network tab or curl)
+   - Screenshot as evidence
+5. **Record in Actual column**: "Clicked Edit → typed 5000 → Save → value updated to 5000"
+   NOT: "page renders correctly"
+
+If Playwright cannot perform the action (e.g., complex drag-and-drop):
+→ RUNTIME_DELEGATED: "Complex interaction. User: please [specific action] and confirm [expected result]"
+NOT: "code review" or "page renders"
+
 
 **HTTP-API Features** (`RUNTIME_BACKEND = http-client`):
 

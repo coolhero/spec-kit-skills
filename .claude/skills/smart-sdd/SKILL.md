@@ -66,8 +66,11 @@ allowed-tools: [Read, Grep, Glob, Bash, Write, Edit, Skill, AskUserQuestion]
 >
 > If infrastructure (DB, Redis, etc.) is required but not running, start it (`docker compose up -d`) or ask the user. NEVER skip runtime verification because of infrastructure absence.
 >
+> **Pipeline Completion Bias Prevention**: After specify→plan→tasks→implement in one session, the agent's implicit pressure shifts to "finish quickly." This manifests as: Level 1 render-only verification for Level 3 CRUD SCs, skipping Playwright for "obvious" pages, and reporting "page renders" as "SC complete." Verify MUST have the SAME rigor as specify — regardless of how many steps preceded it.
+>
 > **Rule 6: Honest SC Evidence + User Demo**
 > An SC is ✅ ONLY when the COMPLETE behavior specified in the SC is verified. Partial verification = ❌ (with notes).
+> **Structural enforcement**: verify-report's Expected column is pre-filled from spec.md BEFORE execution. Result is determined by Expected↔Actual comparison, not agent judgment. If Expected says "chart" and Actual says "error message," Result is ❌ — even if the error renders beautifully. Error state rendering is an error-handling SC's PASS, never a functional SC's PASS.
 > - ❌ WRONG: SC says "API Key → 200 + LLM response" but only auth layer passed (LLM returned 400) → report as ✅
 > - ❌ WRONG: SC says "end-to-end" but only tested middleware → report as ✅
 > - ✅ RIGHT: SC partially verified → report as ⚠️ PARTIAL with exact scope: "Auth ✅, LLM call ❌ (Provider API Key not configured)"

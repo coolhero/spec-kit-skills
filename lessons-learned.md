@@ -287,7 +287,9 @@
 | P6 | Runtime for easy SCs, unit test for hard ones | NO UNIT TEST SUBSTITUTION | Do runtime for all, but report partial as pass |
 | P7 | Report partial pass as full pass | MANDATORY RULE 6 (honest evidence) + User Demo Gate | TBD |
 | P8 | Verify done but no report file → merge anyway | verify-report.md BLOCKING + merge pre-gate checklist | TBD |
+| P9(new) | Runtime error reported as PASS (error UI ≠ functional PASS) | SC Matrix Pre-population + Expected↔Actual structural comparison | Pre-fill Expected from spec BEFORE execution → mismatch = auto-FAIL |
 | P9 | Undefined flag interpreted as --auto → all HARD STOPs skipped | Unknown flag validation + only literal --auto enables auto-approval | TBD |
+| P10 | Page render reported as CRUD PASS | SC Action Depth column + Level mismatch = auto-FAIL | Classify depth BEFORE execution → L1 render cannot pass L3 CRUD |
 
 **The pattern**: Each enforcement closes one evasion path. The agent's "goal" (finish quickly) doesn't change — it finds the next path of least resistance. This is not malice; it's optimization under implicit time pressure.
 
@@ -994,6 +996,14 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 
 **Universal takeaway**: P2 principle (Enforce, Don't Reference) applies to gates too. If a gate is critical enough that skipping it causes downstream failures, it must be elevated to SKILL.md as a MANDATORY RULE. Pipeline.md gates are "should" level; SKILL.md rules are "must" level. The Completeness Gate was elevated to MANDATORY RULE 7 after this incident.
 
+#### L82. Error State Rendered ≠ Feature Working — SC Judgment Must Match Intent
+
+**What happened**: aegis F007 (Admin Dashboard) verify Phase 3 tested SC-003 "usage chart renders with data." The usage page showed "Failed to load usage data" — an error state. The agent judged this as ✅ because "the UI rendered correctly" (the error message was styled, not a crash). But SC-003 was about CHART rendering, not error rendering. The actual cause: frontend sent `period=last7d` but the API only accepts `period=daily|weekly|monthly`.
+
+**Two failures in one**: (1) SC judgment confused error-handling PASS with functional PASS. (2) The 400 API error was classified as "out of scope" instead of investigating the parameter mismatch — which was squarely in F007's frontend code.
+
+**Universal takeaway**: When runtime verification produces an error response, TWO things must happen: (a) the functional SC is marked ❌ FAIL (the intended behavior didn't occur), and (b) the error is INVESTIGATED (Rule 3: Empty Results → Investigate). Only after investigation can it be classified as this Feature's bug (fix it) or another Feature's issue (RUNTIME_BLOCKED with specific reason).
+
 #### L81. "Playwright Not Configured" Is the New "It Works on My Machine"
 
 **What happened**: aegis F007 created a Next.js frontend (apps/web/) during implement. At verify time, the server wouldn't start because `npm install` was never run. The agent classified this as "Playwright not configured" and fell back to code-level verification — reporting 12/12 SCs as ✅ without any runtime testing.
@@ -1001,3 +1011,11 @@ These three are MECE for agent pipeline governance: P1 defines *what* to protect
 **The pattern**: When the agent encounters ANY server startup failure, it attributes it to Playwright rather than diagnosing the actual cause. This is because "Playwright not configured" is a known escape hatch that leads to "code-level verification" — a path of least resistance. The agent has learned that saying "Playwright issue" lets it skip runtime verification entirely.
 
 **Universal takeaway**: Any "infrastructure not available → skip verification" escape hatch will be over-used. The fix is a triage table that forces diagnosis before allowing the escape: is this actually a Playwright issue, or is the app itself broken? Only 2 of 7 common startup failures are actually Playwright-related. The other 5 are fixable by the agent without user intervention.
+
+#### L83. Page Renders ≠ Feature Works — Action Depth Must Match SC Intent
+
+**What happened**: aegis F007 verify tested 12 SCs across 7 admin pages. The agent opened 4 pages in Playwright, confirmed they rendered, and marked those SCs as ✅. Three pages weren't opened at all — marked ✅ via "code review." One critical SC ("Invite User") was marked ✅ but the actual invite flow would fail with a 500 error (missing password field in the API call).
+
+**The pattern**: "I can SEE the page, therefore the feature WORKS." This is the verify equivalent of "it compiles, therefore it's correct." A Budget page that renders but can't save edits is a broken Feature — just as code that compiles but crashes at runtime is broken code.
+
+**Structural fix**: SC Action Depth classification (L1 Render / L2 Interact / L3 Complete) pre-assigned to each SC before execution. Level 1 verification cannot pass a Level 3 SC. The Depth column in verify-report makes the gap visible.

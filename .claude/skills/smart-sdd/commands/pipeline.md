@@ -1425,6 +1425,25 @@ Level 3 — HARD STOP (only after Level 1-2 exhausted):
 > This overlaps with verify Phase 0's Dev Mode Stability Probe but catches issues earlier, avoiding the verify → regression → re-implement cycle.
 
 
+#### API Parameter Smoke Test (for Features with frontend→backend integration)
+
+When the Feature includes BOTH backend API endpoints AND frontend pages that consume them:
+
+1. After implement completes, for EACH API endpoint this Feature calls:
+   - `curl` the actual endpoint with the parameters the frontend sends
+   - Verify 200 response (not 400/404)
+   - If 400: the frontend is sending wrong parameters → fix before smoke launch
+
+2. **WHY this matters**: Frontend code often uses parameter names or formats that differ from the API contract:
+   - `period=last7d` vs `period=daily` (API expects enum, frontend sends custom string)
+   - `groupBy=day` vs `groupBy=model` (frontend invented a value not in the API)
+   - Missing required headers (`x-api-key`, `Authorization`)
+
+This catches integration mismatches at implement time, not verify time.
+
+❌ WRONG: Write frontend → write backend → smoke launch (server starts) → "implement complete" → verify: 400 errors everywhere
+✅ RIGHT: Write backend → curl test endpoints → write frontend → curl with frontend params → both match → smoke launch → "implement complete"
+
 **F8b Integration**: Smoke Launch uses the active Foundation's F8b Runtime Environment:
 - `prerequisites` → start infrastructure
 - `server_start` → start application
