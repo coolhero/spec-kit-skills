@@ -3766,6 +3766,26 @@ When augmenting a Feature (\texttt{add --to}), the pipeline performs impact anal
   \item Post-augmentation: verify cross-Feature integration (Guard~6).
 \end{enumerate}
 
+\section{Cross-Feature API Gap Resolution}
+
+When a Feature needs an API that was supposed to be provided by a preceding (already merged) Feature, there are three options:
+
+\begin{description}
+  \item[Option A: Implement here] Add the missing API in the \emph{current} Feature. Update spec.md to document it as ``supplementary implementation (F003 scope gap).'' Update api-registry with the actual provider. \textbf{Recommended for individual endpoints.}
+  \item[Option B: Reopen preceding Feature] \texttt{add --to F003 "add PUT /users/:id"} $\rightarrow$ full re-pipeline (specify $\rightarrow$ plan $\rightarrow$ tasks $\rightarrow$ implement $\rightarrow$ verify $\rightarrow$ merge). \textbf{Recommended only for architectural changes} --- disproportionate for a single endpoint.
+  \item[Option C: Mark as RUNTIME\_BLOCKED] SC cannot be verified because the API doesn't exist. Defer to a future Feature or Tier.
+\end{description}
+
+\begin{tipbox}[Decision Heuristic]
+\textbf{Individual endpoint missing?} $\rightarrow$ Option A (implement here, document in spec).\\
+\textbf{Data model or architecture change needed?} $\rightarrow$ Option B (reopen preceding Feature).\\
+\textbf{Entire subsystem missing?} $\rightarrow$ Option C (defer to new Feature).
+
+The cost of reopening a merged Feature (6+ pipeline steps) must justify the change. One PATCH endpoint does not justify a full re-pipeline.
+\end{tipbox}
+
+The Feature Boundary Clarification Gate (added to specify) catches this at spec time: ``API not in registry $\rightarrow$ add to In-Scope or Out-of-Scope?'' When caught at verify time (spec predates the gate), the pragmatic fix is Option A.
+
 \section{Multi-Ecosystem Support}
 
 For projects spanning multiple frameworks (e.g., React frontend + FastAPI backend), the Foundation axis accepts comma-separated values. Each framework's rules are loaded independently and applied to the relevant parts of the codebase.
