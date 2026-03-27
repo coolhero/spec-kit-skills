@@ -217,7 +217,7 @@ specs/domains/              ← Project-local custom modules (created by /domain
 | `history.md` | Design decision history |
 | `lessons-learned.md` | Failure patterns and countermeasures |
 | `PLAYWRIGHT-GUIDE.md` | Playwright setup guide for UI verification |
-| `SCENARIO-CATALOG.md` | Scenario catalog (EN) — 42 scenarios across 10 categories |
+| `SCENARIO-CATALOG.md` | Scenario catalog (EN) — 43 scenarios across 10 categories |
 | `SCENARIO-CATALOG.ko.md` | Scenario catalog (KO) — Korean mirror |
 | `SOFTWARE-CATALOG.md` | Target project types catalog with code-explore simulation results |
 | `.gitignore` | Git ignore rules (worktrees, LaTeX artifacts, .DS_Store) |

@@ -5,6 +5,19 @@
 
 ---
 
+## [2026-03-27] Post-pull integrity: resolver regression, SE08, history dedup
+
+### What Changed
+- **_resolver.md**: Fixed cross-concern rule count regression (65→61). P11c commit changed 61→65 without adding rules — actual table has exactly 61 data rows
+- **SCENARIO-CATALOG**: Added SE08 (session separation for verify — MANDATORY RULE 9). Count 42→43. EN/KO synchronized
+- **FILE-MAP.md**: Scenario count reference 42→43
+- **history.md**: Deduplicated 9987→5593 lines (244x repeated sections removed). Root cause: prior commits appended the entire file content instead of a single entry
+
+### Why
+Post-pull audit of 5 commits (b3d3ff2..af91496) found 3 issues: (1) rule count regression from P11c commit; (2) no scenario for Rule 9; (3) history.md had grown to 10K lines from massive duplication.
+
+---
+
 ## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
 
 ### What Changed
@@ -79,24 +92,6 @@ code-explore was designed for pre-pipeline discovery but users also need it for 
 - `history.md` — This entry
 
 ---
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] P19: Feature Detail Log Auto-Creation in Pipeline + Init
 
 ### What Changed
@@ -117,24 +112,6 @@ state-schema.md defined Feature Detail Log with per-step timing, Impact Analysis
 
 
 ---
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Add Case Study Update Trigger to Pipeline Merge Step
 
 ### What Changed
@@ -152,24 +129,6 @@ The case study file existed but the pipeline had no trigger to update it. Featur
 - `history.md` — This entry
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Add Impact Analysis + Flow Proposal to Cascading Update Protocol
 
@@ -194,24 +153,6 @@ User feedback at HARD STOPs was producing analysis without actionable next steps
 
 
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Define Integration Demo script lifecycle across pipeline
 
 ### What Changed
@@ -232,24 +173,6 @@ Integration Demo scripts previously had no defined lifecycle — the execution p
 - `.claude/skills/smart-sdd/commands/pipeline.md` — Integration Demo check in Completeness Gate
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Clarify Release Group vs Demo Group semantics across documentation
 
@@ -286,24 +209,6 @@ CI scoring was previously subjective — different sessions or agents could assi
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Verify .env check-first + Demo script enforcement at implement and verify (aegis P13, P14)
 
 ### What Changed
@@ -322,24 +227,6 @@ P13: Verify was asking users for env vars that already existed in .env. Fix: rea
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Branch pre-flight for --start + cross-Feature change isolation (aegis P12)
 
 ### What Changed
@@ -356,24 +243,6 @@ Escalation from aegis P12 findings. P12a: `--start` re-execution skipped branch 
 - `lessons-learned.md` — L70
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Stale artifact handling + US-SC consistency check (aegis P10, P11)
 
@@ -397,24 +266,6 @@ Escalation from aegis P10 and P11 findings. P10: `--start specify` re-ran specif
 ---
 
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Unknown flag validation + --auto exclusivity (aegis P9)
 
 ### What Changed
@@ -431,24 +282,6 @@ Escalation from P9 finding. The user ran `--hard-stop=recommended` (undefined fl
 - `lessons-learned.md` — G20 P9 row + L68
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Foundation lint BLOCKING + Test Growth in Merge Pre-Gate (aegis P9 escalation)
 
@@ -470,24 +303,6 @@ Escalation from P9 findings. Two issues from aegis pilot:
 -  — L67
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Verify report quality — Method column, lint status, test growth (aegis P9)
 
@@ -511,24 +326,6 @@ Fifth verify quality escalation in the aegis pilot series. P2-P8 focused on ensu
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Fix merge without verify-report.md — inline pre-gate checklist (aegis P8)
 
 ### What Changed
@@ -551,24 +348,6 @@ P8 is a boundary-crossing evasion: the agent satisfies verify rules in conversat
 - `lessons-learned.md` — G20 P8 row
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Fix partial-pass inflation + User Demo Gate + environment readiness (aegis P7)
 
@@ -598,24 +377,6 @@ All three follow P2 (Enforce, Don't Reference) with inline BLOCKING gates and an
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Fix selective SC verification + Post-Implement Smoke Launch enforcement (aegis P6)
 
 ### What Changed
@@ -632,24 +393,6 @@ Two complementary defenses per P2 (Enforce, Don't Reference):
 Both address the same root cause: agents optimize for reporting success over actual runtime verification.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-26] Add verify-report.md as mandatory verify output artifact
 
@@ -681,24 +424,6 @@ P2 (Enforce, Don't Reference) applied: existing Guard 2 and Gap G1 were insuffic
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-26] Post-pull integrity audit — MANDATORY RULE 4, FILE-MAP, SCENARIO-CATALOG
 
 ### What Changed
@@ -710,24 +435,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 Post-pull integrity audit of 11 commits (f0d8abd..1dd4eeb) found: (1) parallel Feature execution prevention rule existed only in pipeline.md — per P2 principle, critical rules must be inline at always-loaded entry points (SKILL.md), not only in on-demand command files; (2) `project-domains-readme.md` template added in 8696838 but not reflected in FILE-MAP.md; (3) SH06 scenario didn't mention project-local output path change from same commit.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-25] Project-local domain modules
 
@@ -744,24 +451,6 @@ domain-extend now creates modules in `specs/domains/` (project-local) by default
 README.md, README.ko.md, ARCHITECTURE-EXTENSIBILITY.md/.ko.md, FILE-MAP.md, and all 6 Medium publication articles (part1-3 EN+KO) updated to reflect three-tier architecture and project-local module storage.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-25] TRM vs Implementation audit — publication corrections
 
@@ -781,24 +470,6 @@ TRM audit against actual implementation revealed 7 numeric/naming discrepancies.
 93/100 — Core mechanisms (HARD STOP, Execute+Review, SC Preservation, Artifact Separation, GEL, P1/P2/P3) are 100% implemented. Gaps were exclusively in publication numbers.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-25] Domain Profile Instance + Guard ID normalization + integrity fixes
 
@@ -827,24 +498,6 @@ Domain Profile Instance closes the gap between profiling framework (module files
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-23] Post-release integrity fixes (v0.1.0)
 
 ### What Changed
@@ -859,24 +512,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 Post-release integrity analysis revealed: (1) domain-extend was not reflected in FILE-MAP, (2) smart-sdd couldn't load migration modifier at runtime, (3) domain-extend browse/validate referenced non-existent shared schema, (4) scenario count in CLAUDE.md was stale from pre-consolidation era.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-23] Architectural Rename: Scenario → Context (5th axis unification)
 
@@ -904,24 +539,6 @@ Unified the 5th axis from "Scenario" to "Context", absorbing the separate Scale 
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-23] Complete Remaining Simulation Gaps — Foundations + k8s-api Interface
 
 ### What Changed
@@ -934,24 +551,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 - No remaining HIGH-severity gaps from the 6-project simulation
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-23] Simulation-Driven Gap Fixes from 6-Project Virtual Pipeline Test
 
@@ -972,24 +571,6 @@ Ran virtual pipeline simulations on 6 representative project types (A05 Message 
 - No custom TCP protocol interface (A05 gap — known from SOFTWARE-CATALOG)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-23] Context Optimization Phase 1 — Enforce Domain Module Lazy-Loading
 
@@ -1016,24 +597,6 @@ Added "Domain Module Filtering" sections to all 9 injection files, enforcing _re
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-23] Implement --from-reverse-spec for init command
 
 ### What Changed
@@ -1056,24 +619,6 @@ Added `--from-reverse-spec <path>` flag to the `init` command, creating an expli
 - `MEDIUM-EDIT-GUIDE.md` — Flag status update
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-23] Context Reset Protocol — Inter-work-unit context management
 
@@ -1109,24 +654,6 @@ Added Context Reset Protocol to manage context window saturation at work unit bo
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-22] SOFTWARE CATALOG + code-explore server/network enhancement
 
 ### What Changed
@@ -1148,24 +675,6 @@ The SOFTWARE CATALOG serves as a systematic test harness for code-explore capabi
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-22] Case-study cleanup + add --to augmentation refinement + SC preservation injection
 
 ### What Changed
@@ -1183,24 +692,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 The `augmented` status in sdd-state.md serves as the trigger for SC preservation in the specify injection. This keeps the add command and specify injection loosely coupled — add sets the status, specify reads it. The `[preserved]`/`[new]`/`[updated]` tags provide traceability in the generated spec.md, making it clear which SCs existed before augmentation and which were added.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-22] S8 Verify Multi-Protocol Extension + Archetype Strategies + Known Limitations
 
@@ -1226,24 +717,6 @@ Extended runtime verification from HTTP-only to 11 protocol backends. Added arch
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Documentation Update — Domain Module Count Sync
 
 ### What Changed
@@ -1263,24 +736,6 @@ Updated documentation files to reflect current domain module counts across all 5
 - `FILE-MAP.md` — § 3 Domain Module Hierarchy diagram, Module File Distribution, § 4 File Inventory tables (shared, reverse-spec, smart-sdd sections)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] 5/5 Quality Improvements — 7 Gap Fixes
 
@@ -1302,24 +757,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Auto-Chaining Consistency: add→pipeline, trace batch mode
 
 ### What Changed
@@ -1334,24 +771,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Revisiting Completed Feature — Branch Management for Step-Back
 
 ### What Changed
@@ -1363,24 +782,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 Step-back to specify/plan was added without addressing the branch scenario: F001 merged → F002 merged → user wants to fix F001's spec. Without this rule, it was unclear whether to checkout the old branch (which doesn't have F002's code) or create a new one. Now explicit: always start from latest main.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] Step-Back Navigation + Cross-Feature Impact Analysis
 
@@ -1402,24 +803,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] User App Configuration Gate (verify-preflight Phase 0-2b)
 
 ### What Changed
@@ -1438,24 +821,6 @@ Desktop apps like Cherry Studio store configuration (AI provider API keys, model
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Context Optimization: Lazy-load Degradation Table + Budget Protocol
 
 ### What Changed
@@ -1472,24 +837,6 @@ context-injection-rules.md is loaded for EVERY pipeline command. The degradation
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] adopt Auto-chains reverse-spec When Artifacts Missing
 
 ### What Changed
@@ -1501,24 +848,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 Users expect `/smart-sdd adopt` to be a single command that handles everything. Requiring a separate `/reverse-spec` invocation first breaks the workflow and confuses users — "adopt" implies "take this code as-is", which should include the analysis step automatically.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] Complete Domain Module Parity — 13 smart-sdd Stubs Added
 
@@ -1533,24 +862,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 12-check review identified that 7 concerns and 6 archetypes had shared domain files (S0/A0 signal keywords + R1 code patterns) but no corresponding smart-sdd pipeline files (S1/S5/S7 or A1-A5). This meant `smart-sdd init` could detect these domains but `specify`, `add`, and `pipeline` had no domain-specific rules to inject — SCs lacked domain guidance, elaboration probes were missing, and bug prevention rules were absent. Full parity ensures every detectable domain has complete pipeline support.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] FILE-MAP.md — Dedicated File Inventory + Relationship Diagrams
 
@@ -1567,24 +878,6 @@ README file tables (~330 lines, ~17% of content) distracted from the project int
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Case-Study Skill Deprecated — Auto-Report Replaces Manual Invocation
 
 ### What Changed
@@ -1599,24 +892,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 The Auto-Report system (completion-report.md) generates reports automatically at pipeline completion, eliminating the need for manual `/case-study` invocation. Data overlap is ~90% — history.md per-Feature Implementation Decisions replace case-study-log.md M6 entries. The Auto-Report adds §5.2 Architecture Philosophy and §5.3 Principle-to-Decision Mapping that case-study lacked.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] Migration Context Module — New Domain Module Type
 
@@ -1640,24 +915,6 @@ S6 previously assumed all migrations follow the same heavy workflow (full adopt 
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Unified Auto-Report Template — Absorbs Case-Study Report Structure
 
 ### What Changed
@@ -1675,24 +932,6 @@ Replacing the manual `/case-study` skill with automatic report generation at pip
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Data-IO Interface Module Expansion
 
 ### What Changed
@@ -1706,24 +945,6 @@ Data pipeline and ETL projects (Airflow, dbt, Spark, Prefect, Dagster) had only 
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Documentation Update — 28 New Files in File Tables
 
 ### What Changed
@@ -1736,24 +957,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 CLAUDE.md Post-Change Propagation Check requires file table updates whenever files are added. The Cross-Reference Map in ARCHITECTURE-EXTENSIBILITY helps contributors find related files when modifying a concept.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] Domain Module Mass Expansion — 28 New Files
 
@@ -1772,24 +975,6 @@ The domain module system was designed to be extensible, but with only web applic
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] Multi-Language & Multi-Platform Coverage Expansion
 
 ### What Changed
@@ -1806,24 +991,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 Coverage gaps meant projects in these stacks would fall through to generic detection paths, losing framework-specific extraction patterns and Foundation signals.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] SJ-Series: Spring/Java Enterprise Support + C/C++ Build System Stubs
 
@@ -1850,24 +1017,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 - C/C++ projects use diverse build systems; Foundation stubs enable framework detection and correct toolchain commands
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] N-Series Gap Fixes Part 2: Multi-Ecosystem + Patterns + Adoption Report
 
@@ -1919,24 +1068,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] N-Series Gap Fixes + Completion Analysis Report
 
 ### What Changed
@@ -1982,24 +1113,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] G1: --from-explore Implementation
 
 ### What Changed
@@ -2019,24 +1132,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] G6: add Type 1/Type 3 Parsing Protocols
 
 ### What Changed
@@ -2050,24 +1145,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 - `.claude/skills/smart-sdd/commands/add.md`
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] G3: Multi-Language Project Support
 
@@ -2088,24 +1165,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] G4: Large-Scale Project Handling
 
 ### What Changed
@@ -2122,24 +1181,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 - `.claude/skills/smart-sdd/reference/context-injection-rules.md`
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] G5: adopt Phase 1.5 Conditional Skip for GUI Projects
 
@@ -2160,24 +1201,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-21] G2: adopt-specify SBI Parsing Protocol
 
 ### What Changed
@@ -2193,24 +1216,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 - `.claude/skills/smart-sdd/reference/injection/adopt-specify.md`
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-21] G8: Archetype multi-detection + G9: SC template expansion
 
@@ -2233,24 +1238,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-20] Lean Scale & Cross-Concern sections in injection files
 
 ### What Changed
@@ -2270,24 +1257,6 @@ All 4 injection files duplicated the procedural framework from `context-injectio
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-20] Post-pull audit: Artifact Structure sync + File Map completeness
 
 ### What Changed
@@ -2299,24 +1268,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 Directory restructure (`specs/reverse-spec/` → `specs/_global/`) was reflected in the Project Directory Structure section (line 172) but not in the Artifact Structure section (line 1290). File Map entries were missing for 2 files added in recent commits. All are documentation consistency issues — no functional impact.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-20] spec-draft.md — reverse-spec generates initial spec for each Feature
 
@@ -2338,24 +1289,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | `context-injection-rules.md` | Graceful degradation for absent spec-draft.md |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-20] Rebuild Fidelity — Runtime Exploration BLOCKING + UI Flow Spec + Artifact Separation
 
@@ -2380,24 +1313,6 @@ Source analysis → reverse-spec artifacts only. smart-sdd artifacts (spec/plan/
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-20] Post-pull Audit — 6 Issues Fixed (verify gate headings, ipc.md schema, README scripts)
 
 Post-pull analysis of 30-commit update (36 files, +4559/-2073 lines). Found and fixed 6 issues:
@@ -2415,24 +1330,6 @@ Key finding: The 30-commit update itself (verify refactor, SKF-053 structural ga
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] SKF-046~047 — Cosmetic Test Detection + Cross-Feature Wiring Runtime
 
 | SKF | Fix | File |
@@ -2441,24 +1338,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 047 | Cross-Feature Wiring Runtime Confirmation: After static check, launch app and confirm element visible. | implement.md |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-19] SKF-053~056 — Structural Verification Gates + Semantic Stub Detection + Functional Smoke Test
 
@@ -2485,24 +1364,6 @@ SKF-053 identified 7 structural causes of shallow verification. SKF-054 found In
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] SKF-053 — 7 Structural Causes of Shallow Verification (initial analysis)
 
 ### Fixes
@@ -2520,24 +1381,6 @@ All gates are **structural** (count/file/diff-based), not trust-based (agent sel
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] SKF-076 — Rebuild UX Equivalence + UI Screen Inventory + Source-First UI
 
 ### Context
@@ -2554,24 +1397,6 @@ Rebuild produced "functionally correct but visually unrecognizable" results — 
 | Source-First UI Structure Extraction: checklist before coding (BLOCKING) | implement.md |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-19] Rule Extensibility Audit — Generalize React/Electron-specific rules to universal principles
 
@@ -2596,24 +1421,6 @@ Separate **principle** (universal) from **implementation** (framework-specific):
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] SKF-075 — Integration Architecture Extraction + Method Specificity + Architecture Pattern
 
 ### Context
@@ -2629,24 +1436,6 @@ Memory Feature (F006) implemented as "system message injection" when source app 
 | Architecture column in Integration Contract (🚫 BLOCKING) — AI Tool vs Injection vs Plugin | plan.md |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-19] SKF-073~074 — AI Reference Pipeline + Source Parity + Cross-Feature Rendering + UX Flow
 
@@ -2668,24 +1457,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] SKF-070~072 — Source Analysis + Tech Verification + Data Mapping + Agent Rules
 
 ### Fixes
@@ -2700,24 +1471,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] Bug Fix Severity — Spec Coverage Pre-check Gate
 
 ### Context
@@ -2729,24 +1482,6 @@ F006 KB citation: verify가 "번호 불안정, tooltip 미동작"을 Major-Imple
 Bug Fix Severity Rule에 **Step A: Spec Coverage Pre-check** 추가. severity 분류 전에 "SC가 있나?" 먼저 체크. SC 없으면 파일 수 무관하게 Major-Spec.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-19] Verify Fix Degradation Loop Prevention
 
@@ -2762,24 +1497,6 @@ F006 citation UI implementation entered a fix → re-fix → re-re-fix loop duri
 | `verify-phases.md` § Minor Fix Accumulator | Added "SC Re-Fix Loop Detection": same SC fails Post-Fix verification 2 times → auto-escalate to Major-Implement. Prevents patch-on-patch degradation. |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-19] Verify WHAT/HOW Separation + Context Budget Split + Implement Library Validation
 
@@ -2808,24 +1525,6 @@ Even after splitting verify into 6 files, the agent might not read the right pha
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] SKF-070 — Extensible Data Integrity Framework (S4) + Source Deep Analysis
 
 ### Context
@@ -2845,24 +1544,6 @@ SKF-070 documented 18 failures in F006 Knowledge-Memory pipeline. Instead of add
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-19] Post-Pull Consistency Audit — 5-Axis Model Sync + llm-agents Module Completeness
 
 | Change | File | Rationale |
@@ -2875,24 +1556,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | **reverse-spec llm-agents module** | `reverse-spec/domains/concerns/llm-agents.md` | Created — was missing from reverse-spec (shared + smart-sdd had it). Follows authorization.md pattern with R1 cross-ref to shared/ |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-18] SKF-065~069 — Verification Evidence + Wiring Check + API Dependency Enforcement
 
@@ -2911,24 +1574,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 067 | Already implemented: Manual Verification Fallback Protocol in verify-phases.md Step 0 item 7. |  |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-18] Python/LLM/Data-Science Domain Support — Simulation-Driven Gap Analysis
 
@@ -2955,24 +1600,6 @@ Simulated code-explore → rebuild of `ai-data-science-team` (Python + LangChain
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-18] SKF-060~063: Semantic Stub Detection + Regression Protocol
 
 ### Context
@@ -2989,24 +1616,6 @@ SKF-060~063 revealed that build/type-passing code can contain completely non-fun
 | 063 | `injection/implement.md` | UI Control Type Audit (BLOCKING for rebuild+GUI): Source Select → Target Input = UX downgrade = BLOCKING |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-18] Stop Hook — spec-kit Output Interception
 
@@ -3029,24 +1638,6 @@ Claude Code Stop hook that detects spec-kit navigation patterns in `last_assista
 This is a concrete example of P2: the inline instruction "SUPPRESS spec-kit output" exists in 6+ locations, but agents still stop. The Stop hook is a **system-level enforcement** that operates below the instruction layer — the agent literally cannot stop when spec-kit output is the last thing shown.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-18] SKF Deep Verification — 5 Critical Enforcement Gaps Fixed
 
@@ -3072,24 +1663,6 @@ Re-verified all 55 SKF items. Found 5 items marked ✅ Reflected but with insuff
 3. Anti-pattern examples (❌ WRONG / ✅ RIGHT)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-18] Domain Profile Architecture: 4-axis → 5-axis + 1 modifier
 
@@ -3128,24 +1701,6 @@ MECE analysis revealed the original 4-axis model (Interface, Concern, Archetype,
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-18] Domain Profile First-Class Citizen Audit — 5 Gap Fixes
 
 ### Context
@@ -3167,24 +1722,6 @@ Full audit of Domain Profile as first-class citizen across all skills. Found tha
 Expanded Domain Profile section in both READMEs to explain first-class citizen philosophy with per-skill bullet points showing how Domain Profile actively influences each step.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-18] Domain Profile Fusion — code-explore ↔ smart-sdd Full Integration
 
@@ -3210,24 +1747,6 @@ The `--from-explore` flag needed to exist on `init` (not just `add`) because ini
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-18] code-explore Sample Artifacts + --from-explore Handoff
 
 ### Context
@@ -3249,24 +1768,6 @@ Created realistic sample code-explore artifacts simulating an opencode explorati
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-18] External Agent Analysis — Enforcement Upgrades
 
 ### Context
@@ -3284,24 +1785,6 @@ Re-evaluated 5 items from external agent analysis (1f, 1g, 2f, 2g, 3g). Found 2g
 Also: inline Feature definition added to README first mention (EN/KO).
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-17] Enforcement Gap Closure — 4 Fixes (from external analysis)
 
@@ -3324,24 +1807,6 @@ External agent analysis identified "trust-based vs guard-rail" enforcement gaps.
 - Brief capability gaps are **blocking** because they represent clear intent violation (user defined X, spec dropped X). Scope drift stays warning (spec may legitimately expand).
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-17] Implementation Gap Analysis — 6 Structural Fixes
 
@@ -3366,24 +1831,6 @@ Analyzed whether the three README-claimed gaps (cross-Feature memory, project co
 - Removed TODO.md from README file tables
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-17] Full Review Protocol Verification (11-point) — Integrity Fixes
 
@@ -3410,24 +1857,6 @@ Performed comprehensive 11-point Review Protocol verification (expanded from 5 t
 | Guard attributions via `> Guard N:` blockquotes | Inline in injection files | Matches existing convention; enables grep-based binding verification |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-17] Self-Assessment Gap Resolution — Intent Verification, GEL Enforcement, Org Convention
 
@@ -3460,24 +1889,6 @@ Self-assessment revealed 3 core concepts had significant gaps:
 | Org convention | ~75% | ~85% | Organization-level convention loading support |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-17] Brief Implementation — S9/A5 Schema, Briefing Process, Pre-Context Template
 
@@ -3533,24 +1944,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-17] Three Core Concepts Framework — GEL, Domain Profile, Brief
 
 Established a unified conceptual framework for spec-kit-skills built on three core concepts, each addressing a structural gap in agentic coding at scale.
@@ -3591,24 +1984,6 @@ Reframed the core narrative from "spec-kit processes one Feature at a time" to t
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-17] README.ko.md Structure Sync with README.md (c541674)
 
 Synchronized README.ko.md structure with README.md changes from commit c541674.
@@ -3626,24 +2001,6 @@ Synchronized README.ko.md structure with README.md changes from commit c541674.
 - Updated _resolver.md with Brownfield/Greenfield profile detection split
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-17] Domain Module Expansion — 6 GAPs from OSS Project Analysis
 
@@ -3695,24 +2052,6 @@ Analyzed 4 open-source projects (OpenJarvis, open-trading-api, Feast, Vanna) aga
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Post-Pull Comprehensive Consistency Audit (17 fixes across 13 files)
 
 ### Foundation ID Prefix Fixes (Critical — ID collision prevention)
@@ -3749,24 +2088,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] SKF-045 — Data Lifecycle Paradigm Mapping + Source Reference BLOCKING
 
 | Change | File | Rationale |
@@ -3782,24 +2103,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Pipeline Integrity Guards — Gap Closure (5 fixes)
 
 | Change | File | Rationale |
@@ -3811,24 +2114,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | **Guard doc cross-reference** | `pipeline.md` | pipeline-integrity-guards.md 직접 참조 링크 추가 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Pipeline Integrity Guards — SKF-001~044 Root Cause Generalization
 
@@ -3846,24 +2131,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Architecture Review — Content Distribution + Contributor Templates
 
 | Change | File | Rationale |
@@ -3876,24 +2143,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] SKF-035~036: Demo --ci ≠ UI Verification + CSS Theme Token Rendering
 
 | Change | File | Rationale |
@@ -3904,24 +2153,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | gui.md S7 cross-reference | `gui.md` | CSS Theme Token Rendering 규칙을 S7 Bug Prevention에 교차 참조 추가 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Multi-Language Backend Expansion — Phase D Completion + Full Verification
 
@@ -3938,24 +2169,6 @@ Completed remaining Phase D: FastAPI and NestJS Foundation files upgraded from T
 | _foundation-core.md F6 update | Foundation protocol | nestjs + fastapi status changed from "TODO scaffold" to "Implemented" |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Multi-Language Backend Expansion — Architecture Stress Test
 
@@ -3981,24 +2194,6 @@ Stress-tested spec-kit-skills against 13+ real-world open source projects across
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Full File Review — Dead Schema Fix + Structure Consumption + Checklist Repair
 
 | Change | File | Rationale |
@@ -4012,24 +2207,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] User-Assisted Manual Verification Gate (Step 3f2)
 
 | Change | File | Rationale |
@@ -4040,24 +2217,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] SKF-033~034: Test State Isolation + Async Hydration Sync
 
 | Change | File | Rationale |
@@ -4066,24 +2225,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Async Hydration Sync | `injection/implement.md` | SKF-034: 비동기 hydration과 외부 시스템(i18n, theme) 간 race condition. i18n에 한정하지 않고 "async hydrate → unconditional sync" 범용 패턴으로 일반화 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] SKF-028~032: SBI resolution, Interaction Chain verification, Feature Reachability, TEST PLAN
 
@@ -4097,24 +2238,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Demo TEST PLAN Execution (Step 3d3) | `smart-sdd/commands/verify-phases.md` | SKF-032: TEST PLAN was write-only — verify never executed its items. Now parses and runs automatable tests via Playwright |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Extensibility expansion — new modules, F8/F9 schema, Structure parameter
 
@@ -4137,24 +2260,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] README readability overhaul + flow diagram
 
 | Change | File | Rationale |
@@ -4169,24 +2274,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] SKF-026/027: Branch conflict recovery + FR coverage severity calibration
 
 | Change | File | Rationale |
@@ -4195,24 +2282,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | MEDIUM severity tier for FR coverage | `injection/analyze.md` | SKF-027: "task exists but lacks implementation detail" was HIGH → added MEDIUM tier. HIGH now reserved for missing behavioral coverage, not missing implementation specifics. |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Inline Execute+Review sections for specify/plan/tasks
 
@@ -4228,24 +2297,6 @@ Pipeline.md had inline Execute+Review instructions for constitution (Phase 0, li
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Pre-context freshness check at specify time
 
 Specify injection read pre-context.md as-is without validating assumptions against preceding Features' actual implementation. If a dependency's tech choice changed after pre-context was written (e.g., better-sqlite3 → electron-store in F001), specify would draft SCs based on stale assumptions. Plan injection already reads actual data-model.md/contracts/, but that's 2 steps too late.
@@ -4255,24 +2306,6 @@ Specify injection read pre-context.md as-is without validating assumptions again
 | Pre-context freshness check | `injection/specify.md` | Step 3 added to Preceding Feature Result Reference — reads actual implementation artifacts and flags ⚠️ discrepancies against pre-context at Checkpoint |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Systemic: Feature completeness + rebuild parity enforcement + rule generalization
 
@@ -4309,24 +2342,6 @@ SKF-023 fixes were CSS-specific. Generalized to cover any build-time transformat
 | "avoid unnecessary re-renders" (React-specific) | "for performance and simplicity" (general) | `injection/implement.md` |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Systemic: Warning → BLOCK escalation across specify/plan/tasks + build-time detection
 
@@ -4371,24 +2386,6 @@ The previous session fixed warning→BLOCK in implement.md and verify-phases.md.
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] SKF-023: CSS rendering verification — build passes but UI is unstyled
 
 ### SKF-023: CSS framework misconfiguration invisible to build/TS/smoke gates (Critical)
@@ -4405,24 +2402,6 @@ Tailwind CSS 4 utility classes were not being generated because `@tailwindcss/vi
 **Files**: `injection/implement.md` (CSS Build Pipeline Verification), `pipeline.md` (Smoke Launch step 3 + Foundation Gate CSS Toolchain), `verify-phases.md` (Phase 1 item 5 — CSS rendering check)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] SKF-022: Inline Execution as default for speckit-* commands + Case Study README enhancement
 
@@ -4443,24 +2422,6 @@ The Skill tool creates a response boundary — when speckit-* completes via `Ski
 Added case-study as a third bullet in the top-level skill introduction (both README.md and README.ko.md). Previously only reverse-spec and smart-sdd were introduced at the top level, making case-study less discoverable.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] SKF-020 + SKF-021: Console noise filter + Feature number conflict prevention
 
@@ -4489,24 +2450,6 @@ smart-sdd creates Feature branch `{NNN}-{name}` in pre-flight (Step 0), then `sp
 **Files**: `pipeline.md` (§ Feature Number Conflict Prevention), `branch-management.md` (§ Pre-Flight auto-numbering warning)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-15] Tech-stack agnostic generalization + SKF-019 native dependency check
 
@@ -4562,24 +2505,6 @@ Comprehensive review identified 40+ points across pipeline.md, implement.md, and
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-15] Smoke Launch failure escalation + implement completion gate
 
 Reinforced the Post-Implement Smoke Launch section in pipeline.md. Previously, step 6 ("On failure: Fix the issue immediately") was too vague — the agent could mark implement ✅ and frame the failure as "verify is blocked," which is incorrect. Smoke Launch is part of implement, so its failure means implement is NOT complete.
@@ -4603,24 +2528,6 @@ Reinforced the Post-Implement Smoke Launch section in pipeline.md. Previously, s
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-15] Foundation Verification Gate — T0 Feature skip condition
 
 Added skip condition to Step 3b (Foundation Verification Gate): when the current Feature IS a T0 (Foundation) Feature, skip the Gate. Rationale: the Gate validates Foundation systems before building Features on top of them, but when the Feature being processed IS the Foundation itself (e.g., F001 app-shell), there is nothing to verify yet. Previously only "greenfield" was listed as a skip condition, which missed the rebuild + clean restart + T0 Feature case.
@@ -4633,24 +2540,6 @@ Added skip condition to Step 3b (Foundation Verification Gate): when the current
 **File**: `smart-sdd/commands/pipeline.md` Step 3b Skip-for line
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-15] MANDATORY RULE 3: spec-kit Output Suppression + Review Gate
 
@@ -4678,24 +2567,6 @@ During Angdu Studio pipeline run, `speckit-constitution` completed and the agent
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-15] reverse-spec Post-Run Bug Fixes (case-study-log path + Demo Group SBI)
 
 Fixed two bugs discovered during the second Cherry Studio reverse-spec run.
@@ -4720,24 +2591,6 @@ Fixed two bugs discovered during the second Cherry Studio reverse-spec run.
 Both bugs have the same root cause pattern: instructions that are technically present but not structurally prominent enough for the agent to follow. The case-study-log bug used `{target-directory}` which is ambiguous (target of the build vs target of the analysis). The Demo Group SBI bug buried a distinct calculation inside an unrelated verification checklist.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-15] reverse-spec Completeness Improvements (SKF-018 + Cherry Studio Findings)
 
@@ -4784,24 +2637,6 @@ Cherry Studio output: SBI/Entity/API excellent, but F7 missing from constitution
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-15] SKF-017: Electron CDP Connection Timing Guidance
 
 Added Electron CDP 3-phase polling guidance to `reverse-spec/analyze.md` Phase 1.5-4, based on field experience with Cherry Studio (electron-vite).
@@ -4815,24 +2650,6 @@ Added Electron CDP 3-phase polling guidance to `reverse-spec/analyze.md` Phase 1
 During Cherry Studio reverse-spec, CDP connection repeatedly failed or returned empty targets. Root cause: electron-vite has a ~45-60s multi-stage startup, and CDP targets only appear after BrowserWindow creation + renderer load. Without this guidance, the agent incorrectly concluded "CDP is not working" and wasted time with retries and alternative approaches.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-15] Case-Study Enhancement: Architecture Philosophy Integration
 
@@ -4862,24 +2679,6 @@ Enhanced the case-study skill to capture and communicate architecture philosophy
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-15] Remove speckit-diff skill
 
 Removed the `speckit-diff` skill entirely (3 files: SKILL.md, commands/diff.md, reference/integration-surface.md).
@@ -4896,24 +2695,6 @@ Removed the `speckit-diff` skill entirely (3 files: SKILL.md, commands/diff.md, 
 - README.md/README.ko.md updated (Quick Start, Utilities, Installation, File Map)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-15] 4-Axis Domain Composition: Archetype modules + Foundation F7 Philosophy
 
@@ -4961,24 +2742,6 @@ Expanded the domain composition model from 3 axes (Interface × Concern × Scena
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] Reverse-spec output quality enforcement: BLOCKING gates + completeness verification
 
 Second-round quality analysis of cherry-studio reverse-spec output (post-Fix 1-4). Fix 1-3 fully reflected; Fix 4 (Runtime Default Verification) still skipped despite MANDATORY keyword. Additionally found pre-context sections wholesale omitted and DG SBI ranges not persisted.
@@ -5000,24 +2763,6 @@ Second-round quality analysis of cherry-studio reverse-spec output (post-Fix 1-4
 - `reverse-spec/commands/analyze.md` — 3 fixes across Phase 1.5 Step 6, Phase 4-2 SBI Verification Step 5, Phase 4-2 Pre-context Completeness Verification
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-14] Reverse-spec quality prevention: SBI integrity + coverage verification
 
@@ -5041,24 +2786,6 @@ Quality analysis of cherry-studio reverse-spec output revealed 7 issues traceabl
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] Flow Review: context-injection-rules.md reachability fix
 
 Post-SKF batch (SKF-010~016) full project flow verification following CLAUDE.md Review Protocol (4-step: flow consistency → unused parts → commonization → over-fragmentation).
@@ -5076,24 +2803,6 @@ Post-SKF batch (SKF-010~016) full project flow verification following CLAUDE.md 
 - `smart-sdd/commands/pipeline.md` — Step 1 Assemble explicit context-injection-rules.md reading requirement
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-14] SKF-015 + SKF-016: Cross-Stage Validation Gates + Interaction Surface Inventory
 
@@ -5124,24 +2833,6 @@ SKF-015: Structural analysis of SKF-001~014 patterns revealing the pipeline's si
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] SKF-014: Pipeline Error Propagation Prevention — Source App Comparison MANDATORY for rebuild+GUI
 
 Skill Feedback from angdu-studio F002-navigation deep analysis. SKF-013 root cause analysis revealed the wrong default propagated through all 6 pipeline stages uncaught. Two additional fixes beyond SKF-013.
@@ -5164,24 +2855,6 @@ Skill Feedback from angdu-studio F002-navigation deep analysis. SKF-013 root cau
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] SKF-013: Runtime Default Verification — prevent code analysis vs runtime mismatch
 
 Skill Feedback from angdu-studio F002-navigation. Critical severity — `navbarPosition` code analysis said `'left'` but runtime default was `'top'`, causing entire Feature to be built with wrong layout.
@@ -5203,24 +2876,6 @@ Skill Feedback from angdu-studio F002-navigation. Critical severity — `navbarP
 - `angdu-studio/skill-feedback.md` — SKF-013 marked as ✅ Reflected
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-14] SKF-012: Dependency Stub Registry — cross-Feature stub tracking mechanism
 
@@ -5251,24 +2906,6 @@ Skill Feedback from angdu-studio F002-navigation. Stubs/placeholders created due
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] SKF-010 + SKF-011: Layout Structure Analysis + GUI Mandatory Playwright Gate
 
 Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) implement phase rebuilt layout without matching source app code-level structure, (2) verify phase skipped Playwright runtime verification despite GUI Feature.
@@ -5297,24 +2934,6 @@ Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) implem
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] SKF-008 + SKF-009: Visual Reference Fallback + Interaction Surface Preservation
 
 Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) visual references not consulted during implement, (2) F001's interaction surfaces removed when F002 replaced App.tsx.
@@ -5340,24 +2959,6 @@ Skill Feedback from angdu-studio F002-navigation. Two related issues: (1) visual
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-14] SKF-007: Demo-Ready Delivery condition expansion
 
 Skill Feedback from angdu-studio F002-navigation. Demo scripts were not generated because the condition only checked constitution, missing the established demo pattern from F001.
@@ -5382,24 +2983,6 @@ Skill Feedback from angdu-studio F002-navigation. Demo scripts were not generate
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-13] Full Project Review + Integration Demo Trigger Fix
 
 Full file analysis per CLAUDE.md Review Protocol (4-step: flow consistency, unused parts, commonization, over-fragmentation). Also verified SKF-001~006 reflection quality and evaluated 2 minor issues.
@@ -5419,24 +3002,6 @@ Full file analysis per CLAUDE.md Review Protocol (4-step: flow consistency, unus
 - `history.md` — this entry
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] Post-Pull Review — 10 Commits Cross-Reference Check
 
@@ -5460,24 +3025,6 @@ Pulled 10 commits (36 files, +2739 lines). Full review per CLAUDE.md Review Prot
 **Files**: demo-standard.md (1 fix), history.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] SKF-001~006: Implement + Verify Gap Fixes from angdu-studio F001
 
@@ -5512,24 +3059,6 @@ Post-review audit found 3 stale/missing cross-references after the SKF fixes:
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-13] Terminology Unification — "Acceptance Criteria" → "Success Criteria"
 
 spec-kit defines SC-### as **Success Criterion** (`## Success Criteria` section in spec.md). However, spec-kit-skills used "Acceptance Criteria" and "Success Criteria" interchangeably across 12 occurrences in 9 files — including one line that used both terms simultaneously (`Draft acceptance criteria (SC-###): Draft Success Criteria / Acceptance Scenario`).
@@ -5549,24 +3078,6 @@ Unified all 12 occurrences of "acceptance criteria" → "success criteria" to ma
 - `history.md` — this entry
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] Full File Review + Cross-Reference Fixes + Context Budget README
 
@@ -5588,24 +3099,6 @@ All other cross-references verified: injection files (11), profiles (4), foundat
 - `history.md` — this entry
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] Context Budget Protocol + Domain Resolution Worked Example
 
@@ -5639,24 +3132,6 @@ Expert analysis (8.2/10) identified two addressable weaknesses:
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-13] README Reliability Mechanisms + File Map Corrections
 
 Post expert analysis (8.2/10) identified key architectural innovations not yet documented in README, plus stale File Map item counts from pre-review state.
@@ -5674,24 +3149,6 @@ Post expert analysis (8.2/10) identified key architectural innovations not yet d
 - `history.md` — this entry
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] Expert Review Fixes + README Architecture Enhancement
 
@@ -5729,24 +3186,6 @@ Post-implementation expert review identified 14 issues across Foundation files, 
 - `history.md` — this entry
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] Micro-Interaction Layer + Expert Analysis Improvements
 
@@ -5805,24 +3244,6 @@ Added comprehensive micro-interaction detection and verification across the full
 | `history.md` | This entry |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-13] Platform Foundation Layer + Architecture Documentation
 
@@ -5907,24 +3328,6 @@ Added framework-specific infrastructure decision management across the entire pi
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-12] Post-Pull Review — 5 Commits Cross-Reference Check
 
 Pulled 5 commits (14 files, +548/-19 lines). Full review per CLAUDE.md Review Protocol: flow consistency, cross-references, unused parts, over-fragmentation.
@@ -5947,24 +3350,6 @@ Pulled 5 commits (14 files, +548/-19 lines). Full review per CLAUDE.md Review Pr
 **Files**: verify-phases.md (1 fix)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-12] Verify Universal HARD STOP + Reverse-Spec Interaction Quality
 
@@ -6015,24 +3400,6 @@ Added behavioral contract extraction to reverse-spec analysis, addressing the ro
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-12] Full File Review — Flow Consistency and File Map Sync
 
 Comprehensive file review across 4 parallel agents (SKILL.md routing, domain system, verify-phases, scripts/README). Validated 98+ cross-file references in SKILL.md routing, 150+ in domain system, with zero broken domain links.
@@ -6055,24 +3422,6 @@ Comprehensive file review across 4 parallel agents (SKILL.md routing, domain sys
 - `README.ko.md` — Synced all File Map additions (Korean translations)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-12] Cross-Feature Integration Wiring — Pipeline Quality Analysis
 
@@ -6108,24 +3457,6 @@ Comprehensive pipeline quality analysis based on F007-knowledge implementation g
 - `reference/injection/plan.md` — Added Cross-Feature Integration rows to Interaction Chains section
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-12] Verify Process Lifecycle Protocol — Comprehensive Gap Analysis
 
@@ -6165,24 +3496,6 @@ Second round of verify gap analysis based on comprehensive review document cover
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-12] Verify Gap Analysis — Dev/Production Code Path Divergence
 
 Runtime crash in angdu-studio (`TypeError: Object has been destroyed`) exposed a structural gap: verify only exercised the production build path, missing bugs that manifest only in dev mode due to different module loading order. Generalized the root cause into two improvements applicable to any project type.
@@ -6212,24 +3525,6 @@ Runtime crash in angdu-studio (`TypeError: Object has been destroyed`) exposed a
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] Rebuild Scenario Enhancement + README Architecture Restructuring
 
 Rebuild.md's 4 configuration parameters (`change_scope`, `preservation_level`, `source_available`, `migration_strategy`) were mostly dead code — only `source_available` was actively consumed. Restructured rebuild.md with proper S1/S3/S5/S7 schema sections, added consumption points throughout the pipeline, and repositioned the Architecture section in README from the bottom Reference area to between Skills and User Journeys for visibility. Integrated "harness engineering for agentic coding" framing into Architecture introduction.
@@ -6255,24 +3550,6 @@ Rebuild.md's 4 configuration parameters (`change_scope`, `preservation_level`, `
 - `README.ko.md` — Synced with README.md structural changes
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-11] Unified Reset Command — remove→reset Redesign
 
@@ -6300,24 +3577,6 @@ User ran `/smart-sdd remove F007` intending to re-run F007's pipeline, but `remo
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] README Update — Reset Command Documentation
 
 Updated both README.md and README.ko.md Management sections to document the three-mode reset command.
@@ -6329,24 +3588,6 @@ Updated both README.md and README.ko.md Management sections to document the thre
 | 3 | Permanent deletion added | `reset --delete F007` |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-11] F007 Post-Mortem — 5 Structural Improvements
 
@@ -6390,24 +3631,6 @@ F007 Knowledge Base verify exposed 12 bugs, all discovered in verify (none in im
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] Source Modification Gate + Post-Fix Runtime Verification
 
 Real F007 failure: agent discovered issues during verify (KB picker restructure + KnowledgeReference.name + CitationBlock) and fixed all 4 files inline without first classifying severity. The Bug Fix Severity Rule existed (lines 14-47) but was a reference section, not an enforced gate. Same structural pattern as the Step 3f problem — agents skip reference rules.
@@ -6431,24 +3654,6 @@ Real F007 failure: agent discovered issues during verify (KB picker restructure 
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] Verify Phase Hardening — SC Decomposition, Import Graph, Depth Enforcement
 
 Three verify-phases.md improvements based on real F007 test failure where `KnowledgeChatService` was implemented and tested but never imported by its consumer (`Inputbar.tsx`), and SC-007 (RAG chat integration) was classified entirely as `user-assisted`, skipping the auto-verifiable UI wiring portion.
@@ -6470,24 +3675,6 @@ Three verify-phases.md improvements based on real F007 test failure where `Knowl
 | `history.md` | This decision record |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-11] CLI+MCP Complementary Mode — Playwright Architecture
 
@@ -6516,24 +3703,6 @@ User-driven: Playwright CLI ran but browser window was invisible (headless defau
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] `/smart-sdd remove` Command
 
 New standalone command for removing specific Features. Previously required either `/smart-sdd add` pre-check (pending only) or manual restructure-guide.md checklist (in_progress/completed). Now unified into one command that works for any Feature status.
@@ -6559,24 +3728,6 @@ New standalone command for removing specific Features. Previously required eithe
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] User-Assisted SC Completion Gate (Step 3f)
 
 Real-world failure in F007 verify: agent classified SCs as `user-assisted` but skipped the cooperation block in Step 3d entirely, marking them as `⚠️` without ever presenting AskUserQuestion to the user. The `user-assisted` SCs subsection existed in Step 3d (with inline HARD STOP) but was treated as optional content among the auto-category subsections.
@@ -6600,24 +3751,6 @@ Real-world failure in F007 verify: agent classified SCs as `user-assisted` but s
 | `history.md` | This decision record |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-11] Full File Review — Over-Fragmentation Consolidation
 
@@ -6647,24 +3780,6 @@ Comprehensive file review identified 3 HIGH-severity duplications from increment
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] Library Import Probe + CWD Fix for Playwright CLI
 
 Real-world failure in reverse-spec Phase 1.5: `ERR_MODULE_NOT_FOUND: Cannot find package 'playwright'` when library mode script ran from `/tmp/` instead of the project root. Root cause: pre-flight only checked `npx playwright --version` (binary exists) but library mode uses `require('playwright')` which depends on CWD having `node_modules/playwright`.
@@ -6690,24 +3805,6 @@ Real-world failure in reverse-spec Phase 1.5: `ERR_MODULE_NOT_FOUND: Cannot find
 | `PLAYWRIGHT-GUIDE.md` | "Verify Library Mode" section + "ERR_MODULE_NOT_FOUND" troubleshooting |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-11] F007 Post-Mortem — Runtime Verification Architecture + Multi-Backend Detection
 
@@ -6746,24 +3843,6 @@ Comprehensive verify improvements based on F007 post-mortem analysis. Core probl
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] Proposal Mode + Clarity Index (CI) — Streamlined Greenfield Entry
 
 Added Proposal Mode to `init` command and Clarity Index (CI) scoring system. Enhances the 3-axis domain composition with signal-based inference for greenfield projects.
@@ -6796,24 +3875,6 @@ Added Proposal Mode to `init` command and Clarity Index (CI) scoring system. Enh
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-10] G8-G10 — v4 Remaining Items: i18n, SDK Contract Gap, UI Interaction Audit
 
 Reviewed F006 v4 improvement document (16 items) against current codebase. Found 12/16 already addressed, 2 not addressed (#4 i18n, #7 UI interaction), 2 partially addressed (#6 SDK completeness, #16 SDK trust).
@@ -6829,24 +3890,6 @@ Reviewed F006 v4 improvement document (16 items) against current codebase. Found
 **Files**: verify-phases.md, injection/implement.md, injection/verify.md, lessons-learned.md, history.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-10] README User-Facing Meaning Review
 
@@ -6866,24 +3909,6 @@ README was accurate but described mechanisms from an implementation perspective 
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-10] G7 — Integration Contracts: Cross-Feature Data Shape Verification
 
 F005↔F006 integration gap: F003's ParameterBuilder expected `assistant.mcpMode/mcpServers`, but F006's useMCPStore stored data differently. No bridge was designed (plan), built (implement), or verified (verify). Root cause: pipeline treats Features as isolated units with no data shape contract at boundaries.
@@ -6898,24 +3923,6 @@ F005↔F006 integration gap: F003's ParameterBuilder expected `assistant.mcpMode
 **Files**: injection/plan.md, verify-phases.md, injection/verify.md, lessons-learned.md, history.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-10] G6 — SC Verification Matrix: Runtime Behavior Verification
 
@@ -6932,24 +3939,6 @@ F006 pipeline: verify did static checks + UI rendering confirmation, but never t
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-10] G5 — Verify Compaction-Safe Checkpoint + Lessons Learned
 
 F006 pipeline: verify lost all Phase references after context compaction, causing Playwright CDP UI verification (Phases 3/3b) to be entirely skipped. Root cause: all 66 countermeasures assume "agent reads skill files" — context compaction breaks this premise.
@@ -6964,24 +3953,6 @@ F006 pipeline: verify lost all Phase references after context compaction, causin
 **Files**: state-schema.md, verify-phases.md, injection/verify.md, lessons-learned.md (new, project root), README.md, README.ko.md, history.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-10] Verify-time Change Recording — Implementation Gap Classification
 
@@ -6998,24 +3969,6 @@ F006 pipeline: during verify, i18n keys were added to source — an implementati
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-10] spec-kit Standalone Prompt — speckit-prompt.md
 
 reverse-spec generates `speckit-prompt.md` for users who run spec-kit without smart-sdd. Provides the manual equivalent of smart-sdd's cross-Feature context injection.
@@ -7031,24 +3984,6 @@ reverse-spec generates `speckit-prompt.md` for users who run spec-kit without sm
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-11] Cross-reference Fix + CLAUDE.md Rule 4 Sync + README File Map
 
 Post-pull analysis (19 commits, 35 files, +2429/-549 lines) found 3 issues. Fixed all:
@@ -7062,24 +3997,6 @@ Post-pull analysis (19 commits, 35 files, +2429/-549 lines) found 3 issues. Fixe
 **Files**: pipeline.md, CLAUDE.md, README.md, README.ko.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-09] Toolchain Pre-flight: Lint Tool Detection at Foundation Gate
 
@@ -7096,24 +4013,6 @@ ESLint not installed → verify Phase 1 "eslint: command not found" repeated at 
 **Files**: state-schema.md, domains/app.md, pipeline.md, verify-phases.md, injection/verify.md, injection/adopt-verify.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-09] Cross-file Consistency Fix — 9 issues (7 critical + 2 bugs)
 
@@ -7132,24 +4031,6 @@ Post W1-W10 cross-file consistency audit found 12 issues. Fixed 9 (critical + bu
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] W10: Async UX Behavior Chains + UX Behavior Contract
 
 Interaction Chains (V2) covered synchronous state propagation (click→handler→store→DOM) but missed temporal/async UX patterns — streaming auto-scroll, loading state transitions, error recovery, cleanup on unmount. These caused real bugs (e.g., chat doesn't scroll during streaming, spinner never disappears, memory leak on unmount).
@@ -7164,24 +4045,6 @@ Changes:
 Key principle: "동작한다"의 기준을 "빌드 성공"에서 "실제 사용자 시나리오 통과"로 올리는 것.
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-09] Pipeline v3: MCP-Independent Verification & Structural Enforcement — 9 changes (W1-W9)
 
@@ -7208,24 +4071,6 @@ Key design decisions:
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] Pipeline v2: "Build Success ≠ Feature Complete" Root Fix — 9 changes (V1-V9)
 
 Root problem: F004/F005 verified successfully but didn't work at runtime. 4 of 6 bugs were invisible to automated checks (build/test). Two remaining gaps after S1-S15: (A) Functional verification — verify checks "element visible?" but not "button works?", (B) Foundation — 7/7 bugs were Foundation-level issues (CSS theme, Zustand patterns, IPC bridge, layout) with no pre-Feature validation.
@@ -7250,24 +4095,6 @@ Key design decisions:
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] HARD STOP audit — re-ask text + explicit options
 
 Full audit of 56 HARD STOP points. Found and fixed 16 issues:
@@ -7280,24 +4107,6 @@ Full audit of 56 HARD STOP points. Found and fixed 16 issues:
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] Post-Execution Output Suppression — per-command inline reinforcement
 
 Root cause: Agent showed spec-kit's "Ready for /speckit.clarify or /speckit.plan." message after speckit-specify instead of smart-sdd's fallback message. pipeline.md had suppression rules (lines 99-108), but per-command injection files had no inline reminder — agent ignored the generic rules at execution time.
@@ -7305,24 +4114,6 @@ Root cause: Agent showed spec-kit's "Ready for /speckit.clarify or /speckit.plan
 Fix: Added `⚠️ SUPPRESS spec-kit output` inline blockquote to all 10 injection files' Review Display Content sections + shared pattern in context-injection-rules.md. Each reminder includes the specific fallback message format: `✅ [command] executed for [FID].\n💡 Type "continue" to review the results.`
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-09] Specify/Tasks/Implement Accuracy Guards — 4 additional changes
 
@@ -7336,24 +4127,6 @@ Root cause (continued): Even with S1-S11 source reference + MCP improvements, pi
 | S15 | Source Complexity Annotation | injection/tasks.md | Shows original file sizes → helps estimate if tasks are under-scoped |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-09] Source Reference Pipeline & Playwright MCP Active Use — 11 supplementary changes
 
@@ -7377,24 +4150,6 @@ Design constraint: MCP-GUIDE.md line 246 warns file-based MCP detection is unrel
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] Runtime-First Verification & Visual Fidelity — 9 changes across pipeline
 
 Root cause: F005-chat-ui passed full pipeline but app didn't work (Zustand selector instability → infinite re-render, useEffect DOM flicker). Verify equated "build passes" with "app works."
@@ -7413,24 +4168,6 @@ Root cause: F005-chat-ui passed full pipeline but app didn't work (Zustand selec
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] smart-sdd — Single-Feature pipeline default + remove Step Mode
 
 | # | Decision | Choice | Rationale |
@@ -7442,24 +4179,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] smart-sdd — Fix --start to force re-execute named step
 
 | # | Decision | Choice | Rationale |
@@ -7469,24 +4188,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 3 | Feature ID ordering fix | Changed reverse-spec ID assignment from "RG-first, Tier within RG" to "Tier-first globally, RG within Tier" | Old rule produced F003(T1)→F004(T2)→F005(T1), causing gaps in T1-only pipeline (F003→F005 skip). New rule: all T1 first→all T2→all T3, so pipeline execution is always sequential with no gaps at any Tier activation level |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-09] smart-sdd — Demote restructure command to reference guide
 
@@ -7498,24 +4199,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-09] smart-sdd — UX: friendly continuation prompts
 
 | # | Decision | Choice | Rationale |
@@ -7525,24 +4208,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 3 | Universal "continue" | All pause/completion messages now offer `💡 Type "continue"` as primary action | One-word action is easier than remembering command syntax. Applied consistently across pipeline, init, expand, restructure-guide, parity |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] smart-sdd add — Vertical Slice Check in Phase 3
 
@@ -7555,24 +4220,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] smart-sdd verify — Promote Step 2b to Step 3 with mandatory checklist
 
 | # | Decision | Choice | Rationale |
@@ -7583,24 +4230,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] smart-sdd verify — Bug Fix Severity Rule (Minor vs Major)
 
 | # | Decision | Choice | Rationale |
@@ -7609,24 +4238,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 2 | Major threshold | 3+ files touched, public API change, or architectural reasoning required | Simple heuristic to distinguish "add the missing line" from "restructure the approach." User can override to Minor if they disagree. |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] smart-sdd verify — Agent-managed app lifecycle for UI verification
 
@@ -7640,24 +4251,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] smart-sdd verify — Add Electron CDP check with user choice
 
 | # | Decision | Choice | Rationale |
@@ -7667,24 +4260,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] reverse-spec Completion — Add CDP cleanup notice
 
 | # | Decision | Choice | Rationale |
@@ -7693,24 +4268,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] README — Remove `<details>` collapsible tags for Confluence compatibility
 
 | # | Decision | Choice | Rationale |
@@ -7718,24 +4275,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 1 | `<details>` tags | Removed from both READMEs | `<details>` HTML tags are not supported in Confluence wiki pages. Converted `<summary><h2>` to regular `## ` headings for universal compatibility. |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] Playwright MCP Detection — Config File Read → Tool List Check
 
@@ -7755,24 +4294,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 3 | `reverse-spec/analyze.md` Phase 1.5-0 | Auto-reconfigure: agent runs `claude mcp remove/add` commands automatically instead of telling user to do it manually. User only needs to restart Claude Code. |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] Pipeline Gap Analysis & Runtime Verification
 
@@ -7826,24 +4347,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] Cross-File Consistency Fixes
 
 > 11 issues found during comprehensive flow review (4 parallel audits).
@@ -7870,24 +4373,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-02-28] Initial Architecture
 
 ### Core Design Decisions
@@ -7908,24 +4393,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-02-28] HARD STOP Philosophy Established
 
 ### Checkpoint / Review Design
@@ -7939,24 +4406,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-02-28] Three Project Modes Introduced
 
 ### Mode Architecture
@@ -7968,24 +4417,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Brownfield rebuild (`reverse-spec`) | Analyze existing code → full Global Evolution Layer → pipeline | Original mode; richest starting context |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-01] Demo-Ready Delivery Principle
 
@@ -8001,24 +4432,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-01] Scope System (Core vs Full)
 
 ### Scope Design
@@ -8033,24 +4446,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-01] Feature Granularity Selection
 
 ### Decomposition Design
@@ -8061,24 +4456,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Present with concrete lists | Show actual Feature names for each level, not just descriptions | Abstract descriptions ("fewer Features") are unhelpful; show the real trade-off |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-01] Stack Negotiation Protocol
 
@@ -8091,24 +4468,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | `stack-migration.md` | Dedicated artifact for migration plan (new stack only) | Migration details don't belong in constitution-seed or pre-context |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-02] Pipeline Hardening
 
@@ -8124,24 +4483,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-02] Feature Restructure Protocol
 
 ### Restructure Design
@@ -8154,24 +4495,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-03] Review System Overhaul
 
 ### Review Architecture
@@ -8183,24 +4506,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Constitution Phase 0 redesign | Prevent Review bypass by restructuring the flow | Original Phase 0 had a gap between execute and review where AI could skip ahead |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-03] Parity Checking System
 
@@ -8216,24 +4521,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-04] speckit-diff Utility Skill
 
 ### Third Skill Design
@@ -8247,24 +4534,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-04] Project Identity Renaming
 
 ### Renaming Design
@@ -8276,24 +4545,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Coverage baseline flagging | Flag original-project-specific names as rename targets | Automated detection of names that need remapping |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-04] Fidelity Gap Solutions
 
@@ -8314,24 +4565,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Parity integration | Added to structural parity metrics | Without this, parity check would miss all library-provided features |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-04] Domain Profile System + Context Optimization
 
@@ -8356,24 +4589,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Common Protocol condensed | ~230→~50 lines in SKILL.md + detailed version in `commands/pipeline.md` | 4-step overview is always needed; checkpoint/review procedure details only needed during pipeline execution |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-04] Context Injection Rules Per-Command Split + Cross-File Consistency
 
@@ -8475,24 +4690,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-06] Audit Fix — Case-Study Relative Path Correction
 
 | Decision | Choice | Rationale |
@@ -8500,24 +4697,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Path depth fix | `adopt.md` (2곳) + `pipeline.md` (3곳): `../../../case-study/` → `../../case-study/` | `commands/` 하위 파일에서 `../../../`은 `.claude/` 레벨까지 올라가 잘못된 경로. `parity.md`는 이미 올바른 `../../`을 사용 중이었으므로 통일 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-06] Context Efficiency Refactoring — Structural File Splitting
 
@@ -8559,24 +4738,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] Audit — Status Command Extraction + MEMORY.md Update
 
 | Decision | Choice | Rationale |
@@ -8585,24 +4746,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | MEMORY.md 전면 갱신 | 2-skill → 4-skill 반영, 경로/아키텍처/v2 기능 업데이트 | speckit-diff, case-study 누락, sdd-state 경로 오류, 공통 프로토콜 단계 수 불일치 등 다수 부정확 수정 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-07] add v3 Redesign — Universal Feature Definition + init Slimming
 
@@ -8644,24 +4787,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] Phase 1 Redesign — 3 Entry Types + Feature Elaboration Framework
 
 ### Phase 1 Entry Type Redesign
@@ -8686,24 +4811,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] Audit Fix — Phase 1 Redesign Cross-File Consistency
 
 | Decision | Choice | Rationale |
@@ -8714,24 +4821,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | README incremental example | Updated to match add's 6-Phase structure | Example used old Phase numbering that didn't match add.md's actual flow |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-07] Pending Feature Cleanup + Catch-Up Workflow + Playwright Phase A
 
@@ -8785,24 +4874,6 @@ This pattern suggests that agent guardrails are as important as the workflow log
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] HARD STOP Enforcement Audit + Mode Simplification
 
 ### HARD STOP Empty Response Enforcement (13 locations fixed)
@@ -8854,24 +4925,6 @@ Also changed `(CheckpointApproval)` shorthand to full inline format: `**HARD STO
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] Real-World Usage Audit — Pipeline Behavior Fixes + Case Study Enhancement
 
 ### Pipeline Behavior Fixes (from actual usage observations)
@@ -8901,24 +4954,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] Pipeline Reset + Reverse-Spec Checkpoint
 
 ### `smart-sdd reset` Command
@@ -8940,24 +4975,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] Demo CI/Interactive Path Convergence
 
 | Decision | Choice | Rationale |
@@ -8967,24 +4984,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Template comments | Added `⚠️` comments at correct CI exit placement in demo template | Makes the correct pattern visually obvious to the implementing agent |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-07] Pipeline --start Flag
 
@@ -8999,24 +4998,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] TODO — Browser MCP → Playwright MCP 용어 통일
 
 | Decision | Choice | Rationale |
@@ -9028,24 +5009,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] TODO Part 7 — Playwright MCP 데스크톱 앱 플랫폼 한계
 
 | Decision | Choice | Rationale |
@@ -9055,24 +5018,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 접근 방식 | A: 스택 기반 자동 모드 분기, B: 데스크톱 특화 체크리스트, C: Electron CDP 장기 대응 | A+B는 Part 0/3 구현 후 확장. C는 Playwright MCP 측 지원 필요로 우리 범위 밖 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-07] TODO Part 8 — Implement-time Incremental Verification
 
@@ -9084,24 +5029,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] TODO Part 9 — F006 Post-Mortem 기반 파이프라인 단계별 버그 예방
 
 | Decision | Choice | Rationale |
@@ -9112,24 +5039,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 주요 발견 | "빌드 성공 ≠ 런타임 성공" — verify가 빌드/테스트에만 의존 | 125/125 테스트 통과했지만 WKWebView 호환성, Zustand 무한 리렌더, IPC 필드 크래시 등 6건 미검출 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-07] TODO Part 7 갱신 — Tauri MCP Server 활용으로 플랫폼 한계 해결
 
@@ -9143,24 +5052,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Part 0 확장 | UI Verify Mode에 `tauri-mcp` 옵션 추가 | auto 모드에서 스택 기반 MCP 자동 감지 (Playwright/Tauri/수동 3분기) |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-07] TODO Part 10 — 추가 파이프라인 개선 (실전 운영 피드백)
 
@@ -9176,24 +5067,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-07] TODO Part 11 — Demo 실패의 근본 원인 5가지 구조적 공백 (F006 종합 분석)
 
 | Decision | Choice | Rationale |
@@ -9207,24 +5080,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | Part 8-10과의 관계 | Part 11은 상위 프레임, Part 8-10은 구체적 해법 | 5가지 공백이 해결되지 않으면 모든 Feature에서 동일 패턴 실패 반복 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] 전체 소스 점검 기반 버그 수정 (H1-H3, M1-M5, M9, L1-L6)
 
@@ -9246,24 +5101,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] case-study 간소화 — init 제거 + generate 단일 명령
 
 | Decision | Choice | Rationale |
@@ -9275,24 +5112,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | 템플릿/프로토콜 유지 | `templates/`, `reference/` 디렉토리는 그대로 유지 | reverse-spec, smart-sdd가 case-study-log.md 자동 생성 시 템플릿/프로토콜을 참조하므로 삭제 불가 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] 전체 소스 2차 점검 — Flow 일관성 + 미활용 연결 수정 (F1-F6 + validate.sh)
 
@@ -9321,24 +5140,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | README 연결 | 헤더 링크 + Prerequisites에 optional 항목 추가 | README.md, README.ko.md 동기화. 필수가 아닌 선택 사항으로 명시 |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-08] TODO 재구성 + A-1 Runtime Exploration 구현
 
@@ -9402,62 +5203,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
-## [2026-03-08] Cross-File Consistency Fixes
-
-11 cross-file consistency issues resolved:
-
-| Item | Fix | Files |
-|------|-----|-------|
-| implement.md MCP-GUIDE.md link path | `../../../../` → `../../../../../` | injection/implement.md |
-| B-2 result classification missing | Added "⚠️ warning (NOT blocking)" | injection/analyze.md |
-| B-3 result classification missing | Added "⚠️ warning (NOT blocking)" | injection/implement.md |
-| implement.md MCP absent silent degradation | Added warning message display | injection/implement.md |
-| implement.md Review Display "Test Results" | Removed (tests run in verify, not implement) | injection/implement.md |
-| app.md §7 B-rule naming mismatches | 4 items fixed to match injection files | domains/app.md |
-| app.md §6 "screenshot" | Changed to "Snapshot" | domains/app.md |
-| MCP detection 3-tool check | Changed to Capability Map Detect (browser_navigate only) | referenced files |
-| pipeline.md Step 5 & 6 summary gaps | Added Demo-Ready/B-3/SC UI Verify/Phase 3b | pipeline.md |
-| pre-context-template.md skip notation | "N/A" → "Skipped — [reason]" | pre-context-template.md |
-| Git commit message language | Added "MUST be written in English" to CLAUDE.md | CLAUDE.md |
-
----
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-08] Session B Testing Fixes — CDP/Electron Runtime Exploration
 
 ### Problem Evolution
@@ -9485,24 +5230,6 @@ Web Preview Mode를 구현했으나, CDP가 업계 표준이고 Web Preview는 �
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-10] 3-Axis Modular Domain Architecture
 
 Decomposed monolithic `domains/app.md` (both smart-sdd and reverse-spec) into a composable 3-axis module system: Interface × Concern × Scenario. ~30 new module files created, 24 references updated across the codebase.
@@ -9521,24 +5248,6 @@ Decomposed monolithic `domains/app.md` (both smart-sdd and reverse-spec) into a 
 **Files**: 30+ new files in `domains/` (both skills), 24 reference updates across SKILL.md, pipeline.md, verify-phases.md, add.md, parity.md, analyze.md, implement.md, state-schema.md, feature-elaboration-framework.md, demo-standard.md, ui-testing-integration.md, README.md, README.ko.md
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-10] v4 Improvement Gap Analysis — Selective Adoption
 
@@ -9573,24 +5282,6 @@ Analyzed v4 improvement document (F005 MCP tool integration case study, proposal
 **Files**: verify-phases.md (Pre-flight status table, Workaround Prohibition, Phase 3 Step 3 probe table)
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-11] CLI-Primary Playwright Architecture + Implement-Phase Browser Access
 
@@ -9670,24 +5361,6 @@ Three problems drove this change:
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Diagram Alignment Fix + File Map Directory Descriptions
 
 | Choice | Rationale |
@@ -9706,24 +5379,6 @@ aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Play
 | `README.ko.md` | Fixed Korean Big Picture box (CJK display width compensation), added Korean Directory Structure Overview |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Shared Domain Directory Introduction
 
@@ -9759,24 +5414,6 @@ Extracted cross-skill signal keywords (S0/R1/A0) into a unified `shared/domains/
 
 ---
 
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
-
 ## [2026-03-16] Greenfield Pipeline Strengthening (Track B)
 
 Fixed 7 gaps in the greenfield pipeline to bring it to parity with the rebuild pipeline's specificity and rigor.
@@ -9801,24 +5438,6 @@ Fixed 7 gaps in the greenfield pipeline to bring it to parity with the rebuild p
 | `commands/verify-phases.md` | Added CI propagation check to Phase 3b |
 
 ---
-
-## [2026-03-26] SC Action Depth — Render ≠ Interact ≠ Complete
-
-### What Changed
-1. **verify-sc-verification.md**: Added "SC Action Depth" subsection (L1 Render / L2 Interact / L3 Complete) — BLOCKING gate that prevents Level 1 render-only verification from passing Level 2/3 SCs. Added "Playwright SC Execution Protocol" for gui Features with Action Depth >= 2.
-2. **verify-report-template.md**: Added Depth column to Phase 3 SC table. Updated examples to show L1/L3 depth values and a Budget edit+save mismatch pattern.
-3. **SKILL.md**: Added Pipeline Completion Bias Prevention reminder after Rule 5 — warns against session-end pressure causing shallow verification.
-4. **lessons-learned.md**: Added L83 (Page Renders ≠ Feature Works). Added P10 row to G20 escalation table.
-
-### Design Decision
-aegis F007 verify Phase 3 revealed a pattern where the agent opens pages in Playwright, confirms rendering, and marks CRUD SCs as PASS without performing the actual CRUD operations. The fix introduces SC Action Depth classification (pre-assigned before execution) so that Level 1 render-only verification structurally cannot pass a Level 3 CRUD SC. The Depth column in verify-report makes the gap visible and enforceable.
-
-### Files Changed
-- `.claude/skills/smart-sdd/commands/verify-sc-verification.md` — SC Action Depth + Playwright SC Execution Protocol
-- `.claude/skills/smart-sdd/templates/verify-report-template.md` — Depth column in Phase 3 table
-- `.claude/skills/smart-sdd/SKILL.md` — Pipeline Completion Bias Prevention
-- `lessons-learned.md` — L83 + G20 P10 row
-- `history.md` — This entry
 
 ## [2026-03-16] Greenfield Simulation + Signal Keyword Fixes
 

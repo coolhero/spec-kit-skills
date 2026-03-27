@@ -65,6 +65,7 @@
 | SE05 | Feature가 너무 커서 나누거나, 겹치는 Feature를 합치고 싶을 때 | 나누기: add 중 분할 결정. 합치기: `pipeline merge F003 F004` | 적절한 크기의 Feature |
 | SE06 | 구현 없이 스펙과 계획만 만들고 싶을 때 (문서 목적) | `pipeline F001 --step specify,plan` — 원하는 단계만 골라서 실행 가능 | spec.md + plan.md (구현 없음) |
 | SE07 | verify가 컨텍스트 한계나 크래시로 중단됐을 때 | `pipeline F001 --start verify` — verify 진행 상황이 sdd-state.md에 저장되어 중단된 Phase부터 재개 | 중단 지점부터 verify 이어서 실행 |
+| SE08 | 긴 implement 후 verify가 형식적으로 끝나는 것을 방지하고 싶을 때 | implement 완료 후 `/clear` → 새 세션에서 `pipeline F001 --start verify`. 깨끗한 컨텍스트에서 Pipeline Completion Bias 제거 (MANDATORY RULE 9) | 깨끗한 세션에서의 엄격한 검증 |
 
 ## F. 여러 Feature 관리하기
 
@@ -113,11 +114,11 @@
 | B: 새 프로젝트 시작하기 | 5 |
 | C: 기존 코드에 SDD 적용 | 5 |
 | D: 코드 전면 재작성 | 3 |
-| E: 수정하고 다시 하기 | 7 |
+| E: 수정하고 다시 하기 | 8 |
 | F: 여러 Feature 관리 | 3 |
 | G: 상태 확인 | 2 |
 | H: 고급 & 커스터마이징 | 11 |
-| **합계** | **42** |
+| **합계** | **43** |
 
 ---
 

@@ -65,6 +65,7 @@
 | SE05 | Split a Feature that's too big, or merge overlapping Features | Split: decide during `add`. Merge: `pipeline merge F003 F004` | Right-sized Features |
 | SE06 | Generate only specs/plans without implementation | `pipeline F001 --step specify,plan` — pick the steps you want | spec.md + plan.md (no code) |
 | SE07 | Resume a verify that was interrupted by context limit or crash | `pipeline F001 --start verify` — verify progress is saved in sdd-state.md, resumes from the exact phase that was interrupted | Verification continues from where it stopped |
+| SE08 | Ensure verify doesn't rubber-stamp after long implement session | After implement completes, run `/clear` → start new session → `pipeline F001 --start verify`. Fresh context eliminates Pipeline Completion Bias (MANDATORY RULE 9) | Rigorous verification in a clean session |
 
 ## F. Manage Multiple Features
 
@@ -113,11 +114,11 @@
 | B: Start New Project | 5 |
 | C: Apply SDD to Existing Code | 5 |
 | D: Rewrite from Scratch | 3 |
-| E: Revise and Iterate | 7 |
+| E: Revise and Iterate | 8 |
 | F: Manage Multiple Features | 3 |
 | G: Check Status | 2 |
 | H: Advanced & Customization | 11 |
-| **Total** | **42** |
+| **Total** | **43** |
 
 ---
 
