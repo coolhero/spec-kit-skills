@@ -5,6 +5,19 @@
 
 ---
 
+## [2026-03-28] TRM Chapter 22: AEGIS Case Study (EN+KO)
+
+### What Changed
+- Added new chapter "Case Study: AEGIS" to both EN and KO TRM, inserted before Appendices (after Ch 21 Advanced Topics)
+- 7 sections: Project Overview, Domain Profile & Custom Modules, Pipeline Execution, Critical Moments, Skill Feedback Evolution, Quantitative Results, Key Lessons
+- EN: 108→118 pages (+10), KO: 144→157 pages (+13)
+- Key content: 12 Features / 122 SC results table, HARD STOP intervention analysis, feedback-to-rule traceability (22 feedback → 9 MANDATORY RULES), F008 vs F009 micro-verify A/B comparison, Pipeline Completion Bias evidence
+
+### Why
+AEGIS is the first complete greenfield project built with spec-kit-skills. The 22 skill feedback items directly drove 9 of the framework's MANDATORY RULES, making it the primary empirical validation for the harness engineering approach. Including it in the TRM bridges the gap between theory (Part I) and architecture (Part II) by providing real-world evidence.
+
+---
+
 ## [2026-03-27] Post-pull integrity: resolver regression, SE08, history dedup
 
 ### What Changed

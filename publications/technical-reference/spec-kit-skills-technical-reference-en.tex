@@ -3951,6 +3951,296 @@ Agent frameworks provide building blocks for tool use and memory. They operate a
 IDE-integrated AI focuses on code generation within an editor context. They are excellent for individual file operations but do not provide cross-Feature memory, domain-adapted rules, or pipeline-level quality gates.
 
 
+%% ────────────────────────────────────────────────────────────────────
+\chapter{Case Study: AEGIS}
+\label{ch:case-study}
+%% ────────────────────────────────────────────────────────────────────
+
+\textit{A complete greenfield project built with \speckit{} over four days: 12~Features, 122~Success Criteria, 3~custom domain modules, and 22~skill feedback items that drove nine of the framework's MANDATORY RULES.}
+
+%% ── Project Overview ─────────────────────────────────────────────────
+\section{Project Overview}
+
+\textbf{AEGIS} (AI Enterprise Gateway \& Intelligence System) is a self-hosted enterprise platform that unifies LLM routing, multi-tenant cost management, security guardrails, and knowledge integration into a single open-source product.
+
+\begin{table}[H]
+\centering
+\caption{AEGIS project summary}
+\label{tab:aegis-summary}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Type & Greenfield \\
+Duration & 4 days (2026-03-25 to 2026-03-28) \\
+Stack & TypeScript, NestJS (backend), Next.js + shadcn/ui (frontend), PostgreSQL + pgvector, Redis, BullMQ \\
+Features & 12 across 4 tiers (T0--T3) and 4 release groups \\
+Success Criteria & 122 total \\
+Tests & 185 (Jest unit + integration) \\
+Source files & $\sim$120 (apps/api + apps/web + libs/common) \\
+Custom domain modules & 3 (ai-gateway, token-budget, prompt-guard) \\
+Skill feedback items & 22 (P1--P18, F007 P8--P11, F008 P12--P13) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ── Domain Profile ───────────────────────────────────────────────────
+\section{Domain Profile and Custom Modules}
+
+\subsection{5-Axis Profile}
+
+The project's Domain Profile was established during \cmd{smart-sdd init} with a Clarity Index of 97\% (Rich tier):
+
+\begin{lstlisting}[style=specstyle, title={AEGIS Domain Profile}]
+Interfaces:  [http-api, gui]
+Concerns:    [auth, multi-tenancy, resilience, observability,
+              realtime, stream-processing, external-sdk,
+              token-budget*, prompt-guard*]
+Archetype:   [ai-gateway*]
+Foundation:  typescript-nestjs
+Context:     greenfield | mvp x small-team
+
+# * = project-local custom modules (not in built-in library)
+\end{lstlisting}
+
+\subsection{Gap Analysis and Module Creation}
+
+Matching the project description against the built-in taxonomy (58~concerns, 14~archetypes, 10~interfaces) revealed three gaps:
+
+\begin{table}[H]
+\centering
+\caption{Domain module gap analysis}
+\label{tab:aegis-gaps}
+\begin{tabularx}{\textwidth}{llcX}
+\toprule
+\textbf{Gap} & \textbf{Closest built-in} & \textbf{Sim.} & \textbf{Why a new module was needed} \\
+\midrule
+AI Gateway routing & ai-assistant & 15\% & Built-in models the LLM \emph{consumer}; AEGIS is the LLM \emph{manager} \\
+Hierarchical token budget & resilience & 20\% & Flat rate-limiting vs.\ Org$>$Team$>$User token+cost tracking \\
+Prompt security & content-moderation & 25\% & Async review queue vs.\ inline $<$100ms LLM-specific scanning \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Three project-local modules were created via \cmd{domain-extend extend}:
+
+\begin{itemize}[nosep]
+  \item \textbf{ai-gateway} (Archetype) --- 5 principles (Provider Abstraction, Streaming-First, Token-Aware Routing, Multi-tenant Isolation, Audit Everything), 5 failure modes (AG-001--005)
+  \item \textbf{token-budget} (Concern) --- 5 SC required patterns, 4 anti-patterns, 5 failure modes (TB-001--005), 6 elaboration probes
+  \item \textbf{prompt-guard} (Concern) --- 5 SC required patterns, 4 anti-patterns, 5 failure modes (PG-001--005), 6 elaboration probes
+\end{itemize}
+
+\begin{notebox}[Custom Module Impact]
+These modules participated in every pipeline stage: S0 keywords improved signal extraction during \cmd{init}, S1 rules enforced SC patterns during \texttt{specify}, S5 probes deepened the Brief during \cmd{add}, and S7 failure modes guided defensive design during \texttt{plan} and \texttt{implement}. Without them, the 22 SC rules and 15 failure modes they contributed would have been left to ad-hoc agent judgment.
+\end{notebox}
+
+%% ── Pipeline Execution ──────────────────────────────────────────────
+\section{Pipeline Execution}
+
+\subsection{Feature-by-Feature Results}
+
+\begin{table}[H]
+\centering
+\caption{Per-Feature pipeline results}
+\label{tab:aegis-features}
+\small
+\begin{tabularx}{\textwidth}{clXcccc}
+\toprule
+\textbf{FID} & \textbf{Tier} & \textbf{Name} & \textbf{SC} & \textbf{Verify} & \textbf{Tests} & \textbf{Sessions} \\
+\midrule
+F001 & T0 & Foundation Setup & 8/8 & \textcolor{specgreen}{PASS} & --- & 1 \\
+F002 & T1 & LLM Gateway Core & 4/4 & \textcolor{specgreen}{PASS} & --- & 1 \\
+F003 & T1 & Auth \& Multi-tenancy & 10/10 & \textcolor{specgreen}{PASS} & --- & 2 \\
+F004 & T1 & Token Budget Management & 13/20 & \textcolor{specorange}{LIMITED} & 107 & 3 \\
+F005 & T1 & Request Logging \& Tracing & 8/16 & \textcolor{specorange}{LIMITED} & 107 & 1 \\
+F006 & T2 & Security Guardrails & 8/8 & \textcolor{specgreen}{PASS} & 168 & 1 \\
+F007 & T2 & Admin Dashboard & 16/16 & \textcolor{specgreen}{PASS} & 168 & 2 \\
+F008 & T2 & Provider Fallback \& LB & 8/8 & \textcolor{specgreen}{PASS} & 168 & 1 \\
+F009 & T3 & Knowledge Integration & 9/9 & \textcolor{specgreen}{PASS} & 178 & 1 \\
+F010 & T3 & Prompt Management & 14/14 & \textcolor{specorange}{LIMITED} & 178 & 1 \\
+F011 & T3 & Semantic Cache & 11/11 & \textcolor{specorange}{LIMITED} & 185 & 1 \\
+F012 & T3 & Developer Playground & 12/12 & \textcolor{specorange}{LIMITED} & 185 & 1 \\
+\midrule
+\multicolumn{3}{l}{\textbf{Total}} & \textbf{122} & \textbf{8 PASS / 4 LTD} & \textbf{185} & \textbf{16} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Verify levels}: 8 Features achieved full runtime verification (curl + Playwright against a running server). 4 Features (F004 partial, F010--F012) were verified at code level only due to infrastructure constraints (DB/Redis not running). Code-level verification still caught structural defects, including the F011 cross-Feature regression (SC-011).
+
+\subsection{Demo Groups: Cross-Feature Integration}
+
+Two Demo Groups validated end-to-end user scenarios after T1 completion:
+
+\begin{itemize}[nosep]
+  \item \textbf{DG1} (F002+F003+F004): JWT login $\to$ LLM call $\to$ budget deduction $\to$ budget exhaustion $\to$ 429 block. 8/8 SC PASS.
+  \item \textbf{DG2} (F003+F005): API Key auth $\to$ LLM call with trace ID propagation $\to$ async log creation $\to$ analytics query. 8/8 SC PASS.
+\end{itemize}
+
+\subsection{Regressions Discovered and Fixed}
+
+\begin{table}[H]
+\centering
+\caption{Regression cases}
+\label{tab:aegis-regressions}
+\begin{tabularx}{\textwidth}{clXX}
+\toprule
+\textbf{Feature} & \textbf{SC} & \textbf{Root Cause} & \textbf{Resolution} \\
+\midrule
+F004 & SC-003 & Token estimation counted only input content; output tokens ignored entirely & Pessimistic estimation formula: input/3 + msg overhead + max\_tokens fallback \\
+F004 & SC-014 & \texttt{extractUserKey()} returned null --- reconciliation never executed & Store key paths in Redis reservation HASH; reconcile reads paths directly \\
+F011 & SC-011 & CacheInterceptor did not set \texttt{request.cacheHit} flag & F005 RequestLoggerInterceptor always logged \texttt{cacheHit:~false}; 2-file fix \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+F004 regressions triggered a full pipeline re-run (\texttt{--start specify}), cascading spec$\to$plan$\to$tasks$\to$implement$\to$verify. F011 was resolved with a targeted implement regression.
+
+%% ── Critical Moments ─────────────────────────────────────────────────
+\section{Critical Moments}
+
+\subsection{HARD STOP Interventions}
+
+Four critical discoveries were made exclusively at \hardstop{} review points:
+
+\begin{table}[H]
+\centering
+\caption{\hardstop{} interventions}
+\label{tab:aegis-hardstop}
+\begin{tabularx}{\textwidth}{clXX}
+\toprule
+\textbf{\#} & \textbf{Stage} & \textbf{What happened} & \textbf{Without \hardstop{}} \\
+\midrule
+1 & F004 specify & UsageRecord state mismatch (\texttt{failed} vs \texttt{released}) caught in review & Incorrect state machine implemented; runtime data corruption \\
+2 & F004 specify & User requested Korean language conversion for F001--F003 artifacts & Missed the conversion window; massive rework after implement \\
+3 & F004 verify & User injected domain decision: ``model-specific budget management (ModelTier)'' & System built with model-agnostic budgets; major refactoring later \\
+4 & F003 verify & Refresh token jti collision bug discovered & Two logins within 1 second produce identical tokens in production \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{dangerbox}[Key Insight]
+\hardstop{} is not merely an approval gate. It is the \emph{only} point where domain expertise enters the pipeline. Intervention \#3 --- the ModelTier budget requirement --- could not have been derived from code analysis; it came from business knowledge that only the user possessed.
+\end{dangerbox}
+
+\subsection{Parallelization Halt (P3)}
+
+Early in the project, the agent attempted to process F003, F004, and F005 simultaneously via background agents. This violated MANDATORY RULE~4 (Sequential Feature Execution) and was halted immediately. The violation produced file conflicts, stale registry references, and entity duplication --- confirming why the rule exists.
+
+\subsection{Pipeline Completion Bias Evidence}
+
+Features F010--F012 were executed late in a long session. All three received only code-level verification despite having runtime-verifiable SCs. The agent's implicit pressure to ``finish quickly'' manifested as:
+
+\begin{itemize}[nosep]
+  \item Level~1 (render-only) checks for Level~3 (CRUD) SCs
+  \item Skipping Playwright for ``obvious'' frontend pages
+  \item Reporting ``page renders correctly'' as ``SC complete''
+\end{itemize}
+
+This pattern directly motivated MANDATORY RULE~9 (Session Separation): implement and verify must run in different sessions to prevent accumulated fatigue from degrading verification rigor.
+
+%% ── Skill Feedback Evolution ─────────────────────────────────────────
+\section{Skill Feedback Evolution}
+
+The 22 skill feedback items followed a predictable four-phase pattern:
+
+\begin{table}[H]
+\centering
+\caption{Skill feedback evolution by phase}
+\label{tab:aegis-feedback}
+\begin{tabularx}{\textwidth}{llcX}
+\toprule
+\textbf{Phase} & \textbf{Items} & \textbf{Severity} & \textbf{Pattern} \\
+\midrule
+Early (F001--F003) & P1--P4 & CRITICAL & Foundational violations: template non-compliance, verify skip, parallel execution \\
+Mid (F004--F005) & P5--P7 & HIGH & Verify quality degradation: runtime checks bypassed, partial SC coverage \\
+Late (F006--F009) & P8--P14 & HIGH--MED & Detail gaps: npm install omission, render$=$PASS fallacy, micro-verify absence \\
+Integration & P15--P18 & MEDIUM & Environment and UX issues: .env handling, demo script guidance \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{From Feedback to MANDATORY RULES}
+
+Nine of the framework's MANDATORY RULES trace directly to AEGIS feedback:
+
+\begin{table}[H]
+\centering
+\caption{Feedback-to-rule traceability}
+\label{tab:aegis-rules}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Feedback} & \textbf{Problem} & \textbf{Rule Created} \\
+\midrule
+P2 & Verify phase entirely skipped & Rule 5: Runtime SC Verification \\
+P3 & Features processed in parallel & Rule 4: Sequential Feature Execution \\
+P5, P6 & Unit test pass treated as SC verification & Rule 5 (strengthened) \\
+P9 & \hardstop{} review bypassed & Rule 1: \hardstop{} Enforcement \\
+P10, P11 & Rendering treated as PASS; code without spec & Rule 6: Honest SC Evidence \\
+P11-D & Code added without spec & Rule 8: No Code Without Spec \\
+P12, P13 & All code written in one batch; code-level PASS reported & Rule 7: Per-Task Micro-Verify \\
+F010--F012 & Late-session verify degradation & Rule 9: Session Separation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Micro-Verify: A Controlled Experiment}
+
+F008 and F009 provide a natural A/B comparison for per-task micro-verify:
+
+\begin{itemize}[nosep]
+  \item \textbf{F008 (without)}: All circuit breaker code written in one batch $\to$ P12 + P13 feedback; compounded issues discovered only in verify
+  \item \textbf{F009 (with)}: Each task verified immediately after writing $\to$ 3~runtime errors caught and fixed during implement (BullMQ connection, pgvector type conflict, SQL column casing)
+\end{itemize}
+
+The contrast directly motivated MANDATORY RULE~7's per-task micro-verify requirement.
+
+%% ── Quantitative Results ─────────────────────────────────────────────
+\section{Quantitative Results}
+
+\begin{table}[H]
+\centering
+\caption{AEGIS final metrics}
+\label{tab:aegis-metrics}
+\begin{tabularx}{\textwidth}{Xr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Features completed & 12 / 12 \\
+Success Criteria (total) & 122 \\
+Runtime-verified Features & 8 / 12 (67\%) \\
+Code-level-only Features & 4 / 12 (33\%) \\
+Jest tests (final) & 185 across 26 suites \\
+Source files & $\sim$120 \\
+Custom domain modules & 3 \\
+Skill feedback items & 22 \\
+Regressions discovered / fixed & 3 \\
+\hardstop{} interventions & 4 \\
+MANDATORY RULES derived & 9 \\
+Demo Groups verified & 2 (16/16 SC) \\
+Pipeline sessions (total) & 16 \\
+Calendar days & 4 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ── Key Lessons ──────────────────────────────────────────────────────
+\section{Key Lessons}
+
+\begin{enumerate}[nosep]
+  \item \textbf{Verify $\neq$ build + test pass.} Runtime SC verification against a running server is the only valid evidence. Unit tests passing is a prerequisite, not a conclusion (P2, P5, P6).
+  \item \textbf{\hardstop{} is irreplaceable.} Domain knowledge that cannot be derived from code (ModelTier budgets, language preferences, state machine corrections) can only enter through user review (P9, \S\ref{tab:aegis-hardstop}).
+  \item \textbf{Features must execute sequentially.} Parallel execution causes entity-registry conflicts, stale cross-Feature references, and untraceable state corruption (P3).
+  \item \textbf{Per-task micro-verify catches bugs earlier.} F008 (without) vs.\ F009 (with) demonstrated that batch-then-verify compounds issues while task-level verification isolates them (P12, P13).
+  \item \textbf{Frontend and backend require different verify strategies.} Backend: curl against API endpoints. Frontend: Playwright full-path verification + API smoke test + npm install gate (F007 P8--P11).
+  \item \textbf{Cross-Feature issues surface during verify, not implement.} The F011 SC-011 regression (CacheInterceptor $\to$ RequestLogger data flow) was invisible to per-task micro-verify but caught in verify Phase~2.
+  \item \textbf{Custom domain modules pay for themselves.} The 22 SC rules and 15 failure modes contributed by ai-gateway, token-budget, and prompt-guard prevented entire classes of defects from reaching verify.
+  \item \textbf{Pipeline Completion Bias is real and structural.} After 2+ hours of pipeline execution, verify quality degrades measurably. The only fix is session separation (MANDATORY RULE~9).
+  \item \textbf{No code without spec.} When verify discovers missing functionality, the fix must start at spec, not at code. Cascading updates (spec $\to$ plan $\to$ tasks $\to$ implement $\to$ verify) preserve SDD integrity (P11-D, Rule~8).
+  \item \textbf{Correction mechanisms before precision.} F004's reconciliation bug taught that an imprecise estimate with working reconciliation is better than a precise estimate with a broken correction path.
+\end{enumerate}
+
+
 %% ████████████████████████████████████████████████████████████████████
 %%  APPENDICES
 %% ████████████████████████████████████████████████████████████████████
